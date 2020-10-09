@@ -12,7 +12,7 @@ namespace PostSharp.Framework.Impl
     /// <item>Primitive types as themselves (e.g. int as int, string as string).</item>
     /// <item>Enums as their underlying type.</item>
     /// <item><see cref="System.Type"/> as <see cref="IType"/>.</item>
-    /// <item>Arrays as <see cref="ImmutableArray{T}"/>.</item>
+    /// <item>Arrays as <see cref="IReadOnlyList{T}"/>.</item>
     /// </list>
     /// </remarks>
     class Attribute : IAttribute

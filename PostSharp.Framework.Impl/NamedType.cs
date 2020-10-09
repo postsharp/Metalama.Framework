@@ -33,5 +33,7 @@ namespace PostSharp.Framework.Impl
 
         [LazyThreadSafeProperty]
         internal TypeInfo TypeInfo => new TypeInfo(this, Compilation);
+
+        public override string ToString() => Symbol.ToString();
     }
 }

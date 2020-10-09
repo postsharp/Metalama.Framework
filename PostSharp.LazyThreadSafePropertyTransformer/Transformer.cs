@@ -59,7 +59,7 @@ namespace PostSharp.LazyThreadSafePropertyTransformer
                     ReturnStatement(IdentifierName(fieldName)));
 
 
-                var newNode = node.WithExpressionBody(null)
+                var newNode = node.WithExpressionBody(null).WithSemicolonToken(default)
                     .AddAccessorListAccessors(AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, block));
 
                 // PropertyType? field;

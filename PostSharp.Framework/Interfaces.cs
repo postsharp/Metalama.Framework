@@ -39,8 +39,10 @@ namespace PostSharp.Framework
         IReadOnlyList<IAttribute> Attributes { get; }
     }
 
+    // TODO: how to represent enums, delegates and records
     public interface ITypeInfo : INamedType, ICodeElement
     {
+        // TODO: differentiate between class, struct and interface
         IReadOnlyList<ITypeInfo> NestedTypes { get; }
         // TODO: how to represent fields in general and compiler-generated backing fields in particular
         IReadOnlyList<IProperty> Properties { get; }
