@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+// TODO: InternalImplement
 namespace PostSharp.Framework
 {
     public interface ICompilation
@@ -9,13 +10,13 @@ namespace PostSharp.Framework
         // TODO: assembly and module attributes? (do they need to be differentiated?)
     }
 
-    // TODO: should this be abstract class, so that users are not tempted to implement it?
     public interface ITypeResolutionToken { }
 
     public interface IType
     {
     }
 
+    // TODO: IArrayType etc.
     public interface INamedType : IType
     {
         string Name { get; }
@@ -39,15 +40,16 @@ namespace PostSharp.Framework
         IReadOnlyList<IAttribute> Attributes { get; }
     }
 
-    // TODO: how to represent enums, delegates and records
+    // TODO: how to represent enums, delegates and records? like roslyn
     public interface ITypeInfo : INamedType, ICodeElement
     {
         // TODO: differentiate between class, struct and interface
         IReadOnlyList<ITypeInfo> NestedTypes { get; }
         // TODO: how to represent fields in general and compiler-generated backing fields in particular
+        // don't show backing fields, ignore their attributes
         IReadOnlyList<IProperty> Properties { get; }
         IReadOnlyList<IEvent> Events { get; }
-        // TODO: does this include accessor methods?
+        // TODO: does this include accessor methods? yes, but classify them
         IReadOnlyList<IMethod> Methods { get; }
         IReadOnlyList<IGenericParameter> GenericParameters { get; }
     }
@@ -60,10 +62,12 @@ namespace PostSharp.Framework
 
     public interface IProperty : IMember
     {
+        // TODO: ref
         IType Type { get; }
         IReadOnlyList<IParameter> Parameters { get; }
         IMethod? Getter { get; }
-        // TODO: what happens if you try to set a get-only property in a constructor?
+        // TODO: what happens if you try to set a get-only property in a constructor? it works, Setter returns pseudo elements for get-only
+        // IsPseudoElement
         IMethod? Setter { get; }
     }
 
@@ -72,8 +76,10 @@ namespace PostSharp.Framework
         INamedType DelegateType { get; }
         IMethod Adder { get; }
         IMethod Remover { get; }
-        // TODO: how does this work? is it a "fake" method that invokes the underlying delegate for field-like events?
-        IMethod? Invoker { get; }
+        // TODO: how does this work? is it a "fake" method that invokes the underlying delegate for field-like events? yes
+        IMethod? Raiser { get; }
+    }
+
     }
 
     public interface IMethod : IMember
@@ -88,7 +94,7 @@ namespace PostSharp.Framework
 
     public interface IParameter : ICodeElement
     {
-        // TODO: should ref-ness be part of the type?
+        // TODO: should ref-ness be part of the type or the parameter? on parameter
         IType Type { get; }
         /// <remarks><see langword="null"/> for <see cref="IMethod.ReturnParameter"/></remarks>
         string? Name { get; }
@@ -102,7 +108,6 @@ namespace PostSharp.Framework
         string Name { get; }
         int Index { get; }
         IReadOnlyList<IType> BaseTypeConstraints { get; }
-        // TODO: do special constraints this way, or do something weird, like reflection?
         bool IsCovariant { get; }
         bool IsContravariant { get; }
         bool HasDefaultConstructorConstraint { get; }
