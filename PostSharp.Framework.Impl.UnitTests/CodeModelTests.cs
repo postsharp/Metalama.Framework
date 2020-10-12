@@ -37,6 +37,41 @@ namespace PostSharp.Framework.Impl.UnitTests
         }
 
         [Fact]
+        public void TypeInfos()
+        {
+            string code = @"
+class C
+{
+    class D { }
+}
+
+namespace NS
+{
+    class C {}
+}";
+
+            var compilation = CreateCompilation(code);
+
+            var types = compilation.Types;
+            Assert.Equal(2, types.Count);
+
+            var c1 = types[0];
+            Assert.Equal("C", c1.Name);
+            Assert.Equal("C", c1.FullName);
+            Assert.Null(c1.ContainingElement);
+
+            var d = c1.NestedTypes.Single();
+            Assert.Equal("D", d.Name);
+            Assert.Equal("C.D", d.FullName);
+            Assert.Same(c1, d.ContainingElement);
+
+            var c2 = types[1];
+            Assert.Equal("C", c2.Name);
+            Assert.Equal("NS.C", c2.FullName);
+            Assert.Null(c2.ContainingElement);
+        }
+
+        [Fact]
         public void LocalFunctions()
         {
             string code = @"
@@ -64,12 +99,15 @@ class C
 
             var method = methods[0];
             Assert.Equal("M", method.Name);
+            Assert.Same(type, method.ContainingElement);
 
             var outerLocalFunction = method.LocalFunctions.Single();
             Assert.Equal("Outer", outerLocalFunction.Name);
+            Assert.Same(method, outerLocalFunction.ContainingElement);
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
             Assert.Equal("Inner", innerLocalFunction.Name);
+            Assert.Same(outerLocalFunction, innerLocalFunction.ContainingElement);
         }
 
         [Fact]
@@ -169,6 +207,34 @@ class C<T1, T2>
 
             Assert.Equal("C<int, string>", method.ReturnType.ToString());
             Assert.Equal(new string[] { "int", "string" }, ((INamedType)method.ReturnType).GenericArguments.Select(t => t.ToString()));
+        }
+
+        [Fact]
+        public void Properties()
+        {
+            string code = @"
+class C
+{
+    int Auto { get; set; }
+    int GetOnly { get; }
+    int ReadWrite { get => 0; set {} }
+    int ReadOnly { get => 0; }
+    int WriteOnly { set {} }
+}";
+
+            var compilation = CreateCompilation(code);
+
+            // TODO
+        }
+
+        [Fact]
+        public void MethodKinds()
+        {
+            string code = @"";
+
+            var compilation = CreateCompilation(code);
+
+            // TODO
         }
     }
 }

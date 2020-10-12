@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -36,26 +35,6 @@ namespace PostSharp.Framework.Impl
                     yield return type;
             }
         }
-    }
-
-    // TODO: rename to TypeCache?
-    // TODO: does this ownership work for accessor methods?
-    /// <remarks>
-    /// Cache owns <see cref="IType"/> objects in the compilation, all other objects are owned by their container.
-    /// </remarks>
-    internal class Cache
-    {
-        private readonly Compilation compilation;
-
-        public Cache(Compilation compilation) => this.compilation = compilation;
-
-        readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
-
-        internal TypeInfo GetTypeInfo(INamedTypeSymbol typeSymbol) => GetNamedType(typeSymbol).TypeInfo;
-
-        internal IType GetIType(ITypeSymbol typeSymbol) => typeCache.GetOrAdd(typeSymbol, ts => Factory.CreateIType(ts, compilation));
-
-        internal NamedType GetNamedType(INamedTypeSymbol typeSymbol) => (NamedType)typeCache.GetOrAdd(typeSymbol, ts => new NamedType((INamedTypeSymbol)ts, compilation));
     }
 
     internal static class Factory

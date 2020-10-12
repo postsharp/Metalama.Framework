@@ -80,6 +80,30 @@ namespace PostSharp.Framework
         IMethod? Raiser { get; }
     }
 
+    public enum MethodKind
+    {
+        Ordinary,
+
+        Constructor,
+        StaticConstructor,
+        Finalizer,
+
+        PropertyGet,
+        PropertySet,
+
+        EventAdd,
+        EventRemove,
+        EventRaise,
+
+        // DelegateInvoke
+        // FunctionPointerSignature
+
+        ExplicitInterfaceImplementation,
+
+        ConversionOperator,
+        UserDefinedOperator,
+
+        LocalFunction,
     }
 
     public interface IMethod : IMember
@@ -90,6 +114,7 @@ namespace PostSharp.Framework
         IReadOnlyList<IMethod> LocalFunctions { get; }
         IReadOnlyList<IParameter> Parameters { get; }
         IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        MethodKind Kind { get; }
     }
 
     public interface IParameter : ICodeElement

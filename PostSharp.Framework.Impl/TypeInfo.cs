@@ -23,7 +23,8 @@ namespace PostSharp.Framework.Impl
         [LazyThreadSafeProperty]
         public IReadOnlyList<ITypeInfo> NestedTypes => Symbol.GetTypeMembers().Select(Cache.GetTypeInfo).ToImmutableArray();
 
-        public IReadOnlyList<IProperty> Properties => throw new NotImplementedException();
+        [LazyThreadSafeProperty]
+        public IReadOnlyList<IProperty> Properties => Symbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this)).ToImmutableArray();
 
         public IReadOnlyList<IEvent> Events => throw new NotImplementedException();
 

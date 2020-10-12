@@ -4,12 +4,14 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace PostSharp.Framework.Impl
 {
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol symbol;
+
         internal override Compilation Compilation { get; }
 
         public Method(IMethodSymbol symbol, Compilation compilation)
@@ -40,13 +42,44 @@ namespace PostSharp.Framework.Impl
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
+        public MethodKind Kind => symbol.MethodKind switch
+        {
+            RoslynMethodKind.Ordinary => MethodKind.Ordinary,
+            RoslynMethodKind.Constructor => MethodKind.Constructor,
+            RoslynMethodKind.StaticConstructor => MethodKind.StaticConstructor,
+            RoslynMethodKind.Destructor => MethodKind.Finalizer,
+            RoslynMethodKind.PropertyGet => MethodKind.PropertyGet,
+            RoslynMethodKind.PropertySet => MethodKind.PropertySet,
+            RoslynMethodKind.EventAdd => MethodKind.EventAdd,
+            RoslynMethodKind.EventRemove => MethodKind.EventRemove,
+            RoslynMethodKind.EventRaise => MethodKind.EventRaise,
+            RoslynMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
+            RoslynMethodKind.Conversion => MethodKind.ConversionOperator,
+            RoslynMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+            RoslynMethodKind.LocalFunction => MethodKind.LocalFunction,
+            RoslynMethodKind.AnonymousFunction or
+            RoslynMethodKind.BuiltinOperator or
+            RoslynMethodKind.DelegateInvoke or
+            RoslynMethodKind.ReducedExtension or
+            RoslynMethodKind.DeclareMethod or
+            RoslynMethodKind.FunctionPointerSignature => throw new NotSupportedException(),
+            _ => throw new InvalidOperationException()
+        };
+
         public string Name => symbol.Name;
 
         public bool IsStatic => symbol.IsStatic;
 
-        public override ICodeElement ContainingElement => throw new NotImplementedException();
+        [LazyThreadSafeProperty]
+        public override ICodeElement ContainingElement => symbol.ContainingSymbol switch
+        {
+            INamedTypeSymbol type => Cache.GetTypeInfo(type),
+            IMethodSymbol method => Cache.GetMethod(method),
+            _ => throw new InvalidOperationException()
+        };
 
-        public override IReadOnlyList<IAttribute> Attributes => throw new NotImplementedException();
+        [LazyThreadSafeProperty]
+        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
 
         public override string ToString() => symbol.ToString();
 
