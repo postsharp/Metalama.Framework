@@ -3,10 +3,10 @@
 namespace PostSharp.Framework.Sdk
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class AspectDriverAttribute : Attribute
+    public class AspectWeaverAttribute : Attribute
     {
         public Type AspectType { get; }
 
-        public AspectDriverAttribute(Type aspectType) => AspectType = aspectType;
+        public AspectWeaverAttribute(Type aspectType) => AspectType = aspectType;
     }
 }

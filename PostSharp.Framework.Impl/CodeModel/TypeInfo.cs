@@ -10,7 +10,7 @@ namespace PostSharp.Framework.Impl
     {
         private readonly NamedType namedType;
         
-        private INamedTypeSymbol Symbol => namedType.Symbol;
+        private INamedTypeSymbol Symbol => namedType.NamedTypeSymbol;
 
         internal override Compilation Compilation { get; }
 
@@ -51,5 +51,7 @@ namespace PostSharp.Framework.Impl
         public override IReadOnlyList<IAttribute> Attributes => Symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken) => this;
+
+        public bool Is(IType other) => namedType.Is(other);
     }
 }

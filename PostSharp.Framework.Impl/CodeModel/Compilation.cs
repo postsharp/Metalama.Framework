@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -20,20 +21,13 @@ namespace PostSharp.Framework.Impl
         }
 
         [LazyThreadSafeProperty]
-        public IReadOnlyList<ITypeInfo> Types => GetTypes(RoslynCompilation.Assembly.GlobalNamespace).ToImmutableArray();
+        public IReadOnlyList<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(Cache.GetTypeInfo).ToImmutableArray();
 
-        private IEnumerable<ITypeInfo> GetTypes(INamespaceSymbol ns)
+        public INamedType? GetTypeByMetadataName(string metadataName)
         {
-            foreach (var type in ns.GetTypeMembers())
-            {
-                yield return Cache.GetTypeInfo(type);
-            }
+            var symbol = RoslynCompilation.GetTypeByMetadataName(metadataName);
 
-            foreach (var namespaceMember in ns.GetNamespaceMembers())
-            {
-                foreach (var type in GetTypes(namespaceMember))
-                    yield return type;
-            }
+            return symbol == null ? null : Cache.GetNamedType(symbol);
         }
     }
 

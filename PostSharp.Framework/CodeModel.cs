@@ -8,12 +8,15 @@ namespace PostSharp.Framework
         IReadOnlyList<ITypeInfo> Types { get; }
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
+
+        INamedType? GetTypeByMetadataName(string metadataName);
     }
 
     public interface ITypeResolutionToken { }
 
     public interface IType
     {
+        bool Is(IType other);
     }
 
     // TODO: IArrayType etc.

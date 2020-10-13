@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PostSharp.Framework.Impl\PostSharp.Framework.Impl.csproj" />
+    <ProjectReference Include="..\PostSharp.Framework\PostSharp.Framework.csproj" />
   </ItemGroup>
 
 </Project>

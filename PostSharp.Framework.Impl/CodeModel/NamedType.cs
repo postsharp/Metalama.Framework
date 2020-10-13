@@ -5,25 +5,22 @@ using Microsoft.CodeAnalysis;
 
 namespace PostSharp.Framework.Impl
 {
-    internal class NamedType : INamedType
+    internal sealed class NamedType : Type, INamedType
     {
-        internal INamedTypeSymbol Symbol { get; }
-        internal Compilation Compilation { get; }
+        internal INamedTypeSymbol NamedTypeSymbol { get; }
+        internal override ITypeSymbol TypeSymbol => NamedTypeSymbol;
 
         internal NamedType(INamedTypeSymbol symbol, Compilation compilation)
-        {
-            Symbol = symbol;
-            Compilation = compilation;
-        }
+            : base(compilation) => NamedTypeSymbol = symbol;
 
-        public string Name => Symbol.Name;
+        public string Name => NamedTypeSymbol.Name;
 
         [LazyThreadSafeProperty]
         // TODO: verify simple call to ToDisplayString gives the desired result in all cases
-        public string FullName => Symbol.ToDisplayString();
+        public string FullName => NamedTypeSymbol.ToDisplayString();
 
         [LazyThreadSafeProperty]
-        public IReadOnlyList<IType> GenericArguments => Symbol.TypeArguments.Select(a => Compilation.Cache.GetIType(a)).ToImmutableArray();
+        public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.Cache.GetIType(a)).ToImmutableArray();
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken)
         {
@@ -34,6 +31,16 @@ namespace PostSharp.Framework.Impl
         [LazyThreadSafeProperty]
         internal TypeInfo TypeInfo => new TypeInfo(this, Compilation);
 
-        public override string ToString() => Symbol.ToString();
+        public override string ToString() => NamedTypeSymbol.ToString();
+    }
+
+    internal abstract class Type : IType
+    {
+        internal abstract ITypeSymbol TypeSymbol { get; }
+        internal Compilation Compilation { get; }
+
+        protected Type(Compilation compilation) => Compilation = compilation;
+
+        public bool Is(IType other) => Compilation.RoslynCompilation.HasImplicitConversion(TypeSymbol, ((Type)other).TypeSymbol);
     }
 }

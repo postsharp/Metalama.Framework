@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{34D4F83E-9C04-4175-8DD3-9D65DDF39F69}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
@@ -19,7 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostSharp.Framework.Impl.Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostSharp.Framework.Sdk", "PostSharp.Framework.Sdk\PostSharp.Framework.Sdk.csproj", "{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostSharp.Patterns.AutoCancellationToken", "PostSharp.Patterns.AutoCancellationToken\PostSharp.Patterns.AutoCancellationToken.csproj", "{A0AEC1AB-6810-4D11-8BAE-8DE34B837A1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostSharp.Patterns.AutoCancellationToken", "PostSharp.Patterns.AutoCancellationToken\PostSharp.Patterns.AutoCancellationToken.csproj", "{A0AEC1AB-6810-4D11-8BAE-8DE34B837A1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostSharp.Patterns.AutoCancellationToken.TestApp", "PostSharp.Patterns.AutoCancellationToken.TestApp\PostSharp.Patterns.AutoCancellationToken.TestApp.csproj", "{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +54,10 @@ Global
 		{A0AEC1AB-6810-4D11-8BAE-8DE34B837A1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0AEC1AB-6810-4D11-8BAE-8DE34B837A1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0AEC1AB-6810-4D11-8BAE-8DE34B837A1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

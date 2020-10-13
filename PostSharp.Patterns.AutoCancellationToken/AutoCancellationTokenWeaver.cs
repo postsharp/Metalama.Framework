@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using PostSharp.Framework.Sdk;
 
 namespace PostSharp.Patterns.AutoCancellationToken
 {
+    [AspectWeaver(typeof(AutoCancellationTokenAttribute))]
     class AutoCancellationTokenWeaver : IAspectWeaver
     {
         public Compilation Transform(AspectWeaverContext context)
