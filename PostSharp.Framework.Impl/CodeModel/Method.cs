@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
@@ -11,6 +12,7 @@ namespace PostSharp.Framework.Impl
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol symbol;
+        protected override ISymbol Symbol => symbol;
 
         internal override Compilation Compilation { get; }
 

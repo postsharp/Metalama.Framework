@@ -8,7 +8,10 @@ namespace PostSharp.Framework.Impl
     internal class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol symbol;
+        protected override ISymbol Symbol => symbol;
+
         private readonly TypeInfo containingElement;
+        public override ICodeElement? ContainingElement => containingElement;
 
         internal override Compilation Compilation => containingElement.Compilation;
 
@@ -35,8 +38,6 @@ namespace PostSharp.Framework.Impl
         public string Name => symbol.Name;
 
         public bool IsStatic => symbol.IsStatic;
-
-        public override ICodeElement? ContainingElement => containingElement;
 
         [LazyThreadSafeProperty]
         public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
