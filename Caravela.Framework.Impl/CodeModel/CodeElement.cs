@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl
     abstract class CodeElement : ICodeElement, IToSyntax
     {
         internal abstract Compilation Compilation { get; }
-        internal Cache Cache => Compilation.Cache;
+        internal SymbolMap Cache => Compilation.Cache;
 
         public abstract ICodeElement? ContainingElement { get; }
         public abstract IReadOnlyList<IAttribute> Attributes { get; }

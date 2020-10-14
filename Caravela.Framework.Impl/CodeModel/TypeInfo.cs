@@ -21,15 +21,15 @@ namespace Caravela.Framework.Impl
             Compilation = compilation;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<ITypeInfo> NestedTypes => TypeSymbol.GetTypeMembers().Select(Cache.GetTypeInfo).ToImmutableArray();
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IProperty> Properties => TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this)).ToImmutableArray();
 
         public IReadOnlyList<IEvent> Events => throw new NotImplementedException();
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IMethod> Methods => TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => new Method(m, Compilation)).ToImmutableArray();
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
@@ -40,16 +40,9 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<IType> GenericArguments => namedType.GenericArguments;
 
-        [LazyThreadSafeProperty]
-        public override ICodeElement? ContainingElement => TypeSymbol.ContainingSymbol switch
-        {
-            INamespaceSymbol => null,
-            INamedTypeSymbol containingType => Cache.GetTypeInfo(containingType),
-            _ => throw new NotImplementedException()
-        };
+        public override ICodeElement? ContainingElement => namedType.ContainingElement;
 
-        [LazyThreadSafeProperty]
-        public override IReadOnlyList<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
+        public override IReadOnlyList<IAttribute> Attributes => namedType.Attributes;
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken) => this;
 

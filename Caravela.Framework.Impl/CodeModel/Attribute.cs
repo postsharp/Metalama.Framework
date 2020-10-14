@@ -18,21 +18,21 @@ namespace Caravela.Framework.Impl
     class Attribute : IAttribute
     {
         private readonly AttributeData data;
-        private readonly Cache cache;
+        private readonly SymbolMap cache;
 
-        public Attribute(AttributeData data, Cache cache)
+        public Attribute(AttributeData data, SymbolMap cache)
         {
             this.data = data;
             this.cache = cache;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public INamedType Type => cache.GetNamedType(data.AttributeClass!);
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<object?> ConstructorArguments => data.ConstructorArguments.Select(Translate).ToImmutableArray();
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyDictionary<string, object?> NamedArguments => data.NamedArguments.ToImmutableDictionary(kvp => kvp.Key, kvp => Translate(kvp.Value));
 
         private object? Translate(TypedConstant constant) =>

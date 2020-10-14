@@ -3,5 +3,5 @@
 namespace Caravela.Framework.Impl
 {
     [AttributeUsage(AttributeTargets.Property)]
-    class LazyThreadSafePropertyAttribute : System.Attribute { }
+    class MemoAttribute : System.Attribute { }
 }

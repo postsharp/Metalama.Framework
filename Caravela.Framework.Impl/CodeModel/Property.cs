@@ -21,17 +21,17 @@ namespace Caravela.Framework.Impl
             this.containingElement = containingElement;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IType Type => Cache.GetIType(symbol.Type);
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IParameter> Parameters => symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
 
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IMethod? Getter => symbol.GetMethod == null ? null : Cache.GetMethod(symbol.GetMethod);
 
-        [LazyThreadSafeProperty]
+        [Memo]
         // TODO: get-only properties
         public IMethod? Setter => symbol.SetMethod == null ? null : Cache.GetMethod(symbol.SetMethod);
 
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl
 
         public bool IsStatic => symbol.IsStatic;
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
     }
 }

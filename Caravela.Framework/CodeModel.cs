@@ -20,7 +20,7 @@ namespace Caravela.Framework
     }
 
     // TODO: IArrayType etc.
-    public interface INamedType : IType
+    public interface INamedType : IType, ICodeElement
     {
         string Name { get; }
         // TODO: how to deal with namespaces, especially considering nested types

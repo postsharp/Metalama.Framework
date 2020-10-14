@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl
         private readonly IParameterSymbol symbol;
         private readonly CodeElement containingMember;
 
-        private Cache Cache => containingMember.Cache;
+        private SymbolMap Cache => containingMember.Cache;
 
         public Parameter(IParameterSymbol symbol, CodeElement containingMember)
         {
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl
             this.containingMember = containingMember;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IType Type => Cache.GetIType(symbol.Type);
 
         public string Name => symbol.Name;
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
 
         public ICodeElement ContainingElement => containingMember;
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
     }
 }

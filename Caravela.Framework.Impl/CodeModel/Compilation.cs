@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
-        internal Cache Cache { get; }
+        internal SymbolMap Cache { get; }
 
         internal Compilation(CSharpCompilation roslynCompilation)
         {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
             Cache = new(this);
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(Cache.GetTypeInfo).ToImmutableArray();
 
         public INamedType? GetTypeByMetadataName(string metadataName)

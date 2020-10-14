@@ -23,14 +23,14 @@ namespace Caravela.Framework.Impl
 
             var newCompilation = aspectWeaver.Transform(new AspectWeaverContext(aspectType, aspectInstances, input.Compilation, diagnosticSink));
 
-            return input.Update(diagnosticSink.Diagnsotics, newCompilation);
+            return input.Update(diagnosticSink.Diagnostics, newCompilation);
         }
 
         class DiagnosticSink : IDiagnosticSink
         {
-            public List<Diagnostic> Diagnsotics { get; } = new();
+            public List<Diagnostic> Diagnostics { get; } = new();
 
-            public void AddDiagnostic(Diagnostic diagnostic) => Diagnsotics.Add(diagnostic);
+            public void AddDiagnostic(Diagnostic diagnostic) => Diagnostics.Add(diagnostic);
         }
     }
 }

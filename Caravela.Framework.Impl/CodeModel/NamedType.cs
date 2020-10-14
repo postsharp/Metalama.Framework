@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -15,11 +16,11 @@ namespace Caravela.Framework.Impl
 
         public string Name => NamedTypeSymbol.Name;
 
-        [LazyThreadSafeProperty]
+        [Memo]
         // TODO: verify simple call to ToDisplayString gives the desired result in all cases
         public string FullName => NamedTypeSymbol.ToDisplayString();
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.Cache.GetIType(a)).ToImmutableArray();
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken)
@@ -28,8 +29,19 @@ namespace Caravela.Framework.Impl
             return TypeInfo;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         internal TypeInfo TypeInfo => new TypeInfo(this, Compilation);
+
+        [Memo]
+        public ICodeElement? ContainingElement => TypeSymbol.ContainingSymbol switch
+        {
+            INamespaceSymbol => null,
+            INamedTypeSymbol containingType => Compilation.Cache.GetTypeInfo(containingType),
+            _ => throw new NotImplementedException()
+        };
+
+        [Memo]
+        public IReadOnlyList<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.Cache)).ToImmutableArray();
 
         public override string ToString() => NamedTypeSymbol.ToString();
     }

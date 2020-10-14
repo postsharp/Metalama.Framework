@@ -21,13 +21,13 @@ namespace Caravela.Framework.Impl
             Compilation = compilation;
         }
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IParameter ReturnParameter => new ReturnParameterImpl(this);
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IType ReturnType => Cache.GetIType(symbol.ReturnType);
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IMethod> LocalFunctions =>
             symbol.DeclaringSyntaxReferences
                 .Select(r => r.GetSyntax())
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl
                 .Select(s => new Method(s, Compilation))
                 .ToImmutableArray();
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public IReadOnlyList<IParameter> Parameters => symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl
 
         public bool IsStatic => symbol.IsStatic;
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public override ICodeElement ContainingElement => symbol.ContainingSymbol switch
         {
             INamedTypeSymbol type => Cache.GetTypeInfo(type),
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl
             _ => throw new InvalidOperationException()
         };
 
-        [LazyThreadSafeProperty]
+        [Memo]
         public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
 
         public override string ToString() => symbol.ToString();
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl
 
             public ICodeElement? ContainingElement => method;
 
-            [LazyThreadSafeProperty]
+            [Memo]
             public IReadOnlyList<IAttribute> Attributes => method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.Cache)).ToImmutableArray();
         }
     }

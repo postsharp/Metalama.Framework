@@ -4,13 +4,13 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl
 {
     /// <remarks>
-    /// Cache owns <see cref="IType"/> and <see cref="IMethod"/> objects in the compilation, other objects are owned by their container.
+    /// Symbol map owns <see cref="IType"/> and <see cref="IMethod"/> objects in the compilation, other objects are owned by their container.
     /// </remarks>
-    internal class Cache
+    internal class SymbolMap
     {
         private readonly Compilation compilation;
 
-        public Cache(Compilation compilation) => this.compilation = compilation;
+        public SymbolMap(Compilation compilation) => this.compilation = compilation;
 
         readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
         readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new();

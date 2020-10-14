@@ -30,7 +30,7 @@ namespace Caravela.LazyThreadSafePropertyTransformer
             public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
             {
                 if (!node.AttributeLists.SelectMany(al => al.Attributes)
-                    .Any(a => a.Name.ToString() == "LazyThreadSafeProperty" || a.Name.ToString() == "LazyThreadSafePropertyAttribute"))
+                    .Any(a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute"))
                     return node;
 
                 if (node.ExpressionBody == null)
