@@ -14,11 +14,13 @@ namespace Caravela.Framework.Impl
         {
             var compilation = (CSharpCompilation)context.Compilation;
 
+            // DI
             var loader = new Loader(context.LoadReferencedAssembly);
             var driverFactory = new AspectDriverFactory(compilation, loader);
+            var aspectTypeFactory = new AspectTypeFactory(driverFactory);
 
             // TODO: how to get other sources?
-            var aspectSources = new AspectSource[] { new AttributeAspectSource(compilation, driverFactory) };
+            var aspectSources = new AspectSource[] { new AttributeAspectSource(compilation, aspectTypeFactory) };
 
             var aspectParts = from source in aspectSources
                               from aspect in source.GetAspects()

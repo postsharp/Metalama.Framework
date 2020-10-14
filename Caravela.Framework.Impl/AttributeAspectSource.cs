@@ -9,19 +9,16 @@ namespace Caravela.Framework.Impl
     class AttributeAspectSource : AspectSource
     {
         private readonly CSharpCompilation compilation;
-        private readonly AspectDriverFactory aspectDriverFactory;
+        private readonly AspectTypeFactory aspectTypeFactory;
 
-        public AttributeAspectSource(CSharpCompilation compilation, AspectDriverFactory aspectDriverFactory)
+        public AttributeAspectSource(CSharpCompilation compilation, AspectTypeFactory aspectTypeFactory)
         {
             this.compilation = compilation;
-            this.aspectDriverFactory = aspectDriverFactory;
+            this.aspectTypeFactory = aspectTypeFactory;
         }
 
         public override IReadOnlyList<AspectInstance> GetAspects()
         {
-            // TODO: this should probably be in a separate type shared by other aspect sources
-            var aspectTypes = new Dictionary<INamedType, AspectType>();
-
             var results = ImmutableArray.CreateBuilder<AspectInstance>();
 
             var CaravelaCompilation = new Compilation(compilation);
@@ -33,12 +30,7 @@ namespace Caravela.Framework.Impl
                 {
                     if (attribute.Type.Is(iAspect!))
                     {
-                        if (!aspectTypes.TryGetValue(attribute.Type, out var aspectType))
-                        {
-                            // TODO: handle AspectParts properly
-                            aspectType = new AspectType(attribute.Type.FullName, aspectDriverFactory.GetAspectDriver(attribute.Type), new[] { new AspectPart(null, 0) });
-                            aspectTypes.Add(attribute.Type, aspectType);
-                        }
+                        var aspectType = aspectTypeFactory.GetAspectType(attribute.Type);
 
                         // TODO: create the aspect
                         results.Add(new AspectInstance(null!, type, aspectType));

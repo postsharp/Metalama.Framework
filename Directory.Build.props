@@ -1,5 +1,7 @@
 <Project>
  <PropertyGroup>
-   <OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>
+   <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
+   <!-- the above stopped working in VS for some reason -->
+   <OutputPath>$([System.IO.Path]::GetDirectoryName($(SolutionPath)))artifacts\bin\$(Configuration)</OutputPath>
  </PropertyGroup>
 </Project>

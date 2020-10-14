@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Sdk" Version="0.1.35-dev" />
+    <PackageReference Include="RoslynEx.Sdk" Version="0.1.36-dev" />
   </ItemGroup>
   
 </Project>
