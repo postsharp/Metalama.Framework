@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using PostSharp.Framework.Aspects;
 using PostSharp.Framework.Sdk;
 using RoslynEx;
 
 namespace PostSharp.Framework.Impl
 {
     [Transformer]
-    class AspectPipeline : ISourceTransformer
+    sealed class AspectPipeline : ISourceTransformer
     {
         public Microsoft.CodeAnalysis.Compilation Execute(TransformerContext context)
         {
@@ -18,61 +17,33 @@ namespace PostSharp.Framework.Impl
             var loader = new Loader(context.LoadReferencedAssembly);
             var driverFactory = new AspectDriverFactory(compilation, loader);
 
-            // TODO?
+            // TODO: how to get other sources?
             var aspectSources = new AspectSource[] { new AttributeAspectSource(compilation, driverFactory) };
-            var aspects = aspectSources.SelectMany(s => s.GetAspects());
 
-            aspects.ToList();
-            throw null;
-        }
-    }
+            var aspectParts = from source in aspectSources
+                              from aspect in source.GetAspects()
+                              group aspect by aspect.AspectType into g
+                              let aspectType = g.Key
+                              from aspectPart in aspectType.Parts
+                              orderby aspectPart.ExecutionOrder
+                              select (aspects: g.AsEnumerable(), aspectType, aspectPart);
 
-    abstract class AspectSource
-    {
-        public abstract IReadOnlyList<AspectInstance> GetAspects();
-    }
+            // TODO: aspect part grouping
 
-    class AttributeAspectSource : AspectSource
-    {
-        private readonly CSharpCompilation compilation;
-        private readonly AspectDriverFactory aspectDriverFactory;
+            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation);
 
-        public AttributeAspectSource(CSharpCompilation compilation, AspectDriverFactory aspectDriverFactory)
-        {
-            this.compilation = compilation;
-            this.aspectDriverFactory = aspectDriverFactory;
-        }
-
-        public override IReadOnlyList<AspectInstance> GetAspects()
-        {
-            // TODO: this should probably be in a separate type shared by other aspect sources
-            var aspectTypes = new Dictionary<INamedType, AspectType>();
-
-            var results = ImmutableArray.CreateBuilder<AspectInstance>();
-
-            var postSharpCompilation = new Compilation(compilation);
-            var iAspect = postSharpCompilation.GetTypeByMetadataName(typeof(IAspect).FullName);
-
-            foreach (var type in postSharpCompilation.Types)
+            foreach (var aspectPart in aspectParts)
             {
-                foreach (var attribute in type.Attributes)
+                PipelineStage stage = aspectPart.aspectType.AspectDriver switch
                 {
-                    if (attribute.Type.Is(iAspect!))
-                    {
-                        if (!aspectTypes.TryGetValue(attribute.Type, out var aspectType))
-                        {
-                            // TODO: handle AspectParts properly
-                            aspectType = new AspectType(attribute.Type.FullName, aspectDriverFactory.GetAspectDriver(attribute.Type), new[] { new AspectPart(null, 0) });
-                            aspectTypes.Add(attribute.Type, aspectType);
-                        }
+                    IAspectWeaver weaver => new AspectWeaverStage(
+                        weaver, aspectCompilation.Compilation.GetTypeByMetadataName(aspectPart.aspectType.Name)!, aspectPart.aspects.ToImmutableArray())
+                };
 
-                        // TODO: create the aspect
-                        results.Add(new AspectInstance(null!, type, aspectType));
-                    }
-                }
+                aspectCompilation = stage.Transform(aspectCompilation);
             }
 
-            return results.ToImmutable();
+            return aspectCompilation.Compilation;
         }
     }
 }

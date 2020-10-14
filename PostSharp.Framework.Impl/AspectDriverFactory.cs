@@ -11,10 +11,10 @@ namespace PostSharp.Framework.Impl
         private readonly CSharpCompilation compilation;
         private readonly Loader loader;
 
-        public AspectDriverFactory(CSharpCompilation compilation)
+        public AspectDriverFactory(CSharpCompilation compilation, Loader loader)
         {
             this.compilation = compilation;
-            loader = new Loader(compilation);
+            this.loader = loader;
         }
 
         public IAspectDriver GetAspectDriver(INamedType type)
