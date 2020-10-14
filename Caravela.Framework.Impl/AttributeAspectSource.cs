@@ -21,14 +21,14 @@ namespace Caravela.Framework.Impl
         {
             var results = ImmutableArray.CreateBuilder<AspectInstance>();
 
-            var CaravelaCompilation = new Compilation(compilation);
-            var iAspect = CaravelaCompilation.GetTypeByMetadataName(typeof(IAspect).FullName);
+            var caravelaCompilation = new Compilation(compilation);
+            var iAspect = caravelaCompilation.GetTypeByMetadataName(typeof(IAspect).FullName)!;
 
-            foreach (var type in CaravelaCompilation.Types)
+            foreach (var type in caravelaCompilation.Types)
             {
                 foreach (var attribute in type.Attributes)
                 {
-                    if (attribute.Type.Is(iAspect!))
+                    if (attribute.Type.Is(iAspect))
                     {
                         var aspectType = aspectTypeFactory.GetAspectType(attribute.Type);
 

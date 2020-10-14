@@ -45,6 +45,11 @@ namespace Caravela.Framework.Impl
                 aspectCompilation = stage.Transform(aspectCompilation);
             }
 
+            foreach (var diagnostic in aspectCompilation.Diagnostics)
+            {
+                context.ReportDiagnostic(diagnostic);
+            }
+
             return aspectCompilation.Compilation;
         }
     }

@@ -23,7 +23,6 @@ namespace Caravela.Framework.Impl
 
             var typeSymbol = ((NamedType)type).NamedTypeSymbol;
 
-            // TODO: it would be easier, if the attribute was on the aspect pointing to the weaver
             // TODO: is ContainingAssembly enough?
             // TODO: perf
             // TODO: nested types
