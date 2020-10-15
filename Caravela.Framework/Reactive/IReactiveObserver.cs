@@ -1,11 +1,12 @@
 using System;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Reactive
 {
     public interface IReactiveObserver : IDisposable
     {
-        // Called when changes cannot be propagated to observers incrementally, and a full resync is necessary.
+        /// <summary>
+        /// Called when changes cannot be propagated to observers incrementally, and a full resync is necessary. 
+        /// </summary>
         void OnReset(IReactiveSubscription subscription);
     }
 

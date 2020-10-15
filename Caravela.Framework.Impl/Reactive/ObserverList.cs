@@ -1,14 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Caravela.Reactive
 {
     internal class ObserverList<T>  : IEnumerable<IReactiveSubscription<T>>
         where T : IReactiveObserver
     {
-        private volatile Node _first;
+        private volatile Node? _first;
         private readonly IReactiveObservable<T> _owner;
 
         public ObserverList(IReactiveObservable<T> owner)
@@ -33,11 +32,10 @@ namespace Caravela.Reactive
 
         public bool RemoveObserver(IReactiveSubscription subscription)
         {
-           
             lock ( this )
             {
-                Node previous = null;
-                for (Node node = _first; node != null; node = node.Next)
+                Node? previous = null;
+                for (Node? node = _first; node != null; node = node.Next)
                 {
                     if (ReferenceEquals(node, subscription))
                     {
@@ -48,7 +46,6 @@ namespace Caravela.Reactive
                         }
                         else
                         {
-
                             previous.Next = node.Next;
                         }
                         
@@ -57,14 +54,11 @@ namespace Caravela.Reactive
 
                     previous = node;
                 }
-                
             }
            
             // Not found.
             return false;
-            
         }
-        
 
         internal class Node : IReactiveSubscription<T>
         {
@@ -80,16 +74,15 @@ namespace Caravela.Reactive
                 Observer = observer;
             }
 
-            public Node Next;
+            public Node? Next;
             public  T Observer { get; }
-
 
             public void Dispose()
             {
                 if (Sender != null)
                 {
                     Sender.RemoveObserver(this);
-                    Sender = null;
+                    Sender = null!;
                 }
             }
 
@@ -98,10 +91,10 @@ namespace Caravela.Reactive
 
         public struct Enumerator : IEnumerator<IReactiveSubscription<T>>
         {
-            private Node _node;
-            private Node _first;
+            private Node? _node;
+            private readonly Node? _first;
 
-            internal Enumerator(Node first)
+            internal Enumerator(Node? first)
             {
                 _first = first;
                 _node = null;
@@ -109,7 +102,6 @@ namespace Caravela.Reactive
 
             public void Dispose()
             {
-                
             }
 
             public bool MoveNext()
@@ -131,7 +123,7 @@ namespace Caravela.Reactive
                 _node = null;
             }
 
-            public IReactiveSubscription<T> Current => _node;
+            public IReactiveSubscription<T> Current => _node!;
 
             object IEnumerator.Current => Current;
         }
@@ -141,6 +133,5 @@ namespace Caravela.Reactive
         IEnumerator<IReactiveSubscription<T>> IEnumerable<IReactiveSubscription<T>>.GetEnumerator() => GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
     }
 }

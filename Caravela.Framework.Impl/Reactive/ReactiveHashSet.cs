@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Caravela.Reactive
@@ -11,11 +9,11 @@ namespace Caravela.Reactive
     {
         private int _version;
         private readonly ObserverList<IReactiveCollectionObserver<T>> _observers;
-        private Dictionary<T,IReactiveSubscription> _items = new Dictionary<T, IReactiveSubscription>();
+        private Dictionary<T, IReactiveSubscription?> _items = new();
 
         protected object WriteSync => _observers;
         
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ReactiveHashSet()
         {
@@ -28,7 +26,6 @@ namespace Caravela.Reactive
             {
                 return;
             }
-
             
             switch (item)
             {
@@ -54,8 +51,8 @@ namespace Caravela.Reactive
             
             switch (item)
             {
-                case IReactiveObservable<IReactiveObserver> _:
-                    subscription.Dispose();
+                case IReactiveObservable<IReactiveObserver>:
+                    subscription!.Dispose();
                     break;
                 
                 case INotifyPropertyChanged notifyPropertyChanged:
@@ -109,46 +106,32 @@ namespace Caravela.Reactive
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (_observers.IsEmpty)
+            foreach (var subscription in _observers)
             {
-                foreach (var subscription in _observers)
-                {
-                    subscription.Observer.OnItemChanged(subscription, (T) sender);
-                }
+                subscription.Observer.OnItemChanged(subscription, (T)sender);
             }
         }
-
 
         public void Dispose()
         {
             if (_items != null)
             {
                 UnfollowAll();
-                _items = null;
+                _items = null!;
             }
-
-
         }
 
         void IReactiveObserver.OnReset(IReactiveSubscription subscription)
         {
-            if (_observers.IsEmpty)
+            foreach (var outSubscription in _observers)
             {
-                foreach (var outSubscription in _observers)
-                {
-                    outSubscription.Observer.OnItemChanged(subscription, (T) subscription.Observer);
-                }
+                outSubscription.Observer.OnItemChanged(subscription, (T) subscription.Observer);
             }
         }
 
         public IEnumerator<T> GetEnumerator() => _items.Keys.GetEnumerator();
-        
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         void ICollection<T>.Add(T item) => this.Add(item);
 
@@ -161,23 +144,17 @@ namespace Caravela.Reactive
 
             lock (this.WriteSync)
             {
-
                 AddCore(item);
 
                 this.OnChanged();
             
-                if (!_observers.IsEmpty)
+                foreach (var subscription in _observers)
                 {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemAdded(subscription, item);
-                    }
+                    subscription.Observer.OnItemAdded(subscription, item);
                 }
             }
 
-
             return true;
-            
         }
 
         public bool Replace(T oldItem, T newItem)
@@ -189,37 +166,25 @@ namespace Caravela.Reactive
 
             lock (this.WriteSync)
             {
-
                 RemoveCore(oldItem);
                 AddCore(newItem);
 
                 this.OnChanged();
 
-                if (!_observers.IsEmpty)
+                foreach (var subscription in _observers)
                 {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemReplaced(subscription, oldItem, newItem);
-                    }
+                    subscription.Observer.OnItemReplaced(subscription, oldItem, newItem);
                 }
             }
 
             return true;
-
         }
 
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
+        public void Clear() => throw new NotImplementedException();
 
         public bool Contains(T item) => _items.ContainsKey(item);
-        
 
-        public void CopyTo(T[] array, int arrayIndex)
-        {
-            throw new NotImplementedException();
-        }
+        public void CopyTo(T[] array, int arrayIndex) => throw new NotImplementedException();
 
         public bool Remove(T item)
         {
@@ -230,12 +195,9 @@ namespace Caravela.Reactive
 
                 this.OnChanged();
 
-                if (!_observers.IsEmpty)
+                foreach (var subscription in _observers)
                 {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemRemoved(subscription, item);
-                    }
+                    subscription.Observer.OnItemRemoved(subscription, item);
                 }
 
                 return true;
