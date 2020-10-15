@@ -2,147 +2,31 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace Caravela.Reactive
 {
-    internal class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReactiveObserver, IReadOnlyCollection<T>
+    public class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReadOnlyCollection<T>
     {
-        private int _version;
         private readonly ObserverList<IReactiveCollectionObserver<T>> _observers;
-        private Dictionary<T,IReactiveSubscription> _items = new Dictionary<T, IReactiveSubscription>();
-
-        protected object WriteSync => _observers;
-        
-        public event PropertyChangedEventHandler PropertyChanged;
+        private ImmutableHashSet<T> _items = ImmutableHashSet<T>.Empty;
+        private int _version;
 
         public ReactiveHashSet()
         {
             _observers = new ObserverList<IReactiveCollectionObserver<T>>(this);
         }
 
-        private void AddCore(T item)
-        {
-            if (item == null)
-            {
-                return;
-            }
+        protected object WriteSync => _observers;
 
-            
-            switch (item)
-            {
-                case IReactiveObservable<IReactiveObserver> observable:
-                    _items[item] = observable.AddObserver(this);
-                    break;
-                
-                case INotifyPropertyChanged notifyPropertyChanged:
-                    notifyPropertyChanged.PropertyChanged += OnPropertyChanged;
-                    _items[item] = null;
-                    break;
-                
-                default:
-                    _items[item] = null;
-                    break;
-            }
+        private ReactiveVersionedValue<IEnumerable<T>> VersionedValue =>
+            new ReactiveVersionedValue<IEnumerable<T>>(this, _version);
+
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _items.GetEnumerator();
         }
 
-        private bool RemoveCore(T item)
-        {
-            if (!_items.TryGetValue(item, out var subscription))
-                return false;
-            
-            switch (item)
-            {
-                case IReactiveObservable<IReactiveObserver> _:
-                    subscription.Dispose();
-                    break;
-                
-                case INotifyPropertyChanged notifyPropertyChanged:
-                    notifyPropertyChanged.PropertyChanged -= OnPropertyChanged;
-                    break;
-            }
-            
-            _items.Remove(item);
-
-            return true;
-        }
-
-        private void UnfollowAll()
-        {
-            foreach (var pair in _items)
-            {
-                if (pair.Value != null)
-                {
-                    pair.Value.Dispose();
-                }
-                else
-                {
-                    switch (pair.Key)
-                    {
-                        case INotifyPropertyChanged notifyPropertyChanged:
-                            notifyPropertyChanged.PropertyChanged -= OnPropertyChanged;
-                            break;
-                    }
-                }
-            }
-            
-            _items.Clear();
-        }
-
-
-        IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer)
-            => _observers.AddObserver(observer);
-
-        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription)
-            => _observers.RemoveObserver(subscription);
-
-        public ReactiveVersionedValue<IEnumerable<T>> VersionedValue => new ReactiveVersionedValue<IEnumerable<T>>(this, _version);
-
-        IEnumerable<T> IReactiveSource<IEnumerable<T>,IReactiveCollectionObserver<T>>.Value => this;
-
-
-        protected void OnChanged()
-        {
-            _version++;
-        }
-
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (_observers.IsEmpty)
-            {
-                foreach (var subscription in _observers)
-                {
-                    subscription.Observer.OnItemChanged(subscription, (T) sender);
-                }
-            }
-        }
-
-
-        public void Dispose()
-        {
-            if (_items != null)
-            {
-                UnfollowAll();
-                _items = null;
-            }
-
-
-        }
-
-        void IReactiveObserver.OnReset(IReactiveSubscription subscription)
-        {
-            if (_observers.IsEmpty)
-            {
-                foreach (var outSubscription in _observers)
-                {
-                    outSubscription.Observer.OnItemChanged(subscription, (T) subscription.Observer);
-                }
-            }
-        }
-
-        public IEnumerator<T> GetEnumerator() => _items.Keys.GetEnumerator();
-        
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -150,71 +34,33 @@ namespace Caravela.Reactive
         }
 
 
-        void ICollection<T>.Add(T item) => this.Add(item);
-
-        public bool Add(T item)
+        void ICollection<T>.Add(T item)
         {
-            if (this.Contains(item))
-            {
-                return false;
-            }
-
-            lock (this.WriteSync)
-            {
-
-                AddCore(item);
-
-                this.OnChanged();
-            
-                if (!_observers.IsEmpty)
-                {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemAdded(subscription, item);
-                    }
-                }
-            }
-
-
-            return true;
-            
-        }
-
-        public bool Replace(T oldItem, T newItem)
-        {
-            if (!_items.ContainsKey(oldItem))
-            {
-                return false;
-            }
-
-            lock (this.WriteSync)
-            {
-
-                RemoveCore(oldItem);
-                AddCore(newItem);
-
-                this.OnChanged();
-
-                if (!_observers.IsEmpty)
-                {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemReplaced(subscription, oldItem, newItem);
-                    }
-                }
-            }
-
-            return true;
-
+            Add(item);
         }
 
         public void Clear()
         {
-            throw new NotImplementedException();
+            if (!_items.IsEmpty)
+                lock (WriteSync)
+                {
+                    IncrementVersion();
+
+                    var oldItems = _items;
+
+                    _items = ImmutableHashSet<T>.Empty;
+
+                    if (!_observers.IsEmpty)
+                        foreach (var subscription in _observers)
+                            subscription.Observer.OnValueChanged(subscription, oldItems, _items, _version, true);
+                }
         }
 
-        public bool Contains(T item) => _items.ContainsKey(item);
-        
+        public bool Contains(T item)
+        {
+            return _items.Contains(item);
+        }
+
 
         public void CopyTo(T[] array, int arrayIndex)
         {
@@ -223,27 +69,138 @@ namespace Caravela.Reactive
 
         public bool Remove(T item)
         {
-            lock (this.WriteSync)
+            if (!_items.Contains(item))
+                return false;
+
+            lock (WriteSync)
             {
-                if (!RemoveCore(item))
-                    return false;
+                var items = _items;
 
-                this.OnChanged();
+                items = items.Remove(item);
 
-                if (!_observers.IsEmpty)
+                if (items != _items)
                 {
-                    foreach (var subscription in _observers)
-                    {
-                        subscription.Observer.OnItemRemoved(subscription, item);
-                    }
-                }
+                    var oldItems = _items;
+                    _items = items;
 
-                return true;
+                    IncrementVersion();
+
+                    if (!_observers.IsEmpty)
+                        foreach (var subscription in _observers)
+                        {
+                            subscription.Observer.OnItemRemoved(subscription, item, _version);
+                            subscription.Observer.OnValueChanged(subscription, oldItems, items, _version);
+                        }
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
         public int Count => _items.Count;
 
         public bool IsReadOnly => false;
+
+
+        IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
+            IReactiveCollectionObserver<T> observer)
+        {
+            return _observers.AddObserver(observer);
+        }
+
+        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription)
+        {
+            return _observers.RemoveObserver(subscription);
+        }
+
+        // TODO: this is not thread-safe.
+        IEnumerable<T> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.GetValue(
+            in ReactiveCollectorToken collectorToken)
+        {
+            return this;
+        }
+
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.
+            GetVersionedValue(in ReactiveCollectorToken collectorToken)
+        {
+            return VersionedValue;
+        }
+
+        public bool IsMaterialized => true;
+
+
+        protected void IncrementVersion()
+        {
+            _version++;
+        }
+
+        public bool Add(T item)
+        {
+            if (Contains(item)) return false;
+
+
+            lock (WriteSync)
+            {
+                var items = _items;
+
+                items = items.Add(item);
+
+                if (items != _items)
+                {
+                    var oldItems = _items;
+                    _items = items;
+
+                    IncrementVersion();
+
+                    if (!_observers.IsEmpty)
+                        foreach (var subscription in _observers)
+                        {
+                            subscription.Observer.OnItemAdded(subscription, item, _version);
+                            subscription.Observer.OnValueChanged(subscription, oldItems, items, _version);
+                        }
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public bool Replace(T oldItem, T newItem)
+        {
+            if (!_items.Contains(oldItem)) return false;
+
+            lock (WriteSync)
+            {
+                var items = _items;
+
+                items = items.Remove(oldItem);
+                items = items.Add(newItem);
+
+                if (items != _items)
+                {
+                    var oldItems = _items;
+                    _items = items;
+
+                    IncrementVersion();
+
+                    if (!_observers.IsEmpty)
+                        foreach (var subscription in _observers)
+                        {
+                            subscription.Observer.OnItemAdded(subscription, newItem, _version);
+                            subscription.Observer.OnItemReplaced(subscription, oldItem, newItem, _version);
+                            subscription.Observer.OnValueChanged(subscription, oldItems, items, _version);
+                        }
+                }
+            }
+
+            return true;
+        }
     }
 }

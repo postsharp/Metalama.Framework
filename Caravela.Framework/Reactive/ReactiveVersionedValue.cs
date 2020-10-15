@@ -1,6 +1,6 @@
 namespace Caravela.Reactive
 {
-    public readonly struct ReactiveVersionedValue<T>
+    public readonly struct ReactiveVersionedValue<T> : IReactiveVersionedValue<T>
     {
         public ReactiveVersionedValue(T value, int version)
         {
