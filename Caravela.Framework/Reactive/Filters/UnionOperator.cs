@@ -6,8 +6,8 @@ namespace Caravela.Reactive
     internal class UnionOperator<T> : ReactiveCollectionOperator<T, T>
     {
         private readonly IReactiveCollection<T> _second;
-        private IEnumerable<T> _results;
-        private IReactiveSubscription _secondSubscription;
+        private IEnumerable<T> _results = null!;
+        private IReactiveSubscription? _secondSubscription;
 
         public UnionOperator(IReactiveCollection<T> source, IReactiveCollection<T> second)
             : base(source)

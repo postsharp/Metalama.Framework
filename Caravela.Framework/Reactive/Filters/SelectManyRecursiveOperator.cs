@@ -7,21 +7,17 @@ namespace Caravela.Reactive
     internal class SelectManyRecursiveOperator<T> : ReactiveCollectionOperator<T, T>
         where T : class
     {
-        private static readonly Func<T, bool> _defaultContinuePredicate = t => t != null;
-        private readonly Func<T, bool> _continuePredicate;
         private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getRecursionValueFunc;
-        private ImmutableDictionary<T, int> _result;
+        private ImmutableDictionary<T, int> _result = null!;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>
             _subscriptions =
                 ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>.Empty;
 
         public SelectManyRecursiveOperator(IReactiveCollection<T> source,
-            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate) : base(source)
+            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc) : base(source)
         {
             _getRecursionValueFunc = getRecursionValueFunc;
-            _continuePredicate = stopPredicate ?? _defaultContinuePredicate;
         }
 
         protected override bool EvaluateFunction(IEnumerable<T> source)

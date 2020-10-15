@@ -8,14 +8,14 @@ namespace Caravela.Reactive
     {
         public static IGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
             this IReactiveCollection<TItem> source, Func<TItem, ReactiveCollectorToken, TKey> getKeyFunc,
-            IEqualityComparer<TKey> equalityComparer = default)
+            IEqualityComparer<TKey>? equalityComparer = default)
         {
             return new GroupByOperator<TKey, TItem>(source, getKeyFunc, equalityComparer);
         }
 
         public static IGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
             this IReactiveCollection<TItem> source, Func<TItem, TKey> getKeyFunc,
-            IEqualityComparer<TKey> equalityComparer = default)
+            IEqualityComparer<TKey>? equalityComparer = default)
         {
             return new GroupByOperator<TKey, TItem>(source, (item, token) => getKeyFunc(item), equalityComparer);
         }
@@ -64,26 +64,23 @@ namespace Caravela.Reactive
 
         public static IReactiveCollection<T> SelectManyRecursive<T>(
             this IReactiveCollection<T> source,
-            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate = null)
+            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc)
             where T : class
         {
-            return new SelectManyRecursiveOperator<T>(source, getRecursionValueFunc, stopPredicate);
+            return new SelectManyRecursiveOperator<T>(source, getRecursionValueFunc);
         }
 
 
         public static IReactiveCollection<T> SelectManyRecursive<T>(
-            this IReactiveCollection<T> source, Func<T, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate = null)
+            this IReactiveCollection<T> source, Func<T, IReactiveCollection<T>> getRecursionValueFunc)
             where T : class
         {
-            return new SelectManyRecursiveOperator<T>(source, (arg1, token) => getRecursionValueFunc(arg1),
-                stopPredicate);
+            return new SelectManyRecursiveOperator<T>(source, (arg1, token) => getRecursionValueFunc(arg1));
         }
 
 
         public static IReactiveCollection<T> SelectRecursive<T>(
-            this IReactiveCollection<T> source, Func<T, T> getRecursionValueFunc, Func<T, bool> stopPredicate = null)
+            this IReactiveCollection<T> source, Func<T, T> getRecursionValueFunc, Func<T, bool>? stopPredicate = null)
             where T : class
         {
             throw new NotImplementedException();
@@ -102,8 +99,8 @@ namespace Caravela.Reactive
             return new WhereOperator<TSource>(source, (source1, token) => func(source1));
         }
 
-        public static IDisposable ForEach<T>(this IReactiveCollection<T> source, Action<T> addAction = null,
-            Action<T> removeAction = null)
+        public static IDisposable ForEach<T>(this IReactiveCollection<T> source, Action<T>? addAction = null,
+            Action<T>? removeAction = null)
         {
             return new ForEachOperator<T>(source, addAction, removeAction);
         }

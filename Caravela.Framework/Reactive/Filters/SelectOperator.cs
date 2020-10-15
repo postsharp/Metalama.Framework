@@ -11,7 +11,7 @@ namespace Caravela.Reactive
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
         private readonly Func<TSource, ReactiveCollectorToken, TResult> _func;
-        private IEnumerable<TResult> _results;
+        private IEnumerable<TResult> _results = null!;
 
         public SelectOperator(IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, TResult> func)
             : base(source)

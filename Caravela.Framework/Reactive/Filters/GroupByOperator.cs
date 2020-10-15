@@ -13,7 +13,7 @@ namespace Caravela.Reactive
         private ImmutableDictionary<TKey, Group<TKey, TItem>> _groups;
 
         public GroupByOperator(IReactiveCollection<TItem> source, Func<TItem, ReactiveCollectorToken, TKey> getKeyFunc,
-            IEqualityComparer<TKey> equalityComparer) : base(source)
+            IEqualityComparer<TKey>? equalityComparer) : base(source)
         {
             _equalityComparer = equalityComparer ?? EqualityComparer<TKey>.Default;
             _getKeyFunc = getKeyFunc;
@@ -116,7 +116,6 @@ namespace Caravela.Reactive
             in UpdateToken updateToken)
         {
             var newResult = _groups;
-            var hasChange = false;
 
             AddItem(ref newResult, item, in updateToken);
         }
@@ -125,7 +124,7 @@ namespace Caravela.Reactive
             in UpdateToken updateToken)
         {
             var newResult = _groups;
-            var hasChange = false;
+
             RemoveItem(ref newResult, item, in updateToken);
         }
 
@@ -133,7 +132,6 @@ namespace Caravela.Reactive
             TItem newItem, in UpdateToken updateToken)
         {
             var newResult = _groups;
-            var hasChange = false;
 
             RemoveItem(ref newResult, oldItem, in updateToken);
             AddItem(ref newResult, newItem, in updateToken);

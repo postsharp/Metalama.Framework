@@ -7,7 +7,7 @@ namespace Caravela.Reactive
     internal abstract class SelectManyOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>,
         IReactiveCollectionObserver<TResult>
     {
-        private IEnumerable<TResult> _results;
+        private IEnumerable<TResult> _results = null!;
 
         protected SelectManyOperator(IReactiveCollection<TSource> source) : base(source)
         {

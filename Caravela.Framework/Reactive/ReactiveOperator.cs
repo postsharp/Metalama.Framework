@@ -34,7 +34,7 @@ namespace Caravela.Reactive
         private object Sync => Observers;
 
 
-        private IReactiveSubscription SubscriptionToSource { get; set; }
+        private IReactiveSubscription? SubscriptionToSource { get; set; }
 
         protected IReactiveSource<TSource, TSourceObserver> Source { get; }
         protected bool HasObserver => !Observers.IsEmpty;

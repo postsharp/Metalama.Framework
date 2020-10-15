@@ -10,7 +10,7 @@ namespace Caravela.Reactive
             EqualityComparerFactory.GetEqualityComparer<T>();
 
         private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
-        private IEnumerable<T> _result;
+        private IEnumerable<T> _result = null!;
 
         public WhereOperator(IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, bool> predicate) :
             base(source)

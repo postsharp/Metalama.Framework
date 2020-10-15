@@ -5,7 +5,7 @@ namespace Caravela.Reactive
 {
     internal class MaterializeOperator<T>: ReactiveCollectionOperator<T, T>
     {
-        private ImmutableList<T> _list;
+        private ImmutableList<T> _list = null!;
         public MaterializeOperator(IReactiveCollection<T> source) : base(source)
         {
         }
