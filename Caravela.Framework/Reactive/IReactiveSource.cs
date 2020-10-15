@@ -1,13 +1,17 @@
-using System;
-using System.ComponentModel;
-
 namespace Caravela.Reactive
 {
-    public interface IReactiveSource<TValue,TObserver> : INotifyPropertyChanged, IReactiveObservable<TObserver>
+    public interface IReactiveSource<out TValue, in TObserver> : IReactiveObservable<TObserver>
         where TObserver : IReactiveObserver
     {
-        ReactiveVersionedValue<TValue> VersionedValue { get; }
+        TValue GetValue(in ReactiveCollectorToken collectorToken);
+        IReactiveVersionedValue<TValue> GetVersionedValue(in ReactiveCollectorToken collectorToken);
+        
+        bool IsMaterialized { get; }
+    }
 
+    public interface IReactiveVersionedValue<out TValue>
+    {
+        int Version { get; }
         TValue Value { get; }
     }
 }
