@@ -11,23 +11,23 @@ namespace Caravela.Framework.Impl
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
-        internal SymbolMap Cache { get; }
+        internal SymbolMap SymbolMap { get; }
 
         internal Compilation(CSharpCompilation roslynCompilation)
         {
             RoslynCompilation = roslynCompilation;
 
-            Cache = new(this);
+            SymbolMap = new(this);
         }
 
         [Memo]
-        public IReadOnlyList<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(Cache.GetTypeInfo).ToImmutableArray();
+        public IReadOnlyList<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(SymbolMap.GetTypeInfo).ToImmutableArray();
 
         public INamedType? GetTypeByMetadataName(string metadataName)
         {
             var symbol = RoslynCompilation.GetTypeByMetadataName(metadataName);
 
-            return symbol == null ? null : Cache.GetNamedType(symbol);
+            return symbol == null ? null : SymbolMap.GetNamedType(symbol);
         }
     }
 

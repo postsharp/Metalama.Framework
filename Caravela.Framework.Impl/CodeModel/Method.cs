@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl
         public IParameter ReturnParameter => new ReturnParameterImpl(this);
 
         [Memo]
-        public IType ReturnType => Cache.GetIType(symbol.ReturnType);
+        public IType ReturnType => SymbolMap.GetIType(symbol.ReturnType);
 
         [Memo]
         public IReadOnlyList<IMethod> LocalFunctions =>
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
                 .SelectMany(n => n.DescendantNodes(descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax))
                 .OfType<LocalFunctionStatementSyntax>()
                 .Select(f => (IMethodSymbol)Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f))
-                .Select(s => new Method(s, Compilation))
+                .Select(s => SymbolMap.GetMethod(s))
                 .ToImmutableArray();
 
         [Memo]
@@ -74,13 +74,13 @@ namespace Caravela.Framework.Impl
         [Memo]
         public override ICodeElement ContainingElement => symbol.ContainingSymbol switch
         {
-            INamedTypeSymbol type => Cache.GetTypeInfo(type),
-            IMethodSymbol method => Cache.GetMethod(method),
+            INamedTypeSymbol type => SymbolMap.GetTypeInfo(type),
+            IMethodSymbol method => SymbolMap.GetMethod(method),
             _ => throw new InvalidOperationException()
         };
 
         [Memo]
-        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
+        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableArray();
 
         public override string ToString() => symbol.ToString();
 
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl
             public ICodeElement? ContainingElement => method;
 
             [Memo]
-            public IReadOnlyList<IAttribute> Attributes => method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.Cache)).ToImmutableArray();
+            public IReadOnlyList<IAttribute> Attributes => method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.SymbolMap)).ToImmutableArray();
         }
     }
 }

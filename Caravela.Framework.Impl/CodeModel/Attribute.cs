@@ -18,16 +18,16 @@ namespace Caravela.Framework.Impl
     class Attribute : IAttribute
     {
         private readonly AttributeData data;
-        private readonly SymbolMap cache;
+        private readonly SymbolMap symbolMap;
 
-        public Attribute(AttributeData data, SymbolMap cache)
+        public Attribute(AttributeData data, SymbolMap symbolMap)
         {
             this.data = data;
-            this.cache = cache;
+            this.symbolMap = symbolMap;
         }
 
         [Memo]
-        public INamedType Type => cache.GetNamedType(data.AttributeClass!);
+        public INamedType Type => symbolMap.GetNamedType(data.AttributeClass!);
 
         [Memo]
         public IReadOnlyList<object?> ConstructorArguments => data.ConstructorArguments.Select(Translate).ToImmutableArray();
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl
             constant.Kind switch
             {
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
-                TypedConstantKind.Type => constant.Value == null ? null : cache.GetIType((ITypeSymbol)constant.Value),
+                TypedConstantKind.Type => constant.Value == null ? null : symbolMap.GetIType((ITypeSymbol)constant.Value),
                 TypedConstantKind.Array => constant.Values.Select(Translate).ToImmutableArray(),
                 _ => throw new ArgumentException(nameof(constant))
             };

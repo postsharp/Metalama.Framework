@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Caravela.Framework.Aspects
+﻿namespace Caravela.Framework.Aspects
 {
     public interface IAspect
     {
-        
     }
 
     public interface IAspect<in T> : IAspect 
@@ -14,7 +9,6 @@ namespace Caravela.Framework.Aspects
     {
         void Initialize(IAspectBuilder<T> aspectBuilder);
     }
-
 
     public interface IAspectBuilder 
     {

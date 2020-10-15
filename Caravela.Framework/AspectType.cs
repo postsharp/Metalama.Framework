@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework
 {
     internal class AspectType
     {

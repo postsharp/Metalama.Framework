@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.CSharp;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {

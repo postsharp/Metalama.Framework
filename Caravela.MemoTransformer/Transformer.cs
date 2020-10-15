@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.LazyThreadSafePropertyTransformer
+namespace Caravela.MemoTransformer
 {
     [Transformer]
     class Transformer : ISourceTransformer

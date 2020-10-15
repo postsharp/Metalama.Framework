@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.LazyThreadSafePropertyTransformer", "Caravela.LazyThreadSafePropertyTransformer\Caravela.LazyThreadSafePropertyTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.UnitTests", "Caravela.Framework.Impl.UnitTests\Caravela.Framework.Impl.UnitTests.csproj", "{B74D3758-0E43-405F-B7C3-8EF444090E86}"
 EndProject

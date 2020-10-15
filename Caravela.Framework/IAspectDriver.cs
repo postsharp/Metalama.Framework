@@ -1,4 +1,4 @@
-﻿namespace Caravela.Framework.Sdk
+﻿namespace Caravela.Framework
 {
     public interface IAspectDriver
     {

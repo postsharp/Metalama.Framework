@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl
         public string FullName => NamedTypeSymbol.ToDisplayString();
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.Cache.GetIType(a)).ToImmutableArray();
+        public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.SymbolMap.GetIType(a)).ToImmutableArray();
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken)
         {
@@ -36,12 +36,12 @@ namespace Caravela.Framework.Impl
         public ICodeElement? ContainingElement => TypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => null,
-            INamedTypeSymbol containingType => Compilation.Cache.GetTypeInfo(containingType),
+            INamedTypeSymbol containingType => Compilation.SymbolMap.GetTypeInfo(containingType),
             _ => throw new NotImplementedException()
         };
 
         [Memo]
-        public IReadOnlyList<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.Cache)).ToImmutableArray();
+        public IReadOnlyList<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.SymbolMap)).ToImmutableArray();
 
         public override string ToString() => NamedTypeSymbol.ToString();
     }

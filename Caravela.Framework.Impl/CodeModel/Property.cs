@@ -22,24 +22,24 @@ namespace Caravela.Framework.Impl
         }
 
         [Memo]
-        public IType Type => Cache.GetIType(symbol.Type);
+        public IType Type => SymbolMap.GetIType(symbol.Type);
 
         [Memo]
         public IReadOnlyList<IParameter> Parameters => symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
 
 
         [Memo]
-        public IMethod? Getter => symbol.GetMethod == null ? null : Cache.GetMethod(symbol.GetMethod);
+        public IMethod? Getter => symbol.GetMethod == null ? null : SymbolMap.GetMethod(symbol.GetMethod);
 
         [Memo]
         // TODO: get-only properties
-        public IMethod? Setter => symbol.SetMethod == null ? null : Cache.GetMethod(symbol.SetMethod);
+        public IMethod? Setter => symbol.SetMethod == null ? null : SymbolMap.GetMethod(symbol.SetMethod);
 
         public string Name => symbol.Name;
 
         public bool IsStatic => symbol.IsStatic;
 
         [Memo]
-        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, Cache)).ToImmutableArray();
+        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableArray();
     }
 }

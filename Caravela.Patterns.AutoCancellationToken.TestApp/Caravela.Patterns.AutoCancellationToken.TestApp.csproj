@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Caravela.Framework.Impl" Version="0.1.7" />
+    <PackageReference Include="Caravela.Framework.Impl" Version="0.1.8" />
   </ItemGroup>
 
   <ItemGroup>

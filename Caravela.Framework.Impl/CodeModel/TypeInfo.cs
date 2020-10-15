@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
         }
 
         [Memo]
-        public IReadOnlyList<ITypeInfo> NestedTypes => TypeSymbol.GetTypeMembers().Select(Cache.GetTypeInfo).ToImmutableArray();
+        public IReadOnlyList<ITypeInfo> NestedTypes => TypeSymbol.GetTypeMembers().Select(SymbolMap.GetTypeInfo).ToImmutableArray();
 
         [Memo]
         public IReadOnlyList<IProperty> Properties => TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this)).ToImmutableArray();
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl
         public IReadOnlyList<IEvent> Events => throw new NotImplementedException();
 
         [Memo]
-        public IReadOnlyList<IMethod> Methods => TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => new Method(m, Compilation)).ToImmutableArray();
+        public IReadOnlyList<IMethod> Methods => TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => SymbolMap.GetMethod(m)).ToImmutableArray();
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
