@@ -6,7 +6,7 @@ namespace Caravela.Reactive
 
         internal ReactiveCollectorToken(IReactiveTokenCollector collector)
         {
-            Collector = collector;
+            this.Collector = collector;
         }
     }
 }

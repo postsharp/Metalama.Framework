@@ -1,5 +1,9 @@
+#region
+
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -8,9 +12,13 @@ namespace Caravela.Reactive
         public static IEqualityComparer<T> GetEqualityComparer<T>()
         {
             if (typeof(T).IsValueType)
+            {
                 return EqualityComparer<T>.Default;
+            }
             else
+            {
                 return ReferenceEqualityComparer<T>.Instance;
+            }
         }
 
         private class ReferenceEqualityComparer<T> : IEqualityComparer<T>

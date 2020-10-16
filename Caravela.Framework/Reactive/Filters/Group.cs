@@ -1,7 +1,11 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -10,17 +14,18 @@ namespace Caravela.Reactive
         private static readonly IEqualityComparer<TItem> _equalityComparer =
             EqualityComparerFactory.GetEqualityComparer<TItem>();
 
-        private ImmutableDictionary<TItem, int> _items;
         private readonly ObserverList<IReactiveCollectionObserver<TItem>> _observers;
         private readonly GroupByOperator<TKey, TItem> _parent;
+
+        private ImmutableDictionary<TItem, int> _items;
         private int _version;
 
         internal Group(GroupByOperator<TKey, TItem> parent, TKey key)
         {
-            Key = key;
-            _observers = new ObserverList<IReactiveCollectionObserver<TItem>>(this);
-            _items = ImmutableDictionary<TItem, int>.Empty.WithComparers(_equalityComparer);
-            _parent = parent;
+            this.Key = key;
+            this._observers = new ObserverList<IReactiveCollectionObserver<TItem>>(this);
+            this._items = ImmutableDictionary<TItem, int>.Empty.WithComparers(_equalityComparer);
+            this._parent = parent;
         }
 
         internal Group(GroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent) : this(parent,
@@ -34,67 +39,82 @@ namespace Caravela.Reactive
                 builder[item] = count + 1;
             }
 
-            _items = builder.ToImmutable();
-            _parent = parent;
+            this._items = builder.ToImmutable();
+            this._parent = parent;
         }
 
-        internal bool HasObserver => !_observers.IsEmpty;
-
-        public int Count => _items.Count;
+        public bool HasObserver => !this._observers.IsEmpty;
+        
+        public int Count => this._items.Count;
 
         public TKey Key { get; }
 
         private ReactiveVersionedValue<IEnumerable<TItem>> VersionedValue =>
-            new ReactiveVersionedValue<IEnumerable<TItem>>(GetValue(new ReactiveCollectorToken(this)), _version);
+            new ReactiveVersionedValue<IEnumerable<TItem>>(this.GetValue(new ReactiveCollectorToken(this)),
+                this._version);
 
         public IEnumerable<TItem> GetValue(in ReactiveCollectorToken collectorToken)
         {
-            return _items.Keys;
+            return this._items.Keys;
         }
 
         IReactiveVersionedValue<IEnumerable<TItem>>
             IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.GetVersionedValue(
                 in ReactiveCollectorToken collectorToken)
         {
-            return VersionedValue;
+            return this.VersionedValue;
         }
 
         bool IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.IsMaterialized => true;
 
 
+        object IReactiveObservable<IReactiveCollectionObserver<TItem>>.Object => this;
+
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<TItem>>.AddObserver(
             IReactiveCollectionObserver<TItem> observer)
         {
-            if (!HasObserver) _parent.SubscribeToSource();
 
-            return _observers.AddObserver(observer);
+            this._parent.EnsureSubscribedToSource();
+            return this._observers.AddObserver(observer);
         }
 
         bool IReactiveObservable<IReactiveCollectionObserver<TItem>>.RemoveObserver(IReactiveSubscription subscription)
         {
-            return _observers.RemoveObserver(subscription);
+            return this._observers.RemoveObserver(subscription);
+        }
+
+        bool IReactiveDebugging.HasPathToObserver(object observer)
+        {
+            return this._observers.HasPathToObserver(observer);
         }
 
         void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> observable)
         {
-            if (observable != null) throw new InvalidOperationException();
+            if (observable != null)
+            {
+                throw new InvalidOperationException();
+            }
         }
 
         internal bool Add(TItem item)
         {
-            var oldItems = _items;
+            var oldItems = this._items;
 
-            _items.TryGetValue(item, out var count);
-            _items = _items.SetItem(item, count + 1);
+            this._items.TryGetValue(item, out var count);
+            this._items = this._items.SetItem(item, count + 1);
 
             if (count == 0)
             {
-                _version++;
+                this._version++;
 
-                foreach (var subscription in _observers)
+                foreach (var subscription in this._observers)
                 {
-                    subscription.Observer.OnItemAdded(subscription, item, _version);
-                    subscription.Observer.OnValueChanged(subscription, oldItems.Keys, _items.Keys, _version);
+                    subscription.Observer.OnItemAdded(subscription.Subscription, item, this._version);
+                }
+                
+                foreach (var subscription in this._observers.OfType<IEnumerable<TItem>>())
+                {
+                    subscription.Observer.OnValueChanged(subscription.Subscription, oldItems.Keys, this._items.Keys, this._version);
                 }
 
                 return true;
@@ -109,26 +129,33 @@ namespace Caravela.Reactive
         internal bool AddRange(IEnumerable<TItem> items)
         {
             var hasChange = false;
-            foreach (var item in items) hasChange |= Add(item);
+            foreach (var item in items)
+            {
+                hasChange |= this.Add(item);
+            }
 
             return hasChange;
         }
 
         internal bool Remove(TItem item)
         {
-            var oldItems = _items;
+            var oldItems = this._items;
 
-            _items.TryGetValue(item, out var count);
+            this._items.TryGetValue(item, out var count);
 
             if (count == 1)
             {
-                _items = _items.Remove(item);
-                _version++;
+                this._items = this._items.Remove(item);
+                this._version++;
 
-                foreach (var subscription in _observers)
+                foreach (var subscription in this._observers)
                 {
-                    subscription.Observer.OnItemRemoved(subscription, item, _version);
-                    subscription.Observer.OnValueChanged(subscription, oldItems.Keys, _items.Keys, _version);
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, item, this._version);
+                }
+                
+                foreach (var subscription in this._observers.OfType<IEnumerable<TItem>>())
+                {
+                    subscription.Observer.OnValueChanged(subscription.Subscription, oldItems.Keys, this._items.Keys, this._version);
                 }
 
 
@@ -136,7 +163,7 @@ namespace Caravela.Reactive
             }
             else
             {
-                _items = _items.SetItem(item, count - 1);
+                this._items = this._items.SetItem(item, count - 1);
                 return false;
             }
         }
@@ -144,7 +171,10 @@ namespace Caravela.Reactive
         internal bool RemoveRange(IEnumerable<TItem> items)
         {
             var hasChange = false;
-            foreach (var item in items) hasChange |= Remove(item);
+            foreach (var item in items)
+            {
+                hasChange |= this.Remove(item);
+            }
 
             return hasChange;
         }

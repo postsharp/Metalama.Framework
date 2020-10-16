@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -20,30 +24,34 @@ namespace Caravela.Reactive
 
         protected override void UnfollowAll()
         {
-            foreach (var subscription in _subscriptions.Values)
+            foreach (var subscription in this._subscriptions.Values)
+            {
                 subscription.subscription.Dispose();
+            }
         }
 
         protected override void Unfollow(TSource source)
         {
-            if (_subscriptions.TryGetValue(source, out var tuple))
+            if (this._subscriptions.TryGetValue(source, out var tuple))
             {
                 if (tuple.count == 1)
                 {
                     tuple.subscription.Dispose();
-                    _subscriptions.Remove(source);
+                    this._subscriptions.Remove(source);
                 }
                 else
                 {
-                    _subscriptions[source] = (tuple.subscription, tuple.count - 1);
+                    this._subscriptions[source] = (tuple.subscription, tuple.count - 1);
                 }
             }
         }
 
         protected override void Follow(TSource source)
         {
-            if (_subscriptions.TryGetValue(source, out var tuple))
-                _subscriptions[source] = (tuple.subscription, tuple.count + 1);
+            if (this._subscriptions.TryGetValue(source, out var tuple))
+            {
+                this._subscriptions[source] = (tuple.subscription, tuple.count + 1);
+            }
             else
                 _subscriptions[source] = (CollectionSelector(source, CollectorToken).AddObserver(this), tuple.count + 1);
         }

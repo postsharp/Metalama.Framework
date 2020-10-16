@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -114,6 +118,14 @@ namespace Caravela.Reactive
         {
             throw new NotImplementedException();
         }
+        
+        public static IReactiveCollection<T> SelectRecursive<T>(
+            this IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, T> getRecursionValueFunc, Func<T, ReactiveCollectorToken,bool> stopPredicate = null)
+            where T : class
+        {
+            throw new NotImplementedException();
+        }
+
 
 
         public static IReactiveCollection<TSource> Where<TSource>(this IReactiveCollection<TSource> source,
@@ -128,10 +140,9 @@ namespace Caravela.Reactive
             return new WhereOperator<TSource>(source, (source1, token) => func(source1));
         }
 
-        public static IDisposable ForEach<T>(this IReactiveCollection<T> source, Action<T>? addAction = null,
-            Action<T>? removeAction = null)
+        public static IDisposable WriteLine<T>(this IReactiveCollection<T> source, string name = null)
         {
-            return new ForEachOperator<T>(source, addAction, removeAction);
+            return new WriteLineOperator<T>(source, name);
         }
 
         public static IReactiveCollection<TResult> Select<TSource, TResult>(this IReactiveCollection<TSource> source,
@@ -145,6 +156,18 @@ namespace Caravela.Reactive
         {
             return new SelectOperator<TSource, TResult>(source, (source1, token) => func(source1));
         }
+        
+        public static IReactiveCollection<TResult> SelectImpure<TSource, TResult>(this IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, TResult> func)
+        {
+            return new SelectImpureOperator<TSource, TResult>(source, func);
+        }
+
+        public static IReactiveCollection<TResult> SelectImpure<TSource, TResult>(this IReactiveCollection<TSource> source,
+            Func<TSource, TResult> func)
+        {
+            return new SelectImpureOperator<TSource, TResult>(source, (source1, token) => func(source1));
+        }
 
         public static IReactiveCollection<T> Materialize<T>(this IReactiveCollection<T> source)
         {
@@ -154,7 +177,7 @@ namespace Caravela.Reactive
             }
             else
             {
-                return new MaterializeOperator<T>(source);
+                return new ToListOperator<T>(source);
             }
         }
 
@@ -162,6 +185,18 @@ namespace Caravela.Reactive
         public static IReactiveCollection<TResult> OfType<TSource, TResult>(this IReactiveCollection<TSource> source)
         {
             throw new NotImplementedException();
+        }
+        
+        public static IReactiveSource<T,IReactiveObserver<T>> First<T>(
+            this IReactiveCollection<T> source, Func<T, bool> func)
+        {
+            return new FirstOperator<T>(source, (source1, token) => func(source1), false);
+        }
+        
+        public static IReactiveSource<T,IReactiveObserver<T>> FirstOrDefault<T>(
+            this IReactiveCollection<T> source, Func<T, bool> func)
+        {
+            return new FirstOperator<T>(source, (source1, token) => func(source1), true);
         }
     }
 }

@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -15,61 +19,77 @@ namespace Caravela.Reactive
         public WhereOperator(IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, bool> predicate) :
             base(source)
         {
-            _predicate = predicate;
+            this._predicate = predicate;
         }
 
         protected override bool EvaluateFunction(IEnumerable<T> source)
         {
-            _result = source.Where(arg => _predicate(arg, CollectorToken));
+            this._result = source.Where(arg => this._predicate(arg, this.CollectorToken));
             return true;
         }
 
         protected override IEnumerable<T> GetFunctionResult()
         {
-            return _result;
+            return this._result;
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
             in UpdateToken updateToken)
         {
-            if (_predicate(item, CollectorToken))
+            if (this._predicate(item, this.CollectorToken))
             {
                 updateToken.SignalChange();
 
-                foreach (var subscription in Observers)
-                    subscription.Observer.OnItemAdded(subscription, item, updateToken.Version);
+                foreach (var subscription in this.Observers)
+                {
+                    subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+                }
             }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
             in UpdateToken updateToken)
         {
-            if (_predicate(item, CollectorToken))
+            if (this._predicate(item, this.CollectorToken))
             {
                 updateToken.SignalChange();
 
-                foreach (var subscription in Observers)
-                    subscription.Observer.OnItemRemoved(subscription, item, updateToken.Version);
+                foreach (var subscription in this.Observers)
+                {
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+                }
             }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
             in UpdateToken updateToken)
         {
-            if (_sourceEqualityComparer.Equals(oldItem, newItem)) return;
+            if (_sourceEqualityComparer.Equals(oldItem, newItem))
+            {
+                return;
+            }
 
-            var remove = _predicate(oldItem, CollectorToken);
-            var add = _predicate(newItem, CollectorToken);
+            var remove = this._predicate(oldItem, this.CollectorToken);
+            var add = this._predicate(newItem, this.CollectorToken);
 
-            if (!remove && !add) return;
+            if (!remove && !add)
+            {
+                return;
+            }
 
             updateToken.SignalChange();
 
-            foreach (var subscription in Observers)
+            foreach (var subscription in this.Observers)
             {
-                if (remove) subscription.Observer.OnItemRemoved(subscription, oldItem, updateToken.Version);
+                if (remove)
+                {
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.Version);
+                }
 
-                if (add) subscription.Observer.OnItemRemoved(subscription, newItem, updateToken.Version);
+                if (add)
+                {
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, newItem, updateToken.Version);
+                }
             }
         }
     }

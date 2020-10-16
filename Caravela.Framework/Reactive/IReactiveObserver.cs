@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -14,6 +18,8 @@ namespace Caravela.Reactive
         ///     by reacting to incremental events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
         void OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange);
+        
+        bool HasPathToSource(object source);
     }
 
     public interface IReactiveObserver<in T> : IReactiveObserver

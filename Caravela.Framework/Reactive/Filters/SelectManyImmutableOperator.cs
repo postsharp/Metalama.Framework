@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+
+#endregion
 
 namespace Caravela.Reactive
 {
