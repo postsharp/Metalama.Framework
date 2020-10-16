@@ -12,8 +12,8 @@ namespace Caravela.Reactive
         protected Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
 
         private readonly Dictionary<TSource, (IReactiveSubscription subscription, int count)> _subscriptions
-            = new Dictionary<TSource, (IReactiveSubscription subscription, int count)>(EqualityComparerFactory
-                .GetEqualityComparer<TSource>());
+            = new(EqualityComparerFactory.GetEqualityComparer<TSource>());
+        private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new();
 
         public SelectManyObservableOperatorBase(IReactiveCollection<TSource> source,
             Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> collectionSelector,
@@ -22,12 +22,16 @@ namespace Caravela.Reactive
             CollectionSelector = collectionSelector;
         }
 
+        protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) =>
+            ResultSelector(_subscriptionsReverse[subscription], item, CollectorToken);
+
         protected override void UnfollowAll()
         {
             foreach (var subscription in this._subscriptions.Values)
             {
                 subscription.subscription.Dispose();
             }
+            this._subscriptionsReverse.Clear();
         }
 
         protected override void Unfollow(TSource source)
@@ -38,6 +42,7 @@ namespace Caravela.Reactive
                 {
                     tuple.subscription.Dispose();
                     this._subscriptions.Remove(source);
+                    this._subscriptionsReverse.Remove(tuple.subscription);
                 }
                 else
                 {
@@ -53,7 +58,11 @@ namespace Caravela.Reactive
                 this._subscriptions[source] = (tuple.subscription, tuple.count + 1);
             }
             else
-                _subscriptions[source] = (CollectionSelector(source, CollectorToken).AddObserver(this), tuple.count + 1);
+            {
+                var subscription = CollectionSelector(source, CollectorToken).AddObserver(this);
+                _subscriptions.Add(source, (subscription, 1));
+                _subscriptionsReverse.Add(subscription, source);
+            }
         }
     }
 

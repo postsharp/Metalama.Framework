@@ -15,6 +15,6 @@ namespace Caravela.Reactive
     public interface IReactiveSubscription<out T> : IReactiveSubscription
         where T : IReactiveObserver
     {
-        T Observer { get; }
+        new T Observer { get; }
     }
 }

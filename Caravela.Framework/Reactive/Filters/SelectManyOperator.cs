@@ -19,7 +19,7 @@ namespace Caravela.Reactive
             ResultSelector = resultSelector;
         }
 
-        private TResult SelectResult(IReactiveSubscription subscription, TCollection item) => ResultSelector((TSource)subscription.Sender, item, CollectorToken);
+        protected abstract TResult SelectResult(IReactiveSubscription subscription, TCollection item);
 
         void IReactiveCollectionObserver<TCollection>.OnItemAdded(IReactiveSubscription subscription, TCollection item,
             int newVersion)

@@ -21,6 +21,8 @@ namespace Caravela.Reactive
             CollectionSelector = collectionSelector;
         }
 
+        protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) => 
+            throw new NotSupportedException();
 
         protected override void UnfollowAll()
         {
