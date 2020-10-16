@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -30,6 +31,7 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<T> GetFunctionResult()
         {
+            Debug.Assert(this._result!=null);
             return this._result;
         }
 
@@ -38,7 +40,7 @@ namespace Caravela.Reactive
         {
             if (this._predicate(item, this.CollectorToken))
             {
-                updateToken.SignalChange();
+                updateToken.SignalChange(true);
 
                 foreach (var subscription in this.Observers)
                 {
@@ -52,7 +54,7 @@ namespace Caravela.Reactive
         {
             if (this._predicate(item, this.CollectorToken))
             {
-                updateToken.SignalChange();
+                updateToken.SignalChange(true);
 
                 foreach (var subscription in this.Observers)
                 {
@@ -77,7 +79,7 @@ namespace Caravela.Reactive
                 return;
             }
 
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {

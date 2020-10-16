@@ -8,11 +8,11 @@ using System.Collections.Generic;
 
 namespace Caravela.Reactive
 {
-    internal class ObserverList<T> : IEnumerable<ReactiveSubscription<T>>
+    internal class ObserverList<T> : IEnumerable<ReactiveEnumeratedSubscription<T>>
         where T : class, IReactiveObserver
     {
         private readonly IReactiveObservable<T> _owner;
-        private volatile ObserverSubscription<T> _first;
+        private volatile ReactiveSubscription<T> _first;
 
         public ObserverList(IReactiveObservable<T> owner)
         {
@@ -29,7 +29,7 @@ namespace Caravela.Reactive
         public SubscriptionEnumerator<T, IReactiveObserver<TOut>> OfType<TOut>()
             => new SubscriptionEnumerator<T, IReactiveObserver<TOut>>(this._first);
 
-        IEnumerator<ReactiveSubscription<T>> IEnumerable<ReactiveSubscription<T>>.GetEnumerator()
+        IEnumerator<ReactiveEnumeratedSubscription<T>> IEnumerable<ReactiveEnumeratedSubscription<T>>.GetEnumerator()
         {
             return new SubscriptionEnumerator<T, T>(this._first);
         }
@@ -56,6 +56,20 @@ namespace Caravela.Reactive
             return false;
         }
 
+        private int Count
+        {
+            get
+            {
+                int count = 0;
+                for (var node = this._first; node != null; node = node.Next)
+                {
+                    count++;
+                }
+
+                return count;
+            }
+        }
+
         public IReactiveSubscription<T> AddObserver(IReactiveObserver observer)
         {
             if (observer == null)
@@ -67,7 +81,7 @@ namespace Caravela.Reactive
             
             #endif
 
-            var node = new ObserverSubscription<T>(this._owner, observer);
+            var node = new ReactiveSubscription<T>(this._owner, observer);
 
             lock (this)
             {
@@ -81,7 +95,7 @@ namespace Caravela.Reactive
         {
             lock (this)
             {
-                ObserverSubscription<T> previous = null;
+                ReactiveSubscription<T> previous = null;
                 for (var node = this._first; node != null; node = node.Next)
                 {
                     if (ReferenceEquals(node, subscription))
@@ -138,31 +152,37 @@ namespace Caravela.Reactive
 
             return false;
         }
+
+        public override string ToString() => $"ObserverList Count={Count}";
+
     }
 
-    public struct ReactiveSubscription<T> where T : IReactiveObserver
+    public struct ReactiveEnumeratedSubscription<T> where T : IReactiveObserver
     {
         public T Observer { get; }
         public IReactiveSubscription<T> Subscription { get; }
 
-        internal ReactiveSubscription(T observer, IReactiveSubscription<T> subscription)
+        internal ReactiveEnumeratedSubscription(T observer, IReactiveSubscription<T> subscription)
         {
             this.Observer = observer;
             this.Subscription = subscription;
         }
+
+        public override string ToString() => this.Observer.ToString();
+
     }
 
 
     public struct SubscriptionEnumerator<TIn, TOut> : 
-        IEnumerable<ReactiveSubscription<TOut>>,
-        IEnumerator<ReactiveSubscription<TOut>>
+        IEnumerable<ReactiveEnumeratedSubscription<TOut>>,
+        IEnumerator<ReactiveEnumeratedSubscription<TOut>>
         where TOut : class, IReactiveObserver
         where TIn : class, IReactiveObserver
     {
-        private ObserverSubscription<TIn> _node;
-        private readonly ObserverSubscription<TIn> _first;
+        private ReactiveSubscription<TIn> _node;
+        private readonly ReactiveSubscription<TIn> _first;
 
-        internal SubscriptionEnumerator(ObserverSubscription<TIn> first)
+        internal SubscriptionEnumerator(ReactiveSubscription<TIn> first)
         {
             this._first = first;
             this._node = null;
@@ -204,8 +224,8 @@ namespace Caravela.Reactive
             this._node = null;
         }
 
-        public ReactiveSubscription<TOut> Current =>
-            new ReactiveSubscription<TOut>((TOut) this._node.WeaklyTypedObserver, (IReactiveSubscription<TOut>) this._node);
+        public ReactiveEnumeratedSubscription<TOut> Current =>
+            new ReactiveEnumeratedSubscription<TOut>((TOut) this._node.WeaklyTypedObserver, (IReactiveSubscription<TOut>) this._node);
 
         object IEnumerator.Current => this.Current;
 
@@ -214,7 +234,7 @@ namespace Caravela.Reactive
             return this;
         }
 
-        IEnumerator<ReactiveSubscription<TOut>> IEnumerable<ReactiveSubscription<TOut>>.GetEnumerator()
+        IEnumerator<ReactiveEnumeratedSubscription<TOut>> IEnumerable<ReactiveEnumeratedSubscription<TOut>>.GetEnumerator()
         {
             return this.GetEnumerator();
         }
@@ -227,13 +247,13 @@ namespace Caravela.Reactive
     }
 
 
-    internal class ObserverSubscription<T> : IReactiveSubscription<T>
+    internal class ReactiveSubscription<T> : IReactiveSubscription<T>
         where T : IReactiveObserver
     {
         public IReactiveObserver WeaklyTypedObserver { get; }
-        internal ObserverSubscription<T> Next;
+        internal ReactiveSubscription<T> Next;
 
-        public ObserverSubscription(IReactiveObservable<T> observable, IReactiveObserver observer)
+        public ReactiveSubscription(IReactiveObservable<T> observable, IReactiveObserver observer)
         {
             if (observable == null)
             {
@@ -258,6 +278,11 @@ namespace Caravela.Reactive
                 this.Sender.RemoveObserver(this);
                 this.Sender = null;
             }
+        }
+
+        public override string ToString()
+        {
+            return this.WeaklyTypedObserver?.ToString();
         }
     }
 }

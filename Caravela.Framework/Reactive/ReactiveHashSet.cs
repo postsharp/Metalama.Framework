@@ -137,6 +137,7 @@ namespace Caravela.Reactive
             return this._observers.AddObserver(observer);
         }
 
+       
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription)
         {
             return this._observers.RemoveObserver(subscription);
@@ -150,6 +151,10 @@ namespace Caravela.Reactive
         
 
         // TODO: this is not thread-safe.
+        bool IReactiveSource.IsImmutable => false;
+
+        int IReactiveSource.Version => this._version;
+
         IEnumerable<T> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.GetValue(
             in ReactiveCollectorToken collectorToken)
         {

@@ -28,11 +28,19 @@ namespace Caravela.Reactive
             this._parent = parent;
         }
 
-        internal Group(GroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent) : this(parent,
-            initialContent.Key)
+        internal Group(GroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent) :
+            this(parent, initialContent.Key)
+        {
+        
+            this._parent = parent;
+            
+            this.SetItems(initialContent);
+        }
+
+        private void SetItems(IEnumerable<TItem> items)
         {
             var builder = ImmutableDictionary.CreateBuilder<TItem, int>(_equalityComparer);
-            foreach (var item in initialContent)
+            foreach (var item in items)
             {
                 var count = 0;
                 builder.TryGetValue(item, out count);
@@ -40,7 +48,6 @@ namespace Caravela.Reactive
             }
 
             this._items = builder.ToImmutable();
-            this._parent = parent;
         }
 
         public bool HasObserver => !this._observers.IsEmpty;
@@ -65,7 +72,11 @@ namespace Caravela.Reactive
             return this.VersionedValue;
         }
 
-        bool IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.IsMaterialized => true;
+        bool IReactiveSource.IsMaterialized => true;
+
+        bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
+            
+        int IReactiveSource.Version => this._version;
 
 
         object IReactiveObservable<IReactiveCollectionObserver<TItem>>.Object => this;
@@ -168,15 +179,35 @@ namespace Caravela.Reactive
             }
         }
 
-        internal bool RemoveRange(IEnumerable<TItem> items)
+     
+
+        internal void Replace(IEnumerable<TItem> items, int mark)
         {
-            var hasChange = false;
-            foreach (var item in items)
+            var oldItems = this._items;
+            
+            // TODO: It may pay off for performance to emit incremental changes instead of a breaking change. It would require to compare the items set before and after.
+            
+            this.SetItems(items);
+            this._version++;
+            
+            foreach (var subscription in this._observers.OfType<IEnumerable<TItem>>())
             {
-                hasChange |= this.Remove(item);
+                subscription.Observer.OnValueChanged(subscription.Subscription, oldItems.Keys, this._items.Keys, this._version, true);
             }
 
-            return hasChange;
+            this.Mark = mark;
+        }
+        
+        internal int Mark { get; private set; }
+
+        public void Clear()
+        {
+            this.Replace(Array.Empty<TItem>(), 0);
+        }
+
+        public override string ToString()
+        {
+            return $"Group Key={this.Key}";
         }
     }
 }

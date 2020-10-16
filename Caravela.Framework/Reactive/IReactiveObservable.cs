@@ -6,7 +6,7 @@ namespace Caravela.Reactive
         bool HasPathToObserver(object observer);
     }
 
-    public interface IReactiveObservable<in T> : IReactiveDebugging
+    public interface IReactiveObservable<in T> : IReactiveDebugging, IReactiveSource
         where T : IReactiveObserver
     {
         // This is the original object, which may be different to the helper object that implements the interface.

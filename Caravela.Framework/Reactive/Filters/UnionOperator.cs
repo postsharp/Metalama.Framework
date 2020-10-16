@@ -1,6 +1,7 @@
 #region
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -25,6 +26,12 @@ namespace Caravela.Reactive
             return true;
         }
 
+        protected override IEnumerable<T> GetFunctionResult()
+        {
+            Debug.Assert(this._results!=null);
+            return this._results;
+        }
+
         protected internal override IReactiveSubscription SubscribeToSource()
         {
             this._secondSubscription = this._second.AddObserver(this);
@@ -38,15 +45,11 @@ namespace Caravela.Reactive
             this._secondSubscription = null;
         }
 
-        protected override IEnumerable<T> GetFunctionResult()
-        {
-            return this._results;
-        }
-
+     
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
             in UpdateToken updateToken)
         {
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
@@ -57,7 +60,7 @@ namespace Caravela.Reactive
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
             in UpdateToken updateToken)
         {
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
@@ -68,7 +71,7 @@ namespace Caravela.Reactive
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
             in UpdateToken updateToken)
         {
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {

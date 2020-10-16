@@ -28,6 +28,8 @@ namespace Caravela.Reactive
             this._continuePredicate = stopPredicate ?? _defaultContinuePredicate;
         }
 
+        public override bool IsMaterialized => true;
+
         protected override bool EvaluateFunction(IEnumerable<T> source)
         {
             var builder = ImmutableDictionary.CreateBuilder<T, int>();
@@ -55,6 +57,11 @@ namespace Caravela.Reactive
 
             this._result = builder.ToImmutable();
             return true;
+        }
+        
+        protected override IEnumerable<T> GetFunctionResult()
+        {
+            return this._result.Keys;
         }
 
         private bool Follow(IReactiveCollection<T> source)
@@ -90,11 +97,7 @@ namespace Caravela.Reactive
             }
         }
 
-        protected override IEnumerable<T> GetFunctionResult()
-        {
-            return this._result.Keys;
-        }
-
+      
         private void AddItem(T item, ref ImmutableDictionary<T, int> newResult, UpdateToken updateToken)
         {
             void Iterate(T item, ref ImmutableDictionary<T, int> newResult)

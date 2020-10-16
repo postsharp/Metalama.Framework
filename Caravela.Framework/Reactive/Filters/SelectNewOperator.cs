@@ -3,51 +3,55 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 #endregion
 
 namespace Caravela.Reactive
 {
-    internal class SelectImpureOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>
+    internal class SelectNewOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>
+        where TSource : class 
+        where TResult : class
     {
         private static readonly IEqualityComparer<TSource> _sourceEqualityComparer =
             EqualityComparerFactory.GetEqualityComparer<TSource>();
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
         private readonly Func<TSource, ReactiveCollectorToken, TResult> _func;
-        private ImmutableDictionary<TSource,TResult> _results;
+        private readonly ConditionalWeakTable<TSource,TResult> _map = new ConditionalWeakTable<TSource, TResult>();
+        private IEnumerable<TResult> _results;
 
-        public SelectImpureOperator(IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, TResult> func)
+        public SelectNewOperator(IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, TResult> func)
             : base(source)
         {
             this._func = func;
         }
 
-        public override bool IsMaterialized => true;
+        public override bool IsMaterialized => false;
 
+        private TResult Selector(TSource s) => this._map.GetValue(s, k => this._func(k, this.CollectorToken));
 
         protected override bool EvaluateFunction(IEnumerable<TSource> source)
         {
-            this._results = source.ToImmutableDictionary(s => s,
-                s => this._func(s, this.CollectorToken), _sourceEqualityComparer);
+            this._results = source.Select(this.Selector);
             
             return true;
         }
 
         protected override IEnumerable<TResult> GetFunctionResult()
         {
-            return this._results.Values;
+            Debug.Assert(this._results!=null);
+            return this._results;
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
             in UpdateToken updateToken)
         {
-            var outItem = this._func(item, this.CollectorToken);
+            var outItem = this.Selector(item);
 
-            this._results = this._results.Add(item, outItem);
-
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
@@ -58,14 +62,12 @@ namespace Caravela.Reactive
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
             in UpdateToken updateToken)
         {
-            if (!this._results.TryGetValue(item, out var outItem))
+            if (!this._map.TryGetValue(item, out var outItem))
             {
                 return;
             }
             
-            this._results = this._results.Remove(item);
-
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
@@ -81,25 +83,21 @@ namespace Caravela.Reactive
                 return;
             }
 
-            if (!this._results.TryGetValue(oldItem, out var oldItemResult))
+            if (!this._map.TryGetValue(oldItem, out var oldItemResult))
             {
                 // Should not happen.
                 return;
             }
             
-            
 
-            var newItemResult = this._func(newItem, this.CollectorToken);
+            var newItemResult = this.Selector(newItem);
 
             if (_resultEqualityComparer.Equals(oldItemResult, newItemResult))
             {
                 return;
             }
             
-                        
-            this._results = this._results.Remove(oldItem).Add(newItem, newItemResult);
-            
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
