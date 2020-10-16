@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using Caravela.Reactive;
 
 // TODO: InternalImplement
 namespace Caravela.Framework
 {
     public interface ICompilation
     {
-        IReadOnlyList<ITypeInfo> Types { get; }
+        IReactiveCollection<ITypeInfo> Types { get; }
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
 
@@ -40,7 +41,7 @@ namespace Caravela.Framework
     public interface ICodeElement
     {
         ICodeElement? ContainingElement { get; }
-        IReadOnlyList<IAttribute> Attributes { get; }
+        IReactiveCollection<IAttribute> Attributes { get; }
     }
 
     // TODO: how to represent enums, delegates and records? like roslyn

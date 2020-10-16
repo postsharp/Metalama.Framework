@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -42,7 +43,7 @@ namespace Caravela.Framework.Impl
 
         public override ICodeElement? ContainingElement => namedType.ContainingElement;
 
-        public override IReadOnlyList<IAttribute> Attributes => namedType.Attributes;
+        public override IReactiveCollection<IAttribute> Attributes => namedType.Attributes;
 
         public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken) => this;
 

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Reactive;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -28,6 +30,6 @@ namespace Caravela.Framework.Impl
         public ICodeElement ContainingElement => containingMember;
 
         [Memo]
-        public IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableArray();
+        public IReactiveCollection<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableReactive();
     }
 }

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Caravela.Reactive;
 
 namespace Caravela.Framework.Impl
 {
     abstract class AspectSource
     {
-        public abstract IReadOnlyList<AspectInstance> GetAspects();
+        public abstract IReactiveCollection<AspectInstance> GetAspects();
     }
 }

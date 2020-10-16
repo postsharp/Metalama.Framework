@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework
 {
@@ -6,9 +7,9 @@ namespace Caravela.Framework
     {
         public string Name { get; }
         public IAspectDriver AspectDriver { get; }
-        public IReadOnlyList<AspectPart> Parts { get; }
+        public IImmutableList<AspectPart> Parts { get; }
 
-        public AspectType(string name, IAspectDriver aspectDriver, IReadOnlyList<AspectPart> parts)
+        public AspectType(string name, IAspectDriver aspectDriver, IImmutableList<AspectPart> parts)
         {
             Name = name;
             AspectDriver = aspectDriver;

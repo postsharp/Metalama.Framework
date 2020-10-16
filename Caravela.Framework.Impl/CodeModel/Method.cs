@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Reactive;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -80,7 +82,7 @@ namespace Caravela.Framework.Impl
         };
 
         [Memo]
-        public override IReadOnlyList<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableArray();
+        public override IReactiveCollection<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableReactive();
 
         public override string ToString() => symbol.ToString();
 
@@ -99,7 +101,8 @@ namespace Caravela.Framework.Impl
             public ICodeElement? ContainingElement => method;
 
             [Memo]
-            public IReadOnlyList<IAttribute> Attributes => method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.SymbolMap)).ToImmutableArray();
+            public IReactiveCollection<IAttribute> Attributes =>
+                method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.SymbolMap)).ToImmutableReactive();
         }
     }
 }

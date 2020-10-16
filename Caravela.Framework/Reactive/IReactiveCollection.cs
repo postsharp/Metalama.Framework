@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Reactive
 {
-    public interface IReactiveCollection<T> : IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>
+    public interface IReactiveCollection<out T> : IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>
     {
     }
 }

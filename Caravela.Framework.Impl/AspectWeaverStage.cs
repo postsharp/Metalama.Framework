@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -21,9 +21,10 @@ namespace Caravela.Framework.Impl
         {
             var diagnosticSink = new DiagnosticSink();
 
-            var newCompilation = aspectWeaver.Transform(new AspectWeaverContext(aspectType, aspectInstances, input.Compilation, diagnosticSink));
+            var newCompilation = aspectWeaver.Transform(
+                new AspectWeaverContext(aspectType, aspectInstances, ((Compilation)input.Compilation).RoslynCompilation, diagnosticSink));
 
-            return input.Update(diagnosticSink.Diagnostics, newCompilation);
+            return input.Update(diagnosticSink.Diagnostics, new Compilation(newCompilation));
         }
 
         class DiagnosticSink : IDiagnosticSink

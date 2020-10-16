@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Reactive;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -41,7 +43,7 @@ namespace Caravela.Framework.Impl
         };
 
         [Memo]
-        public IReadOnlyList<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.SymbolMap)).ToImmutableArray();
+        public IReactiveCollection<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.SymbolMap)).ToImmutableReactive();
 
         public override string ToString() => NamedTypeSymbol.ToString();
     }

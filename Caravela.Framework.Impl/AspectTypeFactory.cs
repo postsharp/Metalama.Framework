@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl
 {
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl
             if (!aspectTypes.TryGetValue(attributeType, out var aspectType))
             {
                 // TODO: handle AspectParts properly
-                aspectType = new AspectType(attributeType.FullName, aspectDriverFactory.GetAspectDriver(attributeType), new[] { new AspectPart(null, 0) });
+                aspectType = new AspectType(attributeType.FullName, aspectDriverFactory.GetAspectDriver(attributeType), ImmutableArray.Create(new AspectPart(null, 0)));
                 aspectTypes.Add(attributeType, aspectType);
             }
 

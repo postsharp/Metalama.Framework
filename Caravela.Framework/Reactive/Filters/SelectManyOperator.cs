@@ -4,39 +4,42 @@ using System.Linq;
 
 namespace Caravela.Reactive
 {
-    internal abstract class SelectManyOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>,
-        IReactiveCollectionObserver<TResult>
+    internal abstract class SelectManyOperator<TSource, TCollection, TResult> : ReactiveCollectionOperator<TSource, TResult>,
+        IReactiveCollectionObserver<TCollection>
     {
         private IEnumerable<TResult> _results = null!;
+        protected Func<TSource, TCollection, ReactiveCollectorToken, TResult> ResultSelector { get; }
 
-        protected SelectManyOperator(IReactiveCollection<TSource> source) : base(source)
+        protected SelectManyOperator(IReactiveCollection<TSource> source, Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector) : base(source)
         {
+            ResultSelector = resultSelector;
         }
 
+        private TResult SelectResult(IReactiveSubscription subscription, TCollection item) => ResultSelector((TSource)subscription.Sender, item, CollectorToken);
 
-        void IReactiveCollectionObserver<TResult>.OnItemAdded(IReactiveSubscription subscription, TResult item,
+        void IReactiveCollectionObserver<TCollection>.OnItemAdded(IReactiveSubscription subscription, TCollection item,
             int newVersion)
         {
             using var updateToken = GetUpdateToken();
 
-            AddItem(item, updateToken);
+            AddItem(SelectResult(subscription, item), updateToken);
         }
 
-        void IReactiveCollectionObserver<TResult>.OnItemRemoved(IReactiveSubscription subscription, TResult item,
+        void IReactiveCollectionObserver<TCollection>.OnItemRemoved(IReactiveSubscription subscription, TCollection item,
             int newVersion)
         {
             using var updateToken = GetUpdateToken();
 
-            RemoveItem(item, updateToken);
+            RemoveItem(SelectResult(subscription, item), updateToken);
         }
 
-        void IReactiveCollectionObserver<TResult>.OnItemReplaced(IReactiveSubscription subscription, TResult oldItem,
-            TResult newItem, int newVersion)
+        void IReactiveCollectionObserver<TCollection>.OnItemReplaced(IReactiveSubscription subscription, TCollection oldItem,
+            TCollection newItem, int newVersion)
         {
             using var updateToken = GetUpdateToken();
 
-            RemoveItem(oldItem, updateToken);
-            AddItem(newItem, updateToken);
+            RemoveItem(SelectResult(subscription, oldItem), updateToken);
+            AddItem(SelectResult(subscription, newItem), updateToken);
         }
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription,
@@ -45,8 +48,8 @@ namespace Caravela.Reactive
             throw new NotImplementedException();
         }
 
-        void IReactiveObserver<IEnumerable<TResult>>.OnValueChanged(IReactiveSubscription subscription,
-            IEnumerable<TResult> oldValue, IEnumerable<TResult> newValue, int newVersion,
+        void IReactiveObserver<IEnumerable<TCollection>>.OnValueChanged(IReactiveSubscription subscription,
+            IEnumerable<TCollection> oldValue, IEnumerable<TCollection> newValue, int newVersion,
             bool isBreakingChange)
         {
             throw new NotImplementedException();

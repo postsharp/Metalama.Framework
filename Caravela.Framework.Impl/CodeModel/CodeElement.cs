@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Caravela.Framework.Sdk;
+using Caravela.Reactive;
 
 namespace Caravela.Framework.Impl
 {
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Impl
         internal SymbolMap SymbolMap => Compilation.SymbolMap;
 
         public abstract ICodeElement? ContainingElement { get; }
-        public abstract IReadOnlyList<IAttribute> Attributes { get; }
+        public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
         protected abstract ISymbol Symbol { get; }
         private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => Symbol.DeclaringSyntaxReferences.Select(r => (CSharpSyntaxNode)r.GetSyntax());

@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Reactive;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl
         }
 
         [Memo]
-        public IReadOnlyList<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(SymbolMap.GetTypeInfo).ToImmutableArray();
+        public IReactiveCollection<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(SymbolMap.GetTypeInfo).ToImmutableReactive();
 
         public INamedType? GetTypeByMetadataName(string metadataName)
         {

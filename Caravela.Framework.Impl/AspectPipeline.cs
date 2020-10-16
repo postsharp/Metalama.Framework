@@ -1,8 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Sdk;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Caravela.Framework.Sdk;
 using RoslynEx;
 
 namespace Caravela.Framework.Impl
@@ -12,34 +13,35 @@ namespace Caravela.Framework.Impl
     {
         public Microsoft.CodeAnalysis.Compilation Execute(TransformerContext context)
         {
-            var compilation = (CSharpCompilation)context.Compilation;
+            var roslynCompilation = (CSharpCompilation)context.Compilation;
 
             // DI
             var loader = new Loader(context.LoadReferencedAssembly);
-            var driverFactory = new AspectDriverFactory(compilation, loader);
+            var driverFactory = new AspectDriverFactory(roslynCompilation, loader);
             var aspectTypeFactory = new AspectTypeFactory(driverFactory);
+            var compilation = new Compilation(roslynCompilation);
 
-            // TODO: how to get other sources?
-            var aspectSources = new AspectSource[] { new AttributeAspectSource(compilation, aspectTypeFactory) };
+            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation, aspectTypeFactory);
 
-            var aspectParts = from source in aspectSources
-                              from aspect in source.GetAspects()
-                              group aspect by aspect.AspectType into g
-                              let aspectType = g.Key
-                              from aspectPart in aspectType.Parts
-                              orderby aspectPart.ExecutionOrder
-                              select (aspects: g.AsEnumerable(), aspectType, aspectPart);
+            // TODO: either change this to get all AspectParts from the initial compilation (not just those that have AspectInstances)
+            // TODO: or change it so that AspectParts are updated after every stage
+
+            var aspectParts = aspectCompilation.Aspects
+                .GroupBy(a => a.AspectType)
+                .SelectMany((g, _) => g.Key.Parts, (aspects, aspectPart, token) => (aspects: aspects.GetValue(token), aspectType: aspects.Key, aspectPart))
+                // TODO: null object ReactiveCollectorToken?
+                .GetValue(default)
+                .OrderBy(x => x.aspectPart);
 
             // TODO: aspect part grouping
-
-            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation);
 
             foreach (var aspectPart in aspectParts)
             {
                 PipelineStage stage = aspectPart.aspectType.AspectDriver switch
                 {
                     IAspectWeaver weaver => new AspectWeaverStage(
-                        weaver, aspectCompilation.Compilation.GetTypeByMetadataName(aspectPart.aspectType.Name)!, aspectPart.aspects.ToImmutableArray())
+                        weaver, ((Compilation)aspectCompilation.Compilation).RoslynCompilation.GetTypeByMetadataName(aspectPart.aspectType.Name)!,
+                        aspectPart.aspects.ToImmutableArray())
                 };
 
                 aspectCompilation = stage.Transform(aspectCompilation);
@@ -50,7 +52,7 @@ namespace Caravela.Framework.Impl
                 context.ReportDiagnostic(diagnostic);
             }
 
-            return aspectCompilation.Compilation;
+            return ((Compilation)aspectCompilation.Compilation).RoslynCompilation;
         }
     }
 }

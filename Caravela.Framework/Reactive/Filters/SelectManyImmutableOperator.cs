@@ -4,14 +4,17 @@ using System.Collections.Immutable;
 
 namespace Caravela.Reactive
 {
-    internal class SelectManyImmutableOperator<TSource, TResult> : SelectManyOperator<TSource, TResult>
+    internal abstract class SelectManyImmutableOperatorBase<TSource, TCollection, TResult> : SelectManyOperator<TSource, TCollection, TResult>
     {
-        private readonly Func<TSource, ReactiveCollectorToken, IEnumerable<TResult>> _func;
+        protected Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> CollectionSelector { get; }
 
-        public SelectManyImmutableOperator(IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> func) : base(source)
+        public SelectManyImmutableOperatorBase(
+            IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> collectionSelector,
+            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+            : base(source, resultSelector)
         {
-            _func = func;
+            CollectionSelector = collectionSelector;
         }
 
 
@@ -26,10 +29,38 @@ namespace Caravela.Reactive
         protected override void Follow(TSource source)
         {
         }
+    }
+
+    internal sealed class SelectManyImmutableOperator<TSource, TResult> : SelectManyImmutableOperatorBase<TSource, TResult, TResult>
+    {
+        public SelectManyImmutableOperator(
+            IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> collectionSelector)
+            : base(source, collectionSelector, (source, result, token) => result)
+        {
+        }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return _func(arg, CollectorToken);
+            return CollectionSelector(arg, CollectorToken);
+        }
+    }
+
+    internal sealed class SelectManyImmutableOperator<TSource, TCollection, TResult> : SelectManyImmutableOperatorBase<TSource, TCollection, TResult>
+    {
+        public SelectManyImmutableOperator(
+            IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> collectionSelector,
+            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+            : base(source, collectionSelector, resultSelector)
+        {
+        }
+
+        protected override IEnumerable<TResult> GetItems(TSource arg)
+        {
+            foreach (var item in CollectionSelector(arg, CollectorToken))
+            {
+                yield return ResultSelector(arg, item, CollectorToken);
+            }
         }
     }
 }

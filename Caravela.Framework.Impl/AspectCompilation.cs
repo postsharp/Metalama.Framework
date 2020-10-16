@@ -1,29 +1,37 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
     sealed class AspectCompilation
     {
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
-        public CSharpCompilation Compilation { get; }
-        // TODO: which aspects is this supposed to contain and why?
-        //public IReadOnlyList<AspectInstance> Aspects { get; }
+        public ICompilation Compilation { get; }
 
-        public AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, CSharpCompilation compilation)
+        public ReactiveHashSet<AspectSource> AspectSources { get; } = new();
+
+        public IReactiveCollection<AspectInstance> Aspects { get; }
+
+        public AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation, AspectTypeFactory aspectTypeFactory)
+            : this(diagnostics, compilation, new ReactiveHashSet<AspectSource>() { new AttributeAspectSource(compilation, aspectTypeFactory) }) { }
+
+        private AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation, ReactiveHashSet<AspectSource> aspectSources)
         {
             Diagnostics = diagnostics;
             Compilation = compilation;
+            AspectSources = aspectSources;
+
+            Aspects = aspectSources.SelectMany(s => s.GetAspects());
         }
 
-        public AspectCompilation Update(IReadOnlyList<Diagnostic> addedDiagnostics, CSharpCompilation newCompilation)
+        public AspectCompilation Update(IReadOnlyList<Diagnostic> addedDiagnostics, ICompilation newCompilation)
         {
             var newDiagnostics = Diagnostics.Concat(addedDiagnostics).ToImmutableArray();
 
-            return new AspectCompilation(newDiagnostics, newCompilation);
+            return new AspectCompilation(newDiagnostics, newCompilation, AspectSources);
         }
     }
 }

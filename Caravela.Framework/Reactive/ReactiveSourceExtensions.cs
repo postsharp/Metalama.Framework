@@ -53,6 +53,35 @@ namespace Caravela.Reactive
             return new SelectManyImmutableOperator<TSource, TResult>(source, (source1, token) => func(source1));
         }
 
+        public static IReactiveCollection<TResult> SelectMany<TSource, TCollection, TResult>(
+            this IReactiveCollection<TSource> source, Func<TSource, IReactiveCollection<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
+        {
+            return new SelectManyObservableOperator<TSource, TCollection, TResult>(
+                source, (source1, token) => collectionSelector(source1), (source2, item, token) => resultSelector(source2, item));
+        }
+
+        public static IReactiveCollection<TResult> SelectMany<TSource, TCollection, TResult>(
+            this IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> collectionSelector,
+            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+        {
+            return new SelectManyObservableOperator<TSource, TCollection, TResult>(source, collectionSelector, resultSelector);
+        }
+
+        public static IReactiveCollection<TResult> SelectMany<TSource, TCollection, TResult>(
+            this IReactiveCollection<TSource> source, Func<TSource, IImmutableList<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
+        {
+            return new SelectManyImmutableOperator<TSource, TCollection, TResult>(
+                source, (source1, token) => collectionSelector(source1), (source2, item, token) => resultSelector(source2, item));
+        }
+
+        public static IReactiveCollection<TResult> SelectMany<TSource, TCollection, TResult>(
+            this IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> collectionSelector,
+            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+        {
+            return new SelectManyImmutableOperator<TSource, TCollection, TResult>(source, collectionSelector, resultSelector);
+        }
 
         public static IReactiveCollection<TResult> Expand<TResult>(
             this IReactiveCollection<IReactiveCollection<TResult>> source)
@@ -116,7 +145,7 @@ namespace Caravela.Reactive
         {
             return new SelectOperator<TSource, TResult>(source, (source1, token) => func(source1));
         }
-        
+
         public static IReactiveCollection<T> Materialize<T>(this IReactiveCollection<T> source)
         {
             if (source.IsMaterialized)
