@@ -11,7 +11,7 @@ namespace Caravela.Reactive
     internal abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
         IReactiveSource<TResult, TResultObserver>,
         IReactiveObserver<TSource>,
-        IReactiveTokenCollector, IEnsureSubscribedToSource
+        IReactiveTokenCollector, IGroupByOperator
         where TSourceObserver : IReactiveObserver<TSource>
         where TResultObserver : class, IReactiveObserver<TResult>
 
@@ -19,7 +19,7 @@ namespace Caravela.Reactive
         private DependencyList _dependencies;
         private bool _currentUpdateHasChange;
         private volatile int _inputVersion = -1;
-        private volatile bool _isDirty = true;
+        private volatile bool _isFunctionResultDirty = true;
         private volatile int _version = -1;
         private DependencyObservable? _dependencyObservable;
 
@@ -44,8 +44,7 @@ namespace Caravela.Reactive
 
         protected IReactiveSource<TSource, TSourceObserver> Source { get; }
 
-        protected bool MustProcessInboundChange => this._version >= 0;
-
+        
         protected ReactiveCollectorToken CollectorToken => new ReactiveCollectorToken(this);
 
 
@@ -83,11 +82,21 @@ namespace Caravela.Reactive
         {
             this.EnsureSubscribedToSource();
 
+            if (this.IsImmutable)
+            {
+                return null;
+            }
+
             return this.Observers.AddObserver(observer);
         }
 
         bool IReactiveObservable<TResultObserver>.RemoveObserver(IReactiveSubscription subscription)
         {
+            if (subscription == null)
+            {
+                return false;
+            }
+
             return this.Observers.RemoveObserver(subscription);
         }
 
@@ -95,6 +104,10 @@ namespace Caravela.Reactive
         {
             return observer == this || this.Observers.HasPathToObserver(observer);
         }
+
+        public bool IsImmutable => this.Source.IsImmutable && this._dependencies.IsEmpty;
+
+        public int Version => this._version;
 
         public TResult GetValue(in ReactiveCollectorToken collectorToken)
         {
@@ -132,7 +145,7 @@ namespace Caravela.Reactive
             }
         }
 
-        void IEnsureSubscribedToSource.EnsureSubscribedToSource() => EnsureSubscribedToSource();
+        void IGroupByOperator.EnsureSubscribedToSource() => EnsureSubscribedToSource();
 
         protected internal virtual void UnsubscribeFromSource()
         {
@@ -142,7 +155,10 @@ namespace Caravela.Reactive
 
         protected abstract bool EvaluateFunction(TSource source);
 
-        protected bool CanProcessIncrementalChange => !this._isDirty;
+        protected abstract TResult GetFunctionResult();
+
+
+        protected bool CanProcessIncrementalChange => this._version >= 0;
 
 
         protected UpdateToken GetIncrementalUpdateToken()
@@ -153,26 +169,27 @@ namespace Caravela.Reactive
 
         private ReactiveVersionedValue<TResult> GetValueImpl(in ReactiveCollectorToken collectorToken)
         {
-            collectorToken.Collector?.AddDependency((this._dependencyObservable ??= new DependencyObservable(this)));
-
             this.EnsureFunctionEvaluated();
+            
+            // Collect after evaluation so that the version number is updated.
+            collectorToken.Collector?.AddDependency((this._dependencyObservable ??= new DependencyObservable(this)));
 
             return new ReactiveVersionedValue<TResult>(this.GetFunctionResult(), this._version);
         }
 
         protected void EnsureFunctionEvaluated()
         {
-            if (this._isDirty)
+            if (this._isFunctionResultDirty)
                 // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
                 lock (this.Sync)
                 {
-                    if (this._isDirty)
+                    if (this._isFunctionResultDirty)
                     {
                         // Evaluate the source.
                         var input = this.Source.GetVersionedValue(this.CollectorToken);
 
-                        if (input.Version != this._inputVersion || !this._dependencies.IsEmpty)
+                        if (input.Version != this._inputVersion || !this._dependencies.IsDirty())
                         {
                             this._inputVersion = input.Version;
 
@@ -188,7 +205,7 @@ namespace Caravela.Reactive
                             }
                         }
 
-                        this._isDirty = false;
+                        this._isFunctionResultDirty = false;
                     }
 
                     this.EnsureSubscribedToSource();
@@ -197,22 +214,18 @@ namespace Caravela.Reactive
         }
 
 
-        protected abstract TResult GetFunctionResult();
-
+        
         private void OnValueChanged(bool isBreakingChange)
         {
             if (isBreakingChange)
             {
-                this.OnBreakingChange();
+                this.OnObserverBreakingChange();
             }
         }
 
-        protected void OnBreakingChange()
+        protected void OnObserverBreakingChange()
         {
-            if (_isDirty)
-                return;
-            
-            this._isDirty = true;
+            this._isFunctionResultDirty = true;
 
             foreach (var subscription in this.Observers.WeaklyTyped())
             {
@@ -222,7 +235,7 @@ namespace Caravela.Reactive
 
         protected virtual void OnOtherValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
         {
-            this.OnBreakingChange();
+            this.OnObserverBreakingChange();
         }
 
 
@@ -240,18 +253,29 @@ namespace Caravela.Reactive
             }
 
             
-            public void SignalChange()
+            public void SignalChange(bool isBreakingCachedFunctionResult = false)
             {
                 if (this._parent == null)
                     throw new InvalidOperationException();
 
-                if (this._parent._isDirty)
-                    throw new InvalidOperationException();
 
                 if (!this._parent._currentUpdateHasChange)
                 {
                     this._parent._currentUpdateHasChange = true;
                     this._parent._version++;
+                }
+
+                if (isBreakingCachedFunctionResult && !this._parent._isFunctionResultDirty )
+                {
+                    
+                    // We have an incremental change that breaks the stored value, so _parent.EvaluateFunction() must
+                    // be called again. However, observers don't need to resynchronize if they are able to process
+                    // the increment.
+                    
+                    this._parent._isFunctionResultDirty = true;
+                    
+                    // We don't nullify the old result now because the current result may eventually be still valid if all versions 
+                    // end up being identical.
                 }
 
             }
@@ -282,6 +306,8 @@ namespace Caravela.Reactive
             }
         }
 
+       
+
         class DependencyObservable : IReactiveObservable<IReactiveObserver>
         {
             private readonly ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
@@ -307,6 +333,12 @@ namespace Caravela.Reactive
             {
                 return observer == this._parent || this._parent.Observers.HasPathToObserver(observer);
             }
+
+            bool IReactiveSource.IsMaterialized => this._parent.IsMaterialized;
+
+            bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
+
+            int IReactiveSource.Version => this._parent._version;
         }
     }
 }

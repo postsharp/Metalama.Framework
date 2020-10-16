@@ -1,6 +1,6 @@
 ﻿namespace Caravela.Reactive
 {
-    internal interface IEnsureSubscribedToSource
+    internal interface IGroupByOperator : IReactiveSource
     {
         void EnsureSubscribedToSource();
     }

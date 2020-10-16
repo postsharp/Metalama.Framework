@@ -44,7 +44,7 @@ namespace Caravela.Reactive
                         token.SignalChange();
 
                         // We never return a null group, instead we create an empty group to which
-                        // items can be added later.
+                        // items can be added later. This is important because the consumer may add an observer.
                         group = new Group<TKey, TElement>(this, key);
 
                         var oldGroups = this._groups;
@@ -53,7 +53,6 @@ namespace Caravela.Reactive
                         foreach (var subscription in this.Observers)
                         {
                             subscription.Observer.OnItemAdded(subscription.Subscription, group, token.Version);
-                            
                         }
 
                         foreach (var subscription in this.Observers.OfType<IEnumerable<Group<TKey, TElement>>>())
@@ -129,10 +128,38 @@ namespace Caravela.Reactive
 
         protected override bool EvaluateFunction(IEnumerable<TSource> source)
         {
-            this._groups = source
-                .GroupBy(s => this._getKeyFunc(s, this.CollectorToken), _getElementFunc)
-                .ToImmutableDictionary(g => g.Key, g => new Group<TKey, TElement>(this, g));
+            // We cannot simply overwrite the dictionary with a brand new one because there may be observers on individual
+            // groups and we need to preserve them.
 
+            var oldGroups = this._groups;
+
+            var builder = oldGroups.ToBuilder();
+
+            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.CollectorToken), _getElementFunc))
+            {
+                if (builder.TryGetValue(group.Key, out var items))
+                {
+                    items.Replace(group, this.Version);
+                }
+            }
+
+            foreach (var group in builder)
+            {
+                if (group.Value.Mark != this.Version)
+                {
+                    if (group.Value.HasObserver)
+                    {
+                        group.Value.Clear();
+                    }
+                    else
+                    {
+                        builder.Remove(group.Key);
+                    }
+                }
+            }
+
+            this._groups = builder.ToImmutable();
+                
             return true;
         }
 
@@ -155,6 +182,7 @@ namespace Caravela.Reactive
             in UpdateToken updateToken)
         {
             var newResult = this._groups;
+            
             this.RemoveItem(ref newResult, item, in updateToken);
             this._groups = newResult;
         }

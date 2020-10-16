@@ -35,7 +35,6 @@ namespace Caravela.Reactive
 
         protected override T GetFunctionResult() => _result;
 
-
         void IReactiveCollectionObserver<T>.OnItemAdded(IReactiveSubscription subscription, T item, int newVersion)
         {
             if (!this.CanProcessIncrementalChange)
@@ -66,7 +65,7 @@ namespace Caravela.Reactive
             
             if (_equalityComparer.Equals(oldResult, item) && this._predicate(item, this.CollectorToken))
             {
-                this.OnBreakingChange();
+                this.OnObserverBreakingChange();
             }
         }
 
@@ -81,7 +80,7 @@ namespace Caravela.Reactive
             if (_equalityComparer.Equals(oldResult, oldItem)
                 && this._predicate(oldItem, this.CollectorToken))
             {
-                this.OnBreakingChange();
+                this.OnObserverBreakingChange();
             }
         }
     }

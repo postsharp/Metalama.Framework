@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -60,7 +61,7 @@ namespace Caravela.Reactive
         {
             if (isBreakingChange)
             {
-                this.OnBreakingChange();
+                this.OnObserverBreakingChange();
             }
         }
 
@@ -70,7 +71,7 @@ namespace Caravela.Reactive
         {
             if (isBreakingChange)
             {
-                this.OnBreakingChange();
+                this.OnObserverBreakingChange();
             }
         }
 
@@ -96,10 +97,15 @@ namespace Caravela.Reactive
             return true;
         }
 
-
+        protected override IEnumerable<TResult> GetFunctionResult()
+        {
+            Debug.Assert(this._results!=null);
+            return this._results;
+        }
+        
         private void AddItem(TResult addedItem, in UpdateToken updateToken)
         {
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
             // We have a new item.
 
@@ -111,7 +117,7 @@ namespace Caravela.Reactive
 
         private void RemoveItem(TResult removedItem, in UpdateToken updateToken)
         {
-            updateToken.SignalChange();
+            updateToken.SignalChange(true);
 
 
             foreach (var observer in this.Observers)
@@ -162,9 +168,6 @@ namespace Caravela.Reactive
         }
 
 
-        protected override IEnumerable<TResult> GetFunctionResult()
-        {
-            return this._results;
-        }
+       
     }
 }

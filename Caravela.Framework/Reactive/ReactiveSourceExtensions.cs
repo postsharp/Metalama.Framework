@@ -164,16 +164,16 @@ namespace Caravela.Reactive
             return new SelectOperator<TSource, TResult>(source, (source1, token) => func(source1));
         }
         
-        public static IReactiveCollection<TResult> SelectImpure<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, TResult> func)
+        public static IReactiveCollection<TResult> SelectNew<TSource, TResult>(this IReactiveCollection<TSource> source,
+            Func<TSource, ReactiveCollectorToken, TResult> func) where TSource : class where TResult : class
         {
-            return new SelectImpureOperator<TSource, TResult>(source, func);
+            return new SelectNewOperator<TSource, TResult>(source, func);
         }
 
-        public static IReactiveCollection<TResult> SelectImpure<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, TResult> func)
+        public static IReactiveCollection<TResult> SelectNew<TSource, TResult>(this IReactiveCollection<TSource> source,
+            Func<TSource, TResult> func) where TResult : class where TSource : class
         {
-            return new SelectImpureOperator<TSource, TResult>(source, (source1, token) => func(source1));
+            return new SelectNewOperator<TSource, TResult>(source, (source1, token) => func(source1));
         }
 
         public static IReactiveCollection<T> Materialize<T>(this IReactiveCollection<T> source)

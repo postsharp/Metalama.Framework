@@ -56,9 +56,12 @@ namespace Caravela.Reactive
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
         {
-            foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+            if (isBreakingChange)
             {
-                this.Add(item);
+                foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+                {
+                    this.Add(item);
+                }
             }
         }
 

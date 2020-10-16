@@ -20,9 +20,13 @@ namespace Caravela.Framework.Impl.Reactive
             _observers = new(this);
         }
 
-        bool IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.IsMaterialized => true;
-
         object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
+
+        bool IReactiveSource.IsMaterialized => true;
+
+        bool IReactiveSource.IsImmutable => true;
+
+        int IReactiveSource.Version => 0;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer) => _observers.AddObserver(observer);
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) => _observers.RemoveObserver(subscription);
