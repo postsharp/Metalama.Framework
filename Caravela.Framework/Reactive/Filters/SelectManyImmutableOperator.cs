@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -11,7 +15,7 @@ namespace Caravela.Reactive
         public SelectManyImmutableOperator(IReactiveCollection<TSource> source,
             Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> func) : base(source)
         {
-            _func = func;
+            this._func = func;
         }
 
 
@@ -29,7 +33,7 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return _func(arg, CollectorToken);
+            return this._func(arg, this.CollectorToken);
         }
     }
 }

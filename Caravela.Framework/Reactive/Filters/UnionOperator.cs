@@ -1,5 +1,9 @@
+#region
+
 using System.Collections.Generic;
 using System.Linq;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -12,31 +16,31 @@ namespace Caravela.Reactive
         public UnionOperator(IReactiveCollection<T> source, IReactiveCollection<T> second)
             : base(source)
         {
-            _second = second;
+            this._second = second;
         }
 
         protected override bool EvaluateFunction(IEnumerable<T> source)
         {
-            _results = source.Union(_second.GetValue(CollectorToken));
+            this._results = source.Union(this._second.GetValue(this.CollectorToken));
             return true;
         }
 
         protected internal override IReactiveSubscription SubscribeToSource()
         {
-            _secondSubscription = _second.AddObserver(this);
+            this._secondSubscription = this._second.AddObserver(this);
             return base.SubscribeToSource();
         }
 
         protected internal override void UnsubscribeFromSource()
         {
             base.UnsubscribeFromSource();
-            _secondSubscription?.Dispose();
-            _secondSubscription = null;
+            this._secondSubscription?.Dispose();
+            this._secondSubscription = null;
         }
 
         protected override IEnumerable<T> GetFunctionResult()
         {
-            return _results;
+            return this._results;
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
@@ -44,8 +48,10 @@ namespace Caravela.Reactive
         {
             updateToken.SignalChange();
 
-            foreach (var subscription in Observers)
-                subscription.Observer.OnItemAdded(subscription, item, updateToken.Version);
+            foreach (var subscription in this.Observers)
+            {
+                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+            }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
@@ -53,8 +59,10 @@ namespace Caravela.Reactive
         {
             updateToken.SignalChange();
 
-            foreach (var subscription in Observers)
-                subscription.Observer.OnItemRemoved(subscription, item, updateToken.Version);
+            foreach (var subscription in this.Observers)
+            {
+                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+            }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
@@ -62,11 +70,14 @@ namespace Caravela.Reactive
         {
             updateToken.SignalChange();
 
-            foreach (var subscription in Observers)
+            foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription, oldItem, updateToken.Version);
-                subscription.Observer.OnItemAdded(subscription, newItem, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.Version);
+                subscription.Observer.OnItemAdded(subscription.Subscription, newItem, updateToken.Version);
             }
         }
+
+        protected override bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> observable)
+            => base.ShouldTrackDependency(observable) && observable.Object != this._second;
     }
 }

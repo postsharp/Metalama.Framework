@@ -1,5 +1,9 @@
+#region
+
 using System.Collections;
 using System.Collections.Generic;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -14,39 +18,50 @@ namespace Caravela.Reactive
 
         IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator()
         {
-            return GetValue(CollectorToken).GetEnumerator();
+            return this.GetValue(this.CollectorToken).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetValue(CollectorToken).GetEnumerator();
+            return this.GetValue(this.CollectorToken).GetEnumerator();
         }
 
 
-        void IReactiveCollectionObserver<TSource>.OnItemAdded(IReactiveSubscription subscription, TSource item,
-            int newVersion)
+        void IReactiveCollectionObserver<TSource>.OnItemAdded(IReactiveSubscription subscription, TSource item, int newVersion)
         {
-            using var token = GetUpdateToken();
-            OnSourceItemAdded(subscription, item, in token);
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var token = this.GetIncrementalUpdateToken();
+            
+            this.OnSourceItemAdded(subscription, item, in token);
         }
 
         void IReactiveCollectionObserver<TSource>.OnItemRemoved(IReactiveSubscription subscription, TSource item,
             int newVersion)
         {
-            using var token = GetUpdateToken();
-            OnSourceItemRemoved(subscription, item, in token);
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var token = this.GetIncrementalUpdateToken();
+
+            this.OnSourceItemRemoved(subscription, item, in token);
         }
 
         void IReactiveCollectionObserver<TSource>.OnItemReplaced(IReactiveSubscription subscription, TSource oldItem,
             TSource newItem, int newVersion)
         {
-            using var token = GetUpdateToken();
-            OnSourceItemReplaced(subscription, oldItem, newItem, in token);
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var token = this.GetIncrementalUpdateToken();
+            
+            this.OnSourceItemReplaced(subscription, oldItem, newItem, in token);
         }
 
         protected internal override IReactiveSubscription SubscribeToSource()
         {
-            return Source.AddObserver(this);
+            return this.Source.AddObserver(this);
         }
 
 

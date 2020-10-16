@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+#endregion
 
 namespace Caravela.Reactive
 {
@@ -17,39 +21,54 @@ namespace Caravela.Reactive
         void IReactiveCollectionObserver<TResult>.OnItemAdded(IReactiveSubscription subscription, TResult item,
             int newVersion)
         {
-            using var updateToken = GetUpdateToken();
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var updateToken = this.GetIncrementalUpdateToken();
 
-            AddItem(item, updateToken);
+            this.AddItem(item, updateToken);
         }
 
         void IReactiveCollectionObserver<TResult>.OnItemRemoved(IReactiveSubscription subscription, TResult item,
             int newVersion)
         {
-            using var updateToken = GetUpdateToken();
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var updateToken = this.GetIncrementalUpdateToken();
 
-            RemoveItem(item, updateToken);
+            this.RemoveItem(item, updateToken);
         }
 
         void IReactiveCollectionObserver<TResult>.OnItemReplaced(IReactiveSubscription subscription, TResult oldItem,
             TResult newItem, int newVersion)
         {
-            using var updateToken = GetUpdateToken();
+            if (!this.CanProcessIncrementalChange)
+                return;
+            
+            using var updateToken = this.GetIncrementalUpdateToken();
 
-            RemoveItem(oldItem, updateToken);
-            AddItem(newItem, updateToken);
+            this.RemoveItem(oldItem, updateToken);
+            this.AddItem(newItem, updateToken);
         }
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription,
             bool isBreakingChange)
         {
-            throw new NotImplementedException();
+            if (isBreakingChange)
+            {
+                this.OnBreakingChange();
+            }
         }
 
         void IReactiveObserver<IEnumerable<TResult>>.OnValueChanged(IReactiveSubscription subscription,
             IEnumerable<TResult> oldValue, IEnumerable<TResult> newValue, int newVersion,
             bool isBreakingChange)
         {
-            throw new NotImplementedException();
+            if (isBreakingChange)
+            {
+                this.OnBreakingChange();
+            }
         }
 
 
@@ -62,11 +81,14 @@ namespace Caravela.Reactive
 
         protected override bool EvaluateFunction(IEnumerable<TSource> source)
         {
-            UnfollowAll();
+            this.UnfollowAll();
 
-            foreach (var s in source) Follow(s);
+            foreach (var s in source)
+            {
+                this.Follow(s);
+            }
 
-            _results = source.SelectMany(GetItems);
+            this._results = source.SelectMany(this.GetItems);
 
             return true;
         }
@@ -78,7 +100,10 @@ namespace Caravela.Reactive
 
             // We have a new item.
 
-            foreach (var observer in Observers) observer.Observer.OnItemAdded(observer, addedItem, updateToken.Version);
+            foreach (var observer in this.Observers)
+            {
+                observer.Observer.OnItemAdded(observer.Subscription, addedItem, updateToken.Version);
+            }
         }
 
         private void RemoveItem(TResult removedItem, in UpdateToken updateToken)
@@ -86,49 +111,57 @@ namespace Caravela.Reactive
             updateToken.SignalChange();
 
 
-            foreach (var observer in Observers)
-                observer.Observer.OnItemRemoved(observer, removedItem, updateToken.Version);
+            foreach (var observer in this.Observers)
+            {
+                observer.Observer.OnItemRemoved(observer.Subscription, removedItem, updateToken.Version);
+            }
         }
 
         private void AddSource(TSource source, in UpdateToken updateToken)
         {
-            Follow(source);
+            this.Follow(source);
 
 
-            foreach (var newItem in GetItems(source)) AddItem(newItem, updateToken);
+            foreach (var newItem in this.GetItems(source))
+            {
+                this.AddItem(newItem, updateToken);
+            }
         }
 
         private void RemoveSource(TSource source, in UpdateToken updateToken)
         {
-            Unfollow(source);
+            this.Unfollow(source);
 
-            foreach (var removedItem in GetItems(source)) RemoveItem(removedItem, updateToken);
+            foreach (var removedItem in this.GetItems(source))
+            {
+                this.RemoveItem(removedItem, updateToken);
+            }
         }
 
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
             in UpdateToken updateToken)
         {
-            AddSource(item, updateToken);
+            this.AddSource(item, updateToken);
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
             in UpdateToken updateToken)
         {
-            RemoveSource(item, updateToken);
+            this.RemoveSource(item, updateToken);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
             TSource newItem, in UpdateToken updateToken)
         {
-            RemoveSource(oldItem, updateToken);
-            AddSource(newItem, updateToken);
+            this.RemoveSource(oldItem, updateToken);
+            this.AddSource(newItem, updateToken);
         }
 
 
         protected override IEnumerable<TResult> GetFunctionResult()
         {
-            return _results;
+            return this._results;
         }
     }
 }

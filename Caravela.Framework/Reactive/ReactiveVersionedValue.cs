@@ -4,8 +4,8 @@ namespace Caravela.Reactive
     {
         public ReactiveVersionedValue(T value, int version)
         {
-            Version = version;
-            Value = value;
+            this.Version = version;
+            this.Value = value;
         }
 
         public int Version { get; }
