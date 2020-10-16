@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl
     {
         private readonly NamedType namedType;
         
-        private INamedTypeSymbol TypeSymbol => namedType.NamedTypeSymbol;
+        internal INamedTypeSymbol TypeSymbol => namedType.NamedTypeSymbol;
         protected override ISymbol Symbol => TypeSymbol;
 
         internal override Compilation Compilation { get; }
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<IAttribute> Attributes => namedType.Attributes;
 
-        public ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken) => this;
+        public ITypeInfo GetTypeInfo(in ReactiveCollectorToken collectorToken) => this;
 
         public bool Is(IType other) => namedType.Is(other);
     }

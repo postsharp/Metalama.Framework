@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace Caravela.Reactive
 {
-    internal class FirstOperator<T> : ReactiveOperator<IEnumerable<T>,IReactiveCollectionObserver<T>,T,IReactiveObserver<T>>, IReactiveCollectionObserver<T>
+    internal class SomeOperator<T> : ReactiveOperator<IEnumerable<T>,IReactiveCollectionObserver<T>,T,IReactiveObserver<T>>, IReactiveCollectionObserver<T>
     {
         private T _result = default!;
         static readonly IEqualityComparer<T?> _equalityComparer = EqualityComparerFactory.GetEqualityComparer<T?>();
         private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
         private readonly bool _orDefault;
 
-        public FirstOperator(IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>> source, Func<T, ReactiveCollectorToken, bool> predicate, bool orDefault) : base(source)
+        public SomeOperator(IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>> source, Func<T, ReactiveCollectorToken, bool> predicate, bool orDefault) : base(source)
         {
             this._predicate = predicate;
             this._orDefault = orDefault;
@@ -43,7 +43,7 @@ namespace Caravela.Reactive
             
             var oldResult = _result;
             
-            if (!_equalityComparer.Equals(oldResult, default) && this._predicate(item, this.CollectorToken))
+            if (_equalityComparer.Equals(oldResult, default) && this._predicate(item, this.CollectorToken))
             {
                 using UpdateToken token = this.GetIncrementalUpdateToken();
 
@@ -64,7 +64,7 @@ namespace Caravela.Reactive
             
             var oldResult = _result;
             
-            if (!_equalityComparer.Equals(oldResult, item) && this._predicate(item, this.CollectorToken))
+            if (_equalityComparer.Equals(oldResult, item) && this._predicate(item, this.CollectorToken))
             {
                 this.OnBreakingChange();
             }
@@ -78,7 +78,7 @@ namespace Caravela.Reactive
             
             var oldResult = _result;
             
-            if (!_equalityComparer.Equals(oldResult, oldItem)
+            if (_equalityComparer.Equals(oldResult, oldItem)
                 && this._predicate(oldItem, this.CollectorToken))
             {
                 this.OnBreakingChange();

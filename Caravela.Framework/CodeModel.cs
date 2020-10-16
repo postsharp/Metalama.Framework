@@ -13,8 +13,6 @@ namespace Caravela.Framework
         INamedType? GetTypeByMetadataName(string metadataName);
     }
 
-    public interface ITypeResolutionToken { }
-
     public interface IType
     {
         bool Is(IType other);
@@ -28,7 +26,7 @@ namespace Caravela.Framework
         string FullName { get; }
         IReadOnlyList<IType> GenericArguments { get; }
 
-        ITypeInfo GetTypeInfo(ITypeResolutionToken typeResolutionToken);
+        ITypeInfo GetTypeInfo(in ReactiveCollectorToken collectorToken);
     }
 
     public interface IAttribute

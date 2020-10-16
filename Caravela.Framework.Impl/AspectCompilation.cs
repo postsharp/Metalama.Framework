@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl
 
         public IReactiveCollection<AspectInstance> Aspects { get; }
 
-        public AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation, AspectTypeFactory aspectTypeFactory)
-            : this(diagnostics, compilation, new ReactiveHashSet<AspectSource>() { new AttributeAspectSource(compilation, aspectTypeFactory) }) { }
+        public AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation)
+            : this(diagnostics, compilation, new ReactiveHashSet<AspectSource>() { new AttributeAspectSource(compilation) }) { }
 
         private AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation, ReactiveHashSet<AspectSource> aspectSources)
         {

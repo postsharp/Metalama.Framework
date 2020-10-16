@@ -9,7 +9,7 @@ namespace Caravela.Reactive
 {
     internal class ToListOperator<T> : ReactiveCollectionOperator<T, T>
     {
-        private ImmutableList<T> _list;
+        private ImmutableList<T> _list = null!;
 
         public ToListOperator(IReactiveCollection<T> source) : base(source)
         {

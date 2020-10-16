@@ -15,12 +15,12 @@ namespace Caravela.Reactive
             EqualityComparerFactory.GetEqualityComparer<TItem>();
 
         private readonly ObserverList<IReactiveCollectionObserver<TItem>> _observers;
-        private readonly GroupByOperator<TKey, TItem> _parent;
+        private readonly IEnsureSubscribedToSource _parent;
 
         private ImmutableDictionary<TItem, int> _items;
         private int _version;
 
-        internal Group(GroupByOperator<TKey, TItem> parent, TKey key)
+        internal Group(IEnsureSubscribedToSource parent, TKey key)
         {
             this.Key = key;
             this._observers = new ObserverList<IReactiveCollectionObserver<TItem>>(this);
@@ -28,7 +28,7 @@ namespace Caravela.Reactive
             this._parent = parent;
         }
 
-        internal Group(GroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent) : this(parent,
+        internal Group(IEnsureSubscribedToSource parent, IGrouping<TKey, TItem> initialContent) : this(parent,
             initialContent.Key)
         {
             var builder = ImmutableDictionary.CreateBuilder<TItem, int>(_equalityComparer);

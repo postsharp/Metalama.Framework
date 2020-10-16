@@ -7,12 +7,10 @@ namespace Caravela.Framework.Impl
     class AttributeAspectSource : AspectSource
     {
         private readonly ICompilation compilation;
-        private readonly AspectTypeFactory aspectTypeFactory;
 
-        public AttributeAspectSource(ICompilation compilation, AspectTypeFactory aspectTypeFactory)
+        public AttributeAspectSource(ICompilation compilation)
         {
             this.compilation = compilation;
-            this.aspectTypeFactory = aspectTypeFactory;
         }
 
         public override IReactiveCollection<AspectInstance> GetAspects()
@@ -24,8 +22,7 @@ namespace Caravela.Framework.Impl
             return from type in compilation.Types
                    from attribute in type.Attributes
                    where attribute.Type.Is(iAspect)
-                   let aspectType = aspectTypeFactory.GetAspectType(attribute.Type)
-                   select new AspectInstance(null!, type, aspectType);
+                   select new AspectInstance(null!, type, attribute.Type);
         }
     }
 }

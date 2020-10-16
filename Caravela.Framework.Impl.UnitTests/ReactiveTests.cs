@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.UnitTests
         record Member(string Name);
 
         [Fact]
-        public void SelectManyTests()
+        public void SelectManyTest()
         {
             var compilation = new Compilation();
 
@@ -44,6 +44,30 @@ namespace Caravela.Framework.Impl.UnitTests
             c.Members.Add(new Member("M"));
 
             Assert.Equal(new[] { "C.M" }, memberNames.GetValue(default));
+        }
+
+        [Fact]
+        public void SomeTest()
+        {
+            var source = new ReactiveHashSet<int>();
+
+            var some = source.Some();
+
+            source.Add(1);
+
+            Assert.Equal(1, some.GetValue(default));
+
+            source.Replace(1, 2);
+
+            Assert.Equal(2, some.GetValue(default));
+
+            source.Add(3);
+
+            Assert.Equal(2, some.GetValue(default));
+
+            source.Remove(2);
+
+            Assert.Equal(3, some.GetValue(default));
         }
     }
 }

@@ -6,9 +6,9 @@ namespace Caravela.Framework
     {
         public IAspect Aspect { get; }
         public ICodeElement CodeElement { get; }
-        internal AspectType AspectType { get; }
+        internal INamedType AspectType { get; }
 
-        internal AspectInstance(IAspect aspect, ICodeElement codeElement, AspectType aspectType)
+        internal AspectInstance(IAspect aspect, ICodeElement codeElement, INamedType aspectType)
         {
             Aspect = aspect;
             CodeElement = codeElement;

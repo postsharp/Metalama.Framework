@@ -11,7 +11,7 @@ namespace Caravela.Reactive
     internal abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
         IReactiveSource<TResult, TResultObserver>,
         IReactiveObserver<TSource>,
-        IReactiveTokenCollector
+        IReactiveTokenCollector, IEnsureSubscribedToSource
         where TSourceObserver : IReactiveObserver<TSource>
         where TResultObserver : class, IReactiveObserver<TResult>
 
@@ -131,6 +131,8 @@ namespace Caravela.Reactive
                 this.SubscriptionToSource = this.SubscribeToSource();
             }
         }
+
+        void IEnsureSubscribedToSource.EnsureSubscribedToSource() => EnsureSubscribedToSource();
 
         protected internal virtual void UnsubscribeFromSource()
         {

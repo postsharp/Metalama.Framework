@@ -17,21 +17,23 @@ namespace Caravela.Framework.Impl
 
             // DI
             var loader = new Loader(context.LoadReferencedAssembly);
-            var driverFactory = new AspectDriverFactory(roslynCompilation, loader);
-            var aspectTypeFactory = new AspectTypeFactory(driverFactory);
             var compilation = new Compilation(roslynCompilation);
+            var driverFactory = new AspectDriverFactory(compilation, loader);
+            var aspectTypeFactory = new AspectTypeFactory(driverFactory);
 
-            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation, aspectTypeFactory);
+            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation);
 
             // TODO: either change this to get all AspectParts from the initial compilation (not just those that have AspectInstances)
             // TODO: or change it so that AspectParts are updated after every stage
 
             var aspectParts = aspectCompilation.Aspects
                 .GroupBy(a => a.AspectType)
-                .SelectMany((g, _) => g.Key.Parts, (aspects, aspectPart, token) => (aspects: aspects.GetValue(token), aspectType: aspects.Key, aspectPart))
-                // TODO: null object ReactiveCollectorToken?
+                .Select((g, token) => (aspects: g.GetValue(token), aspectType: aspectTypeFactory.GetAspectType(g.Key, token)))
+                .SelectMany(
+                    x => x.aspectType.Parts,
+                    (x, aspectPart) => (x.aspects, x.aspectType, aspectPart))
                 .GetValue(default)
-                .OrderBy(x => x.aspectPart);
+                .OrderBy(x => x.aspectPart.ExecutionOrder);
 
             // TODO: aspect part grouping
 

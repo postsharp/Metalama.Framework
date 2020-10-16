@@ -205,7 +205,7 @@ namespace Caravela.Reactive
         }
 
         public ReactiveSubscription<TOut> Current =>
-            new ReactiveSubscription<TOut>((TOut) this._node.WeaklyTypedObserver, (IReactiveSubscription<TOut>) this._node);
+            new ReactiveSubscription<TOut>((TOut) this._node!.WeaklyTypedObserver, (IReactiveSubscription<TOut>) this._node);
 
         object IEnumerator.Current => this.Current;
 

@@ -14,14 +14,21 @@ namespace Caravela.Reactive
             this IReactiveCollection<TItem> source, Func<TItem, ReactiveCollectorToken, TKey> getKeyFunc,
             IEqualityComparer<TKey>? equalityComparer = default)
         {
-            return new GroupByOperator<TKey, TItem>(source, getKeyFunc, equalityComparer);
+            return new GroupByOperator<TItem, TKey, TItem>(source, getKeyFunc, item => item, equalityComparer);
         }
 
         public static IGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
             this IReactiveCollection<TItem> source, Func<TItem, TKey> getKeyFunc,
             IEqualityComparer<TKey>? equalityComparer = default)
         {
-            return new GroupByOperator<TKey, TItem>(source, (item, token) => getKeyFunc(item), equalityComparer);
+            return new GroupByOperator<TItem, TKey, TItem>(source, (item, token) => getKeyFunc(item), item => item, equalityComparer);
+        }
+
+        public static IGroupBy<TKey, TElement> GroupBy<TSource, TKey, TElement>(
+            this IReactiveCollection<TSource> source, Func<TSource, TKey> getKeyFunc, Func<TSource, TElement> getElementFunc,
+            IEqualityComparer<TKey>? equalityComparer = default)
+        {
+            return new GroupByOperator<TSource, TKey, TElement>(source, (item, token) => getKeyFunc(item), getElementFunc, equalityComparer);
         }
 
 
@@ -187,16 +194,24 @@ namespace Caravela.Reactive
             throw new NotImplementedException();
         }
         
-        public static IReactiveSource<T,IReactiveObserver<T>> First<T>(
-            this IReactiveCollection<T> source, Func<T, bool> func)
+        /// <summary>
+        /// Chooses <em>some</em> value from <paramref name="source"/> that matches <paramref name="func"/>.
+        /// If there are multiple matching values, there are no guarantees about which one is chosen.
+        /// </summary>
+        public static IReactiveSource<T,IReactiveObserver<T>> Some<T>(
+            this IReactiveCollection<T> source, Func<T, bool>? func = null)
         {
-            return new FirstOperator<T>(source, (source1, token) => func(source1), false);
+            func ??= _ => true;
+
+            return new SomeOperator<T>(source, (source1, token) => func(source1), false);
         }
         
-        public static IReactiveSource<T,IReactiveObserver<T>> FirstOrDefault<T>(
-            this IReactiveCollection<T> source, Func<T, bool> func)
+        public static IReactiveSource<T,IReactiveObserver<T>> SomeOrDefault<T>(
+            this IReactiveCollection<T> source, Func<T, bool>? func = null)
         {
-            return new FirstOperator<T>(source, (source1, token) => func(source1), true);
+            func ??= _ => true;
+
+            return new SomeOperator<T>(source, (source1, token) => func(source1), true);
         }
     }
 }

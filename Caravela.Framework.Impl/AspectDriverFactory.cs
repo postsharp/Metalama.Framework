@@ -3,42 +3,38 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Caravela.Framework.Sdk;
+using Caravela.Reactive;
 
 namespace Caravela.Framework.Impl
 {
     class AspectDriverFactory
     {
-        private readonly CSharpCompilation compilation;
         private readonly Loader loader;
+        private readonly IGroupBy<IType, ITypeInfo> weaverTypes;
 
-        public AspectDriverFactory(CSharpCompilation compilation, Loader loader)
+        public AspectDriverFactory(ICompilation compilation, Loader loader)
         {
-            this.compilation = compilation;
             this.loader = loader;
+
+            var aspectWeaverAttributeType = compilation.GetTypeByMetadataName(typeof(AspectWeaverAttribute).FullName)!;
+
+            // TODO: nested types?
+            this.weaverTypes =
+                from weaverType in compilation.Types
+                from attribute in weaverType.Attributes
+                where attribute.Type.Is(aspectWeaverAttributeType)
+                group weaverType by (IType)attribute.ConstructorArguments.Single()!;
         }
 
-        public IAspectDriver GetAspectDriver(INamedType type)
+        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveCollectorToken collectorToken)
         {
-            var aspectWeaverAttributeType = compilation.GetTypeByMetadataName(typeof(AspectWeaverAttribute).FullName);
-
-            var typeSymbol = ((NamedType)type).NamedTypeSymbol;
-
-            // TODO: is ContainingAssembly enough?
-            // TODO: perf
-            // TODO: nested types
-            var weavers =
-                (from weaverType in typeSymbol.ContainingAssembly.GetTypes()
-                 from attribute in weaverType.GetAttributes()
-                 where attribute.AttributeClass!.Equals(aspectWeaverAttributeType, SymbolEqualityComparer.Default)
-                 let targetType = (ITypeSymbol)attribute.ConstructorArguments.Single().Value!
-                 where targetType.Equals(typeSymbol, SymbolEqualityComparer.Default)
-                 select weaverType).ToList();
+            var weavers = weaverTypes[type];
 
             if (weavers.Count > 1)
                 throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
 
             if (weavers.Count == 1)
-                return (IAspectDriver)loader.CreateInstance(weavers[0]);
+                return (IAspectDriver)loader.CreateInstance(((TypeInfo)weavers.Some().GetValue(collectorToken)).TypeSymbol);
 
             throw new NotImplementedException();
         }
