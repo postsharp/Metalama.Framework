@@ -34,8 +34,7 @@ namespace Caravela.Reactive
             var builder = ImmutableDictionary.CreateBuilder<TItem, int>(_equalityComparer);
             foreach (var item in initialContent)
             {
-                var count = 0;
-                builder.TryGetValue(item, out count);
+                builder.TryGetValue(item, out int count);
                 builder[item] = count + 1;
             }
 

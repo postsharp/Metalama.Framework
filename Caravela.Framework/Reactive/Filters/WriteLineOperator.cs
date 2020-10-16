@@ -14,7 +14,7 @@ namespace Caravela.Reactive
         private readonly IReactiveSubscription _subscription;
         private DependencyList _dependencies;
 
-        public WriteLineOperator(IReactiveCollection<T> source, string name)
+        public WriteLineOperator(IReactiveCollection<T> source, string? name)
         {
             this._source = source;
             this.Name = name ?? typeof(T).Name;

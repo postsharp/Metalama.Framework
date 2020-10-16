@@ -2,8 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 
 #endregion
@@ -23,7 +21,7 @@ namespace Caravela.Reactive
         private volatile int _inputVersion = -1;
         private volatile bool _isDirty = true;
         private volatile int _version = -1;
-        private DependencyObservable _dependencyObservable;
+        private DependencyObservable? _dependencyObservable;
 
         protected ReactiveOperator(IReactiveSource<TSource, TSourceObserver> source)
         {

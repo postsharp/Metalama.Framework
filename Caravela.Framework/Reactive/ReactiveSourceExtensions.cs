@@ -120,7 +120,7 @@ namespace Caravela.Reactive
         }
         
         public static IReactiveCollection<T> SelectRecursive<T>(
-            this IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, T> getRecursionValueFunc, Func<T, ReactiveCollectorToken,bool> stopPredicate = null)
+            this IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, T> getRecursionValueFunc, Func<T, ReactiveCollectorToken, bool>? stopPredicate = null)
             where T : class
         {
             throw new NotImplementedException();
@@ -140,7 +140,7 @@ namespace Caravela.Reactive
             return new WhereOperator<TSource>(source, (source1, token) => func(source1));
         }
 
-        public static IDisposable WriteLine<T>(this IReactiveCollection<T> source, string name = null)
+        public static IDisposable WriteLine<T>(this IReactiveCollection<T> source, string? name = null)
         {
             return new WriteLineOperator<T>(source, name);
         }
