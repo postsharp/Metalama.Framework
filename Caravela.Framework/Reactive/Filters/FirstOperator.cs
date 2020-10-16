@@ -6,8 +6,8 @@ namespace Caravela.Reactive
 {
     internal class FirstOperator<T> : ReactiveOperator<IEnumerable<T>,IReactiveCollectionObserver<T>,T,IReactiveObserver<T>>, IReactiveCollectionObserver<T>
     {
-        private T _result;
-        static readonly IEqualityComparer<T> _equalityComparer = EqualityComparerFactory.GetEqualityComparer<T>();
+        private T _result = default!;
+        static readonly IEqualityComparer<T?> _equalityComparer = EqualityComparerFactory.GetEqualityComparer<T?>();
         private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
         private readonly bool _orDefault;
 

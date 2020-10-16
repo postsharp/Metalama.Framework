@@ -7,7 +7,7 @@ namespace Caravela.Reactive
 {
     struct DependencyList 
     {
-        private volatile Dictionary<object, IReactiveSubscription> _dependencies;
+        private volatile Dictionary<object, IReactiveSubscription>? _dependencies;
         private readonly IReactiveObserver _parent;
 
         public DependencyList(IReactiveObserver parent)
@@ -39,8 +39,8 @@ namespace Caravela.Reactive
                 if (!this._dependencies.ContainsKey(observable))
                 {
                     var subscription = observable.AddObserver(this._parent);
-                    Debug.Assert(subscription!=null);
-                    this._dependencies.Add(observable, subscription);
+                    Debug.Assert(subscription != null);
+                    this._dependencies.Add(observable, subscription!);
                 }
             }
         }

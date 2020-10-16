@@ -12,7 +12,7 @@ namespace Caravela.Reactive
         where T : class, IReactiveObserver
     {
         private readonly IReactiveObservable<T> _owner;
-        private volatile ObserverSubscription<T> _first;
+        private volatile ObserverSubscription<T>? _first;
 
         public ObserverList(IReactiveObservable<T> owner)
         {
@@ -81,7 +81,7 @@ namespace Caravela.Reactive
         {
             lock (this)
             {
-                ObserverSubscription<T> previous = null;
+                ObserverSubscription<T>? previous = null;
                 for (var node = this._first; node != null; node = node.Next)
                 {
                     if (ReferenceEquals(node, subscription))
@@ -159,10 +159,10 @@ namespace Caravela.Reactive
         where TOut : class, IReactiveObserver
         where TIn : class, IReactiveObserver
     {
-        private ObserverSubscription<TIn> _node;
-        private readonly ObserverSubscription<TIn> _first;
+        private ObserverSubscription<TIn>? _node;
+        private readonly ObserverSubscription<TIn>? _first;
 
-        internal SubscriptionEnumerator(ObserverSubscription<TIn> first)
+        internal SubscriptionEnumerator(ObserverSubscription<TIn>? first)
         {
             this._first = first;
             this._node = null;
@@ -231,7 +231,7 @@ namespace Caravela.Reactive
         where T : IReactiveObserver
     {
         public IReactiveObserver WeaklyTypedObserver { get; }
-        internal ObserverSubscription<T> Next;
+        internal ObserverSubscription<T>? Next;
 
         public ObserverSubscription(IReactiveObservable<T> observable, IReactiveObserver observer)
         {
@@ -256,7 +256,7 @@ namespace Caravela.Reactive
             if (this.Sender != null)
             {
                 this.Sender.RemoveObserver(this);
-                this.Sender = null;
+                this.Sender = null!;
             }
         }
     }
