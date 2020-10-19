@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive;
 
-namespace Caravela.Framework.Impl.Reactive
+namespace Caravela.Reactive
 {
     /// <summary>
     /// Collection that implements the reactive interface, but does not actually ever change.
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl.Reactive
             => new ReactiveVersionedValue<IEnumerable<T>>(_items, 0);
     }
 
-    internal static class ImmutableReactiveExtensions
+    public static class ImmutableReactiveExtensions
     {
         public static IReactiveCollection<T> ToImmutableReactive<T>(this IEnumerable<T> source) => new ImmutableReactiveCollection<T>(source);
     }

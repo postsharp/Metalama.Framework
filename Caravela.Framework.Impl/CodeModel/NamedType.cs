@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Impl.Reactive;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
