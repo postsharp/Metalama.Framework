@@ -7,16 +7,19 @@ namespace Caravela.Reactive
     /// Collection that implements the reactive interface, but does not actually ever change.
     /// </summary>
     // TODO: every usage of this type should be probably changed to make it reactive
-    internal class ImmutableReactiveCollection<T> : IReactiveCollection<T>
+    public sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>
     {
-        private readonly ImmutableArray<T> _items;
+        private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
         private readonly ObserverList<IReactiveCollectionObserver<T>> _observers;
 
-        public ImmutableReactiveCollection(IEnumerable<T> items)
+        public ImmutableReactiveCollection(IImmutableList<T> items)
         {
-            _items = items.ToImmutableArray();
-
+            _value = new ReactiveVersionedValue<IEnumerable<T>>(items, 0);
             _observers = new(this);
+        }
+
+        public ImmutableReactiveCollection(IEnumerable<T> items) : this(items.ToImmutableList())
+        {
         }
 
         object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
@@ -30,14 +33,16 @@ namespace Caravela.Reactive
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer) => _observers.AddObserver(observer);
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) => _observers.RemoveObserver(subscription);
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => _items;
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => _value.Value;
 
         IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
-            => new ReactiveVersionedValue<IEnumerable<T>>(_items, 0);
+            => _value;
     }
 
     public static class ImmutableReactiveExtensions
     {
+        public static IReactiveCollection<T> ToImmutableReactive<T>(this IImmutableList<T> source) => new ImmutableReactiveCollection<T>(source);
+
         public static IReactiveCollection<T> ToImmutableReactive<T>(this IEnumerable<T> source) => new ImmutableReactiveCollection<T>(source);
     }
 }
