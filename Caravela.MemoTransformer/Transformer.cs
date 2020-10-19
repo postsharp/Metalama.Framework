@@ -63,20 +63,20 @@ namespace Caravela.MemoTransformer
                     .AddAccessorListAccessors(AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, block));
 
                 // PropertyType? field;
-                fieldsToAdd.Add(FieldDeclaration(VariableDeclaration(NullableType(node.Type)).AddVariables(VariableDeclarator(fieldName))));
+                this.fieldsToAdd.Add(FieldDeclaration(VariableDeclaration(NullableType(node.Type)).AddVariables(VariableDeclarator(fieldName))));
 
                 return newNode;
             }
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
-                var parentFieldsToAdd = fieldsToAdd;
-                fieldsToAdd = new();
+                var parentFieldsToAdd = this.fieldsToAdd;
+                this.fieldsToAdd = new();
 
                 var result = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
 
-                result = result.AddMembers(fieldsToAdd.ToArray());
-                fieldsToAdd = parentFieldsToAdd;
+                result = result.AddMembers( this.fieldsToAdd.ToArray());
+                this.fieldsToAdd = parentFieldsToAdd;
 
                 return result;
             }

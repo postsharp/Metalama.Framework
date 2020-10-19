@@ -31,7 +31,7 @@ namespace Caravela.Reactive
 
         public ReactiveHashSet(IEnumerable<T> items) : this()
         {
-            _items = items.ToImmutableHashSet();
+            this._items = items.ToImmutableHashSet();
         }
 
         private object WriteSync => this._observers;

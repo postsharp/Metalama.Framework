@@ -11,40 +11,40 @@ namespace Caravela.Framework.Impl
 {
     internal class Method : CodeElement, IMethod
     {
-        private readonly IMethodSymbol symbol;
-        protected override ISymbol Symbol => symbol;
+        private readonly IMethodSymbol _symbol;
+        protected override ISymbol Symbol => this._symbol;
 
         internal override Compilation Compilation { get; }
 
         public Method(IMethodSymbol symbol, Compilation compilation)
         {
-            this.symbol = symbol;
-            Compilation = compilation;
+            this._symbol = symbol;
+            this.Compilation = compilation;
         }
 
         [Memo]
         public IParameter ReturnParameter => new ReturnParameterImpl(this);
 
         [Memo]
-        public IType ReturnType => SymbolMap.GetIType(symbol.ReturnType);
+        public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
 
         [Memo]
         public IReadOnlyList<IMethod> LocalFunctions =>
-            symbol.DeclaringSyntaxReferences
+            this._symbol.DeclaringSyntaxReferences
                 .Select(r => r.GetSyntax())
                 // don't descend into nested local functions
                 .SelectMany(n => n.DescendantNodes(descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax))
                 .OfType<LocalFunctionStatementSyntax>()
-                .Select(f => (IMethodSymbol)Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f))
-                .Select(s => SymbolMap.GetMethod(s))
+                .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f))
+                .Select(s => this.SymbolMap.GetMethod(s))
                 .ToImmutableArray();
 
         [Memo]
-        public IReadOnlyList<IParameter> Parameters => symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
+        public IReadOnlyList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
-        public MethodKind Kind => symbol.MethodKind switch
+        public MethodKind Kind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Ordinary,
             RoslynMethodKind.Constructor => MethodKind.Constructor,
@@ -68,40 +68,40 @@ namespace Caravela.Framework.Impl
             _ => throw new InvalidOperationException()
         };
 
-        public string Name => symbol.Name;
+        public string Name => this._symbol.Name;
 
-        public bool IsStatic => symbol.IsStatic;
+        public bool IsStatic => this._symbol.IsStatic;
 
         [Memo]
-        public override ICodeElement ContainingElement => symbol.ContainingSymbol switch
+        public override ICodeElement ContainingElement => this._symbol.ContainingSymbol switch
         {
-            INamedTypeSymbol type => SymbolMap.GetTypeInfo(type),
-            IMethodSymbol method => SymbolMap.GetMethod(method),
+            INamedTypeSymbol type => this.SymbolMap.GetTypeInfo(type),
+            IMethodSymbol method => this.SymbolMap.GetMethod(method),
             _ => throw new InvalidOperationException()
         };
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => symbol.GetAttributes().Select(a => new Attribute(a, SymbolMap)).ToImmutableReactive();
+        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public override string ToString() => symbol.ToString();
+        public override string ToString() => this._symbol.ToString();
 
         private class ReturnParameterImpl : IParameter
         {
-            private readonly Method method;
+            private readonly Method _method;
 
-            public ReturnParameterImpl(Method method) => this.method = method;
+            public ReturnParameterImpl(Method method) => this._method = method;
 
-            public IType Type => method.ReturnType;
+            public IType Type => this._method.ReturnType;
 
             public string? Name => null;
 
             public int Index => -1;
 
-            public ICodeElement? ContainingElement => method;
+            public ICodeElement? ContainingElement => this._method;
 
             [Memo]
             public IReactiveCollection<IAttribute> Attributes =>
-                method.symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, method.SymbolMap)).ToImmutableReactive();
+                this._method._symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, this._method.SymbolMap)).ToImmutableReactive();
         }
     }
 }

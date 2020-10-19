@@ -11,9 +11,9 @@ namespace Caravela.Framework
 
         public AspectType(string name, IAspectDriver aspectDriver, IImmutableList<AspectPart> parts)
         {
-            Name = name;
-            AspectDriver = aspectDriver;
-            Parts = parts;
+            this.Name = name;
+            this.AspectDriver = aspectDriver;
+            this.Parts = parts;
         }
     }
 }

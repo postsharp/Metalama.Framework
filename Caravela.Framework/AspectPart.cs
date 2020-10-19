@@ -7,8 +7,8 @@
 
         public AspectPart(string? name, int executionOrder)
         {
-            Name = name;
-            ExecutionOrder = executionOrder;
+            this.Name = name;
+            this.ExecutionOrder = executionOrder;
         }
     }
 }

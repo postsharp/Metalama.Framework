@@ -42,7 +42,7 @@ namespace Caravela.Reactive
 
                 token.SetNewValue(item);
 
-                foreach (var observer in Observers)
+                foreach (var observer in this.Observers )
                 {
                     observer.Observer.OnValueChanged(observer.Subscription, oldResult, item, token.NextVersion);
                 }

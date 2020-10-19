@@ -10,9 +10,9 @@ namespace Caravela.Framework
 
         internal AspectInstance(IAspect aspect, ICodeElement codeElement, INamedType aspectType)
         {
-            Aspect = aspect;
-            CodeElement = codeElement;
-            AspectType = aspectType;
+            this.Aspect = aspect;
+            this.CodeElement = codeElement;
+            this.AspectType = aspectType;
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 
@@ -9,17 +7,17 @@ namespace Caravela.Framework.Impl
 {
     class AspectDriverFactory
     {
-        private readonly Loader loader;
-        private readonly IReactiveGroupBy<IType, ITypeInfo> weaverTypes;
+        private readonly Loader _loader;
+        private readonly IReactiveGroupBy<IType, ITypeInfo> _weaverTypes;
 
         public AspectDriverFactory(ICompilation compilation, Loader loader)
         {
-            this.loader = loader;
+            this._loader = loader;
 
             var aspectWeaverAttributeType = compilation.GetTypeByMetadataName(typeof(AspectWeaverAttribute).FullName)!;
 
             // TODO: nested types?
-            this.weaverTypes =
+            this._weaverTypes =
                 from weaverType in compilation.Types
                 from attribute in weaverType.Attributes
                 where attribute.Type.Is(aspectWeaverAttributeType)
@@ -28,13 +26,13 @@ namespace Caravela.Framework.Impl
 
         public IAspectDriver GetAspectDriver(INamedType type, in ReactiveObserverToken observerToken)
         {
-            var weavers = weaverTypes[type].GetValue(observerToken).ToList();
+            var weavers = this._weaverTypes[type].GetValue(observerToken).ToList();
 
             if (weavers.Count > 1)
                 throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
 
             if (weavers.Count == 1)
-                return (IAspectDriver)loader.CreateInstance(((TypeInfo)weavers.Single()).TypeSymbol);
+                return (IAspectDriver) this._loader.CreateInstance(((TypeInfo)weavers.Single()).TypeSymbol);
 
             throw new NotImplementedException();
         }

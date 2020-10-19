@@ -43,7 +43,7 @@ namespace Caravela.Reactive
                 parent._currentUpdateNewSourceVersion = sourceVersion;
                 parent._currentUpdateStatus = IncrementalUpdateStatus.Default;
 
-                var lockTaken = false;
+                bool lockTaken = false;
                 this._parent._lock.Enter(ref lockTaken);
                 
                 Debug.Assert(lockTaken);

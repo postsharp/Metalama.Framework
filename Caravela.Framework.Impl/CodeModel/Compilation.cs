@@ -14,19 +14,19 @@ namespace Caravela.Framework.Impl
 
         internal Compilation(CSharpCompilation roslynCompilation)
         {
-            RoslynCompilation = roslynCompilation;
+            this.RoslynCompilation = roslynCompilation;
 
-            SymbolMap = new(this);
+            this.SymbolMap = new(this);
         }
 
         [Memo]
-        public IReactiveCollection<ITypeInfo> Types => RoslynCompilation.Assembly.GetTypes().Select(SymbolMap.GetTypeInfo).ToImmutableReactive();
+        public IReactiveCollection<ITypeInfo> Types => this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetTypeInfo).ToImmutableReactive();
 
         public INamedType? GetTypeByMetadataName(string metadataName)
         {
-            var symbol = RoslynCompilation.GetTypeByMetadataName(metadataName);
+            var symbol = this.RoslynCompilation.GetTypeByMetadataName(metadataName);
 
-            return symbol == null ? null : SymbolMap.GetNamedType(symbol);
+            return symbol == null ? null : this.SymbolMap.GetNamedType(symbol);
         }
     }
 

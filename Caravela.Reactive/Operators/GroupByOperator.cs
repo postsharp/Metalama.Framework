@@ -68,7 +68,7 @@ namespace Caravela.Reactive
 
         public override bool IsMaterialized => true;
 
-        void IGroupByOperator<TKey, TElement>.EnsureSubscribedToSource() => EnsureSubscribedToSource();
+        void IGroupByOperator<TKey, TElement>.EnsureSubscribedToSource() => this.EnsureSubscribedToSource();
 
         private void AddItem(ref ImmutableDictionary<TKey, Group<TKey, TElement>> newResult, TSource item,
             in IncrementalUpdateToken updateToken)
@@ -88,7 +88,7 @@ namespace Caravela.Reactive
                 }
             }
 
-            var element = _getElementFunc(item);
+            var element = this._getElementFunc(item);
 
             group.Add(element);
         }
@@ -100,7 +100,7 @@ namespace Caravela.Reactive
             var key = this._getKeyFunc(removedItem, this.ObserverToken);
             if (newResult.TryGetValue(key, out var group))
             {
-                var element = _getElementFunc(removedItem);
+                var element = this._getElementFunc(removedItem);
 
                 group.Remove(element);
 
@@ -136,7 +136,7 @@ namespace Caravela.Reactive
 
             var builder = oldGroups.ToBuilder();
 
-            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), _getElementFunc))
+            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc ))
             {
                 if (builder.TryGetValue(group.Key, out var items))
                 {

@@ -21,8 +21,8 @@ namespace Caravela.Framework.Impl
         {
             var diagnosticSink = new DiagnosticSink();
 
-            var newCompilation = aspectWeaver.Transform(
-                new AspectWeaverContext(aspectType, aspectInstances, ((Compilation)input.Compilation).RoslynCompilation, diagnosticSink));
+            var newCompilation = this.aspectWeaver.Transform(
+                new AspectWeaverContext( this.aspectType, this.aspectInstances, ((Compilation)input.Compilation).RoslynCompilation, diagnosticSink));
 
             return input.Update(diagnosticSink.Diagnostics, new Compilation(newCompilation));
         }
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl
         {
             public List<Diagnostic> Diagnostics { get; } = new();
 
-            public void AddDiagnostic(Diagnostic diagnostic) => Diagnostics.Add(diagnostic);
+            public void AddDiagnostic(Diagnostic diagnostic) => this.Diagnostics.Add(diagnostic);
         }
     }
 }

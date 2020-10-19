@@ -17,9 +17,9 @@ namespace Caravela.Framework.Impl
         {
             var results = ImmutableArray.CreateBuilder<AspectInstance>();
 
-            var iAspect = compilation.GetTypeByMetadataName(typeof(IAspect).FullName)!;
+            var iAspect = this.compilation.GetTypeByMetadataName(typeof(IAspect).FullName)!;
 
-            return from type in compilation.Types
+            return from type in this.compilation.Types
                    from attribute in type.Attributes
                    where attribute.Type.Is(iAspect)
                    select new AspectInstance(null!, type, attribute.Type);

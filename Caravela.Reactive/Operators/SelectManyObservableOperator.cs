@@ -19,11 +19,11 @@ namespace Caravela.Reactive
             Func<TSource, IReactiveCollection<TCollection>> collectionSelector,
             Func<TSource, TCollection, TResult> resultSelector) : base(source, resultSelector)
         {
-            CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
+            this.CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) =>
-            ResultSelector(_subscriptionsReverse[subscription], item, this.ObserverToken);
+            this.ResultSelector( this._subscriptionsReverse[subscription], item, this.ObserverToken);
 
         protected override void UnfollowAll()
         {
@@ -60,11 +60,11 @@ namespace Caravela.Reactive
             }
             else
             {
-                var subscription = CollectionSelector(source, this.ObserverToken).AddObserver(this);
+                var subscription = this.CollectionSelector(source, this.ObserverToken).AddObserver(this);
                 if (subscription != null)
                 {
-                    _subscriptions.Add(source, (subscription, 1));
-                    _subscriptionsReverse.Add(subscription, source);
+                    this._subscriptions.Add(source, (subscription, 1));
+                    this._subscriptionsReverse.Add(subscription, source);
                 }
             }
         }
@@ -80,7 +80,7 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken);
+            return this.CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken);
         }
     }
 
@@ -96,9 +96,9 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            foreach (var item in CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken))
+            foreach (var item in this.CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken))
             {
-                yield return ResultSelector(arg, item, this.ObserverToken);
+                yield return this.ResultSelector(arg, item, this.ObserverToken);
             }
         }
     }

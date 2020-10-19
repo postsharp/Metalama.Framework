@@ -15,7 +15,7 @@ namespace Caravela.Reactive
 
         protected SelectManyOperator(IReactiveCollection<TSource> source, Func<TSource, TCollection, TResult> resultSelector) : base(source)
         {
-            ResultSelector = ReactiveObserverToken.WrapWithDefaultToken(resultSelector);
+            this.ResultSelector = ReactiveObserverToken.WrapWithDefaultToken(resultSelector);
         }
 
         protected abstract TResult SelectResult(IReactiveSubscription subscription, TCollection item);
@@ -28,7 +28,7 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken();
 
-            AddItem(SelectResult(subscription, item), updateToken);
+            this.AddItem( this.SelectResult(subscription, item), updateToken);
         }
 
         void IReactiveCollectionObserver<TCollection>.OnItemRemoved(IReactiveSubscription subscription, TCollection item,
@@ -39,7 +39,7 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
-            RemoveItem(SelectResult(subscription, item), updateToken);
+            this.RemoveItem( this.SelectResult(subscription, item), updateToken);
         }
 
         void IReactiveCollectionObserver<TCollection>.OnItemReplaced(IReactiveSubscription subscription, TCollection oldItem,
@@ -50,8 +50,8 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
-            RemoveItem(SelectResult(subscription, oldItem), updateToken);
-            AddItem(SelectResult(subscription, newItem), updateToken);
+            this.RemoveItem( this.SelectResult(subscription, oldItem), updateToken);
+            this.AddItem( this.SelectResult(subscription, newItem), updateToken);
         }
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription,

@@ -15,12 +15,12 @@ namespace Caravela.Framework.Impl
         readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
         readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new();
 
-        internal TypeInfo GetTypeInfo(INamedTypeSymbol typeSymbol) => GetNamedType(typeSymbol).TypeInfo;
+        internal TypeInfo GetTypeInfo(INamedTypeSymbol typeSymbol) => this.GetNamedType(typeSymbol).TypeInfo;
 
-        internal IType GetIType(ITypeSymbol typeSymbol) => typeCache.GetOrAdd(typeSymbol, ts => Factory.CreateIType(ts, compilation));
+        internal IType GetIType(ITypeSymbol typeSymbol) => this.typeCache.GetOrAdd(typeSymbol, ts => Factory.CreateIType(ts, this.compilation ));
 
-        internal NamedType GetNamedType(INamedTypeSymbol typeSymbol) => (NamedType)typeCache.GetOrAdd(typeSymbol, ts => new NamedType((INamedTypeSymbol)ts, compilation));
+        internal NamedType GetNamedType(INamedTypeSymbol typeSymbol) => (NamedType) this.typeCache.GetOrAdd(typeSymbol, ts => new NamedType((INamedTypeSymbol)ts, this.compilation ));
 
-        internal IMethod GetMethod(IMethodSymbol methodSymbol) => methodCache.GetOrAdd(methodSymbol, ms => new Method(ms, compilation));
+        internal IMethod GetMethod(IMethodSymbol methodSymbol) => this.methodCache.GetOrAdd(methodSymbol, ms => new Method(ms, this.compilation ));
     }
 }

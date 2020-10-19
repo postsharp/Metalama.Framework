@@ -144,6 +144,6 @@ namespace Caravela.Reactive
         }
 
 
-        public override string ToString() => $"ObserverList Count={Count}";
+        public override string ToString() => $"ObserverList Count={this.Count}";
     }
 }

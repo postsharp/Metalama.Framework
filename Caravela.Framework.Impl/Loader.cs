@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
 
         public object CreateInstance(INamedTypeSymbol type)
         {
-            var assembly = loadReferencedAssembly(type.ContainingAssembly);
+            var assembly = this.loadReferencedAssembly(type.ContainingAssembly);
 
             var runtimeType = assembly.GetType(GetFullMetadataName(type));
 

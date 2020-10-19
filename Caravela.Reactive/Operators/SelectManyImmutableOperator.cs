@@ -18,7 +18,7 @@ namespace Caravela.Reactive
             Func<TSource, TCollection, TResult> resultSelector)
             : base(source, resultSelector)
         {
-            CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
+            this.CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) => 
@@ -47,7 +47,7 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return CollectionSelector(arg, this.ObserverToken);
+            return this.CollectionSelector(arg, this.ObserverToken);
         }
     }
 
@@ -63,9 +63,9 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            foreach (var item in CollectionSelector(arg, this.ObserverToken))
+            foreach (var item in this.CollectionSelector(arg, this.ObserverToken))
             {
-                yield return ResultSelector(arg, item, this.ObserverToken);
+                yield return this.ResultSelector(arg, item, this.ObserverToken);
             }
         }
     }

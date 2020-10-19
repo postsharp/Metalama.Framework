@@ -105,7 +105,7 @@ namespace Caravela.Reactive
         {
             var oldItems = this._items;
 
-            this._items.TryGetValue(item, out var count);
+            this._items.TryGetValue(item, out int count );
             this._items = this._items.SetItem(item, count + 1);
 
             if (count == 0)
@@ -133,7 +133,7 @@ namespace Caravela.Reactive
 
         internal bool AddRange(IEnumerable<TItem> items)
         {
-            var hasChange = false;
+            bool hasChange = false;
             foreach (var item in items)
             {
                 hasChange |= this.Add(item);
@@ -146,7 +146,7 @@ namespace Caravela.Reactive
         {
             var oldItems = this._items;
 
-            this._items.TryGetValue(item, out var count);
+            this._items.TryGetValue(item, out int count );
 
             if (count == 1)
             {

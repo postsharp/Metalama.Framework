@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.UnitTests
             public ReactiveHashSet<SourceType> Types { get; } = new();
         }
 
-        record SourceType(string Name, IImmutableList<string> baseTypes)
+        record SourceType(string Name, IImmutableList<string> BaseTypes)
         {
             public ReactiveHashSet<Member> Members { get; } = new();
         }
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.UnitTests
                               select $"{type.Name}.{member.Name}";
 
             var baseTypeNames = from type in compilation.Types
-                                from baseType in type.baseTypes
+                                from baseType in type.BaseTypes
                                 select $"{type.Name} : {baseType}";
 
             Assert.Empty(memberNames.GetValue(default));

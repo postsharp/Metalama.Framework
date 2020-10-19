@@ -13,7 +13,7 @@ namespace Caravela.Reactive
         
         public ImmutableReactiveCollection(IImmutableList<T> items)
         {
-            _value = new ReactiveVersionedValue<IEnumerable<T>>(items, 0);
+            this._value = new ReactiveVersionedValue<IEnumerable<T>>(items, 0);
         }
 
         public ImmutableReactiveCollection(IEnumerable<T> items) : this(items.ToImmutableList())
@@ -32,10 +32,10 @@ namespace Caravela.Reactive
 
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) { return true; }
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => _value.Value;
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => this._value.Value;
 
         IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
-            => _value;
+            => this._value;
     }
 
     public static class ImmutableReactiveExtensions

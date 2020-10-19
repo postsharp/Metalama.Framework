@@ -18,10 +18,10 @@ namespace Caravela.Framework.Sdk
 
         internal AspectWeaverContext(INamedTypeSymbol aspectType, IReadOnlyList<AspectInstance> aspectInstances, CSharpCompilation compilation, IDiagnosticSink diagnostics)
         {
-            AspectType = aspectType;
-            AspectInstances = aspectInstances;
-            Compilation = compilation;
-            Diagnostics = diagnostics;
+            this.AspectType = aspectType;
+            this.AspectInstances = aspectInstances;
+            this.Compilation = compilation;
+            this.Diagnostics = diagnostics;
         }
     }
 

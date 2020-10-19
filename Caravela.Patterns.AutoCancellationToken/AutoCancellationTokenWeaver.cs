@@ -33,10 +33,10 @@ namespace Caravela.Patterns.AutoCancellationToken
 
         abstract class RewriterBase : CSharpSyntaxRewriter
         {
-            public override SyntaxNode VisitInterfaceDeclaration(InterfaceDeclarationSyntax node) => VisitTypeDeclaration(node, base.VisitInterfaceDeclaration);
-            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node) => VisitTypeDeclaration(node, base.VisitClassDeclaration);
-            public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax node) => VisitTypeDeclaration(node, base.VisitStructDeclaration);
-            public override SyntaxNode VisitRecordDeclaration(RecordDeclarationSyntax node) => VisitTypeDeclaration(node, base.VisitRecordDeclaration);
+            public override SyntaxNode VisitInterfaceDeclaration(InterfaceDeclarationSyntax node) => this.VisitTypeDeclaration(node, base.VisitInterfaceDeclaration);
+            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node) => this.VisitTypeDeclaration(node, base.VisitClassDeclaration);
+            public override SyntaxNode VisitStructDeclaration(StructDeclarationSyntax node) => this.VisitTypeDeclaration(node, base.VisitStructDeclaration);
+            public override SyntaxNode VisitRecordDeclaration(RecordDeclarationSyntax node) => this.VisitTypeDeclaration(node, base.VisitRecordDeclaration);
 
             protected abstract T VisitTypeDeclaration<T>(T node, Func<T, SyntaxNode> baseVisit) where T : TypeDeclarationSyntax;
 
@@ -65,7 +65,7 @@ namespace Caravela.Patterns.AutoCancellationToken
 
             protected override T VisitTypeDeclaration<T>(T node, Func<T, SyntaxNode> baseVisit)
             {
-                if (!instancesNodes.Contains(node))
+                if (!this.instancesNodes.Contains(node))
                     return node;
 
                 return node.WithAdditionalAnnotations(Annotation);
@@ -88,7 +88,7 @@ namespace Caravela.Patterns.AutoCancellationToken
 
             public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
             {
-                var semanticModel = compilation.GetSemanticModel(node.SyntaxTree);
+                var semanticModel = this.compilation.GetSemanticModel(node.SyntaxTree);
 
                 var methodSymbol = semanticModel.GetDeclaredSymbol(node);
 
@@ -112,7 +112,7 @@ namespace Caravela.Patterns.AutoCancellationToken
                 if (!node.HasAnnotation(AnnotateNodesRewriter.Annotation))
                     return node;
 
-                var semanticModel = compilation.GetSemanticModel(node.SyntaxTree);
+                var semanticModel = this.compilation.GetSemanticModel(node.SyntaxTree);
 
                 var symbol = semanticModel.GetDeclaredSymbol(node);
 
@@ -145,7 +145,7 @@ namespace Caravela.Patterns.AutoCancellationToken
 
             public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
             {
-                var semanticModel = compilation.GetSemanticModel(node.SyntaxTree);
+                var semanticModel = this.compilation.GetSemanticModel(node.SyntaxTree);
 
                 var methodSymbol = semanticModel.GetDeclaredSymbol(node);
 
@@ -157,17 +157,17 @@ namespace Caravela.Patterns.AutoCancellationToken
                 if (cancellationTokenParmeters.Count() != 1)
                     return node;
 
-                cancellationTokenParameterName = cancellationTokenParmeters.Single().Name;
+                this.cancellationTokenParameterName = cancellationTokenParmeters.Single().Name;
 
                 return base.VisitMethodDeclaration(node);
             }
 
-            public override SyntaxNode VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node) => VisitFunction(node, false, base.VisitAnonymousMethodExpression);
+            public override SyntaxNode VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node) => this.VisitFunction(node, false, base.VisitAnonymousMethodExpression);
             // TODO: add support for static lambdas when MS.CA.CS is upgraded to 3.8
-            public override SyntaxNode VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node) => VisitFunction(node, false, base.VisitParenthesizedLambdaExpression);
-            public override SyntaxNode VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node) => VisitFunction(node, false, base.VisitSimpleLambdaExpression);
+            public override SyntaxNode VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node) => this.VisitFunction(node, false, base.VisitParenthesizedLambdaExpression);
+            public override SyntaxNode VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node) => this.VisitFunction(node, false, base.VisitSimpleLambdaExpression);
             public override SyntaxNode VisitLocalFunctionStatement(LocalFunctionStatementSyntax node) =>
-                VisitFunction(node, node.Modifiers.Any(SyntaxKind.StaticKeyword), base.VisitLocalFunctionStatement);
+                this.VisitFunction(node, node.Modifiers.Any(SyntaxKind.StaticKeyword), base.VisitLocalFunctionStatement);
 
             private T VisitFunction<T>(T node, bool isStatic, Func<T, SyntaxNode> baseVisit) where T : SyntaxNode
             {
@@ -181,7 +181,7 @@ namespace Caravela.Patterns.AutoCancellationToken
             {
                 bool addCt = false;
 
-                var semanticModel = compilation.GetSemanticModel(node.SyntaxTree);
+                var semanticModel = this.compilation.GetSemanticModel(node.SyntaxTree);
 
                 var invocationWithCt = node.AddArgumentListArguments(Argument(DefaultExpression(CancellationTokenType)));
                 int newInvocationArgumentsCount = invocationWithCt.ArgumentList.Arguments.Count;
@@ -202,7 +202,7 @@ namespace Caravela.Patterns.AutoCancellationToken
                 node = (InvocationExpressionSyntax)base.VisitInvocationExpression(node);
 
                 if (addCt)
-                    node = node.AddArgumentListArguments(Argument(IdentifierName(cancellationTokenParameterName)));
+                    node = node.AddArgumentListArguments(Argument(IdentifierName( this.cancellationTokenParameterName )));
 
                 return node;
             }

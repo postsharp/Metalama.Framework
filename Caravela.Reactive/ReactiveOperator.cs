@@ -124,7 +124,7 @@ namespace Caravela.Reactive
                     return false;
                 }
 
-                if ( _result == null )
+                if ( this._result == null )
                 {
                     // The function has never been evaluated, so dependencies were not collected.
                     this.EnsureFunctionEvaluated();
@@ -135,7 +135,7 @@ namespace Caravela.Reactive
             }
         }
 
-        public int Version => _result?.Version ?? -1;
+        public int Version => this._result?.Version ?? -1;
 
         public TResult GetValue(in ReactiveObserverToken observerToken = default) =>
             this.GetVersionedValue(observerToken).Value;
@@ -265,18 +265,18 @@ namespace Caravela.Reactive
                             // If the source has changed, we need to evaluate our function again.
                             var newResult = this.EvaluateFunction(input.Value);
 
-                            if (this._result == null || !AreEqual(this._result.Value, newResult))
+                            if (this._result == null || !this.AreEqual(this._result.Value, newResult))
                             {
                                 // Our function gave a different result, so we increase our version number.
                                 this._result =
-                                    new ReactiveVersionedValue<TResult>(newResult, _result?.Version + 1 ?? 0);
+                                    new ReactiveVersionedValue<TResult>(newResult, this._result?.Version + 1 ?? 0);
                             }
 
                             // If the function has not produced dependencies on first execution, we forbid to product later.
                             // This makes sure we can implement the IsImmutable property reliably.
-                            if ( _dependencies.IsEmpty )
+                            if ( this._dependencies.IsEmpty )
                             {
-                                _dependencies.Disable();
+                                this._dependencies.Disable();
                             }
                         }
 

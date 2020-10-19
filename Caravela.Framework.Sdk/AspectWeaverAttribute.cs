@@ -7,6 +7,6 @@ namespace Caravela.Framework.Sdk
     {
         public Type AspectType { get; }
 
-        public AspectWeaverAttribute(Type aspectType) => AspectType = aspectType;
+        public AspectWeaverAttribute(Type aspectType) => this.AspectType = aspectType;
     }
 }

@@ -32,7 +32,7 @@ namespace Caravela.Reactive
 
             void Iterate(T item)
             {
-                builder.TryGetValue(item, out var count);
+                builder.TryGetValue(item, out int count );
                 builder[item] = count + 1;
 
                 var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
@@ -93,7 +93,7 @@ namespace Caravela.Reactive
         {
             void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
             {
-                if (!newResult.TryGetValue(item, out var count))
+                if (!newResult.TryGetValue(item, out int count ))
                 {
                     updateToken.SignalChange();
                     foreach (var subscription in this.Observers)
@@ -122,7 +122,7 @@ namespace Caravela.Reactive
         {
             void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
             {
-                if (!newResult.TryGetValue(item, out var count))
+                if (!newResult.TryGetValue(item, out int count ))
                 {
                     return;
                 }

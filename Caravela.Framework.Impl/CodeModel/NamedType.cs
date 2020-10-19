@@ -10,41 +10,41 @@ namespace Caravela.Framework.Impl
     internal sealed class NamedType : Type, INamedType
     {
         internal INamedTypeSymbol NamedTypeSymbol { get; }
-        internal override ITypeSymbol TypeSymbol => NamedTypeSymbol;
+        internal override ITypeSymbol TypeSymbol => this.NamedTypeSymbol;
 
         internal NamedType(INamedTypeSymbol symbol, Compilation compilation)
-            : base(compilation) => NamedTypeSymbol = symbol;
+            : base(compilation) => this.NamedTypeSymbol = symbol;
 
-        public string Name => NamedTypeSymbol.Name;
+        public string Name => this.NamedTypeSymbol.Name;
 
         [Memo]
         // TODO: verify simple call to ToDisplayString gives the desired result in all cases
-        public string FullName => NamedTypeSymbol.ToDisplayString();
+        public string FullName => this.NamedTypeSymbol.ToDisplayString();
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.SymbolMap.GetIType(a)).ToImmutableArray();
+        public IReadOnlyList<IType> GenericArguments => this.NamedTypeSymbol.TypeArguments.Select(a => this.Compilation.SymbolMap.GetIType(a)).ToImmutableArray();
 
         public ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken)
         {
             // TODO: actually use observerToken
-            return TypeInfo;
+            return this.TypeInfo;
         }
 
         [Memo]
-        internal TypeInfo TypeInfo => new TypeInfo(this, Compilation);
+        internal TypeInfo TypeInfo => new TypeInfo(this, this.Compilation );
 
         [Memo]
-        public ICodeElement? ContainingElement => TypeSymbol.ContainingSymbol switch
+        public ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => null,
-            INamedTypeSymbol containingType => Compilation.SymbolMap.GetTypeInfo(containingType),
+            INamedTypeSymbol containingType => this.Compilation.SymbolMap.GetTypeInfo(containingType),
             _ => throw new NotImplementedException()
         };
 
         [Memo]
-        public IReactiveCollection<IAttribute> Attributes => TypeSymbol.GetAttributes().Select(a => new Attribute(a, Compilation.SymbolMap)).ToImmutableReactive();
+        public IReactiveCollection<IAttribute> Attributes => this.TypeSymbol.GetAttributes().Select(a => new Attribute(a, this.Compilation.SymbolMap)).ToImmutableReactive();
 
-        public override string ToString() => NamedTypeSymbol.ToString();
+        public override string ToString() => this.NamedTypeSymbol.ToString();
     }
 
     internal abstract class Type : IType
@@ -52,8 +52,8 @@ namespace Caravela.Framework.Impl
         internal abstract ITypeSymbol TypeSymbol { get; }
         internal Compilation Compilation { get; }
 
-        protected Type(Compilation compilation) => Compilation = compilation;
+        protected Type(Compilation compilation) => this.Compilation = compilation;
 
-        public bool Is(IType other) => Compilation.RoslynCompilation.HasImplicitConversion(TypeSymbol, ((Type)other).TypeSymbol);
+        public bool Is(IType other) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, ((Type)other).TypeSymbol);
     }
 }

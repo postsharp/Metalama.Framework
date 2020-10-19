@@ -20,18 +20,18 @@ namespace Caravela.Framework.Impl
 
         private AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, ICompilation compilation, ReactiveHashSet<AspectSource> aspectSources)
         {
-            Diagnostics = diagnostics;
-            Compilation = compilation;
-            AspectSources = aspectSources;
+            this.Diagnostics = diagnostics;
+            this.Compilation = compilation;
+            this.AspectSources = aspectSources;
 
-            Aspects = aspectSources.SelectMany(s => s.GetAspects());
+            this.Aspects = aspectSources.SelectMany(s => s.GetAspects());
         }
 
         public AspectCompilation Update(IReadOnlyList<Diagnostic> addedDiagnostics, ICompilation newCompilation)
         {
-            var newDiagnostics = Diagnostics.Concat(addedDiagnostics).ToImmutableArray();
+            var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableArray();
 
-            return new AspectCompilation(newDiagnostics, newCompilation, AspectSources);
+            return new AspectCompilation(newDiagnostics, newCompilation, this.AspectSources );
         }
     }
 }
