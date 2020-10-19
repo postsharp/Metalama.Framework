@@ -142,9 +142,13 @@ namespace Caravela.Reactive
                 {
                     items.Replace(group, this.Version);
                 }
+                else
+                {
+                    builder.Add( group.Key, new Group<TKey, TElement>( this, group, this.Version ) );
+                }
             }
 
-            foreach (var group in builder)
+            foreach (var group in builder.ToImmutable())
             {
                 if (group.Value.Mark != this.Version)
                 {
