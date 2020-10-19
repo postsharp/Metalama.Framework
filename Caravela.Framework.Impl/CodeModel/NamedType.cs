@@ -25,9 +25,9 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReadOnlyList<IType> GenericArguments => NamedTypeSymbol.TypeArguments.Select(a => Compilation.SymbolMap.GetIType(a)).ToImmutableArray();
 
-        public ITypeInfo GetTypeInfo(in ReactiveCollectorToken collectorToken)
+        public ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken)
         {
-            // TODO: actually use collectorToken
+            // TODO: actually use observerToken
             return TypeInfo;
         }
 

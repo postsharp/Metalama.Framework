@@ -6,22 +6,52 @@ using System.Xml;
 
 namespace Caravela.Reactive
 {
-    struct DependencyList
+    /// <summary>
+    /// Implementation of <see cref="IReactiveTokenCollector"/>. This is a mutable struct! Don't make it a property
+    /// or a read-only field.
+    /// </summary>
+    internal struct DependencyList
     {
-        private volatile Dictionary<IReactiveSource, Dependency>? _dependencies;
+        private volatile Node? _dependencies;
         private readonly IReactiveObserver _parent;
 
+        /// <summary>
+        /// Creates a new <see cref="DependencyList"/>.
+        /// </summary>
+        /// <param name="parent">The implementation of <see cref="IReactiveObserver"/>,
+        /// which should receive change notifications.
+        /// </param>
         public DependencyList(IReactiveObserver parent)
         {
             this._parent = parent;
             this._dependencies = null;
         }
 
-        public bool IsEmpty => this._dependencies == null || this._dependencies.Count == 0;
+        public bool IsEmpty => this._dependencies == null;
+
+        private Node? FindNode(IReactiveObservable<IReactiveObserver> source)
+        {
+            for (var node = this._dependencies; node != null; node = node.Next)
+            {
+                if (node.Source == source)
+                {
+                    return node;
+                }
+            }
+
+            return null;
+        }
 
 
-        public void Add<T>(T source)
-            where T : IReactiveObservable<IReactiveObserver>, IReactiveSource
+        /// <summary>
+        /// Adds a dependency to the list and starts observing changes.
+        /// </summary>
+        /// <param name="source">The dependent source.</param>
+        /// <param name="version">The version of the source when it was evaluated.</param>
+        /// <typeparam name="T">An <see cref="IReactiveObservable{T}"/>.</typeparam>
+        /// <exception cref="InvalidOperationException"></exception>
+        public void Add<T>(T source, int version)
+            where T : IReactiveObservable<IReactiveObserver>
         {
             if (source == null)
             {
@@ -33,52 +63,62 @@ namespace Caravela.Reactive
                 throw new InvalidOperationException();
 #endif
 
-
-            if (this._dependencies == null)
+            // Try to find an existing node.
+            var existingNode = this.FindNode(source);
+            if (existingNode != null)
             {
-                Interlocked.CompareExchange(ref this._dependencies,
-                    new Dictionary<IReactiveSource, Dependency>(),
-                    null);
+                // Not sure what to do if the version if different. 
+                Debug.Assert(existingNode.Version == version);
+                return;
             }
+            
+            // No existing node. Add an observer and create a new node.
+            var subscription = source.AddObserver(this._parent);
+            var node = new Node(source, subscription, version);
 
-            lock (this._dependencies)
+            while (true)
             {
-                if (!this._dependencies.ContainsKey(source))
+                var head = this._dependencies;
+                node.Next = head;
+
+                if (Interlocked.CompareExchange(ref this._dependencies, node, head) == head)
                 {
-                    var subscription = source.AddObserver(this._parent);
-                    Debug.Assert(subscription != null);
-                    this._dependencies.Add(source, new Dependency(subscription, source.Version));
+                    // Success.
+                    return;
                 }
             }
+
+
         }
 
+        /// <summary>
+        /// Disposes all subscriptions to dependencies and clears the list.
+        /// </summary>
         public void Clear()
         {
-            // Dispose previous dependencies.
-            var dependencies = this._dependencies;
-
-            if (dependencies != null)
+            for (var node = this._dependencies; node != null; node = node.Next)
             {
-                lock (dependencies)
-                {
-                    foreach (var subscription in dependencies.Values)
-                    {
-                        subscription.Subscription.Dispose();
-                    }
-
-                    dependencies.Clear();
-                }
+                node.Subscription?.Dispose();
             }
+
+            this._dependencies = null;
         }
 
+        
+        /// <summary>
+        /// Determines if any dependency is out of date, based on the cached version number
+        /// and the current version number of the dependent source.
+        /// </summary>
+        /// <returns></returns>
         public bool IsDirty()
         {
             if (this._dependencies == null)
                 return false;
 
-            foreach (var dependency in _dependencies)
+            // No lock is necessary for reading.
+            for (var node = this._dependencies; node != null; node = node.Next)
             {
-                if (dependency.Key.Version > dependency.Value.Version)
+                if (node.Version > node.Source.Version)
                 {
                     return true;
                 }
@@ -87,13 +127,17 @@ namespace Caravela.Reactive
             return false;
         }
 
-        readonly struct Dependency
+        private class Node
         {
-            public IReactiveSubscription Subscription { get; }
+            public IReactiveObservable<IReactiveObserver> Source { get; }
+            public IReactiveSubscription? Subscription { get; }
             public int Version { get;  }
 
-            public Dependency(IReactiveSubscription subscription, int version)
+            public Node? Next { get; set; }
+
+            public Node(IReactiveObservable<IReactiveObserver> source, IReactiveSubscription? subscription, int version)
             {
+                this.Source = source;
                 this.Subscription = subscription;
                 this.Version = version;
             }

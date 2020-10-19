@@ -7,32 +7,37 @@ using System.Collections.Generic;
 
 namespace Caravela.Reactive
 {
+    /// <summary>
+    /// A base implementation of <see cref="ReactiveOperator{TSource,TSourceObserver,TResult,TResultObserver}"/> for collection operators.
+    /// </summary>
+    /// <typeparam name="TSource">Type of source items.</typeparam>
+    /// <typeparam name="TResult">Type of result items.</typeparam>
     internal abstract class ReactiveCollectionOperator<TSource, TResult> :
         ReactiveOperator<IEnumerable<TSource>, IReactiveCollectionObserver<TSource>, IEnumerable<TResult>,
             IReactiveCollectionObserver<TResult>>,
         IReactiveCollection<TResult>, IReactiveCollectionObserver<TSource>, IEnumerable<TResult>
     {
-        public ReactiveCollectionOperator(IReactiveCollection<TSource> source) : base(source)
+        protected ReactiveCollectionOperator(IReactiveCollection<TSource> source) : base(source)
         {
         }
 
         IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator()
         {
-            return this.GetValue(this.CollectorToken).GetEnumerator();
+            return this.GetValue(this.ObserverToken).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetValue(this.CollectorToken).GetEnumerator();
+            return this.GetValue(this.ObserverToken).GetEnumerator();
         }
 
 
         void IReactiveCollectionObserver<TSource>.OnItemAdded(IReactiveSubscription subscription, TSource item, int newVersion)
         {
-            if (!this.CanProcessIncrementalChange)
+            if (!this.ShouldProcessIncrementalChange)
                 return;
             
-            using var token = this.GetIncrementalUpdateToken();
+            using var token = this.GetIncrementalUpdateToken(newVersion);
             
             this.OnSourceItemAdded(subscription, item, in token);
         }
@@ -40,10 +45,10 @@ namespace Caravela.Reactive
         void IReactiveCollectionObserver<TSource>.OnItemRemoved(IReactiveSubscription subscription, TSource item,
             int newVersion)
         {
-            if (!this.CanProcessIncrementalChange)
+            if (!this.ShouldProcessIncrementalChange)
                 return;
             
-            using var token = this.GetIncrementalUpdateToken();
+            using var token = this.GetIncrementalUpdateToken(newVersion);
 
             this.OnSourceItemRemoved(subscription, item, in token);
         }
@@ -51,27 +56,27 @@ namespace Caravela.Reactive
         void IReactiveCollectionObserver<TSource>.OnItemReplaced(IReactiveSubscription subscription, TSource oldItem,
             TSource newItem, int newVersion)
         {
-            if (!this.CanProcessIncrementalChange)
+            if (!this.ShouldProcessIncrementalChange)
                 return;
             
-            using var token = this.GetIncrementalUpdateToken();
+            using var token = this.GetIncrementalUpdateToken(newVersion);
             
             this.OnSourceItemReplaced(subscription, oldItem, newItem, in token);
         }
 
-        protected internal override IReactiveSubscription SubscribeToSource()
+        protected override IReactiveSubscription? SubscribeToSource()
         {
             return this.Source.AddObserver(this);
         }
 
 
         protected abstract void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken);
+            in IncrementalUpdateToken updateToken);
 
         protected abstract void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken);
+            in IncrementalUpdateToken updateToken);
 
         protected abstract void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in UpdateToken updateToken);
+            TSource newItem, in IncrementalUpdateToken updateToken);
     }
 }

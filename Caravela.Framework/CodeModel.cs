@@ -26,7 +26,7 @@ namespace Caravela.Framework
         string FullName { get; }
         IReadOnlyList<IType> GenericArguments { get; }
 
-        ITypeInfo GetTypeInfo(in ReactiveCollectorToken collectorToken);
+        ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken);
     }
 
     public interface IAttribute

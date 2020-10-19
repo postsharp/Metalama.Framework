@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -14,65 +13,57 @@ namespace Caravela.Reactive
         private static readonly IEqualityComparer<T> _sourceEqualityComparer =
             EqualityComparerFactory.GetEqualityComparer<T>();
 
-        private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
-        private IEnumerable<T> _result = null!;
+        private readonly Func<T, ReactiveObserverToken, bool> _predicate;
 
-        public WhereOperator(IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, bool> predicate) :
+        public WhereOperator(IReactiveCollection<T> source, Func<T, bool> predicate) :
             base(source)
         {
-            this._predicate = predicate;
+            this._predicate = ReactiveObserverToken.WrapWithDefaultToken(predicate);
         }
 
-        protected override bool EvaluateFunction(IEnumerable<T> source)
+        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
         {
-            this._result = source.Where(arg => this._predicate(arg, this.CollectorToken));
-            return true;
-        }
-
-        protected override IEnumerable<T> GetFunctionResult()
-        {
-            Debug.Assert(this._result!=null);
-            return this._result;
+            return source.Where(arg => this._predicate(arg, this.ObserverToken));
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            if (this._predicate(item, this.CollectorToken))
+            if (this._predicate(item, this.ObserverToken))
             {
                 updateToken.SignalChange(true);
 
                 foreach (var subscription in this.Observers)
                 {
-                    subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+                    subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
                 }
             }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            if (this._predicate(item, this.CollectorToken))
+            if (this._predicate(item, this.ObserverToken))
             {
                 updateToken.SignalChange(true);
 
                 foreach (var subscription in this.Observers)
                 {
-                    subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
                 }
             }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             if (_sourceEqualityComparer.Equals(oldItem, newItem))
             {
                 return;
             }
 
-            var remove = this._predicate(oldItem, this.CollectorToken);
-            var add = this._predicate(newItem, this.CollectorToken);
+            var remove = this._predicate(oldItem, this.ObserverToken);
+            var add = this._predicate(newItem, this.ObserverToken);
 
             if (!remove && !add)
             {
@@ -85,12 +76,12 @@ namespace Caravela.Reactive
             {
                 if (remove)
                 {
-                    subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.Version);
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.NextVersion);
                 }
 
                 if (add)
                 {
-                    subscription.Observer.OnItemRemoved(subscription.Subscription, newItem, updateToken.Version);
+                    subscription.Observer.OnItemRemoved(subscription.Subscription, newItem, updateToken.NextVersion);
                 }
             }
         }

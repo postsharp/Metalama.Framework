@@ -21,19 +21,20 @@ namespace Caravela.Reactive
             this._subscription = this._source.AddObserver(this);
             this._dependencies = new DependencyList(this);
 
-            foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+            foreach (var item in this._source.GetValue(new ReactiveObserverToken(this)))
             {
                 this.Add(item);
             }
         }
 
-        void Add(T item) => Console.WriteLine($"{this.Name}: Added {item}");
-        void Remove(T item) => Console.WriteLine($"{this.Name}: Removed {item}");
+        private void Add(T item) => Console.WriteLine($"{this.Name}: Added {item}");
+        private void Remove(T item) => Console.WriteLine($"{this.Name}: Removed {item}");
 
         public string Name { get; }
 
         public void Dispose()
         {
+            this._dependencies.Clear();
             this._subscription.Dispose();
         }
 
@@ -51,24 +52,20 @@ namespace Caravela.Reactive
         void IReactiveCollectionObserver<T>.OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem,
             int newVersion)
         {
-            Console.WriteLine($"{this.Name}: Replaced {oldItem}->{newItem}.");
+            Console.WriteLine($"{this.Name}: Replaced {oldItem}  ->  {newItem}.");
         }
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
         {
             if (isBreakingChange)
             {
-                foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+                foreach (var item in this._source.GetValue(new ReactiveObserverToken(this)))
                 {
                     this.Add(item);
                 }
             }
         }
 
-        bool IReactiveObserver.HasPathToSource(object source)
-        {
-            return source == this;
-        }
 
         void IReactiveObserver<IEnumerable<T>>.OnValueChanged(IReactiveSubscription subscription,
             IEnumerable<T> oldValue, IEnumerable<T> newValue, int newVersion,
@@ -88,12 +85,14 @@ namespace Caravela.Reactive
             }
         }
 
-        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> observable)
+        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (observable.Object != this._source && observable.Object != this)
+            if (source.Object != this._source && source.Object != this)
             {
-                this._dependencies.Add(observable);
+                this._dependencies.Add(source, version);
             }
         }
+        
+        
     }
 }

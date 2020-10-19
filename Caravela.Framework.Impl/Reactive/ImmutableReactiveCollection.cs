@@ -22,22 +22,19 @@ namespace Caravela.Framework.Impl.Reactive
 
         object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
 
-        bool IReactiveSource.IsMaterialized => true;
+        bool IReactiveSource<IEnumerable<T>>.IsMaterialized => true;
 
-        bool IReactiveSource.IsImmutable => true;
+        bool IReactiveSource<IEnumerable<T>>.IsImmutable => true;
 
-        int IReactiveSource.Version => 0;
+        int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => 0;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer) => _observers.AddObserver(observer);
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) => _observers.RemoveObserver(subscription);
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.GetValue(in ReactiveCollectorToken collectorToken) => _items;
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => _items;
 
-        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.GetVersionedValue(in ReactiveCollectorToken collectorToken)
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
             => new ReactiveVersionedValue<IEnumerable<T>>(_items, 0);
-
-        // TODO: is this correct?
-        bool IReactiveDebugging.HasPathToObserver(object observer) => false;
     }
 
     internal static class ImmutableReactiveExtensions

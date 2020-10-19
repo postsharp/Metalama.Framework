@@ -9,18 +9,18 @@ using System.Linq;
 
 namespace Caravela.Reactive
 {
-    public class Group<TKey, TItem> : IReactiveCollection<TItem>, IReactiveTokenCollector
+    internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>, IReactiveTokenCollector
     {
         private static readonly IEqualityComparer<TItem> _equalityComparer =
             EqualityComparerFactory.GetEqualityComparer<TItem>();
 
-        private readonly ObserverList<IReactiveCollectionObserver<TItem>> _observers;
-        private readonly IGroupByOperator _parent;
+        private ObserverList<IReactiveCollectionObserver<TItem>> _observers;
+        private readonly IGroupByOperator<TKey, TItem> _parent;
 
         private ImmutableDictionary<TItem, int> _items;
         private int _version;
 
-        internal Group(IGroupByOperator parent, TKey key)
+        internal Group(IGroupByOperator<TKey, TItem> parent, TKey key)
         {
             this.Key = key;
             this._observers = new ObserverList<IReactiveCollectionObserver<TItem>>(this);
@@ -28,7 +28,7 @@ namespace Caravela.Reactive
             this._parent = parent;
         }
 
-        internal Group(IGroupByOperator parent, IGrouping<TKey, TItem> initialContent) :
+        internal Group(IGroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent) :
             this(parent, initialContent.Key)
         {
         
@@ -56,27 +56,25 @@ namespace Caravela.Reactive
         public TKey Key { get; }
 
         private ReactiveVersionedValue<IEnumerable<TItem>> VersionedValue =>
-            new ReactiveVersionedValue<IEnumerable<TItem>>(this.GetValue(new ReactiveCollectorToken(this)),
+            new ReactiveVersionedValue<IEnumerable<TItem>>(this.GetValue(new ReactiveObserverToken(this)),
                 this._version);
 
-        public IEnumerable<TItem> GetValue(in ReactiveCollectorToken collectorToken)
+        public IEnumerable<TItem> GetValue(in ReactiveObserverToken observerToken)
         {
             return this._items.Keys;
         }
 
-        IReactiveVersionedValue<IEnumerable<TItem>>
-            IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.GetVersionedValue(
-                in ReactiveCollectorToken collectorToken)
+        IReactiveVersionedValue<IEnumerable<TItem>> IReactiveSource<IEnumerable<TItem>>.GetVersionedValue(
+                in ReactiveObserverToken observerToken)
         {
             return this.VersionedValue;
         }
 
-        bool IReactiveSource.IsMaterialized => true;
+        bool IReactiveSource<IEnumerable<TItem>>.IsMaterialized => true;
 
-        bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
+        bool IReactiveSource<IEnumerable<TItem>>.IsImmutable => this._parent.IsImmutable;
             
-        int IReactiveSource.Version => this._version;
-
+        int IReactiveObservable<IReactiveCollectionObserver<TItem>>.Version =>this._version;
 
         object IReactiveObservable<IReactiveCollectionObserver<TItem>>.Object => this;
 
@@ -93,14 +91,9 @@ namespace Caravela.Reactive
             return this._observers.RemoveObserver(subscription);
         }
 
-        bool IReactiveDebugging.HasPathToObserver(object observer)
+        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            return this._observers.HasPathToObserver(observer);
-        }
-
-        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> observable)
-        {
-            if (observable != null)
+            if (source != null)
             {
                 throw new InvalidOperationException();
             }

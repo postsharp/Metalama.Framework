@@ -10,15 +10,15 @@ namespace Caravela.Reactive
 {
     internal abstract class SelectManyImmutableOperatorBase<TSource, TCollection, TResult> : SelectManyOperator<TSource, TCollection, TResult>
     {
-        protected Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> CollectionSelector { get; }
+        protected Func<TSource, ReactiveObserverToken, IImmutableList<TCollection>> CollectionSelector { get; }
 
         public SelectManyImmutableOperatorBase(
             IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> collectionSelector,
-            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+            Func<TSource, IImmutableList<TCollection>> collectionSelector,
+            Func<TSource, TCollection, TResult> resultSelector)
             : base(source, resultSelector)
         {
-            CollectionSelector = collectionSelector;
+            CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) => 
@@ -40,14 +40,14 @@ namespace Caravela.Reactive
     internal sealed class SelectManyImmutableOperator<TSource, TResult> : SelectManyImmutableOperatorBase<TSource, TResult, TResult>
     {
         public SelectManyImmutableOperator(
-            IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> collectionSelector)
-            : base(source, collectionSelector, (source, result, token) => result)
+            IReactiveCollection<TSource> source, Func<TSource, IImmutableList<TResult>> collectionSelector)
+            : base(source, collectionSelector, (source, result) => result)
         {
         }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return CollectionSelector(arg, CollectorToken);
+            return CollectionSelector(arg, this.ObserverToken);
         }
     }
 
@@ -55,17 +55,17 @@ namespace Caravela.Reactive
     {
         public SelectManyImmutableOperator(
             IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> collectionSelector,
-            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+            Func<TSource, IImmutableList<TCollection>> collectionSelector,
+            Func<TSource, TCollection, TResult> resultSelector)
             : base(source, collectionSelector, resultSelector)
         {
         }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            foreach (var item in CollectionSelector(arg, CollectorToken))
+            foreach (var item in CollectionSelector(arg, this.ObserverToken))
             {
-                yield return ResultSelector(arg, item, CollectorToken);
+                yield return ResultSelector(arg, item, this.ObserverToken);
             }
         }
     }

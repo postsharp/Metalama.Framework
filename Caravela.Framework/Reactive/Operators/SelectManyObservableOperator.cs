@@ -9,27 +9,27 @@ namespace Caravela.Reactive
 {
     internal abstract class SelectManyObservableOperatorBase<TSource, TCollection, TResult> : SelectManyOperator<TSource, TCollection, TResult>
     {
-        protected Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
+        protected Func<TSource, ReactiveObserverToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
 
-        private readonly Dictionary<TSource, (IReactiveSubscription subscription, int count)> _subscriptions
+        private readonly Dictionary<TSource, (IReactiveSubscription? subscription, int count)> _subscriptions
             = new(EqualityComparerFactory.GetEqualityComparer<TSource>());
         private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new();
 
         public SelectManyObservableOperatorBase(IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> collectionSelector,
-            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector) : base(source, resultSelector)
+            Func<TSource, IReactiveCollection<TCollection>> collectionSelector,
+            Func<TSource, TCollection, TResult> resultSelector) : base(source, resultSelector)
         {
-            CollectionSelector = collectionSelector;
+            CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) =>
-            ResultSelector(_subscriptionsReverse[subscription], item, CollectorToken);
+            ResultSelector(_subscriptionsReverse[subscription], item, this.ObserverToken);
 
         protected override void UnfollowAll()
         {
             foreach (var subscription in this._subscriptions.Values)
             {
-                subscription.subscription.Dispose();
+                subscription.subscription?.Dispose();
             }
             this._subscriptionsReverse.Clear();
         }
@@ -40,9 +40,10 @@ namespace Caravela.Reactive
             {
                 if (tuple.count == 1)
                 {
-                    tuple.subscription.Dispose();
+                    tuple.subscription?.Dispose();
                     this._subscriptions.Remove(source);
-                    this._subscriptionsReverse.Remove(tuple.subscription);
+                    if (tuple.subscription != null)
+                        this._subscriptionsReverse.Remove(tuple.subscription);
                 }
                 else
                 {
@@ -59,9 +60,10 @@ namespace Caravela.Reactive
             }
             else
             {
-                var subscription = CollectionSelector(source, CollectorToken).AddObserver(this);
+                var subscription = CollectionSelector(source, this.ObserverToken).AddObserver(this);
                 _subscriptions.Add(source, (subscription, 1));
-                _subscriptionsReverse.Add(subscription, source);
+                if (subscription != null)
+                    _subscriptionsReverse.Add(subscription, source);
             }
         }
     }
@@ -69,14 +71,14 @@ namespace Caravela.Reactive
     internal sealed class SelectManyObservableOperator<TSource, TResult> : SelectManyObservableOperatorBase<TSource, TResult, TResult>
     {
         public SelectManyObservableOperator(
-            IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, IReactiveCollection<TResult>> collectionSelector)
-            : base(source, collectionSelector, (source, result, token) => result)
+            IReactiveCollection<TSource> source, Func<TSource, IReactiveCollection<TResult>> collectionSelector)
+            : base(source, collectionSelector, (source, result) => result)
         {
         }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return CollectionSelector(arg, CollectorToken).GetValue(CollectorToken);
+            return CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken);
         }
     }
 
@@ -84,17 +86,17 @@ namespace Caravela.Reactive
     {
         public SelectManyObservableOperator(
             IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> collectionSelector,
-            Func<TSource, TCollection, ReactiveCollectorToken, TResult> resultSelector)
+            Func<TSource, IReactiveCollection<TCollection>> collectionSelector,
+            Func<TSource, TCollection, TResult> resultSelector)
             : base(source, collectionSelector, resultSelector)
         {
         }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            foreach (var item in CollectionSelector(arg, CollectorToken).GetValue(CollectorToken))
+            foreach (var item in CollectionSelector(arg, this.ObserverToken).GetValue(this.ObserverToken))
             {
-                yield return ResultSelector(arg, item, CollectorToken);
+                yield return ResultSelector(arg, item, this.ObserverToken);
             }
         }
     }

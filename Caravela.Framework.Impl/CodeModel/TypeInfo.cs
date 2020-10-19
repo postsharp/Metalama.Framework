@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<IAttribute> Attributes => namedType.Attributes;
 
-        public ITypeInfo GetTypeInfo(in ReactiveCollectorToken collectorToken) => this;
+        public ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken) => this;
 
         public bool Is(IType other) => namedType.Is(other);
     }

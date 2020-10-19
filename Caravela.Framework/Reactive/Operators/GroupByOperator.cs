@@ -9,27 +9,27 @@ using System.Linq;
 
 namespace Caravela.Reactive
 {
-    internal class GroupByOperator<TSource, TKey, TElement> : ReactiveCollectionOperator<TSource, Group<TKey, TElement>>,
-        IGroupBy<TKey, TElement>
+    internal class GroupByOperator<TSource, TKey, TElement> : ReactiveCollectionOperator<TSource, IReactiveGroup<TKey, TElement>>,
+        IReactiveGroupBy<TKey, TElement>, IGroupByOperator<TKey, TElement>
     {
         private readonly IEqualityComparer<TKey> _equalityComparer;
-        private readonly Func<TSource, ReactiveCollectorToken, TKey> _getKeyFunc;
+        private readonly Func<TSource, ReactiveObserverToken, TKey> _getKeyFunc;
         private readonly Func<TSource, TElement> _getElementFunc;
         private ImmutableDictionary<TKey, Group<TKey, TElement>> _groups;
 
         public GroupByOperator(
             IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, TKey> getKeyFunc,
+            Func<TSource, TKey> getKeyFunc,
             Func<TSource, TElement> getElementFunc,
             IEqualityComparer<TKey>? equalityComparer) : base(source)
         {
             this._equalityComparer = equalityComparer ?? EqualityComparer<TKey>.Default;
-            this._getKeyFunc = getKeyFunc;
+            this._getKeyFunc = ReactiveObserverToken.WrapWithDefaultToken(getKeyFunc);
             this._getElementFunc = getElementFunc;
             this._groups = ImmutableDictionary<TKey, Group<TKey, TElement>>.Empty.WithComparers(this._equalityComparer);
         }
 
-        public Group<TKey, TElement> this[TKey key]
+        public IReactiveGroup<TKey, TElement> this[TKey key]
         {
             get
             {
@@ -37,7 +37,7 @@ namespace Caravela.Reactive
 
                 if (!this._groups.TryGetValue(key, out var group))
                 {
-                    using var token = this.GetIncrementalUpdateToken();
+                    using var token = this.GetIncrementalUpdateToken(-1);
 
                     if (!this._groups.TryGetValue(key, out group))
                     {
@@ -52,12 +52,12 @@ namespace Caravela.Reactive
 
                         foreach (var subscription in this.Observers)
                         {
-                            subscription.Observer.OnItemAdded(subscription.Subscription, group, token.Version);
+                            subscription.Observer.OnItemAdded(subscription.Subscription, group, token.NextVersion);
                         }
 
                         foreach (var subscription in this.Observers.OfType<IEnumerable<Group<TKey, TElement>>>())
                         {
-                            subscription.Observer.OnValueChanged(subscription.Subscription, oldGroups.Values, this._groups.Values, token.Version);
+                            subscription.Observer.OnValueChanged(subscription.Subscription, oldGroups.Values, this._groups.Values, token.NextVersion);
                         }
                     }
                 }
@@ -68,11 +68,12 @@ namespace Caravela.Reactive
 
         public override bool IsMaterialized => true;
 
+        void IGroupByOperator<TKey, TElement>.EnsureSubscribedToSource() => EnsureSubscribedToSource();
 
         private void AddItem(ref ImmutableDictionary<TKey, Group<TKey, TElement>> newResult, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            var key = this._getKeyFunc(item, this.CollectorToken);
+            var key = this._getKeyFunc(item, this.ObserverToken);
             if (!newResult.TryGetValue(key, out var group))
             {
                 group = new Group<TKey, TElement>(this, key);
@@ -83,7 +84,7 @@ namespace Caravela.Reactive
 
                 foreach (var subscription in this.Observers)
                 {
-                    subscription.Observer.OnItemAdded(subscription.Subscription, group, updateToken.Version);
+                    subscription.Observer.OnItemAdded(subscription.Subscription, group, updateToken.NextVersion);
                 }
             }
 
@@ -94,9 +95,9 @@ namespace Caravela.Reactive
 
 
         private void RemoveItem(ref ImmutableDictionary<TKey, Group<TKey, TElement>> newResult, TSource removedItem,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            var key = this._getKeyFunc(removedItem, this.CollectorToken);
+            var key = this._getKeyFunc(removedItem, this.ObserverToken);
             if (newResult.TryGetValue(key, out var group))
             {
                 var element = _getElementFunc(removedItem);
@@ -119,14 +120,14 @@ namespace Caravela.Reactive
 
                     foreach (var subscription in this.Observers)
                     {
-                        subscription.Observer.OnItemRemoved(subscription.Subscription, @group, updateToken.Version);
+                        subscription.Observer.OnItemRemoved(subscription.Subscription, @group, updateToken.NextVersion);
                     }
                 }
             }
         }
 
 
-        protected override bool EvaluateFunction(IEnumerable<TSource> source)
+        protected override IEnumerable<IReactiveGroup<TKey, TElement>> EvaluateFunction(IEnumerable<TSource> source)
         {
             // We cannot simply overwrite the dictionary with a brand new one because there may be observers on individual
             // groups and we need to preserve them.
@@ -135,7 +136,7 @@ namespace Caravela.Reactive
 
             var builder = oldGroups.ToBuilder();
 
-            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.CollectorToken), _getElementFunc))
+            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), _getElementFunc))
             {
                 if (builder.TryGetValue(group.Key, out var items))
                 {
@@ -160,41 +161,43 @@ namespace Caravela.Reactive
 
             this._groups = builder.ToImmutable();
                 
-            return true;
-        }
-
-        protected override IEnumerable<Group<TKey, TElement>> GetFunctionResult()
-        {
             return this._groups.Values;
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var newResult = this._groups;
 
             this.AddItem(ref newResult, item, in updateToken);
 
             this._groups = newResult;
+            
+            updateToken.SetNewValue(this._groups.Values);
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var newResult = this._groups;
             
             this.RemoveItem(ref newResult, item, in updateToken);
+            
             this._groups = newResult;
+            
+            updateToken.SetNewValue(this._groups.Values);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in UpdateToken updateToken)
+            TSource newItem, in IncrementalUpdateToken updateToken)
         {
             var newResult = this._groups;
 
             this.RemoveItem(ref newResult, oldItem, in updateToken);
             this.AddItem(ref newResult, newItem, in updateToken);
             this._groups = newResult;
+            
+            updateToken.SetNewValue(this._groups.Values);
         }
     }
 }

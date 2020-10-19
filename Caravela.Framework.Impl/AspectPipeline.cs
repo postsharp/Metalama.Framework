@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
 
             var aspectParts = aspectCompilation.Aspects
                 .GroupBy(a => a.AspectType)
-                .Select((g, token) => (aspects: g.GetValue(token), aspectType: aspectTypeFactory.GetAspectType(g.Key, token)))
+                .Select(g => (aspects: g.GetValue(), aspectType: aspectTypeFactory.GetAspectType(g.Key)))
                 .SelectMany(
                     x => x.aspectType.Parts,
                     (x, aspectPart) => (x.aspects, x.aspectType, aspectPart))

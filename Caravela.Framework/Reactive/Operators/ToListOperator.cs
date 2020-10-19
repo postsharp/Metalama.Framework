@@ -17,20 +17,15 @@ namespace Caravela.Reactive
 
         public override bool IsMaterialized => true;
 
-        protected override bool EvaluateFunction(IEnumerable<T> source)
+        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
         {
             this._list = ImmutableList.CreateRange(source);
-            return true;
-        }
-
-        protected override IEnumerable<T> GetFunctionResult()
-        {
             return this._list;
         }
 
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var oldList = this._list;
             
@@ -40,17 +35,19 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
             }
             
             foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.Version);
+                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
+            
+            updateToken.SetNewValue(this._list);
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var oldList = this._list;
             
@@ -60,17 +57,19 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
             }
             
             foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.Version);
+                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
+            
+            updateToken.SetNewValue(this._list);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var oldList = this._list;
             
@@ -80,13 +79,15 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, updateToken.Version);
+                subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, updateToken.NextVersion);
             }
             
             foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.Version);
+                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
+            
+            updateToken.SetNewValue(this._list);
         }
     }
 }

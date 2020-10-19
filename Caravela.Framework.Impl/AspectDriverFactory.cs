@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl
     class AspectDriverFactory
     {
         private readonly Loader loader;
-        private readonly IGroupBy<IType, ITypeInfo> weaverTypes;
+        private readonly IReactiveGroupBy<IType, ITypeInfo> weaverTypes;
 
         public AspectDriverFactory(ICompilation compilation, Loader loader)
         {
@@ -26,15 +26,15 @@ namespace Caravela.Framework.Impl
                 group weaverType by (IType)attribute.ConstructorArguments.Single()!;
         }
 
-        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveCollectorToken collectorToken)
+        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveObserverToken observerToken)
         {
-            var weavers = weaverTypes[type];
+            var weavers = weaverTypes[type].GetValue(observerToken).ToList();
 
             if (weavers.Count > 1)
                 throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
 
             if (weavers.Count == 1)
-                return (IAspectDriver)loader.CreateInstance(((TypeInfo)weavers.Some().GetValue(collectorToken)).TypeSymbol);
+                return (IAspectDriver)loader.CreateInstance(((TypeInfo)weavers.Single()).TypeSymbol);
 
             throw new NotImplementedException();
         }

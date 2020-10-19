@@ -1,7 +1,6 @@
 #region
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 #endregion
@@ -11,7 +10,6 @@ namespace Caravela.Reactive
     internal class UnionOperator<T> : ReactiveCollectionOperator<T, T>
     {
         private readonly IReactiveCollection<T> _second;
-        private IEnumerable<T> _results = null!;
         private IReactiveSubscription? _secondSubscription;
 
         public UnionOperator(IReactiveCollection<T> source, IReactiveCollection<T> second)
@@ -20,25 +18,18 @@ namespace Caravela.Reactive
             this._second = second;
         }
 
-        protected override bool EvaluateFunction(IEnumerable<T> source)
+        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
         {
-            this._results = source.Union(this._second.GetValue(this.CollectorToken));
-            return true;
+            return source.Union(this._second.GetValue(this.ObserverToken));
         }
 
-        protected override IEnumerable<T> GetFunctionResult()
-        {
-            Debug.Assert(this._results!=null);
-            return this._results;
-        }
-
-        protected internal override IReactiveSubscription SubscribeToSource()
+        protected override IReactiveSubscription SubscribeToSource()
         {
             this._secondSubscription = this._second.AddObserver(this);
             return base.SubscribeToSource();
         }
 
-        protected internal override void UnsubscribeFromSource()
+        protected override void UnsubscribeFromSource()
         {
             base.UnsubscribeFromSource();
             this._secondSubscription?.Dispose();
@@ -47,40 +38,40 @@ namespace Caravela.Reactive
 
      
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.Version);
-                subscription.Observer.OnItemAdded(subscription.Subscription, newItem, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.NextVersion);
+                subscription.Observer.OnItemAdded(subscription.Subscription, newItem, updateToken.NextVersion);
             }
         }
 
-        protected override bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> observable)
-            => base.ShouldTrackDependency(observable) && observable.Object != this._second;
+        protected override bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> source)
+            => base.ShouldTrackDependency(source) && source.Object != this._second;
     }
 }
