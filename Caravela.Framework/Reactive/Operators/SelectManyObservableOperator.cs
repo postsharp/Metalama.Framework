@@ -9,16 +9,16 @@ namespace Caravela.Reactive
 {
     internal class SelectManyObservableOperator<TSource, TResult> : SelectManyOperator<TSource, TResult>
     {
-        private readonly Func<TSource, ReactiveCollectorToken, IReactiveCollection<TResult>> _func;
+        private readonly Func<TSource, ReactiveObserverToken, IReactiveCollection<TResult>> _func;
 
         private readonly Dictionary<TSource, (IReactiveSubscription subscription, int count)> _subscriptions
             = new Dictionary<TSource, (IReactiveSubscription subscription, int count)>(EqualityComparerFactory
                 .GetEqualityComparer<TSource>());
 
         public SelectManyObservableOperator(IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IReactiveCollection<TResult>> func) : base(source)
+            Func<TSource, IReactiveCollection<TResult>> func) : base(source)
         {
-            this._func = func;
+            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
         }
 
         protected override void UnfollowAll()
@@ -54,13 +54,13 @@ namespace Caravela.Reactive
             else
             {
                 this._subscriptions[source] =
-                    (this._func(source, this.CollectorToken).AddObserver(this), tuple.count + 1);
+                    (this._func(source, this.ObserverToken).AddObserver(this), tuple.count + 1);
             }
         }
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return this._func(arg, this.CollectorToken).GetValue(this.CollectorToken);
+            return this._func(arg, this.ObserverToken).GetValue(this.ObserverToken);
         }
     }
 }

@@ -10,12 +10,12 @@ namespace Caravela.Reactive
 {
     internal class SelectManyImmutableOperator<TSource, TResult> : SelectManyOperator<TSource, TResult>
     {
-        private readonly Func<TSource, ReactiveCollectorToken, IEnumerable<TResult>> _func;
+        private readonly Func<TSource, ReactiveObserverToken, IEnumerable<TResult>> _func;
 
         public SelectManyImmutableOperator(IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> func) : base(source)
+            Func<TSource, IImmutableList<TResult>> func) : base(source)
         {
-            this._func = func;
+            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
         }
 
 
@@ -33,7 +33,7 @@ namespace Caravela.Reactive
 
         protected override IEnumerable<TResult> GetItems(TSource arg)
         {
-            return this._func(arg, this.CollectorToken);
+            return this._func(arg, this.ObserverToken);
         }
     }
 }

@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace Caravela.Reactive
 {
+    /// <summary>
+    /// A weakly-typed observer to a reactive object. Does not support incremental changes.
+    /// </summary>
     public interface IReactiveObserver : IDisposable
     {
         /// <summary>
@@ -18,10 +21,13 @@ namespace Caravela.Reactive
         ///     by reacting to incremental events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
         void OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange);
-        
-        bool HasPathToSource(object source);
     }
 
+    /// <summary>
+    /// A strongly-typed observer that supports notifications that the value has changed, but does not
+    /// give more detail about the nature of the change.
+    /// </summary>
+    /// <typeparam name="T">Type of value.</typeparam>
     public interface IReactiveObserver<in T> : IReactiveObserver
     {
         /// <summary>
@@ -39,6 +45,11 @@ namespace Caravela.Reactive
             bool isBreakingChange = false);
     }
 
+    /// <summary>
+    /// An observer specialized for <see cref="IEnumerable{T}"/>. Supports notifications of changes
+    /// in a collection: <see cref="OnItemAdded"/>, <see cref="OnItemRemoved"/> and <see cref="OnItemReplaced"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IReactiveCollectionObserver<in T> : IReactiveObserver<IEnumerable<T>>
     {
         void OnItemAdded(IReactiveSubscription subscription, T item, int newVersion);

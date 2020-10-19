@@ -9,9 +9,13 @@ using System.Collections.Immutable;
 
 namespace Caravela.Reactive
 {
-    public class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReadOnlyCollection<T>
+    /// <summary>
+    /// A reactive hash set.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public sealed class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReadOnlyCollection<T>
     {
-        private readonly ObserverList<IReactiveCollectionObserver<T>> _observers;
+        private ObserverList<IReactiveCollectionObserver<T>> _observers;
         private ImmutableHashSet<T> _items = ImmutableHashSet<T>.Empty;
         private int _version;
 
@@ -30,7 +34,7 @@ namespace Caravela.Reactive
             _items = items.ToImmutableHashSet();
         }
 
-        protected object WriteSync => this._observers;
+        private object WriteSync => this._observers;
 
         private ReactiveVersionedValue<IEnumerable<T>> VersionedValue =>
             new ReactiveVersionedValue<IEnumerable<T>>(this, this._version);
@@ -129,6 +133,7 @@ namespace Caravela.Reactive
         public bool IsReadOnly => false;
 
 
+
         object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
@@ -143,26 +148,17 @@ namespace Caravela.Reactive
             return this._observers.RemoveObserver(subscription);
         }
 
-        public bool HasPathToObserver(object observer)
-        {
-            return this._observers.HasPathToObserver(observer);
-        }
-
-        
-
         // TODO: this is not thread-safe.
-        bool IReactiveSource.IsImmutable => false;
+        bool IReactiveSource<IEnumerable<T>>.IsImmutable => false;
 
-        int IReactiveSource.Version => this._version;
+        int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => this._version;
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.GetValue(
-            in ReactiveCollectorToken collectorToken)
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken)
         {
             return this;
         }
 
-        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.
-            GetVersionedValue(in ReactiveCollectorToken collectorToken)
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
         {
             return this.VersionedValue;
         }
@@ -170,7 +166,7 @@ namespace Caravela.Reactive
         public bool IsMaterialized => true;
 
 
-        protected void IncrementVersion()
+        private void IncrementVersion()
         {
             this._version++;
         }

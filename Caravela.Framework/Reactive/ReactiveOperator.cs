@@ -1,14 +1,24 @@
 #region
 
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 #endregion
 
 namespace Caravela.Reactive
 {
-    internal abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
+    /// <summary>
+    /// A base implementation of a reactive operation, i.e. a function that maps an input to an output
+    /// and reacts to changes of the input by invalidating the output and/or processing incremental
+    /// change notifications. 
+    /// </summary>
+    /// <typeparam name="TSource">Type of the source value.</typeparam>
+    /// <typeparam name="TSourceObserver">Type of source observers.</typeparam>
+    /// <typeparam name="TResult">Type of the result value.</typeparam>
+    /// <typeparam name="TResultObserver">Type of result observers.</typeparam>
+    internal abstract partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
         IReactiveSource<TResult, TResultObserver>,
         IReactiveObserver<TSource>,
         IReactiveTokenCollector
@@ -17,11 +27,22 @@ namespace Caravela.Reactive
 
     {
         private DependencyList _dependencies;
-        private bool _currentUpdateHasChange;
-        private volatile int _inputVersion = -1;
+
+        private volatile int _sourceVersion = -1;
         private volatile bool _isFunctionResultDirty = true;
-        private volatile int _version = -1;
+        private volatile ReactiveVersionedValue<TResult> _result;
         private DependencyObservable _dependencyObservable;
+        private IReactiveSubscription _subscriptionToSource;
+        private SpinLock _lock = default;
+        protected ObserverList<TResultObserver> Observers;
+
+        // The following fields logically belong to IncrementalUpdateToken but this
+        // type needs to be immutable so that we can use it with the 'using' statement.
+        // Since there is one or zero update concurrently, we're storing the state here.
+        private IncrementalUpdateStatus _currentUpdateStatus;
+        private int _currentUpdateNewSourceVersion;
+        private TResult _currentUpdateResult;
+
 
         protected ReactiveOperator(IReactiveSource<TSource, TSourceObserver> source)
         {
@@ -35,34 +56,27 @@ namespace Caravela.Reactive
             this._dependencies = new DependencyList(this);
         }
 
-        protected ObserverList<TResultObserver> Observers { get; }
-        private object Sync => this.Observers;
 
-
-        private IReactiveSubscription SubscriptionToSource { get; set; }
-
+        
 
         protected IReactiveSource<TSource, TSourceObserver> Source { get; }
 
-        
-        protected ReactiveCollectorToken CollectorToken => new ReactiveCollectorToken(this);
+
+        protected ReactiveObserverToken ObserverToken => new ReactiveObserverToken(this);
+
+        protected TResult CachedValue => this._result.Value;
 
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
         {
-            if (subscription == this.SubscriptionToSource)
+            if (subscription == this._subscriptionToSource)
             {
                 this.OnValueChanged(isBreakingChange);
             }
             else
             {
-                this.OnOtherValueInvalidated(subscription, isBreakingChange);
+                this.OnObserverBreakingChange();
             }
-        }
-
-        bool IReactiveObserver.HasPathToSource(object source)
-        {
-            return this.Observers.HasPathToObserver(source);
         }
 
 
@@ -74,6 +88,7 @@ namespace Caravela.Reactive
 
         public void Dispose()
         {
+            this._dependencies.Clear();
             this.UnsubscribeFromSource();
         }
 
@@ -100,106 +115,143 @@ namespace Caravela.Reactive
             return this.Observers.RemoveObserver(subscription);
         }
 
-        bool IReactiveDebugging.HasPathToObserver(object observer)
-        {
-            return observer == this || this.Observers.HasPathToObserver(observer);
-        }
-
         public bool IsImmutable => this.Source.IsImmutable && this._dependencies.IsEmpty;
 
-        public int Version => this._version;
+        public int Version => _result?.Version ?? -1;
 
-        public TResult GetValue(in ReactiveCollectorToken collectorToken)
+        public TResult GetValue(in ReactiveObserverToken observerToken = default) =>
+            this.GetVersionedValue(observerToken).Value;
+
+
+        public ReactiveVersionedValue<TResult> GetVersionedValue(in ReactiveObserverToken observerToken = default)
         {
-            return this.GetValueImpl(collectorToken).Value;
+            this.EnsureFunctionEvaluated();
+
+            // Take local copy of the result to guarantee consistency in the version number.
+            var currentValue = this._result;
+            this.CollectDependencies(observerToken, currentValue.Version);
+
+            return this._result;
         }
 
-        IReactiveVersionedValue<TResult> IReactiveSource<TResult, TResultObserver>.
-            GetVersionedValue(in ReactiveCollectorToken collectorToken)
+
+        IReactiveVersionedValue<TResult> IReactiveSource<TResult>.GetVersionedValue(
+            in ReactiveObserverToken observerToken)
         {
-            return this.GetValueImpl(collectorToken);
+            return this.GetVersionedValue(observerToken);
         }
 
         public virtual bool IsMaterialized => false;
 
         object IReactiveObservable<TResultObserver>.Object => this;
 
-        protected virtual bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> observable)
-            => observable.Object != this && observable.Object != this.Source;
+        protected virtual bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> source)
+            => source.Object != this && source.Object != this.Source;
 
-        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> observable)
+        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (this.ShouldTrackDependency(observable))
+            if (this.ShouldTrackDependency(source))
             {
-                this._dependencies.Add(observable);
+                this._dependencies.Add(source, version);
             }
         }
 
-        protected internal abstract IReactiveSubscription SubscribeToSource();
+        protected abstract IReactiveSubscription SubscribeToSource();
 
         protected internal void EnsureSubscribedToSource()
         {
-            if (this.SubscriptionToSource == null)
+            if (this._subscriptionToSource == null)
             {
-                this.SubscriptionToSource = this.SubscribeToSource();
+                this._subscriptionToSource = this.SubscribeToSource();
             }
         }
 
-        protected internal virtual void UnsubscribeFromSource()
+        protected virtual void UnsubscribeFromSource()
         {
-            this.SubscriptionToSource?.Dispose();
-            this.SubscriptionToSource = default;
+            this._subscriptionToSource?.Dispose();
+            this._subscriptionToSource = default;
         }
 
-        protected abstract bool EvaluateFunction(TSource source);
+        /// <summary>
+        /// Evaluates the function (i.e. the operator) and returns its value.
+        /// </summary>
+        /// <param name="source">Source value.</param>
+        /// <returns>Result value.</returns>
+        protected abstract TResult EvaluateFunction(TSource source);
 
-        protected abstract TResult GetFunctionResult();
+        /// <summary>
+        /// Determines whether two return values of <see cref="EvaluateFunction"/> are equal.
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
+        protected virtual bool AreEqual(TResult first, TResult second) =>
+            EqualityComparer<TResult>.Default.Equals(first, second);
 
 
-        protected bool CanProcessIncrementalChange => this._version >= 0;
+        /// <summary>
+        /// Determines whether the current operator should process incremental changes.
+        /// This is  useless only if the operator has not yet been evaluated. It can be useful even if
+        /// the current operator has a breaking change because the operators downstream may still be
+        /// able to process incremental changes.
+        /// </summary>
+        protected bool ShouldProcessIncrementalChange => this._result != null;
 
 
-        protected UpdateToken GetIncrementalUpdateToken()
+        /// <summary>
+        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        protected IncrementalUpdateToken GetIncrementalUpdateToken(int sourceVersion = -1)
         {
-            return new UpdateToken(this);
+            if (this._currentUpdateStatus != IncrementalUpdateStatus.Default && this._currentUpdateStatus != IncrementalUpdateStatus.Disposed)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new IncrementalUpdateToken(this, sourceVersion);
         }
 
 
-        private ReactiveVersionedValue<TResult> GetValueImpl(in ReactiveCollectorToken collectorToken)
+        private void CollectDependencies(ReactiveObserverToken observerToken, int version)
         {
-            this.EnsureFunctionEvaluated();
-            
             // Collect after evaluation so that the version number is updated.
-            collectorToken.Collector?.AddDependency((this._dependencyObservable ??= new DependencyObservable(this)));
-
-            return new ReactiveVersionedValue<TResult>(this.GetFunctionResult(), this._version);
+            observerToken.Collector?.AddDependency((this._dependencyObservable ??= new DependencyObservable(this)), version);
         }
 
+        /// <summary>
+        /// Evaluates the operator if necessary.
+        /// </summary>
         protected void EnsureFunctionEvaluated()
         {
             if (this._isFunctionResultDirty)
                 // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
-                lock (this.Sync)
+                var lockHeld = false;
+                try
                 {
+                    this._lock.Enter(ref lockHeld);
+
                     if (this._isFunctionResultDirty)
                     {
                         // Evaluate the source.
-                        var input = this.Source.GetVersionedValue(this.CollectorToken);
+                        var input = this.Source.GetVersionedValue(this.ObserverToken);
 
-                        if (input.Version != this._inputVersion || !this._dependencies.IsDirty())
+                        if (input.Version != this._sourceVersion || !this._dependencies.IsDirty())
                         {
-                            this._inputVersion = input.Version;
+                            this._sourceVersion = input.Version;
 
                             this._dependencies.Clear();
 
                             // If the source has changed, we need to evaluate our function again.
-                            var isDifferent = this.EvaluateFunction(input.Value);
+                            var newResult = this.EvaluateFunction(input.Value);
 
-                            if (this._version < 0 || isDifferent)
+                            if (this._result == null || !AreEqual(this._result.Value, newResult))
                                 // Our function gave a different result, so we increase our version number.
                             {
-                                this._version++;
+                                this._result =
+                                    new ReactiveVersionedValue<TResult>(newResult, _result?.Version + 1 ?? 0);
                             }
                         }
 
@@ -208,11 +260,17 @@ namespace Caravela.Reactive
 
                     this.EnsureSubscribedToSource();
                 }
+                finally
+                {
+                    if (lockHeld)
+                    {
+                        this._lock.Exit();
+                    }
+                }
             }
         }
 
 
-        
         private void OnValueChanged(bool isBreakingChange)
         {
             if (isBreakingChange)
@@ -221,6 +279,10 @@ namespace Caravela.Reactive
             }
         }
 
+        /// <summary>
+        /// Method called when there are changes in the current operator that break the ability
+        /// of observers to process incremental changes. Observers must then reevaluate the whole operator.
+        /// </summary>
         protected void OnObserverBreakingChange()
         {
             this._isFunctionResultDirty = true;
@@ -231,112 +293,5 @@ namespace Caravela.Reactive
             }
         }
 
-        protected virtual void OnOtherValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
-        {
-            this.OnObserverBreakingChange();
-        }
-
-
-        protected readonly struct UpdateToken : IDisposable
-        {
-            private readonly ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
-
-            public UpdateToken(ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent)
-            {
-                Monitor.Enter(parent.Sync);
-
-                this._parent = parent;
-
-                Debug.Assert(!parent._currentUpdateHasChange);
-            }
-
-            
-            public void SignalChange(bool isBreakingCachedFunctionResult = false)
-            {
-                if (this._parent == null)
-                    throw new InvalidOperationException();
-
-
-                if (!this._parent._currentUpdateHasChange)
-                {
-                    this._parent._currentUpdateHasChange = true;
-                    this._parent._version++;
-                }
-
-                if (isBreakingCachedFunctionResult && !this._parent._isFunctionResultDirty )
-                {
-                    
-                    // We have an incremental change that breaks the stored value, so _parent.EvaluateFunction() must
-                    // be called again. However, observers don't need to resynchronize if they are able to process
-                    // the increment.
-                    
-                    this._parent._isFunctionResultDirty = true;
-                    
-                    // We don't nullify the old result now because the current result may eventually be still valid if all versions 
-                    // end up being identical.
-                }
-
-            }
-
-            public int Version => this._parent._version;
-
-
-            public void Dispose()
-            {
-                if (this._parent == null)
-                {
-                    return;
-                }
-
-
-                if (this._parent._currentUpdateHasChange)
-                {
-                    this._parent._currentUpdateHasChange = false;
-
-                    foreach (var subscription in this._parent.Observers.WeaklyTyped())
-                    {
-                        subscription.Observer.OnValueInvalidated(subscription.Subscription, false);
-                    }
-
-                }
-
-                Monitor.Exit(this._parent.Sync);
-            }
-        }
-
-       
-
-        class DependencyObservable : IReactiveObservable<IReactiveObserver>
-        {
-            private readonly ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
-
-            public DependencyObservable(ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent)
-            {
-                this._parent = parent;
-            }
-
-            public object Object => this._parent;
-
-            IReactiveSubscription IReactiveObservable<IReactiveObserver>.AddObserver(IReactiveObserver observer)
-            {
-                return this._parent.Observers.AddObserver(observer);
-            }
-
-            bool IReactiveObservable<IReactiveObserver>.RemoveObserver(IReactiveSubscription subscription)
-            {
-                return this._parent.Observers.RemoveObserver(subscription);
-            }
-
-            public bool HasPathToObserver(object observer)
-            {
-                return observer == this._parent || this._parent.Observers.HasPathToObserver(observer);
-            }
-
-            bool IReactiveSource.IsMaterialized => this._parent.IsMaterialized;
-
-            bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
-
-            int IReactiveSource.Version => this._parent._version;
-        }
     }
 }

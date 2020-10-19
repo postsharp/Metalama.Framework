@@ -12,8 +12,7 @@ namespace Caravela.Reactive
         where T : class
     {
         private static readonly Func<T, bool> _defaultContinuePredicate = t => t != null;
-        private readonly Func<T, bool> _continuePredicate;
-        private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getRecursionValueFunc;
+        private readonly Func<T, ReactiveObserverToken, IReactiveCollection<T>> _getRecursionValueFunc;
         private ImmutableDictionary<T, int> _result;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>
@@ -21,16 +20,14 @@ namespace Caravela.Reactive
                 ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>.Empty;
 
         public SelectManyRecursiveOperator(IReactiveCollection<T> source,
-            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate) : base(source)
+            Func<T, IReactiveCollection<T>> getRecursionValueFunc) : base(source)
         {
-            this._getRecursionValueFunc = getRecursionValueFunc;
-            this._continuePredicate = stopPredicate ?? _defaultContinuePredicate;
+            this._getRecursionValueFunc = ReactiveObserverToken.WrapWithDefaultToken(getRecursionValueFunc);
         }
 
         public override bool IsMaterialized => true;
 
-        protected override bool EvaluateFunction(IEnumerable<T> source)
+        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
         {
             var builder = ImmutableDictionary.CreateBuilder<T, int>();
 
@@ -39,11 +36,11 @@ namespace Caravela.Reactive
                 builder.TryGetValue(item, out var count);
                 builder[item] = count + 1;
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.CollectorToken);
+                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
 
                 if (this.Follow(recursiveSource))
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.CollectorToken))
+                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
                     {
                         Iterate(recursiveItem);
                     }
@@ -56,11 +53,6 @@ namespace Caravela.Reactive
             }
 
             this._result = builder.ToImmutable();
-            return true;
-        }
-        
-        protected override IEnumerable<T> GetFunctionResult()
-        {
             return this._result.Keys;
         }
 
@@ -98,7 +90,7 @@ namespace Caravela.Reactive
         }
 
       
-        private void AddItem(T item, ref ImmutableDictionary<T, int> newResult, UpdateToken updateToken)
+        private void AddItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
         {
             void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
             {
@@ -107,17 +99,17 @@ namespace Caravela.Reactive
                     updateToken.SignalChange();
                     foreach (var subscription in this.Observers)
                     {
-                        subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.Version);
+                        subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
                     }
                 }
 
                 newResult = newResult.SetItem(item, count + 1);
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.CollectorToken);
+                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
 
                 if (this.Follow(recursiveSource))
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.CollectorToken))
+                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
                     {
                         Iterate(recursiveItem, ref newResult);
                     }
@@ -127,7 +119,7 @@ namespace Caravela.Reactive
             Iterate(item, ref newResult);
         }
 
-        private void RemoveItem(T item, ref ImmutableDictionary<T, int> newResult, UpdateToken updateToken)
+        private void RemoveItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
         {
             void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
             {
@@ -142,7 +134,7 @@ namespace Caravela.Reactive
 
                     foreach (var subscription in this.Observers)
                     {
-                        subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.Version);
+                        subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
                     }
 
                     newResult = newResult.Remove(item);
@@ -152,11 +144,11 @@ namespace Caravela.Reactive
                     newResult = newResult.SetItem(item, count - 1);
                 }
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.CollectorToken);
+                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
 
                 if (this.Unfollow(recursiveSource))
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.CollectorToken))
+                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
                     {
                         Iterate(recursiveItem, ref newResult);
                     }
@@ -167,28 +159,32 @@ namespace Caravela.Reactive
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var newResult = this._result;
 
             this.AddItem(item, ref newResult, updateToken);
 
             this._result = newResult;
+            
+            updateToken.SetNewValue(newResult.Keys);
         }
 
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var newResult = this._result;
 
             this.RemoveItem(item, ref newResult, updateToken);
 
             this._result = newResult;
+            
+            updateToken.SetNewValue(newResult.Keys);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var newResult = this._result;
 
@@ -196,6 +192,8 @@ namespace Caravela.Reactive
             this.AddItem(newItem, ref newResult, updateToken);
 
             this._result = newResult;
+            
+            updateToken.SetNewValue(newResult.Keys);
         }
     }
 }

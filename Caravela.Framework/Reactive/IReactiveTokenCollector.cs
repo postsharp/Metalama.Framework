@@ -1,7 +1,7 @@
 namespace Caravela.Reactive
 {
-    internal interface IReactiveTokenCollector
+    public interface IReactiveTokenCollector
     {
-        void AddDependency(IReactiveObservable<IReactiveObserver> observable);
+        void AddDependency(IReactiveObservable<IReactiveObserver> source, int version);
     }
 }

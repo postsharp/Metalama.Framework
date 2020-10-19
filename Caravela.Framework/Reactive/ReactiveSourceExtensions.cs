@@ -10,18 +10,11 @@ namespace Caravela.Reactive
 {
     public static class ReactiveSourceExtensions
     {
-        public static IGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
-            this IReactiveCollection<TItem> source, Func<TItem, ReactiveCollectorToken, TKey> getKeyFunc,
-            IEqualityComparer<TKey> equalityComparer = default)
-        {
-            return new GroupByOperator<TKey, TItem>(source, getKeyFunc, equalityComparer);
-        }
-
-        public static IGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
+        public static IReactiveGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
             this IReactiveCollection<TItem> source, Func<TItem, TKey> getKeyFunc,
             IEqualityComparer<TKey> equalityComparer = default)
         {
-            return new GroupByOperator<TKey, TItem>(source, (item, token) => getKeyFunc(item), equalityComparer);
+            return new GroupByOperator<TKey, TItem>(source, getKeyFunc, equalityComparer);
         }
 
 
@@ -32,60 +25,39 @@ namespace Caravela.Reactive
 
         public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
             this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IReactiveCollection<TResult>> func)
+            Func<TSource, IReactiveCollection<TResult>> func)
         {
             return new SelectManyObservableOperator<TSource, TResult>(source, func);
         }
 
-        public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
-            this IReactiveCollection<TSource> source, Func<TSource, IReactiveCollection<TResult>> func)
-        {
-            return new SelectManyObservableOperator<TSource, TResult>(source, (source1, token) => func(source1));
-        }
 
         public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
             this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> func)
+            Func<TSource, IImmutableList<TResult>> func)
         {
             return new SelectManyImmutableOperator<TSource, TResult>(source, func);
         }
 
-
-        public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
-            this IReactiveCollection<TSource> source, Func<TSource, IImmutableList<TResult>> func)
-        {
-            return new SelectManyImmutableOperator<TSource, TResult>(source, (source1, token) => func(source1));
-        }
 
 
         public static IReactiveCollection<TResult> Expand<TResult>(
             this IReactiveCollection<IReactiveCollection<TResult>> source)
         {
             return new SelectManyObservableOperator<IReactiveCollection<TResult>, TResult>(source,
-                (collection, token) => collection);
+                collection => collection);
         }
 
 
         public static IReactiveCollection<T> SelectManyRecursive<T>(
             this IReactiveCollection<T> source,
-            Func<T, ReactiveCollectorToken, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate = null)
+            Func<T,  IReactiveCollection<T>> getRecursionValueFunc)
             where T : class
         {
-            return new SelectManyRecursiveOperator<T>(source, getRecursionValueFunc, stopPredicate);
+            return new SelectManyRecursiveOperator<T>(source, getRecursionValueFunc);
         }
 
 
-        public static IReactiveCollection<T> SelectManyRecursive<T>(
-            this IReactiveCollection<T> source, Func<T, IReactiveCollection<T>> getRecursionValueFunc,
-            Func<T, bool> stopPredicate = null)
-            where T : class
-        {
-            return new SelectManyRecursiveOperator<T>(source, (arg1, token) => getRecursionValueFunc(arg1),
-                stopPredicate);
-        }
-
-
+    
         public static IReactiveCollection<T> SelectRecursive<T>(
             this IReactiveCollection<T> source, Func<T, T> getRecursionValueFunc, Func<T, bool> stopPredicate = null)
             where T : class
@@ -93,55 +65,33 @@ namespace Caravela.Reactive
             throw new NotImplementedException();
         }
         
-        public static IReactiveCollection<T> SelectRecursive<T>(
-            this IReactiveCollection<T> source, Func<T, ReactiveCollectorToken, T> getRecursionValueFunc, Func<T, ReactiveCollectorToken,bool> stopPredicate = null)
-            where T : class
-        {
-            throw new NotImplementedException();
-        }
+     
 
-
-
-        public static IReactiveCollection<TSource> Where<TSource>(this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, bool> func)
-        {
-            return new WhereOperator<TSource>(source, func);
-        }
 
         public static IReactiveCollection<TSource> Where<TSource>(this IReactiveCollection<TSource> source,
             Func<TSource, bool> func)
         {
-            return new WhereOperator<TSource>(source, (source1, token) => func(source1));
+            return new WhereOperator<TSource>(source, func);
         }
 
+   
         public static IDisposable WriteLine<T>(this IReactiveCollection<T> source, string name = null)
         {
             return new WriteLineOperator<T>(source, name);
         }
 
         public static IReactiveCollection<TResult> Select<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, TResult> func)
+            Func<TSource, TResult> func)
         {
             return new SelectOperator<TSource, TResult>(source, func);
         }
 
-        public static IReactiveCollection<TResult> Select<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, TResult> func)
+        public static IReactiveCollection<TResult> SelectCached<TSource, TResult>(this IReactiveCollection<TSource> source,
+            Func<TSource,  TResult> func) where TSource : class where TResult : class
         {
-            return new SelectOperator<TSource, TResult>(source, (source1, token) => func(source1));
-        }
-        
-        public static IReactiveCollection<TResult> SelectNew<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, ReactiveCollectorToken, TResult> func) where TSource : class where TResult : class
-        {
-            return new SelectNewOperator<TSource, TResult>(source, func);
+            return new SelectCachedOperator<TSource, TResult>(source, func);
         }
 
-        public static IReactiveCollection<TResult> SelectNew<TSource, TResult>(this IReactiveCollection<TSource> source,
-            Func<TSource, TResult> func) where TResult : class where TSource : class
-        {
-            return new SelectNewOperator<TSource, TResult>(source, (source1, token) => func(source1));
-        }
 
         public static IReactiveCollection<T> Materialize<T>(this IReactiveCollection<T> source)
         {
@@ -164,13 +114,13 @@ namespace Caravela.Reactive
         public static IReactiveSource<T,IReactiveObserver<T>> First<T>(
             this IReactiveCollection<T> source, Func<T, bool> func)
         {
-            return new FirstOperator<T>(source, (source1, token) => func(source1), false);
+            return new FirstOperator<T>(source, func, false);
         }
         
         public static IReactiveSource<T,IReactiveObserver<T>> FirstOrDefault<T>(
             this IReactiveCollection<T> source, Func<T, bool> func)
         {
-            return new FirstOperator<T>(source, (source1, token) => func(source1), true);
+            return new FirstOperator<T>(source, func, true);
         }
     }
 }

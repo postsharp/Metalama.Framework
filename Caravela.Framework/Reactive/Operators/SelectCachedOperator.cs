@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -11,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Reactive
 {
-    internal class SelectNewOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>
+    internal class SelectCachedOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>
         where TSource : class 
         where TResult : class
     {
@@ -19,35 +18,26 @@ namespace Caravela.Reactive
             EqualityComparerFactory.GetEqualityComparer<TSource>();
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
-        private readonly Func<TSource, ReactiveCollectorToken, TResult> _func;
+        private readonly Func<TSource, ReactiveObserverToken, TResult> _func;
         private readonly ConditionalWeakTable<TSource,TResult> _map = new ConditionalWeakTable<TSource, TResult>();
-        private IEnumerable<TResult> _results;
 
-        public SelectNewOperator(IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, TResult> func)
+        public SelectCachedOperator(IReactiveCollection<TSource> source, Func<TSource, TResult> func)
             : base(source)
         {
-            this._func = func;
+            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
         }
 
         public override bool IsMaterialized => false;
 
-        private TResult Selector(TSource s) => this._map.GetValue(s, k => this._func(k, this.CollectorToken));
+        private TResult Selector(TSource s) => this._map.GetValue(s, k => this._func(k, this.ObserverToken));
 
-        protected override bool EvaluateFunction(IEnumerable<TSource> source)
+        protected override IEnumerable<TResult> EvaluateFunction(IEnumerable<TSource> source)
         {
-            this._results = source.Select(this.Selector);
-            
-            return true;
-        }
-
-        protected override IEnumerable<TResult> GetFunctionResult()
-        {
-            Debug.Assert(this._results!=null);
-            return this._results;
+            return source.Select(this.Selector);
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             var outItem = this.Selector(item);
 
@@ -55,12 +45,12 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, outItem, updateToken.Version);
+                subscription.Observer.OnItemAdded(subscription.Subscription, outItem, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
             if (!this._map.TryGetValue(item, out var outItem))
             {
@@ -71,12 +61,12 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, outItem, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, outItem, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in UpdateToken updateToken)
+            TSource newItem, in IncrementalUpdateToken updateToken)
         {
             if (_sourceEqualityComparer.Equals(oldItem, newItem))
             {
@@ -101,8 +91,8 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItemResult, updateToken.Version);
-                subscription.Observer.OnItemAdded(subscription.Subscription, newItemResult, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItemResult, updateToken.NextVersion);
+                subscription.Observer.OnItemAdded(subscription.Subscription, newItemResult, updateToken.NextVersion);
             }
         }
     }

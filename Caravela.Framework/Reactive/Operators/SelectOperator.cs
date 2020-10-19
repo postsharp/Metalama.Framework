@@ -14,62 +14,55 @@ namespace Caravela.Reactive
             EqualityComparerFactory.GetEqualityComparer<TSource>();
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
-        private readonly Func<TSource, ReactiveCollectorToken, TResult> _func;
-        private IEnumerable<TResult> _results;
+        private readonly Func<TSource, ReactiveObserverToken, TResult> _func;
 
-        public SelectOperator(IReactiveCollection<TSource> source, Func<TSource, ReactiveCollectorToken, TResult> func)
+        public SelectOperator(IReactiveCollection<TSource> source, Func<TSource,  TResult> func)
             : base(source)
         {
-            this._func = func;
+            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
         }
 
-        protected override bool EvaluateFunction(IEnumerable<TSource> source)
+        protected override IEnumerable<TResult> EvaluateFunction(IEnumerable<TSource> source)
         {
-            this._results = source.Select(s => this._func(s, this.CollectorToken));
-            return true;
-        }
-
-        protected override IEnumerable<TResult> GetFunctionResult()
-        {
-            return this._results;
+            return source.Select(s => this._func(s, this.ObserverToken));
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            var outItem = this._func(item, this.CollectorToken);
+            var outItem = this._func(item, this.ObserverToken);
 
             updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, outItem, updateToken.Version);
+                subscription.Observer.OnItemAdded(subscription.Subscription, outItem, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
-            in UpdateToken updateToken)
+            in IncrementalUpdateToken updateToken)
         {
-            var outItem = this._func(item, this.CollectorToken);
+            var outItem = this._func(item, this.ObserverToken);
 
             updateToken.SignalChange(true);
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, outItem, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, outItem, updateToken.NextVersion);
             }
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in UpdateToken updateToken)
+            TSource newItem, in IncrementalUpdateToken updateToken)
         {
             if (_sourceEqualityComparer.Equals(oldItem, newItem))
             {
                 return;
             }
 
-            var oldItemResult = this._func(oldItem, this.CollectorToken);
-            var newItemResult = this._func(newItem, this.CollectorToken);
+            var oldItemResult = this._func(oldItem, this.ObserverToken);
+            var newItemResult = this._func(newItem, this.ObserverToken);
 
             if (_resultEqualityComparer.Equals(oldItemResult, newItemResult))
             {
@@ -80,8 +73,8 @@ namespace Caravela.Reactive
 
             foreach (var subscription in this.Observers)
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItemResult, updateToken.Version);
-                subscription.Observer.OnItemAdded(subscription.Subscription, newItemResult, updateToken.Version);
+                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItemResult, updateToken.NextVersion);
+                subscription.Observer.OnItemAdded(subscription.Subscription, newItemResult, updateToken.NextVersion);
             }
         }
     }
