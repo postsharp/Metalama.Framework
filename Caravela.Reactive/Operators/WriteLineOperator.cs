@@ -11,7 +11,7 @@ namespace Caravela.Reactive
     internal class WriteLineOperator<T> : IReactiveCollectionObserver<T>, IReactiveTokenCollector
     {
         private readonly IReactiveCollection<T> _source;
-        private readonly IReactiveSubscription _subscription;
+        private readonly IReactiveSubscription? _subscription;
         private DependencyList _dependencies;
 
         public WriteLineOperator(IReactiveCollection<T> source, string? name)
@@ -35,7 +35,7 @@ namespace Caravela.Reactive
         public void Dispose()
         {
             this._dependencies.Clear();
-            this._subscription.Dispose();
+            this._subscription?.Dispose();
         }
 
 

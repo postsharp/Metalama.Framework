@@ -111,7 +111,7 @@ namespace Caravela.Reactive
                         }
 
                         this._parent._result =
-                            new ReactiveVersionedValue<TResult>(this._parent._currentUpdateResult, this.NextVersion);
+                            new ReactiveVersionedValue<TResult>(this._parent._currentUpdateResult!, this.NextVersion);
                     }
                     else
                     {

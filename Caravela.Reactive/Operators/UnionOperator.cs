@@ -23,7 +23,7 @@ namespace Caravela.Reactive
             return source.Union(this._second.GetValue(this.ObserverToken));
         }
 
-        protected override IReactiveSubscription SubscribeToSource()
+        protected override IReactiveSubscription? SubscribeToSource()
         {
             this._secondSubscription = this._second.AddObserver(this);
             return base.SubscribeToSource();

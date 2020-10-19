@@ -14,9 +14,9 @@ namespace Caravela.Reactive
         private readonly Func<T, ReactiveObserverToken, IReactiveCollection<T>> _getRecursionValueFunc;
         private ImmutableDictionary<T, int> _result = null!;
 
-        private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>
+        private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
             _subscriptions =
-                ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription subscription, int count)>.Empty;
+                ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>.Empty;
 
         public SelectManyRecursiveOperator(IReactiveCollection<T> source,
             Func<T, IReactiveCollection<T>> getRecursionValueFunc) : base(source)
