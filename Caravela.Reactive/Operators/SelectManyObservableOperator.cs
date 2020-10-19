@@ -61,9 +61,11 @@ namespace Caravela.Reactive
             else
             {
                 var subscription = CollectionSelector(source, this.ObserverToken).AddObserver(this);
-                _subscriptions.Add(source, (subscription, 1));
                 if (subscription != null)
+                {
+                    _subscriptions.Add(source, (subscription, 1));
                     _subscriptionsReverse.Add(subscription, source);
+                }
             }
         }
     }

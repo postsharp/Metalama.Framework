@@ -10,12 +10,10 @@ namespace Caravela.Reactive
     public sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>
     {
         private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
-        private readonly ObserverList<IReactiveCollectionObserver<T>> _observers;
-
+        
         public ImmutableReactiveCollection(IImmutableList<T> items)
         {
             _value = new ReactiveVersionedValue<IEnumerable<T>>(items, 0);
-            _observers = new(this);
         }
 
         public ImmutableReactiveCollection(IEnumerable<T> items) : this(items.ToImmutableList())
@@ -30,8 +28,9 @@ namespace Caravela.Reactive
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => 0;
 
-        IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer) => _observers.AddObserver(observer);
-        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) => _observers.RemoveObserver(subscription);
+        IReactiveSubscription? IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(IReactiveCollectionObserver<T> observer) => null;
+
+        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) { return true; }
 
         IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => _value.Value;
 

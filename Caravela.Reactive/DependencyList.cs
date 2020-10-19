@@ -74,6 +74,12 @@ namespace Caravela.Reactive
             
             // No existing node. Add an observer and create a new node.
             var subscription = source.AddObserver(this._parent);
+
+            if ( subscription == null )
+            {
+                return;
+            }
+
             var node = new Node(source, subscription, version);
 
             while (true)
