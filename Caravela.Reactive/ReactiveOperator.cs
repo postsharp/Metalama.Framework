@@ -115,7 +115,25 @@ namespace Caravela.Reactive
             return this.Observers.RemoveObserver(subscription);
         }
 
-        public bool IsImmutable => this.Source.IsImmutable && this._dependencies.IsEmpty;
+        public bool IsImmutable
+        {
+            get
+            {
+                if ( !this.Source.IsImmutable )
+                {
+                    return false;
+                }
+
+                if ( _result == null )
+                {
+                    // The function has never been evaluated, so dependencies were not collected.
+                    this.EnsureFunctionEvaluated();
+                }
+
+
+                return this._dependencies.IsEmpty;
+            }
+        }
 
         public int Version => _result?.Version ?? -1;
 
@@ -248,10 +266,17 @@ namespace Caravela.Reactive
                             var newResult = this.EvaluateFunction(input.Value);
 
                             if (this._result == null || !AreEqual(this._result.Value, newResult))
-                                // Our function gave a different result, so we increase our version number.
                             {
+                                // Our function gave a different result, so we increase our version number.
                                 this._result =
                                     new ReactiveVersionedValue<TResult>(newResult, _result?.Version + 1 ?? 0);
+                            }
+
+                            // If the function has not produced dependencies on first execution, we forbid to product later.
+                            // This makes sure we can implement the IsImmutable property reliably.
+                            if ( _dependencies.IsEmpty )
+                            {
+                                _dependencies.Disable();
                             }
                         }
 

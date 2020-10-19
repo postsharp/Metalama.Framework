@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using System.Xml;
 
 namespace Caravela.Reactive
 {
@@ -13,7 +11,7 @@ namespace Caravela.Reactive
     internal struct DependencyList
     {
         private volatile Node? _dependencies;
-        private readonly IReactiveObserver _parent;
+        private IReactiveObserver? _parent;
 
         /// <summary>
         /// Creates a new <see cref="DependencyList"/>.
@@ -28,6 +26,15 @@ namespace Caravela.Reactive
         }
 
         public bool IsEmpty => this._dependencies == null;
+
+        public bool IsDisabled => this._parent == null;
+
+
+        /// <summary>
+        /// Prevents dependencies to be added.
+        /// </summary>
+        public void Disable() => this._parent = null;
+
 
         private Node? FindNode(IReactiveObservable<IReactiveObserver> source)
         {
@@ -136,7 +143,9 @@ namespace Caravela.Reactive
         private class Node
         {
             public IReactiveObservable<IReactiveObserver> Source { get; }
+
             public IReactiveSubscription? Subscription { get; }
+
             public int Version { get;  }
 
             public Node? Next { get; set; }
@@ -148,5 +157,8 @@ namespace Caravela.Reactive
                 this.Version = version;
             }
         }
+
+
+
     }
 }
