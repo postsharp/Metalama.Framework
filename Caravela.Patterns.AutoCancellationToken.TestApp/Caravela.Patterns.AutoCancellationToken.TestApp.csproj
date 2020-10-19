@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,10 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Caravela.Framework.Impl" Version="0.1.9" />
+    <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Caravela.Patterns.AutoCancellationToken\Caravela.Patterns.AutoCancellationToken.csproj" />
   </ItemGroup>
 
