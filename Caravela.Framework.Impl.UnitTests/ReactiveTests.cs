@@ -1,13 +1,14 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Reactive;
 using Caravela.Reactive.Collections;
+using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
     public class ReactiveTests
     {
-        class Compilation
+        class TestCompilation
         {
             public ReactiveHashSet<SourceType> Types { get; } = new();
         }
@@ -22,7 +23,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void SelectManyTest()
         {
-            var compilation = new Compilation();
+            var compilation = new TestCompilation();
 
             var memberNames = from type in compilation.Types
                               from member in type.Members
@@ -88,6 +89,17 @@ namespace Caravela.Framework.Impl.UnitTests
             var group2 = grouped[1];
             Assert.Equal( 2, group2.Key );
             Assert.Equal( new[] { 2 }, group2.GetValue() );
+        }
+
+        [Fact]
+        public void ImmutableNestedSelectManyTest()
+        {
+            var roslynCompilation = CSharpCompilation.Create( null! );
+
+            new[] { new Compilation( roslynCompilation ) }.ToImmutableReactive()
+                .SelectMany( c => c.Types.SelectMany( t => t.Attributes ) )
+                .GroupBy( a => a.Type )
+                .GetValue();
         }
     }
 }

@@ -168,7 +168,7 @@ namespace Caravela.Reactive.Implementation
 
         void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (this.ShouldTrackDependency(source))
+            if (this.ShouldTrackDependency(source) && !this.IsImmutable)
             {
                 this._dependencies.Add(source, version);
             }

@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
+
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
     <PackageReference Include="RoslynEx.Sdk" Version="0.1.36-dev" />
     <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
