@@ -15,20 +15,21 @@ namespace Caravela.Framework
 
     public interface IType
     {
-        IType BaseType { get; }
-        IReadOnlyList<IType> ImplementedInterfaces { get; }
         bool Is(IType other);
     }
 
     // TODO: IArrayType etc.
     public interface INamedType : IType, ICodeElement
     {
+        INamedType BaseType { get; }
+        IReadOnlyList<INamedType> ImplementedInterfaces { get; }
+
         string Name { get; }
         // TODO: how to deal with namespaces, especially considering nested types
         string FullName { get; }
         IReadOnlyList<IType> GenericArguments { get; }
 
-        ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken);
+        ITypeInfo GetTypeInfo();
     }
 
     public interface IAttribute
