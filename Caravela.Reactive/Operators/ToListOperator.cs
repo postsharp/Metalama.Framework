@@ -31,7 +31,6 @@ namespace Caravela.Reactive.Operators
             
             this._list = this._list.Add(item);
 
-            updateToken.SignalChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -43,7 +42,7 @@ namespace Caravela.Reactive.Operators
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
             
-            updateToken.SetNewValue(this._list);
+            updateToken.SetValue(this._list);
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
@@ -53,7 +52,6 @@ namespace Caravela.Reactive.Operators
             
             this._list = this._list.Remove(item);
 
-            updateToken.SignalChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -65,7 +63,7 @@ namespace Caravela.Reactive.Operators
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
             
-            updateToken.SetNewValue(this._list);
+            updateToken.SetValue(this._list);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
@@ -75,8 +73,7 @@ namespace Caravela.Reactive.Operators
             
             this._list = this._list.Replace(oldItem, newItem);
 
-            updateToken.SignalChange();
-
+            
             foreach (var subscription in this.Observers)
             {
                 subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, updateToken.NextVersion);
@@ -87,7 +84,7 @@ namespace Caravela.Reactive.Operators
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
             
-            updateToken.SetNewValue(this._list);
+            updateToken.SetValue(this._list);
         }
     }
 }

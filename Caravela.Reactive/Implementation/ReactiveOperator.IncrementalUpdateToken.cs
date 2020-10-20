@@ -50,36 +50,30 @@ namespace Caravela.Reactive.Implementation
                 Debug.Assert(lockTaken);
             }
 
-
-
-            /// <summary>
-            /// Signals a change that cannot forces <see cref="ReactiveOperator{TSource, TSourceObserver, TResult, TResultObserver}.EvaluateFunction(TSource)"/> to be re-evaluated.
-            /// </summary>
-            public void SignalChange(bool mustEvaluateFromSource = false)
+            public void SetBreakingChange()
             {
-                if ( this._parent == null )
-                    throw new InvalidOperationException();
-
-
                 // We have an incremental change that breaks the stored value, so _parent.EvaluateFunction() must
                 // be called again. However, observers don't need to resynchronize if they are able to process
                 // the increment.
+
+                if ( this._parent == null )
+                    throw new InvalidOperationException();
+
 
                 if ( this._parent._currentUpdateStatus == IncrementalUpdateStatus.Default )
                 {
                     this._parent._currentUpdateStatus = IncrementalUpdateStatus.HasChange;
                 }
 
-                if (mustEvaluateFromSource)
-                {
-                    this._parent._isFunctionResultDirty = true;
+                this._parent._isFunctionResultDirty = true;
 
-                    // We don't nullify the old result now because the current result may eventually be still valid if all versions 
-                    // end up being identical.
-                }
+                // We don't nullify the old result now because the current result may eventually be still valid if all versions 
+                // end up being identical.
             }
 
-            public void SetNewValue( TResult newResult )
+
+
+            public void SetValue( TResult newResult )
             {
                 if ( this._parent == null )
                     throw new InvalidOperationException();
@@ -89,9 +83,16 @@ namespace Caravela.Reactive.Implementation
                 this._parent._currentUpdateResult = newResult;
             }
 
-            public void SetSideValue(IReactiveSideValue sideValue)
+            public void SetValue( TResult newResult, IReactiveSideValue sideValue)
             {
-                this._parent._currentUpdateSideValues = this._parent._currentUpdateSideValues.WithSideValue( sideValue );
+                this.SetValue( newResult );
+                this._parent._currentUpdateSideValues = this._parent._currentUpdateSideValues.Combine( sideValue );
+            }
+
+            public void SetValue( TResult newResult, ReactiveSideValues sideValues )
+            {
+                this.SetValue( newResult );
+                this._parent._currentUpdateSideValues = this._parent._currentUpdateSideValues.Combine( sideValues );
             }
 
             public int NextVersion => this._parent._result?.Version + 1 ?? 0;

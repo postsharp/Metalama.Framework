@@ -95,7 +95,6 @@ namespace Caravela.Reactive.Operators
             {
                 if (!newResult.TryGetValue(item, out int count ))
                 {
-                    updateToken.SignalChange();
                     foreach (var subscription in this.Observers)
                     {
                         subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
@@ -129,8 +128,7 @@ namespace Caravela.Reactive.Operators
 
                 if (count == 1)
                 {
-                    updateToken.SignalChange();
-
+                    
                     foreach (var subscription in this.Observers)
                     {
                         subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
@@ -166,7 +164,7 @@ namespace Caravela.Reactive.Operators
 
             this._result = newResult;
             
-            updateToken.SetNewValue(newResult.Keys);
+            updateToken.SetValue(newResult.Keys);
         }
 
 
@@ -179,7 +177,7 @@ namespace Caravela.Reactive.Operators
 
             this._result = newResult;
             
-            updateToken.SetNewValue(newResult.Keys);
+            updateToken.SetValue(newResult.Keys);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
@@ -192,7 +190,7 @@ namespace Caravela.Reactive.Operators
 
             this._result = newResult;
             
-            updateToken.SetNewValue(newResult.Keys);
+            updateToken.SetValue(newResult.Keys);
         }
     }
 }

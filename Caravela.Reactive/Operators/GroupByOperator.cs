@@ -41,8 +41,7 @@ namespace Caravela.Reactive.Operators
 
                     if (!this._groups.TryGetValue(key, out group))
                     {
-                        token.SignalChange();
-
+                        
                         // We never return a null group, instead we create an empty group to which
                         // items can be added later. This is important because the consumer may add an observer.
                         group = new Group<TKey, TElement>(this, key);
@@ -60,6 +59,8 @@ namespace Caravela.Reactive.Operators
                             subscription.Observer.OnValueChanged(subscription.Subscription, oldGroups.Values, this._groups.Values, token.NextVersion);
                         }
                     }
+
+                    token.SetValue( this._groups.Values );
                 }
 
                 return group;
@@ -79,8 +80,6 @@ namespace Caravela.Reactive.Operators
                 group = new Group<TKey, TElement>(this, key);
 
                 newResult = newResult.Add(key, group);
-
-                updateToken.SignalChange();
 
                 foreach (var subscription in this.Observers)
                 {
@@ -115,8 +114,6 @@ namespace Caravela.Reactive.Operators
                         // We can't remove a group that has observers because they would not get
                         // notified the next time we're adding something to a group of the same key.
                     }
-
-                    updateToken.SignalChange();
 
                     foreach (var subscription in this.Observers)
                     {
@@ -177,7 +174,7 @@ namespace Caravela.Reactive.Operators
 
             this._groups = newResult;
             
-            updateToken.SetNewValue(this._groups.Values);
+            updateToken.SetValue(this._groups.Values);
         }
 
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
@@ -189,7 +186,7 @@ namespace Caravela.Reactive.Operators
             
             this._groups = newResult;
             
-            updateToken.SetNewValue(this._groups.Values);
+            updateToken.SetValue(this._groups.Values);
         }
 
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
@@ -201,7 +198,7 @@ namespace Caravela.Reactive.Operators
             this.AddItem(ref newResult, newItem, in updateToken);
             this._groups = newResult;
             
-            updateToken.SetNewValue(this._groups.Values);
+            updateToken.SetValue(this._groups.Values);
         }
     }
 }

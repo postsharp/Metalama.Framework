@@ -40,7 +40,7 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
             in IncrementalUpdateToken updateToken)
         {
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -51,7 +51,7 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
             in IncrementalUpdateToken updateToken)
         {
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -62,7 +62,7 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
             in IncrementalUpdateToken updateToken)
         {
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {

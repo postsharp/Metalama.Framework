@@ -47,7 +47,7 @@ namespace Caravela.Reactive
         }
 
 
-        public ReactiveSideValues WithSideValue( IReactiveSideValue value )
+        public ReactiveSideValues Combine( IReactiveSideValue value )
         {
             if ( this._sideValues.IsDefaultOrEmpty )
             {

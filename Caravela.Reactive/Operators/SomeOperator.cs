@@ -41,7 +41,7 @@ namespace Caravela.Reactive.Operators
             {
                 using IncrementalUpdateToken token = this.GetIncrementalUpdateToken(newVersion);
 
-                token.SetNewValue(item);
+                token.SetValue(item);
 
                 foreach (var observer in this.Observers )
                 {

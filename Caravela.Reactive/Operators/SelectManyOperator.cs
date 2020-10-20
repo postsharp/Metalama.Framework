@@ -95,7 +95,7 @@ namespace Caravela.Reactive.Operators
 
         private void AddItem(TResult addedItem, in IncrementalUpdateToken updateToken)
         {
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             // We have a new item.
 
@@ -107,7 +107,7 @@ namespace Caravela.Reactive.Operators
 
         private void RemoveItem(TResult removedItem, in IncrementalUpdateToken updateToken)
         {
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
 
             foreach (var observer in this.Observers)
