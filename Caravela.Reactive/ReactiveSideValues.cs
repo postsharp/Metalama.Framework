@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Reactive
@@ -20,17 +21,49 @@ namespace Caravela.Reactive
 
         public static ReactiveSideValues Create( IReactiveSideValue sideValue ) => new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
+
+        ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
+        {
+            // There's typically just one item so this is optimized for this situation.
+            var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this.SideValues.Count );
+            builder.AddRange( this.SideValues );
+            return builder;
+        }
+
+        void Combine(ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
+        {
+            for ( int i = 0; i < builder.Count; i++ )
+            {
+                if ( builder[i].TryCombine( value, out var combinedValue ) )
+                {
+                    builder[i] = combinedValue;
+                    return;
+                }
+            }
+
+            // We could not combine, so we append it.
+            builder.Add( value );
+
+        }
+
+
         public ReactiveSideValues WithSideValue( IReactiveSideValue value )
         {
             if ( this._sideValues.IsDefaultOrEmpty )
             {
+                // Quick path.
                 return new ReactiveSideValues( ImmutableArray.Create( value ) );
             }
             else
             {
-                return new ReactiveSideValues( this._sideValues.Add( value ) );
+                var builder = this.CreateBuilder();
+                this.Combine( ref builder, value );
+
+                return new ReactiveSideValues( builder.MoveToImmutable() );
             }
         }
+
+
 
         /// <summary>
         /// Combines the current side values (typically stemming from the source) with other side values (typically coming from the valuation of the
@@ -50,27 +83,13 @@ namespace Caravela.Reactive
             }
             else
             {
-                // There's typically just one item so this is optimized for this situation.
-
-                var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this.SideValues.Count );
-                builder.AddRange( this.SideValues );
+                var builder = this.CreateBuilder();
                 foreach ( var otherValue in other.SideValues )
                 {
-                    for ( int i = 0; i < builder.Count; i++ )
-                    {
-                        if ( builder[i].TryCombine( otherValue, out var combinedValue ) )
-                        {
-                            builder[i] = combinedValue;
-                            continue;
-                        }
-                    }
-
-                    // We could not combine, so we append it.
-                    builder.Add( otherValue );
-
+                    this.Combine( ref builder, otherValue );
                 }
 
-                return new ReactiveSideValues( builder.ToImmutable() );
+                return new ReactiveSideValues( builder.MoveToImmutable() );
             }
         }
     }

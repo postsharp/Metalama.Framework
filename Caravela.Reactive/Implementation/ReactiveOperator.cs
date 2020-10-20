@@ -41,6 +41,7 @@ namespace Caravela.Reactive.Implementation
         private IncrementalUpdateStatus _currentUpdateStatus;
         private int _currentUpdateNewSourceVersion;
         private TResult? _currentUpdateResult;
+        private ReactiveSideValues _currentUpdateSideValues;
 
 
         protected ReactiveOperator(IReactiveSource<TSource, TSourceObserver> source)
