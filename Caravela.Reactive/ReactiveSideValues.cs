@@ -12,7 +12,7 @@ namespace Caravela.Reactive
     {
         private readonly ImmutableArray<IReactiveSideValue> _sideValues;
 
-        IReadOnlyList<IReactiveSideValue> SideValues => this._sideValues;
+        IImmutableList<IReactiveSideValue> SideValues => this._sideValues.IsDefault ? ImmutableArray<IReactiveSideValue>.Empty : this._sideValues;
 
         private ReactiveSideValues( ImmutableArray<IReactiveSideValue> sideValues )
         {
