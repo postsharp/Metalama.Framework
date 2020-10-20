@@ -12,8 +12,6 @@ namespace Caravela.Reactive
     {
         private readonly ImmutableArray<IReactiveSideValue> _sideValues;
 
-        IReadOnlyList<IReactiveSideValue> SideValues => this._sideValues;
-
         private ReactiveSideValues( ImmutableArray<IReactiveSideValue> sideValues )
         {
             this._sideValues = sideValues;
@@ -25,8 +23,8 @@ namespace Caravela.Reactive
         ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
         {
             // There's typically just one item so this is optimized for this situation.
-            var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this.SideValues.Count );
-            builder.AddRange( this.SideValues );
+            var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this._sideValues.Length );
+            builder.AddRange( this._sideValues );
             return builder;
         }
 
@@ -73,18 +71,18 @@ namespace Caravela.Reactive
         /// <returns></returns>
         public ReactiveSideValues Combine( ReactiveSideValues other )
         {
-            if ( this.SideValues == null )
+            if ( this._sideValues.IsDefaultOrEmpty )
             {
                 return other;
             }
-            else if ( other.SideValues == null )
+            else if ( other._sideValues.IsDefaultOrEmpty )
             {
                 return this;
             }
             else
             {
                 var builder = this.CreateBuilder();
-                foreach ( var otherValue in other.SideValues )
+                foreach ( var otherValue in other._sideValues )
                 {
                     this.Combine( ref builder, otherValue );
                 }

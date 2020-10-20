@@ -1,9 +1,8 @@
 ﻿using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Reactive
 {
@@ -28,7 +27,7 @@ namespace Caravela.Framework.Impl.Reactive
 
         public ImmutableList<Diagnostic> Diagnostics { get; }
 
-        bool IReactiveSideValue.TryCombine( IReactiveSideValue sideValue, out IReactiveSideValue? combinedValue )
+        bool IReactiveSideValue.TryCombine( IReactiveSideValue sideValue, [NotNullWhen( true )] out IReactiveSideValue? combinedValue )
         {
             if ( sideValue is DiagnosticsResult diagnosticsResult )
             {
@@ -52,12 +51,5 @@ namespace Caravela.Framework.Impl.Reactive
                 return false;
             }
         }
-    }
-
-    class TestCollectionWithDiagnostics<T> : List<T>, IHasDiagnosticsResult
-    {
-        public ReactiveSideValues SideValues => ReactiveSideValues.Create( this.Diagnostics );
-
-        public DiagnosticsResult Diagnostics { get; }
     }
 }

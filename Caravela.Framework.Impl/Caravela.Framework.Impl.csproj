@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
 
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
