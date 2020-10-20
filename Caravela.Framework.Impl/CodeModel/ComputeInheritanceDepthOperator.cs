@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     baseDepth = Max( baseDepth, this.ComputeDepth( containingType ) );
                 }
 
-                // Look at b
+                // Base types are processed before derived types.
                 if ( type.BaseType != null && type.BaseType is INamedType namedType  )
                 {
                     baseDepth = Max( baseDepth, this.ComputeDepth( namedType ) );
@@ -50,6 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     
                 }
 
+                // Implemented interfaces are processed before their implementations.
                 foreach ( var interfaceImplementation in type.ImplementedInterfaces )
                 {
                     baseDepth = Max( baseDepth, this.ComputeDepth( interfaceImplementation ));
