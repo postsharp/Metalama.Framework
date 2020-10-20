@@ -168,7 +168,7 @@ namespace Caravela.Reactive.Implementation
 
         void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (this.ShouldTrackDependency(source) && !this.IsImmutable)
+            if ( this.ShouldTrackDependency( source ) && !this.IsImmutable )
             {
                 this._dependencies.Add(source, version);
             }
@@ -280,9 +280,9 @@ namespace Caravela.Reactive.Implementation
                                     new ReactiveVersionedValue<TResult>(newResult, this._result?.Version + 1 ?? 0, sideValues);
                             }
 
-                            // If the function has not produced dependencies on first execution, we forbid to product later.
+                            // If the function has not produced dependencies on first execution, we forbid to produce them later.
                             // This makes sure we can implement the IsImmutable property reliably.
-                            if ( this._dependencies.IsEmpty )
+                            if ( this._dependencies.IsEmpty && this.Source.IsImmutable )
                             {
                                 this._dependencies.Disable();
                             }

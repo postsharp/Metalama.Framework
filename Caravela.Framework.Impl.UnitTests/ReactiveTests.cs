@@ -101,5 +101,25 @@ namespace Caravela.Framework.Impl.UnitTests
                 .GroupBy( a => a.Type )
                 .GetValue();
         }
+
+
+        [Fact]
+        public void ReactiveNestedSelectManyTest()
+        {
+            var roslynCompilation = CSharpCompilation.Create( null! );
+
+            new ReactiveHashSet<Compilation> { new Compilation( roslynCompilation ) }
+                .SelectMany( c => c.Types.SelectMany( t => t.Attributes ) )
+                .GroupBy( a => a.Type )
+                .GetValue();
+        }
+
+        [Fact]
+        public void EmptyGroupTest()
+        {
+            _ = new[] { 1, 2, 3 }.ToImmutableReactive()
+                .GroupBy( i => i % 10 )
+                [0];
+        }
     }
 }

@@ -41,7 +41,7 @@ namespace Caravela.Reactive.Operators
 
                     if (!this._groups.TryGetValue(key, out group))
                     {
-                        token.SignalChange();
+                        token.SignalChange(true);
 
                         // We never return a null group, instead we create an empty group to which
                         // items can be added later. This is important because the consumer may add an observer.
