@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl
     class AspectDriverFactory
     {
         private readonly Loader _loader;
-        private readonly IReactiveGroupBy<IType, ITypeInfo> _weaverTypes;
+        private readonly IReactiveGroupBy<IType, INamedType> _weaverTypes;
 
         public AspectDriverFactory(ICompilation compilation, Loader loader)
         {
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl
 
             // TODO: nested types?
             this._weaverTypes =
-                from weaverType in compilation.Types
+                from weaverType in compilation.DeclaredAndReferencedTypes
                 from attribute in weaverType.Attributes
                 where attribute.Type.Is(aspectWeaverAttributeType)
                 group weaverType by (IType)attribute.ConstructorArguments.Single()!;
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl
                 throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
 
             if (weavers.Count == 1)
-                return (IAspectDriver) this._loader.CreateInstance(((TypeInfo)weavers.Single()).TypeSymbol);
+                return (IAspectDriver) this._loader.CreateInstance(((NamedType)weavers.Single()).NamedTypeSymbol);
 
             throw new NotImplementedException();
         }

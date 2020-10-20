@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl
 
             var iAspect = this.compilation.GetTypeByMetadataName(typeof(IAspect).FullName)!;
 
-            return from type in this.compilation.Types
+            return from type in this.compilation.DeclaredTypes
                    from attribute in type.Attributes
                    where attribute.Type.Is(iAspect)
                    select new AspectInstance(null!, type, attribute.Type);

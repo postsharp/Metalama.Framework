@@ -52,5 +52,7 @@ namespace Caravela.Framework.Impl
         public ITypeInfo GetTypeInfo() => this;
 
         public bool Is(IType other) => this._namedType.Is(other);
+
+        public override string ToString() => this.FullName;
     }
 }

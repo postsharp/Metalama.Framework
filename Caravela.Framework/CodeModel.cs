@@ -6,7 +6,9 @@ namespace Caravela.Framework
 {
     public interface ICompilation
     {
-        IReactiveCollection<ITypeInfo> Types { get; }
+        IReactiveCollection<ITypeInfo> DeclaredTypes { get; }
+
+        IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
 

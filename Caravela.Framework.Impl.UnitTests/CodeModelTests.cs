@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.UnitTests
             string code = "";
             var compilation = CreateCompilation(code);
 
-            Assert.Same(compilation.Types, compilation.Types);
+            Assert.Same(compilation.DeclaredTypes, compilation.DeclaredTypes);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace NS
 
             var compilation = CreateCompilation(code);
 
-            var types = compilation.Types.GetValue(default).ToList();
+            var types = compilation.DeclaredTypes.GetValue(default).ToList();
             Assert.Equal(2, types.Count);
 
             var c1 = types[0];
@@ -88,7 +88,7 @@ class C
 
             var compilation = CreateCompilation(code);
 
-            var type = compilation.Types.GetValue(default).Single();
+            var type = compilation.DeclaredTypes.GetValue(default).Single();
             Assert.Equal("C", type.Name);
 
             var methods = type.Methods;
@@ -131,7 +131,7 @@ class TestAttribute : Attribute
 }";
             var compilation = CreateCompilation(code);
 
-            var attribute = compilation.Types.GetValue(default).ElementAt(1).Attributes.GetValue(default).Single();
+            var attribute = compilation.DeclaredTypes.GetValue(default).ElementAt(1).Attributes.GetValue(default).Single();
             Assert.Equal("TestAttribute", attribute.Type.FullName);
             Assert.Equal(new object?[] { 42, "foo", null }, attribute.ConstructorArguments);
             var namedArguments = attribute.NamedArguments;
@@ -160,7 +160,7 @@ interface I
 
             var compilation = CreateCompilation(code);
 
-            var methods = compilation.Types.GetValue(default).Single().Methods;
+            var methods = compilation.DeclaredTypes.GetValue(default).Single().Methods;
             Assert.Equal(2, methods.Count);
 
             var m1 = methods[0];
@@ -199,7 +199,7 @@ class C<T1, T2>
 
             var compilation = CreateCompilation(code);
 
-            var type = compilation.Types.GetValue(default).Single();
+            var type = compilation.DeclaredTypes.GetValue(default).Single();
 
             // TODO: check type.GenericArguments once ITypeParameterSymbol is supported
 

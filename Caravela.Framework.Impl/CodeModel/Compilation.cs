@@ -21,7 +21,10 @@ namespace Caravela.Framework.Impl
         }
 
         [Memo]
-        public IReactiveCollection<ITypeInfo> Types => this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetTypeInfo).ToImmutableReactive();
+        public IReactiveCollection<ITypeInfo> DeclaredTypes => this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetTypeInfo ).ToImmutableReactive();
+
+        [Memo]
+        public IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         public INamedType? GetTypeByMetadataName(string metadataName)
         {

@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.UnitTests
             var roslynCompilation = CSharpCompilation.Create( null! );
 
             new[] { new Compilation( roslynCompilation ) }.ToImmutableReactive()
-                .SelectMany( c => c.Types.SelectMany( t => t.Attributes ) )
+                .SelectMany( c => c.DeclaredTypes.SelectMany( t => t.Attributes ) )
                 .GroupBy( a => a.Type )
                 .GetValue();
         }
@@ -109,7 +109,7 @@ namespace Caravela.Framework.Impl.UnitTests
             var roslynCompilation = CSharpCompilation.Create( null! );
 
             new ReactiveHashSet<Compilation> { new Compilation( roslynCompilation ) }
-                .SelectMany( c => c.Types.SelectMany( t => t.Attributes ) )
+                .SelectMany( c => c.DeclaredTypes.SelectMany( t => t.Attributes ) )
                 .GroupBy( a => a.Type )
                 .GetValue();
         }
