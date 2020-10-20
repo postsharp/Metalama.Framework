@@ -5,9 +5,12 @@ namespace Caravela.Reactive
     /// </summary>
     /// <typeparam name="TValue"></typeparam>
     /// <remarks></remarks>
-    public interface IReactiveVersionedValue<out TValue>
+    public interface IReactiveVersionedValue<out TValue> : IHasReactiveSideValues
     {
         int Version { get; }
+
         TValue Value { get; }
+
+
     }
 }

@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Caravela.Reactive
 {
     /// <summary>
@@ -9,13 +11,17 @@ namespace Caravela.Reactive
     /// </remarks>
     public sealed class ReactiveVersionedValue<T> : IReactiveVersionedValue<T>
     {
-        public ReactiveVersionedValue(T value, int version)
+
+        public ReactiveVersionedValue( T value, int version, ReactiveSideValues sideValues = default )
         {
             this.Version = version;
             this.Value = value;
+            this.SideValues = sideValues;
         }
 
         public int Version { get; }
         public T Value { get; }
+        public ReactiveSideValues SideValues { get; }
+
     }
 }
