@@ -22,9 +22,9 @@ namespace Caravela.Reactive.Operators
             this._predicate = ReactiveObserverToken.WrapWithDefaultToken(predicate);
         }
 
-        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
         {
-            return source.Where(arg => this._predicate(arg, this.ObserverToken));
+            return new(source.Where(arg => this._predicate(arg, this.ObserverToken)));
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,

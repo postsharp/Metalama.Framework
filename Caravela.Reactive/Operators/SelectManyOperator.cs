@@ -1,5 +1,6 @@
 #region
 
+using Caravela.Reactive.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +82,7 @@ namespace Caravela.Reactive.Operators
         protected abstract IEnumerable<TResult> GetItems(TSource arg);
 
 
-        protected override IEnumerable<TResult> EvaluateFunction(IEnumerable<TSource> source)
+        protected override ReactiveOperatorResult<IEnumerable<TResult>> EvaluateFunction(IEnumerable<TSource> source)
         {
             this.UnfollowAll();
 
@@ -90,7 +91,7 @@ namespace Caravela.Reactive.Operators
                 this.Follow(s);
             }
 
-            return source.SelectMany(this.GetItems);
+            return new( source.SelectMany( this.GetItems ) );
         }
 
         private void AddItem(TResult addedItem, in IncrementalUpdateToken updateToken)

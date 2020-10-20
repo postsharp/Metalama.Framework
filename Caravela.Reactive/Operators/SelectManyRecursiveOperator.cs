@@ -1,5 +1,6 @@
 #region
 
+using Caravela.Reactive.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -26,7 +27,7 @@ namespace Caravela.Reactive.Operators
 
         public override bool IsMaterialized => true;
 
-        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
         {
             var builder = ImmutableDictionary.CreateBuilder<T, int>();
 
@@ -52,7 +53,7 @@ namespace Caravela.Reactive.Operators
             }
 
             this._result = builder.ToImmutable();
-            return this._result.Keys;
+            return new( this._result.Keys );
         }
 
         private bool Follow(IReactiveCollection<T> source)

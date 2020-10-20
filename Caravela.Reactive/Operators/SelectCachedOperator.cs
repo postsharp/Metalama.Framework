@@ -31,9 +31,9 @@ namespace Caravela.Reactive.Operators
 
         private TResult Selector(TSource s) => this._map.GetValue(s, k => this._func(k, this.ObserverToken));
 
-        protected override IEnumerable<TResult> EvaluateFunction(IEnumerable<TSource> source)
+        protected override ReactiveOperatorResult<IEnumerable<TResult>> EvaluateFunction(IEnumerable<TSource> source)
         {
-            return source.Select(this.Selector);
+            return new( source.Select( this.Selector ) );
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,

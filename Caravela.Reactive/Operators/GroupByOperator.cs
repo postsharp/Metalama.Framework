@@ -1,5 +1,6 @@
 #region
 
+using Caravela.Reactive.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -124,7 +125,7 @@ namespace Caravela.Reactive.Operators
         }
 
 
-        protected override IEnumerable<IReactiveGroup<TKey, TElement>> EvaluateFunction(IEnumerable<TSource> source)
+        protected override ReactiveOperatorResult<IEnumerable<IReactiveGroup<TKey, TElement>>> EvaluateFunction(IEnumerable<TSource> source)
         {
             // We cannot simply overwrite the dictionary with a brand new one because there may be observers on individual
             // groups and we need to preserve them.
@@ -162,7 +163,7 @@ namespace Caravela.Reactive.Operators
 
             this._groups = builder.ToImmutable();
                 
-            return this._groups.Values;
+            return  new(this._groups.Values);
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
