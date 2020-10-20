@@ -44,9 +44,11 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this.TypeSymbol.GetAttributes().Select(a => new Attribute(a, this.Compilation.SymbolMap)).ToImmutableReactive();
 
-        INamedType INamedType.BaseType => throw new NotImplementedException();
+        [Memo]
+        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );
 
-        IReadOnlyList<INamedType> INamedType.ImplementedInterfaces => throw new NotImplementedException();
+        [Memo]
+        public IReadOnlyList<INamedType> ImplementedInterfaces => this.TypeSymbol.Interfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableArray();
 
         public override string ToString() => this.NamedTypeSymbol.ToString();
     }
@@ -55,10 +57,6 @@ namespace Caravela.Framework.Impl
     {
         internal abstract ITypeSymbol TypeSymbol { get; }
         internal Compilation Compilation { get; }
-
-        public IType BaseType => throw new NotImplementedException();
-
-        public IReadOnlyList<IType> ImplementedInterfaces => throw new NotImplementedException();
 
         protected Type(Compilation compilation) => this.Compilation = compilation;
 

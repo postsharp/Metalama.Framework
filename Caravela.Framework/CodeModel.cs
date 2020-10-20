@@ -21,7 +21,7 @@ namespace Caravela.Framework
     // TODO: IArrayType etc.
     public interface INamedType : IType, ICodeElement
     {
-        INamedType BaseType { get; }
+        INamedType? BaseType { get; }
         IReadOnlyList<INamedType> ImplementedInterfaces { get; }
 
         string Name { get; }

@@ -45,21 +45,12 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<IAttribute> Attributes => this._namedType.Attributes;
 
-        public IType BaseType => throw new NotImplementedException();
+        public INamedType? BaseType => this._namedType.BaseType;
 
-        public IReadOnlyList<IType> ImplementedInterfaces => throw new NotImplementedException();
+        public IReadOnlyList<INamedType> ImplementedInterfaces => this._namedType.ImplementedInterfaces;
 
-        INamedType INamedType.BaseType => throw new NotImplementedException();
-
-        IReadOnlyList<INamedType> INamedType.ImplementedInterfaces => throw new NotImplementedException();
-
-        public ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken) => this;
+        public ITypeInfo GetTypeInfo() => this;
 
         public bool Is(IType other) => this._namedType.Is(other);
-
-        public ITypeInfo GetTypeInfo()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
