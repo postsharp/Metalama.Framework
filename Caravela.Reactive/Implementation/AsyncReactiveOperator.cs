@@ -4,36 +4,34 @@
 #endregion
 
 using System;
-using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Caravela.Reactive.Implementation
 {
 
-    public abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : 
-        BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
-       IReactiveSource<TResult, TResultObserver>,
+    public abstract class AsyncReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
+       IAsyncReactiveSource<TResult, TResultObserver>,
        IReactiveObserver<TSource>,
        IReactiveTokenCollector
        where TSourceObserver : class, IReactiveObserver<TSource>
        where TResultObserver : class, IReactiveObserver<TResult>
 
     {
-        private protected SpinLock _lock = default;
 
-        protected ReactiveOperator( IReactiveSource<TSource, TSourceObserver> source ) : base( source )
+        SemaphoreSlim _semaphore = new SemaphoreSlim( 1 );
+
+        protected AsyncReactiveOperator( IAsyncReactiveSource<TSource, TSourceObserver> source, bool hasReactiveDependencies ) : base( source )
         {
+            // We cannot determine synchronously if we have dependencies, so the caller has to specify.
+            if ( !hasReactiveDependencies )
+            {
+                this._dependencies.Disable();
+            }
         }
 
-
-        IReactiveVersionedValue<TResult> IReactiveSource<TResult>.GetVersionedValue(
-            in ReactiveObserverToken observerToken )
-        {
-            return this.GetVersionedValue( observerToken );
-        }
-
-        protected new IReactiveSource<TSource,TSourceObserver> Source => (IReactiveSource < TSource,TSourceObserver>) base.Source;
+        protected new IAsyncReactiveSource<TSource, TSourceObserver> Source => (IAsyncReactiveSource<TSource, TSourceObserver>) base.Source;
 
 
         /// <summary>
@@ -41,7 +39,7 @@ namespace Caravela.Reactive.Implementation
         /// </summary>
         /// <param name="source">Source value.</param>
         /// <returns>Result value.</returns>
-        protected abstract ReactiveOperatorResult<TResult> EvaluateFunction( TSource source );
+        protected abstract ValueTask<ReactiveOperatorResult<TResult>> EvaluateFunctionAsync( TSource source, CancellationToken cancellationToken );
 
         public override bool IsImmutable
         {
@@ -52,48 +50,19 @@ namespace Caravela.Reactive.Implementation
                     return false;
                 }
 
-                if ( this._result == null )
-                {
-                    // The function has never been evaluated, so dependencies were not collected.
-                    this.EnsureFunctionEvaluated();
-                }
-
-
                 return this._dependencies.IsEmpty;
             }
         }
 
-        /// <summary>
-        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        protected IncrementalUpdateToken GetIncrementalUpdateToken( int sourceVersion = -1 )
+
+
+        public async ValueTask<TResult> GetValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken )
+            => (await this.GetVersionedValueAsync( observerToken, cancellationToken )).Value;
+        
+
+        public async ValueTask<IReactiveVersionedValue<TResult>> GetVersionedValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken )
         {
-            if ( this._currentUpdateStatus != IncrementalUpdateStatus.Default && this._currentUpdateStatus != IncrementalUpdateStatus.Disposed )
-            {
-                throw new InvalidOperationException();
-            }
-
-            var lockTaken = false;
-            this._lock.Enter( ref lockTaken );
-
-            Debug.Assert( lockTaken );
-
-            return new IncrementalUpdateToken( this, sourceVersion );
-        }
-
-        private protected override void ReleaseLock()
-        {
-            this._lock.Exit();
-        }
-
-
-
-
-        public ReactiveVersionedValue<TResult> GetVersionedValue( in ReactiveObserverToken observerToken = default )
-        {
-            this.EnsureFunctionEvaluated();
+            await this.EnsureFunctionEvaluatedAsync( cancellationToken );
 
             // Take local copy of the result to guarantee consistency in the version number.
             var currentValue = this._result;
@@ -102,25 +71,24 @@ namespace Caravela.Reactive.Implementation
             return this._result!;
         }
 
-        public TResult GetValue( in ReactiveObserverToken observerToken ) => this.GetVersionedValue( observerToken ).Value;
 
         /// <summary>
         /// Evaluates the operator if necessary.
         /// </summary>
-        protected void EnsureFunctionEvaluated()
+        protected async ValueTask EnsureFunctionEvaluatedAsync(CancellationToken cancellationToken)
         {
             if ( this._isFunctionResultDirty )
             // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
-                var lockHeld = false;
+               
                 try
                 {
-                    this._lock.Enter( ref lockHeld );
+                    await this._semaphore.WaitAsync( cancellationToken );
 
                     if ( this._isFunctionResultDirty )
                     {
                         // Evaluate the source.
-                        var sourceValue = this.Source.GetVersionedValue( this.ObserverToken );
+                        var sourceValue = await this.Source.GetVersionedValueAsync( this.ObserverToken, cancellationToken );
                         var sideValues = sourceValue.SideValues;
 
                         if ( sourceValue.Version != this._sourceVersion || !this._dependencies.IsDirty() )
@@ -130,7 +98,7 @@ namespace Caravela.Reactive.Implementation
                             this._dependencies.Clear();
 
                             // If the source has changed, we need to evaluate our function again.
-                            var newResult = this.EvaluateFunction( sourceValue.Value );
+                            var newResult = await this.EvaluateFunctionAsync( sourceValue.Value, cancellationToken );
 
                             if ( this._result == null || !this.AreEqual( this._result.Value, newResult.Value ) )
                             {
@@ -158,15 +126,35 @@ namespace Caravela.Reactive.Implementation
                 }
                 finally
                 {
-                    if ( lockHeld )
-                    {
-                        this._lock.Exit();
-                    }
+                    this._semaphore.Release();
                 }
             }
         }
 
-        
-        
+
+        /// <summary>
+        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        protected async ValueTask<IncrementalUpdateToken> GetIncrementalUpdateTokenAsync( int sourceVersion = -1, CancellationToken cancellationToken = default )
+        {
+            if ( this._currentUpdateStatus != IncrementalUpdateStatus.Default && this._currentUpdateStatus != IncrementalUpdateStatus.Disposed )
+            {
+                throw new InvalidOperationException();
+            }
+
+            await this._semaphore.WaitAsync( cancellationToken );
+
+
+            return new IncrementalUpdateToken( this, sourceVersion );
+        }
+
+        private protected override void ReleaseLock()
+        {
+            this._semaphore.Release();
+        }
+
+
     }
 }

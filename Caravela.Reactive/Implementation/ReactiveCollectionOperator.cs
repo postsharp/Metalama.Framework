@@ -21,6 +21,8 @@ namespace Caravela.Reactive.Implementation
         {
         }
 
+        
+
         IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator()
         {
             return this.GetValue( this.ObserverToken ).GetEnumerator();

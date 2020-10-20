@@ -150,7 +150,7 @@ namespace Caravela.Reactive.Collections
         }
 
         // TODO: this is not thread-safe.
-        bool IReactiveSource<IEnumerable<T>>.IsImmutable => false;
+        bool IReactiveSource.IsImmutable => false;
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => this._version;
 

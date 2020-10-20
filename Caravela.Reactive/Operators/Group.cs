@@ -73,9 +73,9 @@ namespace Caravela.Reactive.Operators
             return this.VersionedValue;
         }
 
-        bool IReactiveSource<IEnumerable<TItem>>.IsMaterialized => true;
+        bool IReactiveSource.IsMaterialized => true;
 
-        bool IReactiveSource<IEnumerable<TItem>>.IsImmutable => this._parent.IsImmutable;
+        bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
             
         int IReactiveObservable<IReactiveCollectionObserver<TItem>>.Version =>this._version;
 

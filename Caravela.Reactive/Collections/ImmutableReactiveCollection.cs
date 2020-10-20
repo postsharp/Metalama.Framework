@@ -22,9 +22,9 @@ namespace Caravela.Reactive.Collections
 
         object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
 
-        bool IReactiveSource<IEnumerable<T>>.IsMaterialized => true;
+        bool IReactiveSource.IsMaterialized => true;
 
-        bool IReactiveSource<IEnumerable<T>>.IsImmutable => true;
+        bool IReactiveSource.IsImmutable => true;
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => 0;
 

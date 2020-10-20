@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive
@@ -61,6 +62,16 @@ namespace Caravela.Reactive
                 using var tk = WithDefaultCollector(collectorToken._collector);
                 return func(value);
             };
+
+        internal static Func<TIn, ReactiveObserverToken, CancellationToken, ValueTask<TOut>> WrapWithDefaultToken<TIn, TOut>(
+          Func<TIn, CancellationToken, ValueTask<TOut>> func )
+        {
+            return async delegate ( TIn value, ReactiveObserverToken collectorToken, CancellationToken cancellationToken )
+                      {
+                          using var tk = WithDefaultCollector( collectorToken._collector );
+                          return await func( value, cancellationToken );
+                      };
+        }
 
         /// <summary>
         /// Wraps a function, to be used in a <see cref="ReactiveOperator{TSource,TSourceObserver,TResult,TResultObserver}"/>,

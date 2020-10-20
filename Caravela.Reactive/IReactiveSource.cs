@@ -1,6 +1,15 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Caravela.Reactive
 {
-    
+    public interface IReactiveSource
+    {
+
+        bool IsMaterialized { get; }
+        bool IsImmutable { get; }
+    }
+
     /// <summary>
     /// Defines the semantic of a reactive object. Its value can be accessed only by passing a
     /// a <see cref="ReactiveObserverToken"/>. A dependency to the reactive object is added to the observer
@@ -10,10 +19,8 @@ namespace Caravela.Reactive
     /// observers and incremental changes.
     /// </summary>
     /// <typeparam name="T">Type of the value.</typeparam>
-    public interface IReactiveSource<out T>
+    public interface IReactiveSource<out T> : IReactiveSource
     {
-        bool IsMaterialized { get; }
-        bool IsImmutable { get; }
         
         T GetValue(in ReactiveObserverToken observerToken = default);
         
@@ -33,5 +40,28 @@ namespace Caravela.Reactive
         where TObserver : IReactiveObserver<TValue>
     {
      
+    }
+
+    public interface IAsyncReactiveSource<T> : IReactiveSource
+    {
+
+        ValueTask<T> GetValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken );
+
+        // Returns an interface because of covariance.
+        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken );
+    }
+
+
+    /// <summary>
+    /// Defines the semantics of a reactive object that can be observed by strongly-typed observers.
+    /// </summary>
+    /// <typeparam name="TValue">Type of the value.</typeparam>
+    /// <typeparam name="TObserver">Type of the observer.</typeparam>
+    public interface IAsyncReactiveSource<TValue, in TObserver> :
+        IReactiveObservable<TObserver>,
+        IAsyncReactiveSource<TValue>
+        where TObserver : IReactiveObserver<TValue>
+    {
+
     }
 }
