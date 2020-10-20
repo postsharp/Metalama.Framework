@@ -1,5 +1,6 @@
 #region
 
+using Caravela.Reactive.Implementation;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
