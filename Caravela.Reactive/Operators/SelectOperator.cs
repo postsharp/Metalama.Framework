@@ -23,9 +23,9 @@ namespace Caravela.Reactive.Operators
             this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
         }
 
-        protected override IEnumerable<TResult> EvaluateFunction(IEnumerable<TSource> source)
+        protected override ReactiveOperatorResult<IEnumerable<TResult>> EvaluateFunction(IEnumerable<TSource> source)
         {
-            return source.Select(s => this._func(s, this.ObserverToken));
+            return new( source.Select( s => this._func( s, this.ObserverToken ) ) );
         }
 
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,

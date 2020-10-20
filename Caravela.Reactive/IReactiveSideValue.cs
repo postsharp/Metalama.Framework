@@ -11,6 +11,6 @@
         /// <param name="sideValue">The other side value.</param>
         /// <param name="combinedValue">At output, the combined side value.</param>
         /// <returns><c>true</c> if <paramref name="sideValue"/> was of a supported type, otherwise <c>false</c>.</returns>
-        bool TryCombine( IReactiveSideValue sideValue, out IReactiveSideValue combinedValue );
+        bool TryCombine( IReactiveSideValue sideValue, out IReactiveSideValue? combinedValue );
     }
 }

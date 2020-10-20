@@ -22,7 +22,7 @@ namespace Caravela.Reactive.Operators
             return this.Source.AddObserver(this);
         }
 
-        protected override T EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<T> EvaluateFunction(IEnumerable<T> source)
         {
             return this._orDefault 
                 ? source.FirstOrDefault(arg => this._predicate(arg, this.ObserverToken))

@@ -19,7 +19,7 @@ namespace Caravela.Reactive
             this._sideValues = sideValues;
         }
 
-        public static ReactiveSideValues Create( IReactiveSideValue sideValue ) => new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
+        public static ReactiveSideValues Create( IReactiveSideValue? sideValue ) => sideValue == null ? default : new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
 
         ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()

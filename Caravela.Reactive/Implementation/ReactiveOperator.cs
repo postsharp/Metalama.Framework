@@ -8,6 +8,7 @@ using System.Threading;
 
 namespace Caravela.Reactive.Implementation
 {
+
     /// <summary>
     /// A base implementation of a reactive operation, i.e. a function that maps an input to an output
     /// and reacts to changes of the input by invalidating the output and/or processing incremental
@@ -196,7 +197,7 @@ namespace Caravela.Reactive.Implementation
         /// </summary>
         /// <param name="source">Source value.</param>
         /// <returns>Result value.</returns>
-        protected abstract TResult EvaluateFunction(TSource source);
+        protected abstract ReactiveOperatorResult<TResult> EvaluateFunction(TSource source);
 
         /// <summary>
         /// Determines whether two return values of <see cref="EvaluateFunction"/> are equal.
@@ -267,18 +268,15 @@ namespace Caravela.Reactive.Implementation
                             // If the source has changed, we need to evaluate our function again.
                             var newResult = this.EvaluateFunction(sourceValue.Value);
 
-                            if (this._result == null || !this.AreEqual(this._result.Value, newResult))
+                            if (this._result == null || !this.AreEqual(this._result.Value, newResult.Value))
                             {
                                 // Our function gave a different result, so we increase our version number.
 
-                                if ( newResult is IHasReactiveSideValues hasSideValues )
-                                {
-                                    // The function supports IHasReactiveSideValues so we need to combine the side values of the input with those of the function.
-                                    sideValues = sideValues.Combine( hasSideValues.SideValues );
-                                }
+                                sideValues = sideValues.Combine( newResult.SideValues );
+                                
 
                                 this._result =
-                                    new ReactiveVersionedValue<TResult>(newResult, this._result?.Version + 1 ?? 0, sideValues);
+                                    new ReactiveVersionedValue<TResult>(newResult.Value, this._result?.Version + 1 ?? 0, sideValues);
                             }
 
                             // If the function has not produced dependencies on first execution, we forbid to product later.

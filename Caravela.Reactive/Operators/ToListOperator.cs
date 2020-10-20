@@ -18,7 +18,7 @@ namespace Caravela.Reactive.Operators
 
         public override bool IsMaterialized => true;
 
-        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
         {
             this._list = ImmutableList.CreateRange(source);
             return this._list;

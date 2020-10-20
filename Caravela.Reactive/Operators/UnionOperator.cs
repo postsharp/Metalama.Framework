@@ -19,9 +19,9 @@ namespace Caravela.Reactive.Operators
             this._second = second;
         }
 
-        protected override IEnumerable<T> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
         {
-            return source.Union(this._second.GetValue(this.ObserverToken));
+            return new(source.Union(this._second.GetValue(this.ObserverToken)));
         }
 
         protected override IReactiveSubscription? SubscribeToSource()

@@ -18,14 +18,17 @@ namespace Caravela.Framework.Impl.Reactive
 
     class DiagnosticsResult : IReactiveSideValue
     {
-        public DiagnosticsResult( ImmutableList<Diagnostic> diagnostics )
+        private DiagnosticsResult( ImmutableList<Diagnostic> diagnostics )
         {
             this.Diagnostics = diagnostics ?? ImmutableList<Diagnostic>.Empty;
         }
 
+        public static DiagnosticsResult? Get( IReadOnlyList<Diagnostic> list ) => list == null || list.Count == 0 ? null : new DiagnosticsResult( list.ToImmutableList() );
+        
+
         public ImmutableList<Diagnostic> Diagnostics { get; }
 
-        bool IReactiveSideValue.TryCombine( IReactiveSideValue sideValue, out IReactiveSideValue combinedValue )
+        bool IReactiveSideValue.TryCombine( IReactiveSideValue sideValue, out IReactiveSideValue? combinedValue )
         {
             if ( sideValue is DiagnosticsResult diagnosticsResult )
             {
