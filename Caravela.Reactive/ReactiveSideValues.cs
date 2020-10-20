@@ -21,6 +21,27 @@ namespace Caravela.Reactive
 
         public static ReactiveSideValues Create( IReactiveSideValue? sideValue ) => sideValue == null ? default : new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
+        
+        public bool TryGetValue<T>(out T? value) where T : class, IReactiveSideValue
+        {
+            if (this._sideValues.IsDefaultOrEmpty )
+            {
+                value = null;
+                return false;
+            }
+
+            foreach ( var item in this._sideValues )
+            {
+                if ( item is T t )
+                {
+                    value = t;
+                    return true;
+                }
+            }
+
+            value = null;
+            return false;
+        }
 
         ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
         {
