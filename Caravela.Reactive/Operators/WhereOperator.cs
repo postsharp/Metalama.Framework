@@ -32,7 +32,7 @@ namespace Caravela.Reactive.Operators
         {
             if (this._predicate(item, this.ObserverToken))
             {
-                updateToken.SignalChange(true);
+                updateToken.SetBreakingChange();
 
                 foreach (var subscription in this.Observers)
                 {
@@ -46,7 +46,7 @@ namespace Caravela.Reactive.Operators
         {
             if (this._predicate(item, this.ObserverToken))
             {
-                updateToken.SignalChange(true);
+                updateToken.SetBreakingChange();
 
                 foreach (var subscription in this.Observers)
                 {
@@ -71,7 +71,7 @@ namespace Caravela.Reactive.Operators
                 return;
             }
 
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {

@@ -33,7 +33,7 @@ namespace Caravela.Reactive.Operators
         {
             var outItem = this._func(item, this.ObserverToken);
 
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -46,7 +46,7 @@ namespace Caravela.Reactive.Operators
         {
             var outItem = this._func(item, this.ObserverToken);
 
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {
@@ -70,7 +70,7 @@ namespace Caravela.Reactive.Operators
                 return;
             }
 
-            updateToken.SignalChange(true);
+            updateToken.SetBreakingChange();
 
             foreach (var subscription in this.Observers)
             {

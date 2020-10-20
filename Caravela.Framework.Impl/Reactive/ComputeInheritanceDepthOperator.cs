@@ -79,19 +79,19 @@ namespace Caravela.Framework.Impl.Reactive
         protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, INamedType item, in IncrementalUpdateToken updateToken )
         {
             // Incremental updates not implemented.
-            updateToken.SignalChange( true );
+            updateToken.SetBreakingChange();
         }
 
         protected override void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, INamedType item, in IncrementalUpdateToken updateToken )
         {
             // Incremental updates not implemented.
-            updateToken.SignalChange( true );
+            updateToken.SetBreakingChange();
         }
 
         protected override void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, INamedType oldItem, INamedType newItem, in IncrementalUpdateToken updateToken )
         {
             // Incremental updates not implemented.
-            updateToken.SignalChange( true );
+            updateToken.SetBreakingChange();
         }
     }
 }
