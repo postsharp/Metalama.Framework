@@ -254,22 +254,30 @@ namespace Caravela.Reactive.Implementation
                     if (this._isFunctionResultDirty)
                     {
                         // Evaluate the source.
-                        var input = this.Source.GetVersionedValue(this.ObserverToken);
+                        var sourceValue = this.Source.GetVersionedValue(this.ObserverToken);
+                        var sideValues = sourceValue.SideValues;
 
-                        if (input.Version != this._sourceVersion || !this._dependencies.IsDirty())
+                        if (sourceValue.Version != this._sourceVersion || !this._dependencies.IsDirty())
                         {
-                            this._sourceVersion = input.Version;
+                            this._sourceVersion = sourceValue.Version;
 
                             this._dependencies.Clear();
 
                             // If the source has changed, we need to evaluate our function again.
-                            var newResult = this.EvaluateFunction(input.Value);
+                            var newResult = this.EvaluateFunction(sourceValue.Value);
 
                             if (this._result == null || !this.AreEqual(this._result.Value, newResult))
                             {
                                 // Our function gave a different result, so we increase our version number.
+
+                                if ( newResult is IHasReactiveSideValues hasSideValues )
+                                {
+                                    // The function supports IHasReactiveSideValues so we need to combine the side values of the input with those of the function.
+                                    sideValues = sideValues.Combine( hasSideValues.SideValues );
+                                }
+
                                 this._result =
-                                    new ReactiveVersionedValue<TResult>(newResult, this._result?.Version + 1 ?? 0);
+                                    new ReactiveVersionedValue<TResult>(newResult, this._result?.Version + 1 ?? 0, sideValues);
                             }
 
                             // If the function has not produced dependencies on first execution, we forbid to product later.
