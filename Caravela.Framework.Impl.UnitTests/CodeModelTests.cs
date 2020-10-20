@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.UnitTests
                 throw new InvalidOperationException(string.Join(Environment.NewLine, lines));
             }
 
-            return CodeModel.CreateCompilation(roslynCompilation);
+            return CompilationFactory.CreateCompilation(roslynCompilation);
         }
 
         [Fact]

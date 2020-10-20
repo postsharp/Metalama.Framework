@@ -24,11 +24,7 @@ namespace Caravela.Reactive.Operators
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) =>
-<<<<<<< HEAD
             this.ResultSelector( this._subscriptionsReverse[subscription], item, this.ObserverToken);
-=======
-            this.ResultSelector(this._subscriptionsReverse[subscription], item, this.ObserverToken);
->>>>>>> Reactive: move to namespaces and make more things public
 
         protected override void UnfollowAll()
         {

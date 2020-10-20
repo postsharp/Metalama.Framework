@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl
     }
 
     // for testing
-    public static class CodeModel
+    public static class CompilationFactory
     {
         public static ICompilation CreateCompilation(CSharpCompilation roslynCompilation) => new Compilation(roslynCompilation);
     }

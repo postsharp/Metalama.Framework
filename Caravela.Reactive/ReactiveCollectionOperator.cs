@@ -13,7 +13,7 @@ namespace Caravela.Reactive
     /// </summary>
     /// <typeparam name="TSource">Type of source items.</typeparam>
     /// <typeparam name="TResult">Type of result items.</typeparam>
-    internal abstract class ReactiveCollectionOperator<TSource, TResult> :
+    public abstract class ReactiveCollectionOperator<TSource, TResult> :
         ReactiveOperator<IEnumerable<TSource>, IReactiveCollectionObserver<TSource>, IEnumerable<TResult>,
             IReactiveCollectionObserver<TResult>>,
         IReactiveCollection<TResult>, IReactiveCollectionObserver<TSource>, IEnumerable<TResult>

@@ -43,11 +43,7 @@ namespace Caravela.Reactive.Operators
 
                 token.SetNewValue(item);
 
-<<<<<<< HEAD
                 foreach (var observer in this.Observers )
-=======
-                foreach (var observer in this.Observers)
->>>>>>> Reactive: move to namespaces and make more things public
                 {
                     observer.Observer.OnValueChanged(observer.Subscription, oldResult, item, token.NextVersion);
                 }

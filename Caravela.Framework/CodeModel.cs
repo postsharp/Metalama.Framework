@@ -15,6 +15,8 @@ namespace Caravela.Framework
 
     public interface IType
     {
+        IType BaseType { get; }
+        IReadOnlyList<IType> ImplementedInterfaces { get; }
         bool Is(IType other);
     }
 

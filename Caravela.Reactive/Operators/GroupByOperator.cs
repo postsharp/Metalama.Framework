@@ -136,11 +136,7 @@ namespace Caravela.Reactive.Operators
 
             var builder = oldGroups.ToBuilder();
 
-<<<<<<< HEAD
             foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc ))
-=======
-            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc))
->>>>>>> Reactive: move to namespaces and make more things public
             {
                 if (builder.TryGetValue(group.Key, out var items))
                 {

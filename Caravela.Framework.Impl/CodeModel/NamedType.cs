@@ -53,6 +53,10 @@ namespace Caravela.Framework.Impl
         internal abstract ITypeSymbol TypeSymbol { get; }
         internal Compilation Compilation { get; }
 
+        public IType BaseType => throw new NotImplementedException();
+
+        public IReadOnlyList<IType> ImplementedInterfaces => throw new NotImplementedException();
+
         protected Type(Compilation compilation) => this.Compilation = compilation;
 
         public bool Is(IType other) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, ((Type)other).TypeSymbol);

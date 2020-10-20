@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Reactive.Implementation
 {
-    internal static class EqualityComparerFactory
+    public static class EqualityComparerFactory
     {
         public static IEqualityComparer<T> GetEqualityComparer<T>()
         {
