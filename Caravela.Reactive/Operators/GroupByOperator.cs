@@ -7,7 +7,7 @@ using System.Linq;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class GroupByOperator<TSource, TKey, TElement> : ReactiveCollectionOperator<TSource, IReactiveGroup<TKey, TElement>>,
         IReactiveGroupBy<TKey, TElement>, IGroupByOperator<TKey, TElement>
@@ -55,7 +55,7 @@ namespace Caravela.Reactive
                             subscription.Observer.OnItemAdded(subscription.Subscription, group, token.NextVersion);
                         }
 
-                        foreach (var subscription in this.Observers.OfType<IEnumerable<Group<TKey, TElement>>>())
+                        foreach (var subscription in this.Observers.OfEnumerableType<Group<TKey, TElement>>())
                         {
                             subscription.Observer.OnValueChanged(subscription.Subscription, oldGroups.Values, this._groups.Values, token.NextVersion);
                         }
@@ -136,7 +136,11 @@ namespace Caravela.Reactive
 
             var builder = oldGroups.ToBuilder();
 
+<<<<<<< HEAD
             foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc ))
+=======
+            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc))
+>>>>>>> Reactive: move to namespaces and make more things public
             {
                 if (builder.TryGetValue(group.Key, out var items))
                 {

@@ -2,12 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation of a reactive operation, i.e. a function that maps an input to an output
@@ -18,11 +17,11 @@ namespace Caravela.Reactive
     /// <typeparam name="TSourceObserver">Type of source observers.</typeparam>
     /// <typeparam name="TResult">Type of the result value.</typeparam>
     /// <typeparam name="TResultObserver">Type of result observers.</typeparam>
-    internal abstract partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
+    public abstract partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
         IReactiveSource<TResult, TResultObserver>,
         IReactiveObserver<TSource>,
         IReactiveTokenCollector
-        where TSourceObserver : IReactiveObserver<TSource>
+        where TSourceObserver : class, IReactiveObserver<TSource>
         where TResultObserver : class, IReactiveObserver<TResult>
 
     {
@@ -34,7 +33,7 @@ namespace Caravela.Reactive
         private DependencyObservable? _dependencyObservable;
         private IReactiveSubscription? _subscriptionToSource;
         private SpinLock _lock = default;
-        protected ObserverList<TResultObserver> Observers;
+        private ObserverList<TResultObserver> _observers;
 
         // The following fields logically belong to IncrementalUpdateToken but this
         // type needs to be immutable so that we can use it with the 'using' statement.
@@ -52,12 +51,13 @@ namespace Caravela.Reactive
             }
 
             this.Source = source;
-            this.Observers = new ObserverList<TResultObserver>(this);
+            this._observers = new ObserverList<TResultObserver>(this);
             this._dependencies = new DependencyList(this);
         }
 
-
+        protected ObserverListEnumerator<TResultObserver, TResultObserver> Observers => this._observers.GetEnumerator();
         
+
 
         protected IReactiveSource<TSource, TSourceObserver> Source { get; }
 
@@ -102,7 +102,7 @@ namespace Caravela.Reactive
                 return null;
             }
 
-            return this.Observers.AddObserver(observer);
+            return this._observers.AddObserver(observer);
         }
 
         bool IReactiveObservable<TResultObserver>.RemoveObserver(IReactiveSubscription subscription)
@@ -112,7 +112,7 @@ namespace Caravela.Reactive
                 return false;
             }
 
-            return this.Observers.RemoveObserver(subscription);
+            return this._observers.RemoveObserver(subscription);
         }
 
         public bool IsImmutable
@@ -312,7 +312,7 @@ namespace Caravela.Reactive
         {
             this._isFunctionResultDirty = true;
 
-            foreach (var subscription in this.Observers.WeaklyTyped())
+            foreach (var subscription in this._observers.WeaklyTyped())
             {
                 subscription.Observer.OnValueInvalidated(subscription.Subscription, true);
             }

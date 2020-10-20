@@ -3,10 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class WhereOperator<T> : ReactiveCollectionOperator<T, T>
     {

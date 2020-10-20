@@ -3,12 +3,10 @@
     internal class AspectPart
     {
         public string? Name { get; }
-        public int ExecutionOrder { get; }
 
-        public AspectPart(string? name, int executionOrder)
+        public AspectPart(string? name)
         {
-            this.Name = name;
-            this.ExecutionOrder = executionOrder;
+            Name = name;
         }
     }
 }

@@ -32,8 +32,9 @@ namespace Caravela.Framework.Impl
                 .SelectMany(
                     x => x.aspectType.Parts,
                     (x, aspectPart) => (x.aspects, x.aspectType, aspectPart))
-                .GetValue(default)
-                .OrderBy(x => x.aspectPart.ExecutionOrder);
+                .GetValue(default);
+//                .OrderBy(x => x.aspectPart.ExecutionOrder);
+                // TODO: Use a comparer to implement OrderBy (see UML design)
 
             // TODO: aspect part grouping
 

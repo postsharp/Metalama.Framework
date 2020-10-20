@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class ToListOperator<T> : ReactiveCollectionOperator<T, T>
     {
@@ -38,7 +38,7 @@ namespace Caravela.Reactive
                 subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
             }
             
-            foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
+            foreach (var subscription in this.Observers.OfEnumerableType<T>())
             {
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
@@ -60,7 +60,7 @@ namespace Caravela.Reactive
                 subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
             }
             
-            foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
+            foreach (var subscription in this.Observers.OfEnumerableType<T>())
             {
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }
@@ -82,7 +82,7 @@ namespace Caravela.Reactive
                 subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, updateToken.NextVersion);
             }
             
-            foreach (var subscription in this.Observers.OfType<IEnumerable<T>>())
+            foreach (var subscription in this.Observers.OfEnumerableType<T>())
             {
                 subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
             }

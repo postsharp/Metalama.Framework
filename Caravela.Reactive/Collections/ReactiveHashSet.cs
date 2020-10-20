@@ -4,10 +4,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Collections
 {
     /// <summary>
     /// A reactive hash set.

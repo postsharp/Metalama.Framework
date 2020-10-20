@@ -1,10 +1,10 @@
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// An item exposed by enumerators of <see cref="ObserverList{T}"/>.
     /// </summary>
     /// <typeparam name="T">The observer type.</typeparam>
-    internal readonly struct ObserverListEnumeratedItem<T> where T : IReactiveObserver
+    public readonly struct ObserverListEnumeratedItem<T> where T : IReactiveObserver
     {
         public T Observer { get; }
         public IReactiveSubscription<T> Subscription { get; }

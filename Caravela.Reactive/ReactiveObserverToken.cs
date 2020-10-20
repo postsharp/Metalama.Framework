@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive
 {

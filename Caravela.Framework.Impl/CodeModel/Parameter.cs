@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Caravela.Reactive;
+using Caravela.Reactive.Collections;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl

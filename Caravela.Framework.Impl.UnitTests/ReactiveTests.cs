@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Reactive;
+using Caravela.Reactive.Collections;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests

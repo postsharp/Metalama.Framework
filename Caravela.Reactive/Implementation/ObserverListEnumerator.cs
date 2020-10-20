@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// Represents an iterators returned by <see cref="ObserverList{T}"/>.
@@ -9,7 +9,7 @@ namespace Caravela.Reactive
     /// </summary>
     /// <typeparam name="TIn">Type of observers stored in the <see cref="ObserverList{T}"/>.</typeparam>
     /// <typeparam name="TOut">Type of observers requested by the consumer.</typeparam>
-    internal struct ObserverListEnumerator<TIn, TOut> : 
+    public struct ObserverListEnumerator<TIn, TOut> : 
         IEnumerable<ObserverListEnumeratedItem<TOut>>,
         IEnumerator<ObserverListEnumeratedItem<TOut>>
         where TOut : class, IReactiveObserver
@@ -24,6 +24,14 @@ namespace Caravela.Reactive
             this._node = null;
             
         }
+
+        public ObserverListEnumerator<TIn, T> OfType<T>()
+            where T : class, IReactiveObserver
+            => new ObserverListEnumerator<TIn, T>(this._first);
+
+        public ObserverListEnumerator<TIn, IReactiveObserver<IEnumerable<T>>> OfEnumerableType<T>()
+            => new ObserverListEnumerator<TIn, IReactiveObserver<IEnumerable<T>>>(this._first);
+
 
         public void Dispose()
         {

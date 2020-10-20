@@ -1,6 +1,6 @@
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
-    internal abstract partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
+    partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {
         /// <summary>
         /// Implementation of <see cref="IReactiveObservable{T}"/> used for <see cref="ReactiveObserverToken"/>.
@@ -21,12 +21,12 @@ namespace Caravela.Reactive
 
             IReactiveSubscription IReactiveObservable<IReactiveObserver>.AddObserver(IReactiveObserver observer)
             {
-                return this._parent.Observers.AddObserver(observer);
+                return this._parent._observers.AddObserver(observer);
             }
 
             bool IReactiveObservable<IReactiveObserver>.RemoveObserver(IReactiveSubscription subscription)
             {
-                return this._parent.Observers.RemoveObserver(subscription);
+                return this._parent._observers.RemoveObserver(subscription);
             }
         }
     }

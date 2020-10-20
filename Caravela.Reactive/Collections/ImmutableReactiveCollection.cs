@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Collections
 {
     /// <summary>
     /// Collection that implements the reactive interface, but does not actually ever change.
     /// </summary>
     // TODO: every usage of this type should be probably changed to make it reactive
-    public sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>
+    internal sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>
     {
         private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
         

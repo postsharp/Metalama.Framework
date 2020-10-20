@@ -7,13 +7,13 @@ using System.Threading;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation for <see cref="IReactiveObservable{T}"/>.
     /// </summary>
     /// <typeparam name="T">Type of observers/</typeparam>
-    internal struct ObserverList<T> : IEnumerable<ObserverListEnumeratedItem<T>>
+    public struct ObserverList<T> : IEnumerable<ObserverListEnumeratedItem<T>>
         where T : class, IReactiveObserver
     {
         private SpinLock _spinLock;
@@ -36,12 +36,11 @@ namespace Caravela.Reactive
         public ObserverListEnumerator<T, IReactiveObserver<TOut>> OfType<TOut>()
             => new ObserverListEnumerator<T, IReactiveObserver<TOut>>(this._first);
 
-        IEnumerator<ObserverListEnumeratedItem<T>> IEnumerable<ObserverListEnumeratedItem<T>>.GetEnumerator()
-        {
-            return new ObserverListEnumerator<T, T>(this._first);
-        }
+        IEnumerator<ObserverListEnumeratedItem<T>> IEnumerable<ObserverListEnumeratedItem<T>>.GetEnumerator() => this.GetEnumerator();
+       
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public ObserverListEnumerator<T, T> GetEnumerator()
         {
             return new ObserverListEnumerator<T, T>(this._first);
         }

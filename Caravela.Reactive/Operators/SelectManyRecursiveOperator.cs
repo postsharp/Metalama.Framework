@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class SelectManyRecursiveOperator<T> : ReactiveCollectionOperator<T, T>
         where T : class

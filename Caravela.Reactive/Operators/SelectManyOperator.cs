@@ -6,7 +6,7 @@ using System.Linq;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal abstract class SelectManyOperator<TSource, TCollection, TResult> : ReactiveCollectionOperator<TSource, TResult>,
         IReactiveCollectionObserver<TCollection>
@@ -28,7 +28,11 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken();
 
+<<<<<<< HEAD
             this.AddItem( this.SelectResult(subscription, item), updateToken);
+=======
+            this.AddItem(this.SelectResult(subscription, item), updateToken);
+>>>>>>> Reactive: move to namespaces and make more things public
         }
 
         void IReactiveCollectionObserver<TCollection>.OnItemRemoved(IReactiveSubscription subscription, TCollection item,
@@ -39,7 +43,11 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
+<<<<<<< HEAD
             this.RemoveItem( this.SelectResult(subscription, item), updateToken);
+=======
+            this.RemoveItem(this.SelectResult(subscription, item), updateToken);
+>>>>>>> Reactive: move to namespaces and make more things public
         }
 
         void IReactiveCollectionObserver<TCollection>.OnItemReplaced(IReactiveSubscription subscription, TCollection oldItem,
@@ -50,8 +58,13 @@ namespace Caravela.Reactive
             
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
+<<<<<<< HEAD
             this.RemoveItem( this.SelectResult(subscription, oldItem), updateToken);
             this.AddItem( this.SelectResult(subscription, newItem), updateToken);
+=======
+            this.RemoveItem(this.SelectResult(subscription, oldItem), updateToken);
+            this.AddItem(this.SelectResult(subscription, newItem), updateToken);
+>>>>>>> Reactive: move to namespaces and make more things public
         }
 
         void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription,

@@ -2,13 +2,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class SelectCachedOperator<TSource, TResult> : ReactiveCollectionOperator<TSource, TResult>
         where TSource : class 

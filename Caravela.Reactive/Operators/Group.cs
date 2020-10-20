@@ -4,10 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>, IReactiveTokenCollector
     {

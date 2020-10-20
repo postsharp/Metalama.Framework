@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics;
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
-    internal abstract partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
+    partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {
         private enum IncrementalUpdateStatus
         {
@@ -120,7 +120,7 @@ namespace Caravela.Reactive
                     }
 
 
-                    foreach (var subscription in this._parent.Observers.WeaklyTyped())
+                    foreach (var subscription in this._parent._observers.WeaklyTyped())
                     {
                         subscription.Observer.OnValueInvalidated(subscription.Subscription, false);
                     }

@@ -2,11 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
+using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class WriteLineOperator<T> : IReactiveCollectionObserver<T>, IReactiveTokenCollector
     {

@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Reactive.Implementation;
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class SomeOperator<T> : ReactiveOperator<IEnumerable<T>, IReactiveCollectionObserver<T>, T, IReactiveObserver<T>>, IReactiveCollectionObserver<T>
     {
@@ -42,7 +43,11 @@ namespace Caravela.Reactive
 
                 token.SetNewValue(item);
 
+<<<<<<< HEAD
                 foreach (var observer in this.Observers )
+=======
+                foreach (var observer in this.Observers)
+>>>>>>> Reactive: move to namespaces and make more things public
                 {
                     observer.Observer.OnValueChanged(observer.Subscription, oldResult, item, token.NextVersion);
                 }

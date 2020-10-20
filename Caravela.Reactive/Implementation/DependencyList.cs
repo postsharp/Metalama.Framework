@@ -2,13 +2,13 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// Implementation of <see cref="IReactiveTokenCollector"/>. This is a mutable struct! Don't make it a property
     /// or a read-only field.
     /// </summary>
-    internal struct DependencyList
+    public struct DependencyList
     {
         private volatile Node? _dependencies;
         private IReactiveObserver? _parent;

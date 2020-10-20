@@ -5,7 +5,7 @@ using System.Linq;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Operators
 {
     internal class UnionOperator<T> : ReactiveCollectionOperator<T, T>
     {

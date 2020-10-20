@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     internal static class EqualityComparerFactory
     {

@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Caravela.Reactive
+namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// An item of <see cref="ObserverList{T}"/>. Implements <see cref="IReactiveSubscription{T}"/>. 
