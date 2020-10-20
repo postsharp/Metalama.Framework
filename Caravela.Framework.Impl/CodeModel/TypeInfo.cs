@@ -49,8 +49,17 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<IType> ImplementedInterfaces => throw new NotImplementedException();
 
+        INamedType INamedType.BaseType => throw new NotImplementedException();
+
+        IReadOnlyList<INamedType> INamedType.ImplementedInterfaces => throw new NotImplementedException();
+
         public ITypeInfo GetTypeInfo(in ReactiveObserverToken observerToken) => this;
 
         public bool Is(IType other) => this._namedType.Is(other);
+
+        public ITypeInfo GetTypeInfo()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

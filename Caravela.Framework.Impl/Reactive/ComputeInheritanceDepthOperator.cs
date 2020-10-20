@@ -6,7 +6,7 @@ using Caravela.Reactive;
 using Caravela.Reactive.Implementation;
 using static System.Math;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.Reactive
 {
     class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>
     {
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
 
                 // Base types are processed before derived types.
-                if ( type.BaseType != null && type.BaseType is INamedType namedType  )
+                if ( type.BaseType != null && type.BaseType is INamedType namedType )
                 {
                     baseDepth = Max( baseDepth, this.ComputeDepth( namedType ) );
 
@@ -47,13 +47,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     {
                         baseDepth = Max( baseDepth, this.ComputeDepth( nestedType ) );
                     }
-                    
+
                 }
 
                 // Implemented interfaces are processed before their implementations.
                 foreach ( var interfaceImplementation in type.ImplementedInterfaces )
                 {
-                    baseDepth = Max( baseDepth, this.ComputeDepth( interfaceImplementation ));
+                    baseDepth = Max( baseDepth, this.ComputeDepth( interfaceImplementation ) );
                 }
 
                 myDepth = baseDepth + 1;

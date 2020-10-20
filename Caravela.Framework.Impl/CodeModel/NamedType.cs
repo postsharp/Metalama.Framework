@@ -44,6 +44,10 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this.TypeSymbol.GetAttributes().Select(a => new Attribute(a, this.Compilation.SymbolMap)).ToImmutableReactive();
 
+        INamedType INamedType.BaseType => throw new NotImplementedException();
+
+        IReadOnlyList<INamedType> INamedType.ImplementedInterfaces => throw new NotImplementedException();
+
         public override string ToString() => this.NamedTypeSymbol.ToString();
     }
 
