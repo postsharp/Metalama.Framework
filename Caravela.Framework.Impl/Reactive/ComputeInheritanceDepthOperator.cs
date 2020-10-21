@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Reactive;
 using Caravela.Reactive.Implementation;
 using Microsoft.CodeAnalysis;
