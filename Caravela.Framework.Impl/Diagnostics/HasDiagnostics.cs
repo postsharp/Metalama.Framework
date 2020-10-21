@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Impl.Reactive
+namespace Caravela.Framework.Impl.Diagnostics
 {
     internal abstract class HasDiagnostics : IHasDiagnostics
     {

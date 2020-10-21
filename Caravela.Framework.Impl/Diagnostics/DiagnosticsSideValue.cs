@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Reactive
+namespace Caravela.Framework.Impl.Diagnostics
 {
 
     class DiagnosticsSideValue : IReactiveSideValue
