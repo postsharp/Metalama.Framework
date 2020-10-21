@@ -15,12 +15,12 @@ namespace Caravela.Reactive.Operators
             EqualityComparerFactory.GetEqualityComparer<TSource>();
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
-        private readonly Func<TSource, ReactiveObserverToken, TResult> _func;
+        private readonly Func<TSource, ReactiveCollectorToken, TResult> _func;
 
         public SelectOperator(IReactiveCollection<TSource> source, Func<TSource,  TResult> func)
             : base(source)
         {
-            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
+            this._func = ReactiveCollectorToken.WrapWithDefaultToken(func);
         }
 
         protected override ReactiveOperatorResult<IEnumerable<TResult>> EvaluateFunction(IEnumerable<TSource> source)

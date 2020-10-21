@@ -15,7 +15,7 @@ namespace Caravela.Reactive.Implementation
         BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
        IReactiveSource<TResult, TResultObserver>,
        IReactiveObserver<TSource>,
-       IReactiveTokenCollector
+       IReactiveCollector
        where TSourceObserver : class, IReactiveObserver<TSource>
        where TResultObserver : class, IReactiveObserver<TResult>
 
@@ -28,7 +28,7 @@ namespace Caravela.Reactive.Implementation
 
 
         IReactiveVersionedValue<TResult> IReactiveSource<TResult>.GetVersionedValue(
-            in ReactiveObserverToken observerToken )
+            in ReactiveCollectorToken observerToken )
         {
             return this.GetVersionedValue( observerToken );
         }
@@ -91,7 +91,7 @@ namespace Caravela.Reactive.Implementation
 
 
 
-        public ReactiveVersionedValue<TResult> GetVersionedValue( in ReactiveObserverToken observerToken = default )
+        public ReactiveVersionedValue<TResult> GetVersionedValue( in ReactiveCollectorToken observerToken = default )
         {
             this.EnsureFunctionEvaluated();
 
@@ -102,7 +102,7 @@ namespace Caravela.Reactive.Implementation
             return this._result!;
         }
 
-        public TResult GetValue( in ReactiveObserverToken observerToken ) => this.GetVersionedValue( observerToken ).Value;
+        public TResult GetValue( in ReactiveCollectorToken observerToken ) => this.GetVersionedValue( observerToken ).Value;
 
         /// <summary>
         /// Evaluates the operator if necessary.

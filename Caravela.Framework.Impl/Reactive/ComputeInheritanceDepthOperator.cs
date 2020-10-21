@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Reactive
                 }
             }
 
-            return new(Impl(), ReactiveSideValues.Create( DiagnosticsResult.Get(diagnostics)));
+            return new(Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get(diagnostics)));
 
         }
 

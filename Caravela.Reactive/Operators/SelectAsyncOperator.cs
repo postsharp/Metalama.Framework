@@ -18,13 +18,13 @@ namespace Caravela.Reactive.Operators
             EqualityComparerFactory.GetEqualityComparer<TSource>();
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
-        private readonly Func<TSource, ReactiveObserverToken, CancellationToken, ValueTask<TResult>> _func;
+        private readonly Func<TSource, ReactiveCollectorToken, CancellationToken, ValueTask<TResult>> _func;
         private ImmutableList<TResult> _result;
 
         public AsyncSelectOperator( IAsyncReactiveCollection<TSource> source, Func<TSource, CancellationToken, ValueTask<TResult>> func, bool hasReactiveDependencies )
             : base(source, hasReactiveDependencies )
         {
-            this._func = ReactiveObserverToken.WrapWithDefaultToken(func);
+            this._func = ReactiveCollectorToken.WrapWithDefaultToken(func);
         }
 
         protected async override ValueTask<ReactiveOperatorResult<IEnumerable<TResult>>> EvaluateFunctionAsync( IEnumerable<TSource> source, CancellationToken cancellationToken )

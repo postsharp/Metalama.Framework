@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Diagnostics\" />
+  </ItemGroup>
+
 </Project>

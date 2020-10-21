@@ -8,18 +8,18 @@ namespace Caravela.Reactive
     /// <summary>
     /// A token passed to <see cref="IReactiveSource{T}.GetValue"/> or <see cref="IReactiveSource{T}.GetVersionedValue"/>.
     /// Exposes the most primitive (weakly-typed and non-incremental) way to collect dependencies to observables.
-    /// As an end-user you should generally not use <see cref="ReactiveObserverToken"/> directly. You should pass
+    /// As an end-user you should generally not use <see cref="ReactiveCollectorToken"/> directly. You should pass
     /// the default instance instead. The default instance resolves to <see cref="CurrentCollector"/>, which can
     /// be modified using the <see cref="WithDefaultCollector"/> method. 
     /// </summary>
-    public readonly struct ReactiveObserverToken
+    public readonly struct ReactiveCollectorToken
     {
         private static readonly NullCollector _nullCollector = new NullCollector();
 
-        private static readonly ThreadLocal<IReactiveTokenCollector> _defaultCollector =
-            new ThreadLocal<IReactiveTokenCollector>(() => _nullCollector);
+        private static readonly ThreadLocal<IReactiveCollector> _defaultCollector =
+            new ThreadLocal<IReactiveCollector>(() => _nullCollector);
 
-        internal static IReactiveTokenCollector CurrentCollector
+        internal static IReactiveCollector CurrentCollector
         {
             get => _defaultCollector.Value;
         }
@@ -29,7 +29,7 @@ namespace Caravela.Reactive
         /// </summary>
         /// <param name="collector"></param>
         /// <returns></returns>
-        public static WithDefaultObserverToken WithDefaultCollector(IReactiveTokenCollector collector)
+        public static WithDefaultObserverToken WithDefaultCollector(IReactiveCollector collector)
         {
             var previousCollector = CurrentCollector;
             _defaultCollector.Value = collector;
@@ -38,11 +38,11 @@ namespace Caravela.Reactive
         
         
 
-        private readonly IReactiveTokenCollector _collector;
+        private readonly IReactiveCollector _collector;
 
-        internal IReactiveTokenCollector Collector => this._collector ?? CurrentCollector;
+        internal IReactiveCollector Collector => this._collector ?? CurrentCollector;
 
-        internal ReactiveObserverToken(IReactiveTokenCollector collector)
+        internal ReactiveCollectorToken(IReactiveCollector collector)
         {
             this._collector = collector;
         }
@@ -55,21 +55,31 @@ namespace Caravela.Reactive
         /// <typeparam name="TIn"></typeparam>
         /// <typeparam name="TOut"></typeparam>
         /// <returns></returns>
-        internal static Func<TIn, ReactiveObserverToken, TOut> WrapWithDefaultToken<TIn, TOut>(
+        internal static Func<TIn, ReactiveCollectorToken, TOut> WrapWithDefaultToken<TIn, TOut>(
             Func<TIn, TOut> func)
-            => delegate(TIn value, ReactiveObserverToken collectorToken)
+            => delegate(TIn value, ReactiveCollectorToken collectorToken)
             {
                 using var tk = WithDefaultCollector(collectorToken._collector);
-                return func(value);
+                var result = func(value);
+                if ( result is IHasReactiveSideValues hasReactiveSideValues )
+                {
+                    collectorToken._collector.AddSideValues( hasReactiveSideValues.SideValues );
+                }
+                return result;
             };
 
-        internal static Func<TIn, ReactiveObserverToken, CancellationToken, ValueTask<TOut>> WrapWithDefaultToken<TIn, TOut>(
+        internal static Func<TIn, ReactiveCollectorToken, CancellationToken, ValueTask<TOut>> WrapWithDefaultToken<TIn, TOut>(
           Func<TIn, CancellationToken, ValueTask<TOut>> func )
         {
-            return async delegate ( TIn value, ReactiveObserverToken collectorToken, CancellationToken cancellationToken )
+            return async delegate ( TIn value, ReactiveCollectorToken collectorToken, CancellationToken cancellationToken )
                       {
                           using var tk = WithDefaultCollector( collectorToken._collector );
-                          return await func( value, cancellationToken );
+                          var result = await func( value, cancellationToken );
+                          if ( result is IHasReactiveSideValues hasReactiveSideValues )
+                          {
+                              collectorToken._collector.AddSideValues( hasReactiveSideValues.SideValues );
+                          }
+                          return result;
                       };
         }
 
@@ -82,9 +92,9 @@ namespace Caravela.Reactive
         /// <typeparam name="T2"></typeparam>
         /// <typeparam name="TOut"></typeparam>
         /// <returns></returns>
-        internal static Func<T1, T2, ReactiveObserverToken, TOut> WrapWithDefaultToken<T1, T2, TOut>(
+        internal static Func<T1, T2, ReactiveCollectorToken, TOut> WrapWithDefaultToken<T1, T2, TOut>(
             Func<T1, T2, TOut> func)
-            => delegate (T1 x1, T2 x2, ReactiveObserverToken collectorToken)
+            => delegate (T1 x1, T2 x2, ReactiveCollectorToken collectorToken)
             {
                 using var tk = WithDefaultCollector(collectorToken._collector);
                 return func(x1, x2);
@@ -94,22 +104,31 @@ namespace Caravela.Reactive
         /// Represents the absence of collector. We must use a different value than <c>null</c> so that
         /// <c>null</c>, the default value, can represent the fallback to <see cref="CurrentCollector"/>.
         /// </summary>
-        private class NullCollector : IReactiveTokenCollector
+        private class NullCollector : IReactiveCollector
         {
-            void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
+            void IReactiveCollector.AddSideValue( IReactiveSideValue value )
             {
+            }
+
+            void IReactiveCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
+            {
+            }
+
+            void IReactiveCollector.AddSideValues( ReactiveSideValues values )
+            {
+                
             }
         }
         
         /// <summary>
-        /// An opaque return value for <see cref="ReactiveObserverToken.WithDefaultCollector"/>, to be disposed
+        /// An opaque return value for <see cref="ReactiveCollectorToken.WithDefaultCollector"/>, to be disposed
         /// at the end of the scope.
         /// </summary>
         public struct WithDefaultObserverToken : IDisposable
         {
-            private  IReactiveTokenCollector _previousCollector;
+            private  IReactiveCollector _previousCollector;
 
-            internal WithDefaultObserverToken(IReactiveTokenCollector previousCollector)
+            internal WithDefaultObserverToken(IReactiveCollector previousCollector)
             {
                 this._previousCollector = previousCollector;
             }

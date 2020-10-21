@@ -14,12 +14,12 @@ namespace Caravela.Reactive.Operators
         private static readonly IEqualityComparer<T> _sourceEqualityComparer =
             EqualityComparerFactory.GetEqualityComparer<T>();
 
-        private readonly Func<T, ReactiveObserverToken, bool> _predicate;
+        private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
 
         public WhereOperator(IReactiveCollection<T> source, Func<T, bool> predicate) :
             base(source)
         {
-            this._predicate = ReactiveObserverToken.WrapWithDefaultToken(predicate);
+            this._predicate = ReactiveCollectorToken.WrapWithDefaultToken(predicate);
         }
 
         protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)

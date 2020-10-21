@@ -20,7 +20,7 @@ namespace Caravela.Reactive.Implementation
     public abstract partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
     IReactiveObserver<TSource>,
     IReactiveObservable<TResultObserver>,
-    IReactiveTokenCollector
+    IReactiveCollector
     where TSourceObserver : class, IReactiveObserver<TSource>
     where TResultObserver : class, IReactiveObserver<TResult>
 
@@ -51,7 +51,7 @@ namespace Caravela.Reactive.Implementation
         protected IReactiveSource Source { get; }
 
 
-        protected ReactiveObserverToken ObserverToken => new ReactiveObserverToken( this );
+        protected ReactiveCollectorToken ObserverToken => new ReactiveCollectorToken( this );
 
         protected TResult CachedValue => this._result!.Value;
 
@@ -116,12 +116,24 @@ namespace Caravela.Reactive.Implementation
         protected virtual bool ShouldTrackDependency( IReactiveObservable<IReactiveObserver> source )
             => source.Object != this && source.Object != this.Source;
 
-        void IReactiveTokenCollector.AddDependency( IReactiveObservable<IReactiveObserver> source, int version )
+        void IReactiveCollector.AddDependency( IReactiveObservable<IReactiveObserver> source, int version )
         {
             if ( this.ShouldTrackDependency( source ) && !this.IsImmutable )
             {
                 this._dependencies.Add( source, version );
             }
+        }
+        void IReactiveCollector.AddSideValue( IReactiveSideValue value )
+        {
+            if ( value != null )
+            {
+                this._currentUpdateSideValues = this._currentUpdateSideValues.Combine( value );
+            }
+        }
+
+        void IReactiveCollector.AddSideValues( ReactiveSideValues value )
+        {
+            this._currentUpdateSideValues = this._currentUpdateSideValues.Combine( value );
         }
 
         protected abstract IReactiveSubscription? SubscribeToSource();
@@ -162,7 +174,7 @@ namespace Caravela.Reactive.Implementation
 
      
 
-        private protected void CollectDependencies( ReactiveObserverToken observerToken, int version )
+        private protected void CollectDependencies( ReactiveCollectorToken observerToken, int version )
         {
             // Collect after evaluation so that the version number is updated.
             observerToken.Collector?.AddDependency( (this._dependencyObservable ??= new DependencyObservable( this )), version );
@@ -191,6 +203,7 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
+     
 
         protected BaseReactiveOperator( IReactiveSource source)
         {

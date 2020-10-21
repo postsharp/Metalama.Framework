@@ -10,7 +10,7 @@ namespace Caravela.Reactive.Operators
 {
     internal abstract class SelectManyImmutableOperatorBase<TSource, TCollection, TResult> : SelectManyOperator<TSource, TCollection, TResult>
     {
-        protected Func<TSource, ReactiveObserverToken, IImmutableList<TCollection>> CollectionSelector { get; }
+        protected Func<TSource, ReactiveCollectorToken, IImmutableList<TCollection>> CollectionSelector { get; }
 
         public SelectManyImmutableOperatorBase(
             IReactiveCollection<TSource> source,
@@ -18,7 +18,7 @@ namespace Caravela.Reactive.Operators
             Func<TSource, TCollection, TResult> resultSelector)
             : base(source, resultSelector)
         {
-            this.CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
+            this.CollectionSelector = ReactiveCollectorToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) => 

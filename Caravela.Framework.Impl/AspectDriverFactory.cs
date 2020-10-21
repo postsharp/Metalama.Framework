@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl
                 group weaverType by (IType)attribute.ConstructorArguments.Single()!;
         }
 
-        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveObserverToken observerToken)
+        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveCollectorToken observerToken)
         {
             var weavers = this._weaverTypes[type].GetValue(observerToken).ToList();
 

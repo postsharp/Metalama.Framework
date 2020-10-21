@@ -12,8 +12,8 @@ namespace Caravela.Reactive
 
     /// <summary>
     /// Defines the semantic of a reactive object. Its value can be accessed only by passing a
-    /// a <see cref="ReactiveObserverToken"/>. A dependency to the reactive object is added to the observer
-    /// upon evaluating the value. However, the <see cref="ReactiveObserverToken"/> mechanism only allows
+    /// a <see cref="ReactiveCollectorToken"/>. A dependency to the reactive object is added to the observer
+    /// upon evaluating the value. However, the <see cref="ReactiveCollectorToken"/> mechanism only allows
     /// for weakly-typed observers, which excludes the representation of incremental changes.
     /// The <see cref="IReactiveSource{TValue,TObserver}"/> interface adds support for strongly-typed
     /// observers and incremental changes.
@@ -22,10 +22,10 @@ namespace Caravela.Reactive
     public interface IReactiveSource<out T> : IReactiveSource
     {
         
-        T GetValue(in ReactiveObserverToken observerToken = default);
+        T GetValue(in ReactiveCollectorToken observerToken = default);
         
         // Returns an interface because of covariance.
-        IReactiveVersionedValue<T> GetVersionedValue(in ReactiveObserverToken observerToken = default);
+        IReactiveVersionedValue<T> GetVersionedValue(in ReactiveCollectorToken observerToken = default);
     }
     
  
@@ -45,10 +45,10 @@ namespace Caravela.Reactive
     public interface IAsyncReactiveSource<T> : IReactiveSource
     {
 
-        ValueTask<T> GetValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken );
+        ValueTask<T> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken );
 
         // Returns an interface because of covariance.
-        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken );
+        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken );
     }
 
 

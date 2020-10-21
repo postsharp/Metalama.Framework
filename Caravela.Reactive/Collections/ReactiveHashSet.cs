@@ -154,12 +154,12 @@ namespace Caravela.Reactive.Collections
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => this._version;
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken)
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveCollectorToken observerToken)
         {
             return this;
         }
 
-        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveCollectorToken observerToken)
         {
             return this.VersionedValue;
         }

@@ -3,7 +3,7 @@ namespace Caravela.Reactive.Implementation
     partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {
         /// <summary>
-        /// Implementation of <see cref="IReactiveObservable{T}"/> used for <see cref="ReactiveObserverToken"/>.
+        /// Implementation of <see cref="IReactiveObservable{T}"/> used for <see cref="ReactiveCollectorToken"/>.
         /// It is not possible to use the main class for this interface implementation because of potential conflicts.
         /// </summary>
         private class DependencyObservable : IReactiveObservable<IReactiveObserver>

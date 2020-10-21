@@ -5,7 +5,7 @@ using System.Threading;
 namespace Caravela.Reactive.Implementation
 {
     /// <summary>
-    /// Implementation of <see cref="IReactiveTokenCollector"/>. This is a mutable struct! Don't make it a property
+    /// Implementation of <see cref="IReactiveCollector"/>. This is a mutable struct! Don't make it a property
     /// or a read-only field.
     /// </summary>
     public struct DependencyList

@@ -32,9 +32,9 @@ namespace Caravela.Reactive.Collections
 
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription) { return true; }
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveObserverToken observerToken) => this._value.Value;
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveCollectorToken observerToken) => this._value.Value;
 
-        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveObserverToken observerToken)
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveCollectorToken observerToken)
             => this._value;
     }
 

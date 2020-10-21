@@ -14,7 +14,7 @@ namespace Caravela.Reactive.Implementation
     public abstract class AsyncReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
        IAsyncReactiveSource<TResult, TResultObserver>,
        IReactiveObserver<TSource>,
-       IReactiveTokenCollector
+       IReactiveCollector
        where TSourceObserver : class, IReactiveObserver<TSource>
        where TResultObserver : class, IReactiveObserver<TResult>
 
@@ -56,11 +56,11 @@ namespace Caravela.Reactive.Implementation
 
 
 
-        public async ValueTask<TResult> GetValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken )
+        public async ValueTask<TResult> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
             => (await this.GetVersionedValueAsync( observerToken, cancellationToken )).Value;
         
 
-        public async ValueTask<IReactiveVersionedValue<TResult>> GetVersionedValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken )
+        public async ValueTask<IReactiveVersionedValue<TResult>> GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
         {
             await this.EnsureFunctionEvaluatedAsync( cancellationToken );
 

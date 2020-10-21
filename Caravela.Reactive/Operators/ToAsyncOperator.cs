@@ -30,11 +30,11 @@ namespace Caravela.Reactive.Operators
         bool IReactiveObservable<TObserver>.RemoveObserver( IReactiveSubscription subscription ) => this._source.RemoveObserver( subscription );
 
 
-        ValueTask<TValue> IAsyncReactiveSource<TValue>.GetValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken ) 
+        ValueTask<TValue> IAsyncReactiveSource<TValue>.GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken ) 
             => new ValueTask<TValue>( this._source.GetValue( observerToken ) );
 
 
-        ValueTask<IReactiveVersionedValue<TValue>> IAsyncReactiveSource<TValue>.GetVersionedValueAsync( ReactiveObserverToken observerToken, CancellationToken cancellationToken ) 
+        ValueTask<IReactiveVersionedValue<TValue>> IAsyncReactiveSource<TValue>.GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken ) 
             => new ValueTask<IReactiveVersionedValue<TValue>>( this._source.GetVersionedValue( observerToken ) );
         
 
