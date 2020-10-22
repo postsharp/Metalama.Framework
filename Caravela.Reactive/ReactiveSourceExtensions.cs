@@ -60,6 +60,13 @@ namespace Caravela.Reactive
                 source, collectionSelector, resultSelector);
         }
 
+        public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
+         this TSource source, Func<TSource, IImmutableList<TResult>> collectionSelector )
+            where TSource: IReactiveSource<TSource, IReactiveObserver<TSource>>
+        {
+            return new SelectManyFromScalarOperator<TSource, TResult>( source, collectionSelector );
+        }
+
         public static IReactiveCollection<TResult> Expand<TResult>(
             this IReactiveCollection<IReactiveCollection<TResult>> source)
         {

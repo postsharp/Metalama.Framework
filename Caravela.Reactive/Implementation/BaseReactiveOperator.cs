@@ -60,7 +60,7 @@ namespace Caravela.Reactive.Implementation
         {
             if ( subscription == this._subscriptionToSource )
             {
-                this.OnValueChanged( isBreakingChange );
+                this.OnSourceValueChanged( isBreakingChange );
             }
             else
             {
@@ -72,7 +72,7 @@ namespace Caravela.Reactive.Implementation
         void IReactiveObserver<TSource>.OnValueChanged( IReactiveSubscription subscription, TSource oldValue,
             TSource newValue, int newVersion, bool isBreakingChange )
         {
-            this.OnValueChanged( isBreakingChange );
+            this.OnSourceValueChanged( isBreakingChange, oldValue, newValue );
         }
 
         public void Dispose()
@@ -181,7 +181,15 @@ namespace Caravela.Reactive.Implementation
         }
 
 
-        private void OnValueChanged( bool isBreakingChange )
+        protected virtual void OnSourceValueChanged( bool isBreakingChange )
+        {
+            if ( isBreakingChange )
+            {
+                this.OnObserverBreakingChange();
+            }
+        }
+
+        protected virtual void OnSourceValueChanged( bool isBreakingChange, TSource oldValue, TSource newValue )
         {
             if ( isBreakingChange )
             {
