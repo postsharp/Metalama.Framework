@@ -8,7 +8,6 @@ namespace Caravela.Reactive.Operators
 {
     class SelectManyFromScalarOperator<TSource, TResult> : ReactiveOperator<TSource, IReactiveObserver<TSource>, IEnumerable<TResult>, IReactiveCollectionObserver<TResult>>,
         IReactiveCollection<TResult>
-       where TSource : IReactiveSource<TSource, IReactiveObserver<TSource>>
     {
         IEnumerable<TResult>? _cachedResult;
         readonly Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> _func;
@@ -43,7 +42,7 @@ namespace Caravela.Reactive.Operators
 
         private void OnSourceValueChanged( IEnumerable<TResult> newResult )
         {
-            if ( ReferenceEquals( this._cachedResult, newResult ) )
+            if ( !ReferenceEquals( this._cachedResult, newResult ) )
             {
                 // TODO: not sure if side values are handled properly.
 

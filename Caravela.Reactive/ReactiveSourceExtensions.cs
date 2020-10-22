@@ -62,8 +62,7 @@ namespace Caravela.Reactive
         }
 
         public static IReactiveCollection<TResult> SelectMany<TSource, TResult>(
-         this TSource source, Func<TSource, IImmutableList<TResult>> collectionSelector )
-            where TSource: IReactiveSource<TSource, IReactiveObserver<TSource>>
+         this IReactiveSource<TSource, IReactiveObserver<TSource>> source, Func<TSource, IImmutableList<TResult>> collectionSelector )
         {
             return new SelectManyFromScalarOperator<TSource, TResult>( source, collectionSelector );
         }

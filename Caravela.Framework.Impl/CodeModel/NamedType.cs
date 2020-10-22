@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Collections;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
+    
+  
+
     internal sealed class NamedType : Type, INamedType
     {
         internal INamedTypeSymbol NamedTypeSymbol { get; }

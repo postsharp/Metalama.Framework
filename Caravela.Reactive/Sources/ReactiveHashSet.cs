@@ -8,8 +8,10 @@ using Caravela.Reactive.Implementation;
 
 #endregion
 
-namespace Caravela.Reactive.Collections
+namespace Caravela.Reactive.Sources
 {
+
+
     /// <summary>
     /// A reactive hash set.
     /// </summary>
@@ -22,15 +24,15 @@ namespace Caravela.Reactive.Collections
 
         public ReactiveHashSet()
         {
-            this._observers = new ObserverList<IReactiveCollectionObserver<T>>(this);
+            this._observers = new ObserverList<IReactiveCollectionObserver<T>>( this );
         }
 
-        public ReactiveHashSet(params T[] items) : this((IEnumerable<T>) items)
+        public ReactiveHashSet( params T[] items ) : this( (IEnumerable<T>) items )
         {
-            
+
         }
 
-        public ReactiveHashSet(IEnumerable<T> items) : this()
+        public ReactiveHashSet( IEnumerable<T> items ) : this()
         {
             this._items = items.ToImmutableHashSet();
         }
@@ -38,7 +40,7 @@ namespace Caravela.Reactive.Collections
         private object WriteSync => this._observers;
 
         private ReactiveVersionedValue<IEnumerable<T>> VersionedValue =>
-            new ReactiveVersionedValue<IEnumerable<T>>(this, this._version);
+            new ReactiveVersionedValue<IEnumerable<T>>( this, this._version );
 
 
         public IEnumerator<T> GetEnumerator()
@@ -53,16 +55,16 @@ namespace Caravela.Reactive.Collections
         }
 
 
-        void ICollection<T>.Add(T item)
+        void ICollection<T>.Add( T item )
         {
-            this.Add(item);
+            this.Add( item );
         }
 
         public void Clear()
         {
-            if (!this._items.IsEmpty)
+            if ( !this._items.IsEmpty )
             {
-                lock (this.WriteSync)
+                lock ( this.WriteSync )
                 {
                     this.IncrementVersion();
 
@@ -70,54 +72,54 @@ namespace Caravela.Reactive.Collections
 
                     this._items = ImmutableHashSet<T>.Empty;
 
-                    foreach (var subscription in this._observers)
+                    foreach ( var subscription in this._observers )
                     {
-                        subscription.Observer.OnValueChanged(subscription.Subscription, oldItems, this._items, this._version,
-                            true);
+                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, this._items, this._version,
+                            true );
                     }
                 }
             }
         }
 
-        public bool Contains(T item)
+        public bool Contains( T item )
         {
-            return this._items.Contains(item);
+            return this._items.Contains( item );
         }
 
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public void CopyTo( T[] array, int arrayIndex )
         {
             throw new NotImplementedException();
         }
 
-        public bool Remove(T item)
+        public bool Remove( T item )
         {
-            if (!this._items.Contains(item))
+            if ( !this._items.Contains( item ) )
             {
                 return false;
             }
 
-            lock (this.WriteSync)
+            lock ( this.WriteSync )
             {
                 var items = this._items;
 
-                items = items.Remove(item);
+                items = items.Remove( item );
 
-                if (items != this._items)
+                if ( items != this._items )
                 {
                     var oldItems = this._items;
                     this._items = items;
 
                     this.IncrementVersion();
 
-                    foreach (var subscription in this._observers)
+                    foreach ( var subscription in this._observers )
                     {
-                        subscription.Observer.OnItemRemoved(subscription.Subscription, item, this._version);
+                        subscription.Observer.OnItemRemoved( subscription.Subscription, item, this._version );
                     }
-                    
-                    foreach (var subscription in this._observers.OfType<IEnumerable<T>>())
+
+                    foreach ( var subscription in this._observers.OfType<IEnumerable<T>>() )
                     {
-                        subscription.Observer.OnValueChanged(subscription.Subscription, oldItems, items, this._version);
+                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, items, this._version );
                     }
 
                     return true;
@@ -138,15 +140,15 @@ namespace Caravela.Reactive.Collections
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
-            IReactiveCollectionObserver<T> observer)
+            IReactiveCollectionObserver<T> observer )
         {
-            return this._observers.AddObserver(observer);
+            return this._observers.AddObserver( observer );
         }
 
-       
-        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver(IReactiveSubscription subscription)
+
+        bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver( IReactiveSubscription subscription )
         {
-            return this._observers.RemoveObserver(subscription);
+            return this._observers.RemoveObserver( subscription );
         }
 
         // TODO: this is not thread-safe.
@@ -154,12 +156,12 @@ namespace Caravela.Reactive.Collections
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => this._version;
 
-        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue(in ReactiveCollectorToken observerToken)
+        IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue( in ReactiveCollectorToken observerToken )
         {
             return this;
         }
 
-        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveCollectorToken observerToken)
+        IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue( in ReactiveCollectorToken observerToken )
         {
             return this.VersionedValue;
         }
@@ -173,35 +175,35 @@ namespace Caravela.Reactive.Collections
             this._version++;
         }
 
-        public bool Add(T item)
+        public bool Add( T item )
         {
-            if (this.Contains(item))
+            if ( this.Contains( item ) )
             {
                 return false;
             }
 
 
-            lock (this.WriteSync)
+            lock ( this.WriteSync )
             {
                 var items = this._items;
 
-                items = items.Add(item);
+                items = items.Add( item );
 
-                if (items != this._items)
+                if ( items != this._items )
                 {
                     var oldItems = this._items;
                     this._items = items;
 
                     this.IncrementVersion();
 
-                    foreach (var subscription in this._observers)
+                    foreach ( var subscription in this._observers )
                     {
-                        subscription.Observer.OnItemAdded(subscription.Subscription, item, this._version);
+                        subscription.Observer.OnItemAdded( subscription.Subscription, item, this._version );
                     }
-                    
-                    foreach (var subscription in this._observers.OfType<IEnumerable<T>>())
+
+                    foreach ( var subscription in this._observers.OfType<IEnumerable<T>>() )
                     {
-                        subscription.Observer.OnValueChanged(subscription.Subscription, oldItems, items, this._version);
+                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, items, this._version );
                     }
 
                     return true;
@@ -213,35 +215,35 @@ namespace Caravela.Reactive.Collections
             }
         }
 
-        public bool Replace(T oldItem, T newItem)
+        public bool Replace( T oldItem, T newItem )
         {
-            if (!this._items.Contains(oldItem))
+            if ( !this._items.Contains( oldItem ) )
             {
                 return false;
             }
 
-            lock (this.WriteSync)
+            lock ( this.WriteSync )
             {
                 var items = this._items;
 
-                items = items.Remove(oldItem);
-                items = items.Add(newItem);
+                items = items.Remove( oldItem );
+                items = items.Add( newItem );
 
-                if (items != this._items)
+                if ( items != this._items )
                 {
                     var oldItems = this._items;
                     this._items = items;
 
                     this.IncrementVersion();
 
-                    foreach (var subscription in this._observers)
+                    foreach ( var subscription in this._observers )
                     {
-                        subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, this._version);
+                        subscription.Observer.OnItemReplaced( subscription.Subscription, oldItem, newItem, this._version );
                     }
-                    
-                    foreach (var subscription in this._observers.OfType<IEnumerable<T>>())
+
+                    foreach ( var subscription in this._observers.OfType<IEnumerable<T>>() )
                     {
-                        subscription.Observer.OnValueChanged(subscription.Subscription, oldItems, items, this._version);
+                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, items, this._version );
                     }
                 }
             }

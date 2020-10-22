@@ -1,4 +1,4 @@
-﻿using Caravela.Reactive.Collections;
+﻿using Caravela.Reactive.Sources;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
