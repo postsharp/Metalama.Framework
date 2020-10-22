@@ -18,7 +18,6 @@ namespace Caravela.Reactive.Operators
 
         private static readonly IEqualityComparer<TResult> _resultEqualityComparer = EqualityComparer<TResult>.Default;
         private readonly Func<TSource, ReactiveCollectorToken, CancellationToken, ValueTask<TResult>> _func;
-        private ImmutableList<TResult> _result;
 
         public AsyncSelectOperator( IAsyncReactiveCollection<TSource> source, Func<TSource, CancellationToken, ValueTask<TResult>> func, bool hasReactiveDependencies )
             : base(source, hasReactiveDependencies )
@@ -35,9 +34,8 @@ namespace Caravela.Reactive.Operators
                 builder.Add( await this._func( item, this.ObserverToken, cancellationToken ) );
             }
 
-            this._result = builder.ToImmutable();
 
-            return this._result;
+            return new( builder.ToImmutable() );
             
         }
 

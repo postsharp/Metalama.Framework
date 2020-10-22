@@ -11,13 +11,9 @@ namespace Caravela.Reactive.Collections
     {
         private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
         
-        public ImmutableReactiveCollection(IImmutableList<T> items)
+        public ImmutableReactiveCollection(IEnumerable<T> items)
         {
             this._value = new ReactiveVersionedValue<IEnumerable<T>>(items, 0);
-        }
-
-        public ImmutableReactiveCollection(IEnumerable<T> items) : this(items.ToImmutableList())
-        {
         }
 
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
@@ -38,12 +34,8 @@ namespace Caravela.Reactive.Collections
 
         IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue(in ReactiveCollectorToken observerToken)
             => this._value;
+
     }
 
-    public static class ImmutableReactiveExtensions
-    {
-        public static IReactiveCollection<T> ToImmutableReactive<T>(this IImmutableList<T> source) => new ImmutableReactiveCollection<T>(source);
-
-        public static IReactiveCollection<T> ToImmutableReactive<T>(this IEnumerable<T> source) => new ImmutableReactiveCollection<T>(source);
-    }
+    
 }

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Reactive.Collections;
 using Caravela.Reactive.Operators;
 
 #endregion
@@ -157,5 +158,31 @@ namespace Caravela.Reactive
 
             return new SomeOperator<T>(source, func, true);
         }
+
+        /// <summary>
+        /// Wraps a source <see cref="IImmutableList{T}"/> into an <see cref="IReactiveCollection{T}"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IReactiveCollection<T> ToReactive<T>( this IImmutableList<T> source ) => new ImmutableReactiveCollection<T>( source );
+
+        /// <summary>
+        /// Wraps a source <see cref="IImmutableSet{T}"/> into an <see cref="IReactiveCollection{T}"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+
+        public static IReactiveCollection<T> ToReactive<T>( this IImmutableSet<T> source ) => new ImmutableReactiveCollection<T>( source );
+
+        /// <summary>
+        /// Assumes that a source <see cref="IEnumerable{T}"/> is immutable and
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IReactiveCollection<T> ToImmutableReactive<T>( this IEnumerable<T> source ) => new ImmutableReactiveCollection<T>( source );
+
     }
 }
