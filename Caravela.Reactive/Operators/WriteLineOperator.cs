@@ -18,7 +18,7 @@ namespace Caravela.Reactive.Operators
         {
             this._source = source;
             this.Name = name ?? typeof(T).Name;
-            this._subscription = this._source.AddObserver(this);
+            this._subscription = this._source.Observable.AddObserver(this);
             this._dependencies = new DependencyList(this);
 
             foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
@@ -87,7 +87,7 @@ namespace Caravela.Reactive.Operators
 
         void IReactiveCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (source.Object != this._source && source.Object != this)
+            if (source.Source != this._source && source.Source != this)
             {
                 this._dependencies.Add(source, version);
             }

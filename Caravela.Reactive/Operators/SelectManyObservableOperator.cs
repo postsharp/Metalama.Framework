@@ -61,7 +61,7 @@ namespace Caravela.Reactive.Operators
             }
             else
             {
-                var subscription = this.CollectionSelector(source, this.ObserverToken).AddObserver(this);
+                var subscription = this.CollectionSelector(source, this.ObserverToken).Observable.AddObserver(this);
                 if (subscription != null)
                 {
                     this._subscriptions.Add(source, (subscription, 1));

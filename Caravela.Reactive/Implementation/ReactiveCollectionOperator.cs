@@ -68,7 +68,7 @@ namespace Caravela.Reactive.Implementation
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            return this.Source.AddObserver( this );
+            return this.Source.Observable.AddObserver( this );
         }
 
 

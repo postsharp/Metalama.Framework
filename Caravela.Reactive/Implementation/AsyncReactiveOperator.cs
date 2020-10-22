@@ -54,7 +54,11 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
+        IReactiveObservable<TResultObserver> IAsyncReactiveSource<TResult, TResultObserver>.Observable => this;
 
+        bool IReactiveSource.IsMaterialized => throw new NotImplementedException();
+
+        bool IReactiveSource.IsImmutable => throw new NotImplementedException();
 
         public async ValueTask<TResult> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
             => (await this.GetVersionedValueAsync( observerToken, cancellationToken )).Value;
@@ -155,6 +159,14 @@ namespace Caravela.Reactive.Implementation
             this._semaphore.Release();
         }
 
+        ValueTask<TResult> IAsyncReactiveSource<TResult>.GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
+        {
+            throw new NotImplementedException();
+        }
 
+        ValueTask<IReactiveVersionedValue<TResult>> IAsyncReactiveSource<TResult>.GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
+        {
+            throw new NotImplementedException();
+        }
     }
 }

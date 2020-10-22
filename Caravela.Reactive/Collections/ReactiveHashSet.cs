@@ -14,7 +14,7 @@ namespace Caravela.Reactive.Collections
     /// A reactive hash set.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReadOnlyCollection<T>
+    public sealed class ReactiveHashSet<T> : ICollection<T>, IReactiveCollection<T>, IReadOnlyCollection<T>, IReactiveObservable<IReactiveCollectionObserver<T>>
     {
         private ObserverList<IReactiveCollectionObserver<T>> _observers;
         private ImmutableHashSet<T> _items = ImmutableHashSet<T>.Empty;
@@ -135,7 +135,7 @@ namespace Caravela.Reactive.Collections
 
 
 
-        object IReactiveObservable<IReactiveCollectionObserver<T>>.Object => this;
+        IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
             IReactiveCollectionObserver<T> observer)
@@ -166,6 +166,7 @@ namespace Caravela.Reactive.Collections
 
         public bool IsMaterialized => true;
 
+        IReactiveObservable<IReactiveCollectionObserver<T>> IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>>.Observable => this;
 
         private void IncrementVersion()
         {

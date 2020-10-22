@@ -18,6 +18,7 @@ namespace Caravela.Reactive.Implementation
     /// <typeparam name="TResult">Type of the result value.</typeparam>
     /// <typeparam name="TResultObserver">Type of result observers.</typeparam>
     public abstract partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
+        IReactiveSource,
     IReactiveObserver<TSource>,
     IReactiveObservable<TResultObserver>,
     IReactiveCollector
@@ -111,10 +112,10 @@ namespace Caravela.Reactive.Implementation
 
         public virtual bool IsMaterialized => false;
 
-        object IReactiveObservable<TResultObserver>.Object => this;
+        IReactiveSource IReactiveObservable<TResultObserver>.Source => this;
 
         protected virtual bool ShouldTrackDependency( IReactiveObservable<IReactiveObserver> source )
-            => source.Object != this && source.Object != this.Source;
+            => source.Source != this && source.Source != this.Source;
 
         void IReactiveCollector.AddDependency( IReactiveObservable<IReactiveObserver> source, int version )
         {

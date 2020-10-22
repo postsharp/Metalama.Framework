@@ -63,6 +63,10 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
+        IReactiveObservable<TResultObserver> IReactiveSource<TResult, TResultObserver>.Observable => this;
+
+
+
         /// <summary>
         /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
         /// </summary>
@@ -166,7 +170,5 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-        
-        
     }
 }

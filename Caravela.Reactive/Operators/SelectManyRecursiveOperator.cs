@@ -60,7 +60,7 @@ namespace Caravela.Reactive.Operators
         {
             if (!this._subscriptions.TryGetValue(source, out var existing))
             {
-                this._subscriptions = this._subscriptions.Add(source, (source.AddObserver(this), 1));
+                this._subscriptions = this._subscriptions.Add(source, (source.Observable.AddObserver(this), 1));
                 return true;
             }
             else

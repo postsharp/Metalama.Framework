@@ -19,7 +19,7 @@ namespace Caravela.Reactive.Operators
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            return this.Source.AddObserver(this);
+            return this.Source.Observable.AddObserver(this);
         }
 
         protected override ReactiveOperatorResult<T> EvaluateFunction(IEnumerable<T> source)

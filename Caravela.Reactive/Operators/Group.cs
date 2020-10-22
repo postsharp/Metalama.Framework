@@ -10,7 +10,7 @@ using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
-    internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>
+    internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>, IReactiveObservable<IReactiveCollectionObserver<TItem>>
     {
         private static readonly IEqualityComparer<TItem> _equalityComparer =
             EqualityComparerFactory.GetEqualityComparer<TItem>();
@@ -76,7 +76,7 @@ namespace Caravela.Reactive.Operators
             
         int IReactiveObservable<IReactiveCollectionObserver<TItem>>.Version =>this._version;
 
-        object IReactiveObservable<IReactiveCollectionObserver<TItem>>.Object => this;
+        IReactiveSource IReactiveObservable<IReactiveCollectionObserver<TItem>>.Source => this;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<TItem>>.AddObserver(
             IReactiveCollectionObserver<TItem> observer)
@@ -184,6 +184,8 @@ namespace Caravela.Reactive.Operators
         }
         
         internal int Mark { get; private set; }
+
+        IReactiveObservable<IReactiveCollectionObserver<TItem>> IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.Observable => this;
 
         public void Clear()
         {

@@ -12,9 +12,9 @@ namespace Caravela.Reactive
         /// Gets the current version of the observable object.
         /// </summary>
         int Version { get; }
-        
+
         // This is the original object, which may be different to the helper object that implements the interface.
-        object Object { get; }
+        IReactiveSource Source { get; }
         
         /// <summary>
         /// Adds an observer.

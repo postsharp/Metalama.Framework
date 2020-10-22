@@ -17,7 +17,7 @@ namespace Caravela.Reactive.Implementation
 
             int IReactiveObservable<IReactiveObserver>.Version => this._parent.Version;
 
-            public object Object => this._parent;
+            public IReactiveSource Source => this._parent;
 
             IReactiveSubscription IReactiveObservable<IReactiveObserver>.AddObserver(IReactiveObserver observer)
             {

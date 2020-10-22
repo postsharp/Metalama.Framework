@@ -35,11 +35,10 @@ namespace Caravela.Reactive
     /// <typeparam name="TValue">Type of the value.</typeparam>
     /// <typeparam name="TObserver">Type of the observer.</typeparam>
     public interface IReactiveSource<out TValue, in TObserver> : 
-        IReactiveObservable<TObserver>,
         IReactiveSource<TValue>
         where TObserver : IReactiveObserver<TValue>
     {
-     
+        IReactiveObservable<TObserver> Observable { get; }
     }
 
     public interface IAsyncReactiveSource<T> : IReactiveSource
@@ -58,10 +57,9 @@ namespace Caravela.Reactive
     /// <typeparam name="TValue">Type of the value.</typeparam>
     /// <typeparam name="TObserver">Type of the observer.</typeparam>
     public interface IAsyncReactiveSource<TValue, in TObserver> :
-        IReactiveObservable<TObserver>,
         IAsyncReactiveSource<TValue>
         where TObserver : IReactiveObserver<TValue>
     {
-
+        IReactiveObservable<TObserver> Observable { get; }
     }
 }
