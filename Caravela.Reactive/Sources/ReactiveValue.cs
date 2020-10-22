@@ -9,14 +9,14 @@ using System.Threading;
 
 namespace Caravela.Reactive.Sources
 {
-    public sealed class ReactiveSource<T> : IReactiveSource<T, IReactiveObserver<T>>, IReactiveObservable<IReactiveObserver<T>>
+    public sealed class ReactiveValue<T> : IReactiveSource<T, IReactiveObserver<T>>, IReactiveObservable<IReactiveObserver<T>>
     {
         private int _version;
         private readonly IEqualityComparer<T> _comparer;
         private IReactiveVersionedValue<T> _value;
         private ObserverList<IReactiveObserver<T>> _observers;
 
-        public ReactiveSource( T value, IEqualityComparer<T>? comparer = null )
+        public ReactiveValue( T value, IEqualityComparer<T>? comparer = null )
         {
             this._value = new ReactiveVersionedValue<T>( value, 0 );
             this._comparer = comparer ?? EqualityComparer<T>.Default;
