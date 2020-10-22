@@ -30,9 +30,10 @@ namespace Caravela.Reactive.UnitTests
         [Fact]
         public void EmptyGroupTest()
         {
-            _ = new[] { 1, 2, 3 }.ToImmutableReactive()
-                .GroupBy( i => i % 10 )
-                [0];
+            var groups = new[] { 1, 2, 3 }.ToImmutableReactive()
+                .GroupBy( i => i % 10 );
+
+            Assert.Empty( groups[0].GetValue() );
         }
 
         [Fact]

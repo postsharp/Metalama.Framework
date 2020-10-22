@@ -1,7 +1,5 @@
 ﻿using Caravela.Reactive;
 using Caravela.Reactive.Sources;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 using Xunit;
 
@@ -39,31 +37,27 @@ namespace Caravela.Reactive.UnitTests
             Assert.Equal( new[] { "C.M" }, memberNames.GetValue( default ) );
         }
 
-        /*
         [Fact]
         public void ImmutableNestedSelectManyTest()
         {
-            var roslynCompilation = CSharpCompilation.Create( null! );
-
-            new[] { new Compilation( roslynCompilation ) }.ToImmutableReactive()
-                .SelectMany( c => c.DeclaredTypes.SelectMany( t => t.Attributes ) )
-                .GroupBy( a => a.Type )
+            var groups = new[] { new TestCompilation() }.ToImmutableReactive()
+                .SelectMany( c => c.Types.SelectMany( t => t.Members ) )
+                .GroupBy( a => a.Name )
                 .GetValue();
-        }
 
+            Assert.Empty( groups );
+        }
 
         [Fact]
         public void ReactiveNestedSelectManyTest()
         {
-            var roslynCompilation = CSharpCompilation.Create( null! );
-
-            new ReactiveHashSet<Compilation> { new Compilation( roslynCompilation ) }
-                .SelectMany( c => c.DeclaredTypes.SelectMany( t => t.Attributes ) )
-                .GroupBy( a => a.Type )
+            var groups = new ReactiveHashSet<TestCompilation> { new() }
+                .SelectMany( c => c.Types.SelectMany( t => t.Members ) )
+                .GroupBy( a => a.Name )
                 .GetValue();
-        }
-        */
 
+            Assert.Empty( groups );
+        }
     }
 
 }
