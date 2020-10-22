@@ -27,10 +27,9 @@ namespace Caravela.Reactive.Implementation
     {
 
         private protected DependencyList _dependencies;
-
         private protected volatile int _sourceVersion = -1;
         private protected volatile bool _isFunctionResultDirty = true;
-        private protected volatile ReactiveVersionedValue<TResult>? _result;
+        private protected AtomicValue<ReactiveVersionedValue<TResult>> _result;
         private DependencyObservable? _dependencyObservable;
         private protected IReactiveSubscription? _subscriptionToSource;
         private ObserverList<TResultObserver> _observers;
@@ -53,7 +52,7 @@ namespace Caravela.Reactive.Implementation
 
         protected ReactiveCollectorToken ObserverToken => new ReactiveCollectorToken( this );
 
-        protected TResult CachedValue => this._result!.Value;
+        protected TResult CachedValue => this._result.Value.Value;
 
 
         void IReactiveObserver.OnValueInvalidated( IReactiveSubscription subscription, bool isBreakingChange )
@@ -106,7 +105,7 @@ namespace Caravela.Reactive.Implementation
 
       
 
-        public int Version => this._result?.Version ?? -1;
+        public int Version => this._result.Value.Version;
 
 
         public virtual bool IsMaterialized => false;
@@ -169,7 +168,7 @@ namespace Caravela.Reactive.Implementation
         /// the current operator has a breaking change because the operators downstream may still be
         /// able to process incremental changes.
         /// </summary>
-        protected bool ShouldProcessIncrementalChange => this._result != null;
+        protected bool ShouldProcessIncrementalChange => this._result.Value.Version > 0;
 
 
      

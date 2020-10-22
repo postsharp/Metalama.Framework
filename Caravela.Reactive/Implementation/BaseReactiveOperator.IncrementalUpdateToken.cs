@@ -90,7 +90,7 @@ namespace Caravela.Reactive.Implementation
                 this._parent._currentUpdateSideValues = this._parent._currentUpdateSideValues.Combine( sideValues );
             }
 
-            public int NextVersion => this._parent._result?.Version + 1 ?? 0;
+            public int NextVersion => this._parent._result.Value.Version + 1;
 
 
             public void Dispose()
@@ -110,7 +110,7 @@ namespace Caravela.Reactive.Implementation
                             this._parent._sourceVersion = this._parent._currentUpdateNewSourceVersion;
                         }
 
-                        this._parent._result =
+                        this._parent._result.Value =
                             new ReactiveVersionedValue<TResult>(this._parent._currentUpdateResult!, this.NextVersion, this._parent._currentUpdateSideValues);
                     }
                     else

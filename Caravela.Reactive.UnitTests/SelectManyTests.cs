@@ -1,5 +1,5 @@
 ﻿using Caravela.Reactive;
-using Caravela.Reactive.Collections;
+using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;

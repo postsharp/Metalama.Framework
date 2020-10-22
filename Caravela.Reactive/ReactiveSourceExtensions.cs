@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Reactive.Collections;
+using Caravela.Reactive.Sources;
 using Caravela.Reactive.Operators;
 
 #endregion

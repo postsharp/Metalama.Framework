@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Collections;
+using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

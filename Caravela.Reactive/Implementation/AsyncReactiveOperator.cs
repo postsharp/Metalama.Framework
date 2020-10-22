@@ -67,10 +67,10 @@ namespace Caravela.Reactive.Implementation
             await this.EnsureFunctionEvaluatedAsync( cancellationToken );
 
             // Take local copy of the result to guarantee consistency in the version number.
-            var currentValue = this._result;
-            this.CollectDependencies( observerToken, currentValue!.Version );
+            var currentValue = this._result.Value;
+            this.CollectDependencies( observerToken, currentValue.Version );
 
-            return this._result!;
+            return currentValue;
         }
 
 
@@ -99,18 +99,20 @@ namespace Caravela.Reactive.Implementation
 
                             this._dependencies.Clear();
 
+                            var currentValue = this._result.Value;
+
                             // If the source has changed, we need to evaluate our function again.
                             var newResult = await this.EvaluateFunctionAsync( sourceValue.Value, cancellationToken );
 
-                            if ( this._result == null || !this.AreEqual( this._result.Value, newResult.Value ) )
+                            if ( currentValue.Version == 0 || !this.AreEqual( currentValue.Value, newResult.Value ) )
                             {
                                 // Our function gave a different result, so we increase our version number.
 
                                 sideValues = sideValues.Combine( newResult.SideValues );
 
 
-                                this._result =
-                                    new ReactiveVersionedValue<TResult>( newResult.Value, this._result?.Version + 1 ?? 0, sideValues );
+                                this._result.Value =
+                                    new ReactiveVersionedValue<TResult>( newResult.Value, currentValue.Version + 1, sideValues );
                             }
 
                             // If the function has not produced dependencies on first execution, we forbid to produce them later.

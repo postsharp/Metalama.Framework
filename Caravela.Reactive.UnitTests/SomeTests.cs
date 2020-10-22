@@ -1,4 +1,4 @@
-﻿using Caravela.Reactive.Collections;
+﻿using Caravela.Reactive.Sources;
 using Xunit;
 
 namespace Caravela.Reactive.UnitTests
