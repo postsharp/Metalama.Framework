@@ -6,9 +6,11 @@ namespace Caravela.Framework
 {
     public interface ICompilation
     {
-        IReactiveCollection<ITypeInfo> DeclaredTypes { get; }
+        IReactiveCollection<INamedType> DeclaredTypes { get; }
 
         IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
+
+        IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
 
@@ -24,14 +26,37 @@ namespace Caravela.Framework
     public interface INamedType : IType, ICodeElement
     {
         INamedType? BaseType { get; }
-        IReadOnlyList<INamedType> ImplementedInterfaces { get; }
+
+        IReactiveCollection<INamedType> ImplementedInterfaces { get; }
 
         string Name { get; }
-        // TODO: how to deal with namespaces, especially considering nested types
+
+        string? Namespace { get; }
+
         string FullName { get; }
+
         IReadOnlyList<IType> GenericArguments { get; }
 
-        ITypeInfo GetTypeInfo();
+        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+
+
+        // TODO: differentiate between class, struct and interface
+        IReactiveCollection<INamedType> NestedTypes { get; }
+
+        // TODO: how to represent fields in general and compiler-generated backing fields in particular
+        // don't show backing fields, ignore their attributes
+        IReactiveCollection<IProperty> Properties { get; }
+
+        IReactiveCollection<IProperty> AllProperties { get; }
+
+        IReactiveCollection<IEvent> Events { get; }
+
+        IReactiveCollection<IEvent> AllEvents { get; }
+
+        // TODO: does this include accessor methods? yes, but classify them
+        IReactiveCollection<IMethod> Methods { get; }
+
+        IReactiveCollection<IMethod> AllMethods { get; }
     }
 
     public interface IAttribute
@@ -47,24 +72,17 @@ namespace Caravela.Framework
         IReactiveCollection<IAttribute> Attributes { get; }
     }
 
-    // TODO: how to represent enums, delegates and records? like roslyn
-    public interface ITypeInfo : INamedType, ICodeElement
-    {
-        // TODO: differentiate between class, struct and interface
-        IReadOnlyList<ITypeInfo> NestedTypes { get; }
-        // TODO: how to represent fields in general and compiler-generated backing fields in particular
-        // don't show backing fields, ignore their attributes
-        IReadOnlyList<IProperty> Properties { get; }
-        IReadOnlyList<IEvent> Events { get; }
-        // TODO: does this include accessor methods? yes, but classify them
-        IReadOnlyList<IMethod> Methods { get; }
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
-    }
+
 
     public interface IMember : ICodeElement
     {
         string Name { get; }
+
         bool IsStatic { get; }
+
+        bool IsVirtual { get; }
+
+        INamedType? DeclaringType { get; }
     }
 
     public interface IProperty : IMember

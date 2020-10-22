@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -21,10 +20,13 @@ namespace Caravela.Framework.Impl
         }
 
         [Memo]
-        public IReactiveCollection<ITypeInfo> DeclaredTypes => this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetTypeInfo ).ToImmutableReactive();
+        public IReactiveCollection<INamedType> DeclaredTypes => this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
         public IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
+
+        [Memo]
+        public IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace );
 
         public INamedType? GetTypeByMetadataName(string metadataName)
         {

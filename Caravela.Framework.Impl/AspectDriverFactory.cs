@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl
                 throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
 
             if (weavers.Count == 1)
-                return (IAspectDriver) this._loader.CreateInstance(((NamedType)weavers.Single()).NamedTypeSymbol);
+                return (IAspectDriver) this._loader.CreateInstance(((NamedType)weavers.Single()).TypeSymbol);
 
             throw new NotImplementedException();
         }

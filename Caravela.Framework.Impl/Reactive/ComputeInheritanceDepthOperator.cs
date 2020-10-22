@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Reactive
                         // This can cause cycles in computing the inheritance depth. The cycle could be addressed
                         // by taking an arbitrary decision and emitting a warning, however this interface does
                         // not support emitting warnings.
-                        foreach ( var nestedType in namedType.GetTypeInfo().NestedTypes )
+                        foreach ( var nestedType in namedType.NestedTypes.GetValue() )
                         {
                             baseDepth = Max( baseDepth, ComputeDepth( nestedType ) );
                         }
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Reactive
                     }
 
                     // Implemented interfaces are processed before their implementations.
-                    foreach ( var interfaceImplementation in type.ImplementedInterfaces )
+                    foreach ( var interfaceImplementation in type.ImplementedInterfaces.GetValue() )
                     {
                         baseDepth = Max( baseDepth, ComputeDepth( interfaceImplementation ) );
                     }

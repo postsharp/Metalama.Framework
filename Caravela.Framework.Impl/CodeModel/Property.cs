@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -10,14 +9,14 @@ namespace Caravela.Framework.Impl
     internal class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol _symbol;
-        protected override ISymbol Symbol => this._symbol;
+        protected internal override ISymbol Symbol => this._symbol;
 
-        private readonly TypeInfo _containingElement;
+        private readonly NamedType _containingElement;
         public override ICodeElement? ContainingElement => this._containingElement;
 
         internal override Compilation Compilation => this._containingElement.Compilation;
 
-        public Property(IPropertySymbol symbol, TypeInfo containingElement)
+        public Property(IPropertySymbol symbol, NamedType containingElement)
         {
             this._symbol = symbol;
             this._containingElement = containingElement;
@@ -41,7 +40,12 @@ namespace Caravela.Framework.Impl
 
         public bool IsStatic => this._symbol.IsStatic;
 
+        public bool IsVirtual => this._symbol.IsVirtual;
+
+        public INamedType DeclaringType => this._containingElement;
+
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+
     }
 }

@@ -15,9 +15,10 @@ namespace Caravela.Framework.Impl
         public abstract ICodeElement? ContainingElement { get; }
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
-        protected abstract ISymbol Symbol { get; }
+        protected internal abstract ISymbol Symbol { get; }
+
         private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select(r => (CSharpSyntaxNode)r.GetSyntax());
-        // TODO: special case partial methods
+        // TODO: special case partial methods?
         CSharpSyntaxNode IToSyntax.ToSyntaxNode() => this.ToSyntaxNodes().Single();
         IEnumerable<CSharpSyntaxNode> IToSyntax.ToSyntaxNodes() => this.ToSyntaxNodes();
     }

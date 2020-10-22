@@ -60,7 +60,7 @@ namespace NS
             Assert.Equal("C", c1.FullName);
             Assert.Null(c1.ContainingElement);
 
-            var d = c1.NestedTypes.Single();
+            var d = c1.NestedTypes.GetValue().Single();
             Assert.Equal("D", d.Name);
             Assert.Equal("C.D", d.FullName);
             Assert.Same(c1, d.ContainingElement);
@@ -91,11 +91,8 @@ class C
             var type = compilation.DeclaredTypes.GetValue(default).Single();
             Assert.Equal("C", type.Name);
 
-            var methods = type.Methods;
-            Assert.Equal(2, methods.Count);
-
-            var ctor = methods[1];
-            Assert.Equal(".ctor", ctor.Name);
+            var methods = type.Methods.GetValue().ToList();
+            Assert.Single( methods );
 
             var method = methods[0];
             Assert.Equal("M", method.Name);
@@ -160,7 +157,7 @@ interface I
 
             var compilation = CreateCompilation(code);
 
-            var methods = compilation.DeclaredTypes.GetValue(default).Single().Methods;
+            var methods = compilation.DeclaredTypes.GetValue().Single().Methods.GetValue().ToList();
             Assert.Equal(2, methods.Count);
 
             var m1 = methods[0];
@@ -203,7 +200,7 @@ class C<T1, T2>
 
             // TODO: check type.GenericArguments once ITypeParameterSymbol is supported
 
-            var method = type.Methods[0];
+            var method = type.Methods.GetValue().Single();
 
             Assert.Equal("C<int, string>", method.ReturnType.ToString());
             Assert.Equal(new string[] { "int", "string" }, ((INamedType)method.ReturnType).GenericArguments.Select(t => t.ToString()));

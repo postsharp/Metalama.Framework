@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -13,7 +12,7 @@ namespace Caravela.Framework.Impl
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol _symbol;
-        protected override ISymbol Symbol => this._symbol;
+        protected internal override ISymbol Symbol => this._symbol;
 
         internal override Compilation Compilation { get; }
 
@@ -76,13 +75,18 @@ namespace Caravela.Framework.Impl
         [Memo]
         public override ICodeElement ContainingElement => this._symbol.ContainingSymbol switch
         {
-            INamedTypeSymbol type => this.SymbolMap.GetTypeInfo(type),
+            INamedTypeSymbol type => this.SymbolMap.GetNamedType(type),
             IMethodSymbol method => this.SymbolMap.GetMethod(method),
             _ => throw new InvalidOperationException()
         };
 
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+
+        public bool IsVirtual => this._symbol.IsVirtual;
+
+        [Memo]
+        public INamedType? DeclaringType => this._symbol.ContainingType == null ? null : this.SymbolMap.GetNamedType( this._symbol.ContainingType );
 
         public override string ToString() => this._symbol.ToString();
 
