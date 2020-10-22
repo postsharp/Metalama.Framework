@@ -4,7 +4,6 @@
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,8 +18,7 @@ namespace Caravela.Reactive.Implementation
        where TResultObserver : class, IReactiveObserver<TResult>
 
     {
-
-        SemaphoreSlim _semaphore = new SemaphoreSlim( 1 );
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim( 1 );
 
         protected AsyncReactiveOperator( IAsyncReactiveSource<TSource, TSourceObserver> source, bool hasReactiveDependencies ) : base( source )
         {
