@@ -29,15 +29,17 @@ namespace Caravela.Reactive.Operators
             this._parent = parent;
         }
 
-        internal Group(IGroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent, int mark = 0) :
-            this(parent, initialContent.Key)
+        internal Group( IGroupByOperator<TKey, TItem> parent, TKey key, IEnumerable<TItem> initialContent, int mark ) :
+            this( parent, key )
         {
-        
-            this._parent = parent;
-            
-            this.SetItems(initialContent);
+            this.SetItems( initialContent );
 
             this.Mark = mark;
+        }
+
+        internal Group( IGroupByOperator<TKey, TItem> parent, IGrouping<TKey, TItem> initialContent, int mark ) :
+            this( parent, initialContent.Key, initialContent, mark )
+        {
         }
 
         private void SetItems(IEnumerable<TItem> items)

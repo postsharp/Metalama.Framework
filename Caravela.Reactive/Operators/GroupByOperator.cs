@@ -134,7 +134,7 @@ namespace Caravela.Reactive.Operators
 
             var builder = oldGroups.ToBuilder();
 
-            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc ))
+            foreach (var group in source.GroupBy(s => this._getKeyFunc(s, this.ObserverToken), this._getElementFunc, this._equalityComparer))
             {
                 if (builder.TryGetValue(group.Key, out var items))
                 {

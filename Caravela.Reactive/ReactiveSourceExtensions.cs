@@ -25,6 +25,20 @@ namespace Caravela.Reactive
             return new GroupByOperator<TSource, TKey, TElement>(source, getKeyFunc, getElementFunc, equalityComparer);
         }
 
+        public static IReactiveCollection<IReactiveGroup<TKey, TItem>> OrderedGroupBy<TKey, TItem>(
+            this IReactiveCollection<TItem> source, IComparer<TItem> sourceComparer,
+            Func<TItem, TKey> getKeyFunc )
+        {
+            return new OrderedGroupByOperator<TItem, TKey, TItem>( source, sourceComparer, getKeyFunc, item => item, null );
+        }
+
+        public static IReactiveCollection<IReactiveGroup<TKey, TElement>> OrderedGroupBy<TSource, TKey, TElement>(
+            this IReactiveCollection<TSource> source, IComparer<TSource> sourceComparer,
+            Func<TSource, TKey> getKeyFunc, Func<TSource, TElement> getElementFunc )
+        {
+            return new OrderedGroupByOperator<TSource, TKey, TElement>( source, sourceComparer, getKeyFunc, getElementFunc, null );
+        }
+
         public static IReactiveCollection<T> Union<T>(this IReactiveCollection<T> source, IReactiveCollection<T> second)
         {
             return new UnionOperator<T>(source, second);

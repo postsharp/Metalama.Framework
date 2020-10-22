@@ -87,7 +87,7 @@ namespace Caravela.Reactive.Collections
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            ((ICollection<T>) this._items).CopyTo( array, arrayIndex );
         }
 
         public bool Remove(T item)

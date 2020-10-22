@@ -50,11 +50,11 @@ namespace Caravela.Reactive.Implementation
                 Debug.Assert(lockTaken);
             }
 
-            public void SetBreakingChange()
+            public void SetBreakingChange(bool breaksObservers = false)
             {
                 // We have an incremental change that breaks the stored value, so _parent.EvaluateFunction() must
                 // be called again. However, observers don't need to resynchronize if they are able to process
-                // the increment.
+                // the increment and breaksObservers is false.
 
                 if ( this._parent == null )
                     throw new InvalidOperationException();
@@ -66,6 +66,8 @@ namespace Caravela.Reactive.Implementation
                 }
 
                 this._parent._isFunctionResultDirty = true;
+                if (breaksObservers)
+                    this._parent._currentUpdateBreaksObservers = true;
 
                 // We don't nullify the old result now because the current result may eventually be still valid if all versions 
                 // end up being identical.
@@ -124,13 +126,13 @@ namespace Caravela.Reactive.Implementation
                         Debug.Assert(this._parent._isFunctionResultDirty);
                     }
 
-
                     foreach (var subscription in this._parent._observers.WeaklyTyped())
                     {
-                        subscription.Observer.OnValueInvalidated(subscription.Subscription, false);
+                        subscription.Observer.OnValueInvalidated(subscription.Subscription, this._parent._currentUpdateBreaksObservers);
                     }
                 }
 
+                this._parent._currentUpdateBreaksObservers = false;
                 this._parent._currentUpdateStatus = IncrementalUpdateStatus.Disposed;
                 this._parent._lock.Exit();
 

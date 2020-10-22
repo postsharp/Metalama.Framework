@@ -40,6 +40,7 @@ namespace Caravela.Reactive.Implementation
         // type needs to be immutable so that we can use it with the 'using' statement.
         // Since there is one or zero update concurrently, we're storing the state here.
         private IncrementalUpdateStatus _currentUpdateStatus;
+        private bool _currentUpdateBreaksObservers;
         private int _currentUpdateNewSourceVersion;
         private TResult? _currentUpdateResult;
         private ReactiveSideValues _currentUpdateSideValues;
