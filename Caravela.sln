@@ -24,7 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.AutoCance
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.AutoCancellationToken.TestApp", "Caravela.Patterns.AutoCancellationToken.TestApp\Caravela.Patterns.AutoCancellationToken.TestApp.csproj", "{4FECDE66-1079-4660-94D7-D2DE60A3E0B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Reactive", "Caravela.Reactive\Caravela.Reactive.csproj", "{BD041817-F150-43DD-A987-F815730777A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive", "Caravela.Reactive\Caravela.Reactive.csproj", "{BD041817-F150-43DD-A987-F815730777A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Reactive.UnitTests", "Caravela.Reactive.UnitTests\Caravela.Reactive.UnitTests.csproj", "{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{BD041817-F150-43DD-A987-F815730777A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD041817-F150-43DD-A987-F815730777A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD041817-F150-43DD-A987-F815730777A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
