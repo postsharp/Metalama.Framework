@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl
 
         internal override Compilation Compilation { get; }
 
-        public NamedType(INamedTypeSymbol typeSymbol, Compilation compilation)
+        internal NamedType(INamedTypeSymbol typeSymbol, Compilation compilation)
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;
