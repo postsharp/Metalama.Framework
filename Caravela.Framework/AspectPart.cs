@@ -6,7 +6,7 @@
 
         public AspectPart(string? name)
         {
-            Name = name;
+            this.Name = name;
         }
     }
 }

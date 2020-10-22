@@ -13,7 +13,7 @@ namespace Caravela.Reactive.Operators
         where T : class
     {
         private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getRecursionValueFunc;
-        private ImmutableDictionary<T, int> _result = null!;
+        private ImmutableDictionary<T, int>? _dictionary = null;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
             _subscriptions =
@@ -52,8 +52,8 @@ namespace Caravela.Reactive.Operators
                 Iterate(item);
             }
 
-            this._result = builder.ToImmutable();
-            return new( this._result.Keys );
+            this._dictionary = builder.ToImmutable();
+            return new( this._dictionary.Keys );
         }
 
         private bool Follow(IReactiveCollection<T> source)
@@ -159,11 +159,11 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
             in IncrementalUpdateToken updateToken)
         {
-            var newResult = this._result;
+            var newResult = this._dictionary!;
 
             this.AddItem(item, ref newResult, updateToken);
 
-            this._result = newResult;
+            this._dictionary = newResult;
             
             updateToken.SetValue(newResult.Keys);
         }
@@ -172,11 +172,11 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
             in IncrementalUpdateToken updateToken)
         {
-            var newResult = this._result;
+            var newResult = this._dictionary!;
 
             this.RemoveItem(item, ref newResult, updateToken);
 
-            this._result = newResult;
+            this._dictionary = newResult;
             
             updateToken.SetValue(newResult.Keys);
         }
@@ -184,12 +184,12 @@ namespace Caravela.Reactive.Operators
         protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
             in IncrementalUpdateToken updateToken)
         {
-            var newResult = this._result;
+            var newResult = this._dictionary!;
 
             this.RemoveItem(oldItem, ref newResult, updateToken);
             this.AddItem(newItem, ref newResult, updateToken);
 
-            this._result = newResult;
+            this._dictionary = newResult;
             
             updateToken.SetValue(newResult.Keys);
         }
