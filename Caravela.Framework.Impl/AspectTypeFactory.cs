@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl
 
         public AspectTypeFactory( AspectDriverFactory aspectDriverFactory ) => this._aspectDriverFactory = aspectDriverFactory;
 
-        public AspectType GetAspectType( INamedType attributeType, in ReactiveObserverToken observerToken = default )
+        public AspectType GetAspectType( INamedType attributeType, in ReactiveCollectorToken observerToken = default )
         {
             if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
             {

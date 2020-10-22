@@ -26,7 +26,7 @@ namespace Caravela.Reactive.Operators
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            this._secondSubscription = this._second.AddObserver(this);
+            this._secondSubscription = this._second.Observable.AddObserver(this);
             return base.SubscribeToSource();
         }
 
@@ -73,6 +73,6 @@ namespace Caravela.Reactive.Operators
         }
 
         protected override bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> source)
-            => base.ShouldTrackDependency(source) && source.Object != this._second;
+            => base.ShouldTrackDependency(source) && source.Source != this._second;
     }
 }

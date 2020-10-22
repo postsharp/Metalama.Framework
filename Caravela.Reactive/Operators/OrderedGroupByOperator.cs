@@ -16,7 +16,7 @@ namespace Caravela.Reactive.Operators
     {
         private readonly IComparer<TSource> _sourceComparer;
         private readonly IEqualityComparer<TKey> _equalityComparer;
-        private readonly Func<TSource, ReactiveObserverToken, TKey> _getKeyFunc;
+        private readonly Func<TSource, ReactiveCollectorToken, TKey> _getKeyFunc;
         private readonly Func<TSource, TElement> _getElementFunc;
         private ImmutableArray<Group<TKey, TElement>> _groups;
         private ImmutableDictionary<TSource, Group<TKey, TElement>> _sourceMap;
@@ -30,7 +30,7 @@ namespace Caravela.Reactive.Operators
         {
             this._sourceComparer = sourceComparer;
             this._equalityComparer = equalityComparer ?? EqualityComparer<TKey>.Default;
-            this._getKeyFunc = ReactiveObserverToken.WrapWithDefaultToken(getKeyFunc);
+            this._getKeyFunc = ReactiveCollectorToken.WrapWithDefaultToken(getKeyFunc);
             this._getElementFunc = getElementFunc;
             this._groups = ImmutableArray<Group<TKey, TElement>>.Empty;
             this._sourceMap = ImmutableDictionary<TSource, Group<TKey, TElement>>.Empty;

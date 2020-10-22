@@ -8,7 +8,7 @@ using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
-    internal class WriteLineOperator<T> : IReactiveCollectionObserver<T>, IReactiveTokenCollector
+    internal class WriteLineOperator<T> : IReactiveCollectionObserver<T>, IReactiveCollector
     {
         private readonly IReactiveCollection<T> _source;
         private readonly IReactiveSubscription? _subscription;
@@ -18,10 +18,10 @@ namespace Caravela.Reactive.Operators
         {
             this._source = source;
             this.Name = name ?? typeof(T).Name;
-            this._subscription = this._source.AddObserver(this);
+            this._subscription = this._source.Observable.AddObserver(this);
             this._dependencies = new DependencyList(this);
 
-            foreach (var item in this._source.GetValue(new ReactiveObserverToken(this)))
+            foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
             {
                 this.Add(item);
             }
@@ -59,7 +59,7 @@ namespace Caravela.Reactive.Operators
         {
             if (isBreakingChange)
             {
-                foreach (var item in this._source.GetValue(new ReactiveObserverToken(this)))
+                foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
                 {
                     this.Add(item);
                 }
@@ -85,14 +85,20 @@ namespace Caravela.Reactive.Operators
             }
         }
 
-        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
+        void IReactiveCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (source.Object != this._source && source.Object != this)
+            if (source.Source != this._source && source.Source != this)
             {
                 this._dependencies.Add(source, version);
             }
         }
-        
-        
+
+        void IReactiveCollector.AddSideValue( IReactiveSideValue value )
+        {
+        }
+
+        void IReactiveCollector.AddSideValues( ReactiveSideValues values )
+        {
+        }
     }
 }

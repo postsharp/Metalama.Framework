@@ -3,9 +3,9 @@ using System.Diagnostics;
 
 namespace Caravela.Reactive.Implementation
 {
-    partial class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
+    partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {
-        private enum IncrementalUpdateStatus
+        private protected enum IncrementalUpdateStatus
         {
             /// <summary>
             /// No change.
@@ -34,20 +34,15 @@ namespace Caravela.Reactive.Implementation
         /// </summary>
         protected  readonly struct IncrementalUpdateToken : IDisposable
         {
-            private readonly ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
+            private readonly BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
 
-            public IncrementalUpdateToken(ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent,
+            public IncrementalUpdateToken( BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent,
                 int sourceVersion)
             {
                 this._parent = parent;
                 parent._currentUpdateNewSourceVersion = sourceVersion;
                 parent._currentUpdateStatus = IncrementalUpdateStatus.Default;
                 parent._currentUpdateSideValues = default;
-
-                bool lockTaken = false;
-                this._parent._lock.Enter(ref lockTaken);
-                
-                Debug.Assert(lockTaken);
             }
 
             public void SetBreakingChange(bool breaksObservers = false)
@@ -97,7 +92,7 @@ namespace Caravela.Reactive.Implementation
                 this._parent._currentUpdateSideValues = this._parent._currentUpdateSideValues.Combine( sideValues );
             }
 
-            public int NextVersion => this._parent._result?.Version + 1 ?? 0;
+            public int NextVersion => this._parent._result.Value.Version + 1;
 
 
             public void Dispose()
@@ -117,7 +112,7 @@ namespace Caravela.Reactive.Implementation
                             this._parent._sourceVersion = this._parent._currentUpdateNewSourceVersion;
                         }
 
-                        this._parent._result =
+                        this._parent._result.Value =
                             new ReactiveVersionedValue<TResult>(this._parent._currentUpdateResult!, this.NextVersion, this._parent._currentUpdateSideValues);
                     }
                     else
@@ -134,9 +129,11 @@ namespace Caravela.Reactive.Implementation
 
                 this._parent._currentUpdateBreaksObservers = false;
                 this._parent._currentUpdateStatus = IncrementalUpdateStatus.Disposed;
-                this._parent._lock.Exit();
+                this._parent.ReleaseLock();
 
             }
         }
+
+        private protected abstract void ReleaseLock();
     }
 }

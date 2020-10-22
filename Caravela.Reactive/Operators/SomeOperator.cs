@@ -8,18 +8,18 @@ namespace Caravela.Reactive.Operators
     internal class SomeOperator<T> : ReactiveOperator<IEnumerable<T>, IReactiveCollectionObserver<T>, T, IReactiveObserver<T>>, IReactiveCollectionObserver<T>
     {
         private static readonly IEqualityComparer<T?> _equalityComparer = EqualityComparerFactory.GetEqualityComparer<T?>();
-        private readonly Func<T, ReactiveObserverToken, bool> _predicate;
+        private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
         private readonly bool _orDefault;
 
         public SomeOperator(IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>> source, Func<T, bool> predicate, bool orDefault) : base(source)
         {
-            this._predicate = ReactiveObserverToken.WrapWithDefaultToken(predicate);
+            this._predicate = ReactiveCollectorToken.WrapWithDefaultToken(predicate);
             this._orDefault = orDefault;
         }
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            return this.Source.AddObserver(this);
+            return this.Source.Observable.AddObserver(this);
         }
 
         protected override ReactiveOperatorResult<T> EvaluateFunction(IEnumerable<T> source)

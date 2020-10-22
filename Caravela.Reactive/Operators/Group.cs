@@ -10,7 +10,7 @@ using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
-    internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>, IReactiveTokenCollector
+    internal class Group<TKey, TItem> : IReactiveGroup<TKey,TItem>, IReactiveObservable<IReactiveCollectionObserver<TItem>>
     {
         private static readonly IEqualityComparer<TItem> _equalityComparer =
             EqualityComparerFactory.GetEqualityComparer<TItem>();
@@ -60,28 +60,25 @@ namespace Caravela.Reactive.Operators
 
         public TKey Key { get; }
 
-        private ReactiveVersionedValue<IEnumerable<TItem>> VersionedValue =>
-            new ReactiveVersionedValue<IEnumerable<TItem>>(this.GetValue(new ReactiveObserverToken(this)),
-                this._version);
 
-        public IEnumerable<TItem> GetValue(in ReactiveObserverToken observerToken)
+        public IEnumerable<TItem> GetValue(in ReactiveCollectorToken observerToken)
         {
             return this._items.Keys;
         }
 
         IReactiveVersionedValue<IEnumerable<TItem>> IReactiveSource<IEnumerable<TItem>>.GetVersionedValue(
-                in ReactiveObserverToken observerToken)
+                in ReactiveCollectorToken observerToken)
         {
-            return this.VersionedValue;
+            return new ReactiveVersionedValue<IEnumerable<TItem>>( this._items.Keys, this._version );
         }
 
-        bool IReactiveSource<IEnumerable<TItem>>.IsMaterialized => true;
+        bool IReactiveSource.IsMaterialized => true;
 
-        bool IReactiveSource<IEnumerable<TItem>>.IsImmutable => this._parent.IsImmutable;
+        bool IReactiveSource.IsImmutable => this._parent.IsImmutable;
             
         int IReactiveObservable<IReactiveCollectionObserver<TItem>>.Version =>this._version;
 
-        object IReactiveObservable<IReactiveCollectionObserver<TItem>>.Object => this;
+        IReactiveSource IReactiveObservable<IReactiveCollectionObserver<TItem>>.Source => this;
 
         IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<TItem>>.AddObserver(
             IReactiveCollectionObserver<TItem> observer)
@@ -96,13 +93,6 @@ namespace Caravela.Reactive.Operators
             return this._observers.RemoveObserver(subscription);
         }
 
-        void IReactiveTokenCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
-        {
-            if (source != null)
-            {
-                throw new InvalidOperationException();
-            }
-        }
 
         internal bool Add(TItem item)
         {
@@ -197,6 +187,8 @@ namespace Caravela.Reactive.Operators
         
         internal int Mark { get; private set; }
 
+        IReactiveObservable<IReactiveCollectionObserver<TItem>> IReactiveSource<IEnumerable<TItem>, IReactiveCollectionObserver<TItem>>.Observable => this;
+
         public void Clear()
         {
             this.Replace(Array.Empty<TItem>(), 0);
@@ -206,5 +198,7 @@ namespace Caravela.Reactive.Operators
         {
             return $"Group Key={this.Key}";
         }
+
+      
     }
 }

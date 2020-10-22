@@ -10,7 +10,7 @@ namespace Caravela.Reactive.Operators
 {
     internal abstract class SelectManyObservableOperatorBase<TSource, TCollection, TResult> : SelectManyOperator<TSource, TCollection, TResult>
     {
-        protected Func<TSource, ReactiveObserverToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
+        protected Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
 
         private readonly Dictionary<TSource, (IReactiveSubscription? subscription, int count)> _subscriptions
             = new(EqualityComparerFactory.GetEqualityComparer<TSource>());
@@ -20,7 +20,7 @@ namespace Caravela.Reactive.Operators
             Func<TSource, IReactiveCollection<TCollection>> collectionSelector,
             Func<TSource, TCollection, TResult> resultSelector) : base(source, resultSelector)
         {
-            this.CollectionSelector = ReactiveObserverToken.WrapWithDefaultToken(collectionSelector);
+            this.CollectionSelector = ReactiveCollectorToken.WrapWithDefaultToken(collectionSelector);
         }
 
         protected override TResult SelectResult(IReactiveSubscription subscription, TCollection item) =>
@@ -61,7 +61,7 @@ namespace Caravela.Reactive.Operators
             }
             else
             {
-                var subscription = this.CollectionSelector(source, this.ObserverToken).AddObserver(this);
+                var subscription = this.CollectionSelector(source, this.ObserverToken).Observable.AddObserver(this);
                 if (subscription != null)
                 {
                     this._subscriptions.Add(source, (subscription, 1));

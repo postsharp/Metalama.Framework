@@ -12,11 +12,11 @@ namespace Caravela.Reactive.Operators
     internal abstract class SelectManyOperator<TSource, TCollection, TResult> : ReactiveCollectionOperator<TSource, TResult>,
         IReactiveCollectionObserver<TCollection>
     {
-        protected Func<TSource, TCollection, ReactiveObserverToken, TResult> ResultSelector { get; }
+        protected Func<TSource, TCollection, ReactiveCollectorToken, TResult> ResultSelector { get; }
 
         protected SelectManyOperator(IReactiveCollection<TSource> source, Func<TSource, TCollection, TResult> resultSelector) : base(source)
         {
-            this.ResultSelector = ReactiveObserverToken.WrapWithDefaultToken(resultSelector);
+            this.ResultSelector = ReactiveCollectorToken.WrapWithDefaultToken(resultSelector);
         }
 
         protected abstract TResult SelectResult(IReactiveSubscription subscription, TCollection item);

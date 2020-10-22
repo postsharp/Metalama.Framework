@@ -12,7 +12,7 @@ namespace Caravela.Reactive.Operators
     internal class SelectManyRecursiveOperator<T> : ReactiveCollectionOperator<T, T>
         where T : class
     {
-        private readonly Func<T, ReactiveObserverToken, IReactiveCollection<T>> _getRecursionValueFunc;
+        private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getRecursionValueFunc;
         private ImmutableDictionary<T, int> _result = null!;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
@@ -22,7 +22,7 @@ namespace Caravela.Reactive.Operators
         public SelectManyRecursiveOperator(IReactiveCollection<T> source,
             Func<T, IReactiveCollection<T>> getRecursionValueFunc) : base(source)
         {
-            this._getRecursionValueFunc = ReactiveObserverToken.WrapWithDefaultToken(getRecursionValueFunc);
+            this._getRecursionValueFunc = ReactiveCollectorToken.WrapWithDefaultToken(getRecursionValueFunc);
         }
 
         public override bool IsMaterialized => true;
@@ -60,7 +60,7 @@ namespace Caravela.Reactive.Operators
         {
             if (!this._subscriptions.TryGetValue(source, out var existing))
             {
-                this._subscriptions = this._subscriptions.Add(source, (source.AddObserver(this), 1));
+                this._subscriptions = this._subscriptions.Add(source, (source.Observable.AddObserver(this), 1));
                 return true;
             }
             else

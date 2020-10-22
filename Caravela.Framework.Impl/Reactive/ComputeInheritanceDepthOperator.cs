@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Reactive;
 using Caravela.Reactive.Implementation;
 using Microsoft.CodeAnalysis;
@@ -101,7 +99,7 @@ namespace Caravela.Framework.Impl.Reactive
                 }
             }
 
-            return new(Impl(), ReactiveSideValues.Create( DiagnosticsResult.Get(diagnostics)));
+            return new(Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get(diagnostics)));
 
         }
 

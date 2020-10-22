@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Reactive;
-using Caravela.Reactive.Collections;
+using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
