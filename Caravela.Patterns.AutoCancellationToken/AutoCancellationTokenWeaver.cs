@@ -16,7 +16,7 @@ namespace Caravela.Patterns.AutoCancellationToken
         public CSharpCompilation Transform(AspectWeaverContext context)
         {
             var compilation = context.Compilation;
-            var instancesNodes = context.AspectInstances.SelectMany(a => a.CodeElement.ToSyntaxNodes());
+            var instancesNodes = context.AspectInstances.SelectMany(a => a.CodeElement.GetSyntaxNodes());
             RunRewriter(new AnnotateNodesRewriter(instancesNodes));
             RunRewriter(new AddCancellationTokenToMethodsRewriter(compilation));
             RunRewriter(new AddCancellationTokenToInvocationsRewriter(compilation));

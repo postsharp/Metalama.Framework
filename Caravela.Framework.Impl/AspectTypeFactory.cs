@@ -1,6 +1,5 @@
-﻿using Caravela.Reactive;
+﻿using Caravela.Framework.Sdk;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl
 {
@@ -12,13 +11,13 @@ namespace Caravela.Framework.Impl
 
         public AspectTypeFactory( AspectDriverFactory aspectDriverFactory ) => this._aspectDriverFactory = aspectDriverFactory;
 
-        public AspectType GetAspectType( INamedType attributeType, in ReactiveCollectorToken observerToken = default )
+        public AspectType GetAspectType( INamedType attributeType )
         {
             if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
             {
                 // TODO: handle AspectParts properly
                 aspectType = new AspectType(
-                    attributeType.FullName, this._aspectDriverFactory.GetAspectDriver( attributeType, observerToken ), ImmutableArray.Create( new AspectPart( null ) ) );
+                    attributeType.FullName, this._aspectDriverFactory.GetAspectDriver( attributeType ), new string?[] { null } );
                 this._aspectTypes.Add( attributeType, aspectType );
             }
 

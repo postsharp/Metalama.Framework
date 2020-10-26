@@ -13,13 +13,17 @@ namespace Caravela.Framework.Impl
         ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
         protected internal override ISymbol Symbol => this.TypeSymbol;
 
-        internal override Compilation Compilation { get; }
+        internal override SourceCompilation Compilation { get; }
 
-        internal NamedType(INamedTypeSymbol typeSymbol, Compilation compilation)
+        internal NamedType(INamedTypeSymbol typeSymbol, SourceCompilation compilation)
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;
         }
+
+        public bool IsDefaultConstructible =>
+            this.TypeSymbol.TypeKind == TypeKind.Struct ||
+            (this.TypeSymbol.TypeKind == TypeKind.Class && !this.TypeSymbol.IsAbstract && this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         /// <summary>
         /// Filters members to only those that were declared in this type.
@@ -82,8 +86,7 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveCollection<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableReactive();
 
-
-        public bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, ((ITypeInternal) other).TypeSymbol );
+        public bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, other.GetSymbol() );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

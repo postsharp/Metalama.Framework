@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl
 {
     abstract class CodeElement : ICodeElement, IToSyntax
     {
-        internal abstract Compilation Compilation { get; }
+        internal abstract SourceCompilation Compilation { get; }
         internal SymbolMap SymbolMap => this.Compilation.SymbolMap;
 
         public abstract ICodeElement? ContainingElement { get; }
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl
 
         private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select(r => (CSharpSyntaxNode)r.GetSyntax());
         // TODO: special case partial methods?
-        CSharpSyntaxNode IToSyntax.ToSyntaxNode() => this.ToSyntaxNodes().Single();
-        IEnumerable<CSharpSyntaxNode> IToSyntax.ToSyntaxNodes() => this.ToSyntaxNodes();
+        CSharpSyntaxNode IToSyntax.GetSyntaxNode() => this.ToSyntaxNodes().Single();
+        IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => this.ToSyntaxNodes();
     }
 }

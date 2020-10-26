@@ -10,31 +10,32 @@ namespace Caravela.Framework.Impl
         private readonly Loader _loader;
         private readonly IReactiveGroupBy<IType, INamedType> _weaverTypes;
 
-        public AspectDriverFactory(ICompilation compilation, Loader loader)
+        public AspectDriverFactory( ICompilation compilation, Loader loader )
         {
             this._loader = loader;
 
-            var aspectWeaverAttributeType = compilation.GetTypeByMetadataName(typeof(AspectWeaverAttribute).FullName)!;
+            var aspectWeaverAttributeType = compilation.GetTypeByReflectionName( typeof( AspectWeaverAttribute ).FullName )!;
 
             // TODO: nested types?
             this._weaverTypes =
                 from weaverType in compilation.DeclaredAndReferencedTypes
                 from attribute in weaverType.Attributes
-                where attribute.Type.Is(aspectWeaverAttributeType)
-                group weaverType by (IType)attribute.ConstructorArguments.Single()!;
+                where attribute.Type.Is( aspectWeaverAttributeType )
+                group weaverType by (IType) attribute.ConstructorArguments.Single()!;
         }
 
-        public IAspectDriver GetAspectDriver(INamedType type, in ReactiveCollectorToken observerToken)
+        public IAspectDriver GetAspectDriver( INamedType type )
         {
-            var weavers = this._weaverTypes[type].GetValue(observerToken).ToList();
+            var weavers = this._weaverTypes[type].GetValue().ToList();
 
-            if (weavers.Count > 1)
-                throw new InvalidOperationException("There can be at most one weaver for an aspect type.");
+            if ( weavers.Count > 1 )
+                throw new InvalidOperationException( "There can be at most one weaver for an aspect type." );
 
-            if (weavers.Count == 1)
-                return (IAspectDriver) this._loader.CreateInstance(((NamedType)weavers.Single()).TypeSymbol);
+            if ( weavers.Count == 1 )
+                // TODO: this needs to be the same instance for equivalent type, to make reactive grouping work
+                return (IAspectDriver) this._loader.CreateInstance( weavers.Single().GetSymbol() );
 
-            throw new NotImplementedException();
+            return new AspectDriver( type );
         }
     }
 }

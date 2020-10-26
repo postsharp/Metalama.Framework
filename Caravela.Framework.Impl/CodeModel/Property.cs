@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
         private readonly NamedType _containingElement;
         public override ICodeElement? ContainingElement => this._containingElement;
 
-        internal override Compilation Compilation => this._containingElement.Compilation;
+        internal override SourceCompilation Compilation => this._containingElement.Compilation;
 
         public Property(IPropertySymbol symbol, NamedType containingElement)
         {

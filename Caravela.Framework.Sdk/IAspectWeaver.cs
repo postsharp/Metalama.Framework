@@ -11,12 +11,12 @@ namespace Caravela.Framework.Sdk
 
     public class AspectWeaverContext
     {
-        public INamedTypeSymbol AspectType { get; }
+        public INamedType AspectType { get; }
         public IReadOnlyList<AspectInstance> AspectInstances { get; }
         public CSharpCompilation Compilation { get; }
         public IDiagnosticSink Diagnostics { get; }
 
-        internal AspectWeaverContext(INamedTypeSymbol aspectType, IReadOnlyList<AspectInstance> aspectInstances, CSharpCompilation compilation, IDiagnosticSink diagnostics)
+        internal AspectWeaverContext(INamedType aspectType, IReadOnlyList<AspectInstance> aspectInstances, CSharpCompilation compilation, IDiagnosticSink diagnostics)
         {
             this.AspectType = aspectType;
             this.AspectInstances = aspectInstances;

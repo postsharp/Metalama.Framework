@@ -1,6 +1,6 @@
 ﻿using Caravela.Framework.Aspects;
 
-namespace Caravela.Framework
+namespace Caravela.Framework.Sdk
 {
     public class AspectInstance
     {

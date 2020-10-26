@@ -1,28 +1,31 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 
 namespace Caravela.Framework.Impl
 {
     class AttributeAspectSource : AspectSource
     {
-        private readonly ICompilation compilation;
+        private readonly ICompilation _compilation;
+        private readonly Loader _loader;
 
-        public AttributeAspectSource(ICompilation compilation)
+        public AttributeAspectSource( ICompilation compilation, Loader loader )
         {
-            this.compilation = compilation;
+            this._compilation = compilation;
+            this._loader = loader;
         }
 
         public override IReactiveCollection<AspectInstance> GetAspects()
         {
             var results = ImmutableArray.CreateBuilder<AspectInstance>();
 
-            var iAspect = this.compilation.GetTypeByMetadataName(typeof(IAspect).FullName)!;
+            var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
 
-            return from type in this.compilation.DeclaredTypes
+            return from type in this._compilation.DeclaredTypes
                    from attribute in type.Attributes
-                   where attribute.Type.Is(iAspect)
-                   select new AspectInstance(null!, type, attribute.Type);
+                   where attribute.Type.Is( iAspect )
+                   select new AspectInstance( (IAspect) this._loader.CreateInstance( attribute.Type.GetSymbol() ), type, attribute.Type );
         }
     }
 }

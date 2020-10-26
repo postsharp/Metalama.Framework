@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Caravela.Reactive;
 
 // TODO: InternalImplement
@@ -14,7 +15,24 @@ namespace Caravela.Framework
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
 
-        INamedType? GetTypeByMetadataName(string metadataName);
+        // TODO: rename to remove "metadata" and in general make it more user-friendly
+        /// <summary>
+        /// Get type based on its full name, as used in reflection.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// For nested types, this means using <c>+</c>, e.g. to get <see cref="System.Environment.SpecialFolder"/>, use <c>System.Environment+SpecialFolder</c>.
+        /// </para>
+        /// <para>
+        /// For generic type definitions, this required using <c>`</c>, e.g. to get <see cref="List{T}"/>, use <c>System.Collections.Generic.List`1</c>.
+        /// </para>
+        /// <para>
+        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.MakeGenericType"/>.
+        /// </para>
+        /// </remarks>
+        INamedType? GetTypeByReflectionName(string reflectionName);
+
+        INamedType? GetTypeByReflectionType( Type type );
     }
 
     public interface IType
@@ -25,6 +43,8 @@ namespace Caravela.Framework
     // TODO: IArrayType etc.
     public interface INamedType : IType, ICodeElement
     {
+        bool IsDefaultConstructible { get; }
+
         INamedType? BaseType { get; }
 
         IReactiveCollection<INamedType> ImplementedInterfaces { get; }

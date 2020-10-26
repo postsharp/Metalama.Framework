@@ -5,7 +5,7 @@ namespace Caravela.Framework.Sdk
 {
     internal interface IToSyntax
     {
-        CSharpSyntaxNode ToSyntaxNode();
-        IEnumerable<CSharpSyntaxNode> ToSyntaxNodes();
+        CSharpSyntaxNode GetSyntaxNode();
+        IEnumerable<CSharpSyntaxNode> GetSyntaxNodes();
     }
 }

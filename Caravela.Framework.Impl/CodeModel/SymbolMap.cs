@@ -8,9 +8,9 @@ namespace Caravela.Framework.Impl
     /// </remarks>
     internal class SymbolMap
     {
-        private readonly Compilation compilation;
+        private readonly SourceCompilation compilation;
 
-        public SymbolMap(Compilation compilation) => this.compilation = compilation;
+        public SymbolMap(SourceCompilation compilation) => this.compilation = compilation;
 
         readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
         readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new();

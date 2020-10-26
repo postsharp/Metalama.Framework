@@ -1,5 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -17,37 +20,25 @@ namespace Caravela.Framework.Impl
 
             // DI
             var loader = new Loader(context.LoadReferencedAssembly);
-            var compilation = new Compilation(roslynCompilation);
+            var compilation = new SourceCompilation(roslynCompilation);
             var driverFactory = new AspectDriverFactory(compilation, loader);
             var aspectTypeFactory = new AspectTypeFactory(driverFactory);
+            var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-            var aspectCompilation = new AspectCompilation(ImmutableArray.Create<Diagnostic>(), compilation);
+            var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, loader );
 
-            // TODO: either change this to get all AspectParts from the initial compilation (not just those that have AspectInstances)
-            // TODO: or change it so that AspectParts are updated after every stage
-
-            var aspectParts = aspectCompilation.Aspects
-                .GroupBy(a => a.AspectType)
-                .Select(g => (aspects: g.GetValue(), aspectType: aspectTypeFactory.GetAspectType(g.Key)))
+            var stages = GetAspectTypes(compilation)
+                .Select( at => aspectTypeFactory.GetAspectType( at ) )
                 .SelectMany(
-                    x => x.aspectType.Parts,
-                    (x, aspectPart) => (x.aspects, x.aspectType, aspectPart))
-                .GetValue(default);
-//                .OrderBy(x => x.aspectPart.ExecutionOrder);
-                // TODO: Use a comparer to implement OrderBy (see UML design)
+                    at => at.Parts,
+                    ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
+                .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
+                .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
+                .GetValue( default );
 
-            // TODO: aspect part grouping
-
-            foreach (var aspectPart in aspectParts)
+            foreach ( var stage in stages )
             {
-                PipelineStage stage = aspectPart.aspectType.AspectDriver switch
-                {
-                    IAspectWeaver weaver => new AspectWeaverStage(
-                        weaver, ((Compilation)aspectCompilation.Compilation).RoslynCompilation.GetTypeByMetadataName(aspectPart.aspectType.Name)!,
-                        aspectPart.aspects.ToImmutableArray())
-                };
-
-                aspectCompilation = stage.Transform(aspectCompilation);
+                aspectCompilation = stage.Transform( aspectCompilation );
             }
 
             foreach (var diagnostic in aspectCompilation.Diagnostics)
@@ -55,7 +46,59 @@ namespace Caravela.Framework.Impl
                 context.ReportDiagnostic(diagnostic);
             }
 
-            return ((Compilation)aspectCompilation.Compilation).RoslynCompilation;
+            return aspectCompilation.Compilation.GetRoslynCompilation();
+        }
+
+        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
+        {
+            var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
+
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.IsDefaultConstructible && t.Is( iAspect ) );
+        }
+
+        private static object GetGroupingKey( IAspectDriver driver ) =>
+            driver switch
+            {
+                // weavers are not grouped together
+                // Note: this requires that every AspectType has its own instance of IAspectWeaver
+                IAspectWeaver weaver => weaver,
+
+                // AspectDrivers are grouped together
+                AspectDriver => nameof( AspectDriver ),
+
+                _ => throw new NotSupportedException()
+            };
+
+
+        record AspectPartData( AspectType AspectType, AspectPart AspectPart );
+
+        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
+        {
+            switch (groupKey)
+            {
+                case IAspectWeaver weaver:
+
+                    var partData = partsData.Single();
+
+                    return new AspectWeaverStage( weaver, compilation.GetTypeByReflectionName( partData.AspectType.Name )! );
+
+                case nameof( AspectDriver ):
+
+                    return new AdviceWeaverStage(partsData.Select(pd => pd.AspectPart));
+
+                default:
+
+                    throw new NotSupportedException();
+            };
+        }
+
+        class AspectPartDataComparer : IComparer<AspectPartData>
+        {
+            private readonly AspectPartComparer _partComparer;
+
+            public AspectPartDataComparer( AspectPartComparer partComparer ) => this._partComparer = partComparer;
+
+            public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
         }
     }
 }

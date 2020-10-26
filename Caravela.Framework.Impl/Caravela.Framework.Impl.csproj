@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
     <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
   </ItemGroup>
 
@@ -15,11 +16,11 @@
 
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.7.0" />
     <PackageReference Include="RoslynEx.Sdk" Version="0.1.36-dev" />
-    <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
+    <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" PrivateAssets="all" />
 
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />
+    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>
