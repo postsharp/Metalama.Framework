@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
                 // don't descend into nested local functions
                 .SelectMany(n => n.DescendantNodes(descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax))
                 .OfType<LocalFunctionStatementSyntax>()
-                .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f))
+                .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f)!)
                 .Select(s => this.SymbolMap.GetMethod(s))
                 .ToImmutableArray();
 

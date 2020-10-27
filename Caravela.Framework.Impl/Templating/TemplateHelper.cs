@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// This class is used at *run-time* by the generated template code. Do not remove or refactor

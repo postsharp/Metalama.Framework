@@ -1,7 +1,6 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     public interface IDynamicMetaMember
     {
@@ -13,6 +12,5 @@ namespace PostSharp.Caravela.AspectWorkbench
         TypeSyntax CreateTypeSyntax();
         StatementSyntax CreateAssignStatement(string returnValueLocalName);
         StatementSyntax CreateReturnStatement();
-        
     }
 }

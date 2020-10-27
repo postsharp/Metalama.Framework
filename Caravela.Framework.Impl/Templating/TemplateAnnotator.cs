@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     // ReSharper disable TailRecursiveCall
 
@@ -46,7 +46,7 @@ namespace PostSharp.Caravela.AspectWorkbench
         /// Specifies that the current expression is obliged to be compile-time-only.
         /// </summary>
         private bool _forceCompileTimeOnlyExpression;
-        private MethodDeclarationSyntax _currentMethod;
+        private MethodDeclarationSyntax? _currentMethod;
         private readonly SymbolScopeClassifier _symbolScopeClassifier;
         
         /// <summary>
@@ -308,13 +308,13 @@ namespace PostSharp.Caravela.AspectWorkbench
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             // Literals are always compile-time (not really compile-time only but it does not matter).
-            return base.VisitLiteralExpression(node).AddScopeAnnotation(SymbolScope.CompileTimeOnly);
+            return base.VisitLiteralExpression(node)!.AddScopeAnnotation(SymbolScope.CompileTimeOnly);
         }
 
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
-            var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName(node);
-            var symbol = this._semanticAnnotationMap.GetSymbol(node);
+            var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName(node)!;
+            var symbol = this._semanticAnnotationMap.GetSymbol(node)!;
             
             return identifierNameSyntax.AddScopeAnnotation( this.GetSymbolScope(symbol, node));
         }
@@ -322,7 +322,7 @@ namespace PostSharp.Caravela.AspectWorkbench
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             
-            var transformedName = (SimpleNameSyntax) this.Visit(node.Name);
+            var transformedName = (SimpleNameSyntax) this.Visit(node.Name)!;
 
             if (this.GetNodeScope(transformedName) == SymbolScope.CompileTimeOnly)
             {
@@ -331,7 +331,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
                 using (this.EnterForceCompileTimeExpression())
                 {
-                    var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression);
+                    var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
                     return node.Update(transformedExpression, node.OperatorToken, transformedName).AddScopeAnnotation( SymbolScope.CompileTimeOnly);
                 }
                 
@@ -340,7 +340,7 @@ namespace PostSharp.Caravela.AspectWorkbench
             {
                 // The scope of the expression parent is copied from the child expression.
                 
-                var transformedNode =  (MemberAccessExpressionSyntax) base.VisitMemberAccessExpression(node);
+                var transformedNode =  (MemberAccessExpressionSyntax) base.VisitMemberAccessExpression(node)!;
                 return transformedNode.AddScopeAnnotation( this.GetNodeScope(transformedNode.Expression) );
             }
         }
@@ -348,7 +348,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression);
+            var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
 
             if (this.GetNodeScope(transformedExpression) == SymbolScope.CompileTimeOnly)
             {
@@ -359,7 +359,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                 {
 
                     var updatedInvocation = node.Update(transformedExpression,
-                        (ArgumentListSyntax) this.VisitArgumentList(node.ArgumentList));
+                        (ArgumentListSyntax) this.VisitArgumentList(node.ArgumentList)!);
 
                     return updatedInvocation.AddScopeAnnotation( SymbolScope.CompileTimeOnly);
                 }
@@ -370,13 +370,13 @@ namespace PostSharp.Caravela.AspectWorkbench
                 // we cannot take a decision on the parent expression.
                 
                 return node.Update(transformedExpression,
-                    (ArgumentListSyntax) this.VisitArgumentList(node.ArgumentList));
+                    (ArgumentListSyntax) this.VisitArgumentList(node.ArgumentList)!);
             }
         }
 
         public override SyntaxNode? VisitArgument(ArgumentSyntax node)
         {
-            var argument = (ArgumentSyntax) base.VisitArgument(node);
+            var argument = (ArgumentSyntax) base.VisitArgument(node)!;
 
             if (argument.RefKindKeyword.IsMissing)
             {
@@ -402,11 +402,11 @@ namespace PostSharp.Caravela.AspectWorkbench
                 // We have an if statement where the condition is a compile-time expression. Add annotations
                 // to the if and else statements but not to the blocks themselves.
          
-                var annotatedStatement = (StatementSyntax) this.Visit(node.Statement);
+                var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
                 var annotatedElse = node.Else != null
                     ? ElseClause(
                         node.Else.ElseKeyword,
-                        (StatementSyntax) this.Visit(node.Else.Statement)
+                        (StatementSyntax) this.Visit(node.Else.Statement)!
                     ).AddScopeAnnotation(SymbolScope.CompileTimeOnly).WithTriviaFrom(node.Else)
                     : null;
 
@@ -425,8 +425,8 @@ namespace PostSharp.Caravela.AspectWorkbench
                 
                 using (this.EnterRuntimeConditionalBlock())
                 {
-                    var annotatedStatement = (StatementSyntax) this.Visit(node.Statement);
-                    var annotatedElse = (ElseClauseSyntax) this.Visit(node.Else);
+                    var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
+                    var annotatedElse = (ElseClauseSyntax) this.Visit(node.Else)!;
 
                     var result = node.Update(node.IfKeyword, node.OpenParenToken, node.Condition, node.CloseParenToken,
                         annotatedStatement, annotatedElse);
@@ -441,19 +441,19 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node)
         {
-            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node);
+            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
             
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
             // compile-time. 
 
-            var annotatedExpression = (ExpressionSyntax) this.Visit(node.Expression);
+            var annotatedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
             
             if (this._localScopes.TryGetValue(local, out var localScope ) && localScope == SymbolScope.CompileTimeOnly)
             {
                 // This is a build-time loop.
 
 
-                var annotatedStatement = (StatementSyntax) this.Visit(node.Statement);
+                var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
 
                 var transformedNode = 
                     ForEachStatement(
@@ -479,7 +479,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                 using (this.EnterRuntimeConditionalBlock())
                 {
 
-                    var annotatedStatement = (StatementSyntax) this.Visit(node.Statement);
+                    var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
 
 
                     return ForEachStatement(
@@ -518,9 +518,9 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
-            var variable = (VariableDeclaratorSyntax) base.VisitVariableDeclarator(node);
+            var variable = (VariableDeclaratorSyntax) base.VisitVariableDeclarator(node)!;
 
-            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node);
+            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
 
             var localScope = this.GetSymbolScope(local, node); 
             if ( localScope != SymbolScope.Default )
@@ -531,7 +531,7 @@ namespace PostSharp.Caravela.AspectWorkbench
             {
                 // If a variable is always assigned to a meta expression, it is meta itself.
                 // The next line will not return anything in the first run because it refers to the unmodified tree.
-                var assignments = this._semanticAnnotationMap.GetAssignments(local, this._currentMethod);
+                var assignments = this._semanticAnnotationMap.GetAssignments(local, this._currentMethod!);
 
                 var combinedScope = this.GetCombinedScope(assignments.Select(this.GetAssignmentScope));
                 
@@ -548,7 +548,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
-            var variable = (VariableDeclarationSyntax) base.VisitVariableDeclaration(node);
+            var variable = (VariableDeclarationSyntax) base.VisitVariableDeclaration(node)!;
 
             var variableScopes = variable.Variables.Select(v => v.GetScopeFromAnnotation()).Distinct();
             
@@ -569,7 +569,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {
-            var transformedNode = (LocalDeclarationStatementSyntax) base.VisitLocalDeclarationStatement(node);
+            var transformedNode = (LocalDeclarationStatementSyntax) base.VisitLocalDeclarationStatement(node)!;
             
             return transformedNode.AddScopeAnnotation(this.GetNodeScope(transformedNode.Declaration));
         }
@@ -590,7 +590,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
-            var transformedNode = (AssignmentExpressionSyntax) base.VisitAssignmentExpression(node);
+            var transformedNode = (AssignmentExpressionSyntax) base.VisitAssignmentExpression(node)!;
 
             if (this._isRuntimeConditionalBlock)
             {
@@ -607,7 +607,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         public override SyntaxNode? VisitExpressionStatement(ExpressionStatementSyntax node)
         {
-            var transformedNode = (ExpressionStatementSyntax) base.VisitExpressionStatement(node);
+            var transformedNode = (ExpressionStatementSyntax) base.VisitExpressionStatement(node)!;
 
             return transformedNode.WithScopeAnnotationFrom(node.Expression).WithScopeAnnotationFrom(node);
         }

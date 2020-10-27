@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public abstract partial class MetaSyntaxRewriter
     {
@@ -25,7 +25,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                     try
                     {
                         var indentedArguments =
-                            node.Arguments.Select(a => this.Visit(a).WithLeadingTrivia(this._parent.GetIndentation()));
+                            node.Arguments.Select(a => this.Visit(a)!.WithLeadingTrivia(this._parent.GetIndentation()));
                     
 
                         return SyntaxFactory.ArgumentList(node.OpenParenToken.WithTrailingTrivia(this._parent.GetIndentation(false)),
@@ -50,7 +50,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                     try
                     {
                         var indentedExpressions =
-                            node.Expressions.Select(a => this.Visit(a).WithLeadingTrivia(this._parent.GetIndentation()));
+                            node.Expressions.Select(a => this.Visit(a)!.WithLeadingTrivia(this._parent.GetIndentation()));
                     
                         return SyntaxFactory.InitializerExpression(node.Kind(),
                             node.OpenBraceToken.WithTrailingTrivia(this._parent.GetIndentation(false)),
@@ -65,10 +65,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                 {
                     return base.VisitInitializerExpression(node);
                 }
-                
-               
             }
-
 
             public override SyntaxNode? Visit(SyntaxNode? node)
             {

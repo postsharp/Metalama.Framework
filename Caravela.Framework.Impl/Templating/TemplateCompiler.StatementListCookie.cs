@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public sealed partial class TemplateCompiler
     {

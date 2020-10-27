@@ -1,9 +1,10 @@
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// A forwarding <see cref="CSharpSyntaxRewriter"/> that only forwards
@@ -45,7 +46,6 @@ namespace PostSharp.Caravela.AspectWorkbench
         {
             return this.IsTemplate(node) ? this.Inner.VisitMethodDeclaration(node) : node;
         }
-        
 
         public override SyntaxNode? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
@@ -56,6 +56,5 @@ namespace PostSharp.Caravela.AspectWorkbench
         {
             return this.IsTemplate(node) ? this.Inner.VisitEventDeclaration(node) : node;
         }
-        
     }
 }

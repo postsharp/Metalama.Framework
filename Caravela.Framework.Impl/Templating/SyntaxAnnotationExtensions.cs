@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public static class SyntaxAnnotationExtensions
     {

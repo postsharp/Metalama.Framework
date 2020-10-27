@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// Compiles the source code of a template, annotated with <see cref="TemplateAnnotator"/>,
@@ -15,8 +17,8 @@ namespace PostSharp.Caravela.AspectWorkbench
     public sealed partial class TemplateCompiler : MetaSyntaxRewriter
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
-        private string _currentStatementListVariableName;
-        private List<StatementSyntax> _currentMetaStatementList;
+        private string? _currentStatementListVariableName;
+        private List<StatementSyntax>? _currentMetaStatementList;
         private int _nextStatementListId;
 
         public TemplateCompiler(SemanticAnnotationMap semanticAnnotationMap)
@@ -48,7 +50,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                         SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
                         {
                             Argument(this.CreateLiteralExpression(node.Identifier.Text))
-                        }))));
+                        }))))!;
         }
 
 
@@ -64,7 +66,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                             SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
                             {
                                 Argument(this.Transform(node.Expression))
-                            }))));
+                            }))))!;
             }
             else
             {
@@ -160,7 +162,7 @@ namespace PostSharp.Caravela.AspectWorkbench
             }
 
 
-            var type = this._semanticAnnotationMap.GetType(expression);
+            var type = this._semanticAnnotationMap.GetType(expression)!;
 
             if (type is IErrorTypeSymbol)
             {
@@ -261,7 +263,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                 using (this.UseStatementList($"__s{++this._nextStatementListId}", new List<StatementSyntax>()))
                 {
                     // List<StatementSyntax> statements = new List<StatementSyntax>(); 
-                    this._currentMetaStatementList.Add(LocalDeclarationStatement(
+                    this._currentMetaStatementList!.Add(LocalDeclarationStatement(
                         VariableDeclaration(GenericName(Identifier("List"))
                                 .WithTypeArgumentList(
                                     TypeArgumentList(
@@ -270,7 +272,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                             .WithVariables(
                                 SingletonSeparatedList(
                                     VariableDeclarator(
-                                            Identifier(this._currentStatementListVariableName))
+                                            Identifier(this._currentStatementListVariableName!))
                                         .WithInitializer(
                                             EqualsValueClause(
                                                 ObjectCreationExpression(
@@ -297,7 +299,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                                     InvocationExpression(
                                         MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
-                                            IdentifierName(this._currentStatementListVariableName),
+                                            IdentifierName(this._currentStatementListVariableName!),
                                             IdentifierName("ToArray"))))
                                 .WithLeadingTrivia(this.GetIndentation())
                         );
@@ -340,7 +342,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                                 .WithArgumentList(ArgumentList(
                                     SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
                                     {
-                                        Argument(IdentifierName(this._currentStatementListVariableName))
+                                        Argument(IdentifierName(this._currentStatementListVariableName!))
                                     })))).WithLeadingTrivia(this.GetIndentation()));
 
 
@@ -359,7 +361,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                 var metaStatements = this.ToMetaStatements(node.Statements);
 
                 // Add the statements to the parent list.
-                this._currentMetaStatementList.AddRange(metaStatements);
+                this._currentMetaStatementList!.AddRange(metaStatements);
 
                 // Returns an empty block intentionally.
                 return Block();
@@ -413,7 +415,7 @@ namespace PostSharp.Caravela.AspectWorkbench
                     InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                IdentifierName(this._currentStatementListVariableName),
+                                IdentifierName(this._currentStatementListVariableName!),
                                 IdentifierName("Add")))
                         .WithArgumentList(
                             ArgumentList(
@@ -448,7 +450,7 @@ namespace PostSharp.Caravela.AspectWorkbench
         public override SyntaxNode VisitInterpolation(InterpolationSyntax node)
         {
             if (node.Expression.GetScopeFromAnnotation() != SymbolScope.CompileTimeOnly &&
-                this._semanticAnnotationMap.GetType(node.Expression).Kind != SymbolKind.DynamicType)
+                this._semanticAnnotationMap.GetType(node.Expression)!.Kind != SymbolKind.DynamicType)
             {
                 return this.DeepIndent(InvocationExpression(IdentifierName(nameof(InterpolatedStringText)))
                     .WithArgumentList(
@@ -684,8 +686,8 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         private StatementListCookie UseStatementList(string variableName, List<StatementSyntax> metaStatementList)
         {
-            var cookie = new StatementListCookie(this, this._currentStatementListVariableName,
-                this._currentMetaStatementList);
+            var cookie = new StatementListCookie(this, this._currentStatementListVariableName!,
+                this._currentMetaStatementList!);
             this._currentStatementListVariableName = variableName;
             this._currentMetaStatementList = metaStatementList;
             return cookie;

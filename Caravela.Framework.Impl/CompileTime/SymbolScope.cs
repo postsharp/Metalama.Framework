@@ -1,4 +1,4 @@
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public enum SymbolScope
     {

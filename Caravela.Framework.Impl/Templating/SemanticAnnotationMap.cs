@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)
@@ -38,7 +38,7 @@ namespace PostSharp.Caravela.AspectWorkbench
         public SyntaxNode AnnotateTree(SyntaxNode root, SemanticModel semanticModel)
         {
             var rewriter = new AnnotatingRewriter(semanticModel, this);
-            return rewriter.Visit(root);
+            return rewriter.Visit(root)!;
         }
 
       
@@ -125,10 +125,10 @@ namespace PostSharp.Caravela.AspectWorkbench
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public ISymbol GetSymbol(SyntaxNode node)
+        public ISymbol? GetSymbol(SyntaxNode node)
         {
             var annotation = node.GetAnnotations("symbol").SingleOrDefault();
-            if (annotation != null)
+            if (annotation is not null)
             {
                 return this._annotationToSymbolMap[annotation];
             }
@@ -143,10 +143,10 @@ namespace PostSharp.Caravela.AspectWorkbench
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public ISymbol GetDeclaredSymbol(SyntaxNode node)
+        public ISymbol? GetDeclaredSymbol(SyntaxNode node)
         {
             var annotation = node.GetAnnotations("declared").SingleOrDefault();
-            if (annotation != null)
+            if (annotation is not null)
             {
                 return this._annotationToDeclaredSymbolMap[annotation];
             }
@@ -161,10 +161,10 @@ namespace PostSharp.Caravela.AspectWorkbench
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public ITypeSymbol GetType(SyntaxNode node)
+        public ITypeSymbol? GetType(SyntaxNode node)
         {
             var annotation = node.GetAnnotations("type").SingleOrDefault();
-            if (annotation != null)
+            if (annotation is not null)
             {
                 return this._annotationToTypeMap[annotation];
             }
@@ -214,11 +214,11 @@ namespace PostSharp.Caravela.AspectWorkbench
             {
                 // We need annotations.
                 var annotated =
-                    (VariableDeclaratorSyntax) this._map.GetAnnotatedNode(node, base.VisitVariableDeclarator(node), this._semanticModel);
+                    (VariableDeclaratorSyntax) this._map.GetAnnotatedNode(node, base.VisitVariableDeclarator(node)!, this._semanticModel);
                 
                 if (node.Initializer != null)
                 {
-                    var local = (ILocalSymbol) this._map.GetDeclaredSymbol(annotated);
+                    var local = (ILocalSymbol) this._map.GetDeclaredSymbol(annotated)!;
                     return this.AddAssignmentAnnotation(local, annotated);
 
                 }
@@ -230,7 +230,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
             public override SyntaxNode? VisitAssignmentExpression(AssignmentExpressionSyntax node)
             {
-                var annotated = (AssignmentExpressionSyntax) base.VisitAssignmentExpression(node);
+                var annotated = (AssignmentExpressionSyntax) base.VisitAssignmentExpression(node)!;
                 if (this._map.GetSymbol(annotated.Left) is ILocalSymbol local)
                 {
                     return this.AddAssignmentAnnotation(local, annotated);

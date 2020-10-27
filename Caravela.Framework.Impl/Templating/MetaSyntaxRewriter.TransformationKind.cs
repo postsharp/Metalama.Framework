@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public partial class MetaSyntaxRewriter
     {

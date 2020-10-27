@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// A <see cref="CSharpSyntaxRewriter"/> that transforms a syntax tree
@@ -74,7 +74,7 @@ namespace PostSharp.Caravela.AspectWorkbench
         /// <returns></returns>
         protected T DeepIndent<T>(T node) where T : SyntaxNode
         {
-            node = (T) this._indentRewriter.Visit(node);
+            node = (T) this._indentRewriter.Visit(node)!;
             return node;
         }
         #endregion

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     public class SymbolScopeClassifier
     {
@@ -17,7 +18,7 @@ namespace PostSharp.Caravela.AspectWorkbench
 
         protected virtual SymbolScope GetAttributeScope(AttributeData attribute)
         {
-            if (attribute.AttributeClass.Name == nameof(BuildTimeOnlyAttribute))
+            if (attribute.AttributeClass.Name == nameof(CompileTimeOnlyAttribute))
             {
                 return SymbolScope.CompileTimeOnly;
             }

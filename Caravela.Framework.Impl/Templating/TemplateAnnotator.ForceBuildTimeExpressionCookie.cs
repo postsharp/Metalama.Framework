@@ -1,6 +1,6 @@
 using System;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Impl.Templating
 {
     internal partial class TemplateAnnotator
     {

@@ -1,9 +1,9 @@
 using System;
 
-namespace PostSharp.Caravela.AspectWorkbench
+namespace Caravela.Framework.Project
 {
     [AttributeUsage(AttributeTargets.All)]
-    public class BuildTimeOnlyAttribute : Attribute
+    public class CompileTimeOnlyAttribute : Attribute
     {
     }
     
