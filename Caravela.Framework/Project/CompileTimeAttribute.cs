@@ -3,7 +3,7 @@ using System;
 namespace Caravela.Framework.Project
 {
     [AttributeUsage(AttributeTargets.All)]
-    public class CompileTimeOnlyAttribute : Attribute
+    public class CompileTimeAttribute : Attribute
     {
     }
     

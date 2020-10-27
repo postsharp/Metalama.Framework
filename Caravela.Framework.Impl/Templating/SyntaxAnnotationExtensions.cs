@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating
@@ -15,22 +16,22 @@ namespace Caravela.Framework.Impl.Templating
             return node.HasAnnotations("scope");
         }
         
-        public static SymbolScope GetScopeFromAnnotation(this SyntaxNode node)
+        public static SymbolDeclarationScope GetScopeFromAnnotation(this SyntaxNode node)
         {
             var annotation = node.GetAnnotations("scope").SingleOrDefault();
             if (annotation == null)
             {
-                return SymbolScope.Default;
+                return SymbolDeclarationScope.Default;
             }
             else
             {
                 switch (annotation.Data)
                 {
                     case "buildtime":
-                        return SymbolScope.CompileTimeOnly;
+                        return SymbolDeclarationScope.CompileTimeOnly;
                     
                     case "runtime":
-                        return SymbolScope.RunTimeOnly;
+                        return SymbolDeclarationScope.RunTimeOnly;
 
                     default:
                         throw new AssertionFailedException();
@@ -38,16 +39,16 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public static T AddScopeAnnotation<T>(this T node, SymbolScope scope) where T : SyntaxNode
+        public static T AddScopeAnnotation<T>(this T node, SymbolDeclarationScope scope) where T : SyntaxNode
         {
-            if (scope == SymbolScope.Default)
+            if (scope == SymbolDeclarationScope.Default)
             {
                 return node;
             }
             
             var existingScope = node.GetScopeFromAnnotation();
 
-            if (existingScope != SymbolScope.Default)
+            if (existingScope != SymbolDeclarationScope.Default)
             {
                 if (existingScope == scope)
                 {
@@ -61,10 +62,10 @@ namespace Caravela.Framework.Impl.Templating
 
             switch (scope)
             {
-                case SymbolScope.CompileTimeOnly:
+                case SymbolDeclarationScope.CompileTimeOnly:
                     return node.WithAdditionalAnnotations(buildTimeOnlyAnnotation);
                 
-                case SymbolScope.RunTimeOnly:
+                case SymbolDeclarationScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations(runTimeOnlyAnnotation);
                 
                 default:

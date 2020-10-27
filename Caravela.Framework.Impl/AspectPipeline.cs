@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
     [Transformer]
     sealed class AspectPipeline : ISourceTransformer
     {
-        public Microsoft.CodeAnalysis.Compilation Execute(TransformerContext context)
+        public Compilation Execute(TransformerContext context)
         {
             var roslynCompilation = (CSharpCompilation)context.Compilation;
 

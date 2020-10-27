@@ -1,6 +1,6 @@
-namespace Caravela.Framework.Impl.Templating
+namespace Caravela.Framework.Impl.CompileTime
 {
-    public enum SymbolScope
+    public enum SymbolDeclarationScope
     {
         // The symbol can be used both at build time or at run time.
         // The node has not been classified as necessarily build-time or run-time.

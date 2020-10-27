@@ -15,7 +15,6 @@ namespace Caravela.Framework
 
         // TODO: assembly and module attributes? (do they need to be differentiated?)
 
-        // TODO: rename to remove "metadata" and in general make it more user-friendly
         /// <summary>
         /// Get type based on its full name, as used in reflection.
         /// </summary>

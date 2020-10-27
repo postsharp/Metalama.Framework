@@ -22,13 +22,7 @@ namespace Caravela.Patterns.AutoCancellationToken
             RunRewriter(new AddCancellationTokenToInvocationsRewriter(compilation));
             return compilation;
 
-            void RunRewriter(CSharpSyntaxRewriter rewriter)
-            {
-                foreach (var tree in compilation.SyntaxTrees)
-                {
-                    compilation = compilation.ReplaceSyntaxTree(tree, tree.WithRootAndOptions(rewriter.Visit(tree.GetRoot()), tree.Options));
-                }
-            }
+            void RunRewriter( CSharpSyntaxRewriter rewriter ) => compilation = rewriter.VisitAllTrees( compilation );
         }
 
         abstract class RewriterBase : CSharpSyntaxRewriter

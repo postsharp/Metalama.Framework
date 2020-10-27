@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -85,7 +86,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind(SyntaxNode node)
         {
-            if (node.GetScopeFromAnnotation() == SymbolScope.CompileTimeOnly)
+            if (node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly)
             {
                 return TransformationKind.None;
             }
@@ -96,7 +97,7 @@ namespace Caravela.Framework.Impl.Templating
                 parent != null;
                 parent = parent.Parent)
             {
-                if (parent.GetScopeFromAnnotation() == SymbolScope.CompileTimeOnly)
+                if (parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly)
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax
                         ? TransformationKind.Transform
@@ -449,7 +450,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitInterpolation(InterpolationSyntax node)
         {
-            if (node.Expression.GetScopeFromAnnotation() != SymbolScope.CompileTimeOnly &&
+            if (node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
                 this._semanticAnnotationMap.GetType(node.Expression)!.Kind != SymbolKind.DynamicType)
             {
                 return this.DeepIndent(InvocationExpression(IdentifierName(nameof(InterpolatedStringText)))
