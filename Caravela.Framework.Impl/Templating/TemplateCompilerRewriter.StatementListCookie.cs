@@ -4,15 +4,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public sealed partial class TemplateCompiler
+    internal sealed partial class TemplateCompilerRewriter
     {
         private readonly struct StatementListCookie : IDisposable
         {
-            private readonly TemplateCompiler _parent;
+            private readonly TemplateCompilerRewriter _parent;
             private readonly string _initialVariableName;
             private readonly List<StatementSyntax> _initialList;
 
-            public StatementListCookie(TemplateCompiler parent, string initialVariableName,
+            public StatementListCookie(TemplateCompilerRewriter parent, string initialVariableName,
                 List<StatementSyntax> initialList)
             {
                 this._parent = parent;

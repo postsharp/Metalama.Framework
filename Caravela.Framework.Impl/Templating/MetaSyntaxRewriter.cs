@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     /// <remarks>
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
-    /// inheritor: <see cref="TemplateCompiler"/>.
+    /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
     public abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {

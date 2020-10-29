@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -19,6 +21,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compilation = compilation;
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName )!;
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName )!;
+
+            Debug.Assert( this._compileTimeAttribute != null );
+            Debug.Assert( this._templateAttribute != null );
         }
 
         protected virtual SymbolDeclarationScope GetAttributeScope(AttributeData attribute)
@@ -91,35 +96,55 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
             
-            // From base type.
+            
             if (symbol is ITypeSymbol type )
             {
                 if (type.Name == "dynamic")
                 {
                     return SymbolDeclarationScope.RunTimeOnly;
                 }
+
+                if ( symbol is INamedTypeSymbol namedType )
+                {
+                    // From generic arguments.
+                    foreach ( var genericArgument in namedType.TypeArguments )
+                    {
+                        var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
+
+                        if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
+                        {
+                            return AddToCache( scopeFromGenericArgument );
+                        }
+                    }
+
+                    // From base type.
+                    if ( type.BaseType != null )
+                    {
+                        var scopeFromBaseType = this.GetSymbolDeclarationScope( type.BaseType );
+
+                        if ( scopeFromBaseType != SymbolDeclarationScope.Default )
+                        {
+                            return AddToCache( scopeFromBaseType );
+                        }
+                    }
+
+                    // From interfaces.
+                    foreach ( var iface in type.AllInterfaces )
+                    {
+                        var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
+
+                        if ( scopeFromInterface != SymbolDeclarationScope.Default )
+                        {
+                            return AddToCache( scopeFromInterface );
+                        }
+                    }
+                }
                 
-                if (type.BaseType != null)
-                {
-                    var scopeFromBaseType = this.GetSymbolDeclarationScope(type.BaseType);
-
-                    if (scopeFromBaseType != SymbolDeclarationScope.Default)
-                    {
-                        return AddToCache(scopeFromBaseType);
-                    }
-                }
-
-                foreach (var iface in type.AllInterfaces)
-                {
-                    var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
-
-                    if ( scopeFromInterface != SymbolDeclarationScope.Default )
-                    {
-                        return AddToCache( scopeFromInterface );
-                    }
-                }
             }
-            
+
+
+
+
             // From assemblies.
             var scopeFromAssembly = this.GetAssemblyScope(symbol.ContainingAssembly);
             if (scopeFromAssembly != SymbolDeclarationScope.Default)
