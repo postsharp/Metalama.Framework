@@ -1,33 +1,13 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
-    public class CodeModelTests
+
+    public class CodeModelTests : TestBase
     {
-        public static ICompilation CreateCompilation(string code)
-        {
-            var roslynCompilation = CSharpCompilation.Create(null!)
-                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                .AddSyntaxTrees(SyntaxFactory.ParseSyntaxTree(code))
-                .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
-
-            var diagostics = roslynCompilation.GetDiagnostics();
-            if (diagostics.Any(diag => diag.Severity >= DiagnosticSeverity.Error))
-            {
-                var lines = diagostics.Select(diag => diag.ToString()).Prepend("The given code produced errors:");
-
-                throw new InvalidOperationException(string.Join(Environment.NewLine, lines));
-            }
-
-            return CompilationFactory.CreateCompilation(roslynCompilation);
-        }
-
         [Fact]
         public void ObjectIdentity()
         {

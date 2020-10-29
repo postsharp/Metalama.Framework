@@ -40,17 +40,20 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
-            // TODO: if rewriter doesn't find any compile-time types, return null?
+            var removeRunTimeCodeRewriter = new RemoveRunTimeCodeRewriter( this._symbolClassifier, compilation );
+            compilation = removeRunTimeCodeRewriter.VisitAllTrees( compilation );
 
-            compilation = new Rewriter( this._symbolClassifier, compilation ).VisitAllTrees( compilation );
+            if ( !removeRunTimeCodeRewriter.FoundCompileTimeCode )
+                return null;
 
             compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
 
             var preservedReferences = compilation.References
                 .Where( r => r is PortableExecutableReference { FilePath: var path } && _preservedReferenceNames.Contains( Path.GetFileName( path ) ) );
 
-
             compilation = compilation.WithReferences( _netStandardReferences.Concat( preservedReferences ) );
+
+            compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
 
             // TODO: adjust compilation references correctly
 
@@ -59,12 +62,14 @@ namespace Caravela.Framework.Impl.CompileTime
             return compilation;
         }
 
-        class Rewriter : CSharpSyntaxRewriter
+        class RemoveRunTimeCodeRewriter : CSharpSyntaxRewriter
         {
             private readonly ISymbolClassifier _symbolClassifier;
             private readonly Compilation _compilation;
 
-            public Rewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
+            public bool FoundCompileTimeCode { get; private set; }
+
+            public RemoveRunTimeCodeRewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
             {
                 this._symbolClassifier = symbolClassifier;
                 this._compilation = compilation;
@@ -78,20 +83,26 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // TODO: assembly and module-level attributes, incl. assembly version attribute
 
-            // TODO: remove invalid usings
-            public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node ) => node;
-
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitClassDeclaration );
             public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitStructDeclaration );
             public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitInterfaceDeclaration );
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitRecordDeclaration );
 
-            private T? VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> baseVisit ) where T : TypeDeclarationSyntax =>
-                this.GetSymbolDeclarationScope( node ) switch
+            private T? VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> baseVisit ) where T : TypeDeclarationSyntax
+            {
+                switch ( this.GetSymbolDeclarationScope( node ) )
                 {
-                    SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly => null,
-                    SymbolDeclarationScope.CompileTimeOnly => (T?) baseVisit( node )
-                };
+                    case SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly:
+                        return null;
+
+                    case SymbolDeclarationScope.CompileTimeOnly:
+                        this.FoundCompileTimeCode = true;
+                        return (T?) baseVisit( node );
+
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
 
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
@@ -106,6 +117,24 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // TODO: top-level statements?
+        }
+
+        // TODO: improve perf by explicitly skipping over all other nodes?
+        internal class RemoveInvalidUsingsRewriter : CSharpSyntaxRewriter
+        {
+            private readonly Compilation _compilation;
+
+            public RemoveInvalidUsingsRewriter( Compilation compilation ) => this._compilation = compilation;
+
+            public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
+            {
+                var symbolInfo = this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
+
+                if ( symbolInfo.Symbol == null )
+                    return null;
+
+                return node;
+            }
         }
     }
 }

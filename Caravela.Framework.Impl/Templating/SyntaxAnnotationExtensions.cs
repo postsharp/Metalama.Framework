@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public static class SyntaxAnnotationExtensions
+    static class SyntaxAnnotationExtensions
     {
         private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation("scope", "buildtime");
         private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation("scope", "runtime");
