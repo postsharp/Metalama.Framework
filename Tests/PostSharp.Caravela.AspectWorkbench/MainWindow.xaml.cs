@@ -4,26 +4,21 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Formatting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Text;
-using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Caravela.AspectWorkbench
 {
@@ -380,7 +375,13 @@ class TargetCode
                 paragraph.Inlines.Add(run);
             }
 
-            richTextBox.Document = new FlowDocument(paragraph) { PageWidth = richTextBox.ActualWidth };
+
+            richTextBox.Document = new FlowDocument( paragraph ) { PageWidth = 2000 };
+
+            // This is how to enable wrapping on the document:
+            // richTextBox.Document.SetBinding( FlowDocument.PageWidthProperty, 
+            //    new Binding( "ActualWidth" ) { Source = richTextBox } );
+            
         }
     }
     
