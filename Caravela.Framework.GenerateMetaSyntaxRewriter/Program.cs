@@ -23,7 +23,7 @@ namespace GenerateMetaSyntaxRewriter
             writer.WriteLine("using Microsoft.CodeAnalysis.CSharp.Syntax;");
             writer.WriteLine("using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;");
             writer.WriteLine();
-            writer.WriteLine("namespace Caravela.AspectWorkbench");
+            writer.WriteLine("namespace Caravela..Framework.Impl.Templating");
             writer.WriteLine("{");
             writer.WriteLine("\tpartial class MetaSyntaxRewriter");
             writer.WriteLine("\t{");
@@ -31,7 +31,7 @@ namespace GenerateMetaSyntaxRewriter
             var allFactoryMethods =
                 typeof(SyntaxFactory).GetMethods(BindingFlags.Static | BindingFlags.Public).ToArray();
             
-            foreach (var method in typeof(CSharpSyntaxRewriter).GetMethods(BindingFlags.Public | BindingFlags.Instance))
+            foreach (var method in typeof(CSharpSyntaxRewriter).GetMethods(BindingFlags.Public | BindingFlags.Instance).OrderBy(m => m.Name))
             {
                 if (!method.Name.StartsWith("Visit") || method.ReturnType != typeof(SyntaxNode))
                 {
