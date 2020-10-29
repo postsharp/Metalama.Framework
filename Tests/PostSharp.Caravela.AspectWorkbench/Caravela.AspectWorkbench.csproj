@@ -66,7 +66,7 @@
     <Compile Include="MetaModel\ProceedImpl.cs" />
     <Compile Include="MetaModel\SimpleDynamicMetaMember.cs" />
     <Compile Include="MetaModel\TemplateAttribute.cs" />
-    <Compile Include="__Void.cs" />
+    <Compile Include="WorkbenchTemplateCompiler.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

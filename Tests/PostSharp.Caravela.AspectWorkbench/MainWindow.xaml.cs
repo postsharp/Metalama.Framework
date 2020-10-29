@@ -195,12 +195,12 @@ class TargetCode
             var syntaxRoot1 = await document1.GetSyntaxRootAsync();
             var semanticModel1 = await  document1.GetSemanticModelAsync();
 
-            List<Diagnostic> templateDiagnostics = new();
+            
 
-            var templateCompiler = new TemplateCompiler();
-            bool success = templateCompiler.TryCompile( syntaxRoot1, semanticModel1, templateDiagnostics, out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
-
-            this.ReportDiagnostics( templateDiagnostics );
+            var templateCompiler = new WorkbenchTemplateCompiler( semanticModel1);
+            bool success = templateCompiler.TryCompile( syntaxRoot1,  out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
+            
+            this.ReportDiagnostics( templateCompiler.Diagnostics );
 
             // If we have an annotated syntax tree, display it.
             if ( annotatedSyntaxRoot != null )

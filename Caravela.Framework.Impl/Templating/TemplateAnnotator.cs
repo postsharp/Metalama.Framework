@@ -408,7 +408,7 @@ namespace Caravela.Framework.Impl.Templating
                     ).AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly).WithTriviaFrom(node.Else)
                     : null;
 
-                return node.Update(node.IfKeyword, node.OpenParenToken, node.Condition, node.CloseParenToken,
+                return node.Update(node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
                     annotatedStatement, annotatedElse).AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
             }
             else
@@ -557,10 +557,11 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 // TODO: We may have to write this diagnostic in the last iteration only.
+
                 this.Diagnostics.Add(Diagnostic.Create("CA01", "Annotation",
                     "Split build-time and run-time variables into several declarations.",
                     DiagnosticSeverity.Error,
-                    DiagnosticSeverity.Error, true, 0, location: Location.Create(node.SyntaxTree, node.Span)));
+                    DiagnosticSeverity.Error, true, 0, location: node.GetLocation()));
                 return variable;
             }
         }
