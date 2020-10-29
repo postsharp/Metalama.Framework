@@ -1,8 +1,9 @@
+using Caravela.Framework.Project;
 using System.Collections.Generic;
 
 namespace Caravela.AspectWorkbench
 {
-    [BuildTimeOnly]
+    [CompileTimeAttribute]
     public interface IMethodAdviceContext
     {
         string Name { get; }

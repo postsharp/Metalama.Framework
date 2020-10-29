@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.Templating
             this.templateMethod = templateMethodInfo;
         }
 
-        public SyntaxNode ExpandDeclaration(SyntaxNode sourceNode, ITemplateExpansionContext context )
+        public SyntaxNode ExpandDeclaration( object templateInstance, ITemplateExpansionContext context )
         {
-            var output = (SyntaxNode) templateMethod.Invoke( context, null );
+            var output = (SyntaxNode) this.templateMethod.Invoke( templateInstance, null );
             return new FlattenBlocksRewriter().Visit( output );
         }
     }

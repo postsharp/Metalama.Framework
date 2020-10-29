@@ -1,6 +1,8 @@
+using Caravela.Framework.Project;
+
 namespace Caravela.AspectWorkbench
 {
-    [BuildTimeOnly]
+    [CompileTime]
     public interface IParameter
     {
         string Name { get; }

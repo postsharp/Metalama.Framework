@@ -62,7 +62,6 @@
     <Compile Include="MetaModel\MethodAdviceContextImpl.cs" />
     <Compile Include="MetaModel\IMethodAdviceContext.cs" />
     <Compile Include="MetaModel\IParameter.cs" />
-    <Compile Include="MetaModel\BuildTimeOnlyAttribute.cs" />
     <Compile Include="MetaModel\ParameterImpl.cs" />
     <Compile Include="MetaModel\ProceedImpl.cs" />
     <Compile Include="MetaModel\SimpleDynamicMetaMember.cs" />
@@ -129,6 +128,10 @@
     <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj">
       <Project>{fa9772a5-51d5-4374-8dd3-e7cc1b3f138b}</Project>
       <Name>Caravela.Framework.Impl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj">
+      <Project>{3d5d53da-f498-4432-a3f4-99f21deecd69}</Project>
+      <Name>Caravela.Framework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

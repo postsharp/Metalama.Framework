@@ -14,6 +14,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.CSharp;
@@ -268,7 +269,7 @@ class TargetCode
             try
             {
                 var aspectType = assembly.GetType("Aspect");
-                var instance = Activator.CreateInstance(aspectType);
+                var aspectInstance = Activator.CreateInstance(aspectType);
                 var templateMethod =
                     aspectType.GetMethod("Template_Template", BindingFlags.Instance | BindingFlags.Public);
                 
@@ -280,7 +281,7 @@ class TargetCode
 
                 var driver = new TemplateDriver( templateMethod );
 
-                var output = driver.ExpandDeclaration( targetMethod.DeclaringSyntaxReferences[0].GetSyntax(), null );
+                var output = driver.ExpandDeclaration( aspectInstance, null );
                 var formattedOutput = Formatter.Format( output, project3.Solution.Workspace);
 
                 
@@ -330,6 +331,7 @@ class TargetCode
                     .Where(f=>!Path.GetFileNameWithoutExtension(f).EndsWith("Native", StringComparison.OrdinalIgnoreCase))
                     .Select(f => MetadataReference.CreateFromFile(f)))
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(AdviceContext).Assembly.Location))
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(SyntaxNode).Assembly.Location))
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(SyntaxFactory).Assembly.Location))
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateHelper ).Assembly.Location ) )

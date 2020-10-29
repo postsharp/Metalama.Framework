@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                Visit( node.Statement );
+                this.Visit( node.Statement );
             }
             else
             {
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.Mark( block.CloseBraceToken );
                 }
 
-                Visit( node.Statement );
+                this.Visit( node.Statement );
             }
             else
             {

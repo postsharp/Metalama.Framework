@@ -1,10 +1,11 @@
 using System.Threading;
 using Microsoft.CodeAnalysis.CSharp;
 using Caravela.AspectWorkbench;
+using Caravela.Framework.Project;
 
 namespace Caravela.AspectWorkbench
 {
-    [BuildTimeOnly]
+    [CompileTimeAttribute]
     public static class AdviceContext
     {
         private static readonly AsyncLocal<IAdviceContext> _current = new AsyncLocal<IAdviceContext>();
