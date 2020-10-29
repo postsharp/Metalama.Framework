@@ -35,7 +35,7 @@
             
             <DockPanel Grid.Column="2">
                 <TextBox DockPanel.Dock="Top">Source Code with Compile-Time Code Highlighting</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
                     <RichTextBox IsReadOnly="True" Name="richBox1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                            FontFamily="Consolas" />
                 </ScrollViewer>
@@ -46,7 +46,7 @@
             
             <DockPanel Grid.Column="4">
                 <TextBox DockPanel.Dock="Top">Compiled Template</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
                     <RichTextBox IsReadOnly="True" Name="richBox2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                FontFamily="Consolas" />
                 </ScrollViewer>
@@ -58,7 +58,7 @@
             
             <DockPanel Grid.Column="6">
                 <TextBox DockPanel.Dock="Top">Transformed Code</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
                     <RichTextBox IsReadOnly="True" Name="richBox3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                FontFamily="Consolas" />
                 </ScrollViewer>
