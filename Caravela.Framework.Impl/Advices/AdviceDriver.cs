@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.Advices
     {
         public AdviceInstanceResult GetResult(AdviceInstance adviceInstance)
         {
-            // TODO: this should be better designed
             Transformation transformation = adviceInstance.Advice switch
             {
                 OverrideMethodAdvice overrideMethod => new OverriddenMethod(

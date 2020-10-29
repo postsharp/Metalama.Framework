@@ -7,7 +7,6 @@ namespace Caravela.Framework.Impl
 {
     class AspectDriver : IAspectDriver
     {
-        // TODO: should this be AspectType?
         public INamedType AspectType { get; }
 
         public AspectDriver( INamedType aspectType ) => this.AspectType = aspectType;

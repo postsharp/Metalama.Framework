@@ -151,11 +151,11 @@ namespace Caravela.Reactive.Sources
             return this._observers.RemoveObserver( subscription );
         }
 
-        // TODO: this is not thread-safe.
         bool IReactiveSource.IsImmutable => false;
 
         int IReactiveObservable<IReactiveCollectionObserver<T>>.Version => this._version;
 
+        // TODO: this is not thread-safe.
         IEnumerable<T> IReactiveSource<IEnumerable<T>>.GetValue( in ReactiveCollectorToken observerToken )
         {
             return this;

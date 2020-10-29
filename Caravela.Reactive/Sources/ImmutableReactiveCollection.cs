@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Caravela.Reactive.Sources
 {
     /// <summary>
     /// Collection that implements the reactive interface, but does not actually ever change.
     /// </summary>
-    // TODO: every usage of this type should be probably changed to make it reactive
     internal sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>, IReactiveObservable<IReactiveCollectionObserver<T>>
     {
         private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
@@ -34,8 +32,5 @@ namespace Caravela.Reactive.Sources
 
         IReactiveVersionedValue<IEnumerable<T>> IReactiveSource<IEnumerable<T>>.GetVersionedValue( in ReactiveCollectorToken observerToken )
             => this._value;
-
     }
-
-
 }
