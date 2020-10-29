@@ -1,21 +1,24 @@
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    public class SymbolClassifier : ISymbolClassifier
+    class SymbolClassifier : ISymbolClassifier
     {
         private readonly CSharpCompilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
+        private readonly INamedTypeSymbol _templateAttribute;
         private readonly Dictionary<ISymbol, SymbolDeclarationScope> _cache = new Dictionary<ISymbol, SymbolDeclarationScope>( SymbolEqualityComparer.Default );
 
         public SymbolClassifier( CSharpCompilation compilation )
         {
             this._compilation = compilation;
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName )!;
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName )!;
         }
 
         protected virtual SymbolDeclarationScope GetAttributeScope(AttributeData attribute)
@@ -23,6 +26,10 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
                 return SymbolDeclarationScope.CompileTimeOnly;
+            }
+            else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._templateAttribute ) )
+            {
+                return SymbolDeclarationScope.Template;
             }
             else
             {

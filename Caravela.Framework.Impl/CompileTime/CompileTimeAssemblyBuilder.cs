@@ -70,32 +70,42 @@ namespace Caravela.Framework.Impl.CompileTime
                 this._compilation = compilation;
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            private TypeDeclarationSyntax? VisitTypeDeclaration( TypeDeclarationSyntax node )
+            private SymbolDeclarationScope GetSymbolDeclarationScope(MemberDeclarationSyntax node)
             {
                 var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-
-                return this._symbolClassifier.GetSymbolDeclarationScope( symbol ) switch
-                {
-                    SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly => null,
-                    SymbolDeclarationScope.CompileTimeOnly => node
-                };
+                return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
             }
 
             // TODO: assembly and module-level attributes, incl. assembly version attribute
-            // TODO: top-level statements?
 
             // TODO: remove invalid usings
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node ) => node;
 
-            public override SyntaxNode DefaultVisit( SyntaxNode node ) => throw new NotImplementedException();
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitClassDeclaration );
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitStructDeclaration );
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitInterfaceDeclaration );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitRecordDeclaration );
+
+            private T? VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> baseVisit ) where T : TypeDeclarationSyntax =>
+                this.GetSymbolDeclarationScope( node ) switch
+                {
+                    SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly => null,
+                    SymbolDeclarationScope.CompileTimeOnly => (T?) baseVisit( node )
+                };
+
+            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            {
+                if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
+                {
+                    throw new NotImplementedException( "TODO: call the template compiler here?" );
+                }
+                else
+                {
+                    return base.VisitMethodDeclaration( node );
+                }
+            }
+
+            // TODO: top-level statements?
         }
     }
 }

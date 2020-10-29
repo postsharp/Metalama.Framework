@@ -1,17 +1,28 @@
 namespace Caravela.Framework.Impl.CompileTime
 {
-    public enum SymbolDeclarationScope
+    enum SymbolDeclarationScope
     {
-        // The symbol can be used both at build time or at run time.
-        // The node has not been classified as necessarily build-time or run-time.
+        /// <summary>
+        /// The symbol can be used both at compile time or at run time.
+        /// The node has not been classified as necessarily compile-time or run-time.
+        /// </summary>
         Default,
-        
-        // The symbol can be only used at run time only.
-        // The node must be evaluated at run-time, but its children can be build-time expressions.
+
+        /// <summary>
+        /// The symbol can be only used at run time only.
+        /// The node must be evaluated at run-time, but its children can be compile-time expressions.
+        /// </summary>
         RunTimeOnly,
-        
-        // The symbol can be used only at build time.
-        // The node including all children nodes must be evaluated at build time.
-        CompileTimeOnly
+
+        /// <summary>
+        /// The symbol can be used only at compile time.
+        /// The node including all children nodes must be evaluated at compile time.
+        /// </summary>
+        CompileTimeOnly,
+
+        /// <summary>
+        /// The symbol represents a template that has to be transformed at compile time.
+        /// </summary>
+        Template
     }
 }
