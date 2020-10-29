@@ -95,7 +95,7 @@ namespace Caravela..Framework.Impl.Templating
 			switch ( this.GetTransformationKind( node ) ) 
 			{
 				case TransformationKind.Clone: 
-					return AnonymousMethodExpression( node.AsyncKeyword, node.DelegateKeyword, node.ParameterList, node.Block, node.ExpressionBody);
+					return AnonymousMethodExpression( node.Modifiers, node.DelegateKeyword, node.ParameterList, node.Block, node.ExpressionBody);
 				case TransformationKind.Transform: 
 					return this.TransformAnonymousMethodExpression( node );
 				default: 
@@ -106,7 +106,7 @@ namespace Caravela..Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(IdentifierName(nameof(AnonymousMethodExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
 			Argument(this.Transform(node.DelegateKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
@@ -3962,7 +3962,7 @@ namespace Caravela..Framework.Impl.Templating
 			switch ( this.GetTransformationKind( node ) ) 
 			{
 				case TransformationKind.Clone: 
-					return ParenthesizedLambdaExpression( node.AsyncKeyword, node.ParameterList, node.ArrowToken, node.Block, node.ExpressionBody);
+					return ParenthesizedLambdaExpression( node.Modifiers, node.ParameterList, node.ArrowToken, node.Block, node.ExpressionBody);
 				case TransformationKind.Transform: 
 					return this.TransformParenthesizedLambdaExpression( node );
 				default: 
@@ -3973,7 +3973,7 @@ namespace Caravela..Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(IdentifierName(nameof(ParenthesizedLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
@@ -4814,7 +4814,7 @@ namespace Caravela..Framework.Impl.Templating
 			switch ( this.GetTransformationKind( node ) ) 
 			{
 				case TransformationKind.Clone: 
-					return SimpleLambdaExpression( node.AsyncKeyword, node.Parameter, node.ArrowToken, node.Block, node.ExpressionBody);
+					return SimpleLambdaExpression( node.Modifiers, node.Parameter, node.ArrowToken, node.Block, node.ExpressionBody);
 				case TransformationKind.Transform: 
 					return this.TransformSimpleLambdaExpression( node );
 				default: 
@@ -4825,7 +4825,7 @@ namespace Caravela..Framework.Impl.Templating
 		{
 			this.Indent();
 			var result = InvocationExpression(IdentifierName(nameof(SimpleLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
+			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
 			Argument(this.Transform(node.Parameter)).WithLeadingTrivia(this.GetIndentation()),
 			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
