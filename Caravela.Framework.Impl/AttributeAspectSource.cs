@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 
@@ -8,9 +9,9 @@ namespace Caravela.Framework.Impl
     class AttributeAspectSource : AspectSource
     {
         private readonly ICompilation _compilation;
-        private readonly Loader _loader;
+        private readonly CompileTimeAssemblyLoader _loader;
 
-        public AttributeAspectSource( ICompilation compilation, Loader loader )
+        public AttributeAspectSource( ICompilation compilation, CompileTimeAssemblyLoader loader )
         {
             this._compilation = compilation;
             this._loader = loader;

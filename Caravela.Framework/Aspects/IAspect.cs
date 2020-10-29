@@ -1,7 +1,9 @@
 ﻿using Caravela.Framework.Advices;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
 {
+    [CompileTime]
     public interface IAspect
     {
     }
@@ -16,7 +18,7 @@ namespace Caravela.Framework.Aspects
     {
         ICodeElement TargetDeclaration { get; }
 
-        // TODO: should there be an AdviceFactory instead, as per spec?
+        // TODO: there should be an AdviceFactory instead, as per spec
         void AddAdvice<T>( IAdvice<T> advice ) where T : ICodeElement;
     }
 

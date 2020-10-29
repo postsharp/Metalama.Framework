@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl
 
         public IReactiveGroupBy<string, AspectInstance> AspectsByAspectType { get; }
 
-        public AspectCompilation( IReadOnlyList<Diagnostic> diagnostics, BaseCompilation compilation, Loader loader )
+        public AspectCompilation( IReadOnlyList<Diagnostic> diagnostics, BaseCompilation compilation, CompileTimeAssemblyLoader loader )
             : this( diagnostics, compilation, ImmutableArray.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
 
         private AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, BaseCompilation compilation, ImmutableArray<AspectSource> aspectSources)

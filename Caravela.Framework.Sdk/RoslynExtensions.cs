@@ -1,14 +1,16 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Sdk
 {
     public static class RoslynExtensions
     {
-        public static CSharpCompilation VisitAllTrees( this CSharpSyntaxRewriter rewriter, CSharpCompilation compilation )
+        public static TCompilation VisitAllTrees<TCompilation>( this CSharpSyntaxRewriter rewriter, TCompilation compilation )
+            where TCompilation : Compilation
         {
             foreach (var tree in compilation.SyntaxTrees)
             {
-                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
+                compilation = (TCompilation) compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
             }
 
             return compilation;

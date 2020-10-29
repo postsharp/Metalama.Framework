@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj" />
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" OutputItemType="Analyzer" />

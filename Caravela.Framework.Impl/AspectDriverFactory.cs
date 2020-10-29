@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 
@@ -7,10 +8,10 @@ namespace Caravela.Framework.Impl
 {
     class AspectDriverFactory
     {
-        private readonly Loader _loader;
+        private readonly CompileTimeAssemblyLoader _loader;
         private readonly IReactiveGroupBy<IType, INamedType> _weaverTypes;
 
-        public AspectDriverFactory( ICompilation compilation, Loader loader )
+        public AspectDriverFactory( ICompilation compilation, CompileTimeAssemblyLoader loader )
         {
             this._loader = loader;
 

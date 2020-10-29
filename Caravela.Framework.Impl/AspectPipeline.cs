@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl
             var roslynCompilation = (CSharpCompilation)context.Compilation;
 
             // DI
-            var loader = new Loader(context.LoadReferencedAssembly);
+            var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ) ) );
             var compilation = new SourceCompilation(roslynCompilation);
             var driverFactory = new AspectDriverFactory(compilation, loader);
             var aspectTypeFactory = new AspectTypeFactory(driverFactory);
