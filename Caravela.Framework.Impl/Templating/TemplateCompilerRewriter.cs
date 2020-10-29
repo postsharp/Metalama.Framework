@@ -15,14 +15,14 @@ namespace Caravela.Framework.Impl.Templating
     /// Compiles the source code of a template, annotated with <see cref="TemplateAnnotator"/>,
     /// to an executable template.
     /// </summary>
-    public sealed partial class TemplateCompiler : MetaSyntaxRewriter
+    internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private string? _currentStatementListVariableName;
         private List<StatementSyntax>? _currentMetaStatementList;
         private int _nextStatementListId;
 
-        public TemplateCompiler(SemanticAnnotationMap semanticAnnotationMap)
+        public TemplateCompilerRewriter(SemanticAnnotationMap semanticAnnotationMap)
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
