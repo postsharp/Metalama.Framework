@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.Reactive;
 
 // TODO: InternalImplement
-namespace Caravela.Framework
+namespace Caravela.Framework.Code
 {
     public interface ICompilation
     {

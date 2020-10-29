@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Caravela.Framework.Advices

@@ -1,4 +1,6 @@
-﻿namespace Caravela.Framework.Advices
+﻿using Caravela.Framework.Code;
+
+namespace Caravela.Framework.Advices
 {
     public interface IAdvice { }
 

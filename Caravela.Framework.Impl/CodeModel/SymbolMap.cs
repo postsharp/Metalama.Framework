@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl

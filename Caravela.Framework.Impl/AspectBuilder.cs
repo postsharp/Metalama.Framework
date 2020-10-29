@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;

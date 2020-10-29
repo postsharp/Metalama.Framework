@@ -1,6 +1,6 @@
 ﻿using System;
-using Caravela.Framework;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 namespace Caravela.Patterns.AutoCancellationToken
 {
