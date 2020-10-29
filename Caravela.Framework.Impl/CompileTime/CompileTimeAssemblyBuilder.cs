@@ -17,21 +17,32 @@ namespace Caravela.Framework.Impl.CompileTime
             "Caravela.Reactive.dll",
             "Caravela.Framework.dll",
             "Caravela.Framework.Sdk.dll",
-            // TODO: should these be here?
-            "Microsoft.CodeAnalysis.dll",
-            "Microsoft.CodeAnalysis.CSharp.dll"
         }.ToImmutableArray();
 
-        private static readonly IEnumerable<MetadataReference> _netStandardReferences;
+        private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
         static CompileTimeAssemblyBuilder()
         {
             // TODO: make NuGetPackageRoot MSBuild property compiler-visible and use that here?
-            string netstandardDirectoryPath = Path.Combine(
-                Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages", "netstandard.library/2.0.3/build/netstandard2.0/ref" );
-            _netStandardReferences = new[] { "netstandard.dll", "System.Runtime.dll" }
-                .Select( name => MetadataReference.CreateFromFile( Path.Combine( netstandardDirectoryPath, name ) ) )
-                .ToArray();
+            string nugetDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" );
+
+            string netstandardDirectory = Path.Combine( nugetDirectory, "netstandard.library/2.0.3/build/netstandard2.0/ref" );
+            var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
+
+            // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
+            // TODO: check that the path exists and if not, restore the MS.CA.CS package?
+            // TODO: do not hardcode the versions?
+            string roslynVersion = "3.8.0-5.final";
+            string immutableCollectionsVersion = "5.0.0-preview.8.20407.11";
+            var roslynPaths = new (string package, string version, string assembly)[]
+            {
+                ("microsoft.codeanalysis.common", roslynVersion, "Microsoft.CodeAnalysis.dll"),
+                ("microsoft.codeanalysis.csharp", roslynVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
+                ("system.collections.immutable", immutableCollectionsVersion, "System.Collections.Immutable.dll")
+            }
+            .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
+
+            _fixedReferences = netStandardPaths.Concat( roslynPaths ).Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
         private readonly ISymbolClassifier _symbolClassifier;
@@ -51,7 +62,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var preservedReferences = compilation.References
                 .Where( r => r is PortableExecutableReference { FilePath: var path } && _preservedReferenceNames.Contains( Path.GetFileName( path ) ) );
 
-            compilation = compilation.WithReferences( _netStandardReferences.Concat( preservedReferences ) );
+            compilation = compilation.WithReferences( _fixedReferences.Concat( preservedReferences ) );
 
             compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
 

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Sdk
 {
+    [CompileTime]
     public interface IAspectWeaver : IAspectDriver
     {
         CSharpCompilation Transform(AspectWeaverContext context);

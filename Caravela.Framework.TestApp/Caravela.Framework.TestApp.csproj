@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Caravela.Framework.TestApp.Aspects\HelloWorldAspect.cs" Link="HelloWorldAspect.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
   </ItemGroup>
 

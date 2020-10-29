@@ -19,10 +19,14 @@ namespace Caravela.Framework.Impl.CompileTime
         public object CreateInstance ( INamedTypeSymbol typeSymbol)
         {
             var type = this.GetCompileTimeType( typeSymbol );
+
+            if ( type == null )
+                throw new InvalidOperationException( $"Could not load type {typeSymbol}." );
+
             return Activator.CreateInstance( type );
         }
 
-        public Type GetCompileTimeType( INamedTypeSymbol typeSymbol )
+        public Type? GetCompileTimeType( INamedTypeSymbol typeSymbol )
         {
             var assemblySymbol = typeSymbol.ContainingAssembly;
             if ( !this._assemblyMap.TryGetValue( assemblySymbol, out var assembly ) )
