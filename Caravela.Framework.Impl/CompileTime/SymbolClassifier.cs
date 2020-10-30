@@ -22,8 +22,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName )!;
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName )!;
 
-            Debug.Assert( this._compileTimeAttribute != null );
-            Debug.Assert( this._templateAttribute != null );
+            Debug.Assert( this._compileTimeAttribute is not null);
+            Debug.Assert( this._templateAttribute is not null );
         }
 
         protected virtual SymbolDeclarationScope GetAttributeScope(AttributeData attribute)

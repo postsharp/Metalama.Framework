@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     public class TemplateCompiler
     {
-        private bool TryGetAnnotatedSyntax( SyntaxNode sourceSyntaxRoot,
+        private bool TryAnnotate( SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SemanticAnnotationMap? symbolAnnotationMap,
@@ -24,8 +25,7 @@ namespace Caravela.Framework.Impl.Templating
 
 
             // Annotate the syntax tree with info about build- and run-time nodes,
-            var annotatorRewriter = new TemplateRewriterFilter<TemplateAnnotator>( symbolAnnotationMap,
-                new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap ) );
+            var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
 
             var changeIdBefore = -1;
 
@@ -39,21 +39,21 @@ namespace Caravela.Framework.Impl.Templating
 
                 annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot );
 
-                diagnostics.AddRange( annotatorRewriter.Inner.Diagnostics );
+                diagnostics.AddRange( annotatorRewriter.Diagnostics );
 
                 // Stop if we have any error.
-                if ( annotatorRewriter.Inner.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                if ( annotatorRewriter.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
                 {
                     return false;
                 }
 
                 // Stop if no change was detected.
-                if ( changeIdBefore == annotatorRewriter.Inner.ChangeId )
+                if ( changeIdBefore == annotatorRewriter.ChangeId )
                 {
                     return true;
                 }
 
-                changeIdBefore = annotatorRewriter.Inner.ChangeId;
+                changeIdBefore = annotatorRewriter.ChangeId;
             }
 
             // Unreachable.
@@ -62,14 +62,23 @@ namespace Caravela.Framework.Impl.Templating
         }
 
 
-        public bool TryCompile( SyntaxNode sourceSyntaxRoot,
+        public bool TryAnnotate( SyntaxNode sourceSyntaxRoot,
+            SemanticModel semanticModel,
+            List<Diagnostic> diagnostics,
+            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot
+            )
+         => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
+
+
+        public bool TryCompile( 
+            SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
 
-            if ( !this.TryGetAnnotatedSyntax( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
                 return false;
@@ -77,8 +86,7 @@ namespace Caravela.Framework.Impl.Templating
 
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateRewriterFilter<TemplateCompilerRewriter>( symbolAnnotationMap, 
-                new TemplateCompilerRewriter( symbolAnnotationMap ) );
+            var templateCompilerRewriter = new TemplateCompilerRewriter( symbolAnnotationMap );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             // TODO: add diagnostics.
@@ -86,5 +94,6 @@ namespace Caravela.Framework.Impl.Templating
             return true;
 
         }
+
     }
 }
