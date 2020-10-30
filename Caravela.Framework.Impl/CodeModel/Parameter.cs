@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
-using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -30,5 +29,7 @@ namespace Caravela.Framework.Impl
 
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+
+        public CodeElementKind Kind => CodeElementKind.Parameter;
     }
 }

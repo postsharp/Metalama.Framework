@@ -14,7 +14,10 @@ namespace Caravela.Framework.Impl
         internal SymbolMap SymbolMap => this.Compilation.SymbolMap;
 
         public abstract ICodeElement? ContainingElement { get; }
+
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
+
+        public abstract CodeElementKind Kind { get; }
 
         protected internal abstract ISymbol Symbol { get; }
 

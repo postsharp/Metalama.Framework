@@ -1,5 +1,4 @@
 ﻿using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
@@ -16,9 +15,11 @@ namespace Caravela.Framework.Impl
         {
             if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
             {
+                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
+
                 // TODO: create AspectParts properly
-                aspectType = new AspectType(
-                    attributeType.FullName, this._aspectDriverFactory.GetAspectDriver( attributeType ), new string?[] { null } );
+                aspectType = new( attributeType.FullName, aspectDriver, new string?[] { null } );
+
                 this._aspectTypes.Add( attributeType, aspectType );
             }
 

@@ -18,37 +18,50 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute(TransformerContext context)
         {
-            var roslynCompilation = (CSharpCompilation)context.Compilation;
-
-            // DI
-            var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ) ) );
-            var compilation = new SourceCompilation(roslynCompilation);
-            var driverFactory = new AspectDriverFactory(compilation, loader);
-            var aspectTypeFactory = new AspectTypeFactory(driverFactory);
-            var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
-
-            var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, loader );
-
-            var stages = GetAspectTypes(compilation)
-                .Select( at => aspectTypeFactory.GetAspectType( at ) )
-                .SelectMany(
-                    at => at.Parts,
-                    ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
-                .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
-                .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
-                .GetValue( default );
-
-            foreach ( var stage in stages )
+            try
             {
-                aspectCompilation = stage.Transform( aspectCompilation );
-            }
+                var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-            foreach (var diagnostic in aspectCompilation.Diagnostics)
+                // DI
+                var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ) ) );
+                var compilation = new SourceCompilation( roslynCompilation );
+                var driverFactory = new AspectDriverFactory( compilation, loader );
+                var aspectTypeFactory = new AspectTypeFactory( driverFactory );
+                var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
+
+                var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, loader );
+
+                var stages = GetAspectTypes( compilation )
+                    .Select( at => aspectTypeFactory.GetAspectType( at ) )
+                    .SelectMany(
+                        at => at.Parts,
+                        ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
+                    .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
+                    .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
+                    .GetValue( default );
+
+                foreach ( var stage in stages )
+                {
+                    aspectCompilation = stage.Transform( aspectCompilation );
+                }
+
+                foreach ( var diagnostic in aspectCompilation.Diagnostics )
+                {
+                    context.ReportDiagnostic( diagnostic );
+                }
+
+                return aspectCompilation.Compilation.GetRoslynCompilation();
+            }
+            catch (CaravelaException ex)
             {
-                context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic( ex.Diagnostic );
+                return context.Compilation;
             }
-
-            return aspectCompilation.Compilation.GetRoslynCompilation();
+            catch (Exception ex)
+            {
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ex ) );
+                return context.Compilation;
+            }
         }
 
         private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)

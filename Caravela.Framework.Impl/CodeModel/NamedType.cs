@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
+using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -44,7 +45,8 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveCollection<IProperty> Properties => this.OnlyDeclared( this.AllProperties );
 
-        public IReactiveCollection<IEvent> AllEvents => throw new NotImplementedException();
+        // TODO
+        public IReactiveCollection<IEvent> AllEvents => ImmutableReactiveCollection<IEvent>.Empty;
 
         [Memo]
         public IReactiveCollection<IEvent> Events => this.OnlyDeclared( this.AllEvents );
@@ -80,6 +82,8 @@ namespace Caravela.Framework.Impl
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes =>
             this.TypeSymbol.GetAttributes().Select( a => new Attribute( a, this.Compilation.SymbolMap ) ).ToImmutableReactive();
+
+        public override CodeElementKind Kind => CodeElementKind.Type;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );

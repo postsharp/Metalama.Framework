@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Caravela.Reactive.Sources
 {
     /// <summary>
     /// Collection that implements the reactive interface, but does not actually ever change.
     /// </summary>
-    internal sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>, IReactiveObservable<IReactiveCollectionObserver<T>>
+    public sealed class ImmutableReactiveCollection<T> : IReactiveCollection<T>, IReactiveObservable<IReactiveCollectionObserver<T>>
     {
         private readonly ReactiveVersionedValue<IEnumerable<T>> _value;
 
@@ -13,6 +14,8 @@ namespace Caravela.Reactive.Sources
         {
             this._value = new ReactiveVersionedValue<IEnumerable<T>>( items, 0 );
         }
+
+        public static ImmutableReactiveCollection<T> Empty => new ImmutableReactiveCollection<T>( Array.Empty<T>() );
 
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
 

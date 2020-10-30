@@ -60,6 +60,7 @@ namespace Caravela.Framework.Code
 
 
         // TODO: differentiate between class, struct and interface
+        // TODO: separate NestedTypes and AllNestedTypes?
         IReactiveCollection<INamedType> NestedTypes { get; }
 
         // TODO: how to represent fields in general and compiler-generated backing fields in particular
@@ -89,9 +90,20 @@ namespace Caravela.Framework.Code
     {
         ICodeElement? ContainingElement { get; }
         IReactiveCollection<IAttribute> Attributes { get; }
+
+        public CodeElementKind Kind { get; }
     }
 
-
+    public enum CodeElementKind
+    {
+        None,
+        Type,
+        Method,
+        Property,
+        Field,
+        Event,
+        Parameter
+    }
 
     public interface IMember : ICodeElement
     {
@@ -158,7 +170,7 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IMethod> LocalFunctions { get; }
         IReadOnlyList<IParameter> Parameters { get; }
         IReadOnlyList<IGenericParameter> GenericParameters { get; }
-        MethodKind Kind { get; }
+        new MethodKind Kind { get; }
     }
 
     public interface IParameter : ICodeElement

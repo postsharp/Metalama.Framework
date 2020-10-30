@@ -4,6 +4,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
+using Caravela.Reactive.Sources;
 
 namespace Caravela.Framework.Impl
 {
@@ -24,10 +25,17 @@ namespace Caravela.Framework.Impl
 
             var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
 
-            return from type in this._compilation.DeclaredTypes
-                   from attribute in type.Attributes
+            var codeElements = this._compilation.DeclaredTypes.SelectManyRecursive<ICodeElement>( codeElement => codeElement switch
+            {
+                INamedType namedType => namedType.NestedTypes.Union<ICodeElement>( namedType.Methods ).Union( namedType.Properties ).Union( namedType.Events ),
+                IMethod method => method.LocalFunctions.ToImmutableReactive(),
+                _ => ImmutableReactiveCollection<ICodeElement>.Empty
+            } );
+
+            return from codeElement in codeElements
+                   from attribute in codeElement.Attributes
                    where attribute.Type.Is( iAspect )
-                   select new AspectInstance( (IAspect) this._loader.CreateInstance( attribute.Type.GetSymbol() ), type, attribute.Type );
+                   select new AspectInstance( (IAspect) this._loader.CreateInstance( attribute.Type.GetSymbol() ), codeElement, attribute.Type );
         }
     }
 }

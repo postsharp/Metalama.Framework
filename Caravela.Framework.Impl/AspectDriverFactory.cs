@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl
             var weavers = this._weaverTypes[type].GetValue().ToList();
 
             if ( weavers.Count > 1 )
-                throw new InvalidOperationException( "There can be at most one weaver for an aspect type." );
+                throw new CaravelaException( GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver, type, string.Join( ", ", weavers ) );
 
             if ( weavers.Count == 1 )
                 // TODO: this needs to be the same instance for equivalent type, to make reactive grouping work

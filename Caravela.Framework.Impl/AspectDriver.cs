@@ -1,7 +1,9 @@
-﻿using System;
+﻿using System.Collections.Immutable;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -17,18 +19,21 @@ namespace Caravela.Framework.Impl
 
             return aspectInstance.CodeElement switch
             {
-                INamedType type => EvaluateAspect( type, aspect ),
-                IMethod method => EvaluateAspect( method, aspect )
+                INamedType type => this.EvaluateAspect( type, aspect ),
+                IMethod method => this.EvaluateAspect( method, aspect )
             };
         }
 
-        private static AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
+        private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
             where T : ICodeElement
         {
             if (aspect is not IAspect<T> aspectOfT)
             {
-                // TODO: can this happen? if it can, produce a diagnostic instead
-                throw new InvalidOperationException();
+                // TODO: should the diagnostic be applied to the attribute, if one exists?
+                var diagnostic = Diagnostic.Create(
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode().GetLocation(), this.AspectType, codeElement, codeElement.Kind );
+
+                return new( ImmutableArray.Create( diagnostic ), ImmutableArray.Create<AdviceInstance>(), ImmutableArray.Create<AspectInstance>() );
             }
 
             var aspectBuilder = new AspectBuilder<T>( codeElement );

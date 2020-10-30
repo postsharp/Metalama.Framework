@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private SymbolDeclarationScope GetSymbolDeclarationScope(MemberDeclarationSyntax node)
             {
-                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
                 return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
             }
 

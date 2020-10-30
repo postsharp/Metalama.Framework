@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
-        public MethodKind Kind => this._symbol.MethodKind switch
+        MethodKind IMethod.Kind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Ordinary,
             RoslynMethodKind.Constructor => MethodKind.Constructor,
@@ -85,6 +85,8 @@ namespace Caravela.Framework.Impl
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
+        public override CodeElementKind Kind => CodeElementKind.Method;
+
         public bool IsVirtual => this._symbol.IsVirtual;
 
         [Memo]
@@ -109,6 +111,9 @@ namespace Caravela.Framework.Impl
             [Memo]
             public IReactiveCollection<IAttribute> Attributes =>
                 this._method._symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, this._method.SymbolMap)).ToImmutableReactive();
+
+            // TODO: Add IParameter.Kind to distinguish return parameters?
+            public CodeElementKind Kind => CodeElementKind.Parameter;
         }
     }
 }

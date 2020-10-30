@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -19,11 +17,8 @@ namespace Caravela.Framework.Impl.CompileTime
         public SymbolClassifier( CSharpCompilation compilation )
         {
             this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName )!;
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName )!;
-
-            Debug.Assert( this._compileTimeAttribute is not null);
-            Debug.Assert( this._templateAttribute is not null );
+            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
         }
 
         protected virtual SymbolDeclarationScope GetAttributeScope(AttributeData attribute)
@@ -106,16 +101,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( symbol is INamedTypeSymbol namedType )
                 {
-                    // From generic arguments.
-                    foreach ( var genericArgument in namedType.TypeArguments )
-                    {
-                        var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
-
-                        if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
-                        {
-                            return AddToCache( scopeFromGenericArgument );
-                        }
-                    }
+                    // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
+                    // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
                     // From base type.
                     if ( type.BaseType != null )
@@ -138,8 +125,19 @@ namespace Caravela.Framework.Impl.CompileTime
                             return AddToCache( scopeFromInterface );
                         }
                     }
+
+                    // From generic arguments.
+                    foreach ( var genericArgument in namedType.TypeArguments )
+                    {
+                        var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
+
+                        if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
+                        {
+                            return AddToCache( scopeFromGenericArgument );
+                        }
+                    }
                 }
-                
+
             }
 
 
