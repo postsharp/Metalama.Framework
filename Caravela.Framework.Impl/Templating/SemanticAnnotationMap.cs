@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
-using System.IO.Compression;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -192,7 +190,6 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         private class AnnotatingRewriter : CSharpSyntaxRewriter
         {
-            int x = 1, y = 5, z;
             private readonly SemanticModel _semanticModel;
             private readonly SemanticAnnotationMap _map;
 
