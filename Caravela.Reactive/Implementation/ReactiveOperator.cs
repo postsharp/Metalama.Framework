@@ -53,6 +53,13 @@ namespace Caravela.Reactive.Implementation
 
                 if ( this._result.Value.Version == 0 )
                 {
+                    // We're already evaluating the function so we can't do it again.
+                    // To be safe, say we're mutable for now. 
+                    if ( this._lock.IsHeldByCurrentThread )
+                    {
+                        return false;
+                    }
+
                     // The function has never been evaluated, so dependencies were not collected.
                     this.EnsureFunctionEvaluated();
                 }

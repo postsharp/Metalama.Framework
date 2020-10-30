@@ -58,6 +58,29 @@ namespace Caravela.Reactive.UnitTests
 
             Assert.Empty( groups );
         }
-    }
 
+
+        [Fact]
+        public void SelectManyReactiveWithWhereTest()
+        {
+            var compilation = new TestCompilation();
+
+            compilation.Types.Add( new( "C", null ) );
+
+            var codeElements = compilation.Types.SelectManyRecursive( type => type.NestedTypes.Where( m => true ) );
+
+            Assert.Single( codeElements.GetValue() );
+        }
+
+
+        [Fact]
+        public void SelectManyImmutableWithWhereTest()
+        {
+            var types = new[] { new SourceType( "C", null ) }.ToImmutableReactive();
+
+            var codeElements = types.SelectManyRecursive( type => type.NestedTypes.Where( m => true ) );
+
+            Assert.Single( codeElements.GetValue() );
+        }
+    }
 }

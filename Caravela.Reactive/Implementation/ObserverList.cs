@@ -72,16 +72,14 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-        public IReactiveSubscription<T> AddObserver(IReactiveObserver observer)
+        public IReactiveSubscription<T>? AddObserver(IReactiveObserver observer)
         {
             if (observer == null)
                 throw new ArgumentNullException();
 
-#if DEBUG
-            if (this.ContainsObserver(observer))
-                throw new InvalidOperationException();
-
-#endif
+            // this happens when SelectManyRecursive uses its Follow and then GetValue
+            if ( this.ContainsObserver( observer ) )
+                return null;
 
             var node = new ObserverListItem<T>(this._owner, observer);
 

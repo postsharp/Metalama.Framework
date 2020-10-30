@@ -1,10 +1,5 @@
 ﻿using Caravela.Reactive.Sources;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Caravela.Reactive.UnitTests
 {
@@ -16,6 +11,7 @@ namespace Caravela.Reactive.UnitTests
     record SourceType( string Name, IImmutableList<string> BaseTypes )
     {
         public ReactiveHashSet<Member> Members { get; } = new();
+        public ReactiveHashSet<SourceType> NestedTypes { get; } = new();
     }
 
     record Member( string Name );
