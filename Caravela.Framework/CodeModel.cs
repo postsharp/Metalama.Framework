@@ -81,6 +81,8 @@ namespace Caravela.Framework.Code
 
     public interface IAttribute
     {
+        // TODO: add TargetElement?
+
         INamedType Type { get; }
         IReadOnlyList<object?> ConstructorArguments { get; }
         IReadOnlyDictionary<string, object?> NamedArguments { get; }

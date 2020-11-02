@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             var adviceDriver = new AdviceDriver();
 
-            // Modified compilations can form a linked list. First, find the Roslyn compilation at start of the list and collect all advices from the list.
+            // Modified compilations can form a linked list. First, find the Roslyn compilation at the start of the list and collect all advices from the list.
             var primeCompilation = this.GetPrimeCompilation();
             var transformations = this.CollectAdvices().SelectMany( a => adviceDriver.GetResult( a ).Transformations ).GetValue();
 
@@ -67,6 +67,56 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 // make sure all input transformations are accounted for
                 Debug.Assert( this._overriddenMethods.Count == transformations.Count() );
+            }
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
+            {
+                var members = new List<MemberDeclarationSyntax>( node.Members.Count );
+
+                foreach ( var member in node.Members )
+                {
+                    switch ( member )
+                    {
+                        case MethodDeclarationSyntax method:
+                            OverriddenMethod? foundTransformation = null;
+
+                            foreach ( var transformation in this._overriddenMethods )
+                            {
+                                if ( transformation.OverriddenDeclaration.GetSyntaxNode() == member )
+                                {
+                                    foundTransformation = transformation;
+                                    break;
+                                }
+                            }
+
+                            if (foundTransformation != null)
+                            {
+                                // original method, but with _Original added to its name
+                                members.Add(
+                                    method.WithIdentifier( SyntaxFactory.Identifier( method.Identifier.ValueText + "_Original" ).WithTriviaFrom( method.Identifier ) ) );
+
+                                // original method, but with its body replaced
+                                members.Add( method.WithBody( foundTransformation.MethodBody ) );
+                            }
+                            else
+                            {
+                                members.Add( method );
+                            }
+
+                            break;
+
+                        default:
+                            members.Add( member );
+                            break;
+                    }
+                }
+
+                return (T) node.WithMembers( SyntaxFactory.List( members ) );
             }
 
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )

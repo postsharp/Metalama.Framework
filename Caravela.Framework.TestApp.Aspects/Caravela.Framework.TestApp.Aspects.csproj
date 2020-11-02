@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
+    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
   </ItemGroup>
 
 </Project>

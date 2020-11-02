@@ -230,7 +230,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var result = MethodDeclaration(
                     IdentifierName("SyntaxNode"),
-                    Identifier(node.Identifier.Text + "_Template"))
+                    Identifier(node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix))
                 .WithModifiers(
                     TokenList(
                         Token(SyntaxKind.PublicKeyword)))

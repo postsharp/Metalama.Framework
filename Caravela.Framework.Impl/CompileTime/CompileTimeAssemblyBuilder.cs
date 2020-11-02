@@ -1,10 +1,12 @@
-﻿using Caravela.Framework.Sdk;
+﻿using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -12,12 +14,8 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     class CompileTimeAssemblyBuilder
     {
-        private static readonly ImmutableArray<string> _preservedReferenceNames = new[]
-        {
-            "Caravela.Reactive.dll",
-            "Caravela.Framework.dll",
-            "Caravela.Framework.Sdk.dll",
-        }.ToImmutableArray();
+        // TODO: remove this, since it's not used anymore
+        private static readonly ImmutableArray<string> _preservedReferenceNames = new string[] { }.ToImmutableArray();
 
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
@@ -30,31 +28,52 @@ namespace Caravela.Framework.Impl.CompileTime
             var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
 
             // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
-            // TODO: check that the path exists and if not, restore the MS.CA.CS package?
+            // TODO: check that the path exists and if not, restore the package?
             // TODO: do not hardcode the versions?
+            string microsoftCSharpVersion = "4.7.0";
             string roslynVersion = "3.8.0-5.final";
             string immutableCollectionsVersion = "5.0.0-preview.8.20407.11";
-            var roslynPaths = new (string package, string version, string assembly)[]
+            var nugetPaths = new (string package, string version, string assembly)[]
             {
+                ("microsoft.csharp", microsoftCSharpVersion, "Microsoft.CSharp.dll"),
                 ("microsoft.codeanalysis.common", roslynVersion, "Microsoft.CodeAnalysis.dll"),
                 ("microsoft.codeanalysis.csharp", roslynVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
                 ("system.collections.immutable", immutableCollectionsVersion, "System.Collections.Immutable.dll")
             }
             .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
 
-            _fixedReferences = netStandardPaths.Concat( roslynPaths ).Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
+            var caravelaAssemblies = new[]
+            {
+                "Caravela.Reactive.dll",
+                "Caravela.Framework.dll",
+                "Caravela.Framework.Sdk.dll",
+                "Caravela.Framework.Impl.dll"
+            };
+            var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
+                .Select( a => a.Location )
+                .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
+
+            _fixedReferences = netStandardPaths.Concat( nugetPaths ).Concat( caravelaPaths )
+                .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
         private readonly ISymbolClassifier _symbolClassifier;
+        private readonly TemplateCompiler _templateCompiler;
 
-        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier ) => this._symbolClassifier = symbolClassifier;
+        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler )
+        {
+            this._symbolClassifier = symbolClassifier;
+            this._templateCompiler = templateCompiler;
+        }
 
         public Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
-            var removeRunTimeCodeRewriter = new RemoveRunTimeCodeRewriter( this._symbolClassifier, compilation );
-            compilation = removeRunTimeCodeRewriter.VisitAllTrees( compilation );
+            compilation = new DisableRoslynExTracking().VisitAllTrees( compilation );
 
-            if ( !removeRunTimeCodeRewriter.FoundCompileTimeCode )
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
+            compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
+
+            if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
                 return null;
 
             compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
@@ -73,16 +92,30 @@ namespace Caravela.Framework.Impl.CompileTime
             return compilation;
         }
 
-        class RemoveRunTimeCodeRewriter : CSharpSyntaxRewriter
+        // TransformationCompiler uses annotations in a way that is not compatible with RoslynEx tree tracking
+        // and since tree tracking is not necessary here, disable it by removing its annotation
+        class DisableRoslynExTracking : CSharpSyntaxRewriter
+        {
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                node = node.WithoutAnnotations( "RoslynEx.Tracking" );
+
+                return base.VisitCompilationUnit( node );
+            }
+        }
+
+        class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
         {
             private readonly ISymbolClassifier _symbolClassifier;
+            private readonly TemplateCompiler _templateCompiler;
             private readonly Compilation _compilation;
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public RemoveRunTimeCodeRewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
+            public ProduceCompileTimeCodeRewriter( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, Compilation compilation)
             {
                 this._symbolClassifier = symbolClassifier;
+                this._templateCompiler = templateCompiler;
                 this._compilation = compilation;
             }
 
@@ -90,6 +123,32 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
                 return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
+            }
+
+            private bool _addTemplateUsings;
+            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = SyntaxFactory.ParseCompilationUnit( @"
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+" ).Usings;
+
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                node = (CompilationUnitSyntax)base.VisitCompilationUnit( node )!;
+
+                // TODO: handle namespaces properly
+                if ( this._addTemplateUsings )
+                {
+                    // add all template usings, unless such using is already in the list
+                    var usingsToAdd = _templateUsings.Where( tu => !node.Usings.Any( u => u.IsEquivalentTo( tu ) ) );
+
+                    node = node.AddUsings( usingsToAdd.ToArray() );
+                }
+
+                return node;
             }
 
             // TODO: assembly and module-level attributes, incl. assembly version attribute
@@ -119,7 +178,17 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
-                    throw new NotImplementedException( "TODO: call the template compiler here?" );
+                    // TODO: report diagnostics
+                    var diagnostics = new List<Diagnostic>();
+                    bool success =
+                        this._templateCompiler.TryCompile( node, this._compilation.GetSemanticModel( node.SyntaxTree ), diagnostics, out _, out var transformedNode );
+
+                    Debug.Assert( success || diagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error ) );
+
+                    if ( success )
+                        this._addTemplateUsings = true;
+
+                    return transformedNode;
                 }
                 else
                 {

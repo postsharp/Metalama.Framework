@@ -5,6 +5,7 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
                 // DI
-                var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ) ) );
+                var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() ) );
                 var compilation = new SourceCompilation( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, loader );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
@@ -59,7 +60,10 @@ namespace Caravela.Framework.Impl
             }
             catch (Exception ex)
             {
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ex ) );
+                static string ToString( Exception ex ) =>
+                    ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ToString( ex.InnerException )}";
+
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ToString( ex ) ) );
                 return context.Compilation;
             }
         }

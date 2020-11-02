@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -95,7 +97,16 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var stream = new MemoryStream();
 
+#if DEBUG
+            compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+
+            var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
+            var embeddedTexts = compilation.SyntaxTrees.Select( tree => EmbeddedText.FromSource( tree.FilePath, tree.GetText() ) );
+
+            var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
+#else
             var result = compilation.Emit( stream );
+#endif
 
             if (!result.Success)
             {

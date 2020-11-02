@@ -1,8 +1,5 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
+﻿using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Advices
@@ -13,8 +10,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             Transformation transformation = adviceInstance.Advice switch
             {
-                OverrideMethodAdvice overrideMethod => new OverriddenMethod(
-                    overrideMethod.TargetDeclaration, overrideMethod.Transformation( ((MethodDeclarationSyntax) overrideMethod.TargetDeclaration.GetSyntaxNode()).Body ) )
+                OverrideMethodAdvice overrideMethod => new OverriddenMethod( overrideMethod.TargetDeclaration, overrideMethod.Transformation.MethodBody )
             };
 
             return new( ImmutableArray.Create<Diagnostic>(), ImmutableArray.Create( transformation ) );

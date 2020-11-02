@@ -44,5 +44,7 @@ namespace Caravela.Framework.Impl
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
                 _ => throw new ArgumentException(nameof(constant))
             };
+
+        public override string ToString() => this.data.ToString();
     }
 }

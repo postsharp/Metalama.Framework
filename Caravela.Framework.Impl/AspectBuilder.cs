@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -17,7 +18,11 @@ namespace Caravela.Framework.Impl
         public T TargetDeclaration { get; }
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
-        public AspectBuilder( T targetDeclaration ) => this.TargetDeclaration = targetDeclaration;
+        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices )
+        {
+            this.TargetDeclaration = targetDeclaration;
+            this._advices = declarativeAdvices.ToList();
+        }
 
         public void AddAdvice<TAdviceElement>( IAdvice<TAdviceElement> advice ) where TAdviceElement : ICodeElement => this._advices.Add( new( advice ) );
 
