@@ -3,6 +3,7 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -60,13 +61,16 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
 
+        private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
+
         public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
         }
 
-        public Compilation? CreateCompileTimeAssembly( Compilation compilation )
+        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
+        private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
             compilation = new DisableRoslynExTracking().VisitAllTrees( compilation );
 
@@ -91,6 +95,54 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return compilation;
         }
+
+        private static MemoryStream Emit( Compilation compilation )
+        {
+            var stream = new MemoryStream();
+
+#if DEBUG
+            compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+
+            var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
+            var embeddedTexts = compilation.SyntaxTrees.Select( tree => EmbeddedText.FromSource( tree.FilePath, tree.GetText() ) );
+
+            var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
+#else
+            var result = compilation.Emit( stream );
+#endif
+
+            if ( !result.Success )
+            {
+                throw new DiagnosticsException( result.Diagnostics );
+            }
+
+            stream.Position = 0;
+
+            return stream;
+        }
+
+        public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )
+        {
+            if ( compilation == this._previousCompilation?.compilation )
+            {
+                var lastStream = this._previousCompilation.Value.compileTimeAssembly;
+                lastStream.Position = 0;
+                return lastStream;
+            }
+
+            var compileTimeCompilation = this.CreateCompileTimeAssembly( compilation );
+
+            if ( compileTimeCompilation == null )
+                return null;
+
+            var stream = Emit( compileTimeCompilation );
+
+            this._previousCompilation = (compilation, stream);
+
+            return stream;
+        }
+
+        public string GetResourceName( string assemblyName ) => $"Caravela.{assemblyName}.CompileTimeAssembly";
 
         // TransformationCompiler uses annotations in a way that is not compatible with RoslynEx tree tracking
         // and since tree tracking is not necessary here, disable it by removing its annotation

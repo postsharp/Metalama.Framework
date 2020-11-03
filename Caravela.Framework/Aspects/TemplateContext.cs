@@ -3,6 +3,7 @@ using System;
 
 namespace Caravela.Framework.Aspects
 {
+    [CompileTime]
     public static class TemplateContext
     {
         [field: ThreadStatic]

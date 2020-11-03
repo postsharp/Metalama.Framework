@@ -24,13 +24,14 @@ namespace Caravela.Framework.Impl
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
                 // DI
-                var loader = new CompileTimeAssemblyLoader( new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() ) );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() );
+                var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 var compilation = new SourceCompilation( roslynCompilation );
-                var driverFactory = new AspectDriverFactory( compilation, loader );
+                var driverFactory = new AspectDriverFactory( compilation, compileTimeAssemblyLoader );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, loader );
+                var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, compileTimeAssemblyLoader );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
@@ -49,6 +50,17 @@ namespace Caravela.Framework.Impl
                 foreach ( var diagnostic in aspectCompilation.Diagnostics )
                 {
                     context.ReportDiagnostic( diagnostic );
+                }
+
+                if ( roslynCompilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
+                {
+                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
+
+                    if ( compileTimeAssembly != null )
+                    {
+                        context.AddManifestResource( new ResourceDescription(
+                            compileTimeAssemblyBuilder.GetResourceName( roslynCompilation.AssemblyName! ), () => compileTimeAssembly, isPublic: true ) );
+                    }
                 }
 
                 return aspectCompilation.Compilation.GetRoslynCompilation();

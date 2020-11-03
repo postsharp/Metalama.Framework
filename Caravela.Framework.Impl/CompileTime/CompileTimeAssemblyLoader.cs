@@ -1,11 +1,9 @@
-﻿using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Emit;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -13,12 +11,18 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     sealed class CompileTimeAssemblyLoader
     {
+        private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
+
         private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
 
-        public CompileTimeAssemblyLoader( CompileTimeAssemblyBuilder compileTimeAssemblyBuilder ) => this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
+        public CompileTimeAssemblyLoader( CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
+        {
+            this._compilation = compilation;
+            this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
+        }
 
-        public object CreateInstance ( INamedTypeSymbol typeSymbol)
+        public object CreateInstance ( INamedTypeSymbol typeSymbol )
         {
             var type = this.GetCompileTimeType( typeSymbol );
 
@@ -78,44 +82,36 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             if (assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol)
             {
-                var compilation = this._compileTimeAssemblyBuilder.CreateCompileTimeAssembly( sourceAssemblySymbol.Compilation );
+                var assemblyStream = this._compileTimeAssemblyBuilder.EmitCompileTimeAssembly( sourceAssemblySymbol.Compilation );
 
-                if ( compilation == null )
+                if ( assemblyStream == null )
                     throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
 
-                var assemblyStream = Emit( compilation );
                 return Load( assemblyStream );
             }
             else
             {
-                // TODO: load compile-time assemblies from resources
-                throw new NotImplementedException();
+                if ( this._compilation.GetMetadataReference( assemblySymbol ) is not { } reference )
+                    throw new InvalidOperationException( $"Could not find reference for assembly {assemblySymbol}." );
+
+                if ( reference is not PortableExecutableReference peReference )
+                    throw new InvalidOperationException( $"The assembly {assemblySymbol} does not correspond to a PE reference." );
+
+                if ( peReference.FilePath is not { } path )
+                    throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
+
+                // TODO: use S.R.M to avoid loading the runtime assembly?
+                var runtimeAssembly = Assembly.ReflectionOnlyLoad( File.ReadAllBytes( path ) );
+
+                using var stream = runtimeAssembly.GetManifestResourceStream( this._compileTimeAssemblyBuilder.GetResourceName( assemblySymbol.Name ) );
+                if ( stream == null )
+                    throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly reasource." );
+
+                var memoryStream = new MemoryStream( (int)stream.Length );
+                stream.CopyTo( memoryStream );
+
+                return Load( memoryStream );
             }
-        }
-
-        private static MemoryStream Emit(Compilation compilation)
-        {
-            var stream = new MemoryStream();
-
-#if DEBUG
-            compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
-
-            var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-            var embeddedTexts = compilation.SyntaxTrees.Select( tree => EmbeddedText.FromSource( tree.FilePath, tree.GetText() ) );
-
-            var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
-#else
-            var result = compilation.Emit( stream );
-#endif
-
-            if (!result.Success)
-            {
-                throw new DiagnosticsException( result.Diagnostics );
-            }
-
-            stream.Position = 0;
-
-            return stream;
         }
 
         private static Assembly Load(MemoryStream stream)

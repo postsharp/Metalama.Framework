@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Caravela.Framework.TestApp.Aspects\SwallowExceptionsAspect.cs" Link="SwallowExceptionsAspect.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
   </ItemGroup>
 
@@ -19,6 +15,8 @@
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    
+    <ProjectReference Include="..\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj" />
   </ItemGroup>
 
 
