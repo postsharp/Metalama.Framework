@@ -5,6 +5,7 @@ namespace Caravela.Framework.TestApp
 {
     class Program
     {
+        [PrintDebugInfoAspect]
         static void Main()
         {
             var a = new[] { 1, 2, 3, 4, 5 };

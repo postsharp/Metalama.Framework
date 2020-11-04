@@ -4,22 +4,48 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    sealed class CompileTimeAssemblyLoader
+    sealed class CompileTimeAssemblyLoader : IDisposable
     {
         private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
 
         private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
+        private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
 
         public CompileTimeAssemblyLoader( CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {
             this._compilation = compilation;
             this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
+
+            AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
+        }
+
+        public void Dispose()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve -= this.CurrentDomain_AssemblyResolve;
+        }
+
+        // TODO: perf
+        private Assembly? CurrentDomain_AssemblyResolve( object sender, ResolveEventArgs args )
+        {
+            if ( !this._assemblyMap.ContainsValue( args.RequestingAssembly ) )
+                return null;
+
+            var reference = this._compilation.References.SingleOrDefault(
+                r => r is PortableExecutableReference { FilePath: string path } && Path.GetFileNameWithoutExtension( path ) == new AssemblyName(args.Name).Name );
+            if ( reference == null )
+                return null;
+
+            if ( this._compilation.GetAssemblyOrModuleSymbol( reference ) is not IAssemblySymbol symbol )
+                return null;
+
+            return this.LoadCompileTimeAssembly( symbol );
         }
 
         public object CreateInstance ( INamedTypeSymbol typeSymbol )
@@ -35,12 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public Type? GetCompileTimeType( INamedTypeSymbol typeSymbol )
         {
             var assemblySymbol = typeSymbol.ContainingAssembly;
-            if ( !this._assemblyMap.TryGetValue( assemblySymbol, out var assembly ) )
-            {
-                assembly = this.LoadCompileTimeAssembly( assemblySymbol );
-                this._assemblyMap[assemblySymbol] = assembly;
-            }
-
+            var assembly = this.LoadCompileTimeAssembly( assemblySymbol );
             return assembly.GetType( GetFullMetadataName( typeSymbol ) );
         }
 
@@ -78,16 +99,54 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
 
-        private Assembly LoadCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        private Stream? GetResourceStream( string assemblyPath, string resourceName )
         {
-            if (assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol)
+            var resolver = new PathAssemblyResolver( new string[] { typeof( object ).Assembly.Location } );
+            using var mlc = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
+
+            // LoadFromAssemblyPath throws for mscorlib
+            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
+                return null;
+
+            var runtimeAssembly = mlc.LoadFromAssemblyPath( assemblyPath );
+
+            if ( runtimeAssembly.GetManifestResourceNames().Contains( resourceName ) )
+                return runtimeAssembly.GetManifestResourceStream( resourceName );
+            else
+                return null;
+        }
+
+        public byte[]? GetCompileTimeAssembly( string path )
+        {
+            if ( this._assemblyBytesMap.TryGetValue( path, out var assemblyBytes ) )
+                return assemblyBytes;
+
+            using var stream = this.GetResourceStream( path, this._compileTimeAssemblyBuilder.GetResourceName() );
+            if ( stream == null )
+            {
+                assemblyBytes = null;
+            }
+            else
+            {
+                var assemblyStream = new MemoryStream( (int) stream.Length );
+                stream.CopyTo( assemblyStream );
+                assemblyBytes = assemblyStream.ToArray();
+            }
+
+            this._assemblyBytesMap.Add( path, assemblyBytes );
+            return assemblyBytes;
+        }
+
+        private byte[] GetCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        {
+            if ( assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol )
             {
                 var assemblyStream = this._compileTimeAssemblyBuilder.EmitCompileTimeAssembly( sourceAssemblySymbol.Compilation );
 
                 if ( assemblyStream == null )
                     throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
 
-                return Load( assemblyStream );
+                return assemblyStream.ToArray();
             }
             else
             {
@@ -100,24 +159,28 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( peReference.FilePath is not { } path )
                     throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
 
-                // TODO: use S.R.M to avoid loading the runtime assembly?
-                var runtimeAssembly = Assembly.ReflectionOnlyLoad( File.ReadAllBytes( path ) );
-
-                using var stream = runtimeAssembly.GetManifestResourceStream( this._compileTimeAssemblyBuilder.GetResourceName( assemblySymbol.Name ) );
-                if ( stream == null )
+                if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
                     throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly reasource." );
 
-                var memoryStream = new MemoryStream( (int)stream.Length );
-                stream.CopyTo( memoryStream );
-
-                return Load( memoryStream );
+                return assemblyBytes;
             }
         }
 
-        private static Assembly Load(MemoryStream stream)
+        private Assembly LoadCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        {
+            if ( !this._assemblyMap.TryGetValue( assemblySymbol, out var assembly ) )
+            {
+                assembly = Load( this.GetCompileTimeAssembly( assemblySymbol ) );
+                this._assemblyMap[assemblySymbol] = assembly;
+            }
+
+            return assembly;
+        }
+
+        private static Assembly Load( byte[] assembly )
         {
             // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targetting)
-            return Assembly.Load( stream.ToArray() );
+            return Assembly.Load( assembly );
         }
     }
 

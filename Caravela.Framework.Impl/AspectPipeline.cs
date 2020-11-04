@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() );
-                var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
+                using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
+                compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, compileTimeAssemblyLoader );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
@@ -59,7 +60,7 @@ namespace Caravela.Framework.Impl
                     if ( compileTimeAssembly != null )
                     {
                         context.AddManifestResource( new ResourceDescription(
-                            compileTimeAssemblyBuilder.GetResourceName( roslynCompilation.AssemblyName! ), () => compileTimeAssembly, isPublic: true ) );
+                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 
