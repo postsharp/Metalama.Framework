@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
 
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />

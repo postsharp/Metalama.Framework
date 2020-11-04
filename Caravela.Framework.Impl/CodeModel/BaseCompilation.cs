@@ -17,7 +17,8 @@ namespace Caravela.Framework.Impl
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 
-        public INamedType? GetTypeByReflectionType( Type type ) => this.GetTypeByReflectionName( type.FullName );
+        // TODO: add support for other kinds of types
+        public IType? GetTypeByReflectionType( Type type ) => this.GetTypeByReflectionName( type.FullName );
 
         internal abstract CSharpCompilation GetPrimeCompilation();
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();

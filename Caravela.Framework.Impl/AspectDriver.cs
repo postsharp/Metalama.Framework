@@ -94,10 +94,12 @@ namespace Caravela.Framework.Impl
                 // TODO: fully set up TemplateContext
                 var proceed = new ProceedImpl( (MethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
                 TemplateContext.ProceedFunction = () => proceed;
+                TemplateContext.target = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, this._compilation );
 
                 var methodBody = (BlockSyntax)aspect.GetType().GetMethod( templateMethodName ).Invoke( aspect, null );
 
                 TemplateContext.ProceedFunction = null;
+                TemplateContext.target = null;
 
                 return new( new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) ) );
             }

@@ -93,6 +93,9 @@ namespace Caravela.Framework.Impl
 
         public bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, other.GetSymbol() );
 
+        public bool Is( Type other ) =>
+            this.Is( this.Compilation.GetTypeByReflectionType( other ) ?? throw new ArgumentException( $"Could not resolve type {other}.", nameof( other ) ) );
+
         public override string ToString() => this.TypeSymbol.ToString();
     }
 }

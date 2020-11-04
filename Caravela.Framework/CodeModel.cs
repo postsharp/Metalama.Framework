@@ -31,12 +31,13 @@ namespace Caravela.Framework.Code
         /// </remarks>
         INamedType? GetTypeByReflectionName(string reflectionName);
 
-        INamedType? GetTypeByReflectionType( Type type );
+        IType? GetTypeByReflectionType( Type type );
     }
 
     public interface IType
     {
-        bool Is(IType other);
+        bool Is( IType other );
+        bool Is( Type other );
     }
 
     // TODO: IArrayType etc.
@@ -173,6 +174,8 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IParameter> Parameters { get; }
         IReadOnlyList<IGenericParameter> GenericParameters { get; }
         new MethodKind Kind { get; }
+
+        //dynamic Invoke(params object[] args);
     }
 
     public interface IParameter : ICodeElement
