@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.Templating
                         this.Diagnostics.Add(Diagnostic.Create("CA01", "Annotation",
                             "A compile-time expression is required.",
                             DiagnosticSeverity.Error,
-                            DiagnosticSeverity.Error, true, 0, location: Location.Create(nodeForDiagnostic.SyntaxTree, nodeForDiagnostic.Span)));
+                            DiagnosticSeverity.Error, true, 0, location: nodeForDiagnostic.GetLocation()));
                         return SymbolDeclarationScope.CompileTimeOnly;
                     }
 

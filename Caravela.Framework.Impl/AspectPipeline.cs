@@ -25,7 +25,8 @@ namespace Caravela.Framework.Impl
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() );
-                var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
+                using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
+                compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, compileTimeAssemblyLoader );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
@@ -59,23 +60,30 @@ namespace Caravela.Framework.Impl
                     if ( compileTimeAssembly != null )
                     {
                         context.AddManifestResource( new ResourceDescription(
-                            compileTimeAssemblyBuilder.GetResourceName( roslynCompilation.AssemblyName! ), () => compileTimeAssembly, isPublic: true ) );
+                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 
                 return aspectCompilation.Compilation.GetRoslynCompilation();
             }
-            catch (CaravelaException ex)
+            catch (CaravelaException exception)
             {
-                context.ReportDiagnostic( ex.Diagnostic );
+                context.ReportDiagnostic( exception.Diagnostic );
+
+                if (exception is DiagnosticsException diagnosticsException)
+                {
+                    foreach ( var diagnostic in diagnosticsException.Diagnostics )
+                        context.ReportDiagnostic( diagnostic );
+                }
+
                 return context.Compilation;
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 static string ToString( Exception ex ) =>
                     ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ToString( ex.InnerException )}";
 
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ToString( ex ) ) );
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ToString( exception ) ) );
                 return context.Compilation;
             }
         }

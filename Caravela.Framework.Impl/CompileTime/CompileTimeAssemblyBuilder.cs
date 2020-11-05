@@ -4,20 +4,19 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     class CompileTimeAssemblyBuilder
     {
-        // TODO: remove this, since it's not used anymore
-        private static readonly ImmutableArray<string> _preservedReferenceNames = new string[] { }.ToImmutableArray();
-
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
         static CompileTimeAssemblyBuilder()
@@ -61,7 +60,12 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
 
+        // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
+        public CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; set; } = null!;
+
         private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
+
+        private readonly Random _random = new();
 
         public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler )
         {
@@ -72,20 +76,34 @@ namespace Caravela.Framework.Impl.CompileTime
         // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
         private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
-            compilation = new DisableRoslynExTracking().VisitAllTrees( compilation );
-
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
             compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
                 return null;
 
+            compilation = compilation.AddSyntaxTrees(
+                SyntaxFactory.ParseSyntaxTree( $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
+                compilation.SyntaxTrees.First().Options ) );
+
             compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
 
-            var preservedReferences = compilation.References
-                .Where( r => r is PortableExecutableReference { FilePath: var path } && _preservedReferenceNames.Contains( Path.GetFileName( path ) ) );
+            var compileTimeReferences = compilation.References
+                .Select( reference =>
+                {
+                    if ( reference is PortableExecutableReference { FilePath: string path } )
+                    {
+                        var assemblyBytes = this.CompileTimeAssemblyLoader.GetCompileTimeAssembly( path );
 
-            compilation = compilation.WithReferences( _fixedReferences.Concat( preservedReferences ) );
+                        if ( assemblyBytes != null )
+                            return MetadataReference.CreateFromImage( assemblyBytes );
+                    }
+
+                    return null!;
+                } )
+                .Where( r => r != null );
+
+            compilation = compilation.WithReferences( _fixedReferences.Concat( compileTimeReferences ) );
 
             compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
 
@@ -96,6 +114,19 @@ namespace Caravela.Framework.Impl.CompileTime
             return compilation;
         }
 
+        // this is not nearly as good as a GUID, but should be good enough for the purpose of preventing collisions within the same process
+        private string GetUniqueVersion()
+        {
+            int getVersionComponent() => this._random.Next( 0, ushort.MaxValue );
+
+            int major = getVersionComponent();
+            int minor = getVersionComponent();
+            int build = getVersionComponent();
+            int revision = getVersionComponent();
+
+            return new Version( major, minor, build, revision ).ToString();
+        }
+
         private static MemoryStream Emit( Compilation compilation )
         {
             var stream = new MemoryStream();
@@ -104,7 +135,17 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
 
             var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-            var embeddedTexts = compilation.SyntaxTrees.Select( tree => EmbeddedText.FromSource( tree.FilePath, tree.GetText() ) );
+            var embeddedTexts = compilation.SyntaxTrees.Select(
+                tree =>
+                {
+                    string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
+
+                    var text = tree.GetText();
+                    if ( !text.CanBeEmbedded )
+                        text = SourceText.From( text.ToString(), Encoding.UTF8 );
+
+                    return EmbeddedText.FromSource( filePath, text );
+                } );
 
             var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
 #else
@@ -113,7 +154,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !result.Success )
             {
-                throw new DiagnosticsException( result.Diagnostics );
+                throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorBuildingCompileTimeAssembly, result.Diagnostics );
             }
 
             stream.Position = 0;
@@ -142,19 +183,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return stream;
         }
 
-        public string GetResourceName( string assemblyName ) => $"Caravela.{assemblyName}.CompileTimeAssembly";
-
-        // TransformationCompiler uses annotations in a way that is not compatible with RoslynEx tree tracking
-        // and since tree tracking is not necessary here, disable it by removing its annotation
-        class DisableRoslynExTracking : CSharpSyntaxRewriter
-        {
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
-            {
-                node = node.WithoutAnnotations( "RoslynEx.Tracking" );
-
-                return base.VisitCompilationUnit( node );
-            }
-        }
+        public string GetResourceName() => "Caravela.CompileTimeAssembly";
 
         class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
         {
@@ -203,7 +232,8 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
                 return node;
             }
 
-            // TODO: assembly and module-level attributes, incl. assembly version attribute
+            // TODO: assembly and module-level attributes?
+            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitClassDeclaration );
             public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitStructDeclaration );
@@ -239,6 +269,8 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
                     if ( success )
                         this._addTemplateUsings = true;
+                    else
+                        throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
 
                     return transformedNode;
                 }
