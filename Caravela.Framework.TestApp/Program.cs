@@ -5,10 +5,21 @@ namespace Caravela.Framework.TestApp
 {
     class Program
     {
-        [PrintDebugInfoAspect]
         static void Main()
         {
-            var a = new[] { 1, 2, 3, 4, 5 };
+            PrintDebugInfo();
+
+            PrintArray();
+
+            Cancel();
+        }
+
+        [PrintDebugInfoAspect]
+        static void PrintDebugInfo() { }
+
+        static void PrintArray()
+        {
+            var a = new[] { 1, 2, 3, 4 };
 
             for ( int i = 0; i < 10; i++ )
             {
@@ -22,5 +33,18 @@ namespace Caravela.Framework.TestApp
             Console.WriteLine( a[i] );
             Thread.Sleep( 100 );
         }
+
+        static void Cancel()
+        {
+            var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            Cancellable0();
+            Cancellable1( cts.Token );
+        }
+
+        [CancelAspect] static void Cancellable0() { }
+        [CancelAspect] static void Cancellable1( CancellationToken ct ) { }
+        [CancelAspect] static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
 }

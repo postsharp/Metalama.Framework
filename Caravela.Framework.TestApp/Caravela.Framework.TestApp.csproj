@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <EmitCompilerTransformedFiles>true</EmitCompilerTransformedFiles>
+    <!--<RoslynExDebugTransformedCode>true</RoslynExDebugTransformedCode>-->
   </PropertyGroup>
 
   <Import Project="CaravelaReference.props" />

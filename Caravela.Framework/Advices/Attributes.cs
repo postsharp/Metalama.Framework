@@ -8,6 +8,6 @@ namespace Caravela.Framework.Advices
     [AttributeUsage(AttributeTargets.Method)]
     public class OverrideMethodTemplateAttribute : TemplateAttribute { }
 
-    // TODO: spec says this shouldn't exist?
+    // TODO: spec says this shouldn't exist
     public class OverrideMethodAttribute : OverrideMethodTemplateAttribute, IAdviceAttribute { }
 }
