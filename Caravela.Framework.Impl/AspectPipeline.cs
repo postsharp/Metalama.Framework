@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -19,6 +20,13 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute(TransformerContext context)
         {
+            if ( context.GlobalOptions.TryGetValue( "build_property.DebugCaravela", out var debugCaravelaString ) &&
+                bool.TryParse( debugCaravelaString, out bool debugCaravela ) &&
+                debugCaravela )
+            {
+                Debugger.Launch();
+            }
+
             try
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
