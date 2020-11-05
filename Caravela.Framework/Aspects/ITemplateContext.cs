@@ -48,7 +48,7 @@ namespace Caravela.Framework.Aspects
         /// Both instance and static members are made accessible. For instance members, 
         /// the <c>this</c> instance is assumed.
         /// </summary>
-        //dynamic This { get; }
+        dynamic This { get; }
 
         /// <summary>
         /// Gives access to the current type in the state it was before the current aspect.

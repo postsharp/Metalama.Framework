@@ -7,11 +7,13 @@ namespace Caravela.Framework.TestApp
     {
         static void Main()
         {
-            PrintDebugInfo();
+            //PrintDebugInfo();
 
-            PrintArray();
+            //PrintArray();
 
-            Cancel();
+            //Cancel();
+
+            ThisAccess.Run();
         }
 
         [PrintDebugInfoAspect]
@@ -47,4 +49,5 @@ namespace Caravela.Framework.TestApp
         [CancelAspect] static void Cancellable1( CancellationToken ct ) { }
         [CancelAspect] static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
+
 }

@@ -96,9 +96,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
                             if (foundTransformation != null)
                             {
-                                // original method, but with _Original added to its name
-                                members.Add(
-                                    method.WithIdentifier( SyntaxFactory.Identifier( method.Identifier.ValueText + "_Original" ).WithTriviaFrom( method.Identifier ) ) );
+                                //// original method, but with _Original added to its name
+                                //members.Add(
+                                //    method.WithIdentifier( SyntaxFactory.Identifier( method.Identifier.ValueText + AspectDriver.OriginalMemberSuffix )
+                                //        .WithTriviaFrom( method.Identifier ) ) );
 
                                 // original method, but with its body replaced
                                 members.Add( method.WithBody( foundTransformation.MethodBody ) );

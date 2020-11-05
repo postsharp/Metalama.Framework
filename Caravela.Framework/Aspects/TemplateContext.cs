@@ -8,7 +8,7 @@ namespace Caravela.Framework.Aspects
     public static class TemplateContext
     {
         [field: ThreadStatic]
-        internal static Func<object>? ProceedFunction { get; set; }
+        internal static object? ProceedImpl { get; set; }
 
         private static InvalidOperationException NewInvalidOperationException() =>
             new InvalidOperationException( "Code calling this method has to be compiled using Caravela." );
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Aspects
         public static ITemplateContext target { get; internal set; }
 
         [Proceed]
-        public static dynamic proceed() => ProceedFunction == null ? throw NewInvalidOperationException() : ProceedFunction();
+        public static dynamic proceed() => ProceedImpl ?? throw NewInvalidOperationException();
 #pragma warning restore IDE1006 // Naming Styles
     }
 }

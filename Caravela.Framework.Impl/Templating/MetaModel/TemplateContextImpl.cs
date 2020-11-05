@@ -1,12 +1,12 @@
 ﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -21,11 +21,32 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation { get; }
 
+        // TODO: when possible, this vanishes (e.g. `target.This.Property` is compiled to just `Property`); fix it so that it produces `this` or the name of the type, depending on whether the member on the right is static
+        public dynamic This => new ThisDynamicMetaMember( !this.Method.IsStatic );
+
         public TemplateContextImpl( IMethod method, IType type, ICompilation compilation )
         {
             this.Method = method;
             this.Type = type;
             this.Compilation = compilation;
+        }
+
+        class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
+        {
+            private readonly bool _allowExpression;
+
+            public ThisDynamicMetaMember( bool allowExpression ) => this._allowExpression = allowExpression;
+
+            public ExpressionSyntax CreateExpression()
+            {
+                if ( this._allowExpression )
+                    return ThisExpression();
+
+                // TODO: diagnostic
+                throw new InvalidOperationException("Can't directly access 'this' on a static method.");
+            }
+
+            public ExpressionSyntax CreateMemberAccessExpression( string member ) => IdentifierName( Identifier( member ) );
         }
     }
 
@@ -64,7 +85,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Value
         {
-            get => new DynamicMetaMember( SyntaxFactory.IdentifierName( this._parameter.Name! ) );
+            get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
             set => throw new NotImplementedException();
         }
     }

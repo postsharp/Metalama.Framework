@@ -117,7 +117,6 @@ namespace Caravela.Framework.Impl.Templating
             return symbol.GetAttributes().Any(a => a.AttributeClass.Name == nameof(ProceedAttribute));
         }
 
-
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/>, especially taking care of handling
         /// transitions between compile-time expressions and run-time expressions. At these transitions,
@@ -206,6 +205,25 @@ namespace Caravela.Framework.Impl.Templating
                     //TODO: pluggable syntax serializers must be called here.
                     return expression;
             }
+        }
+
+        public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+        {
+            if ( this.GetTransformationKind( node.Expression ) != TransformationKind.Transform &&
+                this._semanticAnnotationMap.GetType( node.Expression )?.Name == "dynamic" )
+            {
+                return InvocationExpression(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            CastExpression(
+                                IdentifierName( nameof( IDynamicMetaMember ) ), node.Expression ) ),
+                        IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
+                    .AddArgumentListArguments( Argument( LiteralExpression(
+                        SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
+            }
+
+            return base.VisitMemberAccessExpression( node );
         }
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
