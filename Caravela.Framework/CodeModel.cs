@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Caravela.Framework.Project;
 using Caravela.Reactive;
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code
 {
+    [CompileTime]
     public interface ICompilation
     {
         IReactiveCollection<INamedType> DeclaredTypes { get; }
@@ -34,6 +36,7 @@ namespace Caravela.Framework.Code
         IType? GetTypeByReflectionType( Type type );
     }
 
+    [CompileTime]
     public interface IType
     {
         bool Is( IType other );
@@ -89,6 +92,7 @@ namespace Caravela.Framework.Code
         IReadOnlyDictionary<string, object?> NamedArguments { get; }
     }
 
+    [CompileTime]
     public interface ICodeElement
     {
         ICodeElement? ContainingElement { get; }
@@ -97,6 +101,7 @@ namespace Caravela.Framework.Code
         public CodeElementKind Kind { get; }
     }
 
+    [CompileTime]
     public enum CodeElementKind
     {
         None,
@@ -139,6 +144,7 @@ namespace Caravela.Framework.Code
         IMethod? Raiser { get; }
     }
 
+    [CompileTime]
     public enum MethodKind
     {
         Ordinary,

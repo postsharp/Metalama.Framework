@@ -3,6 +3,7 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
 {
+    [CompileTime]
     public interface ITemplateContext
     {
         /// <summary>
