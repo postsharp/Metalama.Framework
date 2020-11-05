@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
@@ -68,25 +69,13 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node.Condition );
                 this.Mark( node.OpenParenToken );
                 this.Mark( node.CloseParenToken );
-
-                if ( node.Statement is BlockSyntax block )
-                {
-                    this.Mark( block.OpenBraceToken );
-                    this.Mark( block.CloseBraceToken );
-                }
+                this.VisitCompileTimeStatementNode( node.Statement );
 
                 if ( node.Else != null )
                 {
                     this.Mark( node.Else.ElseKeyword );
-
-                    if ( node.Else.Statement is BlockSyntax elseBlock )
-                    {
-                        this.Mark( elseBlock.OpenBraceToken );
-                        this.Mark( elseBlock.CloseBraceToken );
-                    }
+                    this.VisitCompileTimeStatementNode( node.Else.Statement );
                 }
-
-                this.Visit( node.Statement );
             }
             else
             {
@@ -104,19 +93,23 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node.Expression );
                 this.Mark( node.OpenParenToken );
                 this.Mark( node.CloseParenToken );
-
-                if ( node.Statement is BlockSyntax block )
-                {
-                    this.Mark( block.OpenBraceToken );
-                    this.Mark( block.CloseBraceToken );
-                }
-
-                this.Visit( node.Statement );
+                this.VisitCompileTimeStatementNode( node.Statement );
             }
             else
             {
                 base.VisitForEachStatement( node );
             }
+        }
+
+        private void VisitCompileTimeStatementNode( StatementSyntax statement )
+        {
+            if ( statement is BlockSyntax block )
+            {
+                this.Mark( block.OpenBraceToken );
+                this.Mark( block.CloseBraceToken );
+            }
+
+            this.Visit( statement );
         }
     }
 }
