@@ -183,13 +183,4 @@ namespace Caravela.Framework.Impl.CompileTime
             return Assembly.Load( assembly );
         }
     }
-
-    class DiagnosticsException : CaravelaException
-    {
-        public ImmutableArray<Diagnostic> Diagnostics { get; }
-
-        public DiagnosticsException( ImmutableArray<Diagnostic> diagnostics )
-            : base( GeneralDiagnosticDescriptors.ErrorBuildingCompileTimeAssembly, string.Join( Environment.NewLine, diagnostics ) ) =>
-            this.Diagnostics = diagnostics;
-    }
 }

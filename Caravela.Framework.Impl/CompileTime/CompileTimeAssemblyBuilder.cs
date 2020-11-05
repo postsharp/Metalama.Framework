@@ -76,8 +76,6 @@ namespace Caravela.Framework.Impl.CompileTime
         // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
         private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
-            compilation = new DisableRoslynExTracking().VisitAllTrees( compilation );
-
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
             compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
 
@@ -156,7 +154,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( !result.Success )
             {
-                throw new DiagnosticsException( result.Diagnostics );
+                throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorBuildingCompileTimeAssembly, result.Diagnostics );
             }
 
             stream.Position = 0;
@@ -186,18 +184,6 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public string GetResourceName() => "Caravela.CompileTimeAssembly";
-
-        // TransformationCompiler uses annotations in a way that is not compatible with RoslynEx tree tracking
-        // and since tree tracking is not necessary here, disable it by removing its annotation
-        class DisableRoslynExTracking : CSharpSyntaxRewriter
-        {
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
-            {
-                node = node.WithoutAnnotations( "RoslynEx.Tracking" );
-
-                return base.VisitCompilationUnit( node );
-            }
-        }
 
         class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
         {
@@ -283,6 +269,8 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
                     if ( success )
                         this._addTemplateUsings = true;
+                    else
+                        throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
 
                     return transformedNode;
                 }

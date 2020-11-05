@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Toolset" Version="0.1.36-dev" />
+    <PackageReference Include="RoslynEx.Toolset" Version="0.1.37-dev" />
   </ItemGroup>
 
   <ItemGroup>

@@ -45,13 +45,9 @@ namespace Caravela.Framework.Impl.Templating
 
             // The base implementation is very verbose, so we use this one:
 
-            return
-                node.CopyAnnotationsTo(
-                    InvocationExpression(IdentifierName(nameof(IdentifierName))).WithArgumentList(ArgumentList(
-                        SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-                        {
-                            Argument(this.CreateLiteralExpression(node.Identifier.Text))
-                        }))))!;
+            return InvocationExpression(IdentifierName(nameof(IdentifierName)))
+                .AddArgumentListArguments(Argument(this.CreateLiteralExpression(node.Identifier.Text)))
+                .WithTemplateAnnotationsFrom(node);
         }
 
 
@@ -61,13 +57,9 @@ namespace Caravela.Framework.Impl.Templating
 
             if (node.RefKindKeyword.Kind() == SyntaxKind.None)
             {
-                return
-                    node.CopyAnnotationsTo(
-                        InvocationExpression(IdentifierName(nameof(Argument))).WithArgumentList(ArgumentList(
-                            SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-                            {
-                                Argument(this.Transform(node.Expression))
-                            }))))!;
+                return InvocationExpression(IdentifierName(nameof(Argument)))
+                    .AddArgumentListArguments(Argument(this.Transform(node.Expression)))
+                    .WithTemplateAnnotationsFrom(node);
             }
             else
             {

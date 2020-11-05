@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
@@ -10,7 +11,10 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation("scope", "buildtime");
         private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation("scope", "runtime");
         private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation("noindent");
-        
+
+        private static readonly ImmutableArray<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { "scope", "noindent" } );
+
+
         public static bool HasScopeAnnotation(this SyntaxNode node)
         {
             return node.HasAnnotations("scope");
@@ -79,6 +83,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public static T WithSymbolAnnotationsFrom<T>(this T node, SyntaxNode source) where T : SyntaxNode => 
             node.WithAdditionalAnnotations(source.GetAnnotations(SemanticAnnotationMap.AnnotationKinds));
+
+        public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode =>
+            node.WithAdditionalAnnotations( source.GetAnnotations( templateAnnotationKinds ) );
 
         public static T AddNoDeepIndentAnnotation<T>(this T node) where T : SyntaxNode =>
             node.WithAdditionalAnnotations(noDeepIndentAnnotation);
