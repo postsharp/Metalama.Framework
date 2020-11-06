@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Sdk" Version="0.1.37-dev" />
+    <PackageReference Include="RoslynEx.Sdk" Version="0.1.41-dev" />
   </ItemGroup>
   
 </Project>
