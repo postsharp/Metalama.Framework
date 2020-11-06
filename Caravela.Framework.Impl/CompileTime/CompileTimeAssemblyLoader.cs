@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
 
-        private Stream? GetResourceStream( string assemblyPath, string resourceName )
+        private byte[]? GetResourceBytes( string assemblyPath, string resourceName )
         {
             var resolver = new PathAssemblyResolver( new string[] { typeof( object ).Assembly.Location } );
             using var mlc = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
@@ -111,7 +111,13 @@ namespace Caravela.Framework.Impl.CompileTime
             var runtimeAssembly = mlc.LoadFromAssemblyPath( assemblyPath );
 
             if ( runtimeAssembly.GetManifestResourceNames().Contains( resourceName ) )
-                return runtimeAssembly.GetManifestResourceStream( resourceName );
+            {
+                using var resourceStream = runtimeAssembly.GetManifestResourceStream( resourceName );
+
+                var memoryStream = new MemoryStream( (int) resourceStream.Length );
+                resourceStream.CopyTo( memoryStream );
+                return memoryStream.ToArray();
+            }
             else
                 return null;
         }
@@ -121,17 +127,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( this._assemblyBytesMap.TryGetValue( path, out var assemblyBytes ) )
                 return assemblyBytes;
 
-            using var stream = this.GetResourceStream( path, this._compileTimeAssemblyBuilder.GetResourceName() );
-            if ( stream == null )
-            {
-                assemblyBytes = null;
-            }
-            else
-            {
-                var assemblyStream = new MemoryStream( (int) stream.Length );
-                stream.CopyTo( assemblyStream );
-                assemblyBytes = assemblyStream.ToArray();
-            }
+            assemblyBytes = this.GetResourceBytes( path, this._compileTimeAssemblyBuilder.GetResourceName() );
 
             this._assemblyBytesMap.Add( path, assemblyBytes );
             return assemblyBytes;
