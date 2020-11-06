@@ -91,11 +91,7 @@ namespace Caravela.Framework.Impl
 
                 string templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
-                // TODO: fully set up TemplateContext
-                var proceed = new ProceedImpl( (MethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
-                var templateContext = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, this._compilation );
-
-                var methodBody = new TemplateDriver( aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( aspect, proceed, templateContext );
+                var methodBody = new TemplateDriver( aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( aspect, targetMethod, this._compilation );
 
                 return new( new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) ) );
             }

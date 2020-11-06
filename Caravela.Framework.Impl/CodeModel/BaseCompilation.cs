@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    abstract class BaseCompilation : ICompilation
+    public abstract class BaseCompilation : ICompilation
     {
         public abstract IReactiveCollection<INamedType> DeclaredTypes { get; }
         public abstract IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }

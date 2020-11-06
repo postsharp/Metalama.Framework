@@ -5,7 +5,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class ProceedImpl : IProceedImpl
+    class ProceedImpl : IProceedImpl
     {
         private readonly MethodDeclarationSyntax _method;
 

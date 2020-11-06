@@ -9,13 +9,13 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    class SourceCompilation : BaseCompilation
+    public class SourceCompilation : BaseCompilation
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
         internal SymbolMap SymbolMap { get; }
 
-        internal SourceCompilation(CSharpCompilation roslynCompilation)
+        public SourceCompilation(CSharpCompilation roslynCompilation)
         {
             this.RoslynCompilation = roslynCompilation;
 

@@ -19,6 +19,9 @@ namespace Caravela.Framework.Aspects
 
         [Proceed]
         public static dynamic proceed() => ProceedImpl ?? throw NewInvalidOperationException();
+
+        public static T buildTime<T>( T expression ) => expression;
+
 #pragma warning restore IDE1006 // Naming Styles
     }
 }

@@ -18,6 +18,8 @@ namespace Caravela.Framework.Impl
             this._containingMember = containingMember;
         }
 
+        public bool IsOut => this._symbol.RefKind == RefKind.Out;
+
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 

@@ -100,6 +100,8 @@ namespace Caravela.Framework.Impl
 
             public ReturnParameterImpl(Method method) => this._method = method;
 
+            public bool IsOut => false;
+
             public IType Type => this._method.ReturnType;
 
             public string? Name => null;

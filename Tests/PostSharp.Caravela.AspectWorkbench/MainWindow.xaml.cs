@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -42,23 +42,24 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.AspectWorkbench;
-using static Caravela.AspectWorkbench.AdviceContext;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateHelper;
+using static Caravela.Framework.Aspects.TemplateContext;
 
 class Aspect
 {
   [Template]
   dynamic Template()
   {
-    var parameters = new object[AdviceContext.Method.Parameters.Count];
+    var parameters = new object[target.Method.Parameters.Count];
     var stringBuilder = new StringBuilder();
-    AdviceContext.BuildTime( stringBuilder );
-    stringBuilder.Append(AdviceContext.Method.Name);
+    buildTime( stringBuilder );
+    stringBuilder.Append(target.Method.Name);
     stringBuilder.Append('(');
     int i = 0;
-    foreach ( var p in AdviceContext.Method.Parameters )
+    foreach ( var p in target.Parameters )
     {
        string comma = i > 0 ? "", "" : """";
 
@@ -76,11 +77,11 @@ class Aspect
     }
     stringBuilder.Append(')');
 
-    Console.WriteLine( stringBuilder.ToString() );
+    Console.WriteLine( stringBuilder.ToString(), parameters );
 
     try
     {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         Console.WriteLine( stringBuilder + "" returned "" + result, parameters );
         return result;
     }
@@ -268,15 +269,13 @@ class TargetCode
                 var templateMethod =
                     aspectType.GetMethod("Template_Template", BindingFlags.Instance | BindingFlags.Public);
                 
-                
-                var targetType = compilationForInitialDiagnostics.Assembly.GetTypeByMetadataName("TargetCode");
-                var targetMethod = (IMethodSymbol) targetType.GetMembers().SingleOrDefault(m => m.Name == "Method");
-
-                AdviceContext.Current = new AdviceContextImpl(targetMethod );
-
                 var driver = new TemplateDriver( templateMethod );
 
-                var output = driver.ExpandDeclaration( aspectInstance );
+                var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
+                var targetType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" );
+                var targetMethod = targetType.Methods.GetValue().SingleOrDefault( m => m.Name == "Method" );
+
+                var output = driver.ExpandDeclaration( aspectInstance, targetMethod, caravelaCompilation );
                 var formattedOutput = Formatter.Format( output, project3.Solution.Workspace);
 
                 
@@ -325,7 +324,6 @@ class TargetCode
                 .AddMetadataReferences(Directory.GetFiles(netStandardDirectory, "*.dll")
                     .Where(f=>!Path.GetFileNameWithoutExtension(f).EndsWith("Native", StringComparison.OrdinalIgnoreCase))
                     .Select(f => MetadataReference.CreateFromFile(f)))
-                .AddMetadataReference(MetadataReference.CreateFromFile(typeof(AdviceContext).Assembly.Location))
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(SyntaxNode).Assembly.Location))
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(SyntaxFactory).Assembly.Location))

@@ -55,17 +55,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MetaModel\AdviceContext.cs" />
-    <Compile Include="MetaModel\AdviceContextImpl.cs" />
-    <Compile Include="MetaModel\IAdviceContext.cs" />
-    <Compile Include="MetaModel\IDynamicMetaMember.cs" />
-    <Compile Include="MetaModel\MethodAdviceContextImpl.cs" />
-    <Compile Include="MetaModel\IMethodAdviceContext.cs" />
-    <Compile Include="MetaModel\IParameter.cs" />
-    <Compile Include="MetaModel\ParameterImpl.cs" />
-    <Compile Include="MetaModel\ProceedImpl.cs" />
-    <Compile Include="MetaModel\SimpleDynamicMetaMember.cs" />
-    <Compile Include="MetaModel\TemplateAttribute.cs" />
     <Compile Include="WorkbenchTemplateCompiler.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -129,6 +118,10 @@
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj">
       <Project>{3d5d53da-f498-4432-a3f4-99f21deecd69}</Project>
       <Name>Caravela.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Caravela.Reactive\Caravela.Reactive.csproj">
+      <Project>{bd041817-f150-43dd-a987-f815730777a5}</Project>
+      <Name>Caravela.Reactive</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
