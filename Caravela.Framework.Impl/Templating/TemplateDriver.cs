@@ -6,11 +6,14 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    class TemplateDriver
+    public class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
         public TemplateDriver( MethodInfo templateMethodInfo ) => this._templateMethod = templateMethodInfo;
+
+        // used by AspectWorkbench
+        public BlockSyntax ExpandDeclaration( object templateInstance ) => this.ExpandDeclaration( templateInstance, null!, null! );
 
         internal BlockSyntax ExpandDeclaration( object templateInstance, ProceedImpl proceed, TemplateContextImpl templateContext )
         {

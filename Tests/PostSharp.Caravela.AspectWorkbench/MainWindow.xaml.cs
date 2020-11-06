@@ -276,7 +276,7 @@ class TargetCode
 
                 var driver = new TemplateDriver( templateMethod );
 
-                var output = driver.ExpandDeclaration( aspectInstance, null );
+                var output = driver.ExpandDeclaration( aspectInstance );
                 var formattedOutput = Formatter.Format( output, project3.Solution.Workspace);
 
                 
