@@ -32,6 +32,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         private IReactiveCollection<T> OnlyDeclared<T>( IReactiveCollection<T> source )
             where T : IMember =>
+            // TODO: does this work correctly for overrides?
             source.Where( m => ((CodeElement) (object) m).Symbol.DeclaringSyntaxReferences.Any(
                 memberReference => this.Symbol.DeclaringSyntaxReferences.Any( typeReference =>
                     typeReference.GetSyntax().Contains( memberReference.GetSyntax() ) ) ) );

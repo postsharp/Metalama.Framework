@@ -6,21 +6,10 @@
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Caravela.Patterns.AutoCancellationToken\AutoCancellationTokenAttribute.cs" Link="AutoCancellationTokenAttribute.cs" />
-    <Compile Include="..\Caravela.Patterns.AutoCancellationToken\AutoCancellationTokenWeaver.cs" Link="AutoCancellationTokenWeaver.cs" />
-  </ItemGroup>
+  <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Toolset" Version="0.1.37-dev" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" OutputItemType="Analyzer" />
-    <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <!--<ProjectReference Include="..\Caravela.Patterns.AutoCancellationToken\Caravela.Patterns.AutoCancellationToken.csproj" />-->
+    <ProjectReference Include="..\Caravela.Patterns.AutoCancellationToken\Caravela.Patterns.AutoCancellationToken.csproj" OutputItemType="Analyzer" />
   </ItemGroup>
 
 </Project>

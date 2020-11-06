@@ -6,13 +6,9 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl
 {
@@ -66,7 +62,8 @@ namespace Caravela.Framework.Impl
 
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
 
-            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices );
+            var aspectBuilder = new AspectBuilder<T>( 
+                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this._compileTimeAssemblyLoader, this.AspectType ) );
 
             aspectOfT.Initialize( aspectBuilder );
 
@@ -77,26 +74,7 @@ namespace Caravela.Framework.Impl
 
         private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
         {
-            var overrideMethodTemplateAttribute = this._compilation.GetTypeByReflectionType( typeof( OverrideMethodTemplateAttribute ) ).AssertNotNull();
-
-            if ( attribute.Type.Is( overrideMethodTemplateAttribute ) )
-            {
-                // TODO: is it possible that codeElement is not IMethod?
-                var targetMethod = (IMethod) codeElement;
-
-                // TODO: this should probably all be cached somewhere, possibly as a Func
-
-                // TODO: diagnostic if templateMethod is a local function
-                var aspect = this._compileTimeAssemblyLoader.CreateInstance( ((INamedType) templateMethod.ContainingElement!).GetSymbol() );
-
-                string templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-
-                var methodBody = new TemplateDriver( aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( aspect, targetMethod, this._compilation );
-
-                return new( new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) ) );
-            }
-            else
-                throw new NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

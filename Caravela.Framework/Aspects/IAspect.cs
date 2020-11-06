@@ -27,5 +27,7 @@ namespace Caravela.Framework.Aspects
         where T : ICodeElement
     {
         new T TargetDeclaration { get; }
+
+        IAdviceFactory AdviceFactory { get; }
     }
 }

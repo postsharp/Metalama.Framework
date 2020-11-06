@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
-    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,15 +1,12 @@
 ﻿using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using System;
 
 namespace Caravela.Framework.TestApp
 {
-    class PrintDebugInfoAspect : Attribute, IAspect<IMethod>
+    class PrintDebugInfoAspect : OverrideMethodAspect
     {
-        public void Initialize( IAspectBuilder<IMethod> aspectBuilder ) { }
-
-        [OverrideMethod]
+        [OverrideMethodTemplate]
         public dynamic Template()
         {
             Console.WriteLine( DebugInfo.GetInfo() );

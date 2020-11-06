@@ -1,6 +1,5 @@
 ﻿using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
@@ -35,12 +34,10 @@ namespace Caravela.Framework.TestApp
         }
     }
 
-    class ThisAccessAspect : Attribute, IAspect<IMethod>
+    class ThisAccessAspect : OverrideMethodAspect
     {
-        public void Initialize( IAspectBuilder<IMethod> aspectBuilder ) { }
-
-        [OverrideMethod]
-        dynamic ThisAccess()
+        [OverrideMethodTemplate]
+        public dynamic Template()
         {
             string result = proceed();
 

@@ -5,8 +5,6 @@
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
-  </ItemGroup>
+  <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
 
 </Project>

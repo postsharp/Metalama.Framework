@@ -18,9 +18,13 @@ namespace Caravela.Framework.Impl
         public T TargetDeclaration { get; }
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
-        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices )
+        public IAdviceFactory AdviceFactory { get; }
+
+        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices, IAdviceFactory adviceFactory )
         {
             this.TargetDeclaration = targetDeclaration;
+            this.AdviceFactory = adviceFactory;
+
             this._advices = declarativeAdvices.ToList();
         }
 
