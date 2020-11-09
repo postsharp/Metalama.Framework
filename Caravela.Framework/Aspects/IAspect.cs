@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Code;
+﻿using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
@@ -19,15 +18,12 @@ namespace Caravela.Framework.Aspects
     {
         ICodeElement TargetDeclaration { get; }
 
-        // TODO: there should be an AdviceFactory instead, as per spec
-        void AddAdvice<T>( IAdvice<T> advice ) where T : ICodeElement;
+        IAdviceFactory AdviceFactory { get; }
     }
 
     public interface IAspectBuilder<out T> : IAspectBuilder
         where T : ICodeElement
     {
         new T TargetDeclaration { get; }
-
-        IAdviceFactory AdviceFactory { get; }
     }
 }

@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl
@@ -14,6 +15,9 @@ namespace Caravela.Framework.Impl
         private readonly ICompilation _compilation;
         private readonly INamedType _aspectType;
         private readonly IAspect _aspect;
+
+        private readonly List<AdviceInstance> _advices = new();
+        internal IReadOnlyList<AdviceInstance> Advices => this._advices;
 
         public AdviceFactory( ICompilation compilation, INamedType aspectType, IAspect aspect )
         {
@@ -30,7 +34,11 @@ namespace Caravela.Framework.Impl
 
             var methodBody = new TemplateDriver( this._aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( this._aspect, targetMethod, this._compilation );
 
-            return new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) );
+            var result = new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) );
+
+            this._advices.Add( new AdviceInstance( result ) );
+
+            return result;
         }
     }
 }

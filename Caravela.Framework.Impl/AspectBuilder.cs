@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
@@ -13,23 +11,22 @@ namespace Caravela.Framework.Impl
     class AspectBuilder<T> : IAspectBuilder<T>
         where T : ICodeElement
     {
-        private readonly List<AdviceInstance> _advices = new();
+        private readonly ImmutableArray<AdviceInstance> _declarativeAdvices = new();
 
         public T TargetDeclaration { get; }
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
-        public IAdviceFactory AdviceFactory { get; }
+        private readonly AdviceFactory _adviceFactory;
+        public IAdviceFactory AdviceFactory => this._adviceFactory;
 
-        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices, IAdviceFactory adviceFactory )
+        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices, AdviceFactory adviceFactory )
         {
             this.TargetDeclaration = targetDeclaration;
-            this.AdviceFactory = adviceFactory;
-
-            this._advices = declarativeAdvices.ToList();
+            this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
+            this._adviceFactory = adviceFactory;
         }
 
-        public void AddAdvice<TAdviceElement>( IAdvice<TAdviceElement> advice ) where TAdviceElement : ICodeElement => this._advices.Add( new( advice ) );
-
-        internal AspectInstanceResult ToResult() => new( ImmutableArray.Create<Diagnostic>(), this._advices.ToImmutableArray(), ImmutableArray.Create<AspectInstance>() );
+        internal AspectInstanceResult ToResult() =>
+            new( ImmutableArray.Create<Diagnostic>(), this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), ImmutableArray.Create<AspectInstance>() );
     }
 }
