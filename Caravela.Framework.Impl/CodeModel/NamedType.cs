@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
 
         [Memo]
-        // TODO: verify simple call to ToDisplayString gives the desired result in all cases
+        // TODO: add tests verifying that simple call to ToDisplayString gives the desired result in all cases
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]

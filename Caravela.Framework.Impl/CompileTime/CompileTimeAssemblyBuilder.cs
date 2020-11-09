@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._debugTransformedCode = debugTransformedCode;
         }
 
-        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
+        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it?
         private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
@@ -108,8 +108,6 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = compilation.WithReferences( _fixedReferences.Concat( compileTimeReferences ) );
 
             compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
-
-            // TODO: adjust compilation references correctly
 
             // TODO: produce better errors when there's an incorrect reference from compile-time code to non-compile-time symbol
 
@@ -283,7 +281,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
             {
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
-                    // TODO: report diagnostics
                     var diagnostics = new List<Diagnostic>();
                     bool success =
                         this._templateCompiler.TryCompile( node, this._compilation.GetSemanticModel( node.SyntaxTree ), diagnostics, out _, out var transformedNode );
@@ -291,7 +288,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
                     Debug.Assert( success || diagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error ) );
 
                     if ( success )
+                    {
+                        // reporting warnings is currently not supported here
+                        Debug.Assert( diagnostics.Count == 0 );
+
                         this._addTemplateUsings = true;
+                    }
                     else
                         throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
 
