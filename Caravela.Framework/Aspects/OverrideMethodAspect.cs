@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Code;
+﻿using Caravela.Framework.Advices;
+using Caravela.Framework.Code;
 using System;
 
 namespace Caravela.Framework.Aspects
@@ -8,11 +9,10 @@ namespace Caravela.Framework.Aspects
     {
         public void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, "Template" );
+            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof( Template ) );
         }
 
-        // TODO: somehow make the following code work?
-        //[OverrideMethodTemplate]
-        //public abstract object Template();
+        [OverrideMethodTemplate]
+        public abstract object Template();
     }
 }

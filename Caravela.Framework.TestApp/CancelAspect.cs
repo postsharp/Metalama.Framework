@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using System.Linq;
 using System.Threading;
 using static Caravela.Framework.Aspects.TemplateContext;
@@ -8,8 +7,7 @@ namespace Caravela.Framework.TestApp
 {
     class CancelAspect : OverrideMethodAspect
     {
-        [OverrideMethodTemplate]
-        public dynamic Template()
+        public override dynamic Template()
         {
             var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
 

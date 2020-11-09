@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
@@ -36,8 +35,7 @@ namespace Caravela.Framework.TestApp
 
     class ThisAccessAspect : OverrideMethodAspect
     {
-        [OverrideMethodTemplate]
-        public dynamic Template()
+        public override dynamic Template()
         {
             string result = proceed();
 

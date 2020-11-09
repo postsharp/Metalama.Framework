@@ -79,7 +79,17 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return AddToCache(scopeFromAttributes);
             }
-            
+
+            // From overridden method.
+            if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
+            {
+                var scopeFromOverriddenMethod = this.GetSymbolDeclarationScope( overriddenMethod );
+                if ( scopeFromOverriddenMethod != SymbolDeclarationScope.Default )
+                {
+                    return AddToCache( scopeFromOverriddenMethod );
+                }
+            }
+
             // From declaring type.
             if (symbol.ContainingType != null)
             {

@@ -239,12 +239,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
             // TODO: assembly and module-level attributes?
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitClassDeclaration );
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitStructDeclaration );
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitInterfaceDeclaration );
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitRecordDeclaration );
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-            private T? VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> baseVisit ) where T : TypeDeclarationSyntax
+            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
             {
                 switch ( this.GetSymbolDeclarationScope( node ) )
                 {
@@ -253,14 +253,33 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
                     case SymbolDeclarationScope.CompileTimeOnly:
                         this.FoundCompileTimeCode = true;
-                        return (T?) baseVisit( node );
+
+                        var members = new List<MemberDeclarationSyntax>();
+
+                        foreach (var member in node.Members)
+                        {
+                            switch (member)
+                            {
+                                case MethodDeclarationSyntax method:
+                                    members.AddRange( this.VisitMethodDeclaration( method ) );
+                                    break;
+                                case TypeDeclarationSyntax nestedType:
+                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ) );
+                                    break;
+                                default:
+                                    members.Add( member );
+                                    break;
+                            }
+                        }
+
+                        return (T) node.WithMembers( SyntaxFactory.List( members ) );
 
                     default:
                         throw new NotImplementedException();
                 }
             }
 
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
@@ -276,11 +295,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
                     else
                         throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
 
-                    return transformedNode;
+                    yield return node;
+                    yield return (MethodDeclarationSyntax) transformedNode!;
                 }
                 else
                 {
-                    return base.VisitMethodDeclaration( node );
+                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
                 }
             }
 

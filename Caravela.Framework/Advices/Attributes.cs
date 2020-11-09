@@ -5,6 +5,6 @@ namespace Caravela.Framework.Advices
 {
     public interface IAdviceAttribute { }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = true)]
     public class OverrideMethodTemplateAttribute : TemplateAttribute { }
 }
