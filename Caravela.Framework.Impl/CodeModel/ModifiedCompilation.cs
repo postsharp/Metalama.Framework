@@ -43,6 +43,16 @@ namespace Caravela.Framework.Impl.CodeModel
             var primeCompilation = this.GetPrimeCompilation();
             var transformations = this.CollectAdvices().SelectMany( a => adviceDriver.GetResult( a ).Transformations ).GetValue();
 
+            var multiAdviceElements = transformations
+                .GroupBy( t => t is OverriddenElement oe ? oe.OverriddenDeclaration : null )
+                .Where( g => g.Count() > 1 );
+
+            foreach (var element in multiAdviceElements)
+            {
+                if ( element.Key != null )
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode().GetLocation(), element.Key );
+            }
+
             var result = primeCompilation;
 
             var rewriter = new CompilationRewriter( transformations );
