@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
-            TemplateContext.ProceedImpl = new ProceedImpl( (MethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
+            TemplateContext.ProceedImpl = new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
             TemplateContext.target = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation );
 
             var output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );

@@ -20,9 +20,12 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute(TransformerContext context)
         {
-            if ( context.GlobalOptions.TryGetValue( "build_property.DebugCaravela", out var debugCaravelaString ) &&
-                bool.TryParse( debugCaravelaString, out bool debugCaravela ) &&
-                debugCaravela )
+            bool getFlag( string flagName ) =>
+                context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
+                bool.TryParse( flagString, out bool flagValue ) &&
+                flagValue;
+
+            if ( getFlag("DebugCaravela") )
             {
                 Debugger.Launch();
             }
@@ -31,8 +34,10 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
+                bool debugTransformedCode = getFlag( "RoslynExDebugTransformedCode" );
+
                 // DI
-                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );

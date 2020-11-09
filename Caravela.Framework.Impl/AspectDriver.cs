@@ -17,16 +17,14 @@ namespace Caravela.Framework.Impl
         public INamedType AspectType { get; }
 
         private readonly ICompilation _compilation;
-        private readonly CompileTimeAssemblyLoader _compileTimeAssemblyLoader;
 
         private readonly IReactiveCollection<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
 
-        public AspectDriver( INamedType aspectType, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        public AspectDriver( INamedType aspectType, ICompilation compilation )
         {
             this.AspectType = aspectType;
 
             this._compilation = compilation;
-            this._compileTimeAssemblyLoader = compileTimeAssemblyLoader;
 
             var iAdviceAttribute = compilation.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
@@ -44,7 +42,8 @@ namespace Caravela.Framework.Impl
             return aspectInstance.CodeElement switch
             {
                 INamedType type => this.EvaluateAspect( type, aspect ),
-                IMethod method => this.EvaluateAspect( method, aspect )
+                IMethod method => this.EvaluateAspect( method, aspect ),
+                _ => throw new NotImplementedException()
             };
         }
 
@@ -63,7 +62,7 @@ namespace Caravela.Framework.Impl
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
 
             var aspectBuilder = new AspectBuilder<T>( 
-                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this._compileTimeAssemblyLoader, this.AspectType ) );
+                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
 

@@ -13,7 +13,9 @@ namespace Caravela.Framework.TestApp
 
             //Cancel();
 
-            ThisAccess.Run();
+            //ThisAccess.Run();
+
+            new ClassWithMethods();
         }
 
         [PrintDebugInfoAspect]
@@ -50,4 +52,17 @@ namespace Caravela.Framework.TestApp
         [CancelAspect] static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
 
+    [CountMethodsAspect]
+    class ClassWithMethods
+    {
+        public ClassWithMethods()
+        {
+            this.M1();
+            M2();
+        }
+
+        void M1() { }
+
+        static void M2() { }
+    }
 }

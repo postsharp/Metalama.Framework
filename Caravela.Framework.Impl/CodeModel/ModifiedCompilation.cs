@@ -6,6 +6,7 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -69,12 +70,12 @@ namespace Caravela.Framework.Impl.CodeModel
                 Debug.Assert( this._overriddenMethods.Count == transformations.Count() );
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
+            private TypeDeclarationSyntax VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
 
@@ -82,7 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     switch ( member )
                     {
-                        case MethodDeclarationSyntax method:
+                        case BaseMethodDeclarationSyntax method:
                             OverriddenMethod? foundTransformation = null;
 
                             foreach ( var transformation in this._overriddenMethods )
@@ -117,18 +118,24 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                 }
 
-                return (T) node.WithMembers( SyntaxFactory.List( members ) );
+                return node.WithMembers( SyntaxFactory.List( members ) );
             }
 
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
-            {
-                var result = (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
+            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node ) =>
+                this.VisitBaseMethodDeclaration( node, base.VisitConstructorDeclaration );
 
-                foreach (var transformation in this._overriddenMethods )
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node ) =>
+                this.VisitBaseMethodDeclaration( node, base.VisitMethodDeclaration );
+
+            private T VisitBaseMethodDeclaration<T>( T node, Func<T, SyntaxNode?> visitBase ) where T : BaseMethodDeclarationSyntax
+            {
+                var result = (T) visitBase( node )!;
+
+                foreach ( var transformation in this._overriddenMethods )
                 {
-                    if (transformation.OverriddenDeclaration.GetSyntaxNode() == node)
+                    if ( transformation.OverriddenDeclaration.GetSyntaxNode() == node )
                     {
-                        result = result.WithBody( transformation.MethodBody );
+                        result = (T) result.WithBody( transformation.MethodBody );
                     }
                 }
 

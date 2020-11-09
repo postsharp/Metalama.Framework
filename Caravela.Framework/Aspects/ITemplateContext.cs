@@ -26,7 +26,7 @@ namespace Caravela.Framework.Aspects
         //IEvent? Event { get; }
 
         /// <summary>
-        /// Gets the list parameters of <see cref="Method"/>.
+        /// Gets the list of parameters of <see cref="Method"/>.
         /// </summary>
         IAdviceParameterList Parameters { get; }
 

@@ -59,6 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
+        private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; set; } = null!;
@@ -67,10 +68,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly Random _random = new();
 
-        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler )
+        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
+            this._debugTransformedCode = debugTransformedCode;
         }
 
         // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
@@ -127,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return new Version( major, minor, build, revision ).ToString();
         }
 
-        private static MemoryStream Emit( Compilation compilation )
+        private MemoryStream Emit( Compilation compilation, Compilation input )
         {
             var stream = new MemoryStream();
 
@@ -135,7 +137,8 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
 
             var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-            var embeddedTexts = compilation.SyntaxTrees.Select(
+            var compilationForDebugging = this._debugTransformedCode ? compilation : input;
+            var embeddedTexts = compilationForDebugging.SyntaxTrees.Select(
                 tree =>
                 {
                     string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
@@ -176,7 +179,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( compileTimeCompilation == null )
                 return null;
 
-            var stream = Emit( compileTimeCompilation );
+            var stream = this.Emit( compileTimeCompilation, compilation );
 
             this._previousCompilation = (compilation, stream);
 

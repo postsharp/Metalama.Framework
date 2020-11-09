@@ -2,7 +2,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
@@ -13,25 +12,23 @@ namespace Caravela.Framework.Impl
     class AdviceFactory : IAdviceFactory
     {
         private readonly ICompilation _compilation;
-        private readonly CompileTimeAssemblyLoader _compileTimeAssemblyLoader;
-        readonly INamedType _templateType;
+        private readonly INamedType _aspectType;
+        private readonly IAspect _aspect;
 
-        public AdviceFactory( ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader, INamedType templateType )
+        public AdviceFactory( ICompilation compilation, INamedType aspectType, IAspect aspect )
         {
             this._compilation = compilation;
-            this._compileTimeAssemblyLoader = compileTimeAssemblyLoader;
-            this._templateType = templateType;
+            this._aspectType = aspectType;
+            this._aspect = aspect;
         }
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate )
         {
-            var templateMethod = this._templateType.AllMethods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
-
-            var aspect = this._compileTimeAssemblyLoader.CreateInstance( ((INamedType) templateMethod.ContainingElement!).GetSymbol() );
+            var templateMethod = this._aspectType.AllMethods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
 
             string templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
-            var methodBody = new TemplateDriver( aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( aspect, targetMethod, this._compilation );
+            var methodBody = new TemplateDriver( this._aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( this._aspect, targetMethod, this._compilation );
 
             return new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) );
         }
