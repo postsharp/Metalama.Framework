@@ -177,7 +177,7 @@ class C<T1, T2>
 
             var compilation = CreateCompilation(code);
 
-            var type = compilation.DeclaredTypes.GetValue(default).Single();
+            var type = compilation.DeclaredTypes.GetValue().Single();
 
             // TODO: check type.GenericArguments once ITypeParameterSymbol is supported
 
@@ -185,6 +185,34 @@ class C<T1, T2>
 
             Assert.Equal("C<int, string>", method.ReturnType.ToString());
             Assert.Equal(new string[] { "int", "string" }, ((INamedType)method.ReturnType).GenericArguments.Select(t => t.ToString()));
+        }
+
+        [Fact]
+        public void GlobalAttributes()
+        {
+            string code = @"
+using System;
+
+[module: MyAttribute(""m"")]
+[assembly: MyAttribute(""a"")]
+
+class MyAttribute : Attribute
+{
+    public MyAttribute(string target) {}
+}
+";
+
+            var compilation = CreateCompilation( code );
+
+            var attributes = compilation.GlobalAttributes.GetValue().ToArray();
+
+            Assert.Equal( 2, attributes.Length );
+
+            Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
+            Assert.Equal( "a", Assert.Single( attributes[0].ConstructorArguments ) );
+
+            Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
+            Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments ) );
         }
 
         [Fact]

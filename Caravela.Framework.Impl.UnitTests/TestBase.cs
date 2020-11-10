@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.UnitTests
 {
     public class TestBase
     {
-        public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = true )
+        public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
         {
             var roslynCompilation = CSharpCompilation.Create( null! )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )

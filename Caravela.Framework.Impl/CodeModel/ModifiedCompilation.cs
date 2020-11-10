@@ -29,6 +29,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
+        public override IReactiveCollection<IAttribute> GlobalAttributes => this._originalCompilation.GlobalAttributes;
+
         public override INamedType? GetTypeByReflectionName( string reflectionName ) => this._originalCompilation.GetTypeByReflectionName( reflectionName );
 
         internal override CSharpCompilation GetPrimeCompilation() => this._originalCompilation.GetPrimeCompilation();

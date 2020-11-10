@@ -14,6 +14,7 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace );
 
+        public abstract IReactiveCollection<IAttribute> GlobalAttributes { get; }
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 

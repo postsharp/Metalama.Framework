@@ -18,7 +18,7 @@ namespace Foo
 {
     class C {}
 }
-" );
+", ignoreErrors: true );
 
             string expected = @"
 using System;

@@ -30,6 +30,12 @@ namespace Caravela.Framework.Impl
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => 
             this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
+        [Memo]
+        public override IReactiveCollection<IAttribute> GlobalAttributes =>
+            this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
+                .Select( a => new Attribute( a, this.SymbolMap ) )
+                .ToImmutableReactive();
+
         public override INamedType? GetTypeByReflectionName(string reflectionName)
         {
             var symbol = this.RoslynCompilation.GetTypeByMetadataName(reflectionName);

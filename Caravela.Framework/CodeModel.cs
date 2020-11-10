@@ -15,7 +15,11 @@ namespace Caravela.Framework.Code
 
         IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
 
-        // TODO: assembly and module attributes? (do they need to be differentiated?)
+        // TODO: do assembly and module attributes need to be differentiated?
+        /// <summary>
+        /// Assembly and module attributes.
+        /// </summary>
+        IReactiveCollection<IAttribute> GlobalAttributes { get; }
 
         /// <summary>
         /// Get type based on its full name, as used in reflection.
