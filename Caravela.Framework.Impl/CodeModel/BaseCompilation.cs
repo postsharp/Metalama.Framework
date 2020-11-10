@@ -4,7 +4,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     public abstract class BaseCompilation : ICompilation
     {
@@ -19,7 +19,17 @@ namespace Caravela.Framework.Impl
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 
         // TODO: add support for other kinds of types
-        public IType? GetTypeByReflectionType( Type type ) => this.GetTypeByReflectionName( type.FullName );
+        public IType? GetTypeByReflectionType( Type type )
+        {
+            if ( type.IsArray )
+            {
+                var elementType = this.GetTypeByReflectionType( type.GetElementType() );
+
+                return elementType?.MakeArrayType( type.GetArrayRank() );
+            }
+
+            return this.GetTypeByReflectionName( type.FullName );
+        }
 
         internal abstract CSharpCompilation GetPrimeCompilation();
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();

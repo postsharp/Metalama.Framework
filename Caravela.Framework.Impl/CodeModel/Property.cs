@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Property : CodeElement, IProperty
     {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 
         [Memo]
-        public IReadOnlyList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
 
 
         [Memo]

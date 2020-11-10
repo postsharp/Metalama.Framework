@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Caravela.Framework.Project;
 using Caravela.Reactive;
 
@@ -45,6 +46,8 @@ namespace Caravela.Framework.Code
     {
         bool Is( IType other );
         bool Is( Type other );
+
+        IArrayType MakeArrayType( int rank = 1 );
     }
 
     // TODO: IArrayType etc.
@@ -62,9 +65,9 @@ namespace Caravela.Framework.Code
 
         string FullName { get; }
 
-        IReadOnlyList<IType> GenericArguments { get; }
+        IImmutableList<IType> GenericArguments { get; }
 
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        IImmutableList<IGenericParameter> GenericParameters { get; }
 
 
         // TODO: differentiate between class, struct and interface
@@ -87,12 +90,18 @@ namespace Caravela.Framework.Code
         IReactiveCollection<IMethod> AllMethods { get; }
     }
 
+    public interface IArrayType : IType
+    {
+        IType ElementType { get; }
+        int Rank { get; }
+    }
+
     public interface IAttribute
     {
         // TODO: add TargetElement?
 
         INamedType Type { get; }
-        IReadOnlyList<object?> ConstructorArguments { get; }
+        IImmutableList<object?> ConstructorArguments { get; }
         IReadOnlyDictionary<string, object?> NamedArguments { get; }
     }
 
@@ -132,7 +141,7 @@ namespace Caravela.Framework.Code
     {
         // TODO: ref
         IType Type { get; }
-        IReadOnlyList<IParameter> Parameters { get; }
+        IImmutableList<IParameter> Parameters { get; }
         IMethod? Getter { get; }
         // TODO: what happens if you try to set a get-only property in a constructor? it works, Setter returns pseudo elements for get-only
         // IsPseudoElement
@@ -180,9 +189,9 @@ namespace Caravela.Framework.Code
         IParameter ReturnParameter { get; }
         // for convenience
         IType ReturnType { get; }
-        IReadOnlyList<IMethod> LocalFunctions { get; }
-        IReadOnlyList<IParameter> Parameters { get; }
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        IImmutableList<IMethod> LocalFunctions { get; }
+        IImmutableList<IParameter> Parameters { get; }
+        IImmutableList<IGenericParameter> GenericParameters { get; }
         new MethodKind Kind { get; }
 
         //dynamic Invoke(params object[] args);
@@ -208,7 +217,7 @@ namespace Caravela.Framework.Code
     {
         string Name { get; }
         int Index { get; }
-        IReadOnlyList<IType> BaseTypeConstraints { get; }
+        IImmutableList<IType> BaseTypeConstraints { get; }
         bool IsCovariant { get; }
         bool IsContravariant { get; }
         bool HasDefaultConstructorConstraint { get; }

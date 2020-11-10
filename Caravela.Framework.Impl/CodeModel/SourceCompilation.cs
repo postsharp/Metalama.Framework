@@ -7,7 +7,7 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     public class SourceCompilation : BaseCompilation
     {
@@ -56,6 +56,7 @@ namespace Caravela.Framework.Impl
             typeSymbol switch
             {
                 INamedTypeSymbol namedType => new NamedType(namedType, compilation),
+                IArrayTypeSymbol arrayType => new ArrayType(arrayType, compilation),
                 _ => throw new NotImplementedException()
             };
     }

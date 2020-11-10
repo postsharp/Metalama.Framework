@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -7,7 +6,7 @@ using Caravela.Reactive;
 using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
     {
@@ -58,7 +57,7 @@ namespace Caravela.Framework.Impl
         [Memo]
         public IReactiveCollection<IMethod> Methods => this.OnlyDeclared( this.AllMethods );
 
-        public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
+        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
         public string Name => this.TypeSymbol.Name;
 
@@ -70,7 +69,7 @@ namespace Caravela.Framework.Impl
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableArray();
+        public IImmutableList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableArray();
 
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
@@ -96,6 +95,9 @@ namespace Caravela.Framework.Impl
 
         public bool Is( Type other ) =>
             this.Is( this.Compilation.GetTypeByReflectionType( other ) ?? throw new ArgumentException( $"Could not resolve type {other}.", nameof( other ) ) );
+
+        public IArrayType MakeArrayType( int rank = 1 ) =>
+            (IArrayType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this.TypeSymbol, rank ) );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

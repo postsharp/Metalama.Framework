@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Reactive;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -213,6 +214,35 @@ class MyAttribute : Attribute
 
             Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
             Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments ) );
+        }
+
+        [Fact]
+        public void Arrays()
+        {
+            string code = @"
+class C
+{
+    void M(int[] i) {}
+}
+";
+
+            var compilation = CreateCompilation( code );
+
+            var parameterTypes = from type in compilation.DeclaredTypes
+                                 from method in type.Methods
+                                 from parameter in method.Parameters
+                                 select parameter.Type;
+            var parameterType = Assert.Single( parameterTypes.GetValue() );
+
+            Assert.Equal( "int[]", parameterType.ToString() );
+            Assert.True( parameterType.Is( typeof( int[] ) ) );
+            Assert.False( parameterType.Is( typeof( int[,] ) ) );
+
+            var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
+
+            Assert.Equal( "int", arrayType.ElementType.ToString() );
+            Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
+            Assert.Equal( 1, arrayType.Rank );
         }
 
         [Fact]
