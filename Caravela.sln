@@ -40,7 +40,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.AspectWorkbench", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.TestApp.Library", "Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk.Package", "Caravela.Framework.Sdk\Caravela.Framework.Sdk.Package.csproj", "{C2F42AB0-48F4-47ED-90B7-DAE5C1529D61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,6 +106,10 @@ Global
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2F42AB0-48F4-47ED-90B7-DAE5C1529D61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2F42AB0-48F4-47ED-90B7-DAE5C1529D61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F42AB0-48F4-47ED-90B7-DAE5C1529D61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2F42AB0-48F4-47ED-90B7-DAE5C1529D61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
