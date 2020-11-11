@@ -9,12 +9,13 @@ namespace Caravela.Framework.TestApp
 {
     public class CountMethodsAspect : Attribute, IAspect<INamedType>
     {
+        int i;
         int methodCount;
 
         [OverrideMethodTemplate]
         public dynamic Template()
         {
-            Console.WriteLine( $"This is just 1 of {this.methodCount} methods." );
+            Console.WriteLine( $"This is {++this.i} of {this.methodCount} methods." );
             return proceed();
         }
 

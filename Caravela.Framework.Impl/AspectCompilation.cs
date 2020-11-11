@@ -44,6 +44,8 @@ namespace Caravela.Framework.Impl
 
         internal AspectCompilation Update( IReactiveCollection<AspectInstanceResult> instanceResults )
         {
+            instanceResults = instanceResults.Materialize();
+
             var addedDiagnostics = instanceResults.SelectMany( air => air.Diagnostics );
             var addedAdvices = instanceResults.SelectMany( air => air.Advices );
             var addedAspects = instanceResults.SelectMany( air => air.Aspects );

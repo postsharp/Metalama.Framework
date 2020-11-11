@@ -329,6 +329,7 @@ class TargetCode
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(SyntaxFactory).Assembly.Location))
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateHelper ).Assembly.Location ) )
                 .AddMetadataReference(MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.Binder).Assembly.Location))
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( ImmutableArray ).Assembly.Location ) )
                 ;
             return project;
         }

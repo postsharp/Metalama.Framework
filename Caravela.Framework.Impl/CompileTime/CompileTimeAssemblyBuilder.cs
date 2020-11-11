@@ -212,6 +212,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private bool _addTemplateUsings;
             private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = SyntaxFactory.ParseCompilationUnit( @"
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -219,6 +220,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateHelper;
 " ).Usings;
 
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
@@ -233,6 +235,10 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
                     node = node.AddUsings( usingsToAdd.ToArray() );
                 }
+
+#if DEBUG
+                node = node.NormalizeWhitespace();
+#endif
 
                 return node;
             }
