@@ -42,6 +42,9 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
 
+            // the SDK assembly might not be loaded at this point, so make sure it is
+            _ = new AspectWeaverAttribute( null! );
+
             var caravelaAssemblies = new[]
             {
                 "Caravela.Reactive.dll",

@@ -9,6 +9,8 @@
 
   <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
     <PackageReference Include="Caravela.Framework.Sdk" Version="$(CaravelaReferenceVersion)" />
+    <!-- TODO: create an option that does this automatically? -->
+    <PackageReference Include="RoslynEx.Toolset" Version="$(RoslynExVersion)" PrivateAssets="none" />
   </ItemGroup>
 
 </Project>

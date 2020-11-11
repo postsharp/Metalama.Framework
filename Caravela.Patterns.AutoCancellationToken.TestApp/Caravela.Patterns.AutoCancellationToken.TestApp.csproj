@@ -8,8 +8,12 @@
 
   <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(ReferencesUsingPackages) != 'true'">
     <ProjectReference Include="..\Caravela.Patterns.AutoCancellationToken\Caravela.Patterns.AutoCancellationToken.csproj" OutputItemType="Analyzer" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
+    <PackageReference Include="Caravela.Patterns.AutoCancellationToken" Version="$(CaravelaReferenceVersion)" />
   </ItemGroup>
 
 </Project>

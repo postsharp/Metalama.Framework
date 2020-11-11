@@ -1,6 +1,6 @@
 ﻿<Project>
   <ItemGroup Condition="$(ReferencesUsingPackages) != 'true'">
-    <PackageReference Include="RoslynEx.Toolset" Version="0.1.44-dev" />
+    <PackageReference Include="RoslynEx.Toolset" Version="$(RoslynExVersion)" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" GeneratePathProperty="true" ExcludeAssets="all" />
     <Analyzer Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" />
 
