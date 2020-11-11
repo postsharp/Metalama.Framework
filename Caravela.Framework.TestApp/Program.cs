@@ -7,15 +7,15 @@ namespace Caravela.Framework.TestApp
     {
         static void Main()
         {
-            //PrintDebugInfo();
+            PrintDebugInfo();
 
-            //PrintArray();
+            PrintArray();
 
-            //Cancel();
-
-            //ThisAccess.Run();
+            ThisAccess.Run();
 
             new ClassWithMethods();
+
+            Cancel();
         }
 
         [PrintDebugInfoAspect]

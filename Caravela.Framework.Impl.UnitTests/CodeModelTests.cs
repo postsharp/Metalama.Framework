@@ -205,7 +205,7 @@ class MyAttribute : Attribute
 
             var compilation = CreateCompilation( code );
 
-            var attributes = compilation.GlobalAttributes.GetValue().ToArray();
+            var attributes = compilation.Attributes.GetValue().ToArray();
 
             Assert.Equal( 2, attributes.Length );
 

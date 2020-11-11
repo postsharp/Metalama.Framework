@@ -8,7 +8,7 @@ using Caravela.Reactive;
 namespace Caravela.Framework.Code
 {
     [CompileTime]
-    public interface ICompilation
+    public interface ICompilation : ICodeElement
     {
         IReactiveCollection<INamedType> DeclaredTypes { get; }
 
@@ -17,10 +17,6 @@ namespace Caravela.Framework.Code
         IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
 
         // TODO: do assembly and module attributes need to be differentiated?
-        /// <summary>
-        /// Assembly and module attributes.
-        /// </summary>
-        IReactiveCollection<IAttribute> GlobalAttributes { get; }
 
         /// <summary>
         /// Get type based on its full name, as used in reflection.
@@ -117,7 +113,7 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public enum CodeElementKind
     {
-        None,
+        Compilation,
         Type,
         Method,
         Property,

@@ -5,7 +5,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -41,6 +40,7 @@ namespace Caravela.Framework.Impl
 
             return aspectInstance.CodeElement switch
             {
+                ICompilation compilation => this.EvaluateAspect( compilation, aspect ),
                 INamedType type => this.EvaluateAspect( type, aspect ),
                 IMethod method => this.EvaluateAspect( method, aspect ),
                 _ => throw new NotImplementedException()

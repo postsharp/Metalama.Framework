@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public override IReactiveCollection<IAttribute> GlobalAttributes =>
+        public override IReactiveCollection<IAttribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                 .Select( a => new Attribute( a, this.SymbolMap ) )
                 .ToImmutableReactive();
