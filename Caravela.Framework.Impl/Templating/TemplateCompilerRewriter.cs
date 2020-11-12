@@ -140,17 +140,9 @@ namespace Caravela.Framework.Impl.Templating
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateLiteralExpressionFactory(SyntaxKind syntaxKind)
             {
-                return InvocationExpression(IdentifierName(nameof(LiteralExpression))).WithArgumentList(ArgumentList(
-                    SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-                    {
+                return InvocationExpression(IdentifierName(nameof(LiteralExpression))).AddArgumentListArguments(
                         Argument(this.Transform(syntaxKind)),
-                        Token(SyntaxKind.CommaToken),
-                        Argument(InvocationExpression(IdentifierName(nameof(Literal))).WithArgumentList(ArgumentList(
-                            SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-                            {
-                                Argument(expression)
-                            }))))
-                    })));
+                        Argument(InvocationExpression(IdentifierName(nameof(Literal))).AddArgumentListArguments(Argument(expression))));
             }
 
 
@@ -413,6 +405,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if (statementComment.Length > 120)
                 {
+                    // TODO: handle surrogate pairs correctly
                     statementComment = statementComment.Substring(0, 117) + "...";
                 }
 
