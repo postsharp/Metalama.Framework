@@ -62,6 +62,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
+        private readonly IList<ResourceDescription> _resources;
         private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
@@ -71,10 +72,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly Random _random = new();
 
-        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, bool debugTransformedCode )
+        public CompileTimeAssemblyBuilder( 
+            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IList<ResourceDescription> resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
+            this._resources = resources;
             this._debugTransformedCode = debugTransformedCode;
         }
 
@@ -151,9 +154,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     return EmbeddedText.FromSource( filePath, text );
                 } );
 
-            var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
+            var result = compilation.Emit( stream, manifestResources: this._resources, options: options, embeddedTexts: embeddedTexts );
 #else
-            var result = compilation.Emit( stream );
+            var result = compilation.Emit( stream, manifestResources: this._resources );
 #endif
 
             if ( !result.Success )
@@ -187,7 +190,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return stream;
         }
 
-        public string GetResourceName() => "Caravela.CompileTimeAssembly";
+        public string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
 
         class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
         {

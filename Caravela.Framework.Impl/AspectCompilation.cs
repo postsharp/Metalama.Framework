@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
@@ -16,18 +17,24 @@ namespace Caravela.Framework.Impl
         // TODO: should this be reactive or handled as a side value?
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
 
+        public IReadOnlyList<ResourceDescription> Resources { get; }
+
         public BaseCompilation Compilation { get; }
 
         public IReactiveCollection<AspectInstance> Aspects { get; }
 
         public IReactiveGroupBy<string, AspectInstance> AspectsByAspectType { get; }
 
-        public AspectCompilation( IReadOnlyList<Diagnostic> diagnostics, BaseCompilation compilation, CompileTimeAssemblyLoader loader )
-            : this( diagnostics, compilation, ImmutableArray.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
+        public AspectCompilation( BaseCompilation compilation, CompileTimeAssemblyLoader loader )
+            : this(
+                  Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), compilation,
+                  ImmutableArray.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
 
-        private AspectCompilation(IReadOnlyList<Diagnostic> diagnostics, BaseCompilation compilation, ImmutableArray<AspectSource> aspectSources)
+        private AspectCompilation(
+            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, BaseCompilation compilation, ImmutableArray<AspectSource> aspectSources)
         {
             this.Diagnostics = diagnostics;
+            this.Resources = resources;
             this.Compilation = compilation;
             this._aspectSources = aspectSources;
 
@@ -35,11 +42,12 @@ namespace Caravela.Framework.Impl
             this.AspectsByAspectType = this.Aspects.GroupBy( ai => ai.AspectType.FullName );
         }
 
-        public AspectCompilation Update(IReadOnlyList<Diagnostic> addedDiagnostics, BaseCompilation newCompilation )
+        public AspectCompilation Update( IReadOnlyList<Diagnostic> addedDiagnostics, IReadOnlyList<ResourceDescription> addedResources, BaseCompilation newCompilation )
         {
             var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableArray();
+            var newResources = this.Resources.Concat( addedResources ).ToImmutableArray();
 
-            return new( newDiagnostics, newCompilation, this._aspectSources );
+            return new( newDiagnostics, newResources, newCompilation, this._aspectSources );
         }
 
         internal AspectCompilation Update( IReactiveCollection<AspectInstanceResult> instanceResults )
@@ -54,7 +62,7 @@ namespace Caravela.Framework.Impl
             var newCompilation = new ModifiedCompilation( this.Compilation, addedAdvices );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
-            return new( newDiagnostics, newCompilation, newAspectSources );
+            return new( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources );
         }
     }
 }

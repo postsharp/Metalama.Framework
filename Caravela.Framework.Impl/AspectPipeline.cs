@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -38,7 +37,8 @@ namespace Caravela.Framework.Impl
                 bool debugTransformedCode = getFlag( "RoslynExDebugTransformedCode" );
 
                 // DI
-                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), debugTransformedCode );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( 
+                    new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, compileTimeAssemblyLoader );
+                var aspectCompilation = new AspectCompilation( compilation, compileTimeAssemblyLoader );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
@@ -67,13 +67,18 @@ namespace Caravela.Framework.Impl
                     context.ReportDiagnostic( diagnostic );
                 }
 
+                foreach (var resource in aspectCompilation.Resources)
+                {
+                    context.ManifestResources.Add( resource );
+                }
+
                 if ( roslynCompilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
                     var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
 
                     if ( compileTimeAssembly != null )
                     {
-                        context.AddManifestResource( new ResourceDescription(
+                        context.ManifestResources.Add( new ResourceDescription(
                             compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
@@ -94,10 +99,7 @@ namespace Caravela.Framework.Impl
             }
             catch (Exception exception)
             {
-                static string ToString( Exception ex ) =>
-                    ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ToString( ex.InnerException )}";
-
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ToString( exception ) ) );
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString() ) );
                 return context.Compilation;
             }
         }

@@ -7,7 +7,7 @@
    <Version>0.1.9</Version>
    <CaravelaReferenceVersion>0.1.9</CaravelaReferenceVersion>
    <RoslynVersion>3.8.0-5.final</RoslynVersion>
-   <RoslynExVersion>0.1.44-dev</RoslynExVersion>
+   <RoslynExVersion>0.1.45-dev</RoslynExVersion>
 
    <ReferencesUsingPackages>false</ReferencesUsingPackages>
  </PropertyGroup>

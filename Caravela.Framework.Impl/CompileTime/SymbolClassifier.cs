@@ -45,18 +45,24 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             
             // TODO: be more strict with .NET Standard.
-            if (SymbolEqualityComparer.Default.Equals(assembly, this._compilation.Assembly))
+            if (assembly.Name.StartsWith("System") || assembly.Name == "netstandard")
             {
                 return SymbolDeclarationScope.Default;
             }
-            else if (assembly.Name.StartsWith("System") || assembly.Name == "netstandard")
+
+            var scopeFromAttributes = assembly.GetAttributes().Concat(assembly.Modules.First().GetAttributes())
+                .Select( this.GetAttributeScope ).FirstOrDefault( s => s != SymbolDeclarationScope.Default );
+            if ( scopeFromAttributes != SymbolDeclarationScope.Default )
+            {
+                return scopeFromAttributes;
+            }
+
+            if ( SymbolEqualityComparer.Default.Equals( assembly, this._compilation.Assembly ) )
             {
                 return SymbolDeclarationScope.Default;
             }
-            else
-            {
-                return SymbolDeclarationScope.RunTimeOnly;
-            }
+
+            return SymbolDeclarationScope.RunTimeOnly;
         }
         
         public SymbolDeclarationScope GetSymbolDeclarationScope(ISymbol symbol)

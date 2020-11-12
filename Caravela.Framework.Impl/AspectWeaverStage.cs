@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
@@ -27,11 +29,22 @@ namespace Caravela.Framework.Impl
 
             var diagnosticSink = new DiagnosticSink();
 
-            var newCompilation = this.aspectWeaver.Transform(
-                new AspectWeaverContext( this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink ) );
+            var resources = new List<ResourceDescription>();
+
+            var context = new AspectWeaverContext( this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
+            CSharpCompilation newCompilation;
+            try
+            {
+                newCompilation = this.aspectWeaver.Transform( context );
+            }
+            catch (Exception ex)
+            {
+                newCompilation = context.Compilation;
+                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this.aspectType, ex.ToDiagnosticString() ) );
+            }
 
             // TODO: update AspectCompilation.Aspects
-            return input.Update(diagnosticSink.Diagnostics, new SourceCompilation(newCompilation));
+            return input.Update(diagnosticSink.Diagnostics, resources, new SourceCompilation(newCompilation));
         }
 
         class DiagnosticSink : IDiagnosticSink
