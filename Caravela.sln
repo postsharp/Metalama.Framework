@@ -48,6 +48,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Virtuosit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Virtuosity.TestApp", "Caravela.Patterns.Virtuosity.TestApp\Caravela.Patterns.Virtuosity.TestApp.csproj", "{84D54829-9E20-4B37-AA37-296AC9013B35}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Costura", "Caravela.Patterns.Costura\Caravela.Patterns.Costura.csproj", "{2716F057-BFC5-40AF-8DA4-D90D56362D86}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Costura.TestApp", "Caravela.Patterns.Costura.TestApp\Caravela.Patterns.Costura.TestApp.csproj", "{11570094-57DB-4684-9227-95AB008664E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Costura.Tests", "Caravela.Patterns.Costura.Tests\Caravela.Patterns.Costura.Tests.csproj", "{8053A2E4-4AFC-4D87-BF8B-824C504000EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Patterns.Costura.WpfApp", "Caravela.Patterns.Costura.WpfApp\Caravela.Patterns.Costura.WpfApp.csproj", "{48A77958-5C30-4514-8772-9D98D25F21AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -122,6 +130,22 @@ Global
 		{84D54829-9E20-4B37-AA37-296AC9013B35}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84D54829-9E20-4B37-AA37-296AC9013B35}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84D54829-9E20-4B37-AA37-296AC9013B35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2716F057-BFC5-40AF-8DA4-D90D56362D86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2716F057-BFC5-40AF-8DA4-D90D56362D86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2716F057-BFC5-40AF-8DA4-D90D56362D86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2716F057-BFC5-40AF-8DA4-D90D56362D86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11570094-57DB-4684-9227-95AB008664E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11570094-57DB-4684-9227-95AB008664E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11570094-57DB-4684-9227-95AB008664E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11570094-57DB-4684-9227-95AB008664E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8053A2E4-4AFC-4D87-BF8B-824C504000EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8053A2E4-4AFC-4D87-BF8B-824C504000EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8053A2E4-4AFC-4D87-BF8B-824C504000EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8053A2E4-4AFC-4D87-BF8B-824C504000EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48A77958-5C30-4514-8772-9D98D25F21AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48A77958-5C30-4514-8772-9D98D25F21AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48A77958-5C30-4514-8772-9D98D25F21AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48A77958-5C30-4514-8772-9D98D25F21AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +163,10 @@ Global
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{0BCB1B9A-9B4C-44F1-8458-0A6208D6D417} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{84D54829-9E20-4B37-AA37-296AC9013B35} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{2716F057-BFC5-40AF-8DA4-D90D56362D86} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{11570094-57DB-4684-9227-95AB008664E8} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{8053A2E4-4AFC-4D87-BF8B-824C504000EF} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{48A77958-5C30-4514-8772-9D98D25F21AB} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

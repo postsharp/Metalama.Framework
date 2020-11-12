@@ -2,7 +2,7 @@
 using System.Linq;
 using static System.Reflection.BindingFlags;
 
-[assembly: Caravela.Patterns.Virtuosity.Virtuosity]
+[assembly: Caravela.Patterns.Virtuosity.VirtuosityAspect]
 
 namespace Caravela.Patterns.Virtuosity.TestApp
 {
