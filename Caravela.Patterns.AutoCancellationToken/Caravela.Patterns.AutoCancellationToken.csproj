@@ -3,14 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
+    <CaravelaExportAspects>true</CaravelaExportAspects>
   </PropertyGroup>
 
   <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
 
   <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
-    <PackageReference Include="Caravela.Framework.Sdk" Version="$(CaravelaReferenceVersion)" />
-    <!-- TODO: create an option that does this automatically? -->
-    <PackageReference Include="RoslynEx.Toolset" Version="$(RoslynExVersion)" PrivateAssets="none" />
+    <PackageReference Include="Caravela.Framework.Sdk" Version="$(CaravelaReferenceVersion)" PrivateAssets="none" />
   </ItemGroup>
 
 </Project>

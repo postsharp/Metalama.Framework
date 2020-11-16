@@ -112,27 +112,7 @@ namespace Caravela.Patterns.AutoCancellationToken
 
                 var attributeData = symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass.ToString() == CancellationAttributeName);
 
-                // TODO: removing of attributes should probably be handled automatically by the framework
-
-                var attributeSyntax = (AttributeSyntax)attributeData.ApplicationSyntaxReference.GetSyntax();
-                var attributeList = (AttributeListSyntax)attributeSyntax.Parent;
-                int attributeIndex = attributeList.Attributes.IndexOf(attributeSyntax);
-                int attributeListIndex = node.AttributeLists.IndexOf(attributeList);
-
-                var newNode = (T)baseVisit(node);
-
-                attributeList = newNode.AttributeLists[attributeListIndex];
-                if (attributeList.Attributes.Count == 1)
-                {
-                    newNode = newNode.RemoveNode(attributeList, default);
-                }
-                else
-                {
-                    attributeSyntax = attributeList.Attributes[attributeIndex];
-                    newNode = newNode.RemoveNode(attributeSyntax, default);
-                }
-
-                return newNode;
+                return (T)baseVisit(node);
             }
 
             private string cancellationTokenParameterName;

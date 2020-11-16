@@ -9,4 +9,6 @@
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Import Project="..\Caravela.Framework.Impl\build\Caravela.Framework.targets" />
 </Project>

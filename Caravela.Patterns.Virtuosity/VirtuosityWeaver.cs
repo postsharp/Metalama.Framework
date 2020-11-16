@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxKind;
 
 namespace Caravela.Patterns.Virtuosity
 {
-    [AspectWeaver( typeof( VirtuosityAttribute ) )]
+    [AspectWeaver( typeof( VirtuosityAspect ) )]
     class VirtuosityWeaver : IAspectWeaver
     {
         public CSharpCompilation Transform( AspectWeaverContext context ) => new Rewriter().VisitAllTrees( context.Compilation );

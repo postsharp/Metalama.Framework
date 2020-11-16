@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
+    <CaravelaExportAspects>true</CaravelaExportAspects>
   </PropertyGroup>
 
   <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>

@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
+
+    <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
   </ItemGroup>
+
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />

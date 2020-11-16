@@ -35,6 +35,7 @@ namespace Caravela.Framework.Impl
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
                 bool debugTransformedCode = getFlag( "RoslynExDebugTransformedCode" );
+                bool exportAspects = getFlag( "CaravelaExportAspects" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( 
@@ -72,18 +73,29 @@ namespace Caravela.Framework.Impl
                     context.ManifestResources.Add( resource );
                 }
 
+                bool stripCaravela = true;
+
                 if ( roslynCompilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
-
-                    if ( compileTimeAssembly != null )
+                    if ( exportAspects )
                     {
-                        context.ManifestResources.Add( new ResourceDescription(
-                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                        stripCaravela = false;
+
+                        var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
+
+                        if ( compileTimeAssembly != null )
+                        {
+                            context.ManifestResources.Add( new ResourceDescription(
+                                compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                        }
+                    }
+                    else
+                    {
+                        // TODO: produce error if there are public aspects
                     }
                 }
 
-                return aspectCompilation.Compilation.GetRoslynCompilation();
+                return aspectCompilation.Compilation.GetRoslynCompilation( stripCaravela );
             }
             catch (CaravelaException exception)
             {

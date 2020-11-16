@@ -1,16 +1,16 @@
 <Project>
- <PropertyGroup>
-   <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
-   <!-- the above stopped working in VS for some reason -->
-   <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
+  <PropertyGroup>
+    <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
+    <!-- the above stopped working in VS for some reason -->
+    <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-   <Version>0.1.9</Version>
-   <CaravelaReferenceVersion>0.1.9</CaravelaReferenceVersion>
-   <RoslynVersion>3.8.0-5.final</RoslynVersion>
-   <RoslynExVersion>0.1.45-dev</RoslynExVersion>
+    <Version>0.1.20</Version>
+    <CaravelaReferenceVersion>0.1.20</CaravelaReferenceVersion>
+    <RoslynVersion>3.8.0-5.final</RoslynVersion>
+    <RoslynExVersion>0.1.45-dev</RoslynExVersion>
 
-   <ReferencesUsingPackages>false</ReferencesUsingPackages>
- </PropertyGroup>
+    <ReferencesUsingPackages>false</ReferencesUsingPackages>
+  </PropertyGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />

@@ -1,0 +1,20 @@
+﻿<Project>
+  <PropertyGroup>
+    <CaravelaExportAspects Condition="'$(CaravelaExportAspects)' == ''">false</CaravelaExportAspects>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <CompilerVisibleProperty Include="CaravelaExportAspects" />
+  </ItemGroup>
+
+  <!-- TODO: somehow also set PrivateAssets for aspect libraries (or infer CaravelaExportAspects from PrivateAssets?) -->
+  <ItemGroup Condition="'$(CaravelaExportAspects)' == 'true'">
+    <PackageReference Update="Caravela.Framework" PrivateAssets="none" />
+    <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(CaravelaExportAspects)' == 'false'">
+    <PackageReference Update="Caravela.Framework" PrivateAssets="all" />
+    <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="all" />
+  </ItemGroup>
+  
+</Project>
