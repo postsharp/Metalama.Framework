@@ -13,7 +13,6 @@
     <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
   </ItemGroup>
 
-
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
     
@@ -60,5 +59,19 @@ namespace Caravela.Framework.Impl.CompileTime
     
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
   </Target>
+
+  <PropertyGroup>
+    <Obfuscate Condition="'$(Obfuscate)' == '' AND '$(Configuration)'=='Release'">True</Obfuscate>
+    <PostSharpProperties>
+      ObfuscateMapFile=$(OutputPath)\$(TargetFramework)\$(AssemblyName).obmap;
+      ObfuscateRootPath=$(MSBuildThisFileDirectory)
+    </PostSharpProperties>
+    <PostSharpSearchPath>$(OutputPath)\netstandard2.0</PostSharpSearchPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+    <ProjectReference Include="..\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+  </ItemGroup>
 
 </Project>

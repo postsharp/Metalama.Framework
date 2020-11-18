@@ -7,6 +7,8 @@
     <Version>0.1.55</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>3.8.100</CaravelaCompilerVersion>
+    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
+    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
 
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
