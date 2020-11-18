@@ -1,14 +1,18 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
     public class ObjectSerializers
     {
         private ConcurrentDictionary<Type, ObjectSerializer> serializers = new ConcurrentDictionary<Type, ObjectSerializer>();
+        private EnumSerializer _enumSerializer = new EnumSerializer();
 
         public ObjectSerializers()
         {
@@ -31,25 +35,32 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             // String
             this.serializers.TryAdd( typeof(string), new StringSerializer() );
             // Known simple system types
-            // TODO DateTime
-            // TODO TimeSpan
-            // TODO Guid
-            // TODO CultureInfo
+            this.serializers.TryAdd( typeof(DateTime), new DateTimeSerializer() );// TODO Implement
+            this.serializers.TryAdd( typeof(Guid), new GuidSerializer() );// TODO Implement
+            this.serializers.TryAdd( typeof(TimeSpan), new TimeSpanSerializer() );// TODO Implement
+            this.serializers.TryAdd( typeof(CultureInfo), new CultureInfoSerializer() ); // TODO Implement
             // Nullable types
-            // TODO Nullable
+            this.serializers.TryAdd( typeof(Nullable<>), new NullableSerializer(this) ); // TODO Implement nullable
             // Collections
-            this.serializers.TryAdd( typeof(List<>), new ListSerializer(this) );
-            // TODO Dictionary
+            this.serializers.TryAdd( typeof(List<>), new ListSerializer(this) ); // TODO Implement
+            this.serializers.TryAdd( typeof(Dictionary<,>), new DictionarySerializer(this) ); // TODO Implement
             // TODO dictionary's string comparison
-            // TODO array
             // Reflection types
             // TODO reflection types
         }
 
-        public ExpressionSyntax SerializeToRoslynCreationExpression( object o )
+        public ExpressionSyntax SerializeToRoslynCreationExpression( object? o )
         {
-            // TODO null
+            if ( o == null )
+            {
+                return LiteralExpression( SyntaxKind.NullLiteralExpression );
+            }
             // TODO enums
+            if ( o is Enum e )
+            {
+                return this._enumSerializer.Serialize( e );
+            }
+            // TODO array
             Type t = o.GetType();
             Type mainType;
             if ( t.IsGenericType )

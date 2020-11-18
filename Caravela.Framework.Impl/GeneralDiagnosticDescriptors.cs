@@ -22,8 +22,10 @@ namespace Caravela.Framework.Impl
         public static DiagnosticDescriptor ExceptionInWeaver =
             new( "CR0005", "Exception in aspect weaver.", "Exception ocurred while executing the aspect weaver {0}: {1}", caravelaCategory, Error, true );   
         public static DiagnosticDescriptor UnsupportedSerialization =
-            new( "CR0006", "Build-time code not serializable.", "Build-time code attempt to create {0} but no serializer is registered for that type.", caravelaCategory, Error, true );
-
+            new( "CR0006", "Build-time code not serializable.", "Build-time code attempted to create {0} but no serializer is registered for that type.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor CycleInSerialization =
+            new( "CR0007", "A collection contains itself.", "Build-time code attempted to create a collection which contains itself: {0} ", caravelaCategory, Error, true );
+        
         public static DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0099", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", caravelaCategory, Error, true );
     }

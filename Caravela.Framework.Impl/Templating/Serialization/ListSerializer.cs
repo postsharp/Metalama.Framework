@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
@@ -33,28 +34,32 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 }
                 catch
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedSerialization, argument ); // TODO
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
                 }
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
                 first = false;
             }
             var list = SyntaxFactory.SeparatedList<ExpressionSyntax>( lt );
-            if ( argument.FullName == null )
-            {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedSerialization, argument );
-            }
-            return SyntaxFactory.ObjectCreationExpression(
-                    SyntaxFactory.GenericName(
-                            SyntaxFactory.Identifier( "List" ) )
+            
+            return ObjectCreationExpression(
+                QualifiedName(
+                        QualifiedName(
+                            QualifiedName(
+                                IdentifierName("System"),
+                                IdentifierName("Collections")),
+                            IdentifierName("Generic")),
+                        GenericName(
+                                Identifier("List"))
                         .WithTypeArgumentList(
                             SyntaxFactory.TypeArgumentList(
                                 SyntaxFactory.SingletonSeparatedList(
-                                    SyntaxFactory.ParseTypeName(  argument.FullName )
-                                ))))
-                .WithInitializer(
+                                    SyntaxFactory.ParseTypeName( TypeNameUtility.ToCSharpQualifiedName(argument) )
+                                )))))
+                    .WithInitializer(
                     SyntaxFactory.InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        list ) );
+                        list ) )
+                .NormalizeWhitespace(  );
         }
     }
 }
