@@ -5,7 +5,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class DateTimeSerializer : TypedObjectSerializer<DateTime>
+    internal class DateTimeSerializer : TypedObjectSerializer<DateTime>
     {
         public override ExpressionSyntax Serialize( DateTime o )
         {

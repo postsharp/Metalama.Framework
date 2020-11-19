@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class TimeSpanSerializer : TypedObjectSerializer<TimeSpan>
+    internal class TimeSpanSerializer : TypedObjectSerializer<TimeSpan>
     {
         public override ExpressionSyntax Serialize( TimeSpan o )
         {

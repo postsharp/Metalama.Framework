@@ -4,8 +4,16 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
+    /// <summary>
+    /// Has <see cref="ToCSharpQualifiedName"/>.
+    /// </summary>
     public static class TypeNameUtility
     {
+        /// <summary>
+        /// Returns the fully-qualified name of a type as it would be written in C#, rather than the CLR name. Supports nested types and generics. 
+        /// </summary>
+        /// <param name="type">A type, such as "int".</param>
+        /// <returns>The type's fully qualified name, such as "System.Int32".</returns>
         public static string ToCSharpQualifiedName( Type type )
         {
             return GetCSTypeName( type );

@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class ListSerializer : ObjectSerializer
+    internal class ListSerializer : ObjectSerializer
     {
         private readonly ObjectSerializers _serializers;
 

@@ -6,8 +6,15 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class InitializerFormer
+    /// <summary>
+    /// Has <see cref="CreateCommaSeparatedList"/>.
+    /// </summary>
+    public static class InitializerFormer
     {
+        /// <summary>
+        /// Creates a comma-separated list of expressions.
+        /// </summary>
+        /// <param name="elements">Expressions to be separated by a comma token.</param>
         public static SeparatedSyntaxList<ExpressionSyntax> CreateCommaSeparatedList( IEnumerable<ExpressionSyntax> elements )
         {
             List<SyntaxNodeOrToken> lt = new List<SyntaxNodeOrToken>();

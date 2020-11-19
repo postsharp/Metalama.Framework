@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class CultureInfoSerializer : TypedObjectSerializer<CultureInfo>
+    internal class CultureInfoSerializer : TypedObjectSerializer<CultureInfo>
     {
         public override ExpressionSyntax Serialize( CultureInfo o ) 
         {

@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class GuidSerializer : TypedObjectSerializer<Guid>
+    internal class GuidSerializer : TypedObjectSerializer<Guid>
     {
         public override ExpressionSyntax Serialize( Guid o )
         {

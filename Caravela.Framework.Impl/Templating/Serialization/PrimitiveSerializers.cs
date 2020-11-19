@@ -5,7 +5,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class IntSerializer : TypedObjectSerializer<int>
+    internal class IntSerializer : TypedObjectSerializer<int>
     {
         public override ExpressionSyntax Serialize( int o )
         {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class CharSerializer : TypedObjectSerializer<char>
+    internal class CharSerializer : TypedObjectSerializer<char>
     {
         public override ExpressionSyntax Serialize( char o )
         {
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class BoolSerializer : TypedObjectSerializer<bool>
+    internal class BoolSerializer : TypedObjectSerializer<bool>
     {
         public override ExpressionSyntax Serialize( bool o )
         {
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class ByteSerializer : TypedObjectSerializer<byte>
+    internal class ByteSerializer : TypedObjectSerializer<byte>
     {
         public override ExpressionSyntax Serialize( byte o )
         {
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class SByteSerializer : TypedObjectSerializer<sbyte>
+    internal class SByteSerializer : TypedObjectSerializer<sbyte>
     {
         public override ExpressionSyntax Serialize( sbyte o )
         {
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class UShortSerializer : TypedObjectSerializer<ushort>
+    internal class UShortSerializer : TypedObjectSerializer<ushort>
     {
         public override ExpressionSyntax Serialize( ushort o )
         {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class ShortSerializer : TypedObjectSerializer<short>
+    internal class ShortSerializer : TypedObjectSerializer<short>
     {
         public override ExpressionSyntax Serialize( short o )
         {
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class UIntSerializer : TypedObjectSerializer<uint>
+    internal class UIntSerializer : TypedObjectSerializer<uint>
     {
         public override ExpressionSyntax Serialize( uint o )
         {
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class ULongSerializer : TypedObjectSerializer<ulong>
+    internal class ULongSerializer : TypedObjectSerializer<ulong>
     {
         public override ExpressionSyntax Serialize( ulong o )
         {
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class LongSerializer : TypedObjectSerializer<long>
+    internal class LongSerializer : TypedObjectSerializer<long>
     {
         public override ExpressionSyntax Serialize( long o )
         {
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class FloatSerializer : TypedObjectSerializer<float>
+    internal class FloatSerializer : TypedObjectSerializer<float>
     {
         public override ExpressionSyntax Serialize( float o )
         {
@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class DoubleSerializer : TypedObjectSerializer<double>
+    internal class DoubleSerializer : TypedObjectSerializer<double>
     {
         public override ExpressionSyntax Serialize( double o )
         { 
@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class DecimalSerializer : TypedObjectSerializer<decimal>
+    internal class DecimalSerializer : TypedObjectSerializer<decimal>
     {
         public override ExpressionSyntax Serialize( decimal o )
         {
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class UIntPtrSerializer : TypedObjectSerializer<UIntPtr>
+    internal class UIntPtrSerializer : TypedObjectSerializer<UIntPtr>
     {
         public override ExpressionSyntax Serialize( UIntPtr o )
         {
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class IntPtrSerializer : TypedObjectSerializer<IntPtr>
+    internal class IntPtrSerializer : TypedObjectSerializer<IntPtr>
     {
         public override ExpressionSyntax Serialize( IntPtr o )
         {
@@ -193,7 +193,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
     }
 
-    public class StringSerializer : TypedObjectSerializer<string>
+    internal class StringSerializer : TypedObjectSerializer<string>
     {
         public override ExpressionSyntax Serialize( string o )
         {

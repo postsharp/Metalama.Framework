@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
-    public class DictionarySerializer : ObjectSerializer
+    internal class DictionarySerializer : ObjectSerializer
     {
         private readonly ObjectSerializers _serializers;
 
@@ -90,16 +90,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                                 Argument( comparerExpression ) ) ) );
                 }
             }
-            List<SyntaxNodeOrToken> lt = new List<SyntaxNodeOrToken>();
-            bool first = true;
+            List<InitializerExpressionSyntax> lt = new List<InitializerExpressionSyntax>();
             IDictionary nonGenericDictionary = (IDictionary) o;
             foreach ( var key in nonGenericDictionary.Keys)
             {
-                if ( !first )
-                {
-                    lt.Add( Token( SyntaxKind.CommaToken ) );
-                }
-
                 try
                 {
                     RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -117,12 +111,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             this._serializers.SerializeToRoslynCreationExpression( key ),
                             Token(SyntaxKind.CommaToken),
                             this._serializers.SerializeToRoslynCreationExpression( value )})) );
-                first = false;
             }
-            var list = SeparatedList<ExpressionSyntax>( lt );
+
             creationExpression = creationExpression.WithInitializer(
                 InitializerExpression(
-                    SyntaxKind.CollectionInitializerExpression, list )
+                    SyntaxKind.CollectionInitializerExpression, InitializerFormer.CreateCommaSeparatedList( lt ) )
                     )
                 .NormalizeWhitespace( );
             return creationExpression;
