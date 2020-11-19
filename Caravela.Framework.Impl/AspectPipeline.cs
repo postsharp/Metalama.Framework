@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -11,7 +12,6 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using RoslynEx;
 
 namespace Caravela.Framework.Impl
 {
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = getFlag( "RoslynExDebugTransformedCode" );
+                bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
                 bool exportAspects = getFlag( "CaravelaExportAspects" );
 
                 // DI

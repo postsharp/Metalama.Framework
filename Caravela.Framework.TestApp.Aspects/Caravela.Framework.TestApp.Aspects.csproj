@@ -11,8 +11,4 @@
     <ProjectReference Include="..\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaReferenceVersion)" />
-  </ItemGroup>
-
 </Project>

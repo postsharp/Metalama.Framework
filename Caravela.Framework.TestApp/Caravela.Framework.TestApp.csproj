@@ -4,16 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <EmitCompilerTransformedFiles>true</EmitCompilerTransformedFiles>
-    <!--<RoslynExDebugTransformedCode>true</RoslynExDebugTransformedCode>-->
+    <!--<CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>-->
   </PropertyGroup>
 
   <Import Project="CaravelaReference.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaReferenceVersion)" />
   </ItemGroup>
 </Project>

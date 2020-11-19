@@ -7,8 +7,4 @@
 
   <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
 
-  <ItemGroup Condition="$(ReferencesUsingPackages) == 'true'">
-    <PackageReference Include="Caravela.Framework" Version="$(CaravelaReferenceVersion)" />
-  </ItemGroup>
-
 </Project>

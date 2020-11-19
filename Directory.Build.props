@@ -4,12 +4,9 @@
     <!-- the above stopped working in VS for some reason -->
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-    <Version>0.1.20</Version>
-    <CaravelaReferenceVersion>0.1.20</CaravelaReferenceVersion>
-    <RoslynVersion>3.8.0-5.final</RoslynVersion>
-    <RoslynExVersion>0.1.45-dev</RoslynExVersion>
-
-    <ReferencesUsingPackages>false</ReferencesUsingPackages>
+    <Version>0.1.21</Version>
+    <RoslynVersion>3.8.0</RoslynVersion>
+    <CaravelaCompilerVersion>0.1.46</CaravelaCompilerVersion>
   </PropertyGroup>
 
   <ItemGroup>
