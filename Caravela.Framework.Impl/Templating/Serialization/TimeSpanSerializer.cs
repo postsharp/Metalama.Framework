@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -13,19 +14,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     QualifiedName(
                         IdentifierName("System"),
                         IdentifierName("TimeSpan")))
-                .WithNewKeyword(
-                    Token(
-                        TriviaList(),
-                        SyntaxKind.NewKeyword,
-                        TriviaList(
-                            Space)))
                 .WithArgumentList(
                     ArgumentList(
                         SingletonSeparatedList<ArgumentSyntax>(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal(o.Ticks))))));
+                                    Literal(o.Ticks))))))
+                .NormalizeWhitespace(  );
         }
     }
 }

@@ -1,3 +1,5 @@
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization;
 using EnumSpace;
 using Microsoft.CodeAnalysis;
@@ -15,6 +17,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         public void TestInt()
         {
             this.AssertSerialization( "42", 42);
+        }
+        
+        [Fact]
+        public void TestNullable()
+        {
+            int? i = 42;
+            this.AssertSerialization( "42", i);
         }
 
         [Fact]
@@ -74,14 +83,21 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             this.AssertSerialization( "(EnumSpace.HumanFeatures)9UL", HumanFeatures.Tall | HumanFeatures.Wise );
             this.AssertSerialization( "EnumSpace.WorldFeatures.Icy", WorldFeatures.Icy );
         }
-        
+
         [Fact]
         public void TestEnumsGenerics()
         {
             this.AssertSerialization( "(EnumSpace.Box<System.Int32>.Color)12UL", Box<int>.Color.Blue | Box<int>.Color.Red );
             this.AssertSerialization( "EnumSpace.Box<System.Int32>.Color.Blue", Box<int>.Color.Blue );
-        }  
+            this.AssertSerialization( "EnumSpace.Box<System.Int32>.InnerBox.Shiny.Yes", Box<int>.InnerBox.Shiny.Yes );
+        }
         
+        [Fact]
+        public void TestArray()
+        {
+            this.AssertSerialization( "new System.Int32[2]{1, 2}", new int[] { 1,2} );
+        }
+
         [Fact]
         public void TestEnumsGenericsInGenericMethod()
         {
@@ -90,7 +106,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 
         private void GenericMethod<TK>()
         {
-            this.AssertSerialization( "EnumSpace.Box<TK>.Color.Blue", Box<TK>.Color.Blue );
+            this.AssertSerialization( "EnumSpace.Box<System.Single>.Color.Blue", Box<TK>.Color.Blue );
         }
     }
 }
@@ -108,6 +124,14 @@ namespace EnumSpace
 
     class Box<T>
     {
+        public class InnerBox
+        {
+            public enum Shiny
+            {
+                Yes,
+                No
+            }
+        }
         public enum Color
         {
             Blue = 4,

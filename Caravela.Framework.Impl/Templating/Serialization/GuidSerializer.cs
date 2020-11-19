@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         {
             List<SyntaxNodeOrToken> tokens = new List<SyntaxNodeOrToken>();
             bool first = true;
-            foreach (byte b in o.ToByteArray())
+            foreach ( byte b in o.ToByteArray() )
             {
                 if ( first )
                 {
@@ -23,7 +23,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 {
                     tokens.Add( Token( SyntaxKind.CommaToken ) );
                 }
-                tokens.Add(  LiteralExpression(
+
+                tokens.Add( LiteralExpression(
                     SyntaxKind.NumericLiteralExpression,
                     Literal( b ) ) );
             }
@@ -33,12 +34,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     QualifiedName(
                         IdentifierName( "System" ),
                         IdentifierName( "Guid" ) ) )
-                .WithNewKeyword(
-                    Token(
-                        TriviaList(),
-                        SyntaxKind.NewKeyword,
-                        TriviaList(
-                            Space ) ) )
                 .WithArgumentList(
                     ArgumentList(
                         SingletonSeparatedList<ArgumentSyntax>(
@@ -50,31 +45,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                                             .WithRankSpecifiers(
                                                 SingletonList<ArrayRankSpecifierSyntax>(
                                                     ArrayRankSpecifier(
-                                                            SingletonSeparatedList<ExpressionSyntax>(
-                                                                OmittedArraySizeExpression() ) )
-                                                        .WithCloseBracketToken(
-                                                            Token(
-                                                                TriviaList(),
-                                                                SyntaxKind.CloseBracketToken,
-                                                                TriviaList(
-                                                                    Space ) ) ) ) ) )
-                                    .WithNewKeyword(
-                                        Token(
-                                            TriviaList(),
-                                            SyntaxKind.NewKeyword,
-                                            TriviaList(
-                                                Space ) ) )
+                                                        SingletonSeparatedList<ExpressionSyntax>(
+                                                            OmittedArraySizeExpression() ) )
+                                                ) ) )
                                     .WithInitializer(
                                         InitializerExpression(
-                                                SyntaxKind.ArrayInitializerExpression,
-                                                SeparatedList<ExpressionSyntax>(
-                                                    syntaxNodeOrTokens ) )
-                                            .WithOpenBraceToken(
-                                                Token(
-                                                    TriviaList(),
-                                                    SyntaxKind.OpenBraceToken,
-                                                    TriviaList(
-                                                        Space ) ) ) ) ) ) ) ).NormalizeWhitespace();
+                                            SyntaxKind.ArrayInitializerExpression,
+                                            SeparatedList<ExpressionSyntax>(
+                                                syntaxNodeOrTokens ) )
+                                    ) ) ) ) ).NormalizeWhitespace();
         }
     }
 }

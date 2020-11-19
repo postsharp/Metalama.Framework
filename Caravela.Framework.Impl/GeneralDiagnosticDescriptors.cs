@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl
             new( "CR0006", "Build-time code not serializable.", "Build-time code attempted to create {0} but no serializer is registered for that type.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor CycleInSerialization =
             new( "CR0007", "A collection contains itself.", "Build-time code attempted to create a collection which contains itself: {0} ", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor MultidimensionalArray =
+            new( "CR0007", "Multidimensional arrays not supported.", "Build-time array {0} has more than one dimension.", caravelaCategory, Error, true );
         
         public static DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0099", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", caravelaCategory, Error, true );

@@ -40,13 +40,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 
             Assert.Throws<CaravelaException>( () =>
             {
-                this._serializer.Serialize( l );
+                this._serializer.SerializeObject( l );
             } );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )
         {
-            string creationExpression = this._serializer.Serialize(o).NormalizeWhitespace().ToString();
+            string creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

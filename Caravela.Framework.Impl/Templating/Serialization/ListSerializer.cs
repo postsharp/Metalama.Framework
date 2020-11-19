@@ -15,19 +15,13 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public ListSerializer( ObjectSerializers serializers ) => this._serializers = serializers;
 
-        public override ExpressionSyntax Serialize( object o )
+        public override ExpressionSyntax SerializeObject( object o )
         {
             Type argument = o.GetType().GetGenericArguments()[0];
             
-            List<SyntaxNodeOrToken> lt = new List<SyntaxNodeOrToken>();
-            bool first = true;
+            List<ExpressionSyntax> lt = new List<ExpressionSyntax>();
             foreach ( var obj in (IEnumerable) o)
             {
-                if ( !first )
-                {
-                    lt.Add( SyntaxFactory.Token( SyntaxKind.CommaToken ) );
-                }
-
                 try
                 {
                     RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -37,10 +31,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
                 }
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
-                first = false;
             }
-            var list = SyntaxFactory.SeparatedList<ExpressionSyntax>( lt );
-            
             return ObjectCreationExpression(
                 QualifiedName(
                         QualifiedName(
@@ -58,7 +49,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     .WithInitializer(
                     SyntaxFactory.InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        list ) )
+                        InitializerFormer.CreateCommaSeparatedList( lt ) ) )
                 .NormalizeWhitespace(  );
         }
     }

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         IdentifierName( "FromBinary" ) ) )
                 .WithArgumentList(
                     ArgumentList(
-                        SingletonSeparatedList<ArgumentSyntax>(
+                        SingletonSeparatedList(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
