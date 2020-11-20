@@ -2,8 +2,6 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     static class PackageVersions
     {
-        public const string CaravelaCompilerVersion = "0.1.46";
-        public const string CaravelaCompilerSdkVersion = "0.1.46";
         public const string MicrosoftCodeAnalysisAnalyzersVersion = "3.0.0";
         public const string MicrosoftCodeAnalysisCommonVersion = "3.8.0";
         public const string MicrosoftCodeAnalysisCSharpVersion = "3.8.0";
@@ -19,8 +17,5 @@ namespace Caravela.Framework.Impl.CompileTime
         public const string SystemRuntimeCompilerServicesUnsafeVersion = "4.7.1";
         public const string SystemTextEncodingCodePagesVersion = "4.5.1";
         public const string SystemThreadingTasksExtensionsVersion = "4.5.4";
-        public const string CaravelaFrameworkLibraryVersion = "0.1.22";
-        public const string CaravelaFrameworkSdkLibraryVersion = "0.1.22";
-        public const string CaravelaReactiveVersion = "0.1.22";
     }
 }

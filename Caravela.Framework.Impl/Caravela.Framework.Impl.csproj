@@ -24,6 +24,7 @@
     <None Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 
+    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
@@ -32,14 +33,14 @@
   <!-- based on https://stackoverflow.com/a/56018426/41071 --> 
   <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
     <ItemGroup>
-      <!-- exclude Sdk assembly -->
-      <BuildOutputInPackage Remove="@(ReferenceCopyLocalPaths)" Condition="%(Filename) == 'Caravela.Framework.Sdk'" />
+      <!-- remove everything from lib -->
+      <BuildOutputInPackage Remove="@(ReferenceCopyLocalPaths)" />
     </ItemGroup>
   </Target>
   
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
-      <PackageDefinitions DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" />
+      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="!$([System.String]::Copy('%(Name)').StartsWith('Caravela'))" />
     </ItemGroup>
     
     <PropertyGroup>
@@ -49,7 +50,7 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     static class PackageVersions
     {
-        @(PackageDefinitions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')
+        @(PackageVersions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')
     }
 }
         ]]>

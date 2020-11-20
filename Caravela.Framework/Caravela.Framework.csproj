@@ -4,8 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
-    <PackageId>Caravela.Framework.Library</PackageId>
-    <IsPackable>false</IsPackable>
+    <PackageId>Caravela.Framework.Redist</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,9 +14,19 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
 
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />
+    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
     
     <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
   </ItemGroup>
+
+  <!-- based on https://stackoverflow.com/a/56018426/41071 -->
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);SetPackageContent</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+  <Target Name="SetPackageContent" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
+    </ItemGroup>
+  </Target>
 
 </Project>
