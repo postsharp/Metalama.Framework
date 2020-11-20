@@ -35,7 +35,6 @@ namespace Caravela.Framework.Impl
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
                 bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
-                bool exportAspects = getFlag( "CaravelaExportAspects" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( 
@@ -73,29 +72,18 @@ namespace Caravela.Framework.Impl
                     context.ManifestResources.Add( resource );
                 }
 
-                bool stripCaravela = true;
-
                 if ( roslynCompilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    if ( exportAspects )
-                    {
-                        stripCaravela = false;
+                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
 
-                        var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
-
-                        if ( compileTimeAssembly != null )
-                        {
-                            context.ManifestResources.Add( new ResourceDescription(
-                                compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
-                        }
-                    }
-                    else
+                    if ( compileTimeAssembly != null )
                     {
-                        // TODO: produce error if there are public aspects
+                        context.ManifestResources.Add( new ResourceDescription(
+                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 
-                return aspectCompilation.Compilation.GetRoslynCompilation( stripCaravela );
+                return aspectCompilation.Compilation.GetRoslynCompilation();
             }
             catch (CaravelaException exception)
             {

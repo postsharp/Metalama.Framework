@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override IReactiveCollection<AdviceInstance> CollectAdvices() => this._originalCompilation.CollectAdvices().Union( this._addedAdvices );
 
-        internal override CSharpCompilation GetRoslynCompilation( bool stripCaravela )
+        internal override CSharpCompilation GetRoslynCompilation()
         {
             var adviceDriver = new AdviceDriver();
 
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode().GetLocation(), element.Key );
             }
 
-            var rewriter = new CompilationRewriter( transformations, primeCompilation, stripCaravela );
+            var rewriter = new CompilationRewriter( transformations );
 
             // TODO: make this and the rewriter more efficient by avoiding unnecessary work
             var result = rewriter.VisitAllTrees( primeCompilation );
@@ -63,12 +63,11 @@ namespace Caravela.Framework.Impl.CodeModel
             return result;
         }
 
-        sealed class CompilationRewriter : StripCaravelaRewriter
+        sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
             private readonly List<OverriddenMethod> _overriddenMethods;
 
-            public CompilationRewriter( IEnumerable<Transformation> transformations, CSharpCompilation compilation, bool stripCaravela )
-                : base( compilation, enabled: stripCaravela )
+            public CompilationRewriter( IEnumerable<Transformation> transformations )
             {
                 transformations = transformations.ToList();
 
