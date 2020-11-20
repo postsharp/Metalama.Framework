@@ -24,9 +24,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive", "Carave
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive.UnitTests", "Caravela.Reactive.UnitTests\Caravela.Reactive.UnitTests.csproj", "{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp", "Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj", "{5765A633-EC2E-4488-AF53-5FC912B39710}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj", "{5765A633-EC2E-4488-AF53-5FC912B39710}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Aspects", "Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj", "{522FB0EC-9534-40D7-95F8-F9C7D246CC85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Aspects", "Tests\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj", "{522FB0EC-9534-40D7-95F8-F9C7D246CC85}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.GenerateMetaSyntaxRewriter", "Caravela.Framework.GenerateMetaSyntaxRewriter\Caravela.Framework.GenerateMetaSyntaxRewriter.csproj", "{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}"
 EndProject
@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.AspectWorkbench", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Tests\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk.Package", "Caravela.Framework.Sdk.Package\Caravela.Framework.Sdk.Package.csproj", "{909C6855-918D-46DD-B7FB-83EF471AF1A4}"
 EndProject
