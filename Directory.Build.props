@@ -4,9 +4,14 @@
     <!-- the above stopped working in VS for some reason -->
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-    <Version>0.1.21</Version>
+    <Version>0.1.22</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>0.1.46</CaravelaCompilerVersion>
+
+    <Authors>PostSharp Technologies</Authors>
+    <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/postsharp/Caravela</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
