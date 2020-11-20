@@ -38,6 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal abstract CSharpCompilation GetPrimeCompilation();
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();
 
-        internal abstract CSharpCompilation GetRoslynCompilation( bool stripCaravela );
+        internal abstract CSharpCompilation GetRoslynCompilation();
     }
 }

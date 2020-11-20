@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext(
-                this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation( stripCaravela: false ), diagnosticSink, resources.Add );
+                this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
             CSharpCompilation newCompilation;
             try
             {
