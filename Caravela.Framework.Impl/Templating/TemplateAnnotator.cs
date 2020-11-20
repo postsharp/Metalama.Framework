@@ -551,6 +551,14 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "while statement" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitWhileStatement( node );
+        }
+
         private SymbolDeclarationScope GetAssignmentScope(SyntaxNode node)
         {
             switch (node)
