@@ -5,9 +5,6 @@ namespace Caravela.Framework.Advices
 {
     public interface IAdviceAttribute { }
 
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = true)]
     public class OverrideMethodTemplateAttribute : TemplateAttribute { }
-
-    // TODO: spec says this shouldn't exist
-    public class OverrideMethodAttribute : OverrideMethodTemplateAttribute, IAdviceAttribute { }
 }

@@ -1,5 +1,7 @@
 ﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
@@ -12,13 +14,10 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateDriver( MethodInfo templateMethodInfo ) => this._templateMethod = templateMethodInfo;
 
-        // used by AspectWorkbench
-        public BlockSyntax ExpandDeclaration( object templateInstance ) => this.ExpandDeclaration( templateInstance, null!, null! );
-
-        internal BlockSyntax ExpandDeclaration( object templateInstance, ProceedImpl proceed, TemplateContextImpl templateContext )
+        public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
-            TemplateContext.ProceedImpl = proceed;
-            TemplateContext.target = templateContext;
+            TemplateContext.ProceedImpl = new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
+            TemplateContext.target = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation );
 
             var output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );

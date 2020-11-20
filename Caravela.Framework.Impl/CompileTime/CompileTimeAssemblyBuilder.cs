@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -28,19 +29,17 @@ namespace Caravela.Framework.Impl.CompileTime
             var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
 
             // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
-            // TODO: check that the path exists and if not, restore the package?
-            // TODO: do not hardcode the versions?
-            string microsoftCSharpVersion = "4.7.0";
-            string roslynVersion = "3.8.0-5.final";
-            string immutableCollectionsVersion = "5.0.0-preview.8.20407.11";
             var nugetPaths = new (string package, string version, string assembly)[]
             {
-                ("microsoft.csharp", microsoftCSharpVersion, "Microsoft.CSharp.dll"),
-                ("microsoft.codeanalysis.common", roslynVersion, "Microsoft.CodeAnalysis.dll"),
-                ("microsoft.codeanalysis.csharp", roslynVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
-                ("system.collections.immutable", immutableCollectionsVersion, "System.Collections.Immutable.dll")
+                ("microsoft.csharp", MicrosoftCSharpVersion, "Microsoft.CSharp.dll"),
+                ("microsoft.codeanalysis.common", MicrosoftCodeAnalysisCommonVersion, "Microsoft.CodeAnalysis.dll"),
+                ("microsoft.codeanalysis.csharp", MicrosoftCodeAnalysisCSharpVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
+                ("system.collections.immutable", SystemCollectionsImmutableVersion, "System.Collections.Immutable.dll")
             }
             .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
+
+            // the SDK assembly might not be loaded at this point, so make sure it is
+            _ = new AspectWeaverAttribute( null! );
 
             var caravelaAssemblies = new[]
             {
@@ -59,6 +58,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
+        private readonly IList<ResourceDescription> _resources;
+        private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; set; } = null!;
@@ -67,13 +68,16 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly Random _random = new();
 
-        public CompileTimeAssemblyBuilder( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler )
+        public CompileTimeAssemblyBuilder( 
+            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IList<ResourceDescription> resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
+            this._resources = resources;
+            this._debugTransformedCode = debugTransformedCode;
         }
 
-        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it be able to use aspects?
+        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it?
         private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
@@ -107,8 +111,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
 
-            // TODO: adjust compilation references correctly
-
             // TODO: produce better errors when there's an incorrect reference from compile-time code to non-compile-time symbol
 
             return compilation;
@@ -127,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return new Version( major, minor, build, revision ).ToString();
         }
 
-        private static MemoryStream Emit( Compilation compilation )
+        private MemoryStream Emit( Compilation compilation, Compilation input )
         {
             var stream = new MemoryStream();
 
@@ -135,7 +137,8 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
 
             var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-            var embeddedTexts = compilation.SyntaxTrees.Select(
+            var compilationForDebugging = this._debugTransformedCode ? compilation : input;
+            var embeddedTexts = compilationForDebugging.SyntaxTrees.Select(
                 tree =>
                 {
                     string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
@@ -147,9 +150,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     return EmbeddedText.FromSource( filePath, text );
                 } );
 
-            var result = compilation.Emit( stream, options: options, embeddedTexts: embeddedTexts );
+            var result = compilation.Emit( stream, manifestResources: this._resources, options: options, embeddedTexts: embeddedTexts );
 #else
-            var result = compilation.Emit( stream );
+            var result = compilation.Emit( stream, manifestResources: this._resources );
 #endif
 
             if ( !result.Success )
@@ -176,14 +179,14 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( compileTimeCompilation == null )
                 return null;
 
-            var stream = Emit( compileTimeCompilation );
+            var stream = this.Emit( compileTimeCompilation, compilation );
 
             this._previousCompilation = (compilation, stream);
 
             return stream;
         }
 
-        public string GetResourceName() => "Caravela.CompileTimeAssembly";
+        public string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
 
         class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
         {
@@ -208,6 +211,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private bool _addTemplateUsings;
             private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = SyntaxFactory.ParseCompilationUnit( @"
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -215,6 +219,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateHelper;
 " ).Usings;
 
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
@@ -230,18 +235,22 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
                     node = node.AddUsings( usingsToAdd.ToArray() );
                 }
 
+#if DEBUG
+                node = node.NormalizeWhitespace();
+#endif
+
                 return node;
             }
 
             // TODO: assembly and module-level attributes?
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitClassDeclaration );
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitStructDeclaration );
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitInterfaceDeclaration );
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node, base.VisitRecordDeclaration );
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-            private T? VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> baseVisit ) where T : TypeDeclarationSyntax
+            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
             {
                 switch ( this.GetSymbolDeclarationScope( node ) )
                 {
@@ -250,18 +259,36 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
                     case SymbolDeclarationScope.CompileTimeOnly:
                         this.FoundCompileTimeCode = true;
-                        return (T?) baseVisit( node );
+
+                        var members = new List<MemberDeclarationSyntax>();
+
+                        foreach (var member in node.Members)
+                        {
+                            switch (member)
+                            {
+                                case MethodDeclarationSyntax method:
+                                    members.AddRange( this.VisitMethodDeclaration( method ) );
+                                    break;
+                                case TypeDeclarationSyntax nestedType:
+                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ) );
+                                    break;
+                                default:
+                                    members.Add( member );
+                                    break;
+                            }
+                        }
+
+                        return (T) node.WithMembers( SyntaxFactory.List( members ) );
 
                     default:
                         throw new NotImplementedException();
                 }
             }
 
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
-                    // TODO: report diagnostics
                     var diagnostics = new List<Diagnostic>();
                     bool success =
                         this._templateCompiler.TryCompile( node, this._compilation.GetSemanticModel( node.SyntaxTree ), diagnostics, out _, out var transformedNode );
@@ -269,15 +296,21 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
                     Debug.Assert( success || diagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error ) );
 
                     if ( success )
+                    {
+                        // reporting warnings is currently not supported here
+                        Debug.Assert( diagnostics.Count == 0 );
+
                         this._addTemplateUsings = true;
+                    }
                     else
                         throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
 
-                    return transformedNode;
+                    yield return node;
+                    yield return (MethodDeclarationSyntax) transformedNode!;
                 }
                 else
                 {
-                    return base.VisitMethodDeclaration( node );
+                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
                 }
             }
 

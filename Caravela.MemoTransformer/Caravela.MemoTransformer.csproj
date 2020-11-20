@@ -1,13 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Sdk" Version="0.1.37-dev" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
   
 </Project>

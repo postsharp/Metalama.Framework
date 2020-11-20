@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -9,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Method : CodeElement, IMethod
     {
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl
         public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
 
         [Memo]
-        public IReadOnlyList<IMethod> LocalFunctions =>
+        public IImmutableList<IMethod> LocalFunctions =>
             this._symbol.DeclaringSyntaxReferences
                 .Select(r => r.GetSyntax())
                 // don't descend into nested local functions
@@ -42,9 +41,9 @@ namespace Caravela.Framework.Impl
                 .ToImmutableArray();
 
         [Memo]
-        public IReadOnlyList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
 
-        public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
+        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
         MethodKind IMethod.Kind => this._symbol.MethodKind switch
         {
@@ -99,6 +98,8 @@ namespace Caravela.Framework.Impl
             private readonly Method _method;
 
             public ReturnParameterImpl(Method method) => this._method = method;
+
+            public bool IsOut => false;
 
             public IType Type => this._method.ReturnType;
 

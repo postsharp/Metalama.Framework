@@ -4,7 +4,7 @@ using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    class OverrideMethodAdvice : IAdvice<IMethod>
+    class OverrideMethodAdvice : IOverrideMethodAdvice
     {
         public IMethod TargetDeclaration { get; }
         public OverriddenMethod Transformation { get; }

@@ -5,14 +5,9 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl
 {
@@ -21,16 +16,14 @@ namespace Caravela.Framework.Impl
         public INamedType AspectType { get; }
 
         private readonly ICompilation _compilation;
-        private readonly CompileTimeAssemblyLoader _compileTimeAssemblyLoader;
 
         private readonly IReactiveCollection<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
 
-        public AspectDriver( INamedType aspectType, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        public AspectDriver( INamedType aspectType, ICompilation compilation )
         {
             this.AspectType = aspectType;
 
             this._compilation = compilation;
-            this._compileTimeAssemblyLoader = compileTimeAssemblyLoader;
 
             var iAdviceAttribute = compilation.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
@@ -47,8 +40,10 @@ namespace Caravela.Framework.Impl
 
             return aspectInstance.CodeElement switch
             {
+                ICompilation compilation => this.EvaluateAspect( compilation, aspect ),
                 INamedType type => this.EvaluateAspect( type, aspect ),
-                IMethod method => this.EvaluateAspect( method, aspect )
+                IMethod method => this.EvaluateAspect( method, aspect ),
+                _ => throw new NotImplementedException()
             };
         }
 
@@ -66,7 +61,8 @@ namespace Caravela.Framework.Impl
 
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
 
-            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices );
+            var aspectBuilder = new AspectBuilder<T>( 
+                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
 
@@ -77,30 +73,7 @@ namespace Caravela.Framework.Impl
 
         private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
         {
-            var overrideMethodTemplateAttribute = this._compilation.GetTypeByReflectionType( typeof( OverrideMethodTemplateAttribute ) ).AssertNotNull();
-
-            if ( attribute.Type.Is( overrideMethodTemplateAttribute ) )
-            {
-                // TODO: is it possible that codeElement is not IMethod?
-                var targetMethod = (IMethod) codeElement;
-
-                // TODO: this should probably all be cached somewhere, possibly as a Func
-
-                // TODO: diagnostic if templateMethod is a local function
-                var aspect = this._compileTimeAssemblyLoader.CreateInstance( ((INamedType) templateMethod.ContainingElement!).GetSymbol() );
-
-                string templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-
-                // TODO: fully set up TemplateContext
-                var proceed = new ProceedImpl( (MethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
-                var templateContext = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, this._compilation );
-
-                var methodBody = new TemplateDriver( aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( aspect, proceed, templateContext );
-
-                return new( new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) ) );
-            }
-            else
-                throw new NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

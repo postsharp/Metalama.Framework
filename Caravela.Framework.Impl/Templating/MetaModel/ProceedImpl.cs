@@ -1,29 +1,37 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class ProceedImpl : IProceedImpl
+    class ProceedImpl : IProceedImpl
     {
-        private readonly MethodDeclarationSyntax _method;
+        private readonly BaseMethodDeclarationSyntax _method;
 
-        public ProceedImpl(MethodDeclarationSyntax method)
+        public ProceedImpl(BaseMethodDeclarationSyntax method)
         {
             this._method = method;
         }
 
         public TypeSyntax CreateTypeSyntax()
         {
-            if (this._method.ReturnType is PredefinedTypeSyntax predefinedType &&
-                predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword)
+            if ( this._method is MethodDeclarationSyntax method )
             {
-                return IdentifierName("__Void");
+                if ( method.ReturnType is PredefinedTypeSyntax predefinedType &&
+                    predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword )
+                {
+                    return IdentifierName( "__Void" );
+                }
+                else
+                {
+                    return method.ReturnType;
+                }
             }
             else
             {
-                return this._method.ReturnType;
+                throw new NotImplementedException();
             }
         }
 
@@ -58,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        private bool IsLastStatement(MethodDeclarationSyntax method, SyntaxNode node)
+        private bool IsLastStatement(BaseMethodDeclarationSyntax method, SyntaxNode node)
         {
             if (node.Parent == method.Body)
             {

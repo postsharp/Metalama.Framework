@@ -5,7 +5,7 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     /// <remarks>
     /// Values of arguments are represented as:
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl
         public INamedType Type => this.symbolMap.GetNamedType( this.data.AttributeClass!);
 
         [Memo]
-        public IReadOnlyList<object?> ConstructorArguments => this.data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public IImmutableList<object?> ConstructorArguments => this.data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
         public IReadOnlyDictionary<string, object?> NamedArguments => this.data.NamedArguments.ToImmutableDictionary(kvp => kvp.Key, kvp => this.Translate(kvp.Value));

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -19,12 +20,19 @@ namespace Caravela.Framework.Sdk
         public CSharpCompilation Compilation { get; }
         public IDiagnosticSink Diagnostics { get; }
 
-        internal AspectWeaverContext(INamedType aspectType, IReadOnlyList<AspectInstance> aspectInstances, CSharpCompilation compilation, IDiagnosticSink diagnostics)
+        // TODO: suport reading existing resources
+        private readonly Action<ResourceDescription> _addManifestResource;
+        public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
+
+        internal AspectWeaverContext(
+            INamedType aspectType, IReadOnlyList<AspectInstance> aspectInstances, CSharpCompilation compilation,
+            IDiagnosticSink diagnostics, Action<ResourceDescription> addManifestResource )
         {
             this.AspectType = aspectType;
             this.AspectInstances = aspectInstances;
             this.Compilation = compilation;
             this.Diagnostics = diagnostics;
+            this._addManifestResource = addManifestResource;
         }
     }
 

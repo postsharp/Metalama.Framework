@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using RoslynEx;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,9 +20,12 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute(TransformerContext context)
         {
-            if ( context.GlobalOptions.TryGetValue( "build_property.DebugCaravela", out var debugCaravelaString ) &&
-                bool.TryParse( debugCaravelaString, out bool debugCaravela ) &&
-                debugCaravela )
+            bool getFlag( string flagName ) =>
+                context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
+                bool.TryParse( flagString, out bool flagValue ) &&
+                flagValue;
+
+            if ( getFlag("DebugCaravela") )
             {
                 Debugger.Launch();
             }
@@ -31,8 +34,12 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
+                bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
+                bool exportAspects = getFlag( "CaravelaExportAspects" );
+
                 // DI
-                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler() );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( 
+                    new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
@@ -40,7 +47,7 @@ namespace Caravela.Framework.Impl
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var aspectCompilation = new AspectCompilation( ImmutableArray.Create<Diagnostic>(), compilation, compileTimeAssemblyLoader );
+                var aspectCompilation = new AspectCompilation( compilation, compileTimeAssemblyLoader );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
@@ -61,18 +68,34 @@ namespace Caravela.Framework.Impl
                     context.ReportDiagnostic( diagnostic );
                 }
 
+                foreach (var resource in aspectCompilation.Resources)
+                {
+                    context.ManifestResources.Add( resource );
+                }
+
+                bool stripCaravela = true;
+
                 if ( roslynCompilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
-
-                    if ( compileTimeAssembly != null )
+                    if ( exportAspects )
                     {
-                        context.AddManifestResource( new ResourceDescription(
-                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                        stripCaravela = false;
+
+                        var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( roslynCompilation );
+
+                        if ( compileTimeAssembly != null )
+                        {
+                            context.ManifestResources.Add( new ResourceDescription(
+                                compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                        }
+                    }
+                    else
+                    {
+                        // TODO: produce error if there are public aspects
                     }
                 }
 
-                return aspectCompilation.Compilation.GetRoslynCompilation();
+                return aspectCompilation.Compilation.GetRoslynCompilation( stripCaravela );
             }
             catch (CaravelaException exception)
             {
@@ -88,10 +111,7 @@ namespace Caravela.Framework.Impl
             }
             catch (Exception exception)
             {
-                static string ToString( Exception ex ) =>
-                    ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ToString( ex.InnerException )}";
-
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, ToString( exception ) ) );
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString() ) );
                 return context.Compilation;
             }
         }

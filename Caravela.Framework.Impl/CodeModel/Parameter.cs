@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Parameter : IParameter
     {
@@ -17,6 +17,8 @@ namespace Caravela.Framework.Impl
             this._symbol = symbol;
             this._containingMember = containingMember;
         }
+
+        public bool IsOut => this._symbol.RefKind == RefKind.Out;
 
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);

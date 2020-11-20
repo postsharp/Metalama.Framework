@@ -2,7 +2,7 @@
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
     /// <remarks>
     /// Symbol map owns <see cref="IType"/> and <see cref="IMethod"/> objects in the compilation, other objects are owned by their container.

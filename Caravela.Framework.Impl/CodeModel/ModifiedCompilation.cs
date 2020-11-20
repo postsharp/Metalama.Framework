@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Code;
+﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -28,13 +29,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
+        public override IReactiveCollection<IAttribute> Attributes => this._originalCompilation.Attributes;
+
         public override INamedType? GetTypeByReflectionName( string reflectionName ) => this._originalCompilation.GetTypeByReflectionName( reflectionName );
 
         internal override CSharpCompilation GetPrimeCompilation() => this._originalCompilation.GetPrimeCompilation();
 
         internal override IReactiveCollection<AdviceInstance> CollectAdvices() => this._originalCompilation.CollectAdvices().Union( this._addedAdvices );
 
-        internal override CSharpCompilation GetRoslynCompilation()
+        internal override CSharpCompilation GetRoslynCompilation( bool stripCaravela )
         {
             var adviceDriver = new AdviceDriver();
 
@@ -42,24 +45,30 @@ namespace Caravela.Framework.Impl.CodeModel
             var primeCompilation = this.GetPrimeCompilation();
             var transformations = this.CollectAdvices().SelectMany( a => adviceDriver.GetResult( a ).Transformations ).GetValue();
 
-            var result = primeCompilation;
+            var multiAdviceElements = transformations
+                .GroupBy( t => t is OverriddenElement oe ? oe.OverriddenDeclaration : null )
+                .Where( g => g.Count() > 1 );
 
-            var rewriter = new CompilationRewriter( transformations );
+            foreach (var element in multiAdviceElements)
+            {
+                if ( element.Key != null )
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode().GetLocation(), element.Key );
+            }
+
+            var rewriter = new CompilationRewriter( transformations, primeCompilation, stripCaravela );
 
             // TODO: make this and the rewriter more efficient by avoiding unnecessary work
-            foreach (var tree in result.SyntaxTrees )
-            {
-                result = result.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
-            }
+            var result = rewriter.VisitAllTrees( primeCompilation );
 
             return result;
         }
 
-        class CompilationRewriter : CSharpSyntaxRewriter
+        sealed class CompilationRewriter : StripCaravelaRewriter
         {
             private readonly List<OverriddenMethod> _overriddenMethods;
 
-            public CompilationRewriter(IEnumerable<Transformation> transformations)
+            public CompilationRewriter( IEnumerable<Transformation> transformations, CSharpCompilation compilation, bool stripCaravela )
+                : base( compilation, enabled: stripCaravela )
             {
                 transformations = transformations.ToList();
 
@@ -69,20 +78,22 @@ namespace Caravela.Framework.Impl.CodeModel
                 Debug.Assert( this._overriddenMethods.Count == transformations.Count() );
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
+            private TypeDeclarationSyntax VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
-                var members = new List<MemberDeclarationSyntax>( node.Members.Count );
+                var newMembers = new List<MemberDeclarationSyntax>( node.Members.Count );
 
                 foreach ( var member in node.Members )
                 {
-                    switch ( member )
+                    var newMember = member.WithAttributeLists( this.VisitList( member.AttributeLists ) );
+
+                    switch ( newMember )
                     {
-                        case MethodDeclarationSyntax method:
+                        case BaseMethodDeclarationSyntax newMethod:
                             OverriddenMethod? foundTransformation = null;
 
                             foreach ( var transformation in this._overriddenMethods )
@@ -98,41 +109,28 @@ namespace Caravela.Framework.Impl.CodeModel
                             {
                                 //// original method, but with _Original added to its name
                                 //members.Add(
-                                //    method.WithIdentifier( SyntaxFactory.Identifier( method.Identifier.ValueText + AspectDriver.OriginalMemberSuffix )
-                                //        .WithTriviaFrom( method.Identifier ) ) );
+                                //    newMethod.WithIdentifier( SyntaxFactory.Identifier( newMethod.Identifier.ValueText + AspectDriver.OriginalMemberSuffix )
+                                //        .WithTriviaFrom( newMethod.Identifier ) ) );
 
                                 // original method, but with its body replaced
-                                members.Add( method.WithBody( foundTransformation.MethodBody ) );
+                                newMembers.Add( newMethod.WithBody( foundTransformation.MethodBody ) );
                             }
                             else
                             {
-                                members.Add( method );
+                                newMembers.Add( newMethod );
                             }
 
                             break;
 
                         default:
-                            members.Add( member );
+                            newMembers.Add( newMember );
                             break;
                     }
                 }
 
-                return (T) node.WithMembers( SyntaxFactory.List( members ) );
-            }
-
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
-            {
-                var result = (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
-
-                foreach (var transformation in this._overriddenMethods )
-                {
-                    if (transformation.OverriddenDeclaration.GetSyntaxNode() == node)
-                    {
-                        result = result.WithBody( transformation.MethodBody );
-                    }
-                }
-
-                return result;
+                return node
+                    .WithMembers( SyntaxFactory.List( newMembers ) )
+                    .WithAttributeLists( this.VisitList( node.AttributeLists ) );
             }
         }
     }

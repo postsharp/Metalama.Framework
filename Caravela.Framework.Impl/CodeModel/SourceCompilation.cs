@@ -3,19 +3,20 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.CodeModel
 {
-    class SourceCompilation : BaseCompilation
+    public class SourceCompilation : BaseCompilation
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
         internal SymbolMap SymbolMap { get; }
 
-        internal SourceCompilation(CSharpCompilation roslynCompilation)
+        public SourceCompilation(CSharpCompilation roslynCompilation)
         {
             this.RoslynCompilation = roslynCompilation;
 
@@ -30,6 +31,12 @@ namespace Caravela.Framework.Impl
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => 
             this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
+        [Memo]
+        public override IReactiveCollection<IAttribute> Attributes =>
+            this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
+                .Select( a => new Attribute( a, this.SymbolMap ) )
+                .ToImmutableReactive();
+
         public override INamedType? GetTypeByReflectionName(string reflectionName)
         {
             var symbol = this.RoslynCompilation.GetTypeByMetadataName(reflectionName);
@@ -41,7 +48,13 @@ namespace Caravela.Framework.Impl
 
         internal override IReactiveCollection<AdviceInstance> CollectAdvices() => ImmutableArray.Create<AdviceInstance>().ToReactive();
 
-        internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
+        internal override CSharpCompilation GetRoslynCompilation( bool stripCaravela )
+        {
+            if ( stripCaravela )
+                return new StripCaravelaRewriter( this.RoslynCompilation, enabled: true ).VisitAllTrees( this.RoslynCompilation );
+
+            return this.RoslynCompilation;
+        }
     }
 
     internal static class Factory
@@ -50,6 +63,7 @@ namespace Caravela.Framework.Impl
             typeSymbol switch
             {
                 INamedTypeSymbol namedType => new NamedType(namedType, compilation),
+                IArrayTypeSymbol arrayType => new ArrayType(arrayType, compilation),
                 _ => throw new NotImplementedException()
             };
     }

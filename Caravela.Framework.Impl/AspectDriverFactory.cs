@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl
                 // TODO: this needs to be the same instance for equivalent type, to make reactive grouping work
                 return (IAspectDriver) this._loader.CreateInstance( weavers.Single().GetSymbol() );
 
-            return new AspectDriver( type, this._compilation, this._loader );
+            return new AspectDriver( type, this._compilation );
         }
     }
 }
