@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode().GetLocation(), this.AspectType, codeElement, codeElement.Kind );
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.Kind );
 
                 return new( ImmutableArray.Create( diagnostic ), ImmutableArray.Create<AdviceInstance>(), ImmutableArray.Create<AspectInstance>() );
             }

@@ -36,8 +36,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Tests\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk.Package", "Caravela.Framework.Sdk.Package\Caravela.Framework.Sdk.Package.csproj", "{909C6855-918D-46DD-B7FB-83EF471AF1A4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "Tests\Caravela.TestFramework\Caravela.TestFramework.csproj", "{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Templating.UnitTests", "Tests\Caravela.Templating.UnitTests\Caravela.Templating.UnitTests.csproj", "{973ED0F5-A1F3-44A9-9BF1-204DFEB862E5}"
@@ -94,10 +92,6 @@ Global
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{909C6855-918D-46DD-B7FB-83EF471AF1A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{909C6855-918D-46DD-B7FB-83EF471AF1A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{909C6855-918D-46DD-B7FB-83EF471AF1A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{909C6855-918D-46DD-B7FB-83EF471AF1A4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
