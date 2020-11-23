@@ -84,18 +84,14 @@ namespace Caravela.TestFramework.Templating
                 var aspectInstance = Activator.CreateInstance( aspectType );
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                //var targetType = compilationForInitialDiagnostics.Assembly.GetTypeByMetadataName( "TargetCode" );
-                //var targetMethod = (IMethodSymbol) targetType.GetMembers().SingleOrDefault( m => m.Name == "Method" );
+                var targetType = compilationForInitialDiagnostics.Assembly.GetTypeByMetadataName( "TargetCode" );
+                var targetMethod = (IMethodSymbol) targetType.GetMembers().SingleOrDefault( m => m.Name == "Method" );
 
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
-                var targetType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" );
-                var targetMethod = targetType.Methods.GetValue().SingleOrDefault( m => m.Name == "Method" );
+                AdviceContext.Current = new AdviceContextImpl( targetMethod );
 
-                //AdviceContext.Current = new AdviceContextImpl( targetMethod );
-
-                var output = driver.ExpandDeclaration( aspectInstance, targetMethod, caravelaCompilation );
+                var output = driver.ExpandDeclaration( aspectInstance );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
                 result.TemplateOutputSource = formattedOutput.GetText();
