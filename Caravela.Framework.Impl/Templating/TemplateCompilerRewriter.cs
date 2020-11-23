@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -140,9 +141,12 @@ namespace Caravela.Framework.Impl.Templating
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateLiteralExpressionFactory(SyntaxKind syntaxKind)
             {
-                return InvocationExpression(IdentifierName(nameof(LiteralExpression))).AddArgumentListArguments(
-                        Argument(this.Transform(syntaxKind)),
-                        Argument(InvocationExpression(IdentifierName(nameof(Literal))).AddArgumentListArguments(Argument(expression))));
+                return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
+                        Argument( this.Transform( syntaxKind ) ),
+                        Argument( InvocationExpression( IdentifierName( nameof( Literal ) ) ).AddArgumentListArguments(
+                            Argument( expression )
+                            ) )
+                        );
             }
 
 
@@ -191,6 +195,13 @@ namespace Caravela.Framework.Impl.Templating
 
                 case nameof(Char):
                     return CreateLiteralExpressionFactory(SyntaxKind.CharacterLiteralExpression);
+
+                case nameof( Boolean ):
+                    return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
+                        Argument( InvocationExpression( IdentifierName (nameof( BooleanKeyword ) ) ).AddArgumentListArguments(
+                            Argument( expression )
+                            ) )
+                        );
 
                 default:
                     //TODO: emit an error. We don't know how to serialize this into syntax.
