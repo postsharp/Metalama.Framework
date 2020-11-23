@@ -1,0 +1,8 @@
+﻿<Project>
+  <!-- TODO: somehow also set PrivateAssets for aspect libraries -->
+  <ItemGroup>
+    <PackageReference Update="Caravela.Framework" PrivateAssets="none" />
+    <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
+  </ItemGroup>
+  
+</Project>

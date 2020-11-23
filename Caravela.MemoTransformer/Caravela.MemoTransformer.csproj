@@ -3,11 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
-    <Version>0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoslynEx.Sdk" Version="$(RoslynExVersion)" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
   
 </Project>

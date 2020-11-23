@@ -1,17 +1,26 @@
 <Project>
- <PropertyGroup>
-   <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
-   <!-- the above stopped working in VS for some reason -->
-   <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
+  <PropertyGroup>
+    <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
+    <!-- the above stopped working in VS for some reason -->
+    <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-   <Version>0.1.9</Version>
-   <CaravelaReferenceVersion>0.1.9</CaravelaReferenceVersion>
-   <RoslynVersion>3.8.0-5.final</RoslynVersion>
-   <RoslynExVersion>0.1.45-dev</RoslynExVersion>
+    <Version>0.1.23</Version>
+    <RoslynVersion>3.8.0</RoslynVersion>
+    <CaravelaCompilerVersion>0.1.46</CaravelaCompilerVersion>
 
-   <ReferencesUsingPackages>false</ReferencesUsingPackages>
- </PropertyGroup>
+    <Authors>PostSharp Technologies</Authors>
+    <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/postsharp/Caravela</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageIcon>PostSharpIcon.png</PackageIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>

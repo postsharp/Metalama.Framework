@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <CaravelaExportAspects>true</CaravelaExportAspects>
+  </PropertyGroup>
+
+  <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj" />
+  </ItemGroup>
+
+</Project>

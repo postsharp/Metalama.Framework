@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -28,17 +29,12 @@ namespace Caravela.Framework.Impl.CompileTime
             var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
 
             // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
-            // TODO: check that the path exists and if not, restore the package?
-            // TODO: do not hardcode the versions?
-            string microsoftCSharpVersion = "4.7.0";
-            string roslynVersion = "3.8.0-5.final";
-            string immutableCollectionsVersion = "5.0.0-preview.8.20407.11";
             var nugetPaths = new (string package, string version, string assembly)[]
             {
-                ("microsoft.csharp", microsoftCSharpVersion, "Microsoft.CSharp.dll"),
-                ("microsoft.codeanalysis.common", roslynVersion, "Microsoft.CodeAnalysis.dll"),
-                ("microsoft.codeanalysis.csharp", roslynVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
-                ("system.collections.immutable", immutableCollectionsVersion, "System.Collections.Immutable.dll")
+                ("microsoft.csharp", MicrosoftCSharpVersion, "Microsoft.CSharp.dll"),
+                ("microsoft.codeanalysis.common", MicrosoftCodeAnalysisCommonVersion, "Microsoft.CodeAnalysis.dll"),
+                ("microsoft.codeanalysis.csharp", MicrosoftCodeAnalysisCSharpVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
+                ("system.collections.immutable", SystemCollectionsImmutableVersion, "System.Collections.Immutable.dll")
             }
             .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
 
