@@ -1,4 +1,5 @@
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization;
 using EnumSpace;
@@ -75,6 +76,18 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             this.AssertSerialization( "EnumSpace.World.Venus", World.Venus );
             this.AssertSerialization( "EnumSpace.Mars.Moon.Phobos", Mars.Moon.Phobos );
         }
+        
+         
+        [Fact]
+        public void TestReflectionObject()
+        {
+            IType caravelaType = null;
+            Type superType = CreateTypeForSerialization( caravelaType );
+            this.AssertSerialization( "Caravela.Intrinsics.LdTokenThing(\"Namespace-doc-comment-id-somehwat\").CreateTypeFromRuntimeTypeHandle()", superType );
+            this.AssertSerialization( "EnumSpace.World.Venus", World.Venus );
+            this.AssertSerialization( "EnumSpace.Mars.Moon.Phobos", Mars.Moon.Phobos );
+        }
+
         
         [Fact]
         public void TestEnumsFlags()

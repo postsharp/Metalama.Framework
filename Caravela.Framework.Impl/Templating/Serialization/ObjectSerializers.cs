@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -59,6 +60,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this._serializers.TryAdd( typeof(Dictionary<,>), new DictionarySerializer(this) ); 
             
             // Reflection types
+            this.RegisterSerializer( typeof(CaravelaType), new CaravelaTypeSerializer() );      
+            this.RegisterSerializer( typeof(CaravelaMethodInfo), new CaravelaMethodInfoSerializer() );
             // TODO reflection types
         }
         
@@ -112,6 +115,56 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedSerialization, mainType );
             }
             return serializer.SerializeObject( o );
+        }
+    }
+
+    internal class CaravelaMethodInfoSerializer : TypedObjectSerializer<CaravelaMethodInfo>
+    {
+        public override ExpressionSyntax Serialize( CaravelaMethodInfo o )
+        {
+            string documentationId = DocumentationCommentId.CreateDeclarationId( o.Symbol );
+            return InvocationExpression(
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                IdentifierName( "System" ),
+                                IdentifierName( "Reflection" ) ),
+                            IdentifierName( "MethodBase" ) ),
+                        IdentifierName( "GetMethodFromHandle" ) ) )
+                .WithArgumentList(
+                    ArgumentList(
+                        SingletonSeparatedList<ArgumentSyntax>(
+                            Argument(
+                                InvocationExpression(
+                                        MemberAccessExpression(
+                                            SyntaxKind.SimpleMemberAccessExpression,
+                                            MemberAccessExpression(
+                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    IdentifierName( "Caravela" ),
+                                                    IdentifierName( "Compiler" ) ),
+                                                IdentifierName( "Intrinsics" ) ),
+                                            IdentifierName( "GetRuntimeMethodHandle" ) ) )
+                                    .WithArgumentList(
+                                        ArgumentList(
+                                            SingletonSeparatedList<ArgumentSyntax>(
+                                                Argument(
+                                                    LiteralExpression(
+                                                        SyntaxKind.StringLiteralExpression,
+                                                        Literal(documentationId) ) ) ) ) ) ) ) ) )
+                .NormalizeWhitespace();
+        }
+    }
+
+    internal class CaravelaTypeSerializer : TypedObjectSerializer<CaravelaType>
+    {
+        public override ExpressionSyntax Serialize( CaravelaType o )
+        {
+            return default;
         }
     }
 }
