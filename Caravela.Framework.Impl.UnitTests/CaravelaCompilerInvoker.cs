@@ -15,6 +15,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
+            // TODO: use WritePackageVersions from Caravela.Framework.Impl.csproj to avoid hardcoding the version?
             string csproj = @"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
@@ -22,8 +23,8 @@ namespace Caravela.Framework.Impl.UnitTests
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include='Caravela.Compiler.Sdk' Version='0.1.46' />
-    <PackageReference Include='Caravela.Compiler' Version='0.1.46' />
+    <PackageReference Include='Caravela.Compiler.Sdk' Version='0.1.51' />
+    <PackageReference Include='Caravela.Compiler' Version='0.1.51' />
   </ItemGroup>
 </Project>
 ";
