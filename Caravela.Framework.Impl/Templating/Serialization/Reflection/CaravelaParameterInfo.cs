@@ -1,3 +1,4 @@
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
 
@@ -5,11 +6,13 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaParameterInfo : ParameterInfo
     {
-        public ISymbol Symbol { get; }
+        public IParameterSymbol Symbol { get; }
+        public ICodeElement ContainingMember { get; }
 
-        public CaravelaParameterInfo( ISymbol symbol )
+        public CaravelaParameterInfo( IParameterSymbol symbol, ICodeElement containingMember )
         {
             this.Symbol = symbol;
+            this.ContainingMember = containingMember;
         }
     }
 }

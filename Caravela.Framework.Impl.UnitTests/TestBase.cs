@@ -10,6 +10,8 @@ namespace Caravela.Framework.Impl.UnitTests
 {
     public class TestBase
     {
+        public static bool DoCodeExecutionTests = true;
+            
         public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
         {
             var roslynCompilation = CSharpCompilation.Create( null! )
@@ -51,6 +53,15 @@ class Expression
             var assembly = Assembly.LoadFile( assemblyPath );
 
             return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
+        }
+        
+        public static void TestExpression<T>(string context, string expression, Action<T> withResult)
+        {
+            if ( DoCodeExecutionTests )
+            {
+                T t = (T) ExecuteExpression( context, expression )!;
+                withResult( t );
+            }
         }
     }
 }

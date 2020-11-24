@@ -8,6 +8,8 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class Parameter : IParameter
     {
         private readonly IParameterSymbol _symbol;
+
+        public IParameterSymbol Symbol => this._symbol;
         private readonly CodeElement _containingMember;
 
         private SymbolMap SymbolMap => this._containingMember.SymbolMap;

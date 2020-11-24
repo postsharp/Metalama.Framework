@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.UnitTests
             string csproj = @"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             Assert.True( process.ExitCode == 0, process.StandardOutput.ReadToEnd() );
 
-            return Path.Combine( dir, "bin/Debug/net5.0/test.dll" );
+            return Path.Combine( dir, "bin/Debug/net48/test.dll" );
         }
     }
 }
