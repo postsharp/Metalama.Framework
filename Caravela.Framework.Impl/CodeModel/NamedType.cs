@@ -48,8 +48,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReactiveCollection<IProperty> Properties => this.OnlyDeclared( this.AllProperties );
 
-        // TODO
-        public IReactiveCollection<IEvent> AllEvents => ImmutableReactiveCollection<IEvent>.Empty;
+        [Memo]
+        public IReactiveCollection<IEvent> AllEvents => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
 
         [Memo]
         public IReactiveCollection<IEvent> Events => this.OnlyDeclared( this.AllEvents );
