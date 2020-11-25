@@ -70,8 +70,6 @@ namespace Caravela.Framework.Code
         // TODO: separate NestedTypes and AllNestedTypes?
         IReactiveCollection<INamedType> NestedTypes { get; }
 
-        // TODO: how to represent fields in general and compiler-generated backing fields in particular
-        // don't show backing fields, ignore their attributes
         IReactiveCollection<IProperty> Properties { get; }
 
         IReactiveCollection<IProperty> AllProperties { get; }

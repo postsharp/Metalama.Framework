@@ -40,7 +40,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IProperty> AllProperties => this.TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this)).ToImmutableReactive();
+        public IReactiveCollection<IProperty> AllProperties => 
+            this.TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this))
+            .Concat<IProperty>( this.TypeSymbol.GetMembers().OfType<IFieldSymbol>().Select( f => new Field( f, this ) ) )
+            .ToImmutableReactive();
 
         [Memo]
         public IReactiveCollection<IProperty> Properties => this.OnlyDeclared( this.AllProperties );
