@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <EmitCompilerTransformedFiles>true</EmitCompilerTransformedFiles>
+    <CaravelaEmitCompilerTransformedFiles>true</CaravelaEmitCompilerTransformedFiles>
     <!--<CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>-->
   </PropertyGroup>
 

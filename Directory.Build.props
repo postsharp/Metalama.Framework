@@ -6,7 +6,7 @@
 
     <Version>0.1.32</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>0.1.51</CaravelaCompilerVersion>
+    <CaravelaCompilerVersion>0.1.53</CaravelaCompilerVersion>
 
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
