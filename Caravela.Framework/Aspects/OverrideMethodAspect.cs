@@ -13,6 +13,6 @@ namespace Caravela.Framework.Aspects
         }
 
         [OverrideMethodTemplate]
-        public abstract object Template();
+        public abstract dynamic Template();
     }
 }
