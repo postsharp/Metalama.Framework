@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         public override ExpressionSyntax Serialize( CaravelaReturnParameterInfo o )
         {
             // TODO generics
-            var methodBaseExpression = this._methodInfoSerializer.Serialize( new CaravelaMethodInfo( o.Method.Symbol ) );
+            var methodBaseExpression = this._methodInfoSerializer.Serialize( new CaravelaMethodInfo( o.Method ) );
             return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(

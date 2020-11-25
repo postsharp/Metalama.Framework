@@ -1,7 +1,71 @@
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
+using System;
+using System.Linq;
+using System.Reflection;
+using Xunit;
+
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
-    public class CaravelaTypeTests
-    {
-        
+    public class CaravelaTypeTests: TestBase
+    {  
+        [Fact]
+        public void TestType()
+        {
+            string code = "class Target {  }";
+            string serialized = this.SerializeType( code );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
+
+            TestExpression<Type>( code, serialized, ( info ) =>
+            {
+                Assert.Equal( "Target", info.Name );
+            } );
+        }
+        [Fact]
+        public void TestGenericType()
+        {
+            string code = "class Target<TKey,TValue> {  }";
+            string serialized = this.SerializeType( code );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
+
+            TestExpression<Type>( code, serialized, ( info ) =>
+            {
+                Assert.Equal( "Target", info.Name );
+                Assert.Equal( 2, info.GetGenericArguments().Length );
+            } );
+        }
+        [Fact]
+        public void TestArrayType()
+        {
+            string code = "class Target { int[] Property { get; set; } }";
+            string serialized = this.SerializeTypeOfProperty( code );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()", serialized );
+
+            TestExpression<Type>( code, serialized, ( info ) =>
+            {
+                Assert.Equal( "System.Int32[]", info.FullName );
+                Assert.Equal( typeof(int[]), info );
+            } );
+        }
+       
+        // Types other than named types and array types are not implemented.
+
+        private string SerializeType( string code )
+        {
+            var compilation  = TestBase.CreateCompilation( code );
+            IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
+            ITypeInternal p = (single as ITypeInternal)!;
+            string actual = new CaravelaTypeSerializer().Serialize( new CaravelaType( p.TypeSymbol ) ).ToString();
+            return actual;
+        }
+        private string SerializeTypeOfProperty( string code )
+        {
+            var compilation  = TestBase.CreateCompilation( code );
+            IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" ).Type;
+            ITypeInternal p = (single as ITypeInternal)!;
+            string actual = new CaravelaTypeSerializer().Serialize( new CaravelaType( p.TypeSymbol ) ).ToString();
+            return actual;
+        }
     }
 }

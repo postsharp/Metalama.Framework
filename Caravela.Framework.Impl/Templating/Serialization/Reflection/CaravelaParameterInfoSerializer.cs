@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             // Emit load parameter info
             if ( method != null )
             {
-                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( method.Symbol ) );
+                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( method ) );
 
                 return ElementAccessExpression(
                         InvocationExpression(
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             else if (property != null)
             {
                 var setter = (property.Setter as Method);
-                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( setter.Symbol ) );
+                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( setter ) );
                 return ElementAccessExpression(
                         InvocationExpression(
                             MemberAccessExpression(

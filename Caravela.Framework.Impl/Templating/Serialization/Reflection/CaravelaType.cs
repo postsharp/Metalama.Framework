@@ -1,3 +1,4 @@
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -7,9 +8,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaType : Type
     {
-        public ISymbol Symbol { get; }
+        public ITypeSymbol Symbol { get; }
 
-        public CaravelaType( ISymbol symbol ) => this.Symbol = symbol;
+        public CaravelaType( ITypeSymbol symbol ) => this.Symbol = symbol;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
 

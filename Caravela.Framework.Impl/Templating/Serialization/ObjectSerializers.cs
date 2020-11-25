@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer() );
             this.RegisterSerializer( typeof(CaravelaParameterInfo), new CaravelaParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer(methodInfoSerializer) );
-            this.RegisterSerializer( typeof(LocationInfo), new LocationInfoSerializer() );
+            this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this) );
             // TODO reflection types
         }
         

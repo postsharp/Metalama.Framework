@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         [Fact]
         public void TestFieldLikeEvent()
         {
-            string code = "class Target { public event System.Action Target; }";
+            string code = "class Target { public event System.Action Activated; }";
             string serialized = this.SerializeEvent( code );
             Assert.Equal( @"xxxx", serialized );
 
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         [Fact]
         public void TestCustomEvent()
         {
-            string code = "class Target { public event System.Action Target { add { } remove { } } }";
+            string code = "class Target { public event System.Action Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
             Assert.Equal( @"xxxx", serialized );
 
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         [Fact]
         public void TestCustomGenericEvent()
         {
-            string code = "class Target<TKey> { public event System.Func<TKey> Target { add { } remove { } } }";
+            string code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
             Assert.Equal( @"xxxx", serialized );
 
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeEvent( string code )
         {
             var compilation  = TestBase.CreateCompilation( code );
-            IEvent single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Events.GetValue().Single( m => m.Name == "Target" );
+            IEvent single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Events.GetValue().Single( m => m.Name == "Activated" );
             string actual = new CaravelaEventInfoSerializer().Serialize( new CaravelaEventInfo( null ) ).ToString();
             return actual;
         }

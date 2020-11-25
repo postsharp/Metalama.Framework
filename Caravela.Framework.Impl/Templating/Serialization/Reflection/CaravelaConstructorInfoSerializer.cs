@@ -1,4 +1,6 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
@@ -6,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         public override ExpressionSyntax Serialize( CaravelaConstructorInfo o )
         {
-            return null;
+            return CaravelaMethodInfoSerializer.CreateMethodBase( o );
         }
     }
 }

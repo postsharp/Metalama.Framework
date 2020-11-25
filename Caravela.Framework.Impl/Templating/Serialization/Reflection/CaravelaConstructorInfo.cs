@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -5,13 +6,15 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
-    internal class CaravelaConstructorInfo : ConstructorInfo
+    internal class CaravelaConstructorInfo : ConstructorInfo, ICaravelaMethodOrConstructorInfo
     {
         public ISymbol Symbol { get; }
+        public ISymbol DeclaringTypeSymbol { get; }
 
-        public CaravelaConstructorInfo( ISymbol symbol )
+        public CaravelaConstructorInfo( Method method )
         {
-            this.Symbol = symbol;
+            this.Symbol = method.Symbol;
+            this.DeclaringTypeSymbol = CaravelaMethodInfo.FindDeclaringTypeSymbol( method );
         }
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
 
