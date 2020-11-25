@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Impl.CompileTime;
+using System;
 using System.Diagnostics;
 using System.IO;
 using Xunit;
@@ -15,15 +16,15 @@ namespace Caravela.Framework.Impl.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            string csproj = @"
+            string csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include='Caravela.Compiler.Sdk' Version='0.1.46' />
-    <PackageReference Include='Caravela.Compiler' Version='0.1.46' />
+    <PackageReference Include='Caravela.Compiler.Sdk' Version='{PackageVersions.CaravelaCompilerSdkVersion}' />
+    <PackageReference Include='Caravela.Compiler' Version='{PackageVersions.CaravelaCompilerVersion}' />
   </ItemGroup>
 </Project>
 ";
