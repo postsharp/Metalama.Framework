@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
