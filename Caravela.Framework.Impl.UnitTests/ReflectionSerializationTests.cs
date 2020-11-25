@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -21,13 +22,21 @@ class C
         }
 
         [Fact]
-        public void TestGenericMethod() 
+        public void TestGenericMethod()
         {
             string code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
-            string serialized = "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))"; //this.SerializeTargetDotMethod( code );
-            Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))", serialized );
+            string serialized = "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
             var methodInfo = (MethodInfo) ExecuteExpression( code, serialized )!;
             Assert.Equal( 42, methodInfo.MakeGenericMethod( typeof( int ) ).Invoke( null, new object[] { 21 } ) );
+        }
+
+        [Fact]
+        public void TestGenericType()
+        {
+            string code = "class Target<T> { }";
+            string serialized = "System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
+            var type = (Type) ExecuteExpression( code, serialized )!;
+            Assert.Equal( "Target`1", type.FullName );
         }
     }
 }

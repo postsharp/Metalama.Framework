@@ -1,14 +1,13 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Property : CodeElement, IProperty
+    internal class Event : CodeElement, IEvent
     {
-        private readonly IPropertySymbol _symbol;
+        private readonly IEventSymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
 
         private readonly NamedType _containingElement;
@@ -16,25 +15,24 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override SourceCompilation Compilation => this._containingElement.Compilation;
 
-        public Property(IPropertySymbol symbol, NamedType containingElement)
+        public Event( IEventSymbol symbol, NamedType containingElement)
         {
             this._symbol = symbol;
             this._containingElement = containingElement;
         }
 
         [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
+        public INamedType DelegateType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
-
-
-        [Memo]
-        public IMethod? Getter => this._symbol.GetMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.GetMethod);
+        public IMethod Adder => this.SymbolMap.GetMethod( this._symbol.AddMethod! );
 
         [Memo]
-        // TODO: get-only properties
-        public IMethod? Setter => this._symbol.SetMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.SetMethod);
+        public IMethod Remover => this.SymbolMap.GetMethod( this._symbol.RemoveMethod! );
+
+        // TODO: pseudo-accessor
+        [Memo]
+        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.RaiseMethod );
 
         public string Name => this._symbol.Name;
 
@@ -47,6 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Property;
+        public override CodeElementKind Kind => CodeElementKind.Event;
     }
 }
