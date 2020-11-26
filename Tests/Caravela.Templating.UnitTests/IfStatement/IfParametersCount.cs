@@ -46,14 +46,11 @@ class TargetCode
 
         private const string IfParametersCount_ExpectedOutput = @"
 {
-    bool b;
-    b = true;
-    Console.WriteLine(b);
+    Console.WriteLine(true);
     int result;
     result = a;
     return result;
-}
-";
+}";
 
         [Fact]
         public async Task IfParametersCount()

@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.Framework.Impl.CompileTime;
+using System.Net.Http.Headers;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -571,10 +572,18 @@ namespace Caravela.Framework.Impl.Templating
 
                 case AssignmentExpressionSyntax assignment:
                     // Assignments must be classified by the visitor to take into account _isNonMetaConditionalBranch.
-                    return this.GetNodeScope(assignment);
+                    var assignmentScope = this.GetNodeScope( assignment );
+                    if ( assignmentScope == SymbolDeclarationScope.Default )
+                    {
+                        return this.GetNodeScope( assignment.Right );
+                    }
+                    else
+                    {
+                        return assignmentScope;
+                    }
 
                 default:
-                    return SymbolDeclarationScope.Default;
+                    throw new AssertionFailedException();
             }
         }
 
