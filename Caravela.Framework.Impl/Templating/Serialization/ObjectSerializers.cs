@@ -29,24 +29,24 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this._arraySerializer = new ArraySerializer(this);
             
             // Primitive types
-            this._serializers.TryAdd( typeof(char),   new CharSerializer() );
-            this._serializers.TryAdd( typeof(bool),   new BoolSerializer() );
-            this._serializers.TryAdd( typeof(byte),   new ByteSerializer() );
-            this._serializers.TryAdd( typeof(sbyte),  new SByteSerializer() );
-            this._serializers.TryAdd( typeof(ushort), new UShortSerializer() );
-            this._serializers.TryAdd( typeof(short),  new ShortSerializer() );
-            this._serializers.TryAdd( typeof(uint),   new UIntSerializer() );
-            this._serializers.TryAdd( typeof(int),    new IntSerializer() );
-            this._serializers.TryAdd( typeof(ulong),  new ULongSerializer() );
-            this._serializers.TryAdd( typeof(long),   new LongSerializer() );
-            this._serializers.TryAdd( typeof(float),  new FloatSerializer() );
-            this._serializers.TryAdd( typeof(double), new DoubleSerializer() );
-            this._serializers.TryAdd( typeof(decimal),new DecimalSerializer() );
-            this._serializers.TryAdd( typeof(UIntPtr),new UIntPtrSerializer() );
-            this._serializers.TryAdd( typeof(IntPtr), new IntPtrSerializer() );
+            this.RegisterSerializer( typeof(char),   new CharSerializer() );
+            this.RegisterSerializer( typeof(bool),   new BoolSerializer() );
+            this.RegisterSerializer( typeof(byte),   new ByteSerializer() );
+            this.RegisterSerializer( typeof(sbyte),  new SByteSerializer() );
+            this.RegisterSerializer( typeof(ushort), new UShortSerializer() );
+            this.RegisterSerializer( typeof(short),  new ShortSerializer() );
+            this.RegisterSerializer( typeof(uint),   new UIntSerializer() );
+            this.RegisterSerializer( typeof(int),    new IntSerializer() );
+            this.RegisterSerializer( typeof(ulong),  new ULongSerializer() );
+            this.RegisterSerializer( typeof(long),   new LongSerializer() );
+            this.RegisterSerializer( typeof(float),  new FloatSerializer() );
+            this.RegisterSerializer( typeof(double), new DoubleSerializer() );
+            this.RegisterSerializer( typeof(decimal),new DecimalSerializer() );
+            this.RegisterSerializer( typeof(UIntPtr),new UIntPtrSerializer() );
+            this.RegisterSerializer( typeof(IntPtr), new IntPtrSerializer() );
             
             // String
-            this._serializers.TryAdd( typeof(string), new StringSerializer() );
+            this.RegisterSerializer( typeof(string), new StringSerializer() );
             
             // Known simple system types
             this.RegisterSerializer( typeof(DateTime), new DateTimeSerializer() );
@@ -55,19 +55,18 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this.RegisterSerializer( typeof(CultureInfo), new CultureInfoSerializer() ); 
             
             // Collections
-            this._serializers.TryAdd( typeof(List<>), new ListSerializer(this) );
-            this._serializers.TryAdd( typeof(Dictionary<,>), new DictionarySerializer(this) ); 
+            this.RegisterSerializer( typeof(List<>), new ListSerializer(this) );
+            this.RegisterSerializer( typeof(Dictionary<,>), new DictionarySerializer(this) ); 
             
             // Reflection types
-            this.RegisterSerializer( typeof(CaravelaType), new CaravelaTypeSerializer() );
             CaravelaMethodInfoSerializer methodInfoSerializer = new CaravelaMethodInfoSerializer();
+            this.RegisterSerializer( typeof(CaravelaType), new CaravelaTypeSerializer() );
             this.RegisterSerializer( typeof(CaravelaMethodInfo), methodInfoSerializer );
             this.RegisterSerializer( typeof(CaravelaConstructorInfo), new CaravelaConstructorInfoSerializer() );
             this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer() );
             this.RegisterSerializer( typeof(CaravelaParameterInfo), new CaravelaParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this) );
-            // TODO reflection types
         }
         
         /// <summary>
@@ -77,7 +76,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         /// For generic types, register the type without generic arguments, for example "List&lt;&gt;" rather than "List&lt;int&gt;". The serializer will handle
         /// lists of any element.
         /// </remarks>
-        /// <param name="type">The specific type that this serializer supports.</param>
+        /// <param name="type">The specific type that this serializer supports. It will be called for all objects that are of this type exactly.</param>
         /// <param name="serializer">A new serializer that supports that type.</param>
         public void RegisterSerializer( Type type, ObjectSerializer serializer )
         {

@@ -9,13 +9,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     internal class CaravelaConstructorInfo : ConstructorInfo, ICaravelaMethodOrConstructorInfo
     {
         public ISymbol Symbol { get; }
-        public ISymbol DeclaringTypeSymbol { get; }
+        public ISymbol? DeclaringTypeSymbol { get; }
 
         public CaravelaConstructorInfo( Method method )
         {
             this.Symbol = method.Symbol;
             this.DeclaringTypeSymbol = CaravelaMethodInfo.FindDeclaringTypeSymbol( method );
         }
+        
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
 
         public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw new NotImplementedException();

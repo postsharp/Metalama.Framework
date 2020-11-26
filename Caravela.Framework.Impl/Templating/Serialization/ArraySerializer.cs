@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public ExpressionSyntax Serialize( Array array )
         {
-            Type elementType = array.GetType().GetElementType();
+            Type elementType = array.GetType().GetElementType()!;
             if ( array.Rank > 1 )
             {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.MultidimensionalArray, array );

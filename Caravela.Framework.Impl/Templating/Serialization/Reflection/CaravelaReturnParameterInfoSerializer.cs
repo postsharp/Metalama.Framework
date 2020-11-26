@@ -9,14 +9,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         private readonly CaravelaMethodInfoSerializer _methodInfoSerializer;
 
-        public CaravelaReturnParameterInfoSerializer( CaravelaMethodInfoSerializer methodInfoSerializer )
-        {
-            this._methodInfoSerializer = methodInfoSerializer;
-        }
-        
+        public CaravelaReturnParameterInfoSerializer( CaravelaMethodInfoSerializer methodInfoSerializer ) => this._methodInfoSerializer = methodInfoSerializer;
+
         public override ExpressionSyntax Serialize( CaravelaReturnParameterInfo o )
         {
             // TODO generics
+            // TODO side cases?
             var methodBaseExpression = this._methodInfoSerializer.Serialize( new CaravelaMethodInfo( o.Method ) );
             return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,

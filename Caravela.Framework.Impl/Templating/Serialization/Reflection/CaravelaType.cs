@@ -1,4 +1,5 @@
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -11,6 +12,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         public ITypeSymbol Symbol { get; }
 
         public CaravelaType( ITypeSymbol symbol ) => this.Symbol = symbol;
+
+        public static CaravelaType Create( IType type )
+        {
+            return new CaravelaType( ((type as ITypeInternal)!).TypeSymbol );
+        }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
 

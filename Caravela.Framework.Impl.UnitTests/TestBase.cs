@@ -11,6 +11,11 @@ namespace Caravela.Framework.Impl.UnitTests
 {
     public class TestBase
     {
+        /// <summary>
+        /// Flag that determines whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
+        /// resulting syntax tree actually compiles and results in valid IL. This is slow but neccessary during development, at least, since an incorrect syntax tree
+        /// can easily be produced.
+        /// </summary>
         public static bool DoCodeExecutionTests = true;
             
         public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
@@ -56,6 +61,14 @@ class Expression
             return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
         }
         
+        /// <summary>
+        /// Executes the C# <paramref name="expression"/> alongside the code <paramref name="context"/> and passes the value of the expression
+        /// as the argument to the callback <paramref name="withResult"/>. Does all of this only conditionally: it does nothing if <see cref="DoCodeExecutionTests"/>
+        /// is false.
+        /// </summary>
+        /// <param name="context">Additional C# code.</param>
+        /// <param name="expression">A C# expression of type <typeparamref name="T"/>.</param>
+        /// <param name="withResult">Code to run on the result of the expression.</param>
         public static void TestExpression<T>(string context, string expression, Action<T> withResult)
         {
             if ( DoCodeExecutionTests )

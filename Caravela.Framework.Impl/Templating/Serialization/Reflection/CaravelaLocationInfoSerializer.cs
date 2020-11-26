@@ -1,3 +1,4 @@
+using Caravela.Compiler;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -5,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -13,18 +15,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         private readonly ObjectSerializers _serializers;
 
-        public CaravelaLocationInfoSerializer( ObjectSerializers serializers )
-        {
-            this._serializers = serializers;
-        }
-        
+        public CaravelaLocationInfoSerializer( ObjectSerializers serializers ) => this._serializers = serializers;
+
         public override ExpressionSyntax Serialize( CaravelaLocationInfo o )
         {
+            ExpressionSyntax propertyInfo;
             if ( o.Property != null )
             {
-                ITypeInternal p = (o.Property.DeclaringType as ITypeInternal)!;
-                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( new CaravelaType( p.TypeSymbol ));
-                ExpressionSyntax propertyInfo = null;
+                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.DeclaringType ));
                 if ( o.Property.Parameters.Count == 0 )
                 {
                     propertyInfo = InvocationExpression(
@@ -34,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 IdentifierName( "GetProperty" ) ) )
                         .WithArgumentList(
                             ArgumentList(
-                                SingletonSeparatedList<ArgumentSyntax>(
+                                SingletonSeparatedList(
                                     Argument(
                                         LiteralExpression(
                                             SyntaxKind.StringLiteralExpression,
@@ -42,12 +40,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 }
                 else
                 {
-                    var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( new CaravelaType((o.Property.Type as ITypeInternal).TypeSymbol ));
+                    var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.Type ));
                     List<ExpressionSyntax> parameterTypes = new List<ExpressionSyntax>();
                     foreach ( IParameter parameter in o.Property.Parameters )
                     {
-                        CaravelaType cType = new CaravelaType( (parameter.Type as ITypeInternal).TypeSymbol );
-                        parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( cType ) );
+                        parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( parameter.Type ) ) );
                     }
 
                     propertyInfo = InvocationExpression(
@@ -73,7 +70,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                                                     IdentifierName("System"),
                                                                     IdentifierName("Type")) )
                                                             .WithRankSpecifiers(
-                                                                SingletonList<ArrayRankSpecifierSyntax>(
+                                                                SingletonList(
                                                                     ArrayRankSpecifier(
                                                                         SingletonSeparatedList<ExpressionSyntax>(
                                                                             OmittedArraySizeExpression() ) ) ) ) )
@@ -84,21 +81,47 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                         } ) ) )
                         ;
                 }
-
-                return ObjectCreationExpression(
-                        QualifiedName(
-                            QualifiedName(
-                                IdentifierName( "Caravela" ),
-                                IdentifierName( "Framework" ) ),
-                            IdentifierName( "LocationInfo" ) ) )
+            }
+            else
+            {
+                Field f = o.Field!;
+                string fieldCommentId = DocumentationCommentId.CreateDeclarationId( f.Symbol );
+                string typeCommentId = DocumentationCommentId.CreateDeclarationId( ((f.ContainingElement as ITypeInternal)!).TypeSymbol );
+                var containingType = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), typeCommentId );
+                var fieldToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeFieldHandle), fieldCommentId );
+                propertyInfo = InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "FieldInfo" ) ),
+                            IdentifierName( "GetFieldFromHandle" ) ) )
                     .WithArgumentList(
                         ArgumentList(
-                            SingletonSeparatedList<ArgumentSyntax>(
-                                Argument( propertyInfo ) ) ) )
+                            SeparatedList<ArgumentSyntax>(
+                                new SyntaxNodeOrToken[]
+                                {
+                                    Argument( fieldToken ),
+                                    Token( SyntaxKind.CommaToken ), 
+                                    Argument( containingType )
+                                } ) ) )
                     .NormalizeWhitespace();
             }
-
-            throw new Exception( "Fields not supported yet." );
+            return ObjectCreationExpression(
+                    QualifiedName(
+                        QualifiedName(
+                            IdentifierName( "Caravela" ),
+                            IdentifierName( "Framework" ) ),
+                        IdentifierName( "LocationInfo" ) ) )
+                .WithArgumentList(
+                    ArgumentList(
+                        SingletonSeparatedList(
+                            Argument( propertyInfo ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

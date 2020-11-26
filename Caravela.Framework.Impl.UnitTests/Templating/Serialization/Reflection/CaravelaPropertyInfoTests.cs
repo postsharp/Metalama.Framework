@@ -18,10 +18,26 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             string serialized = this.SerializeProperty( code );
             Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property""))", serialized );
 
-            TestExpression<PropertyInfo>( code, this.StripLocationInfo( serialized ), ( info ) =>
+            TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Property", info.Name );
                 Assert.Equal( typeof(int), info.PropertyType );
+                Assert.Null( info.SetMethod );
+                Assert.NotNull( info.GetMethod );
+            } );
+        }
+        
+        [Fact]
+        public void TestGenericProperty()
+        {
+            string code = "class Target<T> { public T Property {get;} }";
+            string serialized = this.SerializeProperty( code );
+            Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetProperty(""Property""))", serialized );
+
+            TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
+            {
+                Assert.Equal( "Property", info.Name );
+                Assert.Equal("T", info.PropertyType.Name );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
             } );
@@ -34,7 +50,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             string serialized = this.SerializeProperty( code );
             Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Property""))", serialized );
 
-            TestExpression<PropertyInfo>( code, this.StripLocationInfo( serialized ), ( info ) =>
+            TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Property", info.Name );
                 Assert.Equal( typeof(string), info.PropertyType );
@@ -50,7 +66,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             string serialized = this.SerializeIndexerWithTarget( code );
             Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Item"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );
 
-            TestExpression<PropertyInfo>( code, this.StripLocationInfo( serialized ), ( info ) =>
+            TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Item", info.Name );
                 Assert.Equal( typeof(string), info.PropertyType );
@@ -58,19 +74,6 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.NotNull( info.GetMethod );
                 Assert.Equal( 1, info.GetIndexParameters().Length );
             } );
-        }
-
-        [Fact]
-        public void TestRealIndexer()
-        {
-            Type t = typeof(FakeTarget);
-            PropertyInfo p = t.GetProperty( "this[]" );
-            PropertyInfo p2 = t.GetProperty( "this[]", typeof(string), new[] {typeof(int)} );
-        }
-
-        class FakeTarget
-        {
-            public string this[int target] { get { return default; } }
         }
 
         private string SerializeIndexerWithTarget( string code )
@@ -82,7 +85,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             return actual;
         }
 
-        private string StripLocationInfo( string serialized )
+        public static string StripLocationInfo( string serialized )
         {
             return serialized.Substring( "new Caravela.Framework.LocationInfo(".Length, serialized.Length - "new Caravela.Framework.LocationInfo(".Length - 1 );
         }

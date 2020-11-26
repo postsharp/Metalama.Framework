@@ -13,8 +13,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             if ( o.Symbol.TypeKind == TypeKind.Array )
             {
-                var arraySymbol = o.Symbol as IArrayTypeSymbol;
-                ExpressionSyntax innerTypeCreation = this.Serialize( new CaravelaType( arraySymbol!.ElementType ) );
+                IArrayTypeSymbol arraySymbol = (o.Symbol as IArrayTypeSymbol)!;
+                ExpressionSyntax innerTypeCreation = this.Serialize( new CaravelaType( arraySymbol.ElementType ) );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,

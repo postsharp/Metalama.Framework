@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
-                Assert.Equal( "Target", info.Name );
+                Assert.Equal( "Target`2", info.Name );
                 Assert.Equal( 2, info.GetGenericArguments().Length );
             } );
         }
