@@ -33,15 +33,16 @@ class Aspect
         return result;
   }
 }
+";
 
+        private const string ForEachParameter_Target = @"
 class TargetCode
 {
     int Method(int a, int b)
     {
         return a + b;
     }
-}
-";
+}";
 
         private const string ForEachParameter_ExpectedOutput = @"
 {
@@ -55,7 +56,7 @@ class TargetCode
         [Fact]
         public async Task ForEachParameter()
         {
-            var testResult = await this._testRunner.Run( new TestInput( ForEachParameter_Template, null ) );
+            var testResult = await this._testRunner.Run( new TestInput( ForEachParameter_Template, ForEachParameter_Target ) );
             testResult.AssertOutput( ForEachParameter_ExpectedOutput );
         }
     }

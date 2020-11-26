@@ -5,12 +5,6 @@
         public const string TemplateSource = @"  
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 class Aspect
 {
@@ -21,7 +15,9 @@ class Aspect
         return result;
   }
 }
+";
 
+        public const string TargetSource = @"
 class TargetCode
 {
     int Method(int a)
@@ -29,6 +25,31 @@ class TargetCode
         return a;
     }
 }
+";
+
+        public const string EmptyUnitTest = @"
+using Caravela.TestFramework.Templating;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Caravela.Templating.UnitTests
+{{
+    public partial class {0}Tests
+    {{
+        private const string {1}_Template = @"""";
+
+        private const string {1}_Target = @"""";
+
+        private const string {1}_ExpectedOutput = @"""";
+
+        [Fact]
+        public async Task {1}()
+        {{
+            var testResult = await this._testRunner.Run( new TestInput( {1}_Template, {1}_Target ) );
+            testResult.AssertOutput( {1}_ExpectedOutput );
+        }}
+    }}
+}}
 ";
     }
 }

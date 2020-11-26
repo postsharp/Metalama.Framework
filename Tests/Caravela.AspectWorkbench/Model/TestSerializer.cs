@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.TestFramework.Templating;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using System.Text;
 
 namespace Caravela.AspectWorkbench.Model
 {
@@ -21,7 +22,7 @@ namespace Caravela.AspectWorkbench.Model
             string targetFieldName = $"{testName}_Target";
 
             string testSource = await File.ReadAllTextAsync( filePath );
-            var syntaxTree = CSharpSyntaxTree.ParseText( testSource );
+            var syntaxTree = CSharpSyntaxTree.ParseText( testSource, encoding: Encoding.UTF8 );
 
             var syntaxRoot = await syntaxTree.GetRootAsync();
 
@@ -41,12 +42,15 @@ namespace Caravela.AspectWorkbench.Model
 
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
+            string testName = Path.GetFileNameWithoutExtension( filePath );
+
             if ( test.OriginalSyntaxRoot == null )
             {
-                throw new NotImplementedException();
+                string folderName = Path.GetFileName( Path.GetDirectoryName( filePath ) );
+                string testSource = string.Format( NewTestDefaults.EmptyUnitTest, folderName, testName );
+                test.OriginalSyntaxRoot = await CSharpSyntaxTree.ParseText( testSource, encoding: Encoding.UTF8 ).GetRootAsync();
             }
 
-            string testName = Path.GetFileNameWithoutExtension( filePath );
             string templateFieldName = $"{testName}_Template";
             string expectedOutputFieldName = $"{testName}_ExpectedOutput";
             string targetFieldName = $"{testName}_Target";
@@ -79,7 +83,7 @@ namespace Caravela.AspectWorkbench.Model
         private static SyntaxNode SetFieldValue( SyntaxNode root, string fieldName, string value )
         {
             return root.ReplaceNode(
-                GetField(GetFields(root), fieldName).DescendantNodes().OfType<LiteralExpressionSyntax>().First(),
+                GetField( GetFields( root ), fieldName ).DescendantNodes().OfType<LiteralExpressionSyntax>().First(),
                 LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "@\"" + value.Replace( "\"", "\"\"" ) + "\"", value ) )
             );
         }

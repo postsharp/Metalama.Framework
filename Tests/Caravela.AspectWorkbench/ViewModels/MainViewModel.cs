@@ -19,7 +19,6 @@ namespace Caravela.AspectWorkbench.ViewModels
         private readonly SyntaxColorizer syntaxColorizer;
         private readonly TestSerializer testSerializer;
         private TemplateTest currentTest;
-        private string currentPath;
 
         public MainViewModel()
         {
@@ -41,6 +40,8 @@ namespace Caravela.AspectWorkbench.ViewModels
         public FlowDocument TransformedTargetDocument { get; set; }
 
         public string ErrorsText { get; set; }
+
+        public string CurrentPath { get; set; }
 
         public async Task RunTestAsync()
         {
@@ -104,7 +105,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         public void NewTest()
         {
             this.TemplateText = NewTestDefaults.TemplateSource;
-            this.TargetText = null;
+            this.TargetText = NewTestDefaults.TargetSource;
             this.ExpectedOutputText = null;
             this.ColoredTemplateDocument = null;
             this.CompiledTemplateDocument = null;
@@ -120,7 +121,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ColoredTemplateDocument = null;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
-            this.currentPath = filePath;
+            this.CurrentPath = filePath;
         }
 
         public async Task SaveTestAsync( string filePath )
@@ -131,9 +132,9 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
 
             this.currentTest.Input = new TestInput( this.TemplateText, this.TargetText );
-            this.currentTest.ExpectedOutput = this.ExpectedOutputText;
+            this.currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
-            await this.testSerializer.SaveToFileAsync( this.currentTest, filePath ?? this.currentPath );
+            await this.testSerializer.SaveToFileAsync( this.currentTest, filePath ?? this.CurrentPath );
         }
     }
 }

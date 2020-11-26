@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using Caravela.AspectWorkbench.ViewModels;
+using Microsoft.Win32;
 using PostSharp;
 
 namespace Caravela.AspectWorkbench.Views
@@ -54,7 +55,7 @@ namespace Caravela.AspectWorkbench.Views
 
         private async void OpenButton_Click( object sender, RoutedEventArgs e )
         {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            OpenFileDialog dlg = new OpenFileDialog();
             dlg.DefaultExt = ".cs";
             dlg.Filter = "C# Files (*.cs)|*.cs";
             dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
@@ -68,7 +69,22 @@ namespace Caravela.AspectWorkbench.Views
         private async void SaveButton_Click( object sender, RoutedEventArgs e )
         {
             this.UpdateViewModel();
-            await this.viewModel.SaveTestAsync( null );
+
+            if (this.viewModel.CurrentPath == null)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.DefaultExt = ".cs";
+                dlg.Filter = "C# Files (*.cs)|*.cs";
+                dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+
+                if ( dlg.ShowDialog() == false )
+                {
+                    return;
+                }
+                this.viewModel.CurrentPath = dlg.FileName;
+            }
+
+            await this.viewModel.SaveTestAsync( this.viewModel.CurrentPath );
         }
 
         private async void RunButton_Click( object sender, RoutedEventArgs e )
