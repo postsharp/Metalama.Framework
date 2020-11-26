@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using Caravela.TestFramework.Templating;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
     public partial class ForEachStatementTests
     {
-        private const string ForEachParameterInput = @"
+        private const string ForEachParameter_Template = @"
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -42,7 +43,7 @@ class TargetCode
 }
 ";
 
-        private const string ForEachParameterExpectedOutput = @"
+        private const string ForEachParameter_ExpectedOutput = @"
 {
     Console.WriteLine(2);
     int result;
@@ -54,8 +55,8 @@ class TargetCode
         [Fact]
         public async Task ForEachParameter()
         {
-            var testResult = await _testRunner.Run( ForEachParameterInput );
-            testResult.AssertOutput( ForEachParameterExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( ForEachParameter_Template, null ) );
+            testResult.AssertOutput( ForEachParameter_ExpectedOutput );
         }
     }
 }

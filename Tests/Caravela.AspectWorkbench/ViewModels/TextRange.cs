@@ -2,9 +2,9 @@
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Caravela.AspectWorkbench
+namespace Caravela.AspectWorkbench.ViewModels
 {
-    public class TextRange
+    class TextRange
     {
         public ClassifiedSpan ClassifiedSpan { get; }
         public string Text { get; }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -8,15 +6,9 @@ namespace Caravela.Templating.UnitTests
 {
     public partial class IfStatementTests
     {
-        private const string ForEachParameterInput = @"
+        private const string IfParametersCount_Template = @"
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 class Aspect
 {
@@ -40,7 +32,9 @@ class Aspect
         return result;
   }
 }
+";
 
+        private const string IfParametersCount_Target = @"
 class TargetCode
 {
     int Method(int a)
@@ -50,7 +44,7 @@ class TargetCode
 }
 ";
 
-        private const string ForEachParameterExpectedOutput = @"
+        private const string IfParametersCount_ExpectedOutput = @"
 {
     bool b;
     b = true;
@@ -64,8 +58,8 @@ class TargetCode
         [Fact]
         public async Task IfParametersCount()
         {
-            var testResult = await _testRunner.Run( ForEachParameterInput );
-            testResult.AssertOutput( ForEachParameterExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( IfParametersCount_Template, IfParametersCount_Target ) );
+            testResult.AssertOutput( IfParametersCount_ExpectedOutput );
         }
     }
 }
