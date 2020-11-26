@@ -55,16 +55,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation  = TestBase.CreateCompilation( code );
             IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
-            ITypeInternal p = (single as ITypeInternal)!;
-            string actual = new CaravelaTypeSerializer().Serialize( new CaravelaType( p.TypeSymbol ) ).ToString();
+            string actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
             return actual;
         }
         private string SerializeTypeOfProperty( string code )
         {
             var compilation  = TestBase.CreateCompilation( code );
             IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" ).Type;
-            ITypeInternal p = (single as ITypeInternal)!;
-            string actual = new CaravelaTypeSerializer().Serialize( new CaravelaType( p.TypeSymbol ) ).ToString();
+            string actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single )  ).ToString();
             return actual;
         }
     }

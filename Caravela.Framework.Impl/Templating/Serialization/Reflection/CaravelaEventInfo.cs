@@ -1,3 +1,4 @@
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -6,12 +7,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaEventInfo : EventInfo
     {
-        public CaravelaEventInfo( ISymbol symbol )
+        public CaravelaEventInfo( ISymbol symbol, IType containingType )
         {
             this.Symbol = symbol;
+            this.ContainingType = containingType;
         }
 
         public ISymbol Symbol { get; }
+        public IType ContainingType { get; }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
 

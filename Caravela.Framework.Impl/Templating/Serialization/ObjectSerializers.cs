@@ -60,10 +60,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             
             // Reflection types
             CaravelaMethodInfoSerializer methodInfoSerializer = new CaravelaMethodInfoSerializer();
-            this.RegisterSerializer( typeof(CaravelaType), new CaravelaTypeSerializer() );
+            CaravelaTypeSerializer typeSerializer = new CaravelaTypeSerializer();
+            this.RegisterSerializer( typeof(CaravelaType), typeSerializer );
             this.RegisterSerializer( typeof(CaravelaMethodInfo), methodInfoSerializer );
             this.RegisterSerializer( typeof(CaravelaConstructorInfo), new CaravelaConstructorInfoSerializer() );
-            this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer() );
+            this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer(typeSerializer) );
             this.RegisterSerializer( typeof(CaravelaParameterInfo), new CaravelaParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this) );

@@ -25,9 +25,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation  = TestBase.CreateCompilation( code );
             IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).NestedTypes.GetValue().Single( nt => nt.Name == "Sub" );
-            ITypeInternal p = (single as ITypeInternal)!;
-            string actual = new CaravelaTypeSerializer().Serialize( new CaravelaType( p.TypeSymbol ) ).ToString();
-            return actual;
+            return new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
         }
     }
 }

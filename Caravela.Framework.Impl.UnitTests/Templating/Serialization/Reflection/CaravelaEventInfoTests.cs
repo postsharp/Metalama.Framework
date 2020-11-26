@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target { public event System.Action Activated; }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"xxxx", serialized );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target { public event System.Action Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"xxxx", serialized );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
@@ -47,14 +47,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"xxxx", serialized );
+            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
                 Assert.NotNull( info.AddMethod );
                 Assert.NotNull( info.RemoveMethod );
-                Assert.Equal( "System.Func<TKey>", info.EventHandlerType!.Name );
-                Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.Equal( "Func`1", info.EventHandlerType!.Name );
+                Assert.Equal( "Target`1", info.DeclaringType!.Name );
             } );
         }
 
@@ -62,7 +62,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation  = TestBase.CreateCompilation( code );
             IEvent single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Events.GetValue().Single( m => m.Name == "Activated" );
-            string actual = new CaravelaEventInfoSerializer().Serialize( new CaravelaEventInfo( null ) ).ToString();
+            Event e = (single as Event)!;
+            string actual = new CaravelaEventInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
             return actual;
         }
     }
