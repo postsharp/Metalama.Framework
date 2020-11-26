@@ -17,6 +17,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             this.Symbol = method.Symbol;
             this.DeclaringTypeSymbol = FindDeclaringTypeSymbol( method );
         }
+        public static CaravelaMethodInfo Create( IMethod method )
+        {
+            return new CaravelaMethodInfo( (method as Method)! );
+        }
         public static ISymbol? FindDeclaringTypeSymbol( Method method )
         {
             ITypeInternal methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
@@ -51,6 +55,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw new NotImplementedException();
 
-      
+
     }
 }

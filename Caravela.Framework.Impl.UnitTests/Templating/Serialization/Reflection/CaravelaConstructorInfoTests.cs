@@ -40,7 +40,6 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         }
         
         // If there is no constructor, there is no constructor to serialize. We are at C#, not IL level.
-        
         private string SerializeConstructor( string code )
         {
             var compilation  = TestBase.CreateCompilation( code );
