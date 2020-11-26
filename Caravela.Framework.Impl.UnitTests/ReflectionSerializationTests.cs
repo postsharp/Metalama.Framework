@@ -31,6 +31,18 @@ class C
         }
 
         [Fact]
+        public void TestFieldInGenericType()
+        {
+            string code = "class Target<T> { int f; }";
+            string serialized = @"
+System.Reflection.FieldInfo.GetFieldFromHandle(
+    Caravela.Compiler.Intrinsics.GetRuntimeFieldHandle(""F:Target`1.f""),
+    Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))";
+            var fieldInfo = (FieldInfo) ExecuteExpression( code, serialized )!;
+            Assert.Equal( "f", fieldInfo.Name );
+        }
+
+        [Fact]
         public void TestGenericType()
         {
             string code = "class Target<T> { }";

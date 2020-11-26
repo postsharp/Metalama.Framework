@@ -13,7 +13,7 @@ namespace Caravela.Framework.Sdk
         CSharpCompilation Transform(AspectWeaverContext context);
     }
 
-    public class AspectWeaverContext
+    public sealed class AspectWeaverContext
     {
         public INamedType AspectType { get; }
         public IReadOnlyList<AspectInstance> AspectInstances { get; }
