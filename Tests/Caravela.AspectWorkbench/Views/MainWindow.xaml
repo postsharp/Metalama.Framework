@@ -18,6 +18,7 @@
                 <Button Content="New" Click="NewButton_Click" />
                 <Button Content="Open" Click="OpenButton_Click" />
                 <Button Content="Save" Click="SaveButton_Click" />
+                <Button Content="SaveAs" Click="SaveAsButton_Click" />
             </ToolBar>
             <ToolBar Band="0" BandIndex="1">
                 <Button Content="Run" Click="RunButton_Click" />

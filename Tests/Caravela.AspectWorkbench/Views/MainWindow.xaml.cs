@@ -16,7 +16,7 @@ namespace Caravela.AspectWorkbench.Views
         public MainWindow()
         {
             this.InitializeComponent();
-            
+
             var newViewModel = new MainViewModel();
             this.viewModel = newViewModel;
             this.DataContext = newViewModel;
@@ -70,7 +70,8 @@ namespace Caravela.AspectWorkbench.Views
         {
             this.UpdateViewModel();
 
-            if (this.viewModel.CurrentPath == null)
+            string filePath = null;
+            if ( this.viewModel.IsUnsaved )
             {
                 SaveFileDialog dlg = new SaveFileDialog();
                 dlg.DefaultExt = ".cs";
@@ -81,10 +82,26 @@ namespace Caravela.AspectWorkbench.Views
                 {
                     return;
                 }
-                this.viewModel.CurrentPath = dlg.FileName;
+                filePath = dlg.FileName;
             }
 
-            await this.viewModel.SaveTestAsync( this.viewModel.CurrentPath );
+            await this.viewModel.SaveTestAsync( filePath );
+        }
+
+        private async void SaveAsButton_Click( object sender, RoutedEventArgs e )
+        {
+            this.UpdateViewModel();
+
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.DefaultExt = ".cs";
+            dlg.Filter = "C# Files (*.cs)|*.cs";
+            dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+
+            if ( dlg.ShowDialog() == false )
+            {
+                return;
+            }
+            await this.viewModel.SaveTestAsync( dlg.FileName );
         }
 
         private async void RunButton_Click( object sender, RoutedEventArgs e )

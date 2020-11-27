@@ -4,7 +4,9 @@ using Caravela.TestFramework.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +21,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         private readonly SyntaxColorizer syntaxColorizer;
         private readonly TestSerializer testSerializer;
         private TemplateTest currentTest;
+        private string currentPath;
 
         public MainViewModel()
         {
@@ -41,7 +44,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public string ErrorsText { get; set; }
 
-        public string CurrentPath { get; set; }
+        public bool IsUnsaved => string.IsNullOrEmpty( this.currentPath );
 
         public async Task RunTestAsync()
         {
@@ -121,11 +124,18 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ColoredTemplateDocument = null;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
-            this.CurrentPath = filePath;
+            this.currentPath = filePath;
         }
 
         public async Task SaveTestAsync( string filePath )
         {
+            filePath ??= this.currentPath;
+
+            if ( string.IsNullOrEmpty( filePath ) )
+            {
+                throw new ArgumentException( "The path cannot be null or empty." );
+            }
+
             if ( this.currentTest == null )
             {
                 this.currentTest = new TemplateTest();
@@ -134,7 +144,14 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.currentTest.Input = new TestInput( this.TemplateText, this.TargetText );
             this.currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
-            await this.testSerializer.SaveToFileAsync( this.currentTest, filePath ?? this.CurrentPath );
+            if ( !string.Equals( filePath, this.currentPath ) )
+            {
+                this.currentTest.OriginalSyntaxRoot = null;
+            }
+
+            this.currentPath = filePath;
+
+            await this.testSerializer.SaveToFileAsync( this.currentTest, this.currentPath );
         }
     }
 }
