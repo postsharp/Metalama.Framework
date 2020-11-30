@@ -29,6 +29,8 @@ namespace Caravela.Framework.Impl
             new( "CR0008", "Multidimensional arrays not supported.", "Build-time array {0} has more than one dimension.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor UnsupportedDictionaryComparer =
             new( "CR0009", "Custom equality comparers not supported.", "Build-time dictionary has an equality comparer {0} which is not supported. Only the default comparer and predefined string comparers are supported.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor TypeNotSerializable =
+            new( "CR0010", "Type not serializable.", "Build-time Type value {0} is of a form that is not supported for serialization.", caravelaCategory, Error, true );
         
         public static DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0099", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", caravelaCategory, Error, true );
