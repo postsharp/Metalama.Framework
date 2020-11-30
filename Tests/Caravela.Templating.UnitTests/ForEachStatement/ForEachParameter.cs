@@ -9,28 +9,22 @@ namespace Caravela.Templating.UnitTests
         private const string ForEachParameter_Template = @"
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 class Aspect
 {
   [Template]
   dynamic Template()
   {
-        int i = 0;
-        foreach ( var p in AdviceContext.Method.Parameters )
-        {
-            i++;
-        }
+      int i = 0;
+      foreach (var p in AdviceContext.Method.Parameters)
+      {
+          i++;
+      }
 
-        Console.WriteLine( i );
+      Console.WriteLine(i);
 
-        dynamic result = AdviceContext.Proceed();
-        return result;
+      dynamic result = AdviceContext.Proceed();
+      return result;
   }
 }
 ";

@@ -45,13 +45,11 @@ class TargetCode
 
         private const string IfMethodName_ExpectedOutput = @"
 {
-    int b;
-    b = 1;
-    Console.WriteLine(b);
-    int result;
-    result = 1;
+    Console.WriteLine(1);
+    __Void result;
     return result;
-}";
+}
+";
 
 
         [Fact]

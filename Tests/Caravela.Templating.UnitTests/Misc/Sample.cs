@@ -1,4 +1,4 @@
-﻿using Caravela.TestFramework.Templating;
+using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -61,8 +61,9 @@ class Aspect
         private const string Sample_Target = @"
 class TargetCode
 {
-    int Method( int a, int b )
+    int Method( int a, int b, out int c )
     {
+        c = a - b;
         return a + b;
     }
 }
@@ -70,20 +71,21 @@ class TargetCode
 
         private const string Sample_ExpectedOutput = @"
 {
-    var parameters = new object[2];
+    var parameters = new object[3];
     parameters[0] = a;
     parameters[1] = b;
-    Console.WriteLine(""Method(a = {0}, b = {1})"", parameters);
+    Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> )"", parameters);
     try
     {
         int result;
+        c = a - b;
         result = a + b;
-        Console.WriteLine(""Method(a = {0}, b = {1}) returned "" + result, parameters);
+        Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> ) returned "" + result, parameters);
         return result;
     }
     catch (Exception _e)
     {
-        Console.WriteLine(""Method(a = {0}, b = {1}) failed: "" + _e, parameters);
+        Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> ) failed: "" + _e, parameters);
         throw;
     }
 }
