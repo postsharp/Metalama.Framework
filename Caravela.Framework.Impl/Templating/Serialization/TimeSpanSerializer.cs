@@ -14,13 +14,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     QualifiedName(
                         IdentifierName("System"),
                         IdentifierName("TimeSpan")))
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList<ArgumentSyntax>(
+                .AddArgumentListArguments( 
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal(o.Ticks))))))
+                                    Literal(o.Ticks))))
                 .NormalizeWhitespace(  );
         }
     }

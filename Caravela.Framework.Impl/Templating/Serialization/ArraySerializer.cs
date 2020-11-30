@@ -25,15 +25,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             var lt = new List<ExpressionSyntax>();
             foreach ( var o in array )
             {
-                try
-                {
-                    RuntimeHelpers.EnsureSufficientExecutionStack();
-                }
-                catch
-                {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, o );
-                }
-
+                ObjectSerializer.ThrowIfStackTooDeep(o);
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( o ) );
             }
 
@@ -45,13 +37,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             SingletonList<ArrayRankSpecifierSyntax>(
                                 ArrayRankSpecifier(
                                     SingletonSeparatedList<ExpressionSyntax>(
-                                        LiteralExpression(
-                                            SyntaxKind.NumericLiteralExpression,
-                                            Literal( array.Length ) ) ) ) ) ) )
+                                        OmittedArraySizeExpression()))))
+                    )
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.ArrayInitializerExpression,
-                        InitializerFormer.CreateCommaSeparatedList( lt ) ) )
+                        SyntaxFactory.SeparatedList( lt ) ) )
                 .NormalizeWhitespace();
         }
     }

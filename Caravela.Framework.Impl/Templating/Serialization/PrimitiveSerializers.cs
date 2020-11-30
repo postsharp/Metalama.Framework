@@ -165,13 +165,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     QualifiedName(
                         IdentifierName("System"),
                         IdentifierName("UIntPtr")))
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
+                .AddArgumentListArguments( 
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.ToUInt64() ) ) ) ) ) );
+                                    Literal( o.ToUInt64() ) ) ) );
         }
     }
 
@@ -183,13 +181,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     QualifiedName(
                         IdentifierName("System"),
                         IdentifierName("IntPtr")))
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
+                .AddArgumentListArguments( 
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.ToInt64() ) ) ) ) ) );
+                                    Literal( o.ToInt64() ) ) ) );
         }
     }
 

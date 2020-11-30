@@ -32,10 +32,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                             IdentifierName( "System" ),
                             IdentifierName( "Type" ) ),
                         IdentifierName( "GetTypeFromHandle" ) ) )
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList<ArgumentSyntax>(
-                            Argument( token ) ) ) )
+                .AddArgumentListArguments( Argument( token ) )
                 .NormalizeWhitespace();
         }
     }

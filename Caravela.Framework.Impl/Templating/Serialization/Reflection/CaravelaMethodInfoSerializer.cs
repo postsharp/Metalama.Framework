@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaMethodInfoSerializer : TypedObjectSerializer<CaravelaMethodInfo>
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             string documentationId = DocumentationCommentId.CreateDeclarationId( info.Symbol );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle), documentationId );
             if ( info.DeclaringTypeSymbol != null )
-            {       
+            {
                 string typeDocumentationId = DocumentationCommentId.CreateDeclarationId( info.DeclaringTypeSymbol );
                 var typeToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle), typeDocumentationId );
                 return InvocationExpression(
@@ -31,17 +32,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                     IdentifierName( "Reflection" ) ),
                                 IdentifierName( "MethodBase" ) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SeparatedList<ArgumentSyntax>(
-                                new SyntaxNodeOrToken[]
-                                {
-                                    Argument(
-                                        methodToken ),
-                                    Token( SyntaxKind.CommaToken ), Argument(
-                                        typeToken )
-                                } ) ) )
-                    .NormalizeWhitespace();
+                    .AddArgumentListArguments(
+                        Argument( methodToken ), Argument( typeToken )
+                    ).NormalizeWhitespace();
             }
             else
             {
@@ -56,11 +49,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                     SyntaxFactory.IdentifierName( "Reflection" ) ),
                                 SyntaxFactory.IdentifierName( "MethodBase" ) ),
                             SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
-                                SyntaxFactory.Argument(
-                                    methodToken ) ) ) )
+                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) ) 
                     .NormalizeWhitespace();
             }
         }

@@ -16,27 +16,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             IdentifierName("System"),
                             IdentifierName("Globalization")),
                         IdentifierName("CultureInfo")))
-                .WithNewKeyword(
-                    Token(
-                        TriviaList(),
-                        SyntaxKind.NewKeyword,
-                        TriviaList(
-                            Space)))
-                .WithArgumentList(
-                    ArgumentList(
-                        SeparatedList<ArgumentSyntax>(
-                            new SyntaxNodeOrToken[]{
+                .AddArgumentListArguments(  
                                 Argument(
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal(o.Name))),
-                                Token(
-                                    TriviaList(),
-                                    SyntaxKind.CommaToken,
-                                    TriviaList(
-                                        Space)),
                                 Argument(
-                                    LiteralExpression(o.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression))})));
+                                    LiteralExpression(o.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression)))
+                .NormalizeWhitespace(  );
         }
     }
 }

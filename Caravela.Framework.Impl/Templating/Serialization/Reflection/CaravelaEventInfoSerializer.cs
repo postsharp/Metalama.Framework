@@ -11,10 +11,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
 
-        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer )
-        {
-            this._caravelaTypeSerializer = caravelaTypeSerializer;
-        }
+        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer ) => this._caravelaTypeSerializer = caravelaTypeSerializer;
+
         public override ExpressionSyntax Serialize( CaravelaEventInfo o )
         {
             string eventName = o.Symbol.Name;
@@ -24,10 +22,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                         SyntaxKind.SimpleMemberAccessExpression,
                         typeCreation,
                         IdentifierName("GetEvent")))
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList<ArgumentSyntax>(
-                            Argument(LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ))))
+                .AddArgumentListArguments( 
+                            Argument(LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ))
                 .NormalizeWhitespace();
         }
     }

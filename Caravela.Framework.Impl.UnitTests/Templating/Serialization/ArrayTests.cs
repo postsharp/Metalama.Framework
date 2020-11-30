@@ -13,21 +13,21 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestBasicArray()
         {
-            this.AssertSerialization( "new System.Int32[4]{0, 0, 0, 0}", new int[4]);
-            this.AssertSerialization( "new System.Int32[3]{10, 20, 30}", new int[3] { 10, 20, 30 });
-            this.AssertSerialization( "new EnumSpace.Mars.Moon[1]{EnumSpace.Mars.Moon.Deimos}", new[] {Mars.Moon.Deimos });
+            this.AssertSerialization( "new System.Int32[]{0, 0, 0, 0}", new int[4]);
+            this.AssertSerialization( "new System.Int32[]{10, 20, 30}", new int[3] { 10, 20, 30 });
+            this.AssertSerialization( "new EnumSpace.Mars.Moon[]{EnumSpace.Mars.Moon.Deimos}", new[] {Mars.Moon.Deimos });
         }
         
         [Fact]
         public void TestArrayOfLists()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>[1]{new System.Collections.Generic.List<System.Int32>{2}}",
+            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>[]{new System.Collections.Generic.List<System.Int32>{2}}",
                 new List<int>[]{new List<int>(){2}});
         }
         [Fact]
         public void TestArrayOfArrays()
         {
-            this.AssertSerialization( "new System.Int32[][1]{new System.Int32[2]{1, 2}}",
+            this.AssertSerialization( "new System.Int32[][]{new System.Int32[]{1, 2}}",
                 new int[][] {new int[] {1, 2}} );
         }
         
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             Assert.Throws<CaravelaException>( () =>
             {
-                this.AssertSerialization( "new System.Int32[1,1]{{2}}", new int[1, 1] {{2}} );
+                this.AssertSerialization( "new System.Int32[,]{{2}}", new int[1, 1] {{2}} );
             } );
         }
         

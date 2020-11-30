@@ -17,13 +17,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             IdentifierName( "System" ),
                             IdentifierName( "DateTime" ) ),
                         IdentifierName( "FromBinary" ) ) )
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
+                .AddArgumentListArguments( 
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.ToBinary() ) ) ) ) ) );
+                                    Literal( o.ToBinary() ) ) ) ) ;
         }
     }
 }

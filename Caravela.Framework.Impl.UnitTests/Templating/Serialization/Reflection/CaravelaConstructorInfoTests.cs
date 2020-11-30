@@ -39,13 +39,27 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             } );
         }
         
+        [Fact]
+        public void TestDefaultConstructor()
+        {
+            string code = "class Target {  }";
+            string serialized = this.SerializeConstructor( code );
+            Assert.Equal( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))", serialized );
+
+            TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
+            {
+                Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.Empty( info.GetParameters());
+            } );
+        }
+        
         // If there is no constructor, there is no constructor to serialize. We are at C#, not IL level.
         private string SerializeConstructor( string code )
         {
             var compilation  = TestBase.CreateCompilation( code );
             var namedTypes = compilation.DeclaredTypes.GetValue();
             INamedType type = namedTypes.Single( t => t.Name == "Target" );
-            IEnumerable<IMethod> methods = type.Methods.GetValue();
+            IEnumerable<IMethod> methods = type.AllMethods.GetValue();
             IMethod single = methods.Single( m => m.Name == ".ctor" );
             Method p = (single as Method)!;
             string actual = new CaravelaConstructorInfoSerializer().Serialize( new CaravelaConstructorInfo( p ) ).ToString();

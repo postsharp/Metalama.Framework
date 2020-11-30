@@ -49,18 +49,5 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             string actual = new CaravelaMethodInfoSerializer().Serialize( new CaravelaMethodInfo( m ) ).ToString();
             return actual;
         }
-
-        
-        class A
-        {
-            public int M() => 42;
-        }
-        
-        [Fact]
-        public void TestNewMethodInfo()
-        {
-            var methodInfo = System.Reflection.MethodBase.GetMethodFromHandle( typeof(A).GetMethod( "M" ).MethodHandle );
-            Assert.Equal( 42, methodInfo.Invoke( new A(), null ) );
-        }
     }
 }

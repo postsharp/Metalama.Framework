@@ -76,19 +76,25 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             this.AssertSerialization( "EnumSpace.World.Venus", World.Venus );
             this.AssertSerialization( "EnumSpace.Mars.Moon.Phobos", Mars.Moon.Phobos );
         }
+        
+        [Fact]
+        public void TestNegativeEnum()
+        {
+            this.AssertSerialization( "(EnumSpace.LongEnum)(-1L)", (LongEnum) (- 1) );
+        }
 
         [Fact]
         public void TestEnumsFlags()
         {
-            this.AssertSerialization( "(EnumSpace.WorldFeatures)9UL", WorldFeatures.Icy | WorldFeatures.Volcanic );
-            this.AssertSerialization( "(EnumSpace.HumanFeatures)9UL", HumanFeatures.Tall | HumanFeatures.Wise );
+            this.AssertSerialization( "(EnumSpace.WorldFeatures)(9UL)", WorldFeatures.Icy | WorldFeatures.Volcanic );
+            this.AssertSerialization( "(EnumSpace.HumanFeatures)(9UL)", HumanFeatures.Tall | HumanFeatures.Wise );
             this.AssertSerialization( "EnumSpace.WorldFeatures.Icy", WorldFeatures.Icy );
         }
 
         [Fact]
         public void TestEnumsGenerics()
         {
-            this.AssertSerialization( "(EnumSpace.Box<System.Int32>.Color)12UL", Box<int>.Color.Blue | Box<int>.Color.Red );
+            this.AssertSerialization( "(EnumSpace.Box<System.Int32>.Color)(12L)", Box<int>.Color.Blue | Box<int>.Color.Red );
             this.AssertSerialization( "EnumSpace.Box<System.Int32>.Color.Blue", Box<int>.Color.Blue );
             this.AssertSerialization( "EnumSpace.Box<System.Int32>.InnerBox.Shiny.Yes", Box<int>.InnerBox.Shiny.Yes );
         }
@@ -96,7 +102,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestArray()
         {
-            this.AssertSerialization( "new System.Int32[2]{1, 2}", new int[] { 1,2} );
+            this.AssertSerialization( "new System.Int32[]{1, 2}", new int[] { 1,2} );
         }
 
         [Fact]
@@ -114,6 +120,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 
 namespace EnumSpace
 {
+    public enum LongEnum
+    {
+        First,
+        Second
+    }
     class Mars
     {
         public enum Moon

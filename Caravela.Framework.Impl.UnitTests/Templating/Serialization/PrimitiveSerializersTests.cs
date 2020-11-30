@@ -115,6 +115,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             var serializer = new DecimalSerializer();
             Assert.Equal( "42M", serializer.Serialize( 42 ).ToString() );
+            Assert.Equal( "1.0M", serializer.Serialize( 1.0M ).ToString() );
+            Assert.Equal( "1.00M", serializer.Serialize( 1.00M ).ToString() );
             Assert.Equal( "4.2M", serializer.Serialize( 4.2M ).ToString() );
             Assert.Equal( "-340282300M", serializer.Serialize( -3.402823E+8M ).ToString() );
             Assert.Equal( "340282300M", serializer.Serialize( 3.402823E+8M).ToString() );

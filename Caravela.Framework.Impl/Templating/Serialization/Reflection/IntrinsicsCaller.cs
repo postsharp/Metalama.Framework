@@ -25,13 +25,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 SyntaxFactory.IdentifierName( "Compiler" ) ),
                             SyntaxFactory.IdentifierName( "Intrinsics" ) ),
                         SyntaxFactory.IdentifierName( methodName ) ) )
-                .WithArgumentList(
-                    SyntaxFactory.ArgumentList(
-                        SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                .AddArgumentListArguments( 
                             SyntaxFactory.Argument(
                                 SyntaxFactory.LiteralExpression(
                                     SyntaxKind.StringLiteralExpression,
-                                    SyntaxFactory.Literal( documentationId ) ) ) ) ) );
+                                    SyntaxFactory.Literal( documentationId ) ) ) );
         } 
     }
 }

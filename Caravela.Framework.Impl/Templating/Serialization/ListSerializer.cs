@@ -22,14 +22,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             List<ExpressionSyntax> lt = new List<ExpressionSyntax>();
             foreach ( var obj in (IEnumerable) o)
             {
-                try
-                {
-                    RuntimeHelpers.EnsureSufficientExecutionStack();
-                }
-                catch
-                {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
-                }
+                ThrowIfStackTooDeep(obj);
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
             }
             return ObjectCreationExpression(
@@ -49,7 +42,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     .WithInitializer(
                     SyntaxFactory.InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        InitializerFormer.CreateCommaSeparatedList( lt ) ) )
+                        SyntaxFactory.SeparatedList( lt ) ) )
                 .NormalizeWhitespace(  );
         }
     }

@@ -23,52 +23,33 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             IParameterSymbol symbol = o.Symbol;
             ICodeElement container = o.ContainingMember;
             IMember containerAsMember = container as IMember;
-            Method? method = containerAsMember as Method;
-            Property? property = containerAsMember as Property;
+            var method = containerAsMember as Method;
+            var property = containerAsMember as Property;
             int ordinal = o.Symbol.Ordinal;
-            
+
             // Emit load method
             // Emit load parameter info
-            if ( method != null )
+            if ( method == null && property != null )
             {
-                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( method ) );
-
-                return ElementAccessExpression(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                retrieveMethodBase,
-                                IdentifierName( "GetParameters" ) ) ) )
-                    .WithArgumentList(
-                        BracketedArgumentList(
-                            SingletonSeparatedList<ArgumentSyntax>(
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.NumericLiteralExpression,
-                                        Literal( ordinal ) ) ) ) ) )
-                    .NormalizeWhitespace();
-            }
-            else if (property != null)
-            {
-                var setter = (property.Setter as Method);
-                var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( setter ) );
-                return ElementAccessExpression(
-                        InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                retrieveMethodBase,
-                                IdentifierName( "GetParameters" ) ) ) )
-                    .WithArgumentList(
-                        BracketedArgumentList(
-                            SingletonSeparatedList<ArgumentSyntax>(
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.NumericLiteralExpression,
-                                        Literal( ordinal ) ) ) ) ) )
-                    .NormalizeWhitespace();
+                method = property.Setter as Method;
             }
 
-            throw new NotImplementedException();
+            var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CaravelaMethodInfo( method! ) );
+
+            return ElementAccessExpression(
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            retrieveMethodBase,
+                            IdentifierName( "GetParameters" ) ) ) )
+                .WithArgumentList(
+                    BracketedArgumentList(
+                        SingletonSeparatedList<ArgumentSyntax>(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NumericLiteralExpression,
+                                    Literal( ordinal ) ) ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

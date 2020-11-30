@@ -52,6 +52,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this.RegisterSerializer( typeof(DateTime), new DateTimeSerializer() );
             this.RegisterSerializer( typeof(Guid), new GuidSerializer() );
             this.RegisterSerializer( typeof(TimeSpan), new TimeSpanSerializer() );
+            this.RegisterSerializer( typeof(DateTimeOffset), new DateTimeOffsetSerializer() );
             this.RegisterSerializer( typeof(CultureInfo), new CultureInfoSerializer() ); 
             
             // Collections

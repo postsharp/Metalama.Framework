@@ -84,24 +84,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             IdentifierName( comparerName ) )
                         .NormalizeWhitespace();
 
-                    creationExpression = creationExpression.WithArgumentList(
-                        ArgumentList(
-                            SingletonSeparatedList(
-                                Argument( comparerExpression ) ) ) );
+                    creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
                 }
             }
             List<InitializerExpressionSyntax> lt = new List<InitializerExpressionSyntax>();
             IDictionary nonGenericDictionary = (IDictionary) o;
             foreach ( var key in nonGenericDictionary.Keys)
             {
-                try
-                {
-                    RuntimeHelpers.EnsureSufficientExecutionStack();
-                }
-                catch
-                {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, o );
-                }
+                ThrowIfStackTooDeep( o );
 
                 var value = nonGenericDictionary[key];
                 lt.Add( InitializerExpression(
@@ -115,7 +105,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
             creationExpression = creationExpression.WithInitializer(
                 InitializerExpression(
-                    SyntaxKind.CollectionInitializerExpression, InitializerFormer.CreateCommaSeparatedList( lt ) )
+                    SyntaxKind.CollectionInitializerExpression, 
+                    SyntaxFactory.SeparatedList<ExpressionSyntax>( lt ) )
                     )
                 .NormalizeWhitespace( );
             return creationExpression;

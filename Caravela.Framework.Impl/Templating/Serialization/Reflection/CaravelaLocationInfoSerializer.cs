@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             ExpressionSyntax propertyInfo;
             if ( o.Property != null )
             {
-                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.DeclaringType ));
+                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.DeclaringType ) );
                 if ( o.Property.Parameters.Count == 0 )
                 {
                     propertyInfo = InvocationExpression(
@@ -30,17 +30,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 typeCreation,
                                 IdentifierName( "GetProperty" ) ) )
-                        .WithArgumentList(
-                            ArgumentList(
-                                SingletonSeparatedList(
-                                    Argument(
-                                        LiteralExpression(
-                                            SyntaxKind.StringLiteralExpression,
-                                            Literal( o.Property.Name ) ) ) ) ) );
+                        .AddArgumentListArguments( Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( o.Property.Name ) ) ) );
                 }
                 else
                 {
-                    var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.Type ));
+                    var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.Type ) );
                     List<ExpressionSyntax> parameterTypes = new List<ExpressionSyntax>();
                     foreach ( IParameter parameter in o.Property.Parameters )
                     {
@@ -52,33 +49,29 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     typeCreation,
                                     IdentifierName( "GetProperty" ) ) )
-                            .WithArgumentList(
-                                ArgumentList(
-                                    SeparatedList<ArgumentSyntax>(
-                                        new SyntaxNodeOrToken[]
-                                        {
-                                            Argument(
-                                                LiteralExpression(
-                                                    SyntaxKind.StringLiteralExpression,
-                                                    Literal( "Item" ) ) ),
-                                            Token( SyntaxKind.CommaToken ), Argument(
-                                                returnTypeCreation ),
-                                            Token( SyntaxKind.CommaToken ), Argument(
-                                                ArrayCreationExpression(
-                                                        ArrayType(
-                                                                QualifiedName(
-                                                                    IdentifierName("System"),
-                                                                    IdentifierName("Type")) )
-                                                            .WithRankSpecifiers(
-                                                                SingletonList(
-                                                                    ArrayRankSpecifier(
-                                                                        SingletonSeparatedList<ExpressionSyntax>(
-                                                                            OmittedArraySizeExpression() ) ) ) ) )
-                                                    .WithInitializer(
-                                                        InitializerExpression(
-                                                            SyntaxKind.ArrayInitializerExpression,
-                                                            InitializerFormer.CreateCommaSeparatedList( parameterTypes ) ) ) )
-                                        } ) ) )
+                            .AddArgumentListArguments(
+                                Argument(
+                                    LiteralExpression(
+                                        SyntaxKind.StringLiteralExpression,
+                                        Literal( "Item" ) ) ),
+                                Argument(
+                                    returnTypeCreation ),
+                                Argument(
+                                    ArrayCreationExpression(
+                                            ArrayType(
+                                                    QualifiedName(
+                                                        IdentifierName( "System" ),
+                                                        IdentifierName( "Type" ) ) )
+                                                .WithRankSpecifiers(
+                                                    SingletonList(
+                                                        ArrayRankSpecifier(
+                                                            SingletonSeparatedList<ExpressionSyntax>(
+                                                                OmittedArraySizeExpression() ) ) ) ) )
+                                        .WithInitializer(
+                                            InitializerExpression(
+                                                SyntaxKind.ArrayInitializerExpression,
+                                                SyntaxFactory.SeparatedList( parameterTypes ) ) ) )
+                            )
                         ;
                 }
             }
@@ -100,27 +93,19 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                     IdentifierName( "Reflection" ) ),
                                 IdentifierName( "FieldInfo" ) ),
                             IdentifierName( "GetFieldFromHandle" ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SeparatedList<ArgumentSyntax>(
-                                new SyntaxNodeOrToken[]
-                                {
-                                    Argument( fieldToken ),
-                                    Token( SyntaxKind.CommaToken ), 
-                                    Argument( containingType )
-                                } ) ) )
+                    .AddArgumentListArguments(
+                        Argument( fieldToken ),
+                        Argument( containingType ) )
                     .NormalizeWhitespace();
             }
+
             return ObjectCreationExpression(
                     QualifiedName(
                         QualifiedName(
                             IdentifierName( "Caravela" ),
                             IdentifierName( "Framework" ) ),
                         IdentifierName( "LocationInfo" ) ) )
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument( propertyInfo ) ) ) )
+                .AddArgumentListArguments( Argument( propertyInfo ) )
                 .NormalizeWhitespace();
         }
     }
