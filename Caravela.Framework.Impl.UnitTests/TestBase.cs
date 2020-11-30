@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -35,6 +36,21 @@ namespace Caravela.Framework.Impl.UnitTests
             var roslynCompilation = CreateRoslynCompilation( code );
 
             return CompilationFactory.CreateCompilation( roslynCompilation );
+        }
+
+        public static object? ExecuteExpression(string context, string expression)
+        {
+            string expressionContainer = $@"
+class Expression
+{{
+    public static object Execute() => {expression};
+}}";
+
+            var assemblyPath = CaravelaCompiler.CompileAssembly( context, expressionContainer );
+
+            var assembly = Assembly.LoadFile( assemblyPath );
+
+            return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
-                var driverFactory = new AspectDriverFactory( compilation, compileTimeAssemblyLoader );
+                var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 

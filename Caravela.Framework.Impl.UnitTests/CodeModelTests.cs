@@ -256,11 +256,16 @@ class C
     int ReadWrite { get => 0; set {} }
     int ReadOnly { get => 0; }
     int WriteOnly { set {} }
+    int field;
 }";
 
             var compilation = CreateCompilation(code);
 
-            // TODO
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var propertyNames = type.Properties.Select( p => p.Name ).GetValue();
+
+            Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly", "field" }, propertyNames );
         }
 
         [Fact]

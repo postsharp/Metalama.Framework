@@ -40,7 +40,7 @@
   
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
-      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="!$([System.String]::Copy('%(Name)').StartsWith('Caravela'))" />
+      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Type) != 'project'" />
     </ItemGroup>
     
     <PropertyGroup>
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.CompileTime
       </PackageVersionsCode>
     </PropertyGroup>
     
-    <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" Lines="$(PackageVersionsCode)" />
+    <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
   </Target>
 
 </Project>
