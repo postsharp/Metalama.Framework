@@ -15,6 +15,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         private readonly ObjectSerializers _serializers;
 
         public DictionarySerializer( ObjectSerializers serializers ) => this._serializers = serializers;
+        
+        static object GetDefaultComparer<TK, TV>(Dictionary<TK, TV> dictionary) => EqualityComparer<TK>.Default;
 
         public override ExpressionSyntax SerializeObject( object o )
         {
@@ -35,12 +37,17 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                                 SeparatedList<TypeSyntax>(
                                     new SyntaxNodeOrToken[]
                                     {
-                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( keyType ) ), Token( SyntaxKind.CommaToken ), ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) ),
+                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( keyType ) ),
+                                        Token( SyntaxKind.CommaToken ), 
+                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) ),
                                     } ) ) ) ) );
+            
+            dynamic dictionary = o;
+            object defaultComparer = GetDefaultComparer( dictionary );
+            object actualComparer = dictionary.Comparer;
             
             if ( keyType == typeof(string) )
             {
-                dynamic dictionary = o;
                 string? comparerName = null;
                 if ( dictionary.Comparer is StringComparer sc )
                 {
@@ -60,18 +67,29 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     {
                         comparerName = "InvariantCultureIgnoreCase";
                     }
+                    else if ( sc.Equals( StringComparer.CurrentCulture ) ) 
+                    {
+                        comparerName = "CurrentCulture";
+                    }
+                    else if ( sc.Equals( StringComparer.CurrentCultureIgnoreCase ) )
+                    {
+                        comparerName = "CurrentCultureIgnoreCase";
+                    }
                     else
                     {
                         // Unknown string comparer
+                        throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, sc );
                     }
+                }
+                else if (dictionary.Comparer.Equals( EqualityComparer<string>.Default ))
+                {
+                    // Unknown string comparer
                 }
                 else
                 {
                     // Unknown custom comparer
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
                 }
-                
-                // For the unknown comparers, I don't really want to throw an exception because CurrentCulture and even the default comparer aren't easily recognized, so 
-                // we would force the user to pick a comparer, when the default comparer is usually good.
 
                 if ( comparerName != null )
                 {
@@ -86,6 +104,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
                     creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
                 }
+            }
+            else if ( actualComparer != defaultComparer )
+            {                   
+                throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
             }
             List<InitializerExpressionSyntax> lt = new List<InitializerExpressionSyntax>();
             IDictionary nonGenericDictionary = (IDictionary) o;

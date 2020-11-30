@@ -44,6 +44,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                         parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( parameter.Type ) ) );
                     }
 
+                    string propertyName = o.Property.Symbol.MetadataName;
+
                     propertyInfo = InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
@@ -53,7 +55,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 Argument(
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
-                                        Literal( "Item" ) ) ),
+                                        Literal( propertyName ) ) ),
                                 Argument(
                                     returnTypeCreation ),
                                 Argument(

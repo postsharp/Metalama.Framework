@@ -3,6 +3,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -64,12 +65,35 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target { public string this[int target] {get{return default;}} }";
             string serialized = this.SerializeIndexerWithTarget( code );
+            
             Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetProperty(""Item"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Item", info.Name );
                 Assert.Equal( typeof(string), info.PropertyType );
+                Assert.Null( info.SetMethod );
+                Assert.NotNull( info.GetMethod );
+                Assert.Equal( 1, info.GetIndexParameters().Length );
+            } );
+        }
+        
+        [Fact]
+        public void TestIndexerOnString()
+        {
+            string code = "class Target { public string this[int target] {get{return default;}} }";
+            ICompilation compilation = TestBase.CreateCompilation( code );
+            IEnumerable<INamedType> referencedTypes = compilation.DeclaredAndReferencedTypes.GetValue();
+            INamedType stringType = referencedTypes.Single( t => t.Name == "String" );
+            IEnumerable<IProperty> properties = stringType.AllProperties.GetValue();
+            IProperty property = properties.Single( p => p.Name == "this[]" );
+            string serialized = new CaravelaLocationInfoSerializer(new ObjectSerializers()).Serialize( new CaravelaLocationInfo( property as Property ) ).ToString();
+            Assert.Equal( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );
+
+            TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
+            {
+                Assert.Equal( "Chars", info.Name );
+                Assert.Equal( typeof(char), info.PropertyType );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
                 Assert.Equal( 1, info.GetIndexParameters().Length );

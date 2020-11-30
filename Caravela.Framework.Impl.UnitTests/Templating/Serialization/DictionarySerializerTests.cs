@@ -73,18 +73,47 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
                 new Dictionary<string, int>(StringComparer.InvariantCulture) {{"A", 8}} );
             this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>(System.StringComparer.InvariantCultureIgnoreCase)\r\n{{\"A\", 8}}",
                 new Dictionary<string, int>(StringComparer.InvariantCultureIgnoreCase) {{"A", 8}} );
-            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>{{\"A\", 8}}",
+            
+            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>(System.StringComparer.CurrentCulture)\r\n{{\"A\", 8}}",
                 new Dictionary<string, int>(StringComparer.CurrentCulture) {{"A", 8}} );
-            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>{{\"A\", 8}}",
+            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>(System.StringComparer.CurrentCultureIgnoreCase)\r\n{{\"A\", 8}}",
                 new Dictionary<string, int>(StringComparer.CurrentCultureIgnoreCase) {{"A", 8}} );
+            
+            
+            // default comparer:
+            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Int32>{{\"A\", 8}}",
+                new Dictionary<string, int> {{"A", 8}} );
         }
 
         [Fact]
         public void TestStringDictionaryWithUnknownComparer()
         {   
             // fallback to default comparer
-            this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
-                new Dictionary<string, object>(StringComparer.Create( new CultureInfo( "cs-CZ" ), false)) );
+            Assert.Throws<CaravelaException>( () =>
+            {
+                this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
+                    new Dictionary<string, object>( StringComparer.Create( new CultureInfo( "sk-SK" ), false ) ) );
+            } );
+        }
+        [Fact]
+        public void TestStringDictionaryWithUnknownComparer2()
+        {
+            Assert.Throws<CaravelaException>( () =>
+            {
+                // fallback to default comparer
+                this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
+                    new Dictionary<string, object>( new CustomComparer<string>() ) );
+            } );
+        }
+        [Fact]
+        public void TestIntDictionaryWithUnknownComparer()
+        {
+            Assert.Throws<CaravelaException>( () =>
+            {
+                // fallback to default comparer
+                this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.Int32, System.Object>{}",
+                    new Dictionary<int, object>( new CustomComparer<int>() ) {{2, 8}} );
+            } );
         }
 
 
@@ -94,5 +123,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             string creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
+    }
+
+    public class CustomComparer<T> : IEqualityComparer<T>
+    {
+        public bool Equals( T x, T y ) => true;
+
+        public int GetHashCode( T obj ) => 0;
     }
 }

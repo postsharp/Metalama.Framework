@@ -17,18 +17,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         public override ExpressionSyntax Serialize( CaravelaParameterInfo o )
         {
-            // TODO generics
-            // TODO properties
-            // TODO lots of side cases
-            IParameterSymbol symbol = o.Symbol;
             ICodeElement container = o.ContainingMember;
             IMember containerAsMember = container as IMember;
             var method = containerAsMember as Method;
             var property = containerAsMember as Property;
             int ordinal = o.Symbol.Ordinal;
 
-            // Emit load method
-            // Emit load parameter info
             if ( method == null && property != null )
             {
                 method = property.Setter as Method;
