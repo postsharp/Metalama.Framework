@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     internal class CaravelaMethodInfo : MethodInfo, ICaravelaMethodOrConstructorInfo
     {
         public ISymbol Symbol { get; }
-        public ISymbol? DeclaringTypeSymbol { get; }
+        public ITypeSymbol? DeclaringTypeSymbol { get; }
 
         public CaravelaMethodInfo( Method method )
         {
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             return new CaravelaMethodInfo( (method as Method)! );
         }
-        public static ISymbol? FindDeclaringTypeSymbol( Method method )
+        public static ITypeSymbol? FindDeclaringTypeSymbol( Method method )
         {
             ITypeInternal methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
             ITypeSymbol typeSymbol = methodDeclaringType.TypeSymbol;

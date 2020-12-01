@@ -13,13 +13,22 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaLocationInfoSerializer : TypedObjectSerializer<CaravelaLocationInfo>
     {
+        // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
+        // binding flags for private indexers, and that overload is complicated.
+        
         private readonly ObjectSerializers _serializers;
+        private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
 
-        public CaravelaLocationInfoSerializer( ObjectSerializers serializers ) => this._serializers = serializers;
+        public CaravelaLocationInfoSerializer( ObjectSerializers serializers, CaravelaTypeSerializer caravelaTypeSerializer )
+        {
+            this._serializers = serializers;
+            this._caravelaTypeSerializer = caravelaTypeSerializer;
+        }
 
         public override ExpressionSyntax Serialize( CaravelaLocationInfo o )
         {
             ExpressionSyntax propertyInfo;
+            var allBindingFlags = CreateBindingFlags();
             if ( o.Property != null )
             {
                 var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.DeclaringType ) );
@@ -30,10 +39,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 typeCreation,
                                 IdentifierName( "GetProperty" ) ) )
-                        .AddArgumentListArguments( Argument(
-                            LiteralExpression(
-                                SyntaxKind.StringLiteralExpression,
-                                Literal( o.Property.Name ) ) ) );
+                        .AddArgumentListArguments(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( o.Property.Name ) ) ),
+                            Argument( allBindingFlags ) );
                 }
                 else
                 {
@@ -79,25 +90,19 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             }
             else
             {
-                Field f = o.Field!;
-                string fieldCommentId = DocumentationCommentId.CreateDeclarationId( f.Symbol );
-                string typeCommentId = DocumentationCommentId.CreateDeclarationId( ((f.ContainingElement as ITypeInternal)!).TypeSymbol );
-                var containingType = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), typeCommentId );
-                var fieldToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeFieldHandle), fieldCommentId );
+                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Field.DeclaringType ) );
                 propertyInfo = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName( "System" ),
-                                    IdentifierName( "Reflection" ) ),
-                                IdentifierName( "FieldInfo" ) ),
-                            IdentifierName( "GetFieldFromHandle" ) ) )
+                            typeCreation,
+                            IdentifierName( "GetField" ) ) )
                     .AddArgumentListArguments(
-                        Argument( fieldToken ),
-                        Argument( containingType ) )
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( o.Field.Name ) ) ),
+                        Argument( allBindingFlags )
+                    )
                     .NormalizeWhitespace();
             }
 
@@ -110,5 +115,69 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 .AddArgumentListArguments( Argument( propertyInfo ) )
                 .NormalizeWhitespace();
         }
+
+        private static BinaryExpressionSyntax CreateBindingFlags()
+        {
+            BinaryExpressionSyntax allBindingFlags = BinaryExpression(
+                SyntaxKind.BitwiseOrExpression,
+                BinaryExpression(
+                    SyntaxKind.BitwiseOrExpression,
+                    BinaryExpression(
+                        SyntaxKind.BitwiseOrExpression,
+                        BinaryExpression(
+                            SyntaxKind.BitwiseOrExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName( "System" ),
+                                        IdentifierName( "Reflection" ) ),
+                                    IdentifierName( "BindingFlags" ) ),
+                                IdentifierName( "DeclaredOnly" ) ),
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName( "System" ),
+                                        IdentifierName( "Reflection" ) ),
+                                    IdentifierName( "BindingFlags" ) ),
+                                IdentifierName( "Public" ) ) ),
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "BindingFlags" ) ),
+                            IdentifierName( "NonPublic" ) ) ),
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                IdentifierName( "System" ),
+                                IdentifierName( "Reflection" ) ),
+                            IdentifierName( "BindingFlags" ) ),
+                        IdentifierName( "Static" ) ) ),
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName( "System" ),
+                            IdentifierName( "Reflection" ) ),
+                        IdentifierName( "BindingFlags" ) ),
+                    IdentifierName( "Instance" ) ) );
+            return allBindingFlags;
+        }
     }
 }
+

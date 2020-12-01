@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var compilation  = TestBase.CreateCompilation( code );
             IMethod single = compilation.DeclaredTypes.GetValue().Single(t => t.Name == "Target").Methods.GetValue().Single( m => m.Name == "Method" );
             Method m = (single as Method)!;
-            string actual = new CaravelaMethodInfoSerializer().Serialize( new CaravelaMethodInfo( m ) ).ToString();
+            string actual = new CaravelaMethodInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaMethodInfo( m ) ).ToString();
             return actual;
         }
     }

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             return this.CreateTypeCreationExpressionFromSymbolRecursive( o.Symbol );
         }
 
-        private ExpressionSyntax CreateTypeCreationExpressionFromSymbolRecursive( ITypeSymbol symbol )
+        public ExpressionSyntax CreateTypeCreationExpressionFromSymbolRecursive( ITypeSymbol symbol )
         {
             if ( symbol.TypeKind == TypeKind.Array )
             {
@@ -35,23 +35,39 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 var basicType = namedSymbol.ConstructUnboundGenericType();
                 List<ExpressionSyntax> arguments = new List<ExpressionSyntax>();
                 bool hasTypeParameterSymbols = false;
-                foreach ( ITypeSymbol typeSymbol in namedSymbol.TypeArguments )
+                INamedTypeSymbol self = namedSymbol;
+                List<INamedTypeSymbol> chain = new List<INamedTypeSymbol>();
+                while ( self != null )
                 {
-                    if ( typeSymbol is ITypeParameterSymbol )
+                    chain.Add( self );
+                    self = self.ContainingType;
+                }
+
+                chain.Reverse();
+                foreach ( INamedTypeSymbol layer in chain )
+                {
+
+
+                    foreach ( ITypeSymbol typeSymbol in layer.TypeArguments )
                     {
-                        if ( arguments.Count > 0 )
+                        if ( typeSymbol is ITypeParameterSymbol )
                         {
-                            throw new CaravelaException( GeneralDiagnosticDescriptors.TypeNotSerializable, namedSymbol );
+                            if ( arguments.Count > 0 )
+                            {
+                                throw new CaravelaException( GeneralDiagnosticDescriptors.TypeNotSerializable, layer );
+                            }
+
+                            hasTypeParameterSymbols = true;
                         }
-                        hasTypeParameterSymbols = true;
-                    }
-                    else
-                    {
-                        if ( hasTypeParameterSymbols )
+                        else
                         {
-                            throw new CaravelaException( GeneralDiagnosticDescriptors.TypeNotSerializable, namedSymbol );
+                            if ( hasTypeParameterSymbols )
+                            {
+                                throw new CaravelaException( GeneralDiagnosticDescriptors.TypeNotSerializable, layer );
+                            }
+
+                            arguments.Add( this.CreateTypeCreationExpressionFromSymbolRecursive( typeSymbol ) );
                         }
-                        arguments.Add( this.CreateTypeCreationExpressionFromSymbolRecursive( typeSymbol ) );
                     }
                 }
 
@@ -74,14 +90,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         private static ExpressionSyntax CreateTypeCreationExpressionFromSymbolLeaf( ITypeSymbol typeSymbol )
         {
-            try
-            {
-                DocumentationCommentId.CreateDeclarationId( typeSymbol );
-            }
-            catch ( Exception ex )
-            {
-                
-            }
             string documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
             var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Compiler.Intrinsics.GetRuntimeTypeHandle), documentationId );
             return InvocationExpression(

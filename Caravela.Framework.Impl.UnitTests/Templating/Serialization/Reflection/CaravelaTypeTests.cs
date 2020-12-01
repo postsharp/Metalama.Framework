@@ -5,17 +5,18 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
-    public class CaravelaTypeTests: TestBase
+    public class CaravelaTypeTests: ReflectionTestBase
     {  
         [Fact]
         public void TestType()
         {
             string code = "class Target {  }";
             string serialized = this.SerializeType( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target<TKey,TValue> {  }";
             string serialized = this.SerializeType( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
@@ -40,7 +41,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target { int[] Property { get; set; } }";
             string serialized = this.SerializeTypeOfProperty( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()", serialized );
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
@@ -64,6 +65,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" ).Type;
             string actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single )  ).ToString();
             return actual;
+        }
+
+        public CaravelaTypeTests(ITestOutputHelper helper) : base(helper)
+        {
         }
     }
 }

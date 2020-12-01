@@ -5,17 +5,18 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
-    public class CaravelaEventInfoTests : TestBase
+    public class CaravelaEventInfoTests : ReflectionTestBase
     {
         [Fact]
         public void TestFieldLikeEvent()
         {
             string code = "class Target { public event System.Action Activated; }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
@@ -31,7 +32,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target { public event System.Action Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
@@ -47,7 +48,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
             string serialized = this.SerializeEvent( code );
-            Assert.Equal( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetEvent(""Activated"")", serialized );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
@@ -65,6 +66,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             Event e = (single as Event)!;
             string actual = new CaravelaEventInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
             return actual;
+        }
+
+        public CaravelaEventInfoTests(ITestOutputHelper helper) : base(helper)
+        {
         }
     }
 }

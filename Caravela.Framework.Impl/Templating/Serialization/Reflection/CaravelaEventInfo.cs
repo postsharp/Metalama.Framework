@@ -1,4 +1,5 @@
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -11,6 +12,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             this.Symbol = symbol;
             this.ContainingType = containingType;
+        }
+        public static CaravelaEventInfo Create( IEvent @event )
+        {
+            Event fullEvent = @event as Event;
+            return new CaravelaEventInfo( fullEvent.Symbol, fullEvent.ContainingElement as IType );
         }
 
         public ISymbol Symbol { get; }
@@ -32,5 +38,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         public override MethodInfo GetRemoveMethod( bool nonPublic ) => throw new NotImplementedException();
 
         public override EventAttributes Attributes => throw new NotImplementedException();
+
     }
 }

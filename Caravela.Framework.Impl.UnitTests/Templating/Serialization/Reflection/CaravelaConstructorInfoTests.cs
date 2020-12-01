@@ -6,17 +6,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
-    public class CaravelaConstructorInfoTests : TestBase
+    public class CaravelaConstructorInfoTests : ReflectionTestBase
     {  
         [Fact]
         public void TestConstructor()
         {
             string code = "class Target { public Target(int hello) { } }";
             string serialized = this.SerializeConstructor( code );
-            Assert.Equal( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)""))", serialized );
+            AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)""))", serialized );
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
@@ -30,7 +31,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target<T> where T: struct { public Target(T hello) { } }";
             string serialized = this.SerializeConstructor( code );
-            Assert.Equal( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))", serialized );
+            AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)", serialized );
            
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
@@ -44,7 +45,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             string code = "class Target {  }";
             string serialized = this.SerializeConstructor( code );
-            Assert.Equal( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))", serialized );
+            AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))", serialized );
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
@@ -62,8 +63,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             IEnumerable<IMethod> methods = type.AllMethods.GetValue();
             IMethod single = methods.Single( m => m.Name == ".ctor" );
             Method p = (single as Method)!;
-            string actual = new CaravelaConstructorInfoSerializer().Serialize( new CaravelaConstructorInfo( p ) ).ToString();
+            string actual = new CaravelaConstructorInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaConstructorInfo( p ) ).ToString();
             return actual;
+        }
+
+        public CaravelaConstructorInfoTests(ITestOutputHelper helper) : base(helper)
+        {
         }
     }
 }

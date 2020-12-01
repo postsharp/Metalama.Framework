@@ -60,15 +60,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this.RegisterSerializer( typeof(Dictionary<,>), new DictionarySerializer(this) ); 
             
             // Reflection types
-            CaravelaMethodInfoSerializer methodInfoSerializer = new CaravelaMethodInfoSerializer();
             CaravelaTypeSerializer typeSerializer = new CaravelaTypeSerializer();
+            CaravelaMethodInfoSerializer methodInfoSerializer = new CaravelaMethodInfoSerializer(typeSerializer);
             this.RegisterSerializer( typeof(CaravelaType), typeSerializer );
             this.RegisterSerializer( typeof(CaravelaMethodInfo), methodInfoSerializer );
-            this.RegisterSerializer( typeof(CaravelaConstructorInfo), new CaravelaConstructorInfoSerializer() );
+            this.RegisterSerializer( typeof(CaravelaConstructorInfo), new CaravelaConstructorInfoSerializer(typeSerializer) );
             this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer(typeSerializer) );
             this.RegisterSerializer( typeof(CaravelaParameterInfo), new CaravelaParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer(methodInfoSerializer) );
-            this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this) );
+            this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this, typeSerializer) );
         }
         
         /// <summary>
