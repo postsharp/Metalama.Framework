@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.UnitTests
 
             if ( !ignoreErrors )
             {
-                var diagostics = roslynCompilation.GetDiagnostics();
-                if ( diagostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
+                var diagnostics = roslynCompilation.GetDiagnostics();
+                if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
                 {
-                    var lines = diagostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
+                    var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
 
                     throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
                 }

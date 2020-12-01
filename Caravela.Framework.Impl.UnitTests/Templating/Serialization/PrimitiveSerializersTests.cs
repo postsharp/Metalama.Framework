@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             Assert.Equal( "3.1415927F", serializer.Serialize( 3.1415927F ).ToString() );
             Assert.Equal( "-3.402823E+38F", serializer.Serialize( -3.402823E+38F ).ToString() );
             Assert.Equal( "3.402823E+38F", serializer.Serialize( 3.402823E+38F).ToString() );
-            Assert.Equal( "1E-45F", serializer.Serialize( float.Epsilon ).ToString() ); // TODO Possibly incorrect. Actual precision can be higher?
+            Assert.Equal( "1E-45F", serializer.Serialize( float.Epsilon ).ToString() ); 
             Assert.Equal( "float.PositiveInfinity", serializer.Serialize( float.PositiveInfinity).ToString() );
             Assert.Equal( "float.NegativeInfinity", serializer.Serialize( float.NegativeInfinity).ToString() );
             Assert.Equal( "float.NaN", serializer.Serialize( float.NaN).ToString() );
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             Assert.Equal( "3.14159285", serializer.Serialize( 3.14159285 ).ToString() );
             Assert.Equal( "-3.402823E+38", serializer.Serialize( -3.402823E+38 ).ToString() );
             Assert.Equal( "3.402823E+38", serializer.Serialize( 3.402823E+38).ToString() );
-            Assert.Equal( "5E-324", serializer.Serialize( double.Epsilon ).ToString() ); // TODO Possibly incorrect. Actual precision can be higher?
+            Assert.Equal( "5E-324", serializer.Serialize( double.Epsilon ).ToString() ); 
             Assert.Equal( "double.PositiveInfinity", serializer.Serialize( double.PositiveInfinity).ToString() );
             Assert.Equal( "double.NegativeInfinity", serializer.Serialize( double.NegativeInfinity).ToString() );
             Assert.Equal( "double.NaN", serializer.Serialize( float.NaN).ToString() );
