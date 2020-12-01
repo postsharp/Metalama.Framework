@@ -9,6 +9,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     /// </summary>
     public static class TypeNameUtility
     {
+        // TODO Multidimensional arrays, such as "int[,]", are not well-supported.
+        
         /// <summary>
         /// Returns the fully-qualified name of a type as it would be written in C#, rather than the CLR name. Supports nested types and generics. 
         /// </summary>

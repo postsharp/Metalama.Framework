@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.UnitTests
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but neccessary during development, at least, since an incorrect syntax tree
         /// can easily be produced.
         /// </summary>
-        public static bool DoCodeExecutionTests = true;
+        public static bool DoCodeExecutionTests = false;
             
         public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
         {

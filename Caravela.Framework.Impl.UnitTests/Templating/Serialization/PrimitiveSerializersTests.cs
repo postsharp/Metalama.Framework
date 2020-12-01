@@ -73,6 +73,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             Assert.Equal( ulong.MinValue.ToString() + "UL", serializer.Serialize( ulong.MinValue ).ToString() );
         } 
         [Fact]
+        public void TestUInt()
+        {
+            var serializer = new UIntSerializer();
+            Assert.Equal( "42U", serializer.Serialize( 42 ).ToString() );
+            Assert.Equal( uint.MaxValue.ToString() + "U", serializer.Serialize( uint.MaxValue ).ToString() );
+            Assert.Equal( uint.MinValue.ToString() + "U", serializer.Serialize( uint.MinValue ).ToString() );
+        } 
+        [Fact]
         public void TestLong()
         {
             var serializer = new LongSerializer();

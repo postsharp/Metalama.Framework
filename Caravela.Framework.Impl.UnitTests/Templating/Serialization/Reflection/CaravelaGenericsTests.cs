@@ -45,5 +45,20 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.Equal( "TKey", info.ReturnParameter.ParameterType.Name );
             } );
         }
+
+        [Fact]
+        public void TestHalfTypes()
+        {
+            string code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
+            Assert.Throws<CaravelaException>( () =>
+            {
+                this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().Single() ) );
+            } );
+            string code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
+            Assert.Throws<CaravelaException>( () =>
+            {
+                this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().Single() ) );
+            } );
+        }
     }
 }
