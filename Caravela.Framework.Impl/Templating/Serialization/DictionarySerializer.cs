@@ -83,11 +83,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 }
                 else if (dictionary.Comparer.Equals( EqualityComparer<string>.Default ))
                 {
-                    // Unknown string comparer
+                    // It's the default string comparer.
                 }
                 else
                 {
-                    // Unknown custom comparer
+                    // Unknown custom comparer for a string-keyed dictionary
                     throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
                 }
 
@@ -106,7 +106,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 }
             }
             else if ( actualComparer != defaultComparer )
-            {                   
+            {             
+                // Unknown custom comparer
                 throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
             }
             List<InitializerExpressionSyntax> lt = new List<InitializerExpressionSyntax>();

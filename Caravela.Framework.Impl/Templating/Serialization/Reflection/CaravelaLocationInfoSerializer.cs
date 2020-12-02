@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -116,67 +117,21 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 .NormalizeWhitespace();
         }
 
-        private static BinaryExpressionSyntax CreateBindingFlags()
+        static ExpressionSyntax MemberAccess(params string[] names)
         {
-            BinaryExpressionSyntax allBindingFlags = BinaryExpression(
-                SyntaxKind.BitwiseOrExpression,
-                BinaryExpression(
-                    SyntaxKind.BitwiseOrExpression,
-                    BinaryExpression(
-                        SyntaxKind.BitwiseOrExpression,
-                        BinaryExpression(
-                            SyntaxKind.BitwiseOrExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName( "System" ),
-                                        IdentifierName( "Reflection" ) ),
-                                    IdentifierName( "BindingFlags" ) ),
-                                IdentifierName( "DeclaredOnly" ) ),
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName( "System" ),
-                                        IdentifierName( "Reflection" ) ),
-                                    IdentifierName( "BindingFlags" ) ),
-                                IdentifierName( "Public" ) ) ),
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName( "System" ),
-                                    IdentifierName( "Reflection" ) ),
-                                IdentifierName( "BindingFlags" ) ),
-                            IdentifierName( "NonPublic" ) ) ),
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                IdentifierName( "System" ),
-                                IdentifierName( "Reflection" ) ),
-                            IdentifierName( "BindingFlags" ) ),
-                        IdentifierName( "Static" ) ) ),
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName( "System" ),
-                            IdentifierName( "Reflection" ) ),
-                        IdentifierName( "BindingFlags" ) ),
-                    IdentifierName( "Instance" ) ) );
-            return allBindingFlags;
+            ExpressionSyntax result = IdentifierName(names[0]);
+            for (int i = 1; i < names.Length; i++)
+            {
+                result = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName(names[i]));
+            }
+            return result!;
+        }
+
+
+        private static ExpressionSyntax CreateBindingFlags()
+        {
+            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance"}.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
+                .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
     }
 }
