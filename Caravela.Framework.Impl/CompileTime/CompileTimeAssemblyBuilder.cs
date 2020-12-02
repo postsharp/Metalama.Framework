@@ -49,6 +49,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 "Caravela.Framework.Impl.dll"
             };
             var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Select( a => a.Location )
                 .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
 
