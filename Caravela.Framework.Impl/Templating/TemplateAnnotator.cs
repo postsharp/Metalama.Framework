@@ -445,7 +445,7 @@ namespace Caravela.Framework.Impl.Templating
                     var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
                     var annotatedElse = (ElseClauseSyntax) this.Visit(node.Else)!;
 
-                    var result = node.Update(node.IfKeyword, node.OpenParenToken, node.Condition, node.CloseParenToken,
+                    var result = node.Update(node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
                         annotatedStatement, annotatedElse);
 
                     return result;
