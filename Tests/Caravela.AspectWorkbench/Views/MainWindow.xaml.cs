@@ -11,6 +11,10 @@ namespace Caravela.AspectWorkbench.Views
 {
     public partial class MainWindow
     {
+        private const string TestsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+        private const string FileDialogueExt = ".cs";
+        private const string FileDialogueFilter = "C# Files (*.cs)|*.cs";
+
         private readonly MainViewModel viewModel;
 
         public MainWindow()
@@ -56,9 +60,9 @@ namespace Caravela.AspectWorkbench.Views
         private async void OpenButton_Click( object sender, RoutedEventArgs e )
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = ".cs";
-            dlg.Filter = "C# Files (*.cs)|*.cs";
-            dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+            dlg.DefaultExt = FileDialogueExt;
+            dlg.Filter = FileDialogueFilter;
+            dlg.InitialDirectory = TestsProjectPath;
 
             if ( dlg.ShowDialog() == true )
             {
@@ -74,9 +78,9 @@ namespace Caravela.AspectWorkbench.Views
             if ( this.viewModel.IsUnsaved )
             {
                 SaveFileDialog dlg = new SaveFileDialog();
-                dlg.DefaultExt = ".cs";
-                dlg.Filter = "C# Files (*.cs)|*.cs";
-                dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+                dlg.DefaultExt = FileDialogueExt;
+                dlg.Filter = FileDialogueFilter;
+                dlg.InitialDirectory = TestsProjectPath;
 
                 if ( dlg.ShowDialog() == false )
                 {
@@ -93,9 +97,9 @@ namespace Caravela.AspectWorkbench.Views
             this.UpdateViewModel();
 
             SaveFileDialog dlg = new SaveFileDialog();
-            dlg.DefaultExt = ".cs";
-            dlg.Filter = "C# Files (*.cs)|*.cs";
-            dlg.InitialDirectory = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+            dlg.DefaultExt = FileDialogueExt;
+            dlg.Filter = FileDialogueFilter;
+            dlg.InitialDirectory = TestsProjectPath;
 
             if ( dlg.ShowDialog() == false )
             {
