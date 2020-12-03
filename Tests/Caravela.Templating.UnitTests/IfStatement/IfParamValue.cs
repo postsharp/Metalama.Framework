@@ -13,23 +13,23 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
-  dynamic Template()
-  {
-      if (AdviceContext.Method.Parameters[0].Value == null)
-      {
-          throw new ArgumentNullException(AdviceContext.Method.Parameters[0].Name);
-      }
+    [Template]
+    dynamic Template()
+    {
+        if (AdviceContext.Method.Parameters[0].Value == null)
+        {
+            throw new ArgumentNullException(AdviceContext.Method.Parameters[0].Name);
+        }
 
-      var p = AdviceContext.Method.Parameters[1];
-      if (p.Value == null)
-      {
-          throw new ArgumentNullException(p.Name);
-      }
+        var p = AdviceContext.Method.Parameters[1];
+        if (p.Value == null)
+        {
+            throw new ArgumentNullException(p.Name);
+        }
 
-      dynamic result = AdviceContext.Proceed();
-      return result;
-  }
+        dynamic result = AdviceContext.Proceed();
+        return result;
+    }
 }
 ";
 

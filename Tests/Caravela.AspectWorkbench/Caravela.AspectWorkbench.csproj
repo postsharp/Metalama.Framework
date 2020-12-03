@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="PostSharp.Patterns.Model" Version="6.8.3-preview" />
+    <PackageReference Include="RoslynPad.Editor.Windows" Version="1.3.0" />
+    <PackageReference Include="RoslynPad.Roslyn" Version="3.8.0" />
   </ItemGroup>
 
   <ItemGroup>

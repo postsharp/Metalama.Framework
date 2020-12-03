@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
 using Microsoft.Win32;
 using PostSharp;
+using RoslynPad.Editor;
 
 namespace Caravela.AspectWorkbench.Views
 {
@@ -20,6 +23,7 @@ namespace Caravela.AspectWorkbench.Views
         public MainWindow()
         {
             this.InitializeComponent();
+            this.InitializeRoslynEditors();
 
             var newViewModel = new MainViewModel();
             this.viewModel = newViewModel;
@@ -27,11 +31,27 @@ namespace Caravela.AspectWorkbench.Views
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;
         }
 
+        private void InitializeRoslynEditors()
+        {
+            var roslynHost = CustomRoslynHost.Create();
+            var highlightColors = new ClassificationHighlightColors();
+            string workingDirectory = Directory.GetCurrentDirectory();
+            
+            this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
+            this.targetSourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
+        }
+
         private void ViewModel_PropertyChanged( object sender, PropertyChangedEventArgs e )
         {
-            // TODO RichTextBox doesn't support data binding out of the box.
+            // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
+                case nameof( MainViewModel.TemplateText ):
+                    this.sourceTextBox.Text = this.viewModel.TemplateText;
+                    break;
+                case nameof( MainViewModel.TargetText ):
+                    this.targetSourceTextBox.Text = this.viewModel.TargetText;
+                    break;
                 case nameof( MainViewModel.ColoredTemplateDocument ):
                     this.highlightedSourceRichBox.Document = this.viewModel.ColoredTemplateDocument ?? new FlowDocument();
                     break;
@@ -46,10 +66,10 @@ namespace Caravela.AspectWorkbench.Views
 
         private void UpdateViewModel()
         {
+            this.viewModel.TemplateText = this.sourceTextBox.Text;
+            this.viewModel.TargetText = this.targetSourceTextBox.Text;
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
-            this.sourceTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
-            this.targetSourceTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
         }
 
         private void NewButton_Click( object sender, RoutedEventArgs e )
