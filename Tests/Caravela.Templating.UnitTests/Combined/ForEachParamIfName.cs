@@ -20,7 +20,15 @@ class Aspect
       {
           if (p.Name.Length == 1)
           {
-              Console.WriteLine(p.Name + "" = "" + p.Value);
+              Console.WriteLine($""{p.Name} = {p.Value}"");
+          }
+      }
+
+      foreach ( var p in AdviceContext.Method.Parameters )
+      {
+          if (p.Name.StartsWith(""b""))
+          {
+              Console.WriteLine(""{0} = {1}"", p.Name, p.Value);
           }
       }
 
@@ -33,28 +41,21 @@ class Aspect
         private const string ForEachParamIfName_Target = @"
 class TargetCode
 {
-    string Method(object a, object b)
+    string Method(object a, object bb)
     {
-        return a.ToString() + b.ToString();
+        return a.ToString() + bb.ToString();
     }
 }";
 
         private const string ForEachParamIfName_ExpectedOutput = @"
 {
-    if (a == null)
-    {
-        throw new ArgumentNullException(""a"");
-    }
-
-    if (b == null)
-    {
-        throw new ArgumentNullException(""b"");
-    }
-
+    Console.WriteLine($""a = {a}"");
+    Console.WriteLine(""{0} = {1}"", ""bb"", bb);
     string result;
-    result = a.ToString() + b.ToString();
+    result = a.ToString() + bb.ToString();
     return result;
-}";
+}
+";
 
         [Fact]
         public async Task ForEachParamIfName()

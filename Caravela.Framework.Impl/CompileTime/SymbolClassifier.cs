@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
         }
 
-        protected virtual SymbolDeclarationScope GetAttributeScope(AttributeData attribute)
+        protected virtual SymbolDeclarationScope GetAttributeScope( AttributeData attribute )
         {
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
@@ -37,20 +37,20 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        protected virtual SymbolDeclarationScope GetAssemblyScope(IAssemblySymbol assembly)
+        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol assembly )
         {
-            if (assembly == null)
-            {
-                return SymbolDeclarationScope.Default;
-            }
-            
-            // TODO: be more strict with .NET Standard.
-            if (assembly.Name.StartsWith("System") || assembly.Name == "netstandard")
+            if ( assembly == null )
             {
                 return SymbolDeclarationScope.Default;
             }
 
-            var scopeFromAttributes = assembly.GetAttributes().Concat(assembly.Modules.First().GetAttributes())
+            // TODO: be more strict with .NET Standard.
+            if ( assembly.Name.StartsWith( "System" ) || assembly.Name == "netstandard" )
+            {
+                return SymbolDeclarationScope.Default;
+            }
+
+            var scopeFromAttributes = assembly.GetAttributes().Concat( assembly.Modules.First().GetAttributes() )
                 .Select( this.GetAttributeScope ).FirstOrDefault( s => s != SymbolDeclarationScope.Default );
             if ( scopeFromAttributes != SymbolDeclarationScope.Default )
             {
@@ -64,26 +64,29 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return SymbolDeclarationScope.RunTimeOnly;
         }
-        
-        public SymbolDeclarationScope GetSymbolDeclarationScope(ISymbol symbol)
+
+        public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
         {
-            SymbolDeclarationScope AddToCache(SymbolDeclarationScope scope)
+            SymbolDeclarationScope AddToCache( SymbolDeclarationScope scope )
             {
                 this._cache[symbol] = scope;
                 return scope;
             }
-            
+
             // From cache.
-            if (this._cache.TryGetValue(symbol, out var scopeFromCache))
+            if ( this._cache.TryGetValue( symbol, out var scopeFromCache ) )
             {
                 return scopeFromCache;
             }
-            
+
+            // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
+            AddToCache( SymbolDeclarationScope.Default );
+
             // From attributes.
-            var scopeFromAttributes = symbol.GetAttributes().Select(this.GetAttributeScope).FirstOrDefault(s => s != SymbolDeclarationScope.Default);
-            if (scopeFromAttributes != SymbolDeclarationScope.Default)
+            var scopeFromAttributes = symbol.GetAttributes().Select( this.GetAttributeScope ).FirstOrDefault( s => s != SymbolDeclarationScope.Default );
+            if ( scopeFromAttributes != SymbolDeclarationScope.Default )
             {
-                return AddToCache(scopeFromAttributes);
+                return AddToCache( scopeFromAttributes );
             }
 
             // From overridden method.
@@ -97,22 +100,21 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // From declaring type.
-            if (symbol.ContainingType != null)
+            if ( symbol.ContainingType != null )
             {
-                var scopeFromContainingType = this.GetSymbolDeclarationScope(symbol.ContainingType);
-                
-                if (scopeFromContainingType != SymbolDeclarationScope.Default )
+                var scopeFromContainingType = this.GetSymbolDeclarationScope( symbol.ContainingType );
+
+                if ( scopeFromContainingType != SymbolDeclarationScope.Default )
                 {
-                    return AddToCache(scopeFromContainingType);
+                    return AddToCache( scopeFromContainingType );
                 }
             }
-            
-            
-            if (symbol is ITypeSymbol type )
+
+            if ( symbol is ITypeSymbol type )
             {
-                if (type.Name == "dynamic")
+                if ( type.Name == "dynamic" )
                 {
-                    return SymbolDeclarationScope.RunTimeOnly;
+                    return AddToCache( SymbolDeclarationScope.RunTimeOnly );
                 }
 
                 if ( symbol is INamedTypeSymbol namedType )
@@ -156,14 +158,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
             }
 
-
-
-
-            // From assemblies.
-            var scopeFromAssembly = this.GetAssemblyScope(symbol.ContainingAssembly);
-            if (scopeFromAssembly != SymbolDeclarationScope.Default)
+            var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
+            if ( scopeFromAssembly != SymbolDeclarationScope.Default )
             {
-                return AddToCache(scopeFromAssembly);
+                return AddToCache( scopeFromAssembly );
             }
 
             return AddToCache( SymbolDeclarationScope.Default );

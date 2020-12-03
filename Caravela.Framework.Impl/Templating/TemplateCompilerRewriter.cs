@@ -130,8 +130,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             switch (expression.Kind())
             {
-                case SyntaxKind.DefaultExpression:
+                // TODO: We need to transform null and default values though. How to do this right then?
                 case SyntaxKind.NullLiteralExpression:
+                    return
+                        InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
+                            Argument( this.Transform( SyntaxKind.NullLiteralExpression ) ) );
+                case SyntaxKind.DefaultExpression:
+                //case SyntaxKind.NullLiteralExpression:
                 case SyntaxKind.DefaultLiteralExpression:
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
