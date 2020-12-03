@@ -47,11 +47,16 @@ class TargetCode
 {
     if (a == null)
     {
-        throw new ArgumentNullException();
+        throw new ArgumentNullException(""a"");
     }
 
-    int result;
-    result = a;
+    if (b == null)
+    {
+        throw new ArgumentNullException(""b"");
+    }
+
+    string result;
+    result = a.ToString() + b.ToString();
     return result;
 }
 ";

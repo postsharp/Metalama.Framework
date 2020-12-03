@@ -449,10 +449,7 @@ namespace Caravela.Framework.Impl.Templating
                         annotatedStatement, annotatedElse);
 
                     return result;
-
                 }
-
-               
             }
         }
 
