@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Note: this package exists so that Try Caravela can use Caravela.Framework.Impl as a library. -->
+  
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Caravela.Framework.Impl</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- TODO: change to Caravela.CA.CS -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+    <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" PrivateAssets="all" />
+
+    <!--<ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />-->
+
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);SetPackageContent</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+  <Target Name="SetPackageContent" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- include Impl assembly -->
+      <BuildOutputInPackage Include="$(OutputPath)Caravela.Framework.Impl.dll" />
+      <!-- exclude assembly from the current project -->
+      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
+    </ItemGroup>
+  </Target>
+</Project>
