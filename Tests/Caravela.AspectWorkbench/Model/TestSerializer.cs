@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -43,12 +42,23 @@ namespace Caravela.AspectWorkbench.Model
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
             string testName = Path.GetFileNameWithoutExtension( filePath );
+            string testCategoryName = Path.GetFileName( Path.GetDirectoryName( filePath ) );
 
             if ( test.OriginalSyntaxRoot == null )
             {
-                string folderName = Path.GetFileName( Path.GetDirectoryName( filePath ) );
-                string testSource = string.Format( NewTestDefaults.EmptyUnitTest, folderName, testName );
+                // This is a new test without a source file.
+                string testSource = string.Format( NewTestDefaults.EmptyUnitTest, testCategoryName, testName );
                 test.OriginalSyntaxRoot = await CSharpSyntaxTree.ParseText( testSource, encoding: Encoding.UTF8 ).GetRootAsync();
+            }
+
+            // Make sure that the main source file of the test category exists.
+            // The main category file path is 'Caravela.Templating.UnitTests\{CATEGORY}Tests.cs'.
+            // The file path of each test within the category is 'Caravela.Templating.UnitTests\{CATEGORY}\{TEST}.cs'.
+            string testCategorySourcePath = Path.Combine( Path.GetDirectoryName( Path.GetDirectoryName( filePath ) ), $"{testCategoryName}Tests.cs" );
+            if ( !File.Exists( testCategorySourcePath ) )
+            {
+                string testCategorySource = string.Format( NewTestDefaults.TestCategoryMainSource, testCategoryName );
+                File.WriteAllText( testCategorySourcePath, testCategorySource );
             }
 
             string templateFieldName = $"{testName}_Template";

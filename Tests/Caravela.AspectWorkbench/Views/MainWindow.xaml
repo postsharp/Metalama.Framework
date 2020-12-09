@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:editor="clr-namespace:RoslynPad.Editor;assembly=RoslynPad.Editor.Windows"
         mc:Ignorable="d"
-        Title="Aspect Workbench" Height="1100" Width="1620">
+        Title="{Binding Title}" Height="1100" Width="1620">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

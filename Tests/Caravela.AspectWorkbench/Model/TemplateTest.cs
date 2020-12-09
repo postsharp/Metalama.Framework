@@ -11,6 +11,7 @@ namespace Caravela.AspectWorkbench.Model
 
         public string ExpectedOutput { get; set; }
 
-        public string TestMethod { get; set; }
+        // TODO: Execute and edit test methods.
+        //public string TestMethod { get; set; }
     }
 }

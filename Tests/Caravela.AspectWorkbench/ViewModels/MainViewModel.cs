@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +20,6 @@ namespace Caravela.AspectWorkbench.ViewModels
         private readonly SyntaxColorizer syntaxColorizer;
         private readonly TestSerializer testSerializer;
         private TemplateTest currentTest;
-        private string currentPath;
 
         public MainViewModel()
         {
@@ -29,6 +27,9 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.syntaxColorizer = new SyntaxColorizer( this.testRunner );
             this.testSerializer = new TestSerializer();
         }
+
+        
+        public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
         public string TemplateText { get; set; }
 
@@ -44,11 +45,15 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public string ErrorsText { get; set; }
 
-        public bool IsUnsaved => string.IsNullOrEmpty( this.currentPath );
+        public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
+
+        private string CurrentPath { get; set; }
+
 
         public async Task RunTestAsync()
         {
             this.ErrorsText = string.Empty;
+            this.TransformedTargetDocument = null;
 
             var stopwatch = Stopwatch.StartNew();
             var testResult = await this.testRunner.Run( new TestInput( this.TemplateText, this.TargetText ) );
@@ -113,6 +118,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ColoredTemplateDocument = null;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
+            this.CurrentPath = null;
         }
 
         public async Task LoadTestAsync( string filePath )
@@ -124,12 +130,12 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ColoredTemplateDocument = null;
             this.CompiledTemplateDocument = null;
             this.TransformedTargetDocument = null;
-            this.currentPath = filePath;
+            this.CurrentPath = filePath;
         }
 
         public async Task SaveTestAsync( string filePath )
         {
-            filePath ??= this.currentPath;
+            filePath ??= this.CurrentPath;
 
             if ( string.IsNullOrEmpty( filePath ) )
             {
@@ -144,14 +150,14 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.currentTest.Input = new TestInput( this.TemplateText, this.TargetText );
             this.currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
-            if ( !string.Equals( filePath, this.currentPath ) )
+            if ( !string.Equals( filePath, this.CurrentPath ) )
             {
                 this.currentTest.OriginalSyntaxRoot = null;
             }
 
-            this.currentPath = filePath;
+            this.CurrentPath = filePath;
 
-            await this.testSerializer.SaveToFileAsync( this.currentTest, this.currentPath );
+            await this.testSerializer.SaveToFileAsync( this.currentTest, this.CurrentPath );
         }
     }
 }

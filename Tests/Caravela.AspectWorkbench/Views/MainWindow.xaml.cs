@@ -36,7 +36,7 @@ namespace Caravela.AspectWorkbench.Views
             var roslynHost = CustomRoslynHost.Create();
             var highlightColors = new ClassificationHighlightColors();
             string workingDirectory = Directory.GetCurrentDirectory();
-            
+
             this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
             this.targetSourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
         }
@@ -92,24 +92,14 @@ namespace Caravela.AspectWorkbench.Views
 
         private async void SaveButton_Click( object sender, RoutedEventArgs e )
         {
-            this.UpdateViewModel();
-
-            string filePath = null;
-            if ( this.viewModel.IsUnsaved )
+            if ( this.viewModel.IsNewTest )
             {
-                SaveFileDialog dlg = new SaveFileDialog();
-                dlg.DefaultExt = FileDialogueExt;
-                dlg.Filter = FileDialogueFilter;
-                dlg.InitialDirectory = TestsProjectPath;
-
-                if ( dlg.ShowDialog() == false )
-                {
-                    return;
-                }
-                filePath = dlg.FileName;
+                this.SaveAsButton_Click( sender, e );
+                return;
             }
 
-            await this.viewModel.SaveTestAsync( filePath );
+            this.UpdateViewModel();
+            await this.viewModel.SaveTestAsync( null );
         }
 
         private async void SaveAsButton_Click( object sender, RoutedEventArgs e )

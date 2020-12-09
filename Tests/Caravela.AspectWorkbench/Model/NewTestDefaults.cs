@@ -27,8 +27,7 @@ class TargetCode
 }
 ";
 
-        public const string EmptyUnitTest = @"
-using Caravela.TestFramework.Templating;
+        public const string EmptyUnitTest = @"using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -47,6 +46,24 @@ namespace Caravela.Templating.UnitTests
         {{
             var testResult = await this._testRunner.Run( new TestInput( {1}_Template, {1}_Target ) );
             testResult.AssertOutput( {1}_ExpectedOutput );
+        }}
+    }}
+}}
+";
+
+        public const string TestCategoryMainSource = @"using Xunit.Abstractions;
+
+namespace Caravela.Templating.UnitTests
+{{
+    public partial class {0}Tests
+    {{
+        private readonly ITestOutputHelper _logger;
+        private readonly UnitTestRunner _testRunner;
+
+        public {0}Tests( ITestOutputHelper logger )
+        {{
+            _logger = logger;
+            _testRunner = new UnitTestRunner( _logger );
         }}
     }}
 }}
