@@ -15,7 +15,7 @@ namespace Caravela.Framework.TestApp
             catch (Exception ex)
             {
                 Console.WriteLine( "Caravela caught: " + ex );
-                return null;
+                return default;
             }
         }
     }

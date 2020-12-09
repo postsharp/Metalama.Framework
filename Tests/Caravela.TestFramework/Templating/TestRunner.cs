@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Caravela.TestFramework.MetaModel;
@@ -17,18 +17,22 @@ namespace Caravela.TestFramework.Templating
 {
     public class TestRunner
     {
-        public virtual async Task<TestResult> Run( string testInput )
+        public virtual async Task<TestResult> Run( TestInput testInput )
         {
             TestResult result = new TestResult();
+            string templateSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
+            string targetSource = CommonSnippets.CaravelaUsings + testInput.TargetSource;
 
             // Source.
             var project = this.CreateProject();
-            var document1 = project.AddDocument( "TestInput.cs", testInput );
-            result.InputDocument = document1;
+            var templateDocument = project.AddDocument( "Template.cs", templateSource );
+            var targetDocument = project.AddDocument( "Target.cs", targetSource );
+            var targetSyntaxTree = CSharpSyntaxTree.ParseText( targetSource, encoding: Encoding.UTF8 );
+            result.InputDocument = templateDocument;
 
             var compilationForInitialDiagnostics = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { await document1.GetSyntaxTreeAsync() },
+                new[] { await templateDocument.GetSyntaxTreeAsync(), targetSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions );
             var diagnostics = compilationForInitialDiagnostics.GetDiagnostics();
@@ -40,8 +44,8 @@ namespace Caravela.TestFramework.Templating
                 return result;
             }
 
-            var syntaxRoot1 = await document1.GetSyntaxRootAsync();
-            var semanticModel1 = await document1.GetSemanticModelAsync();
+            var syntaxRoot1 = await templateDocument.GetSyntaxRootAsync();
+            var semanticModel1 = await templateDocument.GetSemanticModelAsync();
 
             var templateCompiler = new TestTemplateCompiler( semanticModel1 );
             bool success = templateCompiler.TryCompile( syntaxRoot1, out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
@@ -59,13 +63,15 @@ namespace Caravela.TestFramework.Templating
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { transformedSyntaxRoot.SyntaxTree },
+                new[] { transformedSyntaxRoot.SyntaxTree, targetSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions );
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
-            var emitResult = finalCompilation.Emit( buildTimeAssemblyStream, buildTimeDebugStream );
+            var emitResult = finalCompilation.Emit( buildTimeAssemblyStream, buildTimeDebugStream,
+                options: new Microsoft.CodeAnalysis.Emit.EmitOptions( defaultSourceFileEncoding: Encoding.UTF8, fallbackSourceFileEncoding: Encoding.UTF8 ) );
+            
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
