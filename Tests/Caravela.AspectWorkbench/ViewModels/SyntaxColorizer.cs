@@ -1,103 +1,26 @@
-﻿using System;
+﻿using Caravela.AspectWorkbench.Model;
+using Microsoft.CodeAnalysis.Classification;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Caravela.Framework.Impl.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Classification;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Text;
 
-namespace Caravela.AspectWorkbench
+namespace Caravela.AspectWorkbench.ViewModels
 {
-    public partial class MainWindow
+    class SyntaxColorizer
     {
-        private WorkbenchTestRunner testRunner;
+        private readonly WorkbenchTestRunner testRunner;
 
-        public MainWindow()
+        public SyntaxColorizer( WorkbenchTestRunner testRunner )
         {
-            this.InitializeComponent();
-
-            testRunner = new WorkbenchTestRunner( this.errorsTextBlock );
-
-            #region Initial test source
-
-            this.sourceTextBox.Text = @"  
-// Don't rename classes, methods, neither remove namespaces. Many things are hardcoded.  
-using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
-
-class Aspect
-{
-  [Template]
-  dynamic Template()
-  {
-    var parameters = new object[AdviceContext.Method.Parameters.Count];
-    var stringBuilder = new StringBuilder();
-    AdviceContext.BuildTime( stringBuilder );
-    stringBuilder.Append(AdviceContext.Method.Name);
-    stringBuilder.Append('(');
-    int i = 0;
-    foreach ( var p in AdviceContext.Method.Parameters )
-    {
-       string comma = i > 0 ? "", "" : """";
-
-        if ( p.IsOut )
-        {
-            stringBuilder.Append( $""{comma}{p.Name} = <out>"" );
-        }
-        else
-        {
-            stringBuilder.Append( $""{comma}{p.Name} = {{{i}}}"" );
-            parameters[i] = p.Value;
+            this.testRunner = testRunner;
         }
 
-        i++;
-    }
-    stringBuilder.Append(')');
-
-    Console.WriteLine( stringBuilder.ToString(), parameters );
-
-    try
-    {
-        dynamic result = AdviceContext.Proceed();
-        Console.WriteLine( stringBuilder + "" returned "" + result, parameters );
-        return result;
-    }
-    catch ( Exception _e )
-    {
-        Console.WriteLine( stringBuilder + "" failed: "" + _e, parameters );
-        throw;
-    }
-  }
-}
-
-class TargetCode
-{
-    int Method(int a, int b )
-    {
-        return a + b;
-    }
-}
-
-";
-            #endregion
-        }
+        #region Colors
 
         private static readonly Dictionary<string, Color> classificationToColor = new Dictionary<string, Color>
         {
@@ -168,74 +91,10 @@ class TargetCode
             {ClassificationTypeNames.RegexOtherEscape, Colors.Indigo},
         };
 
+        #endregion
 
-        private async void OnClick( object sender, RoutedEventArgs e )
+        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, ImmutableList<TextSpan> metaSpans )
         {
-            var stopwatch = Stopwatch.StartNew();
-
-            this.errorsTextBlock.Text = "";
-
-            var testResult = await testRunner.Run( this.sourceTextBox.Text );
-
-            if ( testResult.AnnotatedSyntaxRoot != null )
-            {
-                // Display the annotated syntax tree.
-                var document2 = testResult.InputDocument.WithSyntaxRoot( testResult.AnnotatedSyntaxRoot );
-                var text2 = await document2.GetTextAsync();
-
-                var marker = new CompileTimeTextSpanMarker( text2 );
-                marker.Visit( await document2.GetSyntaxRootAsync() );
-                var metaSpans = marker.GetMarkedSpans();
-
-                await WriteSyntaxColoring( text2, metaSpans, this.highlightedSourceRichBox );
-            }
-
-            if ( testResult.TransformedSyntaxRoot != null )
-            {
-                // Render the transformed tree.
-                var project3 = testRunner.CreateProject();
-                var document3 = project3.AddDocument( "name.cs", testResult.TransformedSyntaxRoot );
-                var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
-
-                var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedSyntaxRoot, project3.Solution.Workspace, optionSet );
-                var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                var spanMarker = new CompileTimeTextSpanMarker( text4 );
-                spanMarker.Visit( formattedTransformedSyntaxRoot );
-                await WriteSyntaxColoring( text4, spanMarker.GetMarkedSpans(), this.compiledTemplateRichBox );
-            }
-
-            if ( testResult.TemplateOutputSource != null )
-            {
-                // Display the transformed code.
-                await WriteSyntaxColoring( testResult.TemplateOutputSource, null, this.transformedCodeRichBox );
-            }
-
-            if ( !string.IsNullOrEmpty( testResult.TestErrorMessage ) )
-            {
-                this.errorsTextBlock.Text += Environment.NewLine + testResult.TestErrorMessage;
-            }
-            this.errorsTextBlock.Text += Environment.NewLine + $"It took {stopwatch.Elapsed.TotalSeconds:f1} s.";
-        }
-
-        private void ReportDiagnostics( IReadOnlyList<Diagnostic> diagnostics )
-        {
-            diagnostics = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
-
-            if ( diagnostics.Count > 0 )
-            {
-                if ( this.errorsTextBlock.Text.Length > 0 )
-                {
-                    this.errorsTextBlock.Text += Environment.NewLine;
-                }
-
-                this.errorsTextBlock.Text += string.Join( Environment.NewLine,
-                    diagnostics.Select( d => d.Location + ":" + d.Id + " " + d.GetMessage() ) );
-            }
-        }
-
-        private async Task WriteSyntaxColoring( SourceText text, ImmutableList<TextSpan> metaSpans, RichTextBox richTextBox )
-        {
-
             var project = testRunner.CreateProject();
             var document = project.AddDocument( "name.cs", text.ToString() );
 
@@ -270,13 +129,11 @@ class TargetCode
                 paragraph.Inlines.Add( run );
             }
 
-
-            richTextBox.Document = new FlowDocument( paragraph ) { PageWidth = 2000 };
+            return new FlowDocument( paragraph ) { PageWidth = 2000 };
 
             // This is how to enable wrapping on the document:
             // richTextBox.Document.SetBinding( FlowDocument.PageWidthProperty, 
             //    new Binding( "ActualWidth" ) { Source = richTextBox } );
-
         }
     }
 }

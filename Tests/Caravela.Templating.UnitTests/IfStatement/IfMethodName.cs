@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -8,15 +6,9 @@ namespace Caravela.Templating.UnitTests
 {
     public partial class IfStatementTests
     {
-        private const string IfMethodNameInput = @"
+        private const string IfMethodName_Template = @"
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 class Aspect
 {
@@ -40,7 +32,9 @@ class Aspect
         return result;
   }
 }
+";
 
+        private const string IfMethodName_Target = @"
 class TargetCode
 {
     void Method()
@@ -49,22 +43,20 @@ class TargetCode
 }
 ";
 
-        private const string IfMethodNameExpectedOutput = @"
+        private const string IfMethodName_ExpectedOutput = @"
 {
-    int b;
-    b = 1;
-    Console.WriteLine(b);
-    int result;
-    result = 1;
+    Console.WriteLine(1);
+    __Void result;
     return result;
-}";
+}
+";
 
 
         [Fact]
         public async Task IfMethodName()
         {
-            var testResult = await _testRunner.Run( IfMethodNameInput );
-            testResult.AssertOutput( IfMethodNameExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( IfMethodName_Template, IfMethodName_Target ) );
+            testResult.AssertOutput( IfMethodName_ExpectedOutput );
         }
     }
 }

@@ -22,6 +22,9 @@ namespace Caravela.Framework.Impl.Templating
         public static SeparatedSyntaxList<T> SeparatedList<T>(params T[] items) where T : SyntaxNode
             => SyntaxFactory.SeparatedList(items);
 
-
+        public static SyntaxKind BooleanKeyword(bool value)
+        {
+            return value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
+        }
     }
 }

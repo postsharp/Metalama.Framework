@@ -1,21 +1,16 @@
-﻿using System.Threading.Tasks;
+using Caravela.TestFramework.Templating;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
     public partial class MiscTests
     {
-        private const string SampleInput = @"  
+        private const string Sample_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 class Aspect
 {
@@ -61,32 +56,36 @@ class Aspect
         }
     }
 }
+";
 
+        private const string Sample_Target = @"
 class TargetCode
 {
-    int Method( int a, int b )
+    int Method( int a, int b, out int c )
     {
+        c = a - b;
         return a + b;
     }
 }
 ";
-        
-        private const string SampleExpectedOutput = @"
+
+        private const string Sample_ExpectedOutput = @"
 {
-    var parameters = new object[2];
+    var parameters = new object[3];
     parameters[0] = a;
     parameters[1] = b;
-    Console.WriteLine(""Method(a = {0}, b = {1})"", parameters);
+    Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> )"", parameters);
     try
     {
         int result;
+        c = a - b;
         result = a + b;
-        Console.WriteLine(""Method(a = {0}, b = {1}) returned "" + result, parameters);
+        Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> ) returned "" + result, parameters);
         return result;
     }
     catch (Exception _e)
     {
-        Console.WriteLine(""Method(a = {0}, b = {1}) failed: "" + _e, parameters);
+        Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> ) failed: "" + _e, parameters);
         throw;
     }
 }
@@ -95,9 +94,8 @@ class TargetCode
         [Fact]
         public async Task Sample()
         {
-            var testResult = await _testRunner.Run( SampleInput );
-            
-            testResult.AssertOutput( SampleExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( Sample_Template, Sample_Target ) );
+            testResult.AssertOutput( Sample_ExpectedOutput );
         }
     }
 }
