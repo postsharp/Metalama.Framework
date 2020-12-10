@@ -10,7 +10,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.100" />
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
-
   </ItemGroup>
 
   <PropertyGroup>
