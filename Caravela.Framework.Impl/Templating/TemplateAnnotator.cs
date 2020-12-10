@@ -362,7 +362,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
@@ -406,8 +405,6 @@ namespace Caravela.Framework.Impl.Templating
                 return argument;
             }
         }
-
-      
 
         public override SyntaxNode? VisitIfStatement(IfStatementSyntax node)
         {
@@ -549,14 +546,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
-        {
-            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "while statement" );
-            this.Diagnostics.Add( diagnostic );
-            
-            return base.VisitWhileStatement( node );
-        }
-
         private SymbolDeclarationScope GetAssignmentScope(SyntaxNode node)
         {
             switch (node)
@@ -675,7 +664,6 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode.AddScopeAnnotation(this.GetNodeScope(transformedNode.Declaration));
         }
 
-
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             this._currentMethod = node;
@@ -713,6 +701,104 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode.WithScopeAnnotationFrom(node.Expression).WithScopeAnnotationFrom(node);
         }
 
+        #region Unsupported syntax
 
+        public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "for statement" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitForStatement( node );
+        }
+
+        public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "while statement" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitWhileStatement( node );
+        }
+
+        public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "do statement" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitDoStatement( node );
+        }
+
+        public override SyntaxNode? VisitGotoStatement( GotoStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "goto statement" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitGotoStatement( node );
+        }
+
+        public override SyntaxNode? VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "local function" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitLocalFunctionStatement( node );
+        }
+
+        public override SyntaxNode? VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "anonymous method" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitAnonymousMethodExpression( node );
+        }
+
+        public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "lambda expression" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitParenthesizedLambdaExpression( node );
+        }
+
+        public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "lambda expression" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitSimpleLambdaExpression( node );
+        }
+
+        public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "switch statement" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitSwitchStatement( node );
+        }
+
+        public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "query expression" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitQueryExpression( node );
+        }
+
+        public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "lock statement" );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitLockStatement( node );
+        }
+
+        public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "await expression" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitAwaitExpression( node );
+        }
+
+        #endregion
     }
 }

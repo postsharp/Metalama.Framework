@@ -44,11 +44,16 @@ namespace Caravela.TestFramework.Templating
                 return result;
             }
 
-            var syntaxRoot1 = await templateDocument.GetSyntaxRootAsync();
-            var semanticModel1 = await templateDocument.GetSemanticModelAsync();
+            var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
+            var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
 
-            var templateCompiler = new TestTemplateCompiler( semanticModel1 );
-            bool success = templateCompiler.TryCompile( syntaxRoot1, out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
+            foreach ( var templateAnalyzer in this.GetTemplateAnalyzers() )
+            {
+                templateAnalyzer.Visit( templateSyntaxRoot );
+            }
+
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
+            bool success = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
             result.AnnotatedSyntaxRoot = annotatedSyntaxRoot;
             result.TransformedSyntaxRoot = transformedSyntaxRoot;
 
@@ -69,7 +74,8 @@ namespace Caravela.TestFramework.Templating
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
-            var emitResult = finalCompilation.Emit( buildTimeAssemblyStream, buildTimeDebugStream,
+            var emitResult = finalCompilation.Emit(
+                buildTimeAssemblyStream, buildTimeDebugStream,
                 options: new Microsoft.CodeAnalysis.Emit.EmitOptions( defaultSourceFileEncoding: Encoding.UTF8, fallbackSourceFileEncoding: Encoding.UTF8 ) );
             
             if ( !emitResult.Success )
@@ -137,6 +143,11 @@ namespace Caravela.TestFramework.Templating
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( Microsoft.CSharp.RuntimeBinder.Binder ).Assembly.Location ) )
                 ;
             return project;
+        }
+
+        protected virtual IEnumerable<CSharpSyntaxVisitor> GetTemplateAnalyzers()
+        {
+            yield break;
         }
 
         protected virtual void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
