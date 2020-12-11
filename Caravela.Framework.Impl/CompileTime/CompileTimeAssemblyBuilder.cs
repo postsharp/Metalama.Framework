@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -22,21 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         static CompileTimeAssemblyBuilder()
         {
-            // TODO: make NuGetPackageRoot MSBuild property compiler-visible and use that here?
-            string nugetDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" );
-
-            string netstandardDirectory = Path.Combine( nugetDirectory, "netstandard.library/2.0.3/build/netstandard2.0/ref" );
-            var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
-
-            // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
-            var nugetPaths = new (string package, string version, string assembly)[]
-            {
-                ("microsoft.csharp", MicrosoftCSharpVersion, "Microsoft.CSharp.dll"),
-                ("microsoft.codeanalysis.common", MicrosoftCodeAnalysisCommonVersion, "Microsoft.CodeAnalysis.dll"),
-                ("microsoft.codeanalysis.csharp", MicrosoftCodeAnalysisCSharpVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
-                ("system.collections.immutable", SystemCollectionsImmutableVersion, "System.Collections.Immutable.dll")
-            }
-            .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
+            var referenceAssemblyPaths = ReferenceAssemblyLocator.GetReferenceAssemblies();
 
             // the SDK assembly might not be loaded at this point, so make sure it is
             _ = new AspectWeaverAttribute( null! );
@@ -53,7 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( a => a.Location )
                 .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
 
-            _fixedReferences = netStandardPaths.Concat( nugetPaths ).Concat( caravelaPaths )
+            _fixedReferences = referenceAssemblyPaths.Concat( caravelaPaths )
                 .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 

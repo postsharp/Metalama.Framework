@@ -16,10 +16,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
-
-    <!-- this should list every kind of asset MS.CA.CS or its dependencies could contain, which should effectively turn this dependency into restore-only, which is what we want -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="compile;runtime;build;buildMultitargeting;buildTransitive;analyzers" />
     
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="all" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" PrivateAssets="all" GeneratePathProperty="true" />
@@ -42,7 +40,8 @@
   
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
-      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Type) != 'project'" />
+      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))"
+                       Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
     </ItemGroup>
     
     <PropertyGroup>
