@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
         private const string SimpleLambdaNotSupported_Template = @"  
 using System;

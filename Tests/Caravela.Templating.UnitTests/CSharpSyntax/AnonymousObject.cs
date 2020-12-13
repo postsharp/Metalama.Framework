@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class MiscTests
+    public partial class CSharpSyntaxTests
     {
         private const string AnonymousObject_Template = @"  
 using System;

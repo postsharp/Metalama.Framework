@@ -1,0 +1,61 @@
+using Caravela.Framework.Impl;
+using Caravela.TestFramework.Templating;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Caravela.Templating.UnitTests
+{
+    public partial class TryCatchFinallyTests
+    {
+        private const string TryCatchFinallyCompileTime_Template = @"  
+using System;
+using System.Collections.Generic;
+
+class Aspect
+{
+    [Template]
+    dynamic Template()
+    {
+        int n = 1;
+        try
+        {
+            n = 2;
+        }
+        catch
+        {
+            n = 3;
+        }
+        finally
+        {
+            n = 4;
+        }
+        
+        AdviceContext.Method.Parameters[0].Value = n;
+        return AdviceContext.Proceed();
+    }
+}
+";
+
+        private const string TryCatchFinallyCompileTime_Target = @"
+class TargetCode
+{
+    int Method(int a)
+    {
+        return a;
+    }
+}
+";
+
+        private const string TryCatchFinallyCompileTime_ExpectedOutput = @"{
+    a = 4;
+    return a;
+}";
+
+        [Fact]
+        public async Task TryCatchFinallyCompileTime()
+        {
+            var testResult = await this._testRunner.Run( new TestInput( TryCatchFinallyCompileTime_Template, TryCatchFinallyCompileTime_Target ) );
+            testResult.AssertOutput( TryCatchFinallyCompileTime_ExpectedOutput );
+        }
+    }
+}

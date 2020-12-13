@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string GotoNotSupported_Template = @"  
+        private const string WhileNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,19 +18,21 @@ class Aspect
     [Template]
     dynamic Template()
     {
+        int i = 0;
+        while ( i < AdviceContext.Method.Parameters.Count )
+        {
+            i++;
+        }
+
+        Console.WriteLine( ""Test result = "" + i );
+
         dynamic result = AdviceContext.Proceed();
-        
-        if (result != null) goto end;
-        
-        return default;
-        
-end:        
         return result;
     }
 }
 ";
 
-        private const string GotoNotSupported_Target = @"
+        private const string WhileNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -40,12 +42,12 @@ class TargetCode
 }
 ";
 
-        private const string GotoNotSupported_ExpectedOutput = @"";
+        private const string WhileNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task GotoNotSupported()
+        public async Task WhileNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( GotoNotSupported_Template, GotoNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( WhileNotSupported_Template, WhileNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

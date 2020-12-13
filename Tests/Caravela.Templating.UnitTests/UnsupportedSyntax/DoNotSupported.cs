@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string LambdaNotSupported_Template = @"  
+        private const string DoNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,21 +18,21 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        Action<object> action = (object p) =>
+        int i = 0;
+        do
         {
-            Console.WriteLine(p.ToString());
-        };
+            i++;
+        } while ( i < AdviceContext.Method.Parameters.Count );
+
+        Console.WriteLine( ""Test result = "" + i );
 
         dynamic result = AdviceContext.Proceed();
-        
-        action(result);
-        
         return result;
     }
 }
 ";
 
-        private const string LambdaNotSupported_Target = @"
+        private const string DoNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -42,12 +42,12 @@ class TargetCode
 }
 ";
 
-        private const string LambdaNotSupported_ExpectedOutput = @"";
+        private const string DoNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task LambdaNotSupported()
+        public async Task DoNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( LambdaNotSupported_Template, LambdaNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( DoNotSupported_Template, DoNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

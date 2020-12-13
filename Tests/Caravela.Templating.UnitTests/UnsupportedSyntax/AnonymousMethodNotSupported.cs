@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string LocalFuncNotSupported_Template = @"  
+        private const string AnonymousMethodNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,21 +18,22 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        void LocalFunc(dynamic p)
+        Action<object> action =
+        delegate (object p)
         {
             Console.WriteLine(p.ToString());
-        }
+        };
 
         dynamic result = AdviceContext.Proceed();
         
-        LocalFunc(result);
+        action(result);
         
         return result;
     }
 }
 ";
 
-        private const string LocalFuncNotSupported_Target = @"
+        private const string AnonymousMethodNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -42,12 +43,12 @@ class TargetCode
 }
 ";
 
-        private const string LocalFuncNotSupported_ExpectedOutput = @"";
+        private const string AnonymousMethodNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task LocalFuncNotSupported()
+        public async Task AnonymousMethodNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( LocalFuncNotSupported_Template, LocalFuncNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( AnonymousMethodNotSupported_Template, AnonymousMethodNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

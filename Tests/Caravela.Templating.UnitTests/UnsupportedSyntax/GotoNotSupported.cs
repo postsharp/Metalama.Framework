@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string LockNotSupported_Template = @"  
+        private const string GotoNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -15,22 +15,22 @@ using System.Linq;
 
 class Aspect
 {
-    private static readonly object o = new object();
-    
     [Template]
     dynamic Template()
     {
-        dynamic result;
-        lock (o)
-        {
-            result = AdviceContext.Proceed();
-        }
+        dynamic result = AdviceContext.Proceed();
+        
+        if (result != null) goto end;
+        
+        return default;
+        
+end:        
         return result;
     }
 }
 ";
 
-        private const string LockNotSupported_Target = @"
+        private const string GotoNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -40,12 +40,12 @@ class TargetCode
 }
 ";
 
-        private const string LockNotSupported_ExpectedOutput = @"";
+        private const string GotoNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task LockNotSupported()
+        public async Task GotoNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( LockNotSupported_Template, LockNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( GotoNotSupported_Template, GotoNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

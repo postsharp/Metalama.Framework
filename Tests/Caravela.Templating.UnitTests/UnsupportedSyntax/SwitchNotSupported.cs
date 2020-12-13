@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
         private const string SwitchNotSupported_Template = @"  
 using System;
@@ -29,6 +29,8 @@ class Aspect
                 break;
             case 2:
                 goto default;
+            case 3:
+                goto case 2;
             default:
                 result = AdviceContext.Proceed();
                 break;

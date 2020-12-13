@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string DoNotSupported_Template = @"  
+        private const string ForNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,13 +18,10 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int i = 0;
-        do
+        for (int i = 0; i < AdviceContext.Method.Parameters.Count; i++)
         {
-            i++;
-        } while ( i < AdviceContext.Method.Parameters.Count );
-
-        Console.WriteLine( ""Test result = "" + i );
+            Console.WriteLine( AdviceContext.Method.Parameters[i].Name );
+        }
 
         dynamic result = AdviceContext.Proceed();
         return result;
@@ -32,7 +29,7 @@ class Aspect
 }
 ";
 
-        private const string DoNotSupported_Target = @"
+        private const string ForNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -42,12 +39,12 @@ class TargetCode
 }
 ";
 
-        private const string DoNotSupported_ExpectedOutput = @"";
+        private const string ForNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task DoNotSupported()
+        public async Task ForNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( DoNotSupported_Template, DoNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( ForNotSupported_Template, ForNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

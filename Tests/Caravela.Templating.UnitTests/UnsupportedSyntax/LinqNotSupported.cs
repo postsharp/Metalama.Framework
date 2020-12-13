@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
         private const string LinqNotSupported_Template = @"  
 using System;

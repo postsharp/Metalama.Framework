@@ -573,13 +573,13 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode? VisitVariableDeclarator(VariableDeclaratorSyntax node)
+        public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator(node)!;
+            var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator( node )!;
 
-            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
+            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
-            var localScope = this.GetSymbolScope(local, node); 
+            var localScope = this.GetSymbolScope( local, node );
 
             if ( this._forceCompileTimeOnlyExpression )
             {
@@ -596,6 +596,7 @@ namespace Caravela.Framework.Impl.Templating
                         this._localScopes.Add( local, SymbolDeclarationScope.CompileTimeOnly );
                         break;
                 }
+
                 return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else if ( localScope != SymbolDeclarationScope.Default )
@@ -606,15 +607,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // If a variable is always assigned to a meta expression, it is meta itself.
                 // The next line will not return anything in the first run because it refers to the unmodified tree.
-                var assignments = this._semanticAnnotationMap.GetAssignments(local, this._currentMethod!);
+                var assignments = this._semanticAnnotationMap.GetAssignments( local, this._currentMethod! );
+                var combinedScope = this.GetCombinedScope( assignments.Select( this.GetAssignmentScope ) );
 
-                var combinedScope = this.GetCombinedScope(assignments.Select(this.GetAssignmentScope));
-                
-                
-                if (combinedScope != SymbolDeclarationScope.Default)
+                if ( combinedScope != SymbolDeclarationScope.Default )
                 {
-                    this._localScopes.Add(local, combinedScope);
-                    return transformedNode.AddScopeAnnotation(combinedScope);
+                    this._localScopes.Add( local, combinedScope );
+                    return transformedNode.AddScopeAnnotation( combinedScope );
                 }
 
                 return transformedNode;
@@ -797,6 +796,14 @@ namespace Caravela.Framework.Impl.Templating
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitAwaitExpression( node );
+        }
+
+        public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
+        {
+            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "initializer expression" );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitInitializerExpression( node );
         }
 
         #endregion

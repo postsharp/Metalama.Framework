@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string WhileNotSupported_Template = @"  
+        private const string LocalFuncNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,21 +18,21 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int i = 0;
-        while ( i < AdviceContext.Method.Parameters.Count )
+        void LocalFunc(dynamic p)
         {
-            i++;
+            Console.WriteLine(p.ToString());
         }
 
-        Console.WriteLine( ""Test result = "" + i );
-
         dynamic result = AdviceContext.Proceed();
+        
+        LocalFunc(result);
+        
         return result;
     }
 }
 ";
 
-        private const string WhileNotSupported_Target = @"
+        private const string LocalFuncNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -42,12 +42,12 @@ class TargetCode
 }
 ";
 
-        private const string WhileNotSupported_ExpectedOutput = @"";
+        private const string LocalFuncNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task WhileNotSupported()
+        public async Task LocalFuncNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( WhileNotSupported_Template, WhileNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( LocalFuncNotSupported_Template, LocalFuncNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }

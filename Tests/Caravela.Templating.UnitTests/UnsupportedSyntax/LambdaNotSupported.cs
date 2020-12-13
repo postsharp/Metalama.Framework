@@ -5,9 +5,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class UnsupportedTests
+    public partial class UnsupportedSyntaxTests
     {
-        private const string AnonymousMethodNotSupported_Template = @"  
+        private const string LambdaNotSupported_Template = @"  
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -18,8 +18,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        Action<object> action =
-        delegate (object p)
+        Action<object> action = (object p) =>
         {
             Console.WriteLine(p.ToString());
         };
@@ -33,7 +32,7 @@ class Aspect
 }
 ";
 
-        private const string AnonymousMethodNotSupported_Target = @"
+        private const string LambdaNotSupported_Target = @"
 class TargetCode
 {
     int Method( int a, int b )
@@ -43,12 +42,12 @@ class TargetCode
 }
 ";
 
-        private const string AnonymousMethodNotSupported_ExpectedOutput = @"";
+        private const string LambdaNotSupported_ExpectedOutput = @"";
 
         [Fact]
-        public async Task AnonymousMethodNotSupported()
+        public async Task LambdaNotSupported()
         {
-            var testResult = await this._testRunner.Run( new TestInput( AnonymousMethodNotSupported_Template, AnonymousMethodNotSupported_Target ) );
+            var testResult = await this._testRunner.Run( new TestInput( LambdaNotSupported_Template, LambdaNotSupported_Target ) );
             testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }
