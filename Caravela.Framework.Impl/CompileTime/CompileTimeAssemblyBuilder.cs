@@ -166,6 +166,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var stream = this.Emit( compileTimeCompilation, compilation );
 
+            stream = Callbacks.AssemblyRewriter?.Invoke( stream ) ?? stream;
+
             this._previousCompilation = (compilation, stream);
 
             return stream;
