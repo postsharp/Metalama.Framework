@@ -83,7 +83,11 @@ namespace Caravela.Framework.Impl
                     }
                 }
 
-                return aspectCompilation.Compilation.GetRoslynCompilation();
+                var resultCompilation = aspectCompilation.Compilation.GetRoslynCompilation();
+
+                resultCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( resultCompilation );
+
+                return resultCompilation;
             }
             catch (CaravelaException exception)
             {
