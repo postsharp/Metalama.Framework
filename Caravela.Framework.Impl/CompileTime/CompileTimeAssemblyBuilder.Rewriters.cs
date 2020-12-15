@@ -29,6 +29,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
                 return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
             }
+
+            protected static MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+            {
+                // throw new System.NotSupportedException("message")
+                var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
+                    .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
+
+                return method.WithBody( null ).WithExpressionBody( ArrowExpressionClause( body ) );
+            }
         }
 
         sealed class ProduceCompileTimeCodeRewriter : Rewriter
@@ -139,7 +148,7 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
                     else
                         throw new DiagnosticsException(GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray());
 
-                    yield return node;
+                    yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     yield return (MethodDeclarationSyntax)transformedNode!;
                 }
                 else
@@ -176,19 +185,10 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly or SymbolDeclarationScope.Template )
-                {
-                    string message = "Compile-time only code cannot be called at run-time.";
-
-                    // throw new System.NotSupportedException("message")
-                    var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
-                        .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
-
-                    return node.WithBody( null ).WithExpressionBody( ArrowExpressionClause( body ) );
-                }
+                    return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
 
                 return node;
             }
         }
-
     }
 }
