@@ -8,12 +8,12 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
-  dynamic Template()
-  {
+    [Template]
+    dynamic Template()
+    {
         dynamic result = AdviceContext.Proceed();
         return result;
-  }
+    }
 }
 ";
 
