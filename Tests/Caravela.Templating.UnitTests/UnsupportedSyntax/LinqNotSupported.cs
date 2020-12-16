@@ -20,7 +20,7 @@ class Aspect
     {
         dynamic result = AdviceContext.Proceed();
         
-        IEnumerable<int> list = new int[] {1,2,3};
+        IEnumerable<int> list = from i in new int[]{1,2,3} select i*i;
         if (result == null)
         {
             result =

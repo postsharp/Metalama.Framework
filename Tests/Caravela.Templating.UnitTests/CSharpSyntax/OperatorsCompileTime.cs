@@ -45,8 +45,13 @@ class Aspect
         i = i >> 1;
         i = ~(~i);
         
-        bool x = (i == 1);
+        bool x = i switch
+        {
+            1 => true,
+            _ => false
+        };
         bool y = (i >= 2);
+        
         
         var t = (x, y);
         (x, y) = t;
@@ -55,6 +60,7 @@ class Aspect
         
         string s = default(string);
         s ??= ""42"";
+        //s = s[0..2];
         
         Console.WriteLine(i);
         Console.WriteLine(z.Value);
@@ -95,7 +101,7 @@ class TargetCode
         public async Task OperatorsCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( OperatorsCompileTime_Template, OperatorsCompileTime_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+            testResult.AssertOutput( OperatorsCompileTime_ExpectedOutput );
         }
     }
 }
