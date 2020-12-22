@@ -65,7 +65,7 @@ class TargetCode
         public async Task TemplateClassMembers()
         {
             var testResult = await this._testRunner.Run( new TestInput( TemplateClassMembers_Template, TemplateClassMembers_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+            testResult.AssertOutput( TemplateClassMembers_ExpectedOutput );
         }
     }
 }

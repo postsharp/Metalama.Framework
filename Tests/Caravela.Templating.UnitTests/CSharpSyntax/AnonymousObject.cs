@@ -67,7 +67,7 @@ class TargetCode
         public async Task AnonymousObject()
         {
             var testResult = await this._testRunner.Run( new TestInput( AnonymousObject_Template, AnonymousObject_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+            testResult.AssertOutput( AnonymousObject_ExpectedOutput );
         }
     }
 }

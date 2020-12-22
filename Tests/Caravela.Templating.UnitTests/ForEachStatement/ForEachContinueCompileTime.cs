@@ -44,7 +44,7 @@ class TargetCode
 {
     Console.WriteLine(1);
     int result;
-    result = a + b;
+    result = a + bb;
     return result;
 }
 ";
@@ -53,7 +53,7 @@ class TargetCode
         public async Task ForEachContinueCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( ForEachContinueCompileTime_Template, ForEachContinueCompileTime_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+            testResult.AssertOutput( ForEachContinueCompileTime_ExpectedOutput );
         }
     }
 }
