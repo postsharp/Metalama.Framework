@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
-
+    
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="all" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
@@ -40,7 +40,8 @@
   
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
-      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Type) != 'project'" />
+      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))"
+                       Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
     </ItemGroup>
     
     <PropertyGroup>

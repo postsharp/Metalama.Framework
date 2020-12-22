@@ -17,14 +17,28 @@ namespace Caravela.Framework.Impl.Templating
         private readonly MarkedSpanSet _spans = new MarkedSpanSet();
         private readonly SourceText _sourceText;
 
+        private bool _isInTemplate;
+
         public CompileTimeTextSpanMarker( SourceText sourceText )
         {
             this._sourceText = sourceText;
         }
 
-        public override void DefaultVisit( SyntaxNode? node )
+        public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
+            {
+                this._isInTemplate = true;
+
+                base.VisitMethodDeclaration( node );
+
+                this._isInTemplate = false;
+            }
+        }
+
+        public override void DefaultVisit( SyntaxNode node )
+        {
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
                 this.Mark( node );
             }
@@ -63,12 +77,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitIfStatement( IfStatementSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
-                this.Mark( node.IfKeyword );
-                this.Mark( node.Condition );
-                this.Mark( node.OpenParenToken );
-                this.Mark( node.CloseParenToken );
+                this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ) );
                 this.VisitCompileTimeStatementNode( node.Statement );
 
                 if ( node.Else != null )
@@ -85,14 +96,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitForEachStatement( ForEachStatementSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
-                this.Mark( node.ForEachKeyword );
-                this.Mark( node.Type );
-                this.Mark( node.Identifier );
-                this.Mark( node.Expression );
-                this.Mark( node.OpenParenToken );
-                this.Mark( node.CloseParenToken );
+                this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ) );
                 this.VisitCompileTimeStatementNode( node.Statement );
             }
             else

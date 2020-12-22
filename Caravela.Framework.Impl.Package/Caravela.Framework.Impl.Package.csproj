@@ -7,12 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- TODO: change to Caravela.CA.CS -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.100" />
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" PrivateAssets="all" />
-
-    <!--<ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />-->
-
+    <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

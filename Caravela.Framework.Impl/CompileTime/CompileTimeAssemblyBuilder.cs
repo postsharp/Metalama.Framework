@@ -8,35 +8,19 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    class CompileTimeAssemblyBuilder
+    partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
         static CompileTimeAssemblyBuilder()
         {
-            // TODO: make NuGetPackageRoot MSBuild property compiler-visible and use that here?
-            string nugetDirectory = Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" );
-
-            string netstandardDirectory = Path.Combine( nugetDirectory, "netstandard.library/2.0.3/build/netstandard2.0/ref" );
-            var netStandardPaths = new[] { "netstandard.dll", "System.Runtime.dll" }.Select( name => Path.Combine( netstandardDirectory, name ) );
-
-            // Note: references to Roslyn assemblies can't be simply preserved, because they might have the wrong TFM
-            var nugetPaths = new (string package, string version, string assembly)[]
-            {
-                ("microsoft.csharp", MicrosoftCSharpVersion, "Microsoft.CSharp.dll"),
-                ("microsoft.codeanalysis.common", MicrosoftCodeAnalysisCommonVersion, "Microsoft.CodeAnalysis.dll"),
-                ("microsoft.codeanalysis.csharp", MicrosoftCodeAnalysisCSharpVersion, "Microsoft.CodeAnalysis.CSharp.dll"),
-                ("system.collections.immutable", SystemCollectionsImmutableVersion, "System.Collections.Immutable.dll")
-            }
-            .Select( x => $"{nugetDirectory}/{x.package}/{x.version}/lib/netstandard2.0/{x.assembly}" );
+            var referenceAssemblyPaths = ReferenceAssemblyLocator.GetReferenceAssemblies();
 
             // the SDK assembly might not be loaded at this point, so make sure it is
             _ = new AspectWeaverAttribute( null! );
@@ -53,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( a => a.Location )
                 .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
 
-            _fixedReferences = netStandardPaths.Concat( nugetPaths ).Concat( caravelaPaths )
+            _fixedReferences = referenceAssemblyPaths.Concat( caravelaPaths )
                 .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
@@ -182,6 +166,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var stream = this.Emit( compileTimeCompilation, compilation );
 
+            stream = Callbacks.AssemblyRewriter?.Invoke( stream ) ?? stream;
+
             this._previousCompilation = (compilation, stream);
 
             return stream;
@@ -189,151 +175,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
 
-        class ProduceCompileTimeCodeRewriter : CSharpSyntaxRewriter
-        {
-            private readonly ISymbolClassifier _symbolClassifier;
-            private readonly TemplateCompiler _templateCompiler;
-            private readonly Compilation _compilation;
-
-            public bool FoundCompileTimeCode { get; private set; }
-
-            public ProduceCompileTimeCodeRewriter( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, Compilation compilation)
-            {
-                this._symbolClassifier = symbolClassifier;
-                this._templateCompiler = templateCompiler;
-                this._compilation = compilation;
-            }
-
-            private SymbolDeclarationScope GetSymbolDeclarationScope(MemberDeclarationSyntax node)
-            {
-                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-                return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
-            }
-
-            private bool _addTemplateUsings;
-            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = SyntaxFactory.ParseCompilationUnit( @"
-using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
-" ).Usings;
-
-            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
-            {
-                node = (CompilationUnitSyntax)base.VisitCompilationUnit( node )!;
-
-                // TODO: handle namespaces properly
-                if ( this._addTemplateUsings )
-                {
-                    // add all template usings, unless such using is already in the list
-                    var usingsToAdd = _templateUsings.Where( tu => !node.Usings.Any( u => u.IsEquivalentTo( tu ) ) );
-
-                    node = node.AddUsings( usingsToAdd.ToArray() );
-                }
-
-#if DEBUG
-                node = node.NormalizeWhitespace();
-#endif
-
-                return node;
-            }
-
-            // TODO: assembly and module-level attributes?
-            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
-
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            private T? VisitTypeDeclaration<T>( T node ) where T : TypeDeclarationSyntax
-            {
-                switch ( this.GetSymbolDeclarationScope( node ) )
-                {
-                    case SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly:
-                        return null;
-
-                    case SymbolDeclarationScope.CompileTimeOnly:
-                        this.FoundCompileTimeCode = true;
-
-                        var members = new List<MemberDeclarationSyntax>();
-
-                        foreach (var member in node.Members)
-                        {
-                            switch (member)
-                            {
-                                case MethodDeclarationSyntax method:
-                                    members.AddRange( this.VisitMethodDeclaration( method ) );
-                                    break;
-                                case TypeDeclarationSyntax nestedType:
-                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ) );
-                                    break;
-                                default:
-                                    members.Add( member );
-                                    break;
-                            }
-                        }
-
-                        return (T) node.WithMembers( SyntaxFactory.List( members ) );
-
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
-
-            private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
-            {
-                if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
-                {
-                    var diagnostics = new List<Diagnostic>();
-                    bool success =
-                        this._templateCompiler.TryCompile( node, this._compilation.GetSemanticModel( node.SyntaxTree ), diagnostics, out _, out var transformedNode );
-
-                    Debug.Assert( success || diagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error ) );
-
-                    if ( success )
-                    {
-                        // reporting warnings is currently not supported here
-                        Debug.Assert( diagnostics.Count == 0 );
-
-                        this._addTemplateUsings = true;
-                    }
-                    else
-                        throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
-
-                    yield return node;
-                    yield return (MethodDeclarationSyntax) transformedNode!;
-                }
-                else
-                {
-                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
-                }
-            }
-
-            // TODO: top-level statements?
-        }
-
-        // TODO: improve perf by explicitly skipping over all other nodes?
-        internal class RemoveInvalidUsingsRewriter : CSharpSyntaxRewriter
-        {
-            private readonly Compilation _compilation;
-
-            public RemoveInvalidUsingsRewriter( Compilation compilation ) => this._compilation = compilation;
-
-            public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
-            {
-                var symbolInfo = this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
-
-                if ( symbolInfo.Symbol == null )
-                    return null;
-
-                return node;
-            }
-        }
+        /// <summary>
+        /// Prepares run-time assembly by making compile-time only methods throw <see cref="NotSupportedException"/>.
+        /// </summary>
+        public CSharpCompilation PrepareRunTimeAssembly( CSharpCompilation compilation ) =>
+            new PrepareRunTimeAssemblyRewriter( this._symbolClassifier, compilation ).VisitAllTrees( compilation );
     }
 }

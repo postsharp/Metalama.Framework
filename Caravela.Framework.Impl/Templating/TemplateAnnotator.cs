@@ -120,7 +120,10 @@ namespace Caravela.Framework.Impl.Templating
                     }
 
                     return SymbolDeclarationScope.RunTimeOnly;
-                    
+
+                case SymbolDeclarationScope.Template:
+                    return SymbolDeclarationScope.Template;
+
                 default:
                         return SymbolDeclarationScope.Default;
             }
@@ -664,6 +667,13 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
+            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
+
+            if ( this.GetSymbolScope( symbol, node ) == SymbolDeclarationScope.Template)
+            {
+                node = node.AddScopeAnnotation( SymbolDeclarationScope.Template );
+            }
+
             this._currentMethod = node;
             try
             {

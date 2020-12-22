@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Caravela.TestFramework.MetaModel;
@@ -123,24 +124,17 @@ namespace Caravela.TestFramework.Templating
 
         protected virtual Project CreateProject()
         {
-            var netStandardDirectory =
-                Environment.ExpandEnvironmentVariables(
-                    @"%USERPROFILE%\.nuget\packages\netstandard.library\2.0.0\build\netstandard2.0\ref" );
+            var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
                 .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
-                .AddMetadataReferences( Directory.GetFiles( netStandardDirectory, "*.dll" )
-                    .Where( f => !Path.GetFileNameWithoutExtension( f ).EndsWith( "Native", StringComparison.OrdinalIgnoreCase ) )
-                    .Select( f => MetadataReference.CreateFromFile( f ) ) )
+                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( AdviceContext ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( SyntaxNode ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( SyntaxFactory ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateHelper ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( Microsoft.CSharp.RuntimeBinder.Binder ).Assembly.Location ) )
                 ;
             return project;
         }

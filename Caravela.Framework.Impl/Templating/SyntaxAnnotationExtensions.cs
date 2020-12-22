@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation( "scope", "buildtime" );
         private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( "scope", "runtime" );
+        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation("scope", "template");
         private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( "noindent" );
 
         private static readonly ImmutableArray<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { "scope", "noindent" } );
@@ -35,6 +36,9 @@ namespace Caravela.Framework.Impl.Templating
 
                     case "runtime":
                         return SymbolDeclarationScope.RunTimeOnly;
+
+                    case "template":
+                        return SymbolDeclarationScope.Template;
 
                     default:
                         throw new AssertionFailedException();
@@ -70,6 +74,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SymbolDeclarationScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( runTimeOnlyAnnotation );
+
+                case SymbolDeclarationScope.Template:
+                    return node.WithAdditionalAnnotations(templateAnnotation);
 
                 default:
                     return node;

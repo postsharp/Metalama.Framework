@@ -118,6 +118,9 @@ namespace Caravela.Framework.Impl.Templating
             return symbol.GetAttributes().Any(a => a.AttributeClass.Name == nameof(ProceedAttribute));
         }
 
+        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
+            CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
+
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/>, especially taking care of handling
         /// transitions between compile-time expressions and run-time expressions. At these transitions,
@@ -184,7 +187,7 @@ namespace Caravela.Framework.Impl.Templating
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ParenthesizedExpression(
-                                CastExpression(
+                                CastFromDynamic(
                                     IdentifierName(nameof(IDynamicMetaMember)), expression)),
                             IdentifierName(nameof(IDynamicMetaMember.CreateExpression))));
 
@@ -229,7 +232,7 @@ namespace Caravela.Framework.Impl.Templating
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
-                            CastExpression(
+                            CastFromDynamic(
                                 IdentifierName( nameof( IDynamicMetaMember ) ), node.Expression ) ),
                         IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
                     .AddArgumentListArguments( Argument( LiteralExpression(
@@ -603,7 +606,7 @@ namespace Caravela.Framework.Impl.Templating
                                                                                             SyntaxKind
                                                                                                 .SimpleMemberAccessExpression,
                                                                                             ParenthesizedExpression(
-                                                                                                CastExpression(
+                                                                                                CastFromDynamic(
                                                                                                     IdentifierName(
                                                                                                         nameof(
                                                                                                             IProceedImpl
@@ -654,7 +657,7 @@ namespace Caravela.Framework.Impl.Templating
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
                                         ParenthesizedExpression(
-                                            CastExpression(
+                                            CastFromDynamic(
                                                 IdentifierName(nameof(IProceedImpl)),
                                                 proceedAssignments[0].Initializer.Value)),
                                         IdentifierName(nameof(IProceedImpl.CreateAssignStatement))),
@@ -696,7 +699,7 @@ namespace Caravela.Framework.Impl.Templating
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
-                            CastExpression(
+                            CastFromDynamic(
                                 IdentifierName(nameof(IProceedImpl)), node.Expression)),
                         IdentifierName(nameof(IProceedImpl.CreateReturnStatement))),
                     ArgumentList());
