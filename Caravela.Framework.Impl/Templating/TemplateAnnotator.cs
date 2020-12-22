@@ -591,7 +591,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator(node)!;
 
-            var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
+            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
+
+            if (symbol is not ILocalSymbol local)
+            {
+                // it's a field, or a field-like event
+                return node;
+            }
 
             var localScope = this.GetSymbolScope(local, node); 
 
