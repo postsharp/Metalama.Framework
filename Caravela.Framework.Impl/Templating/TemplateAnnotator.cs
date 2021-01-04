@@ -673,22 +673,24 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
-
-            if ( this.GetSymbolScope( symbol, node ) == SymbolDeclarationScope.Template)
-            {
-                node = node.AddScopeAnnotation( SymbolDeclarationScope.Template );
-            }
-
             this._currentMethod = node;
             try
             {
-                return base.VisitMethodDeclaration(node);
+                node = (MethodDeclarationSyntax) base.VisitMethodDeclaration(node)!;
             }
             finally
             {
                 this._currentMethod = null;
             }
+
+            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
+
+            if ( this.GetSymbolScope( symbol, node ) == SymbolDeclarationScope.Template )
+            {
+                node = node.AddScopeAnnotation( SymbolDeclarationScope.Template );
+            }
+
+            return node;
         }
 
         public override SyntaxNode? VisitAssignmentExpression(AssignmentExpressionSyntax node)

@@ -22,6 +22,10 @@ namespace Caravela.Framework.Impl.Templating
             symbolAnnotationMap = new SemanticAnnotationMap();
             annotatedSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
+            // Put the annotated node back into the original tree, so that diagnostics have correct locations.
+            var markerAnnotation = new SyntaxAnnotation();
+            var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot.WithAdditionalAnnotations(markerAnnotation) );
+            annotatedSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
 
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
