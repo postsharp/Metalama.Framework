@@ -7,9 +7,14 @@ namespace Caravela.Framework.TestApp
 {
     class CancelAspect : OverrideMethodAspect
     {
+        static bool TypeIsCancellationToken( IAdviceParameter p ) => p.Type.Is( typeof( CancellationToken ) );
+
         public override dynamic Template()
         {
-            var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
+            // error CR0101: This C# language feature is not supported by the template compiler - ParenthesizedLambdaExpression.
+            // var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
+
+            var parameter = target.Parameters.LastOrDefault( TypeIsCancellationToken );
 
             if ( parameter != null )
             {

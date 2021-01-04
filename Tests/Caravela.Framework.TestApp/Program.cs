@@ -32,10 +32,13 @@ namespace Caravela.Framework.TestApp
         }
 
         [SwallowExceptionsAspect]
-        static void PrintArrayAtIndex(int[] a, int i)
+        static object PrintArrayAtIndex(int[] a, int i)
         {
             Console.WriteLine( a[i] );
             Thread.Sleep( 100 );
+
+            // void methods don't work if template contains "return default;"
+            return null;
         }
 
         static void Cancel()
