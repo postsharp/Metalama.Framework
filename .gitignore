@@ -26,7 +26,7 @@
 [Bb]uild[Ll]og.*
 [Bb]in/
 [Oo]bj/
-/.vs/
+.vs/
 .vscode
 _ReSharper*/
 .idea/

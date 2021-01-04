@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.Framework.Impl.CompileTime;
-using System.Net.Http.Headers;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -365,7 +364,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
@@ -409,8 +407,6 @@ namespace Caravela.Framework.Impl.Templating
                 return argument;
             }
         }
-
-      
 
         public override SyntaxNode? VisitIfStatement(IfStatementSyntax node)
         {
@@ -552,14 +548,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
-        {
-            var diagnostic = Diagnostic.Create( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node.GetLocation(), "while statement" );
-            this.Diagnostics.Add( diagnostic );
-            
-            return base.VisitWhileStatement( node );
-        }
-
         private SymbolDeclarationScope GetAssignmentScope(SyntaxNode node)
         {
             switch (node)
@@ -587,9 +575,9 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode? VisitVariableDeclarator(VariableDeclaratorSyntax node)
+        public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
-            var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator(node)!;
+            var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator( node )!;
 
             var symbol = this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
 
@@ -599,7 +587,7 @@ namespace Caravela.Framework.Impl.Templating
                 return node;
             }
 
-            var localScope = this.GetSymbolScope(local, node); 
+            var localScope = this.GetSymbolScope( local, node );
 
             if ( this._forceCompileTimeOnlyExpression )
             {
@@ -616,6 +604,7 @@ namespace Caravela.Framework.Impl.Templating
                         this._localScopes.Add( local, SymbolDeclarationScope.CompileTimeOnly );
                         break;
                 }
+
                 return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else if ( localScope != SymbolDeclarationScope.Default )
@@ -626,15 +615,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // If a variable is always assigned to a meta expression, it is meta itself.
                 // The next line will not return anything in the first run because it refers to the unmodified tree.
-                var assignments = this._semanticAnnotationMap.GetAssignments(local, this._currentMethod!);
+                var assignments = this._semanticAnnotationMap.GetAssignments( local, this._currentMethod! );
+                var combinedScope = this.GetCombinedScope( assignments.Select( this.GetAssignmentScope ) );
 
-                var combinedScope = this.GetCombinedScope(assignments.Select(this.GetAssignmentScope));
-                
-                
-                if (combinedScope != SymbolDeclarationScope.Default)
+                if ( combinedScope != SymbolDeclarationScope.Default )
                 {
-                    this._localScopes.Add(local, combinedScope);
-                    return transformedNode.AddScopeAnnotation(combinedScope);
+                    this._localScopes.Add( local, combinedScope );
+                    return transformedNode.AddScopeAnnotation( combinedScope );
                 }
 
                 return transformedNode;
@@ -684,7 +671,6 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode.AddScopeAnnotation(this.GetNodeScope(transformedNode.Declaration));
         }
 
-
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
@@ -729,6 +715,145 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode.WithScopeAnnotationFrom(node.Expression).WithScopeAnnotationFrom(node);
         }
 
+        #region Unsupported syntax
 
+        public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitForStatement( node );
+        }
+
+        public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitWhileStatement( node );
+        }
+
+        public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitDoStatement( node );
+        }
+
+        public override SyntaxNode? VisitGotoStatement( GotoStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitGotoStatement( node );
+        }
+
+        public override SyntaxNode? VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitLocalFunctionStatement( node );
+        }
+
+        public override SyntaxNode? VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitAnonymousMethodExpression( node );
+        }
+
+        public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitParenthesizedLambdaExpression( node );
+        }
+
+        public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitSimpleLambdaExpression( node );
+        }
+
+        public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitSwitchStatement( node );
+        }
+
+        public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitQueryExpression( node );
+        }
+
+        public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+            
+            return base.VisitLockStatement( node );
+        }
+
+        public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
+        {
+            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            this.Diagnostics.Add( diagnostic );
+
+            return base.VisitAwaitExpression( node );
+        }
+
+        public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
+        {
+            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+
+            return base.VisitInitializerExpression( node );
+        }
+
+        public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
+        {
+            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+
+            return base.VisitCastExpression( node );
+        }
+
+        public override SyntaxNode? VisitBinaryExpression( BinaryExpressionSyntax node )
+        {
+            switch (node.Kind())
+            {
+                case SyntaxKind.IsExpression:
+                case SyntaxKind.AsExpression:
+                    this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+                    break;
+            }
+
+            return base.VisitBinaryExpression( node );
+        }
+
+        public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
+        {
+            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+
+            return base.VisitYieldStatement( node );
+        }
+
+        public override SyntaxNode? VisitUsingStatement( UsingStatementSyntax node )
+        {
+            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+
+            return base.VisitUsingStatement( node );
+        }
+
+        #endregion
     }
 }

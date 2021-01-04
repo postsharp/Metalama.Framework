@@ -1,0 +1,62 @@
+using Caravela.Framework.Impl;
+using Caravela.TestFramework.Templating;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Caravela.Templating.UnitTests
+{
+    public partial class UnsupportedSyntaxTests
+    {
+        private const string SwitchNotSupported_Template = @"  
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+
+class Aspect
+{
+    [Template]
+    dynamic Template()
+    {
+        dynamic result;
+        switch( AdviceContext.Method.Parameters.Count )
+        {
+            case 0:
+                result = null;
+                break;
+            case 1:
+                result = AdviceContext.Method.Parameters[0].Value;
+                break;
+            case 2:
+                goto default;
+            case 3:
+                goto case 2;
+            default:
+                result = AdviceContext.Proceed();
+                break;
+        }
+        return result;
+    }
+}
+";
+
+        private const string SwitchNotSupported_Target = @"
+class TargetCode
+{
+    int Method( int a, int b )
+    {
+        return a + b;
+    }
+}
+";
+
+        private const string SwitchNotSupported_ExpectedOutput = @"";
+
+        [Fact]
+        public async Task SwitchNotSupported()
+        {
+            var testResult = await this._testRunner.Run( new TestInput( SwitchNotSupported_Template, SwitchNotSupported_Target ) );
+            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+        }
+    }
+}
