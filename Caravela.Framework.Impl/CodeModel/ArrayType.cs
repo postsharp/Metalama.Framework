@@ -32,6 +32,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IArrayType MakeArrayType( int rank = 1 ) =>
             (IArrayType) this._compilation.SymbolMap.GetIType( this._compilation.RoslynCompilation.CreateArrayTypeSymbol( this._typeSymbol, rank ) );
 
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._typeSymbol.ToDisplayString();
+
+
         public override string ToString() => this._typeSymbol.ToString();
     }
 }

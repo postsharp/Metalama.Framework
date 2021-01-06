@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl
 {
     sealed class AspectCompilation
     {
-        private readonly ImmutableArray<AspectSource> _aspectSources;
+        private readonly IImmutableList<AspectSource> _aspectSources;
 
         // TODO: should this be reactive or handled as a side value?
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
@@ -28,10 +28,10 @@ namespace Caravela.Framework.Impl
         public AspectCompilation( BaseCompilation compilation, CompileTimeAssemblyLoader loader )
             : this(
                   Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), compilation,
-                  ImmutableArray.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
+                  ImmutableList.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
 
         private AspectCompilation(
-            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, BaseCompilation compilation, ImmutableArray<AspectSource> aspectSources)
+            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, BaseCompilation compilation, IImmutableList<AspectSource> aspectSources)
         {
             this.Diagnostics = diagnostics;
             this.Resources = resources;
@@ -44,8 +44,8 @@ namespace Caravela.Framework.Impl
 
         public AspectCompilation Update( IReadOnlyList<Diagnostic> addedDiagnostics, IReadOnlyList<ResourceDescription> addedResources, BaseCompilation newCompilation )
         {
-            var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableArray();
-            var newResources = this.Resources.Concat( addedResources ).ToImmutableArray();
+            var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableList();
+            var newResources = this.Resources.Concat( addedResources ).ToImmutableList();
 
             return new( newDiagnostics, newResources, newCompilation, this._aspectSources );
         }
@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl
             var addedAdvices = instanceResults.SelectMany( air => air.Advices );
             var addedAspects = instanceResults.SelectMany( air => air.Aspects );
 
-            var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).ToImmutableArray();
+            var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).ToImmutableList();
             var newCompilation = new ModifiedCompilation( this.Compilation, addedAdvices );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 

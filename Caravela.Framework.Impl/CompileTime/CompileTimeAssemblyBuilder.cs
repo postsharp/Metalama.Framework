@@ -104,12 +104,12 @@ namespace Caravela.Framework.Impl.CompileTime
         // this is not nearly as good as a GUID, but should be good enough for the purpose of preventing collisions within the same process
         private string GetUniqueVersion()
         {
-            int getVersionComponent() => this._random.Next( 0, ushort.MaxValue );
+            int GetVersionComponent() => this._random.Next( 0, ushort.MaxValue );
 
-            int major = getVersionComponent();
-            int minor = getVersionComponent();
-            int build = getVersionComponent();
-            int revision = getVersionComponent();
+            int major = GetVersionComponent();
+            int minor = GetVersionComponent();
+            int build = GetVersionComponent();
+            int revision = GetVersionComponent();
 
             return new Version( major, minor, build, revision ).ToString();
         }

@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Compilation = compilation;
         }
 
-        public bool IsDefaultConstructible =>
+        public bool HasDefaultConstructor =>
             this.TypeSymbol.TypeKind == TypeKind.Struct ||
             (this.TypeSymbol.TypeKind == TypeKind.Class && !this.TypeSymbol.IsAbstract && this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]
-        public IImmutableList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableArray();
+        public IImmutableList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
 
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
@@ -103,5 +103,6 @@ namespace Caravela.Framework.Impl.CodeModel
             (IArrayType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this.TypeSymbol, rank ) );
 
         public override string ToString() => this.TypeSymbol.ToString();
+        
     }
 }

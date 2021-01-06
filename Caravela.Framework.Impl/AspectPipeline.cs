@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            return compilation.DeclaredAndReferencedTypes.Where( t => t.IsDefaultConstructible && t.Is( iAspect ) );
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.HasDefaultConstructor && t.Is( iAspect ) );
         }
 
         private static object GetGroupingKey( IAspectDriver driver ) =>

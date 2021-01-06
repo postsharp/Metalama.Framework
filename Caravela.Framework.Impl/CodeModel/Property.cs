@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IPropertySymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
+        
 
         private readonly NamedType _containingElement;
         public override ICodeElement? ContainingElement => this._containingElement;
@@ -26,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
 
 
         [Memo]

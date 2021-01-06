@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl
         }
 
         private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
-            where T : ICodeElement
+            where T : class, ICodeElement
         {
             if (aspect is not IAspect<T> aspectOfT)
             {
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.Kind );
 
-                return new( ImmutableArray.Create( diagnostic ), ImmutableArray.Create<AdviceInstance>(), ImmutableArray.Create<AspectInstance>() );
+                return new( ImmutableList.Create( diagnostic ), ImmutableList.Create<AdviceInstance>(), ImmutableList.Create<AspectInstance>() );
             }
 
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );

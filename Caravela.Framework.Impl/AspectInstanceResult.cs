@@ -5,5 +5,5 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl
 {
-    record AspectInstanceResult( ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<AdviceInstance> Advices, ImmutableArray<AspectInstance> Aspects );
+    record AspectInstanceResult( IImmutableList<Diagnostic> Diagnostics, IImmutableList<AdviceInstance> Advices, IImmutableList<AspectInstance> Aspects );
 }
