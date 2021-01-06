@@ -464,7 +464,16 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node)
         {
+            bool callsProceed = node.HasCallsProceedAnnotation();
+
+            
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
+            
+            if ( callsProceed )
+            {
+                // If the loop calls proceed, we force it to be run-time.
+                this._localScopes[local] = SymbolDeclarationScope.RunTimeOnly;
+            }
 
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
             // compile-time. 
@@ -486,9 +495,10 @@ namespace Caravela.Framework.Impl.Templating
             }
 
 
+            
             bool isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
             
-            if ( isBuildTimeLocalVariable || isBuildTimeExpression )
+            if ( (isBuildTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
             {
                 // This is a build-time loop.
 
@@ -534,15 +544,17 @@ namespace Caravela.Framework.Impl.Templating
 
 
                     return ForEachStatement(
-                        default,
-                        node.ForEachKeyword,
-                        node.OpenParenToken,
-                        node.Type,
-                        node.Identifier,
-                        node.InKeyword,
-                        annotatedExpression,
-                        node.CloseParenToken,
-                        annotatedStatement).WithSymbolAnnotationsFrom(node);
+                            default,
+                            node.ForEachKeyword,
+                            node.OpenParenToken,
+                            node.Type,
+                            node.Identifier,
+                            node.InKeyword,
+                            annotatedExpression,
+                            node.CloseParenToken,
+                            annotatedStatement )
+                        .WithSymbolAnnotationsFrom( node )
+                        .WithCallsProceedAnnotationFrom( node );
 
                 }
             }
@@ -721,10 +733,30 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            // This is a quick-and-dirty implementation that all for statements runtime.
+
+            foreach ( var localDeclaration in node.Declaration.Variables )
+            {
+                var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( localDeclaration ); 
+                this._localScopes[ local ] = SymbolDeclarationScope.RunTimeOnly;
+            }
             
-            return base.VisitForStatement( node );
+            var transformedVariableDeclaration = (VariableDeclarationSyntax) this.Visit( node.Declaration );
+            var transformedInitializers =  node.Initializers.Select( i => (ExpressionSyntax) this.Visit( i ) );
+            var transformedCondition = (ExpressionSyntax) this.Visit( node.Condition );
+            var transformedIncrementors = node.Incrementors.Select( i => this.Visit( i ) );
+
+            StatementSyntax transformedStatement;
+            using ( this.EnterRuntimeConditionalBlock() )
+            {
+                transformedStatement = (StatementSyntax) this.Visit( node.Statement );
+            }
+
+            return ForStatement( node.ForKeyword, node.OpenParenToken, transformedVariableDeclaration,
+                SeparatedList( transformedInitializers ),
+                node.FirstSemicolonToken, transformedCondition, node.SecondSemicolonToken,
+                SeparatedList( transformedIncrementors ),
+                node.CloseParenToken, transformedStatement );
         }
 
         public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )

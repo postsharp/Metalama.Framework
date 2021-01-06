@@ -12,8 +12,9 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( "scope", "runtime" );
         private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation("scope", "template");
         private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( "noindent" );
+        private static readonly SyntaxAnnotation proceedAnnotation = new SyntaxAnnotation( "proceed" );
 
-        private static readonly ImmutableArray<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { "scope", "noindent" } );
+        private static readonly ImmutableList<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { "scope", "noindent" } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
         {
@@ -91,10 +92,29 @@ namespace Caravela.Framework.Impl.Templating
 
         public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode =>
             node.WithAdditionalAnnotations( source.GetAnnotations( templateAnnotationKinds ) );
+        
+        public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode
+            => source.HasCallsProceedAnnotation() ? node.AddCallsProceedAnnotation() : node;
+
 
         public static T AddNoDeepIndentAnnotation<T>( this T node ) where T : SyntaxNode =>
             node.WithAdditionalAnnotations( noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( noDeepIndentAnnotation );
+        
+       public static bool HasCallsProceedAnnotation( this SyntaxNode node ) 
+           => node.HasAnnotation( proceedAnnotation );
+
+       public static T AddCallsProceedAnnotation<T>(this T node ) where T : SyntaxNode
+        {
+            if ( node.HasCallsProceedAnnotation() )
+            {
+                return node;
+            }
+            else
+            {
+                return node.WithAdditionalAnnotations( proceedAnnotation );
+            }
+        }
     }
 }

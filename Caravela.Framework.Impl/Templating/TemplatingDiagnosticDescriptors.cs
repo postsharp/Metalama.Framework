@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
 
         public static readonly DiagnosticDescriptor LanguageFeatureIsNotSupported
              = new DiagnosticDescriptor( "CR0101", "The C# language feature is not supported.",
-                 "This C# language feature is not supported by the template compiler - {0}.",
+                 "The {0} language feature is not supported by the template compiler .",
                  templateCategory, DiagnosticSeverity.Error, true );
     }
 }

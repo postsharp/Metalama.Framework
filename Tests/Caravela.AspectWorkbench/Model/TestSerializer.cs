@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.TestFramework.Templating;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using System.Text;
 
@@ -87,6 +88,11 @@ namespace Caravela.AspectWorkbench.Model
 
         private static string GetFieldValue( SyntaxNode fieldNode )
         {
+            if ( fieldNode == null )
+            {
+                return null;
+            }
+            
             return fieldNode.DescendantNodes().OfType<LiteralExpressionSyntax>().FirstOrDefault()?.Token.ValueText;
         }
 

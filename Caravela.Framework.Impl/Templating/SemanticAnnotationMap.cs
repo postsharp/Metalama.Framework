@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<SyntaxAnnotation,ITypeSymbol> _annotationToTypeMap = new Dictionary<SyntaxAnnotation, ITypeSymbol>();
         private readonly Dictionary<ILocalSymbol,SyntaxAnnotation> _localToAssignmentMap = new Dictionary<ILocalSymbol, SyntaxAnnotation>();
 
-        internal static readonly ImmutableArray<string> AnnotationKinds = ImmutableArray.Create("local", "symbol", "declared", "type" );
+        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create("local", "symbol", "declared", "type" );
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
