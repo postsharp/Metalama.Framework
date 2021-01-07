@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
         public static DiagnosticDescriptor ErrorBuildingCompileTimeAssembly =
             new( "CR0002", "Error while building compile-time assembly.", "Error occurred while building compile-time assembly.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor AspectAppliedToIncorrectElement =
-            new( "CR0003", "Aspect applied to incorrect kind of element.", "Aspect {0} cannot be applied to element {1}, because it is a {2}.", caravelaCategory, Error, true );
+            new( "CR0003", "Aspect applied to incorrect kind of element.", "Aspect {0} cannot be applied to element {1}, because it is a {2} or because the associated aspect weaver was not found.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor AspectHasMoreThanOneWeaver =
             new( "CR0004", "Aspect has more than one weaver.", "Aspect {0} can have at most one weaver, but it has the following: {1}.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor ErrorProcessingTemplates =

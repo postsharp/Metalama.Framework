@@ -37,8 +37,7 @@ namespace Caravela.Framework.Impl
                 bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
-                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( 
-                    new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), context.ManifestResources, debugTransformedCode );
+                var compileTimeAssemblyBuilder = CreateCompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
@@ -107,6 +106,10 @@ namespace Caravela.Framework.Impl
                 return context.Compilation;
             }
         }
+
+        public static CompileTimeAssemblyBuilder CreateCompileTimeAssemblyBuilder(
+            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false ) =>
+            new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode );
 
         private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
         {
