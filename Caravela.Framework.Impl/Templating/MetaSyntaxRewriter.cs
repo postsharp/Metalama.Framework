@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Templating
         protected virtual ExpressionSyntax TransformExpression(ExpressionSyntax expression) => expression;
 
 
-        protected ExpressionSyntax Transform<T>(T node) where T : SyntaxNode
+        protected ExpressionSyntax Transform<T>(T node) where T : SyntaxNode?
         {
             if (node == null)
             {

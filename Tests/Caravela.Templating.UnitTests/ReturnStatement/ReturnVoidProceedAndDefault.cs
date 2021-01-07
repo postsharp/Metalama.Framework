@@ -1,4 +1,3 @@
-
 using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;
@@ -7,7 +6,7 @@ namespace Caravela.Templating.UnitTests
 {
     public partial class ReturnStatementTests
     {
-        private const string ReturnVoid_Template = @"  
+        private const string ReturnVoidProceedAndDefault_Template = @"  
 using System;
 using System.Collections.Generic;
 
@@ -18,8 +17,7 @@ class Aspect
     {
         try
         {
-            dynamic result = AdviceContext.Proceed();
-            return result;
+            return AdviceContext.Proceed();
         }
         catch
         {
@@ -29,7 +27,7 @@ class Aspect
 }
 ";
 
-        private const string ReturnVoid_Target = @"
+        private const string ReturnVoidProceedAndDefault_Target = @"
 using System;
 
 class TargetCode
@@ -41,26 +39,23 @@ class TargetCode
 }
 ";
 
-        private const string ReturnVoid_ExpectedOutput = @"
+        private const string ReturnVoidProceedAndDefault_ExpectedOutput = @"
 {
     try
     {
-        __Void result;
         Console.WriteLine(a / b);
-        return result;
     }
     catch
     {
         return;
     }
-}
-";
+}";
 
         [Fact]
-        public async Task ReturnVoid()
+        public async Task ReturnVoidProceedAndDefault()
         {
-            var testResult = await this._testRunner.Run( new TestInput( ReturnVoid_Template, ReturnVoid_Target ) );
-            testResult.AssertOutput( ReturnVoid_ExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( ReturnVoidProceedAndDefault_Template, ReturnVoidProceedAndDefault_Target ) );
+            testResult.AssertOutput( ReturnVoidProceedAndDefault_ExpectedOutput );
         }
     }
 }
