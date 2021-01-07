@@ -882,8 +882,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
         {
-            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
-
+            // TODO: https://tp.postsharp.net/entity/28017-template-compiler-support-for-cast-as
+            // this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
             return base.VisitCastExpression( node );
         }
 
@@ -893,7 +893,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
-                    this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+                    // TODO: https://tp.postsharp.net/entity/28017-template-compiler-support-for-cast-as
+                    // this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
                     break;
             }
 
