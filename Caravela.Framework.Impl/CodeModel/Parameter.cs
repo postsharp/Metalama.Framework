@@ -33,5 +33,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
         public CodeElementKind Kind => CodeElementKind.Parameter;
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._symbol.ToDisplayString( );
     }
 }

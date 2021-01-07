@@ -20,7 +20,9 @@ namespace Caravela.Framework.Impl.CodeModel
             foreach (var namespaceMember in ns.GetNamespaceMembers())
             {
                 foreach (var type in namespaceMember.GetTypes())
+                {
                     yield return type;
+                }
             }
         }
     }

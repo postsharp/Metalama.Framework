@@ -26,6 +26,11 @@ namespace Caravela.Framework.Impl.Templating
             var markerAnnotation = new SyntaxAnnotation();
             var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot.WithAdditionalAnnotations(markerAnnotation) );
             annotatedSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
+            
+            // Find calls to Proceed.
+            var proceedAnnotator = new CallProceedAnnotator( symbolAnnotationMap );
+            annotatedSyntaxRoot = proceedAnnotator.Visit( annotatedSyntaxRoot );
+            
 
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );

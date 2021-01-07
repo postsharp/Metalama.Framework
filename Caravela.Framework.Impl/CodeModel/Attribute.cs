@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType Type => this.symbolMap.GetNamedType( this.data.AttributeClass!);
 
         [Memo]
-        public IImmutableList<object?> ConstructorArguments => this.data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public IImmutableList<object?> ConstructorArguments => this.data.ConstructorArguments.Select( this.Translate ).ToImmutableList();
 
         [Memo]
         public IReadOnlyDictionary<string, object?> NamedArguments => this.data.NamedArguments.ToImmutableDictionary(kvp => kvp.Key, kvp => this.Translate(kvp.Value));

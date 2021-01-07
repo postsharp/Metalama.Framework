@@ -38,10 +38,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 .OfType<LocalFunctionStatementSyntax>()
                 .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f)!)
                 .Select(s => this.SymbolMap.GetMethod(s))
-                .ToImmutableArray();
+                .ToImmutableList();
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
 
         public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
@@ -115,6 +115,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // TODO: Add IParameter.Kind to distinguish return parameters?
             public CodeElementKind Kind => CodeElementKind.Parameter;
+
+            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
         }
     }
 }

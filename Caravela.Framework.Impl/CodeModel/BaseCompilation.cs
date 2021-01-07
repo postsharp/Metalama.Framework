@@ -39,5 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();
 
         internal abstract CSharpCompilation GetRoslynCompilation();
+        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );
     }
 }

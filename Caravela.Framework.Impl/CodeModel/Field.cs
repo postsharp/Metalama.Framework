@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 
-        public IImmutableList<IParameter> Parameters => ImmutableArray.Create<IParameter>();
+        public IImmutableList<IParameter> Parameters => ImmutableList<IParameter>.Empty;
 
         // TODO: pseudo-accessors
         [Memo]

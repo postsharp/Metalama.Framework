@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
 
         public override AspectCompilation Transform(AspectCompilation input)
         {
-            var aspectInstances = input.AspectsByAspectType[this.aspectType.FullName].GetValue().ToImmutableArray();
+            var aspectInstances = input.AspectsByAspectType[this.aspectType.FullName].GetValue().ToImmutableList();
 
             if ( aspectInstances.IsEmpty )
                 return input;

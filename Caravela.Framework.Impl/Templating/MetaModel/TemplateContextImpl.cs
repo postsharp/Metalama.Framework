@@ -90,6 +90,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
             set => throw new NotImplementedException();
         }
+
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._parameter.ToDisplayString( format, context );
     }
 
     class DynamicMetaMember : IDynamicMetaMember

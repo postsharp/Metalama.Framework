@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
@@ -104,7 +105,11 @@ namespace Caravela.TestFramework.Templating
 
                 AdviceContext.Current = new AdviceContextImpl( targetMethod );
 
-                var output = driver.ExpandDeclaration( aspectInstance );
+                var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
+                var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" );
+                var targetCaravelaMethod = targetCaravelaType.Methods.GetValue().SingleOrDefault( m => m.Name == "Method" );
+
+                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
                 result.TemplateOutputSource = formattedOutput.GetText();

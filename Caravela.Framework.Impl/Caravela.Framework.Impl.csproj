@@ -40,8 +40,7 @@
   
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
-      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))"
-                       Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
+      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
     </ItemGroup>
     
     <PropertyGroup>
