@@ -683,30 +683,32 @@ namespace Caravela.Framework.Impl.Templating
         }
 
 
-        public override SyntaxNode VisitReturnStatement(ReturnStatementSyntax node)
+        public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
-            if (node.Expression != null && this.IsProceed(node.Expression))
+            if ( node.Expression != null && this.IsProceed( node.Expression ) )
             {
-                var expressionType = this._semanticAnnotationMap.GetType(node.Expression);
-                if (expressionType == null)
+                var expressionType = this._semanticAnnotationMap.GetType( node.Expression );
+                if ( expressionType == null )
                 {
                     // We need the expression type.
                     throw new Exception();
                 }
-
 
                 return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastFromDynamic(
-                                IdentifierName(nameof(IProceedImpl)), node.Expression)),
-                        IdentifierName(nameof(IProceedImpl.CreateReturnStatement))),
-                    ArgumentList());
+                                IdentifierName( nameof( IProceedImpl ) ), node.Expression ) ),
+                        IdentifierName( nameof( IProceedImpl.CreateReturnStatement ) ) ),
+                    ArgumentList() );
             }
             else
             {
-                return base.VisitReturnStatement(node);
+                return InvocationExpression(
+                    IdentifierName( nameof( TemplateHelper.TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                        Argument( this.Transform( node.Expression ) )
+                    );
             }
         }
 

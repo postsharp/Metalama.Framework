@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public interface ITemplateExpansionContext
+    internal interface ITemplateExpansionContext
     {
-
+        StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression );
     }
 }
