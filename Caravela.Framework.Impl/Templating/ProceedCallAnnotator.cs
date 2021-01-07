@@ -2,18 +2,22 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal class CallProceedAnnotator : CSharpSyntaxRewriter
+    internal class ProceedCallAnnotator : CSharpSyntaxRewriter
     {
+        private int calls;
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
 
-        public CallProceedAnnotator( SemanticAnnotationMap semanticAnnotationMap )
+        public ProceedCallAnnotator( SemanticAnnotationMap semanticAnnotationMap )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
+        
+        public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
@@ -51,6 +55,12 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this.IsProceed( node.Expression ) )
             {
+                if ( this.calls > 0 )
+                {
+                    // TODO: Emit an error.
+                }
+                
+                this.calls++;
                 return node.AddCallsProceedAnnotation();
             }
             else

@@ -62,6 +62,31 @@ namespace Caravela.Framework.Impl.Templating
 
         public int ChangeId => this._localScopes.Count;
 
+        private bool TrySetLocalVariableScope( ILocalSymbol local, SymbolDeclarationScope scope )
+        {
+            if ( this._localScopes.TryGetValue( local, out var oldScope ) )
+            {
+                if ( oldScope != scope )
+                {
+                    this.Diagnostics.Add(Diagnostic.Create("CA06", "Annotation",
+                        $"The local variable '{local.Name}' is both coerced to be run-time and build-time",
+                        DiagnosticSeverity.Error,
+                        DiagnosticSeverity.Error, true, 0, 
+                        location: local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation()));
+                    
+                    return false;
+                }
+                else
+                {
+                    // Nothing to do.
+                    return true;
+                }
+            }
+            
+            this._localScopes.Add( local, scope );
+            return true;
+        }
+
   
         #region Computing scope
         
@@ -90,7 +115,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     if (this._forceCompileTimeOnlyExpression)
                     {
-                        this._localScopes.Add(local, SymbolDeclarationScope.CompileTimeOnly);
+                        this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly);
                         return SymbolDeclarationScope.CompileTimeOnly;
                     }
                     else
@@ -277,20 +302,21 @@ namespace Caravela.Framework.Impl.Templating
             
             // Adds annotations to the children node.
             var transformedNode = base.Visit(node);
-            
-            if  (this._forceCompileTimeOnlyExpression)
+
+            if ( this._forceCompileTimeOnlyExpression )
             {
-                // The current expression is obliged to be compile-time-only by inference.
-                // Emit an error if the type of the expression is inferred to be runtime-only.
-                
-                var expressionType = this._semanticAnnotationMap.GetType(transformedNode);
-                
-                if (expressionType != null && expressionType.Kind == SymbolKind.DynamicType)
+                if ( transformedNode.GetScopeFromAnnotation() == SymbolDeclarationScope.RunTimeOnly ||
+                     this.IsDynamic(transformedNode) )
                 {
-                    this.Diagnostics.Add(Diagnostic.Create("CA02", "Annotation",
+                    // The current expression is obliged to be compile-time-only by inference.
+                    // Emit an error if the type of the expression is inferred to be runtime-only.
+
+                    this.Diagnostics.Add( Diagnostic.Create( "CA02", "Annotation",
                         $"The expression {node} cannot be used in a build-time expression.",
                         DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error, true, 0, location: Location.Create(node.SyntaxTree, node.Span)));
+                        DiagnosticSeverity.Error, true, 0, location: Location.Create( node.SyntaxTree, node.Span ) ) );
+
+                    return transformedNode;
                 }
 
                 return transformedNode.AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
@@ -472,7 +498,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( callsProceed )
             {
                 // If the loop calls proceed, we force it to be run-time.
-                this._localScopes[local] = SymbolDeclarationScope.RunTimeOnly;
+                this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly );
             }
 
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
@@ -504,7 +530,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( !isBuildTimeLocalVariable )
                 {
-                    this._localScopes.Add( local, SymbolDeclarationScope.CompileTimeOnly );
+                    this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
                 }
 
                 StatementSyntax annotatedStatement;
@@ -613,7 +639,7 @@ namespace Caravela.Framework.Impl.Templating
                         throw new AssertionFailedException();
 
                     case SymbolDeclarationScope.Default:
-                        this._localScopes.Add( local, SymbolDeclarationScope.CompileTimeOnly );
+                        this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
                         break;
                 }
 
@@ -632,7 +658,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( combinedScope != SymbolDeclarationScope.Default )
                 {
-                    this._localScopes.Add( local, combinedScope );
+                    this.TrySetLocalVariableScope( local, combinedScope );
                     return transformedNode.AddScopeAnnotation( combinedScope );
                 }
 
@@ -738,7 +764,7 @@ namespace Caravela.Framework.Impl.Templating
             foreach ( var localDeclaration in node.Declaration.Variables )
             {
                 var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( localDeclaration ); 
-                this._localScopes[ local ] = SymbolDeclarationScope.RunTimeOnly;
+                this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly );
             }
             
             var transformedVariableDeclaration = (VariableDeclarationSyntax) this.Visit( node.Declaration );
