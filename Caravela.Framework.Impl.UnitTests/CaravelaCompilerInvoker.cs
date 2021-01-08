@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl.UnitTests
             string csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,11 +43,14 @@ namespace Caravela.Framework.Impl.UnitTests
                 RedirectStandardOutput = true
             };
             var process = Process.Start( psi )!;
-            process.WaitForExit();
+            Task completion = process.WaitForExitAsync();
+            Task<string> outputPromise = process.StandardOutput.ReadToEndAsync();
 
-            Assert.True( process.ExitCode == 0, process.StandardOutput.ReadToEnd() );
+            Task.WhenAll( completion, outputPromise ).Wait();
 
-            return Path.Combine( dir, "bin/Debug/net5.0/test.dll" );
+            Assert.True( process.ExitCode == 0, outputPromise.Result );
+
+            return Path.Combine( dir, "bin/Debug/net48/test.dll" );
         }
     }
 }

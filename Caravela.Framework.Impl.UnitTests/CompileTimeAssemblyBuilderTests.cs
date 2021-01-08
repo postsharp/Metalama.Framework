@@ -32,7 +32,7 @@ namespace Foo
 
             var rewriter = new CompileTimeAssemblyBuilder.RemoveInvalidUsingsRewriter( compilation );
 
-            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
+            string? actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
 
             Assert.Equal( expected, actual );
         }
