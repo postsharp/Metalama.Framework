@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />
+    <ProjectReference Include="..\..\Caravela.Reactive\Caravela.Reactive.csproj" />
 	  
   </ItemGroup>
 
