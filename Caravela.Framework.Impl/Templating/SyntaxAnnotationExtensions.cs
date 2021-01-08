@@ -58,14 +58,8 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( existingScope != SymbolDeclarationScope.Default )
             {
-                if ( existingScope == scope )
-                {
-                    return node;
-                }
-                else if ( existingScope != scope )
-                {
-                    throw new Exception();
-                }
+                DebugEx.Assert( existingScope == scope );
+                return node;
             }
 
             switch ( scope )

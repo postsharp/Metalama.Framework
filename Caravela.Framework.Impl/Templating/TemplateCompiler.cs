@@ -24,12 +24,14 @@ namespace Caravela.Framework.Impl.Templating
 
             // Put the annotated node back into the original tree, so that diagnostics have correct locations.
             var markerAnnotation = new SyntaxAnnotation();
-            var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot, annotatedSyntaxRoot.WithAdditionalAnnotations(markerAnnotation) );
+            var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot, 
+                annotatedSyntaxRoot.WithAdditionalAnnotations(markerAnnotation) );
             annotatedSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             
             // Find calls to Proceed.
-            var proceedAnnotator = new CallProceedAnnotator( symbolAnnotationMap );
-            annotatedSyntaxRoot = proceedAnnotator.Visit( annotatedSyntaxRoot );
+            var proceedAnnotator = new ProceedCallAnnotator( symbolAnnotationMap );
+            annotatedSyntaxRoot = proceedAnnotator.Visit( annotatedSyntaxRoot )!;
+            diagnostics.AddRange( proceedAnnotator.Diagnostics );
             
 
             // Annotate the syntax tree with info about build- and run-time nodes,
@@ -45,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 Debug.Assert( iterations < 32 );
 
-                annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot );
+                annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
                 diagnostics.AddRange( annotatorRewriter.Diagnostics );
 
