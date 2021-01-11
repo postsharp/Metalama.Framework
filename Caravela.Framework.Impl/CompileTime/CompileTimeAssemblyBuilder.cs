@@ -43,18 +43,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
-        private readonly IList<ResourceDescription> _resources;
+        private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
-        public CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; set; } = null!;
+        public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
 
         private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
 
         private readonly Random _random = new();
 
         public CompileTimeAssemblyBuilder( 
-            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IList<ResourceDescription> resources, bool debugTransformedCode )
+            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( reference is PortableExecutableReference { FilePath: string path } )
                     {
-                        var assemblyBytes = this.CompileTimeAssemblyLoader.GetCompileTimeAssembly( path );
+                        var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
 
                         if ( assemblyBytes != null )
                             return MetadataReference.CreateFromImage( assemblyBytes );

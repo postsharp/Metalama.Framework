@@ -93,10 +93,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        private class ReturnParameterImpl : IParameter
+        internal class ReturnParameterImpl : IParameter
         {
             private readonly Method _method;
 
+            public Method Method => this._method;
+            
             public ReturnParameterImpl(Method method) => this._method = method;
 
             public bool IsOut => false;

@@ -9,12 +9,12 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     class SymbolClassifier : ISymbolClassifier
     {
-        private readonly CSharpCompilation _compilation;
+        private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
         private readonly Dictionary<ISymbol, SymbolDeclarationScope> _cache = new Dictionary<ISymbol, SymbolDeclarationScope>( SymbolEqualityComparer.Default );
 
-        public SymbolClassifier( CSharpCompilation compilation )
+        public SymbolClassifier( Compilation compilation )
         {
             this._compilation = compilation;
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
