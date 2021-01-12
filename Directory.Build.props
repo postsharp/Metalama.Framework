@@ -12,17 +12,19 @@
 
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/postsharp/Caravela</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageIcon>PostSharpIcon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
+
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>
