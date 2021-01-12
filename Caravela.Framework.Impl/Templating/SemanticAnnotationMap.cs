@@ -215,11 +215,9 @@ namespace Caravela.Framework.Impl.Templating
                 var annotated =
                     (VariableDeclaratorSyntax) this._map.GetAnnotatedNode(node, base.VisitVariableDeclarator(node)!, this._semanticModel);
                 
-                if (node.Initializer != null)
+                if (node.Initializer != null && this._map.GetDeclaredSymbol( annotated ) is ILocalSymbol local)
                 {
-                    var local = (ILocalSymbol) this._map.GetDeclaredSymbol(annotated)!;
                     return this.AddAssignmentAnnotation(local, annotated);
-
                 }
                 else
                 {
