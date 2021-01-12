@@ -5,6 +5,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
+    [Obfuscation( Exclude = true )]
     internal class CaravelaReturnParameterInfoSerializer : TypedObjectSerializer<CaravelaReturnParameterInfo>
     {
         private readonly CaravelaMethodInfoSerializer _methodInfoSerializer;

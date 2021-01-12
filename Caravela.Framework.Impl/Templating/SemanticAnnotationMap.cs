@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>. Additionally, this class indexes assignments
     /// of local variables. This is accessible from the <see cref="GetAssignments"/> method.
     /// </summary>
-    public sealed class SemanticAnnotationMap
+    sealed class SemanticAnnotationMap
     {
         private int _nextId;
         private readonly Dictionary<ISymbol,SyntaxAnnotation> _declaredSymbolToAnnotationMap = new Dictionary<ISymbol, SyntaxAnnotation>();

@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public static class TemplatingDiagnostic
+    static class TemplatingDiagnostic
     {
         public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
         {

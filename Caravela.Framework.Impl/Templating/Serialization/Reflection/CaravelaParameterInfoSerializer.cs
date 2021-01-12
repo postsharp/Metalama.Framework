@@ -9,6 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
+    [Obfuscation( Exclude = true )]
     internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CaravelaParameterInfo>
     {
         private readonly CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;

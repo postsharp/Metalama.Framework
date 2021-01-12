@@ -1,5 +1,8 @@
+using System.Reflection;
+
 namespace Caravela.Framework.Impl.CompileTime
 {
+    [Obfuscation( Exclude = true )]
     static class PackageVersions
     {
         public const string CaravelaCompilerVersion = "3.8.100";

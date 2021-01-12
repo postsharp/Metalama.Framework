@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
+    [Obfuscation( Exclude = true )]
     internal class CaravelaLocationInfo : LocationInfo
     {
         public Property? Property { get; }

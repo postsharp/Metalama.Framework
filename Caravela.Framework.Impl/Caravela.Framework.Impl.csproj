@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Caravela.TestFramework" />
     <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
+    <InternalsVisibleTo Include="Caravela.Templating.UnitTests" />
     
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" PrivateAssets="all" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
@@ -46,8 +48,11 @@
     <PropertyGroup>
       <PackageVersionsCode>
         <![CDATA[
+using System.Reflection%3B
+
 namespace Caravela.Framework.Impl.CompileTime
 {
+    [Obfuscation( Exclude = true )]
     static class PackageVersions
     {
         @(PackageVersions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')

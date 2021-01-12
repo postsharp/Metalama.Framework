@@ -1,10 +1,12 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
+    [Obfuscation( Exclude = true )]
     internal class DateTimeSerializer : TypedObjectSerializer<DateTime>
     {
         public override ExpressionSyntax Serialize( DateTime o )

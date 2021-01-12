@@ -7,6 +7,7 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
+    [Obfuscation( Exclude = true )]
     internal class CaravelaType : Type
     {
         public ITypeSymbol Symbol { get; }

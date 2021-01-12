@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         ExpressionSyntax CreateExpression();
     }
 
-    public interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
+    interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
     {
         ExpressionSyntax CreateMemberAccessExpression( string member );
     }

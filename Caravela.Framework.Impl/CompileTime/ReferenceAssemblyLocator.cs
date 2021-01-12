@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    public static class ReferenceAssemblyLocator
+    [Obfuscation( Exclude = true )]
+    static class ReferenceAssemblyLocator
     {
         private static readonly string project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>

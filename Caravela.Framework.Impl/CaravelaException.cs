@@ -1,8 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
+    [Obfuscation( Exclude = true )]
     class CaravelaException : Exception
     {
         public Diagnostic Diagnostic{ get; }

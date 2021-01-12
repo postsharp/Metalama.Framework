@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
     /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
-    public abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
+    abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
         private readonly Stack<string> _indentTriviaStack = new Stack<string>();
         private readonly IndentRewriter _indentRewriter;

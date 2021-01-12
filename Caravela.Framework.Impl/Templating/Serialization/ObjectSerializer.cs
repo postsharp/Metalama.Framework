@@ -1,5 +1,5 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Concurrent;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -7,7 +7,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     /// <summary>
     /// An object serializer can be registered with <see cref="ObjectSerializers"/> to serialize objects of a specific type into Roslyn creation expressions.
     /// </summary>
-    public abstract class ObjectSerializer
+    [Obfuscation( Exclude = true )]
+    abstract class ObjectSerializer
     {
         /// <summary>
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.

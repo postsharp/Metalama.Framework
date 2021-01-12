@@ -2,11 +2,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
+    [Obfuscation( Exclude = true )]
     internal class GuidSerializer : TypedObjectSerializer<Guid>
     {
         public override ExpressionSyntax Serialize( Guid o )

@@ -1,8 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
-    public static partial class TemplatingDiagnosticDescriptors
+    [Obfuscation( Exclude = true )]
+    static partial class TemplatingDiagnosticDescriptors
     {
         // Templating errors (alex).
         // Reserved range 100-199

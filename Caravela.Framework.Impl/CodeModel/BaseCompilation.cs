@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
@@ -6,7 +7,8 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public abstract class BaseCompilation : ICompilation
+    [Obfuscation( Exclude = true )]
+    abstract class BaseCompilation : ICompilation
     {
         public abstract IReactiveCollection<INamedType> DeclaredTypes { get; }
         public abstract IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }

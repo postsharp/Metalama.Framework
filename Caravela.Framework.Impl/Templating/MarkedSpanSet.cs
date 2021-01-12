@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <summary>
     /// A set of <see cref="TextSpan"/>. 
     /// </summary>
-    public sealed class MarkedSpanSet
+    sealed class MarkedSpanSet
     {
         // This is a quick and naive implementation. This algorithm is actually quite exactly the interview
         // test for the company so I guess we can do better.

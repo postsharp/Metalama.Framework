@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
@@ -6,7 +7,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     /// As <see cref="ObjectSerializer"/>, except strongly-typed.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class TypedObjectSerializer<T> : ObjectSerializer
+    [Obfuscation( Exclude = true )]
+    abstract class TypedObjectSerializer<T> : ObjectSerializer
     {
         /// <inheritdoc />
         public sealed override ExpressionSyntax SerializeObject( object o )
