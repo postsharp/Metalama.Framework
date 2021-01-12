@@ -48,7 +48,9 @@ class TargetCode
     return a;
 }";
 
-        [Fact]
+        // NOTE: first decide whether the try/catch blocks are run-time or compile-time.
+        [Fact( Skip = "#28038 Template compiler: emit a diagnostic error when template expansion throws an exception."
+            + "#28037 Template compiler: try/catch/finally blocks must be always marked as run-time code." )]
         public async Task ExceptionFilterCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( ExceptionFilterCompileTime_Template, ExceptionFilterCompileTime_Target ) );

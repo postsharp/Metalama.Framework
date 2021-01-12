@@ -55,7 +55,7 @@ class TargetCode
         public async Task ExceptionFilterRunTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( ExceptionFilterRunTime_Template, ExceptionFilterRunTime_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
+            testResult.AssertOutput( ExceptionFilterRunTime_ExpectedOutput );
         }
     }
 }

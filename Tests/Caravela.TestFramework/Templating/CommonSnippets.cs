@@ -10,6 +10,7 @@ using Caravela.Framework.Aspects;
 using Caravela.TestFramework.MetaModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Aspects.TemplateContext;
 using static Caravela.Framework.Impl.Templating.TemplateHelper;
 ";
     }

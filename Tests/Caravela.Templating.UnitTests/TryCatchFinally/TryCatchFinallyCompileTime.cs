@@ -51,7 +51,7 @@ class TargetCode
     return a;
 }";
 
-        [Fact]
+        [Fact( Skip = "#28037 Template compiler: try/catch/finally blocks must be always marked as run-time code." )]
         public async Task TryCatchFinallyCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( TryCatchFinallyCompileTime_Template, TryCatchFinallyCompileTime_Target ) );

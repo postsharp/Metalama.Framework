@@ -28,7 +28,7 @@ class Aspect
       {
           if (string.IsNullOrEmpty(p.Value))
           {
-              throw new ArgumentException("""", p.Name);
+              throw new ArgumentException(""IsNullOrEmpty"", p.Name);
           }
       }
       dynamic result = AdviceContext.Proceed();
@@ -48,9 +48,9 @@ class TargetCode
 
         private const string IfCompileTimeIfRunTime_ExpectedOutput = @"
 {
-    if (a == null)
+    if (string.IsNullOrEmpty(a))
     {
-        throw new ArgumentNullException();
+        throw new ArgumentException(""IsNullOrEmpty"", ""a"");
     }
 
     __Void result;

@@ -20,7 +20,7 @@ class Aspect
       {
           if (p.Name.Length == 1)
           {
-              Console.WriteLine($""{p.Name} = {p.Value}"");
+              Console.WriteLine(""{0} = {1}"", p.Name, p.Value);
           }
       }
 
@@ -49,7 +49,7 @@ class TargetCode
 
         private const string ForEachParamIfName_ExpectedOutput = @"
 {
-    Console.WriteLine($""a = {a}"");
+    Console.WriteLine(""{0} = {1}"", ""a"", a);
     Console.WriteLine(""{0} = {1}"", ""bb"", bb);
     string result;
     result = a.ToString() + bb.ToString();
