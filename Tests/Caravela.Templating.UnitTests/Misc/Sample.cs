@@ -19,7 +19,7 @@ class Aspect
     {
         var parameters = new object[AdviceContext.Method.Parameters.Count];
         var stringBuilder = new StringBuilder();
-        AdviceContext.BuildTime( stringBuilder );
+        //AdviceContext.BuildTime( stringBuilder );
         stringBuilder.Append( AdviceContext.Method.Name );
         stringBuilder.Append( '(' );
         int i = 0;

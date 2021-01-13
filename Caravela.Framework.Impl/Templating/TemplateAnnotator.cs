@@ -68,11 +68,10 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( oldScope != scope )
                 {
-                    this.Diagnostics.Add(Diagnostic.Create("CA06", "Annotation",
-                        $"The local variable '{local.Name}' is both coerced to be run-time and build-time",
-                        DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error, true, 0, 
-                        location: local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation()));
+                    this.Diagnostics.Add( Diagnostic.Create(
+                        TemplatingDiagnosticDescriptors.LocalVariableAmbiguousCoercion,
+                        local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation(),
+                        local.Name ) );
                     
                     return false;
                 }
@@ -113,6 +112,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
+                    // TODO: remove this coercion
                     if (this._forceCompileTimeOnlyExpression)
                     {
                         this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly);
@@ -252,10 +252,9 @@ namespace Caravela.Framework.Impl.Templating
                 return combinedScope;
             }
         }
-        
-        #endregion
 
-   
+#endregion
+
         /// <summary>
         /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
         /// Local variables modified within such branch cannot be compile-time.
@@ -443,8 +442,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We have an if statement where the condition is a compile-time expression. Add annotations
                 // to the if and else statements but not to the blocks themselves.
-         
-                var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
+
+                StatementSyntax? annotatedStatement;
+                using ( this.EnterLocalVariableScope(SymbolDeclarationScope.CompileTimeOnly) )
+                {
+                    annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                }
+                
                 var annotatedElse = node.Else != null
                     ? ElseClause(
                         node.Else.ElseKeyword,
@@ -492,7 +496,6 @@ namespace Caravela.Framework.Impl.Templating
         {
             bool callsProceed = node.HasCallsProceedAnnotation();
 
-            
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
             
             if ( callsProceed )
@@ -520,8 +523,6 @@ namespace Caravela.Framework.Impl.Templating
                 annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
             }
 
-
-            
             bool isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
             
             if ( (isBuildTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
@@ -535,6 +536,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 StatementSyntax annotatedStatement;
                 using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.CompileTimeOnly ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -553,21 +555,19 @@ namespace Caravela.Framework.Impl.Templating
                         .AddScopeAnnotation(localScope)
                         .WithSymbolAnnotationsFrom(node);
 
-           
                 return transformedNode;
             }
             else
             {
                 // Run-time or default loop, we don't know.
 
-                using (this.EnterRuntimeConditionalBlock())
+                using ( this.EnterRuntimeConditionalBlock() )
                 {
                     StatementSyntax annotatedStatement;
                     using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
                     {
                         annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                     }
-
 
                     return ForEachStatement(
                             default,
@@ -581,35 +581,7 @@ namespace Caravela.Framework.Impl.Templating
                             annotatedStatement )
                         .WithSymbolAnnotationsFrom( node )
                         .WithCallsProceedAnnotationFrom( node );
-
                 }
-            }
-        }
-
-        private SymbolDeclarationScope GetAssignmentScope(SyntaxNode node)
-        {
-            switch (node)
-            {
-                case VariableDeclaratorSyntax declarator when declarator.Initializer == null:
-                    return SymbolDeclarationScope.Default;
-                
-                case VariableDeclaratorSyntax declarator when declarator.Initializer != null:
-                    return this.GetNodeScope(declarator.Initializer.Value);
-
-                case AssignmentExpressionSyntax assignment:
-                    // Assignments must be classified by the visitor to take into account _isNonMetaConditionalBranch.
-                    var assignmentScope = this.GetNodeScope( assignment );
-                    if ( assignmentScope == SymbolDeclarationScope.Default )
-                    {
-                        return this.GetNodeScope( assignment.Right );
-                    }
-                    else
-                    {
-                        return assignmentScope;
-                    }
-
-                default:
-                    throw new AssertionFailedException();
             }
         }
 
@@ -617,9 +589,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedNode = (VariableDeclaratorSyntax) base.VisitVariableDeclarator( node )!;
 
-            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
+            var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
-            if (symbol is not ILocalSymbol local)
+            if ( symbol is not ILocalSymbol local )
             {
                 // it's a field, or a field-like event
                 return node;
@@ -627,42 +599,22 @@ namespace Caravela.Framework.Impl.Templating
 
             var localScope = this.GetSymbolScope( local, node );
 
-            if ( this._forceCompileTimeOnlyExpression )
-            {
-                switch ( localScope )
-                {
-                    case SymbolDeclarationScope.CompileTimeOnly:
-                        // Nothing to do.
-                        break;
-
-                    case SymbolDeclarationScope.RunTimeOnly:
-                        throw new AssertionFailedException();
-
-                    case SymbolDeclarationScope.Default:
-                        this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
-                        break;
-                }
-
-                return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
-            }
-            else if ( localScope != SymbolDeclarationScope.Default )
-            {
-                return transformedNode.AddScopeAnnotation( localScope );
-            }
-            else
+            if ( localScope == SymbolDeclarationScope.Default )
             {
                 SymbolDeclarationScope initializerScope;
 
                 if ( node.Initializer != null )
                 {
                     // Variables initialized with literal expression have runtime scope.
-                    if (node.Initializer.Value is LiteralExpressionSyntax)
+                    if ( node.Initializer.Value is LiteralExpressionSyntax )
                     {
                         initializerScope = SymbolDeclarationScope.Default;
                     }
                     else
                     {
-                        initializerScope = this.GetNodeScope( node.Initializer.Value );
+                        var transformedInitiazer = this.Visit( node.Initializer.Value );
+                        initializerScope = this.GetNodeScope( transformedInitiazer );
+                        //transformedNode = transformedNode.WithInitializer( transformedInitiazer );
                     }
                 }
                 else
@@ -672,12 +624,36 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( initializerScope != SymbolDeclarationScope.Default )
                 {
-                    this.TrySetLocalVariableScope( local, initializerScope );
-                    return transformedNode.AddScopeAnnotation( initializerScope );
+                    if ( this.TrySetLocalVariableScope( local, initializerScope ) )
+                    {
+                        localScope = initializerScope;
+                    }
                 }
-
-                return transformedNode;
             }
+
+            SymbolDeclarationScope forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : this._requiredVariableDeclarationScope;
+            if ( forcedScope != SymbolDeclarationScope.Default )
+            {
+                if ( this.TrySetLocalVariableScope( local, forcedScope ) )
+                {
+                    localScope = forcedScope;
+                }
+            }
+
+            if ( localScope == SymbolDeclarationScope.Default )
+            {
+                // The default scope for variable declaration is RunTimeOnly.
+                if ( this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly ) )
+                {
+                    localScope = SymbolDeclarationScope.RunTimeOnly;
+                }
+                else
+                {
+                    throw new AssertionFailedException();
+                }
+            }
+
+            return transformedNode.AddScopeAnnotation( localScope );
         }
 
         public override SyntaxNode? VisitVariableDeclaration(VariableDeclarationSyntax node)
