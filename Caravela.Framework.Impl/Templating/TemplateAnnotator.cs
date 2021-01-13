@@ -343,7 +343,8 @@ namespace Caravela.Framework.Impl.Templating
         
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
-            return base.VisitLiteralExpression( node )!.AddScopeAnnotation( SymbolDeclarationScope.Default );
+            // Literals are always compile-time (not really compile-time only but it does not matter).
+            return base.VisitLiteralExpression( node )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
         }
 
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
@@ -650,7 +651,24 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                var initializerScope = node.Initializer != null ? this.GetNodeScope( node.Initializer.Value ) : SymbolDeclarationScope.Default;
+                SymbolDeclarationScope initializerScope;
+
+                if ( node.Initializer != null )
+                {
+                    // Variables initialized with literal expression have runtime scope.
+                    if (node.Initializer.Value is LiteralExpressionSyntax)
+                    {
+                        initializerScope = SymbolDeclarationScope.Default;
+                    }
+                    else
+                    {
+                        initializerScope = this.GetNodeScope( node.Initializer.Value );
+                    }
+                }
+                else
+                {
+                    initializerScope = SymbolDeclarationScope.Default;
+                }
 
                 if ( initializerScope != SymbolDeclarationScope.Default )
                 {

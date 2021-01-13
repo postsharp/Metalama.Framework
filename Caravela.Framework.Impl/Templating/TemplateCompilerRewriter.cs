@@ -84,11 +84,6 @@ namespace Caravela.Framework.Impl.Templating
                 return TransformationKind.None;
             }
 
-            if (node is LiteralExpressionSyntax)
-            {
-                return TransformationKind.None;
-            }
-
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
             for (var parent = node.Parent;
