@@ -4,6 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
+    <PackageDescription>
+      PostSharp project "Caravela" SDK. A tool for custom source code modifying extensions using the Roslyn API. More powerful than source generators.
+    </PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>

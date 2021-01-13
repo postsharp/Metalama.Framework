@@ -5,6 +5,9 @@
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <PackageId>Caravela.Framework</PackageId>
+    <PackageDescription>
+      PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
+    </PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,6 +5,10 @@
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <PackageId>Caravela.Framework.Redist</PackageId>
+    <PackageDescription>
+      Redistributable components for package 'Caravela.Framework'. This package should only be installed as a dependency.
+      (This is not the package you are looking for).
+    </PackageDescription>
   </PropertyGroup>
 
   <ItemGroup>
