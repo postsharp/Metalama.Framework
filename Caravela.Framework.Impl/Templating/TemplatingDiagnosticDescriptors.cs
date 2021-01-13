@@ -25,5 +25,10 @@ namespace Caravela.Framework.Impl
              = new DiagnosticDescriptor( "CR0102", "The value returned by the template does not match the target's return type.",
                  "The template {0} cannot be applied to the target {1} - the value returned by the template does not match the target's return type.",
                  templateCategory, DiagnosticSeverity.Error, true );
+
+        public static readonly DiagnosticDescriptor LocalVariableAmbiguousCoercion
+            = new DiagnosticDescriptor( "CR0103", "The local variable '{local.Name}' is both coerced to be run-time and build-time",
+                "The local variable '{0}' is both coerced to be run-time and build-time.",
+                templateCategory, DiagnosticSeverity.Error, true );
     }
 }
