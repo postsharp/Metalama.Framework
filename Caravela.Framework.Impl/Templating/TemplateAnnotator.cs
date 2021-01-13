@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.Templating
                     return SymbolDeclarationScope.Template;
 
                 default:
-                        return SymbolDeclarationScope.Default;
+                    return SymbolDeclarationScope.Default;
             }
         }
 
@@ -344,7 +344,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             // Literals are always compile-time (not really compile-time only but it does not matter).
-            return base.VisitLiteralExpression(node)!.AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
+            return base.VisitLiteralExpression( node )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
         }
 
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
@@ -651,15 +651,29 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                // If a variable is always assigned to a meta expression, it is meta itself.
-                // The next line will not return anything in the first run because it refers to the unmodified tree.
-                var assignments = this._semanticAnnotationMap.GetAssignments( local, this._currentMethod! );
-                var combinedScope = this.GetCombinedScope( assignments.Select( this.GetAssignmentScope ) );
+                SymbolDeclarationScope initializerScope;
 
-                if ( combinedScope != SymbolDeclarationScope.Default )
+                if ( node.Initializer != null )
                 {
-                    this.TrySetLocalVariableScope( local, combinedScope );
-                    return transformedNode.AddScopeAnnotation( combinedScope );
+                    // Variables initialized with literal expression have runtime scope.
+                    if (node.Initializer.Value is LiteralExpressionSyntax)
+                    {
+                        initializerScope = SymbolDeclarationScope.Default;
+                    }
+                    else
+                    {
+                        initializerScope = this.GetNodeScope( node.Initializer.Value );
+                    }
+                }
+                else
+                {
+                    initializerScope = SymbolDeclarationScope.Default;
+                }
+
+                if ( initializerScope != SymbolDeclarationScope.Default )
+                {
+                    this.TrySetLocalVariableScope( local, initializerScope );
+                    return transformedNode.AddScopeAnnotation( initializerScope );
                 }
 
                 return transformedNode;
@@ -677,7 +691,6 @@ namespace Caravela.Framework.Impl.Templating
                     var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
                     return transformedVariableDeclaration.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
                 }
-
             }
             else
             {
@@ -692,7 +705,6 @@ namespace Caravela.Framework.Impl.Templating
                 else
                 {
                     // TODO: We may have to write this diagnostic in the last iteration only.
-
                     this.Diagnostics.Add( Diagnostic.Create( "CA01", "Annotation",
                         "Split build-time and run-time variables into several declarations.",
                         DiagnosticSeverity.Error,
