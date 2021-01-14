@@ -1,10 +1,12 @@
 ﻿using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    [Obfuscation( Exclude = true )]
     internal class Event : CodeElement, IEvent
     {
         private readonly IEventSymbol _symbol;

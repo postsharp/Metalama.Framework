@@ -1,11 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    [Obfuscation( Exclude = true )]
     internal class Field : CodeElement, IProperty
     {
         private readonly IFieldSymbol _symbol;
@@ -25,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 
-        public IImmutableList<IParameter> Parameters => ImmutableArray.Create<IParameter>();
+        public IImmutableList<IParameter> Parameters => ImmutableList<IParameter>.Empty;
 
         // TODO: pseudo-accessors
         [Memo]

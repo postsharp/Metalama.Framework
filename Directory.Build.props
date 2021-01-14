@@ -4,23 +4,28 @@
     <!-- the above stopped working in VS for some reason -->
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-    <Version>0.1.50</Version>
+    <Version>0.1.61</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>3.8.100</CaravelaCompilerVersion>
+    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
+    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
 
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/postsharp/Caravela</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+    <PackageTags>PostSharp Caravela AOP</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageIcon>PostSharpIcon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
+
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>

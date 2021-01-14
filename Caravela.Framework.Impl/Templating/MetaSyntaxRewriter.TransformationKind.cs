@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public partial class MetaSyntaxRewriter
+    partial class MetaSyntaxRewriter
     {
         /// <summary>
         /// Specifies how a <see cref="SyntaxNode"/> must be transformed.

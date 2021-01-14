@@ -63,6 +63,9 @@ namespace Caravela.Framework.Impl.CodeModel
             return result;
         }
 
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._originalCompilation.ToDisplayString( format, context );
+
+
         sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
             private readonly List<OverriddenMethod> _overriddenMethods;

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>. Additionally, this class indexes assignments
     /// of local variables. This is accessible from the <see cref="GetAssignments"/> method.
     /// </summary>
-    public sealed class SemanticAnnotationMap
+    sealed class SemanticAnnotationMap
     {
         private int _nextId;
         private readonly Dictionary<ISymbol,SyntaxAnnotation> _declaredSymbolToAnnotationMap = new Dictionary<ISymbol, SyntaxAnnotation>();
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<SyntaxAnnotation,ITypeSymbol> _annotationToTypeMap = new Dictionary<SyntaxAnnotation, ITypeSymbol>();
         private readonly Dictionary<ILocalSymbol,SyntaxAnnotation> _localToAssignmentMap = new Dictionary<ILocalSymbol, SyntaxAnnotation>();
 
-        internal static readonly ImmutableArray<string> AnnotationKinds = ImmutableArray.Create("local", "symbol", "declared", "type" );
+        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create("local", "symbol", "declared", "type" );
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -215,11 +215,9 @@ namespace Caravela.Framework.Impl.Templating
                 var annotated =
                     (VariableDeclaratorSyntax) this._map.GetAnnotatedNode(node, base.VisitVariableDeclarator(node)!, this._semanticModel);
                 
-                if (node.Initializer != null)
+                if (node.Initializer != null && this._map.GetDeclaredSymbol( annotated ) is ILocalSymbol local)
                 {
-                    var local = (ILocalSymbol) this._map.GetDeclaredSymbol(annotated)!;
                     return this.AddAssignmentAnnotation(local, annotated);
-
                 }
                 else
                 {

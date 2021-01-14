@@ -11,18 +11,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
+		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
+		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.UnitTests", "Caravela.Framework.Impl.UnitTests\Caravela.Framework.Impl.UnitTests.csproj", "{B74D3758-0E43-405F-B7C3-8EF444090E86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.UnitTests", "Tests\Caravela.Framework.Impl.UnitTests\Caravela.Framework.Impl.UnitTests.csproj", "{B74D3758-0E43-405F-B7C3-8EF444090E86}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk", "Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj", "{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive", "Caravela.Reactive\Caravela.Reactive.csproj", "{BD041817-F150-43DD-A987-F815730777A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive.UnitTests", "Caravela.Reactive.UnitTests\Caravela.Reactive.UnitTests.csproj", "{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive.UnitTests", "Tests\Caravela.Reactive.UnitTests\Caravela.Reactive.UnitTests.csproj", "{7853A7E0-527B-4C70-B7AE-CC3FBAB958E8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj", "{5765A633-EC2E-4488-AF53-5FC912B39710}"
 EndProject
@@ -42,7 +44,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Templating.UnitTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.AspectWorkbench", "Tests\Caravela.AspectWorkbench\Caravela.AspectWorkbench.csproj", "{5D2A08C6-9F80-4C58-B5A6-51349078A78B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +114,10 @@ Global
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

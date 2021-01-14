@@ -1,6 +1,9 @@
-﻿namespace Caravela.Framework.Impl.Templating
+﻿using System.Reflection;
+
+namespace Caravela.Framework.Impl.Templating
 {
-    public static class TemplatingDiagnosticProperties
+    [Obfuscation( Exclude = true )]
+    static class TemplatingDiagnosticProperties
     {
         public const string SyntaxKind = "SyntaxKind";
     }

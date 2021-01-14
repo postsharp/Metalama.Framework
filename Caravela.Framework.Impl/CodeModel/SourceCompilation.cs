@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public class SourceCompilation : BaseCompilation
+    [Obfuscation( Exclude = true )]
+    class SourceCompilation : BaseCompilation
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
@@ -49,6 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal override IReactiveCollection<AdviceInstance> CollectAdvices() => ImmutableArray.Create<AdviceInstance>().ToReactive();
 
         internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this.RoslynCompilation.AssemblyName;
     }
 
     internal static class Factory
@@ -63,7 +65,8 @@ namespace Caravela.Framework.Impl.CodeModel
     }
 
     // for testing
-    public static class CompilationFactory
+    [Obfuscation( Exclude = true )]
+    static class CompilationFactory
     {
         public static ICompilation CreateCompilation(CSharpCompilation roslynCompilation) => new SourceCompilation(roslynCompilation);
     }

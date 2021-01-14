@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -10,6 +11,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    [Obfuscation( Exclude = true )]
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol _symbol;
@@ -38,10 +40,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 .OfType<LocalFunctionStatementSyntax>()
                 .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f)!)
                 .Select(s => this.SymbolMap.GetMethod(s))
-                .ToImmutableArray();
+                .ToImmutableList();
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableArray<IParameter>();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
 
         public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
@@ -93,10 +95,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        private class ReturnParameterImpl : IParameter
+        [Obfuscation( Exclude = true )]
+        internal class ReturnParameterImpl : IParameter
         {
             private readonly Method _method;
 
+            public Method Method => this._method;
+            
             public ReturnParameterImpl(Method method) => this._method = method;
 
             public bool IsOut => false;
@@ -115,6 +120,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // TODO: Add IParameter.Kind to distinguish return parameters?
             public CodeElementKind Kind => CodeElementKind.Parameter;
+
+            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
         }
     }
 }

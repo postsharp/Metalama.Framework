@@ -10,10 +10,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
+    [Obfuscation( Exclude = true )]
     partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
@@ -43,18 +45,18 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
-        private readonly IList<ResourceDescription> _resources;
+        private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
-        public CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; set; } = null!;
+        public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
 
         private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
 
         private readonly Random _random = new();
 
         public CompileTimeAssemblyBuilder( 
-            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IList<ResourceDescription> resources, bool debugTransformedCode )
+            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
@@ -82,7 +84,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( reference is PortableExecutableReference { FilePath: string path } )
                     {
-                        var assemblyBytes = this.CompileTimeAssemblyLoader.GetCompileTimeAssembly( path );
+                        var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
 
                         if ( assemblyBytes != null )
                             return MetadataReference.CreateFromImage( assemblyBytes );
@@ -104,12 +106,12 @@ namespace Caravela.Framework.Impl.CompileTime
         // this is not nearly as good as a GUID, but should be good enough for the purpose of preventing collisions within the same process
         private string GetUniqueVersion()
         {
-            int getVersionComponent() => this._random.Next( 0, ushort.MaxValue );
+            int GetVersionComponent() => this._random.Next( 0, ushort.MaxValue );
 
-            int major = getVersionComponent();
-            int minor = getVersionComponent();
-            int build = getVersionComponent();
-            int revision = getVersionComponent();
+            int major = GetVersionComponent();
+            int minor = GetVersionComponent();
+            int build = GetVersionComponent();
+            int revision = GetVersionComponent();
 
             return new Version( major, minor, build, revision ).ToString();
         }

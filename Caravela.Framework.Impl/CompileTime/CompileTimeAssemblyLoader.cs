@@ -135,31 +135,42 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private byte[] GetCompileTimeAssembly( IAssemblySymbol assemblySymbol )
         {
+            MemoryStream? assemblyStream;
+
             if ( assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol )
             {
-                var assemblyStream = this._compileTimeAssemblyBuilder.EmitCompileTimeAssembly( sourceAssemblySymbol.Compilation );
-
-                if ( assemblyStream == null )
-                    throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
-
-                return assemblyStream.ToArray();
+                assemblyStream = this._compileTimeAssemblyBuilder.EmitCompileTimeAssembly( sourceAssemblySymbol.Compilation );
             }
             else
             {
                 if ( this._compilation.GetMetadataReference( assemblySymbol ) is not { } reference )
                     throw new InvalidOperationException( $"Could not find reference for assembly {assemblySymbol}." );
 
-                if ( reference is not PortableExecutableReference peReference )
-                    throw new InvalidOperationException( $"The assembly {assemblySymbol} does not correspond to a PE reference." );
+                if ( reference is CompilationReference compilationReference )
+                {
+                    // note: this should only happen in Try Caravela
+                    var compilation = compilationReference.Compilation;
+                    assemblyStream = AspectPipeline.CreateCompileTimeAssemblyBuilder( compilation ).EmitCompileTimeAssembly( compilation );
+                }
+                else
+                {
+                    if ( reference is not PortableExecutableReference peReference )
+                        throw new InvalidOperationException( $"The assembly {assemblySymbol} does not correspond to a known kind of reference." );
 
-                if ( peReference.FilePath is not { } path )
-                    throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
+                    if ( peReference.FilePath is not { } path )
+                        throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
 
-                if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
-                    throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly reasource." );
+                    if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
+                        throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly reasource." );
 
-                return assemblyBytes;
+                    return assemblyBytes;
+                }
             }
+
+            if ( assemblyStream == null )
+                throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
+
+            return assemblyStream.ToArray();
         }
 
         private Assembly LoadCompileTimeAssembly( IAssemblySymbol assemblySymbol )

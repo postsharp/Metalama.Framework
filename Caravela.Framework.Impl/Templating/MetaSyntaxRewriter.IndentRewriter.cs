@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public abstract partial class MetaSyntaxRewriter
+    abstract partial class MetaSyntaxRewriter
     {
         private class IndentRewriter : CSharpSyntaxRewriter
         {

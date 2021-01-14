@@ -5,9 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    [Obfuscation( Exclude = true )]
     abstract class CodeElement : ICodeElement, IToSyntax
     {
         internal abstract SourceCompilation Compilation { get; }
@@ -25,5 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel
         // TODO: special case partial methods?
         CSharpSyntaxNode IToSyntax.GetSyntaxNode() => this.ToSyntaxNodes().Single();
         IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => this.ToSyntaxNodes();
+
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) =>
+            this.Symbol.ToDisplayString();
     }
 }

@@ -1,13 +1,17 @@
 ﻿using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    [Obfuscation( Exclude = true )]
     internal class Parameter : IParameter
     {
         private readonly IParameterSymbol _symbol;
+
+        public IParameterSymbol Symbol => this._symbol;
         private readonly CodeElement _containingMember;
 
         private SymbolMap SymbolMap => this._containingMember.SymbolMap;
@@ -33,5 +37,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
         public CodeElementKind Kind => CodeElementKind.Parameter;
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._symbol.ToDisplayString( );
     }
 }
