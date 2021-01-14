@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
@@ -10,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    [Obfuscation( Exclude = true )]
     class SourceCompilation : BaseCompilation
     {
         internal CSharpCompilation RoslynCompilation { get; }
@@ -65,7 +63,6 @@ namespace Caravela.Framework.Impl.CodeModel
     }
 
     // for testing
-    [Obfuscation( Exclude = true )]
     static class CompilationFactory
     {
         public static ICompilation CreateCompilation(CSharpCompilation roslynCompilation) => new SourceCompilation(roslynCompilation);

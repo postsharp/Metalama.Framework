@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
     /// <summary>
     /// Has <see cref="ToCSharpQualifiedName"/>.
     /// </summary>
-    [Obfuscation( Exclude = true )]
     static class TypeNameUtility
     {
         // TODO Multidimensional arrays, such as "int[,]", are not well-supported.

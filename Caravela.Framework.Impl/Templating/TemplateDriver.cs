@@ -10,7 +10,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    [Obfuscation( Exclude = true )]
     class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;

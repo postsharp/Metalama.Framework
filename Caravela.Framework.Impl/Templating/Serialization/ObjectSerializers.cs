@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -14,7 +13,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class
     /// to support additional types.
     /// </summary>
-    [Obfuscation( Exclude = true )]
     class ObjectSerializers
     {
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new ConcurrentDictionary<Type, ObjectSerializer>();

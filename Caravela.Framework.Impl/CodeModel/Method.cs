@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -11,7 +10,6 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    [Obfuscation( Exclude = true )]
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol _symbol;
@@ -95,7 +93,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        [Obfuscation( Exclude = true )]
         internal class ReturnParameterImpl : IParameter
         {
             private readonly Method _method;

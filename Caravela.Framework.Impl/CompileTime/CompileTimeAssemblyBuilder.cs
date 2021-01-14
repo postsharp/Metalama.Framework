@@ -10,12 +10,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    [Obfuscation( Exclude = true )]
     partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;

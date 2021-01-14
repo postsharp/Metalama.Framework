@@ -6,7 +6,7 @@ IF "%~2" == "" GOTO Error
 set "CARAVELA_VERSION=%~1"
 set "NUGET_KEY=%~2"
 
-dotnet pack -c Release
+dotnet pack -c Release -p:Obfuscate=True
 
 echo Publishing Caravela version %CARAVELA_VERSION%
 

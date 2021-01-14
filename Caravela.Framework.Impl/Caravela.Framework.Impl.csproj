@@ -51,11 +51,8 @@
     <PropertyGroup>
       <PackageVersionsCode>
         <![CDATA[
-using System.Reflection%3B
-
 namespace Caravela.Framework.Impl.CompileTime
 {
-    [Obfuscation( Exclude = true )]
     static class PackageVersions
     {
         @(PackageVersions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')
@@ -69,7 +66,6 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 
   <PropertyGroup>
-    <Obfuscate Condition="'$(Obfuscate)' == '' AND '$(Configuration)'=='Release'">True</Obfuscate>
     <PostSharpProperties>
       ObfuscateMapFile=$(OutputPath)\$(TargetFramework)\$(AssemblyName).obmap;
       ObfuscateRootPath=$(MSBuildThisFileDirectory)
@@ -81,5 +77,9 @@ namespace Caravela.Framework.Impl.CompileTime
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
     <ProjectReference Include="..\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
   </ItemGroup>
+
+  <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
+    <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
+  </Target>
 
 </Project>
