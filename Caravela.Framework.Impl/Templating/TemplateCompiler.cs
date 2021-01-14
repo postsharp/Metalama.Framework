@@ -18,21 +18,31 @@ namespace Caravela.Framework.Impl.Templating
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot
             )
         {
+            SyntaxNode currentSyntaxRoot;
+
+            void FixupTreeForDiagnostics()
+            {
+                // Put the annotated node back into the original tree, so that diagnostics have correct locations.
+                var markerAnnotation = new SyntaxAnnotation();
+                var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot,
+                    currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
+                currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
+            }
+
             // Annotate the syntax tree with symbols.
             symbolAnnotationMap = new SemanticAnnotationMap();
-            annotatedSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
+            currentSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
-            // Put the annotated node back into the original tree, so that diagnostics have correct locations.
-            var markerAnnotation = new SyntaxAnnotation();
-            var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot, 
-                annotatedSyntaxRoot.WithAdditionalAnnotations(markerAnnotation) );
-            annotatedSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
-            
+            FixupTreeForDiagnostics();
+
             // Find calls to Proceed.
-            var proceedAnnotator = new ProceedCallAnnotator( symbolAnnotationMap );
-            annotatedSyntaxRoot = proceedAnnotator.Visit( annotatedSyntaxRoot )!;
-            diagnostics.AddRange( proceedAnnotator.Diagnostics );
-            
+            var proceedAnnotator = new ProceedCallAnnotator(symbolAnnotationMap);
+            currentSyntaxRoot = proceedAnnotator.Visit( currentSyntaxRoot )!;
+            diagnostics.AddRange(proceedAnnotator.Diagnostics);
+
+            FixupTreeForDiagnostics();
+
+            annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
