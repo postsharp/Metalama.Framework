@@ -1,9 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
-    [Obfuscation( Exclude = true )]
     static partial class TemplatingDiagnosticDescriptors
     {
         // Templating errors (alex).

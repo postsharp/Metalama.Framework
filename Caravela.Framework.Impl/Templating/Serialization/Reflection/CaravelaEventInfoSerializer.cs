@@ -7,7 +7,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
-    [Obfuscation( Exclude = true )]
     internal class CaravelaEventInfoSerializer : TypedObjectSerializer<CaravelaEventInfo>
     {
         private readonly CaravelaTypeSerializer _caravelaTypeSerializer;

@@ -5,11 +5,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    [Obfuscation( Exclude = true )]
     abstract class CodeElement : ICodeElement, IToSyntax
     {
         internal abstract SourceCompilation Compilation { get; }

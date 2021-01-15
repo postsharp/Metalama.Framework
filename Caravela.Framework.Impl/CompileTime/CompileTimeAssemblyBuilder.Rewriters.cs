@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -162,7 +161,6 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
         }
 
         // PERF: explicitly skip over all other nodes?
-        [Obfuscation( Exclude = true )]
         internal class RemoveInvalidUsingsRewriter : CSharpSyntaxRewriter
         {
             private readonly Compilation _compilation;

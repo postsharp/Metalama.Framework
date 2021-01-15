@@ -12,7 +12,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
-    [Obfuscation( Exclude = true )]
     internal class CaravelaLocationInfoSerializer : TypedObjectSerializer<CaravelaLocationInfo>
     {
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and

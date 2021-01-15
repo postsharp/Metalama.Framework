@@ -62,15 +62,12 @@ class User {
                 Assert.Equal( "T2", m.ReturnType.Name  );
                 Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).TypeHandle)");
-            // Partial instantiations are not supported:
-            Assert.Throws<CaravelaException>( () =>
+
+            this.TestSerializable( this._code, descendant.BaseType.Method( "Method21" ), ( m ) =>
             {
-                this.TestSerializable( this._code, descendant.BaseType.Method( "Method21" ), ( m ) =>
-                {
-                    Assert.Equal( "T2", m.ReturnType.Name );
-                    Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
-                } , "irrelevant, never reached");
-            } );
+                Assert.Equal( "T3", m.ReturnType.Name );
+                Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
+            }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).GetGenericArguments()[0]).TypeHandle)" );
         }
         [Fact]
         public void TestGenericInstances()
