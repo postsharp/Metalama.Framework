@@ -4,7 +4,7 @@
     <!-- the above stopped working in VS for some reason -->
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-    <Version>0.1.61</Version>
+    <Version>0.1.62</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>3.8.100</CaravelaCompilerVersion>
     <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
