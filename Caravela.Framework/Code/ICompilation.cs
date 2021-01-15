@@ -15,8 +15,6 @@ namespace Caravela.Framework.Code
 
         IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
 
-        // TODO: do assembly and module attributes need to be differentiated?
-
         /// <summary>
         /// Get type based on its full name, as used in reflection.
         /// </summary>
@@ -35,6 +33,4 @@ namespace Caravela.Framework.Code
 
         IType? GetTypeByReflectionType( Type type );
     }
-
-    // TODO: IArrayType etc.
 }

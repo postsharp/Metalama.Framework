@@ -3,8 +3,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
-using Caravela.Reactive.Sources;
 using Microsoft.CodeAnalysis;
+using TypeKind = Caravela.Framework.Code.TypeKind;
+using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -22,45 +23,39 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Compilation = compilation;
         }
 
-        public bool HasDefaultConstructor =>
-            this.TypeSymbol.TypeKind == TypeKind.Struct ||
-            (this.TypeSymbol.TypeKind == TypeKind.Class && !this.TypeSymbol.IsAbstract && this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
+        TypeKind IType.Kind => this.TypeSymbol.TypeKind switch
+        {
+            RoslynTypeKind.Class => TypeKind.Class,
+            RoslynTypeKind.Delegate => TypeKind.Delegate,
+            RoslynTypeKind.Enum => TypeKind.Enum,
+            RoslynTypeKind.Interface => TypeKind.Interface,
+            RoslynTypeKind.Struct => TypeKind.Struct,
+            _ => throw new InvalidOperationException($"Unexpected type kind {this.TypeSymbol.TypeKind}.")
+        };
 
-        /// <summary>
-        /// Filters members to only those that were declared in this type.
-        /// </summary>
-        private IReactiveCollection<T> OnlyDeclared<T>( IReactiveCollection<T> source )
-            where T : IMember =>
-            // TODO: does this work correctly for overrides?
-            source.Where( m => ((CodeElement) (object) m).Symbol.DeclaringSyntaxReferences.Any(
-                memberReference => this.Symbol.DeclaringSyntaxReferences.Any( typeReference =>
-                    typeReference.GetSyntax().Contains( memberReference.GetSyntax() ) ) ) );
+        public bool HasDefaultConstructor =>
+            this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
+            (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract && this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         [Memo]
         public IReactiveCollection<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IProperty> AllProperties => 
-            this.TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select(p => new Property(p, this))
-            .Concat<IProperty>( this.TypeSymbol.GetMembers().OfType<IFieldSymbol>().Select( f => new Field( f, this ) ) )
+        public IReactiveCollection<IProperty> Properties =>
+            this.TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select( p => new Property( p, this ) )
+            .Concat<IProperty>(
+                this.TypeSymbol.GetMembers().OfType<IFieldSymbol>().Where( f => !f.IsImplicitlyDeclared ).Select( f => new Field( f, this ) ) )
             .ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IProperty> Properties => this.OnlyDeclared( this.AllProperties );
+        public IReactiveCollection<IEvent> Events => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IEvent> AllEvents => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
+        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => this.SymbolMap.GetMethod(m)).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IEvent> Events => this.OnlyDeclared( this.AllEvents );
-
-        [Memo]
-        public IReactiveCollection<IMethod> AllMethods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => this.SymbolMap.GetMethod(m)).ToImmutableReactive();
-
-        [Memo]
-        public IReactiveCollection<IMethod> Methods => this.OnlyDeclared( this.AllMethods );
-
-        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
+        public IImmutableList<IGenericParameter> GenericParameters =>
+            this.TypeSymbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
 
         public string Name => this.TypeSymbol.Name;
 
@@ -102,7 +97,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IArrayType MakeArrayType( int rank = 1 ) =>
             (IArrayType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this.TypeSymbol, rank ) );
 
+        public IPointerType MakePointerType() =>
+            (IPointerType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this.TypeSymbol ) );
+
         public override string ToString() => this.TypeSymbol.ToString();
-        
     }
 }

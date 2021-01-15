@@ -53,9 +53,6 @@ class User {
             var origin = this._topLevelTypes.Single( t => t.Name == "Origin" );
             var nested = origin.NestedTypes.GetValue().Single();
             var descendant = this._topLevelTypes.Single( t => t.Name == "Descendant" );
-            var allMethods1 = origin.AllMethods.GetValue().ToList();
-            var allMethods2 = nested.AllMethods.GetValue().ToList();
-            var allMethods3 = descendant.AllMethods.GetValue().ToList();
             
             this.TestSerializable( this._code, nested.Method("Method21" ),  ( m ) =>
             {

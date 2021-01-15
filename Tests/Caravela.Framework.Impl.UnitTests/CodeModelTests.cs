@@ -3,10 +3,11 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Xunit;
+using static Caravela.Framework.Code.MethodKind;
+using static Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
-
     public class CodeModelTests : TestBase
     {
         [Fact]
@@ -74,7 +75,6 @@ class C
             Assert.Equal("C", type.Name);
 
             var methods = type.Methods.GetValue().ToList();
-            Assert.Single( methods );
 
             var method = methods[0];
             Assert.Equal("M", method.Name);
@@ -131,9 +131,9 @@ class TestAttribute : Attribute
             string code = @"
 using System;
 
-interface I
+interface I<T>
 {
-    void M1(Int32 i, in object o, out String s);
+    void M1(Int32 i, T t, dynamic d, in object o, out String s);
     ref readonly int M2();
 }";
 
@@ -146,10 +146,12 @@ interface I
             Assert.Equal("M1", m1.Name);
 
             CheckParameterData(m1.ReturnParameter, m1, "void", null, -1);
-            Assert.Equal(3, m1.Parameters.Count);
+            Assert.Equal(5, m1.Parameters.Count);
             CheckParameterData(m1.Parameters[0], m1, "int", "i", 0);
-            CheckParameterData(m1.Parameters[1], m1, "object", "o", 1);
-            CheckParameterData(m1.Parameters[2], m1, "string", "s", 2);
+            CheckParameterData(m1.Parameters[1], m1, "T", "t", 1);
+            CheckParameterData(m1.Parameters[2], m1, "dynamic", "d", 2);
+            CheckParameterData(m1.Parameters[3], m1, "object", "o", 3);
+            CheckParameterData(m1.Parameters[4], m1, "string", "s", 4);
 
             var m2 = methods[1];
             Assert.Equal("M2", m2.Name);
@@ -161,7 +163,7 @@ interface I
                 IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index)
             {
                 Assert.Same(containingElement, parameter.ContainingElement);
-                Assert.Equal(typeName, ((INamedType)parameter.Type).FullName);
+                Assert.Equal(typeName, parameter.Type.ToString());
                 Assert.Equal(name, parameter.Name);
                 Assert.Equal(index, parameter.Index);
             }
@@ -180,12 +182,12 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.GetValue().Single();
 
-            // TODO: check type.GenericArguments once ITypeParameterSymbol is supported
+            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select( t => t.ToString() ) );
 
-            var method = type.Methods.GetValue().Single();
+            var method = type.Methods.GetValue().First();
 
             Assert.Equal("C<int, string>", method.ReturnType.ToString());
-            Assert.Equal(new string[] { "int", "string" }, ((INamedType)method.ReturnType).GenericArguments.Select(t => t.ToString()));
+            Assert.Equal(new[] { "int", "string" }, ((INamedType)method.ReturnType).GenericArguments.Select(t => t.ToString()));
         }
 
         [Fact]
@@ -271,11 +273,67 @@ class C
         [Fact]
         public void MethodKinds()
         {
-            string code = @"";
+            string code = @"
+using System;
+class C : IDisposable
+{
+	void M()
+	{
+		void L() { }
+	}
+	C() { }
+	static C() { }
+	~C() { }
+	int P { get; set; }
+	event EventHandler E { add {} remove {} }
+	void IDisposable.Dispose() { }
+	public static explicit operator int(C c) => 42;
+	public static C operator -(C c) => c;
+}";
 
-            var compilation = CreateCompilation(code);
+            var compilation = CreateCompilation( code );
 
-            // TODO
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var methodKinds = new[] {
+                Ordinary,
+                Constructor, StaticConstructor, Finalizer,
+                PropertyGet, PropertySet,
+                EventAdd, EventRemove,
+                ExplicitInterfaceImplementation,
+                ConversionOperator, UserDefinedOperator
+            };
+
+            Assert.Equal( methodKinds, type.Methods.Select( m => m.Kind ).GetValue() );
+
+            Assert.Equal( LocalFunction, type.Methods.GetValue().First().LocalFunctions.Single().Kind );
+        }
+
+        [Fact]
+        public void TypeKinds()
+        {
+            string code = @"
+using System;
+class C<T>
+{
+    int[] arr;
+    C<T> c;
+    Action a;
+    dynamic d;
+    DayOfWeek e;
+    T t;
+    IDisposable i;
+    unsafe void* p;
+    int s;
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var typeKinds = new[] { Array, Class, Delegate, Dynamic, Enum, GenericParameter, Interface, Pointer, Struct };
+
+            Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.Kind ).GetValue() );
         }
     }
 }

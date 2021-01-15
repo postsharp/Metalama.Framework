@@ -43,8 +43,10 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
 
-        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
-
+        [Memo]
+        public IImmutableList<IGenericParameter> GenericParameters =>
+            this._symbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
+        
         MethodKind IMethod.Kind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Ordinary,

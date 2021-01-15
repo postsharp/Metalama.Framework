@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         public void MethodInDerivedType()
         {
             string code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
-            string serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single(t => t.Name == "Target").Methods.GetValue().Single() ) )
+            string serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single(t => t.Name == "Target").Methods.GetValue().First() ) )
                 .ToString();
             AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)", serialized );
 
@@ -69,14 +69,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         public void TestHalfTypes()
         {
             string code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
-            string serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().Single() ) )
+            string serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().First() ) )
                 .ToString();
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
             {
                 Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() );
             } );
             string code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
-            string serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().Single() ) )
+            string serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType.Methods.GetValue().First() ) )
                 .ToString();
             TestExpression<MethodInfo>( code2, serialized2, ( info ) =>
             {
