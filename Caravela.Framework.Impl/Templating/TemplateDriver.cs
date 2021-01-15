@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplateContext.ProceedImpl = proceedImpl;
             TemplateContext.target = templateContext;
             TemplateContext.ExpansionContext = new TemplateDriverExpansionContext( this, templateContext );
-            
+
             var output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
@@ -55,7 +55,8 @@ namespace Caravela.Framework.Impl.Templating
 
             public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
             {
-                if ( this._templateContext.Method.ReturnType.Is( typeof( void ) ) && IsVoidLiteralExpression( returnExpression ) )
+                if ( (this._templateContext.Method.ReturnType.Is( typeof( void ) ) && IsVoidLiteralExpression( returnExpression ))
+                    || returnExpression == null )
                 {
                     return ReturnStatement();
                 }
@@ -65,8 +66,7 @@ namespace Caravela.Framework.Impl.Templating
                 //throw new CaravelaException(
                 //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
                 //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
-
-                return ReturnStatement( returnExpression );
+                return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );
             }
 
             private static bool IsVoidLiteralExpression( ExpressionSyntax? returnExpression )
