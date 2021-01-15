@@ -15,7 +15,7 @@ namespace Caravela.TestFramework.Templating
 
         public string TestException { get; set; }
 
-        public Document InputDocument { get; set; }
+        public Document TemplateDocument { get; set; }
         
         public SyntaxNode AnnotatedSyntaxRoot { get; set; }
 

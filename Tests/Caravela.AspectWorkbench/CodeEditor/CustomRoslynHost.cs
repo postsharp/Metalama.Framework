@@ -25,19 +25,17 @@ namespace Caravela.AspectWorkbench.CodeEditor
                     assemblyReferences: new[]
                     {
                         typeof(object).Assembly, typeof(DateTime).Assembly, typeof(Enumerable).Assembly,
+                        typeof(Console).Assembly,
                         typeof(System.Runtime.CompilerServices.DynamicAttribute).Assembly,
                         typeof(SyntaxFactory).Assembly,
-                        typeof(Framework.Impl.Templating.TemplateHelper).Assembly,
-                        typeof(TestFramework.MetaModel.AdviceContext).Assembly
+                        typeof(Framework.Aspects.TemplateContext).Assembly,
+                        typeof(Framework.Impl.Templating.TemplateHelper).Assembly
                     },
                     imports: new[]
                     {
-                        "Microsoft.CodeAnalysis",
-                        "Microsoft.CodeAnalysis.CSharp",
-                        "Microsoft.CodeAnalysis.CSharp.Syntax",
-                        "Caravela.TestFramework.MetaModel"
+                        "Caravela.Framework.Aspects"
                     },
-                    typeNamespaceImports: new[] { typeof(SyntaxFactory), typeof(Framework.Impl.Templating.TemplateHelper) }
+                    typeNamespaceImports: new[] { typeof(SyntaxFactory), typeof( Framework.Aspects.TemplateContext ) }
                 )
             );
 
