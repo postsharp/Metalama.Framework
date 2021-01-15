@@ -22,14 +22,17 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             return CreateMethodBase( this._typeSerializer, o );
         }
 
-        public static ExpressionSyntax CreateMethodBase( CaravelaTypeSerializer typeSerializer, ICaravelaMethodOrConstructorInfo info )
+        public static ExpressionSyntax CreateMethodBase( CaravelaTypeSerializer typeSerializer, ICaravelaMethodOrConstructorInfo info ) =>
+            CreateMethodBase( typeSerializer, (IMethodSymbol) info.Symbol, info.DeclaringTypeSymbol );
+
+        public static ExpressionSyntax CreateMethodBase( CaravelaTypeSerializer typeSerializer, IMethodSymbol methodSymbol, ITypeSymbol? declaringGenericTypeSymbol )
         {
-            IMethodSymbol methodSymbol = (info.Symbol as IMethodSymbol)!.OriginalDefinition;
+            methodSymbol = methodSymbol.OriginalDefinition;
             string documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle), documentationId );
-            if ( info.DeclaringTypeSymbol != null )
+            if ( declaringGenericTypeSymbol != null )
             {
-                var typeHandle = CreateTypeHandleExpression(typeSerializer, info.DeclaringTypeSymbol );
+                var typeHandle = CreateTypeHandleExpression(typeSerializer, declaringGenericTypeSymbol );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
