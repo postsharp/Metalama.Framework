@@ -17,8 +17,8 @@ class Aspect
     dynamic Template()
     {
         A<Aspect, int, string> x = new C<object, int, string>();
-        AdviceContext.Method.Parameters[0].Value = x;
-        dynamic result = AdviceContext.Proceed();
+        target.Parameters[0].Value = x;
+        dynamic result = proceed();
         return result;
     }
 }
@@ -89,7 +89,7 @@ class TargetCode
     a = x;
     object result;
     result = a;
-    return result;
+    return (object)result;
 }
 ";
 

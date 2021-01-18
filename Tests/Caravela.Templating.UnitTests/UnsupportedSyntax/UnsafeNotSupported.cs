@@ -18,7 +18,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int i = AdviceContext.Method.Parameters.Count;
+        int i = target.Parameters.Count;
         unsafe
         {
             int* p = &i;
@@ -28,7 +28,7 @@ class Aspect
 
         Console.WriteLine( ""Test result = "" + i );
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

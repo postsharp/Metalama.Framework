@@ -16,9 +16,9 @@ class Aspect
   [Template]
   dynamic Template()
   {
-      if (AdviceContext.Method.Parameters[0].Value == null)
+      if (target.Parameters[0].Value == null)
       {
-          if (AdviceContext.Method.Name == ""DontThrowMethod"")
+          if (target.Method.Name == ""DontThrowMethod"")
           {
               Console.WriteLine( ""Oops"" );
           }
@@ -27,8 +27,7 @@ class Aspect
               throw new ArgumentNullException();
           }
       }
-      dynamic result = AdviceContext.Proceed();
-      return result;
+      return proceed();
   }
 }
 ";
@@ -42,15 +41,11 @@ class TargetCode
 }
 ";
 
-        private const string IfRunTimeIfCompileTime_ExpectedOutput = @"
-{
+        private const string IfRunTimeIfCompileTime_ExpectedOutput = @"{
     if (a == null)
     {
         throw new ArgumentNullException();
     }
-
-    __Void result;
-    return result;
 }";
 
         [Fact]

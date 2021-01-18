@@ -17,7 +17,7 @@ class Aspect
   dynamic Template()
   {
       int t = 0;
-      string name = AdviceContext.Method.Parameters[0].Name;
+      string name = target.Parameters[0].Name;
       if (name.Contains(""a""))
       {
           if (name.Contains(""b""))
@@ -42,7 +42,7 @@ class Aspect
       }
 
       Console.WriteLine(t);
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -65,7 +65,7 @@ class TargetCode
     return result;
 }";
 
-        [Fact(Skip = "#28034 Template compiler: compile - time variable is not replaced with a value in the final code")]
+        [Fact(Skip = "#28034 Template compiler: compile-time variable is not replaced with a value in the final code")]
         public async Task IfCompileTimeNested()
         {
             var testResult = await this._testRunner.Run( new TestInput( IfCompileTimeNested_Template, IfCompileTimeNested_Target ) );

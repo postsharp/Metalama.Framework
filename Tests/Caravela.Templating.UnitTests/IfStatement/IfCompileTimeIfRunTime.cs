@@ -16,8 +16,8 @@ class Aspect
   [Template]
   dynamic Template()
   {
-      var p = AdviceContext.Method.Parameters[0];
-      if (AdviceContext.Method.Name == ""NotNullMethod"")
+      var p = target.Parameters[0];
+      if (target.Method.Name == ""NotNullMethod"")
       {
           if (p.Value == null)
           {
@@ -31,8 +31,8 @@ class Aspect
               throw new ArgumentException(""IsNullOrEmpty"", p.Name);
           }
       }
-      dynamic result = AdviceContext.Proceed();
-      return result;
+      
+      return proceed();
   }
 }
 ";
@@ -40,21 +40,20 @@ class Aspect
         private const string IfCompileTimeIfRunTime_Target = @"
 class TargetCode
 {
-    void Method(string a)
+    string Method(string a)
     {
+        return a;
     }
 }
 ";
 
-        private const string IfCompileTimeIfRunTime_ExpectedOutput = @"
-{
+        private const string IfCompileTimeIfRunTime_ExpectedOutput = @"{
     if (string.IsNullOrEmpty(a))
     {
         throw new ArgumentException(""IsNullOrEmpty"", ""a"");
     }
 
-    __Void result;
-    return result;
+    return a;
 }";
 
         [Fact]

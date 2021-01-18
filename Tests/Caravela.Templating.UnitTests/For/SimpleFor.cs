@@ -21,7 +21,7 @@ class Aspect
         {
             try
             {
-                return AdviceContext.Proceed();
+                return proceed();
             }
             catch
             {

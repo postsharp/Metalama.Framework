@@ -19,20 +19,20 @@ class Aspect
     dynamic Template()
     {
         dynamic result;
-        switch( AdviceContext.Method.Parameters.Count )
+        switch( target.Parameters.Count )
         {
             case 0:
                 result = null;
                 break;
             case 1:
-                result = AdviceContext.Method.Parameters[0].Value;
+                result = target.Parameters[0].Value;
                 break;
             case 2:
                 goto default;
             case 3:
                 goto case 2;
             default:
-                result = AdviceContext.Proceed();
+                result = proceed();
                 break;
         }
         return result;

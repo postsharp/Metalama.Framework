@@ -43,7 +43,7 @@ class TargetCode
     Console.WriteLine(2);
     int result;
     result = a + b;
-    return result;
+    return (int)result;
 }
 ";
 

@@ -18,7 +18,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         
         IEnumerable<int> list = from i in new int[]{1,2,3} select i*i;
         if (result == null)

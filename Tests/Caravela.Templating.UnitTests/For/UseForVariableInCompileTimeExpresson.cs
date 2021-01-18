@@ -17,12 +17,12 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        for (int i = 0; i < AdviceContext.Method.Parameters.Count; i++)
+        for (int i = 0; i < target.Parameters.Count; i++)
         {
-            Console.WriteLine( AdviceContext.Method.Parameters[i].Name );
+            Console.WriteLine( target.Parameters[i].Name );
         }
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

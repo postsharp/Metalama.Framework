@@ -30,8 +30,8 @@ class Aspect
             n = 4;
         }
         
-        AdviceContext.Method.Parameters[0].Value = n;
-        return AdviceContext.Proceed();
+        target.Parameters[0].Value = n;
+        return proceed();
     }
 }
 ";

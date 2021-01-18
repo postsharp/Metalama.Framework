@@ -28,7 +28,7 @@ class Aspect
         
         var b = a with { Property1 = 2 };
         
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

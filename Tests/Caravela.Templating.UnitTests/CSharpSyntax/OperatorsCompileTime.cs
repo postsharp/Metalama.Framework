@@ -16,7 +16,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int i = AdviceContext.Method.Parameters.Count;
+        int i = target.Parameters.Count;
         
         i = +-i;
         i = unchecked(i + 1);
@@ -69,7 +69,7 @@ class Aspect
         Console.WriteLine(sizeof(bool));
         Console.WriteLine(typeof(int));
         
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

@@ -19,7 +19,7 @@ class Aspect
     {
         using(new MemoryStream())
         {
-            dynamic result = AdviceContext.Proceed();
+            dynamic result = proceed();
             return result;
         }
     }

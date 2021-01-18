@@ -33,9 +33,9 @@ namespace Caravela.AspectWorkbench.CodeEditor
                     },
                     imports: new[]
                     {
-                        "Caravela.Framework.Aspects"
-                    },
-                    typeNamespaceImports: new[] { typeof(SyntaxFactory), typeof( Framework.Aspects.TemplateContext ) }
+                        "Caravela.Framework.Aspects",
+                        "Caravela.Framework.Aspects.TemplateContext"
+                    }
                 )
             );
 

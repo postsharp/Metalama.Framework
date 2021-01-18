@@ -18,11 +18,11 @@ class Aspect
     {
         yield return 1;
         
-        if (AdviceContext.Method.Parameters.Count == 0)
+        if (target.Parameters.Count == 0)
         {
             yield break;
         }
-        AdviceContext.Proceed();
+        proceed();
     }
 }
 ";

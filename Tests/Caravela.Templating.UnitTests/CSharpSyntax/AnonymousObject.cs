@@ -18,14 +18,14 @@ class Aspect
     {
         var x = new
         {
-            A = AdviceContext.Method.Parameters[0].Value,
-            B = AdviceContext.Method.Parameters[1].Value,
-            Count = AdviceContext.Method.Parameters.Count
+            A = target.Parameters[0].Value,
+            B = target.Parameters[1].Value,
+            Count = target.Parameters.Count
         };
 
         var y = new
         {
-            Count = AdviceContext.Method.Parameters.Count
+            Count = target.Parameters.Count
         };
         
         Console.WriteLine( x );
@@ -33,7 +33,7 @@ class Aspect
         Console.WriteLine( x.Count );
         Console.WriteLine( y.Count );
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }
@@ -49,8 +49,7 @@ class TargetCode
 }
 ";
 
-        private const string AnonymousObject_ExpectedOutput = @"
-{
+        private const string AnonymousObject_ExpectedOutput = @"{
     var x = new { A = a, B = b, Count = 2 };
     var y = new { Count = 2 };
     Console.WriteLine(x);
@@ -59,7 +58,7 @@ class TargetCode
     Console.WriteLine(y.Count);
     int result;
     result = a + b;
-    return result;
+    return (int)result;
 }
 ";
 

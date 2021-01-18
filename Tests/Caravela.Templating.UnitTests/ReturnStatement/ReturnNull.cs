@@ -16,13 +16,13 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        var a = AdviceContext.Method.Parameters[0];
-        var b = AdviceContext.Method.Parameters[1];
+        var a = target.Parameters[0];
+        var b = target.Parameters[1];
         if (a.Value == null || b.Value == null)
         {
             return null;
         }
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }
@@ -38,8 +38,7 @@ class TargetCode
 }
 ";
 
-        private const string ReturnNull_ExpectedOutput = @"
-{
+        private const string ReturnNull_ExpectedOutput = @"{
     if (a == null || b == null)
     {
         return null;
@@ -47,7 +46,7 @@ class TargetCode
 
     string result;
     result = a + b;
-    return result;
+    return (string)result;
 }
 ";
 

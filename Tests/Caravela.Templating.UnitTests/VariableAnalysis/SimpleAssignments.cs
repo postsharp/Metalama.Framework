@@ -15,19 +15,18 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        var n = AdviceContext.Method.Parameters.Count; // build-time
+        var n = target.Parameters.Count; // build-time
         //var n = runTime(target.Method.Parameters.Count); // run-time
-        var a0 = AdviceContext.Method.Parameters[0].Value; // run-time
+        var a0 = target.Parameters[0].Value; // run-time
         var x = 0; // run-time
-        var y = AdviceContext.BuildTime( 0 ); // build-time    
+        var y = compileTime( 0 ); // compile-time    
     
         Console.WriteLine(n);
         Console.WriteLine(a0);
         Console.WriteLine(x);
         Console.WriteLine(y);
         
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
     }
 }
 ";
@@ -42,17 +41,14 @@ class TargetCode
 }
 ";
 
-        private const string SimpleAssignments_ExpectedOutput = @"
-{
+        private const string SimpleAssignments_ExpectedOutput = @"{
     var a0 = a;
     var x = 0;
     Console.WriteLine(1);
     Console.WriteLine(a0);
     Console.WriteLine(x);
     Console.WriteLine(0);
-    int result;
-    result = a;
-    return result;
+    return a;
 }";
 
         [Fact]

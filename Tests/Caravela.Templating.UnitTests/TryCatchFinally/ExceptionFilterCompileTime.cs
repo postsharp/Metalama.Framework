@@ -16,7 +16,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int a = AdviceContext.Method.Parameters.Count;
+        int a = target.Parameters.Count;
         int b = 0;
         try
         {
@@ -28,7 +28,7 @@ class Aspect
         }
         
         Console.WriteLine(b);
-        return AdviceContext.Proceed();
+        return proceed();
     }
 }
 ";

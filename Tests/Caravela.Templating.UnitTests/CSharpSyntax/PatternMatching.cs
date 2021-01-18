@@ -16,7 +16,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         
         switch(result)
         {

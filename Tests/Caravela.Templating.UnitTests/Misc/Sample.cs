@@ -17,13 +17,12 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        var parameters = new object[AdviceContext.Method.Parameters.Count];
-        var stringBuilder = new StringBuilder();
-        //AdviceContext.BuildTime( stringBuilder );
-        stringBuilder.Append( AdviceContext.Method.Name );
+        var parameters = new object[target.Parameters.Count];
+        var stringBuilder = compileTime(new StringBuilder());
+        stringBuilder.Append( target.Method.Name );
         stringBuilder.Append( '(' );
-        int i = 0;
-        foreach ( var p in AdviceContext.Method.Parameters )
+        int i = compileTime(0);
+        foreach ( var p in target.Parameters )
         {
             string comma = i > 0 ? "", "" : """";
 
@@ -45,7 +44,7 @@ class Aspect
 
         try
         {
-            dynamic result = AdviceContext.Proceed();
+            dynamic result = proceed();
             Console.WriteLine( stringBuilder + "" returned "" + result, parameters );
             return result;
         }
@@ -69,8 +68,7 @@ class TargetCode
 }
 ";
 
-        private const string Sample_ExpectedOutput = @"
-{
+        private const string Sample_ExpectedOutput = @"{
     var parameters = new object[3];
     parameters[0] = a;
     parameters[1] = b;
@@ -81,7 +79,7 @@ class TargetCode
         c = a - b;
         result = a + b;
         Console.WriteLine(""Method(a = {0}, b = {1}, c = <out> ) returned "" + result, parameters);
-        return result;
+        return (int)result;
     }
     catch (Exception _e)
     {

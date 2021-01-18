@@ -18,7 +18,7 @@ class Aspect
     {
         try
         {
-            return AdviceContext.Proceed();
+            return proceed();
         }
         catch (Exception e) when (e.GetType().Name.Contains(""DivideByZero""))
         {
@@ -38,15 +38,14 @@ class TargetCode
 }
 ";
 
-        private const string ExceptionFilterRunTime_ExpectedOutput = @"
-{
+        private const string ExceptionFilterRunTime_ExpectedOutput = @"{
     try
     {
         return 42 / a;
     }
     catch (Exception e) when (e.GetType().Name.Contains(""DivideByZero""))
     {
-        return -1;
+        return (int)-1;
     }
 }
 ";

@@ -40,12 +40,11 @@ class TargetCode
     }
 }";
 
-        private const string ForEachBreakCompileTime_ExpectedOutput = @"
-{
+        private const string ForEachBreakCompileTime_ExpectedOutput = @"{
     Console.WriteLine(1);
     int result;
     result = a + bb;
-    return result;
+    return (int)result;
 }
 ";
 

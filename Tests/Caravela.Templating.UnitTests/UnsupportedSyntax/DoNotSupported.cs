@@ -22,11 +22,11 @@ class Aspect
         do
         {
             i++;
-        } while ( i < AdviceContext.Method.Parameters.Count );
+        } while ( i < target.Parameters.Count );
 
         Console.WriteLine( ""Test result = "" + i );
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

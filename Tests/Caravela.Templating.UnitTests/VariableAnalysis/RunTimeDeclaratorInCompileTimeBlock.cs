@@ -16,17 +16,25 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        var x = 0;
-        
-        foreach(var p in AdviceContext.Method.Parameters)
+        if (target.Parameters.Count > 0)
         {
-            x++;
-            var y = x;
+            var x = 0;
+            Console.WriteLine(x);
+        }
+        
+        if (target.Parameters.Count > 1)
+        {
+            var x = 1;
+            Console.WriteLine(x);
+        }
+        
+        foreach(var p in target.Parameters)
+        {
+            var y = 0;
             Console.WriteLine(y);
         }
         
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
     }
 }
 ";
@@ -36,7 +44,7 @@ class TargetCode
 {
     int Method(int a, int b)
     {
-        return a;
+        return a + b;
     }
 }
 ";

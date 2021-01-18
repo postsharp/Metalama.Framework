@@ -10,15 +10,16 @@ namespace Caravela.Templating.UnitTests
         private const string ForEachCompileTimeForEachRunTime_Template = @"
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 class Aspect
 {
   [Template]
   dynamic Template()
   {
-      int[] array = new int[] {1,2};
+      IEnumerable<int> array = Enumerable.Range(1, 2);
       
-      foreach (var p in AdviceContext.Method.Parameters)
+      foreach (var p in target.Parameters)
       {
           foreach (int n in array)
           {
@@ -29,7 +30,7 @@ class Aspect
           }
       }
 
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -44,33 +45,28 @@ class TargetCode
     }
 }";
 
-        private const string ForEachCompileTimeForEachRunTime_ExpectedOutput = @"
-{
-    if (a <= 1)
+        private const string ForEachCompileTimeForEachRunTime_ExpectedOutput = @"{
+    IEnumerable<int> array = Enumerable.Range(1, 2);
+    foreach (int n in array)
     {
-        Console.WriteLine($""Oops "" + ""a"" + "" <= "" + 1);
+        if (a <= n)
+        {
+            Console.WriteLine(""Oops a <= "" + n);
+        }
     }
 
-    if (b <= 1)
+    foreach (int n in array)
     {
-        Console.WriteLine($""Oops "" + ""b"" + "" <= "" + 1);
-    }
-
-    if (a <= 2)
-    {
-        Console.WriteLine($""Oops "" + ""a"" + "" <= "" + 2);
-    }
-
-    if (b <= 2)
-    {
-        Console.WriteLine($""Oops "" + ""b"" + "" <= "" + 2);
+        if (b <= n)
+        {
+            Console.WriteLine(""Oops b <= "" + n);
+        }
     }
 
     int result;
     result = a + b;
-    return result;
-}
-";
+    return (int)result;
+}";
 
         [Fact]
         public async Task ForEachCompileTimeForEachRunTime()

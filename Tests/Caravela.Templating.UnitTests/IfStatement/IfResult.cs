@@ -16,7 +16,7 @@ class Aspect
   [Template]
   dynamic Template()
   {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
 
         if (result == null)
         {
@@ -38,16 +38,15 @@ class TargetCode
 }
 ";
 
-        private const string IfResult_ExpectedOutput = @"
-{
+        private const string IfResult_ExpectedOutput = @"{
     string result;
     result = a?.ToString();
     if (result == null)
     {
-        return """";
+        return (string)"""";
     }
 
-    return result;
+    return (string)result;
 }
 ";
 
