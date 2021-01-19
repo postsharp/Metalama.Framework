@@ -11,6 +11,7 @@ namespace Caravela.Framework.Code
         Property,
         Field,
         Event,
-        Parameter
+        Parameter,
+        GenericParameter
     }
 }

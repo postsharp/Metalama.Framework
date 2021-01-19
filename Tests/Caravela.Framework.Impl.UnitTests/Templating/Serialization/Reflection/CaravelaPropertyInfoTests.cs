@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             ICompilation compilation = TestBase.CreateCompilation( code );
             IEnumerable<INamedType> referencedTypes = compilation.DeclaredAndReferencedTypes.GetValue();
             INamedType stringType = referencedTypes.Single( t => t.Name == "String" );
-            IEnumerable<IProperty> properties = stringType.AllProperties.GetValue();
+            IEnumerable<IProperty> properties = stringType.Properties.GetValue();
             IProperty property = properties.Single( p => p.Name == "this[]" );
             string serialized = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( property as Property ) ).ToString();
             AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );

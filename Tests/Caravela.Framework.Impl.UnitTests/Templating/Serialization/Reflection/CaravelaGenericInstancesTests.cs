@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             IEnumerable<INamedType> allTypes = CreateCompilation(code).DeclaredTypes.GetValue();
             IEnumerable<INamedType> nestedTypes = allTypes.Single().NestedTypes.GetValue();
             INamedType innerType = nestedTypes.Single();
-            IEnumerable<IProperty> allProperties = innerType.AllProperties.GetValue();
+            IEnumerable<IProperty> allProperties = innerType.Properties.GetValue();
             string serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
                     CaravelaType.Create(
                         allProperties.Single().Type))

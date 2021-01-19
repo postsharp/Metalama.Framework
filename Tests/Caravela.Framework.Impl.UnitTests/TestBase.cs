@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -21,9 +22,11 @@ namespace Caravela.Framework.Impl.UnitTests
         public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
         {
             var roslynCompilation = CSharpCompilation.Create( null! )
-                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
+                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) )
-                .AddReferences( MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ) );
+                .AddReferences( 
+                    MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ) );
 
             if ( !ignoreErrors )
             {

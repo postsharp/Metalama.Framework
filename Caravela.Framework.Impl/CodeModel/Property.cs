@@ -3,10 +3,11 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Property : CodeElement, IProperty
+    internal sealed class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
@@ -22,6 +23,14 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
             this._containingElement = containingElement;
         }
+
+        public RefKind RefKind => ReturnParameter.MapRefKind( this._symbol.RefKind );
+
+        public bool IsByRef => this.RefKind != RefKind.None;
+
+        public bool IsRef => this.RefKind == RefKind.Ref;
+
+        public bool IsRefReadonly => this.RefKind == RefKind.RefReadonly;
 
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);

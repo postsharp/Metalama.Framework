@@ -4,26 +4,24 @@ using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class ArrayType : IArrayType, ITypeInternal
+    class PointerType : IPointerType, ITypeInternal
     {
-        private readonly IArrayTypeSymbol _typeSymbol;
+        private readonly IPointerTypeSymbol _typeSymbol;
 
         ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
 
         private readonly SourceCompilation _compilation;
 
-        internal ArrayType( IArrayTypeSymbol typeSymbol, SourceCompilation compilation )
+        internal PointerType( IPointerTypeSymbol typeSymbol, SourceCompilation compilation )
         {
             this._typeSymbol = typeSymbol;
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.Array;
+        public Code.TypeKind Kind => Code.TypeKind.Pointer;
 
         [Memo]
-        public IType ElementType => this._compilation.SymbolMap.GetIType( this._typeSymbol.ElementType );
-
-        public int Rank => this._typeSymbol.Rank;
+        public IType PointedAtType => this._compilation.SymbolMap.GetIType( this._typeSymbol.PointedAtType );
 
         public bool Is( IType other ) =>
             this._compilation.RoslynCompilation.HasImplicitConversion( this._typeSymbol, other.GetSymbol() );

@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var compilation  = TestBase.CreateCompilation( code );
             var namedTypes = compilation.DeclaredTypes.GetValue();
             INamedType type = namedTypes.Single( t => t.Name == "Target" );
-            IEnumerable<IMethod> methods = type.AllMethods.GetValue();
+            IEnumerable<IMethod> methods = type.Methods.GetValue();
             IMethod single = methods.Single( m => m.Name == ".ctor" );
             Method p = (single as Method)!;
             string actual = new CaravelaConstructorInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaConstructorInfo( p ) ).ToString();

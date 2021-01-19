@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IParameter ReturnParameter => new ReturnParameterImpl(this);
+        public IParameter? ReturnParameter => ((IMethod)this).Kind is MethodKind.Constructor ? null : new MethodReturnParameter(this);
 
         [Memo]
         public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
@@ -43,8 +43,10 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
 
-        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
-
+        [Memo]
+        public IImmutableList<IGenericParameter> GenericParameters =>
+            this._symbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
+        
         MethodKind IMethod.Kind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Ordinary,
@@ -93,32 +95,21 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        internal class ReturnParameterImpl : IParameter
+        internal sealed class MethodReturnParameter : ReturnParameter
         {
-            private readonly Method _method;
+            public Method Method { get; }
 
-            public Method Method => this._method;
-            
-            public ReturnParameterImpl(Method method) => this._method = method;
+            public MethodReturnParameter( Method method ) => this.Method = method;
 
-            public bool IsOut => false;
+            protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method._symbol.RefKind;
 
-            public IType Type => this._method.ReturnType;
+            public override IType Type => this.Method.ReturnType;
 
-            public string? Name => null;
-
-            public int Index => -1;
-
-            public ICodeElement? ContainingElement => this._method;
+            public override ICodeElement? ContainingElement => this.Method;
 
             [Memo]
-            public IReactiveCollection<IAttribute> Attributes =>
-                this._method._symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, this._method.SymbolMap)).ToImmutableReactive();
-
-            // TODO: Add IParameter.Kind to distinguish return parameters?
-            public CodeElementKind Kind => CodeElementKind.Parameter;
-
-            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
+            public override IReactiveCollection<IAttribute> Attributes =>
+                this.Method._symbol.GetReturnTypeAttributes().Select( a => new Attribute( a, this.Method.SymbolMap ) ).ToImmutableReactive();
         }
     }
 }
