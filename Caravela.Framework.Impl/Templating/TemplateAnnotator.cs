@@ -605,21 +605,31 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( node.Initializer != null )
                 {
-                    // Variables initialized with literal expression have runtime scope.
                     if ( node.Initializer.Value is LiteralExpressionSyntax )
                     {
-                        initializerScope = SymbolDeclarationScope.Default;
+                        // Variables initialized with literal expression have runtime scope.
+                        initializerScope = SymbolDeclarationScope.RunTimeOnly;
                     }
                     else
                     {
-                        var transformedInitiazer = this.Visit( node.Initializer.Value );
-                        initializerScope = this.GetNodeScope( transformedInitiazer );
-                        //transformedNode = transformedNode.WithInitializer( transformedInitiazer );
+                        // Inference the variable scope from the initializer.
+                        var transformedInitiazerValue = this.Visit( node.Initializer.Value );
+                        if ( transformedInitiazerValue != null )
+                        {
+                            initializerScope = this.GetNodeScope( transformedInitiazerValue );
+                            transformedNode = transformedNode.WithInitializer( node.Initializer.WithValue( (ExpressionSyntax) transformedInitiazerValue ) );
+                        }
+                        else
+                        {
+                            // Variables without initializer have runtime scope.
+                            initializerScope = SymbolDeclarationScope.RunTimeOnly;
+                        }
                     }
                 }
                 else
                 {
-                    initializerScope = SymbolDeclarationScope.Default;
+                    // Variables without initializer have runtime scope.
+                    initializerScope = SymbolDeclarationScope.RunTimeOnly;
                 }
 
                 if ( initializerScope != SymbolDeclarationScope.Default )
