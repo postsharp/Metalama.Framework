@@ -357,5 +357,40 @@ class C
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.GetValue().First().Parameters.Select( p => p.RefKind ) );
             Assert.Equal( new RefKind?[] { None, Ref, RefReadonly, null }, type.Methods.GetValue().Select(m => m.ReturnParameter?.RefKind) );
         }
+
+        [Fact]
+        public void ParameterDefaultValue()
+        {
+            string code = @"
+using System;
+
+class C
+{
+    void M(int i, int j = 42, string s = ""forty two"", decimal d = 3.14m, DateTime dt = default, DateTime? dt2 = null, object o = null) {}
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var method = type.Methods.GetValue().First();
+
+            var parametersWithoutDefaults = new[] { method.ReturnParameter!, method.Parameters[0] };
+
+            foreach ( var parameter in parametersWithoutDefaults )
+            {
+                Assert.False( parameter.HasDefaultValue );
+                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue );
+            }
+
+            var parametersWithDefaults = method.Parameters.Skip( 1 );
+
+            foreach ( var parameter in parametersWithDefaults )
+            {
+                Assert.True( parameter.HasDefaultValue );
+            }
+
+            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue ) );
+        }
     }
 }

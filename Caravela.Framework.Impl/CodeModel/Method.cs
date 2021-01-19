@@ -133,6 +133,10 @@ namespace Caravela.Framework.Impl.CodeModel
             // TODO: Add IParameter.Kind to distinguish return parameters?
             public CodeElementKind Kind => CodeElementKind.Parameter;
 
+            public bool HasDefaultValue => false;
+
+            public object? DefaultValue => throw new InvalidOperationException("Return parameter can't have default value.");
+
             public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
         }
     }

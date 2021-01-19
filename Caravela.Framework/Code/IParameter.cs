@@ -2,7 +2,6 @@ namespace Caravela.Framework.Code
 {
     public interface IParameter : ICodeElement
     {
-        // TODO: should ref-ness be part of the type or the parameter? on parameter
         RefKind RefKind { get; }
 
         /// <summary>
@@ -22,6 +21,12 @@ namespace Caravela.Framework.Code
         /// <remarks>-1 for <see cref="IMethod.ReturnParameter"/></remarks>
         int Index { get; }
 
-        // TODO: default value?
+        bool HasDefaultValue { get; }
+
+        /// <remarks>
+        /// Returns <c>null</c> if the parameter type is a struct and the default value of the parameter is the default value of the struct type.
+        /// </remarks>
+        /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
+        object? DefaultValue { get; }
     }
 }

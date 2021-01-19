@@ -91,6 +91,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CodeElementKind Kind => this._parameter.Kind;
 
+        public bool HasDefaultValue => this._parameter.HasDefaultValue;
+
+        public object? DefaultValue => this._parameter.DefaultValue;
+
         public dynamic Value
         {
             get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
