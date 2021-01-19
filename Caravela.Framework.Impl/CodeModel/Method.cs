@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
-using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IParameter? ReturnParameter => ((IMethod)this).Kind is MethodKind.Constructor ? null : new ReturnParameterImpl(this);
+        public IParameter? ReturnParameter => ((IMethod)this).Kind is MethodKind.Constructor ? null : new MethodReturnParameter(this);
 
         [Memo]
         public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
@@ -96,48 +95,21 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToString() => this._symbol.ToString();
 
-        internal class ReturnParameterImpl : IParameter
+        internal sealed class MethodReturnParameter : ReturnParameter
         {
-            private readonly Method _method;
+            public Method Method { get; }
 
-            public Method Method => this._method;
-            
-            public ReturnParameterImpl(Method method) => this._method = method;
+            public MethodReturnParameter( Method method ) => this.Method = method;
 
-            public RefKind RefKind => this._method._symbol.RefKind switch
-            {
-                Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
-                Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
-                Microsoft.CodeAnalysis.RefKind.RefReadOnly => RefKind.RefReadonly,
-                _ => throw new InvalidOperationException( $"Roslyn RefKind {this._method._symbol.RefKind} not recognized here." )
-            };
+            protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method._symbol.RefKind;
 
-            public bool IsByRef => this.RefKind != RefKind.None;
+            public override IType Type => this.Method.ReturnType;
 
-            public bool IsRef => this.RefKind == RefKind.Ref;
-
-            public bool IsOut => false;
-
-            public IType Type => this._method.ReturnType;
-
-            public string? Name => null;
-
-            public int Index => -1;
-
-            public ICodeElement? ContainingElement => this._method;
+            public override ICodeElement? ContainingElement => this.Method;
 
             [Memo]
-            public IReactiveCollection<IAttribute> Attributes =>
-                this._method._symbol.GetReturnTypeAttributes().Select(a => new Attribute(a, this._method.SymbolMap)).ToImmutableReactive();
-
-            // TODO: Add IParameter.Kind to distinguish return parameters?
-            public CodeElementKind Kind => CodeElementKind.Parameter;
-
-            public bool HasDefaultValue => false;
-
-            public object? DefaultValue => throw new InvalidOperationException("Return parameter can't have default value.");
-
-            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
+            public override IReactiveCollection<IAttribute> Attributes =>
+                this.Method._symbol.GetReturnTypeAttributes().Select( a => new Attribute( a, this.Method.SymbolMap ) ).ToImmutableReactive();
         }
     }
 }

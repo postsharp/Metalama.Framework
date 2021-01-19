@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation  = TestBase.CreateCompilation( code );
             IParameter single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).ReturnParameter;
-            Method.ReturnParameterImpl p = (single as Method.ReturnParameterImpl)!;
+            var p = (Method.MethodReturnParameter) single;
             string actual = new CaravelaReturnParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;
         }
@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation  = TestBase.CreateCompilation( code );
             IParameter single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( m => m.Name == "Property" ).Getter.ReturnParameter;
-            Method.ReturnParameterImpl p = (single as Method.ReturnParameterImpl)!;
+            var p = (Method.MethodReturnParameter) single;
             string actual = new CaravelaReturnParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;
         }

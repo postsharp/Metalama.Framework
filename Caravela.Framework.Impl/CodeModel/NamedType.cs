@@ -42,9 +42,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IReactiveCollection<IProperty> Properties =>
-            this.TypeSymbol.GetMembers().OfType<IPropertySymbol>().Select( p => new Property( p, this ) )
-            .Concat<IProperty>(
-                this.TypeSymbol.GetMembers().OfType<IFieldSymbol>().Where( f => !f.IsImplicitlyDeclared ).Select( f => new Field( f, this ) ) )
+            this.TypeSymbol.GetMembers().Select( m => m switch
+            {
+                IPropertySymbol p => new Property( p, this ),
+                IFieldSymbol { IsImplicitlyDeclared: false } f => new Field( f, this ),
+                _ => (IProperty) null!
+            } )
+            .Where( p => p != null )
             .ToImmutableReactive();
 
         [Memo]

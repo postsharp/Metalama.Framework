@@ -146,7 +146,7 @@ interface I<T>
             var m1 = methods[0];
             Assert.Equal("M1", m1.Name);
 
-            CheckParameterData(m1.ReturnParameter, m1, "void", null, -1);
+            CheckParameterData(m1.ReturnParameter!, m1, "void", null, -1);
             Assert.Equal(5, m1.Parameters.Count);
             CheckParameterData(m1.Parameters[0], m1, "int", "i", 0);
             CheckParameterData(m1.Parameters[1], m1, "T", "t", 1);
@@ -157,7 +157,7 @@ interface I<T>
             var m2 = methods[1];
             Assert.Equal("M2", m2.Name);
 
-            CheckParameterData(m2.ReturnParameter, m2, "int", null, -1);
+            CheckParameterData(m2.ReturnParameter!, m2, "int", null, -1);
             Assert.Equal(0, m2.Parameters.Count);
 
             static void CheckParameterData(
@@ -269,6 +269,28 @@ class C
             var propertyNames = type.Properties.Select( p => p.Name ).GetValue();
 
             Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly", "field" }, propertyNames );
+        }
+
+        [Fact]
+        public void RefProperties()
+        {
+            string code = @"
+class C
+{
+    int field;
+
+    int None { get; set; }
+    ref int Ref => ref field;
+    ref readonly int RefReadonly => ref field;
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var refKinds = type.Properties.Select( p => p.RefKind ).GetValue();
+
+            Assert.Equal( new[] { None, None, Ref, RefReadonly }, refKinds );
         }
 
         [Fact]
