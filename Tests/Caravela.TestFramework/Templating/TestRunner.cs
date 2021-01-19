@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
-using Caravela.TestFramework.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
@@ -137,7 +136,6 @@ namespace Caravela.TestFramework.Templating
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
                 .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
                 .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( AdviceContext ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateHelper ).Assembly.Location ) )
                 ;
