@@ -4,7 +4,10 @@ namespace Caravela.Framework.Code
 {
     public interface IMethod : IMember
     {
-        IParameter ReturnParameter { get; }
+        /// <remarks>
+        /// Returns <c>null</c> for methods that don't have return types: constructors and finalizers.
+        /// </remarks>
+        IParameter? ReturnParameter { get; }
         // for convenience
         IType ReturnType { get; }
         IImmutableList<IMethod> LocalFunctions { get; }

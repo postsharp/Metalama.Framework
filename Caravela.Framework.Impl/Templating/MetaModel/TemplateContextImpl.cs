@@ -71,6 +71,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public AdviceParameter( IParameter p ) => this._parameter = p;
 
+        public RefKind RefKind => this._parameter.RefKind;
+
+        public bool IsByRef => this._parameter.IsByRef;
+
+        public bool IsRef => this._parameter.IsRef;
+
         public bool IsOut => this._parameter.IsOut;
 
         public IType Type => this._parameter.Type;

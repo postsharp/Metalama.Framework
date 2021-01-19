@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,7 +22,20 @@ namespace Caravela.Framework.Impl.CodeModel
             this._containingMember = containingMember;
         }
 
-        public bool IsOut => this._symbol.RefKind == RefKind.Out;
+        public RefKind RefKind => this._symbol.RefKind switch
+        {
+            Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
+            Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
+            Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
+            Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
+            _ => throw new InvalidOperationException($"Roslyn RefKind {this._symbol.RefKind} not recognized.")
+        };
+
+        public bool IsByRef => this.RefKind != RefKind.None;
+
+        public bool IsRef => this.RefKind == RefKind.Ref;
+
+        public bool IsOut => this.RefKind == RefKind.Out;
 
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
@@ -35,6 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
         public CodeElementKind Kind => CodeElementKind.Parameter;
+
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._symbol.ToDisplayString( );
     }
 }

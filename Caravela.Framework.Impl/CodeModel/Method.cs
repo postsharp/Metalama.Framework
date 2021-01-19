@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IParameter ReturnParameter => new ReturnParameterImpl(this);
+        public IParameter? ReturnParameter => ((IMethod)this).Kind is MethodKind.Constructor ? null : new ReturnParameterImpl(this);
 
         [Memo]
         public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
@@ -102,6 +103,18 @@ namespace Caravela.Framework.Impl.CodeModel
             public Method Method => this._method;
             
             public ReturnParameterImpl(Method method) => this._method = method;
+
+            public RefKind RefKind => this._method._symbol.RefKind switch
+            {
+                Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
+                Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
+                Microsoft.CodeAnalysis.RefKind.RefReadOnly => RefKind.RefReadonly,
+                _ => throw new InvalidOperationException( $"Roslyn RefKind {this._method._symbol.RefKind} not recognized here." )
+            };
+
+            public bool IsByRef => this.RefKind != RefKind.None;
+
+            public bool IsRef => this.RefKind == RefKind.Ref;
 
             public bool IsOut => false;
 

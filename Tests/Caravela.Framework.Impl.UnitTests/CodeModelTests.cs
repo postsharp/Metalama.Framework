@@ -5,6 +5,7 @@ using Caravela.Reactive;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.TypeKind;
+using static Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
@@ -334,6 +335,27 @@ class C<T>
             var typeKinds = new[] { Array, Class, Delegate, Dynamic, Enum, GenericParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.Kind ).GetValue() );
+        }
+
+        [Fact]
+        public void ParameterKinds()
+        {
+            string code = @"
+class C
+{
+    int i;
+
+    void M1(int i, in int j, ref int k, out int m) => m = 0;
+    ref int M2() => ref i;
+    ref readonly int M3 => ref i;
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.GetValue().First().Parameters.Select( p => p.RefKind ) );
+            Assert.Equal( new RefKind?[] { None, Ref, RefReadonly, null }, type.Methods.GetValue().Select(m => m.ReturnParameter?.RefKind) );
         }
     }
 }
