@@ -32,6 +32,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
             protected static MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
             {
+                // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace
+                if ( method.Body == null && method.ExpressionBody == null )
+                    return method;
+
                 // throw new System.NotSupportedException("message")
                 var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
@@ -180,7 +184,26 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
         private class PrepareRunTimeAssemblyRewriter : Rewriter
         {
-            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation compilation ) : base( symbolClassifier, compilation ) { }
+            private readonly INamedTypeSymbol? _aspectDriverSymbol;
+
+            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
+                : base( symbolClassifier, compilation )
+                => this._aspectDriverSymbol = compilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+
+                // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
+                // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.
+                // But it is a pattern used by Caravela.Samples for try.postsharp.net.
+                if ( this._aspectDriverSymbol != null && symbol.AllInterfaces.Any( i => SymbolEqualityComparer.Default.Equals( i, this._aspectDriverSymbol ) ) )
+                {
+                    return node;
+                }
+
+                return base.VisitClassDeclaration( node );
+            }
 
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {

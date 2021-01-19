@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
 
                     if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
-                        throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly reasource." );
+                        throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly resource." );
 
                     return assemblyBytes;
                 }
