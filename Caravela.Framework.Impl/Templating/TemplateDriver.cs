@@ -55,10 +55,15 @@ namespace Caravela.Framework.Impl.Templating
 
             public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
             {
-                if ( (this._templateContext.Method.ReturnType.Is( typeof( void ) ) && IsVoidLiteralExpression( returnExpression ))
-                    || returnExpression == null )
+                if ( this._templateContext.Method.ReturnType.Is( typeof( void ) ) || returnExpression == null )
                 {
                     return ReturnStatement();
+                }
+
+                var returnExpressionKind = returnExpression.Kind();
+                if (returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression)
+                {
+                    return ReturnStatement( returnExpression );
                 }
 
                 // TODO: validate the returnExpression according to the method's return type.
@@ -67,13 +72,6 @@ namespace Caravela.Framework.Impl.Templating
                 //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
                 //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
                 return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );
-            }
-
-            private static bool IsVoidLiteralExpression( ExpressionSyntax? returnExpression )
-            {
-                return returnExpression == null
-                        || returnExpression.Kind() == SyntaxKind.DefaultLiteralExpression
-                        || returnExpression.Kind() == SyntaxKind.NullLiteralExpression;
             }
         }
     }

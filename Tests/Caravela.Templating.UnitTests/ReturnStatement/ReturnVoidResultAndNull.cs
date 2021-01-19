@@ -45,7 +45,7 @@ class TargetCode
     {
         __Void result;
         Console.WriteLine(a / b);
-        return result;
+        return;
     }
     catch
     {
