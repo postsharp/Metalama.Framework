@@ -414,5 +414,18 @@ class C
 
             Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue ) );
         }
+
+        [Fact]
+        public void GetTypeByReflectionType()
+        {
+            var compilation = CreateCompilation( null );
+
+            Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
+            Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
+            Assert.Equal( "int[][*,*]", compilation.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
+            Assert.Equal( "void*", compilation.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
+
+            Assert.Throws<System.ArgumentException>( () => compilation.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+        }
     }
 }

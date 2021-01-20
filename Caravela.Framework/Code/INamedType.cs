@@ -1,4 +1,5 @@
 using Caravela.Reactive;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
@@ -28,5 +29,7 @@ namespace Caravela.Framework.Code
         IReactiveCollection<IEvent> Events { get; }
 
         IReactiveCollection<IMethod> Methods { get; }
+
+        public INamedType MakeGenericType( params IType[] genericArguments );
     }
 }

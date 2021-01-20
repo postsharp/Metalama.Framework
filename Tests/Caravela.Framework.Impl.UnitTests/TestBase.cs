@@ -19,11 +19,10 @@ namespace Caravela.Framework.Impl.UnitTests
         /// </summary>
         public static bool DoCodeExecutionTests = true;
             
-        public static CSharpCompilation CreateRoslynCompilation( string code, bool ignoreErrors = false )
+        public static CSharpCompilation CreateRoslynCompilation( string? code, bool ignoreErrors = false )
         {
             var roslynCompilation = CSharpCompilation.Create( null! )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) )
                 .AddReferences(
                     new[] { "netstandard", "System.Runtime" }
                         .Select( r => MetadataReference.CreateFromFile(
@@ -33,6 +32,11 @@ namespace Caravela.Framework.Impl.UnitTests
                     MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
+
+            if ( code != null )
+            {
+                roslynCompilation = roslynCompilation.AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) );
+            }
 
             if ( !ignoreErrors )
             {
@@ -48,7 +52,7 @@ namespace Caravela.Framework.Impl.UnitTests
             return roslynCompilation;
         }
 
-        public static ICompilation CreateCompilation( string code )
+        public static ICompilation CreateCompilation( string? code )
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 
