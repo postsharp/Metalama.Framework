@@ -86,9 +86,9 @@ namespace Caravela.Framework.Impl.Templating
             return true;
         }
 
-  
+
         #region Computing scope
-        
+
         /// <summary>
         /// Gets the scope of a symbol.
         /// </summary>
@@ -166,14 +166,15 @@ namespace Caravela.Framework.Impl.Templating
             return type != null && type.Kind == SymbolKind.DynamicType;
         }
 
-
         /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private SymbolDeclarationScope GetNodeScope(SyntaxNode node)
+        private SymbolDeclarationScope GetNodeScope(SyntaxNode? node)
         {
+            if ( node == null ) return SymbolDeclarationScope.Default;
+
             // If the node is dynamic, it is run-time only.
             if (this.IsDynamic(node))
             {
@@ -202,13 +203,12 @@ namespace Caravela.Framework.Impl.Templating
                     return node.GetScopeFromAnnotation();
             }
         }
-
  
         private SymbolDeclarationScope GetCombinedScope(params SymbolDeclarationScope[] scopes) => this.GetCombinedScope((IEnumerable<SymbolDeclarationScope>) scopes);
 
-        private SymbolDeclarationScope GetCombinedScope(params SyntaxNode[] nodes) => this.GetCombinedScope((IEnumerable<SyntaxNode>) nodes);
+        private SymbolDeclarationScope GetCombinedScope(params SyntaxNode?[] nodes) => this.GetCombinedScope((IEnumerable<SyntaxNode?>) nodes);
 
-        private SymbolDeclarationScope GetCombinedScope(IEnumerable<SyntaxNode> nodes) => this.GetCombinedScope(nodes.Select(this.GetNodeScope));
+        private SymbolDeclarationScope GetCombinedScope(IEnumerable<SyntaxNode?> nodes) => this.GetCombinedScope(nodes.Select(this.GetNodeScope));
         
         /// <summary>
         /// Gives the <see cref="SymbolDeclarationScope"/> of a parent given the scope of its children.
@@ -253,7 +253,8 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-#endregion
+        #endregion
+
 
         /// <summary>
         /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
@@ -356,7 +357,6 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
-            
             var transformedName = (SimpleNameSyntax) this.Visit(node.Name)!;
 
             if (this.GetNodeScope(transformedName) == SymbolDeclarationScope.CompileTimeOnly)
@@ -368,7 +368,6 @@ namespace Caravela.Framework.Impl.Templating
                     var transformedExpression = (ExpressionSyntax) this.Visit(node.Expression)!;
                     return node.Update(transformedExpression, node.OperatorToken, transformedName).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly);
                 }
-                
             }
             else
             {
@@ -463,19 +462,20 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We have an if statement where the condition is a runtime expression. Any variable assignment
                 // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-                
+
                 // TODO: It's not clear here whether we have a run-time expression or an expression that
                 // has not been classified yet as compile-time. We may find a counter-example to this algorithm that
                 // would counter-proof this code here. However, it may need that our whole algorithm is flawed,
                 // so we may want to live with that behavior anyway. Perhaps the same remark is true for `foreach`.
-                
-                using (this.EnterRuntimeConditionalBlock())
-                {
-                    var annotatedStatement = (StatementSyntax) this.Visit(node.Statement)!;
-                    var annotatedElse = (ElseClauseSyntax) this.Visit(node.Else)!;
 
-                    var result = node.Update(node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
-                        annotatedStatement, annotatedElse);
+                using ( this.EnterRuntimeConditionalBlock() )
+                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
+                {
+                    var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                    var annotatedElse = (ElseClauseSyntax) this.Visit( node.Else )!;
+
+                    var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
+                        annotatedStatement, annotatedElse );
 
                     return result;
                 }
@@ -562,6 +562,7 @@ namespace Caravela.Framework.Impl.Templating
                 // Run-time or default loop, we don't know.
 
                 using ( this.EnterRuntimeConditionalBlock() )
+                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
                 {
                     StatementSyntax annotatedStatement;
                     using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
@@ -753,6 +754,46 @@ namespace Caravela.Framework.Impl.Templating
             return transformedNode.WithScopeAnnotationFrom(node.Expression).WithScopeAnnotationFrom(node);
         }
 
+        public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
+        {
+            var annotatedType = (TypeSyntax?) this.Visit( node.Type );
+            var annotatedExpression = (ExpressionSyntax?) this.Visit( node.Expression );
+            var transformedNode = CastExpression( annotatedType ?? node.Type, annotatedExpression ?? node.Expression );
+
+            return this.AnnotateCastExpression( transformedNode, annotatedType, annotatedExpression );
+        }
+
+        public override SyntaxNode? VisitBinaryExpression( BinaryExpressionSyntax node )
+        {
+            switch ( node.Kind() )
+            {
+                case SyntaxKind.IsExpression:
+                case SyntaxKind.AsExpression:
+                    var annotatedType = (TypeSyntax?) this.Visit( node.Right );
+                    var annotatedExpression = (ExpressionSyntax?) this.Visit( node.Left );
+                    var transformedNode = BinaryExpression( node.Kind(), annotatedExpression ?? node.Left, annotatedType ?? node.Right );
+
+                    return this.AnnotateCastExpression( transformedNode, annotatedType, annotatedExpression );
+            }
+
+            return base.VisitBinaryExpression( node );
+        }
+
+        private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax? annotatedType, ExpressionSyntax? annotatedExpression )
+        {
+            var combinedScope = this.GetNodeScope( annotatedType ) == SymbolDeclarationScope.Default
+                ? this.GetNodeScope( annotatedExpression )
+                : this.GetCombinedScope( annotatedType, annotatedExpression );
+
+            if ( combinedScope != SymbolDeclarationScope.Default )
+            {
+                return transformedCastNode.AddScopeAnnotation( combinedScope );
+            }
+
+            return transformedCastNode;
+        }
+
+
         #region Unsupported syntax
 
         public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
@@ -876,27 +917,6 @@ namespace Caravela.Framework.Impl.Templating
             this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
 
             return base.VisitInitializerExpression( node );
-        }
-
-        public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
-        {
-            // TODO: https://tp.postsharp.net/entity/28017-template-compiler-support-for-cast-as
-            // this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
-            return base.VisitCastExpression( node );
-        }
-
-        public override SyntaxNode? VisitBinaryExpression( BinaryExpressionSyntax node )
-        {
-            switch (node.Kind())
-            {
-                case SyntaxKind.IsExpression:
-                case SyntaxKind.AsExpression:
-                    // TODO: https://tp.postsharp.net/entity/28017-template-compiler-support-for-cast-as
-                    // this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
-                    break;
-            }
-
-            return base.VisitBinaryExpression( node );
         }
 
         public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
