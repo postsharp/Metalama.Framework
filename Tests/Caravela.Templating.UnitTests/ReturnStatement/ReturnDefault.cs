@@ -18,7 +18,7 @@ class Aspect
     {
         try
         {
-            dynamic result = AdviceContext.Proceed();
+            dynamic result = proceed();
             return result;
         }
         catch
@@ -39,13 +39,12 @@ class TargetCode
 }
 ";
 
-        private const string ReturnDefault_ExpectedOutput = @"
-{
+        private const string ReturnDefault_ExpectedOutput = @"{
     try
     {
         int result;
         result = 42 / a;
-        return result;
+        return (int)result;
     }
     catch
     {

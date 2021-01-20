@@ -15,15 +15,15 @@ class Aspect
   [Template]
   dynamic Template()
   {
-      int i = 0;
-      foreach (var p in AdviceContext.Method.Parameters)
+      int i = compileTime(0);
+      foreach (var p in target.Parameters)
       {
           i++;
       }
 
       Console.WriteLine(i);
 
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -43,7 +43,7 @@ class TargetCode
     Console.WriteLine(2);
     int result;
     result = a + b;
-    return result;
+    return (int)result;
 }
 ";
 

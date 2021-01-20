@@ -19,7 +19,7 @@ class Aspect
         try
         {
             Console.WriteLine(""try"");
-            dynamic result = AdviceContext.Proceed();
+            dynamic result = proceed();
             Console.WriteLine(""success"");
             return result;
         }
@@ -46,15 +46,14 @@ class TargetCode
 }
 ";
 
-        private const string TryCatchFinallyRunTime_ExpectedOutput = @"
-{
+        private const string TryCatchFinallyRunTime_ExpectedOutput = @"{
     try
     {
         Console.WriteLine(""try"");
         int result;
         result = a;
         Console.WriteLine(""success"");
-        return result;
+        return (int)result;
     }
     catch
     {

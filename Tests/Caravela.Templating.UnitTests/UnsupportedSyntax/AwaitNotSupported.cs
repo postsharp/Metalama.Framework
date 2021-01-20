@@ -21,7 +21,7 @@ class Aspect
     {
         await Task.Yield();
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

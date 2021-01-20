@@ -23,7 +23,7 @@ class Aspect
             Console.WriteLine(p.ToString());
         };
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         
         action(result);
         

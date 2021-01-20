@@ -15,21 +15,20 @@ class Aspect
   [Template]
   dynamic Template()
   {
-        int b;
+        int b = compileTime(0);
 
-        if (AdviceContext.Method.Name == ""Method"")
+        if (target.Method.Name == ""Method"")
         {
             b = 1;
         }
         else
         {
-            b = 0;
+            b = 2;
         }
 
         Console.WriteLine( b );
 
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
   }
 }
 ";
@@ -43,13 +42,9 @@ class TargetCode
 }
 ";
 
-        private const string IfMethodName_ExpectedOutput = @"
-{
+        private const string IfMethodName_ExpectedOutput = @"{
     Console.WriteLine(1);
-    __Void result;
-    return result;
-}
-";
+}";
 
 
         [Fact]

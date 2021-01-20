@@ -17,7 +17,7 @@ class Aspect
     {
         try
         {
-            return AdviceContext.Proceed();
+            return proceed();
         }
         catch
         {
@@ -39,8 +39,7 @@ class TargetCode
 }
 ";
 
-        private const string ReturnVoidProceedAndDefault_ExpectedOutput = @"
-{
+        private const string ReturnVoidProceedAndDefault_ExpectedOutput = @"{
     try
     {
         Console.WriteLine(a / b);

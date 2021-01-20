@@ -23,7 +23,7 @@ class Aspect
         dynamic result;
         lock (o)
         {
-            result = AdviceContext.Proceed();
+            result = proceed();
         }
         return result;
     }

@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
-using Caravela.TestFramework.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
@@ -30,7 +29,7 @@ namespace Caravela.TestFramework.Templating
             var templateDocument = project.AddDocument( "Template.cs", templateSource );
             var targetDocument = project.AddDocument( "Target.cs", targetSource );
             var targetSyntaxTree = CSharpSyntaxTree.ParseText( targetSource, encoding: Encoding.UTF8 );
-            result.InputDocument = templateDocument;
+            result.TemplateDocument = templateDocument;
 
             var compilationForInitialDiagnostics = CSharpCompilation.Create(
                 "assemblyName",
@@ -61,7 +60,7 @@ namespace Caravela.TestFramework.Templating
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
-            if (!success)
+            if ( !success )
             {
                 result.TestErrorMessage = "Template compiler failed.";
                 return result;
@@ -79,14 +78,14 @@ namespace Caravela.TestFramework.Templating
             var emitResult = finalCompilation.Emit(
                 buildTimeAssemblyStream, buildTimeDebugStream,
                 options: new Microsoft.CodeAnalysis.Emit.EmitOptions( defaultSourceFileEncoding: Encoding.UTF8, fallbackSourceFileEncoding: Encoding.UTF8 ) );
-            
+
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
                 result.TestErrorMessage = "Final compilation failed.";
                 return result;
             }
-            
+
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
             buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
@@ -103,7 +102,7 @@ namespace Caravela.TestFramework.Templating
 
                 var driver = new TemplateDriver( templateMethod );
 
-                AdviceContext.Current = new AdviceContextImpl( targetMethod );
+                //AdviceContext.Current = new AdviceContextImpl( targetMethod );
 
                 var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
                 var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" );
@@ -137,7 +136,6 @@ namespace Caravela.TestFramework.Templating
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
                 .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
                 .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( AdviceContext ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateHelper ).Assembly.Location ) )
                 ;

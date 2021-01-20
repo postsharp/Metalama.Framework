@@ -16,7 +16,7 @@ class Aspect
   [Template]
   dynamic Template()
   {
-      foreach ( var p in AdviceContext.Method.Parameters )
+      foreach ( var p in target.Parameters )
       {
           if (p.Value == null)
           {
@@ -24,7 +24,7 @@ class Aspect
           }
       }
 
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -39,8 +39,7 @@ class TargetCode
     }
 }";
 
-        private const string ForEachParamIfValue_ExpectedOutput = @"
-{
+        private const string ForEachParamIfValue_ExpectedOutput = @"{
     if (a == null)
     {
         throw new ArgumentNullException(""a"");
@@ -53,7 +52,7 @@ class TargetCode
 
     string result;
     result = a.ToString() + b.ToString();
-    return result;
+    return (string)result;
 }";
 
         [Fact]

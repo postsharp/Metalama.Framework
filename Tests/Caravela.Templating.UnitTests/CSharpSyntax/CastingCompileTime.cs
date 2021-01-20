@@ -17,11 +17,11 @@ class Aspect
     dynamic Template()
     {
         string text = """";
-        short c = (short) AdviceContext.Method.Parameters.Count;
+        short c = (short) target.Parameters.Count;
         
         if (c > 0)
         {
-            object s = AdviceContext.Method.Parameters[0].Name;
+            object s = target.Parameters[0].Name;
             if (s is string)
             {
                 text = (s as string) + ""42"";
@@ -30,7 +30,7 @@ class Aspect
         
         Console.WriteLine(text);
         
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }
@@ -48,7 +48,7 @@ class TargetCode
 
         private const string CastingCompileTime_ExpectedOutput = @"";
 
-        [Fact]
+        [Fact( Skip = "#28017 Template compiler: support for cast, as, is, typeof" )]
         public async Task CastingCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( CastingCompileTime_Template, CastingCompileTime_Target ) );

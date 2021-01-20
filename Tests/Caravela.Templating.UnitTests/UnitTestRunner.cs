@@ -21,23 +21,23 @@ namespace Caravela.Templating.UnitTests
 
         public UnitTestRunner( ITestOutputHelper logger )
         {
-            _logger = logger;
+            this._logger = logger;
         }
 
         public async Task<TestResult> Run( TestInput testInput, [CallerMemberName] string callerName = null )
         {
             var result = await base.Run( testInput );
 
-            if ( !string.IsNullOrEmpty( callerName ) )
+            if ( !string.IsNullOrEmpty( callerName ) && this._usedSyntaxKindsCollector.CollectedSyntaxKinds.Any() )
             {
                 string syntaxKindsText = string.Join(
                     Environment.NewLine,
-                    _usedSyntaxKindsCollector.CollectedSyntaxKinds
-                        .Select( s => _unsupportedSyntaxKinds.Contains( s ) ? $"{s}*" : $"{s}" )
+                    this._usedSyntaxKindsCollector.CollectedSyntaxKinds
+                        .Select( s => this._unsupportedSyntaxKinds.Contains( s ) ? $"{s}*" : $"{s}" )
                         .OrderBy( s => s ) );
 
                 string dirPath = Path.GetFullPath(@"..\..\..\tests\SyntaxCover");
-                string filePath = Path.Combine( dirPath, callerName + ".txt" );
+                string filePath = Path.Combine( dirPath, callerName + ".txt" ); // TODO: file name should include test class name in addition to the test method name.
                 Directory.CreateDirectory( dirPath );
                 File.WriteAllText( filePath, syntaxKindsText );
             }
@@ -47,7 +47,7 @@ namespace Caravela.Templating.UnitTests
 
         protected override IEnumerable<CSharpSyntaxVisitor> GetTemplateAnalyzers()
         {
-            yield return _usedSyntaxKindsCollector;
+            yield return this._usedSyntaxKindsCollector;
         }
 
         protected override void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
@@ -60,7 +60,7 @@ namespace Caravela.Templating.UnitTests
             {
                 foreach ( var d in diagnosticsToLog )
                 {
-                    _logger.WriteLine( d.Location + ":" + d.Id + " " + d.GetMessage() );
+                    this._logger.WriteLine( d.Location + ":" + d.Id + " " + d.GetMessage() );
 
                     if ( d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) )
                     {
@@ -78,7 +78,7 @@ namespace Caravela.Templating.UnitTests
                 object? syntaxKind;
                 if ( Enum.TryParse( typeof( SyntaxKind ), syntaxKindString, out syntaxKind ) )
                 {
-                    _unsupportedSyntaxKinds.Add( (SyntaxKind) syntaxKind );
+                    this._unsupportedSyntaxKinds.Add( (SyntaxKind) syntaxKind );
                 }
             }
         }

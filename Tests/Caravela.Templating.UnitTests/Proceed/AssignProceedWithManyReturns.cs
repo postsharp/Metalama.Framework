@@ -15,7 +15,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }
@@ -38,8 +38,7 @@ class TargetCode
 }
 ";
 
-        private const string AssignProceedWithManyReturns_ExpectedOutput = @"
-{
+        private const string AssignProceedWithManyReturns_ExpectedOutput = @"{
     bool result;
     if (a % 2 == 0)
     {
@@ -54,7 +53,7 @@ class TargetCode
 
 __continue:
     ;
-    return result;
+    return (bool)result;
 }
 ";
 

@@ -15,9 +15,9 @@ class Aspect
   [Template]
   dynamic Template()
   {
-        bool b;
+        bool b = compileTime(false);
 
-        if (AdviceContext.Method.Parameters.Count > 0)
+        if (target.Parameters.Count > 0)
         {
             b = true;
         }
@@ -28,8 +28,7 @@ class Aspect
 
         Console.WriteLine( b );
 
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
   }
 }
 ";
@@ -44,12 +43,9 @@ class TargetCode
 }
 ";
 
-        private const string IfParametersCount_ExpectedOutput = @"
-{
+        private const string IfParametersCount_ExpectedOutput = @"{
     Console.WriteLine(true);
-    int result;
-    result = a;
-    return result;
+    return a;
 }";
 
         [Fact]

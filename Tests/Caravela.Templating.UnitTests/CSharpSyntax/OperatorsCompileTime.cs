@@ -16,7 +16,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        int i = AdviceContext.Method.Parameters.Count;
+        int i = target.Parameters.Count;
         
         i = +-i;
         i = unchecked(i + 1);
@@ -60,15 +60,16 @@ class Aspect
         
         string s = default(string);
         s ??= ""42"";
-        //s = s[0..2];
+        s = s[0..2];
         
         Console.WriteLine(i);
+        Console.WriteLine(t);
         Console.WriteLine(z.Value);
         Console.WriteLine(s);
         Console.WriteLine(sizeof(bool));
         Console.WriteLine(typeof(int));
         
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }
@@ -87,6 +88,7 @@ class TargetCode
         private const string OperatorsCompileTime_ExpectedOutput = @"
 {
     Console.WriteLine(2);
+    Console.WriteLine((false, true));
     Console.WriteLine(true);
     Console.WriteLine(""42"");
     Console.WriteLine(sizeof(bool));
@@ -97,7 +99,9 @@ class TargetCode
 }
 ";
 
-        [Fact]
+        [Fact(Skip = "#28025 Template compiler: simple variable analysis. "
+            + "#28114 Template compiler: C# features requiring framework > netstandard 2.0 should not be evaluated at compile time. "
+            + "#28116 Template compiler: support for compile - time tuples.")]
         public async Task OperatorsCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( OperatorsCompileTime_Template, OperatorsCompileTime_Target ) );

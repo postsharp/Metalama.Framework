@@ -24,7 +24,7 @@ class Aspect : BaseAspect
     [Template]
     dynamic Template()
     {
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         
         Console.WriteLine(this.Format(result));
         
@@ -61,7 +61,7 @@ class TargetCode
 
         private const string TemplateClassMembers_ExpectedOutput = @"";
 
-        [Fact]
+        [Fact( Skip = "#28133 Template compiler: accessing instance members of the template class" )]
         public async Task TemplateClassMembers()
         {
             var testResult = await this._testRunner.Run( new TestInput( TemplateClassMembers_Template, TemplateClassMembers_Target ) );

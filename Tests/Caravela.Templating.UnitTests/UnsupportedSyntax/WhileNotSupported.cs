@@ -19,14 +19,14 @@ class Aspect
     dynamic Template()
     {
         int i = 0;
-        while ( i < AdviceContext.Method.Parameters.Count )
+        while ( i < target.Parameters.Count )
         {
             i++;
         }
 
         Console.WriteLine( ""Test result = "" + i );
 
-        dynamic result = AdviceContext.Proceed();
+        dynamic result = proceed();
         return result;
     }
 }

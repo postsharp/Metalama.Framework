@@ -16,19 +16,18 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        if (AdviceContext.Method.Parameters[0].Value == null)
+        if (target.Parameters[0].Value == null)
         {
-            throw new ArgumentNullException(AdviceContext.Method.Parameters[0].Name);
+            throw new ArgumentNullException(target.Parameters[0].Name);
         }
 
-        var p = AdviceContext.Method.Parameters[1];
+        var p = target.Parameters[1];
         if (p.Value == null)
         {
             throw new ArgumentNullException(p.Name);
         }
 
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
     }
 }
 ";
@@ -43,8 +42,7 @@ class TargetCode
 }
 ";
 
-        private const string IfParamValue_ExpectedOutput = @"
-{
+        private const string IfParamValue_ExpectedOutput = @"{
     if (a == null)
     {
         throw new ArgumentNullException(""a"");
@@ -55,9 +53,7 @@ class TargetCode
         throw new ArgumentNullException(""b"");
     }
 
-    string result;
-    result = a.ToString() + b.ToString();
-    return result;
+    return a.ToString() + b.ToString();
 }
 ";
 

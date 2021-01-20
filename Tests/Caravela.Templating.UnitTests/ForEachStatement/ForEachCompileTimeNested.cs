@@ -10,18 +10,18 @@ namespace Caravela.Templating.UnitTests
         private const string ForEachCompileTimeNested_Template = @"
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 class Aspect
 {
   [Template]
   dynamic Template()
   {
-      int[] array = new int[] {1,2};
-      AdviceContext.BuildTime(array);
+      IEnumerable<int> array = compileTime(Enumerable.Range(1, 2));
       
       foreach (int n in array)
       {
-          foreach (var p in AdviceContext.Method.Parameters)
+          foreach (var p in target.Parameters)
           {
               if (p.Value <= n)
               {
@@ -30,7 +30,7 @@ class Aspect
           }
       }
 
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -45,8 +45,7 @@ class TargetCode
     }
 }";
 
-        private const string ForEachCompileTimeNested_ExpectedOutput = @"
-{
+        private const string ForEachCompileTimeNested_ExpectedOutput = @"{
     if (a <= 1)
     {
         Console.WriteLine(""Oops a <= 1"");
@@ -69,7 +68,7 @@ class TargetCode
 
     int result;
     result = a + b;
-    return result;
+    return (int)result;
 }
 ";
 

@@ -16,15 +16,15 @@ class Aspect
   [Template]
   dynamic Template()
   {
-      foreach ( var p in AdviceContext.Method.Parameters )
+      foreach ( var p in target.Parameters )
       {
           if (p.Name.Length == 1)
           {
-              Console.WriteLine($""{p.Name} = {p.Value}"");
+              Console.WriteLine(""{0} = {1}"", p.Name, p.Value);
           }
       }
 
-      foreach ( var p in AdviceContext.Method.Parameters )
+      foreach ( var p in target.Parameters )
       {
           if (p.Name.StartsWith(""b""))
           {
@@ -32,7 +32,7 @@ class Aspect
           }
       }
 
-      dynamic result = AdviceContext.Proceed();
+      dynamic result = proceed();
       return result;
   }
 }
@@ -47,13 +47,12 @@ class TargetCode
     }
 }";
 
-        private const string ForEachParamIfName_ExpectedOutput = @"
-{
-    Console.WriteLine($""a = {a}"");
+        private const string ForEachParamIfName_ExpectedOutput = @"{
+    Console.WriteLine(""{0} = {1}"", ""a"", a);
     Console.WriteLine(""{0} = {1}"", ""bb"", bb);
     string result;
     result = a.ToString() + bb.ToString();
-    return result;
+    return (string)result;
 }
 ";
 

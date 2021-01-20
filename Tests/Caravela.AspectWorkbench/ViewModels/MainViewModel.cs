@@ -62,7 +62,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             if ( testResult.AnnotatedSyntaxRoot != null )
             {
                 // Display the annotated syntax tree.
-                var document2 = testResult.InputDocument.WithSyntaxRoot( testResult.AnnotatedSyntaxRoot );
+                var document2 = testResult.TemplateDocument.WithSyntaxRoot( testResult.AnnotatedSyntaxRoot );
                 var text2 = await document2.GetTextAsync();
 
                 var marker = new CompileTimeTextSpanMarker( text2 );
