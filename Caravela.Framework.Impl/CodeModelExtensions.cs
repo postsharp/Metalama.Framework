@@ -9,5 +9,7 @@ namespace Caravela.Framework.Impl
         // TODO: should this be in the SDK?
         public static INamedTypeSymbol GetSymbol( this INamedType namedType ) => ((NamedType) namedType).TypeSymbol;
         public static ITypeSymbol GetSymbol( this IType type ) => ((ITypeInternal) type).TypeSymbol;
+
+        public static IMethodSymbol GetSymbol( this IMethod method ) => (IMethodSymbol) ((Method) method).Symbol;
     }
 }

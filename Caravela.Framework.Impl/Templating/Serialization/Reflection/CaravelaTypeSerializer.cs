@@ -18,13 +18,17 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             if ( symbol.TypeKind == TypeKind.Array )
             {
-                IArrayTypeSymbol arraySymbol = (symbol as IArrayTypeSymbol)!;
+                var arraySymbol = (IArrayTypeSymbol)symbol;
+                var makeArrayTypeArguments = arraySymbol.IsSZArray
+                    ? new ArgumentSyntax[0]
+                    : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
                 ExpressionSyntax innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             innerTypeCreation,
-                            IdentifierName( "MakeArrayType" ) ) )
+                            IdentifierName( "MakeArrayType" ) )
+                        ).AddArgumentListArguments( makeArrayTypeArguments )
                     .NormalizeWhitespace();
             }
 

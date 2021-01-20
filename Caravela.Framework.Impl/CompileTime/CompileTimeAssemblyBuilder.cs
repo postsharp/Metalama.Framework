@@ -53,6 +53,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly Random _random = new();
 
+        public CompileTimeAssemblyBuilder(
+            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
+            : this( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode ) { }
+
         public CompileTimeAssemblyBuilder( 
             ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
         {

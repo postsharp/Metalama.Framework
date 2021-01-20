@@ -36,7 +36,8 @@ namespace Caravela.Framework.Impl
             return from codeElement in codeElements
                    from attribute in codeElement.Attributes
                    where attribute.Type.Is( iAspect )
-                   select new AspectInstance( (IAspect) this._loader.CreateInstance( attribute.Type.GetSymbol() ), codeElement, attribute.Type );
+                   let aspect = (IAspect) this._loader.CreateAttributeInstance( attribute )
+                   select new AspectInstance( aspect, codeElement, attribute.Type );
         }
     }
 }

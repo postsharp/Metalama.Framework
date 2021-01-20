@@ -23,6 +23,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compilation = compilation;
             this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
 
+            // TODO: this is probably not enough
+            this._assemblyMap.Add( compilation.ObjectType.ContainingAssembly, typeof( object ).Assembly );
+
             AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
         }
 
@@ -38,7 +41,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return null;
 
             var reference = this._compilation.References.SingleOrDefault(
-                r => r is PortableExecutableReference { FilePath: string path } && Path.GetFileNameWithoutExtension( path ) == new AssemblyName(args.Name).Name );
+                r => r is PortableExecutableReference { FilePath: string path } && Path.GetFileNameWithoutExtension( path ) == new AssemblyName( args.Name ).Name );
             if ( reference == null )
                 return null;
 
@@ -48,21 +51,110 @@ namespace Caravela.Framework.Impl.CompileTime
             return this.LoadCompileTimeAssembly( symbol );
         }
 
-        public object CreateInstance ( INamedTypeSymbol typeSymbol )
+        public object CreateAttributeInstance ( Code.IAttribute attribute )
         {
-            var type = this.GetCompileTimeType( typeSymbol );
+            var constructorSymbol = attribute.Constructor.GetSymbol();
+            var constructor = this.GetCompileTimeConstructor( constructorSymbol );
 
-            if ( type == null )
-                throw new InvalidOperationException( $"Could not load type {typeSymbol}." );
+            if ( constructor == null )
+                throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
 
-            return Activator.CreateInstance( type );
+            var parameters = attribute.ConstructorArguments.Select(
+                ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) ).ToArray();
+            var result = constructor.Invoke( parameters );
+
+            var type = constructor.DeclaringType;
+
+            foreach (var (name, value) in attribute.NamedArguments)
+            {
+                var property = type.GetProperty( name );
+                property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
+            }
+
+            return result;
         }
 
-        public Type? GetCompileTimeType( INamedTypeSymbol typeSymbol )
+        private ConstructorInfo? GetCompileTimeConstructor( IMethodSymbol constructorSymbol )
         {
+            var type = this.GetCompileTimeType( constructorSymbol.ContainingType );
+            return type?.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
+        }
+
+        private Type? GetCompileTimeType( ITypeSymbol typeSymbol )
+        {
+            if (typeSymbol is IArrayTypeSymbol arrayType)
+            {
+                var elementType = this.GetCompileTimeType( arrayType.ElementType );
+
+                if ( arrayType.IsSZArray )
+                    return elementType?.MakeArrayType();
+
+                return elementType?.MakeArrayType( arrayType.Rank );
+            }
+
             var assemblySymbol = typeSymbol.ContainingAssembly;
             var assembly = this.LoadCompileTimeAssembly( assemblySymbol );
-            return assembly.GetType( GetFullMetadataName( typeSymbol ) );
+            var result = assembly.GetType( GetFullMetadataName( typeSymbol ) );
+
+            if ( typeSymbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedTypeSymbol )
+            {
+                var typeArguments = CollectTypeArguments( namedTypeSymbol );
+
+                result = result.MakeGenericType( typeArguments.Select( this.GetCompileTimeType ).ToArray() );
+            }
+
+            return result;
+        }
+
+        private object? TranslateAttributeArgument( object? roslynArgument, Type targetType )
+        {
+            switch ( roslynArgument )
+            {
+                case Code.IType type:
+                    if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
+                        throw new InvalidOperationException( $"System.Type can't be assigned to {targetType}" );
+
+                    var translatedType = this.GetCompileTimeType( type.GetSymbol() );
+                    if ( translatedType == null )
+                        throw new InvalidOperationException( $"Could not load type {type}." );
+                    return translatedType;
+                case IReadOnlyList<object?> list:
+                    if ( !targetType.IsArray )
+                        throw new InvalidOperationException( $"Array can't be assigned to {targetType}" );
+
+                    var array = Array.CreateInstance( targetType.GetElementType(), list.Count );
+
+                    for ( int i = 0; i < list.Count; i++ )
+                    {
+                        array.SetValue( this.TranslateAttributeArgument( list[i], targetType.GetElementType() ), i );
+                    }
+
+                    return array;
+                default:
+                    if (targetType.IsEnum)
+                    {
+                        return Enum.ToObject( targetType, roslynArgument );
+                    }
+
+                    if ( roslynArgument != null && !targetType.IsAssignableFrom( roslynArgument.GetType() ) )
+                        throw new InvalidOperationException( $"{roslynArgument.GetType()} can't be assigned to {targetType}" );
+
+                    return roslynArgument;
+            }
+        }
+
+        private bool ParametersMatch( ParameterInfo[] reflectionParameters, ImmutableArray<IParameterSymbol> roslynParameters )
+        {
+            if ( reflectionParameters.Length != roslynParameters.Length )
+                return false;
+
+            for ( int i = 0; i < reflectionParameters.Length; i++ )
+            {
+                if ( reflectionParameters[i].ParameterType != this.GetCompileTimeType( roslynParameters[i].Type ) )
+                    return false;
+            }
+
+            return true;
         }
 
         // https://stackoverflow.com/a/27106959/41071
@@ -73,28 +165,45 @@ namespace Caravela.Framework.Impl.CompileTime
                 return string.Empty;
             }
 
-            var sb = new StringBuilder( s.MetadataName );
-            var last = s;
+            var sb = new StringBuilder();
+            bool first = true;
 
-            s = s.ContainingSymbol;
-
-            while ( !IsRootNamespace( s ) )
+            do
             {
-                if ( s is ITypeSymbol && last is ITypeSymbol )
+                if ( !first )
                 {
-                    sb.Insert( 0, '+' );
+                    if ( s is ITypeSymbol )
+                    {
+                        sb.Insert( 0, '+' );
+                    }
+                    else if ( s is INamespaceSymbol )
+                    {
+                        sb.Insert( 0, '.' );
+                    }
                 }
-                else
-                {
-                    sb.Insert( 0, '.' );
-                }
+                first = false;
 
                 //sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
                 sb.Insert( 0, s.MetadataName );
+
                 s = s.ContainingSymbol;
-            }
+            } while ( !IsRootNamespace( s ) );
 
             return sb.ToString();
+        }
+
+        private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
+        {
+            var typeArguments = new List<ITypeSymbol>();
+
+            while ( s != null )
+            {
+                typeArguments.InsertRange( 0, s.TypeArguments );
+
+                s = s.ContainingSymbol as INamedTypeSymbol;
+            }
+
+            return typeArguments;
         }
 
         private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
@@ -150,7 +259,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     // note: this should only happen in Try Caravela
                     var compilation = compilationReference.Compilation;
-                    assemblyStream = AspectPipeline.CreateCompileTimeAssemblyBuilder( compilation ).EmitCompileTimeAssembly( compilation );
+                    assemblyStream = new CompileTimeAssemblyBuilder( compilation ).EmitCompileTimeAssembly( compilation );
                 }
                 else
                 {

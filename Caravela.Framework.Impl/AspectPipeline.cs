@@ -7,7 +7,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl
                 bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
-                var compileTimeAssemblyBuilder = CreateCompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
@@ -107,15 +106,11 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        public static CompileTimeAssemblyBuilder CreateCompileTimeAssemblyBuilder(
-            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false ) =>
-            new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode );
-
         private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            return compilation.DeclaredAndReferencedTypes.Where( t => t.HasDefaultConstructor && t.Is( iAspect ) );
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) );
         }
 
         private static object GetGroupingKey( IAspectDriver driver ) =>

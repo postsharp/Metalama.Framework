@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.Equal( 2, info.GetGenericArguments().Length );
             } );
         }
+
         [Fact]
         public void TestArrayType()
         {
@@ -49,7 +50,21 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.Equal( typeof(int[]), info );
             } );
         }
-       
+
+        [Fact]
+        public void TestMultidimensionalArrayType()
+        {
+            string code = "class Target { int[,] Property { get; set; } }";
+            string serialized = this.SerializeTypeOfProperty( code );
+            AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType(2)", serialized );
+
+            TestExpression<Type>( code, serialized, ( info ) =>
+            {
+                Assert.Equal( "System.Int32[,]", info.FullName );
+                Assert.Equal( typeof( int[,] ), info );
+            } );
+        }
+
         // Types other than named types and array types are not implemented.
 
         private string SerializeType( string code )

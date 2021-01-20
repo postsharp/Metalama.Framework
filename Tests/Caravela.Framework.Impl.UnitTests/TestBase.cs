@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -6,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
@@ -24,9 +24,15 @@ namespace Caravela.Framework.Impl.UnitTests
             var roslynCompilation = CSharpCompilation.Create( null! )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) )
-                .AddReferences( 
+                .AddReferences(
+                    new[] { "netstandard", "System.Runtime" }
+                        .Select( r => MetadataReference.CreateFromFile(
+                             Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) )
+                )
+                .AddReferences(
                     MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ) );
+                    MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
 
             if ( !ignoreErrors )
             {
