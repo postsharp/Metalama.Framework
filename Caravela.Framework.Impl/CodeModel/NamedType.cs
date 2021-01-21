@@ -6,7 +6,6 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -68,7 +67,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
 
         [Memo]
-        // TODO: add tests verifying that simple call to ToDisplayString gives the desired result in all cases
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]

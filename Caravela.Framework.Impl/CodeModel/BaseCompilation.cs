@@ -23,7 +23,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 
-        // TODO: add support for other kinds of types
         public IType? GetTypeByReflectionType( Type type )
         {
             if ( type.IsByRef )

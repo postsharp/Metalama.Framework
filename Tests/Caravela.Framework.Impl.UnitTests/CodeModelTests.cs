@@ -427,5 +427,29 @@ class C
 
             Assert.Throws<System.ArgumentException>( () => compilation.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
+
+        [Fact]
+        public void TypeName()
+        {
+            string code = @"
+using System.Collections.Generic;
+
+class C<T>
+{
+    int i;
+    List<T>.Enumerator e;
+    Dictionary<int, string> d;
+    (int i, int j) t;
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var fieldTypes = type.Properties.Select( p => (INamedType) p.Type ).GetValue();
+
+            Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
+            Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
+        }
     }
 }
