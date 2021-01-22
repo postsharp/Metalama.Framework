@@ -13,6 +13,7 @@
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
     <PackageTags>PostSharp Caravela AOP</PackageTags>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup>
