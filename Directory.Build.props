@@ -26,6 +26,12 @@
     <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <!-- XML doc config -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Disable XML doc warnings in the debug build -->
+    <NoWarn Condition="'$(Configuration)'=='Debug'">1591</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />

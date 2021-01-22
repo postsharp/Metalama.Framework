@@ -30,6 +30,7 @@
   <Target Name="SetPackageContent" DependsOnTargets="ResolveReferences">
     <ItemGroup>
       <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths)" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->'%(rootdir)%(directory)%(filename).xml')" Condition="%(ReferenceSourceTarget) == 'ProjectReference'" />
     </ItemGroup>
   </Target>
 
