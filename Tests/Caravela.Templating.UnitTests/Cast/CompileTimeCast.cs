@@ -15,19 +15,19 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        string text = compileTime("""");
         short c = (short) target.Parameters.Count;
         
         if (c > 0)
         {
+            string text = compileTime("""");
             object s = target.Parameters[0].Name;
             if (s is string)
             {
-                text = (s as string) + ""42"";
+                text = (s as string) + "" = "";
             }
+            
+            Console.WriteLine(text + target.Parameters[0].Value);
         }
-        
-        Console.WriteLine(text);
         
         return proceed();
     }
@@ -45,7 +45,7 @@ class TargetCode
 ";
 
         private const string CompileTimeCast_ExpectedOutput = @"{
-    Console.WriteLine(""a42"");
+    Console.WriteLine(""a = "" + a);
     return a;
 }";
 

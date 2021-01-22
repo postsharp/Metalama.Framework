@@ -295,18 +295,18 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         public override SyntaxNode? Visit(SyntaxNode? node)
         {
-            if (node == null)
+            if ( node == null )
             {
                 return null;
             }
-            
+
             // Adds annotations to the children node.
-            var transformedNode = base.Visit(node);
+            var transformedNode = base.Visit( node );
 
             if ( this._forceCompileTimeOnlyExpression )
             {
                 if ( transformedNode.GetScopeFromAnnotation() == SymbolDeclarationScope.RunTimeOnly ||
-                     this.IsDynamic(transformedNode) )
+                     this.IsDynamic( transformedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
@@ -319,28 +319,26 @@ namespace Caravela.Framework.Impl.Templating
                     return transformedNode;
                 }
 
-                return transformedNode.AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
+                return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
-            else if (transformedNode.HasScopeAnnotation())
+            else if ( transformedNode.HasScopeAnnotation() )
             {
                 // If the transformed node has already an annotation, it means it has already been classified by
                 // a previous run of the algorithm, and there is no need to classify it again.
                 return transformedNode;
             }
-            else if (node is ExpressionSyntax)
+            else if ( node is ExpressionSyntax )
             {
                 // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
-                
-                var childScopes = transformedNode.ChildNodes().Where(c => c is ExpressionSyntax);
-
-                return transformedNode.AddScopeAnnotation(this.GetCombinedScope(childScopes));
+                var childScopes = transformedNode.ChildNodes().Where( c => c is ExpressionSyntax );
+                return transformedNode.AddScopeAnnotation( this.GetCombinedScope( childScopes ) );
             }
             else
             {
                 return transformedNode;
             }
         }
-        
+
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             // Literals are always compile-time (not really compile-time only but it does not matter).
