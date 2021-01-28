@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected ExpressionSyntax Transform(BracketedArgumentListSyntax list)
+        protected ExpressionSyntax Transform(BracketedArgumentListSyntax? list)
         {
             if (list == null)
             {
@@ -292,7 +292,7 @@ namespace Caravela.Framework.Impl.Templating
                                         )))))));
         }
 
-        protected ExpressionSyntax Transform(SyntaxToken token)
+        protected virtual ExpressionSyntax Transform(SyntaxToken token)
         {
             if (token.Kind() == SyntaxKind.None)
             {

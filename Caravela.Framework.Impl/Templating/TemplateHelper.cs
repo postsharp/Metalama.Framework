@@ -44,5 +44,14 @@ namespace Caravela.Framework.Impl.Templating
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) =>
             TemplateExpansionContext.CreateReturnStatement( returnExpression );
+
+        public static IDisposable OpenTemplateLexicalScope() => TemplateExpansionContext.OpenLexicalScope();
+        
+        public static SyntaxToken TemplateIdentifier( string text ) => SyntaxFactory.Identifier( text );
+
+        public static IdentifierNameSyntax TemplateIdentifierName( string name ) => SyntaxFactory.IdentifierName( name );
+
+        public static VariableDeclaratorSyntax? TemplateVariableDeclarator( SyntaxToken identifier, BracketedArgumentListSyntax argumentList, EqualsValueClauseSyntax initializer ) =>
+            SyntaxFactory.VariableDeclarator( identifier, argumentList, initializer );
     }
 }

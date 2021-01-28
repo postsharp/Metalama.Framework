@@ -30,41 +30,37 @@ namespace Caravela.Framework.Impl.Templating
 
         #region Pretty print
 
-        protected override ExpressionSyntax TransformIdentifierName(IdentifierNameSyntax node)
+        protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
         {
-            if (node.Identifier.Text == "var")
+            if ( node.Identifier.Text == "var" )
             {
                 // The simplified form does not work.
-                return base.TransformIdentifierName(node);
+                return base.TransformIdentifierName( node );
             }
-            else if (node.Identifier.Text == "dynamic")
+            else if ( node.Identifier.Text == "dynamic" )
             {
                 // We change all dynamic into var in the template.
-                return base.TransformIdentifierName(IdentifierName(Identifier("var")));
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
 
-
             // The base implementation is very verbose, so we use this one:
-
-            return InvocationExpression(IdentifierName(nameof(IdentifierName)))
-                .AddArgumentListArguments(Argument(this.CreateLiteralExpression(node.Identifier.Text)))
-                .WithTemplateAnnotationsFrom(node);
+            return InvocationExpression( IdentifierName( nameof( IdentifierName ) ) )
+                .AddArgumentListArguments( Argument( this.CreateLiteralExpression( node.Identifier.Text ) ) )
+                .WithTemplateAnnotationsFrom( node );
         }
 
-
-        protected override ExpressionSyntax TransformArgument(ArgumentSyntax node)
+        protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
         {
             // The base implementation is very verbose, so we use this one:
-
-            if (node.RefKindKeyword.Kind() == SyntaxKind.None)
+            if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                return InvocationExpression(IdentifierName(nameof(Argument)))
-                    .AddArgumentListArguments(Argument(this.Transform(node.Expression)))
-                    .WithTemplateAnnotationsFrom(node);
+                return InvocationExpression( IdentifierName( nameof( Argument ) ) )
+                    .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) )
+                    .WithTemplateAnnotationsFrom( node );
             }
             else
             {
-                return base.TransformArgument(node);
+                return base.TransformArgument( node );
             }
         }
 
@@ -100,7 +96,6 @@ namespace Caravela.Framework.Impl.Templating
 
             return TransformationKind.Transform;
         }
-
 
         /// <summary>
         /// Determines if a symbol represents a call to <c>proceed()</c>.
@@ -395,7 +390,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-
         private IEnumerable<StatementSyntax> ToMetaStatements(in SyntaxList<StatementSyntax> statements)
             => statements.Select(this.ToMetaStatement);
 
@@ -475,6 +469,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        
         public override SyntaxNode VisitInterpolation(InterpolationSyntax node)
         {
             if (node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
@@ -560,6 +555,32 @@ namespace Caravela.Framework.Impl.Templating
             return ForEachStatement(node.Type, node.Identifier, node.Expression, statement);
         }
 
+
+        protected override ExpressionSyntax TransformVariableDeclarator( VariableDeclaratorSyntax node )
+        {
+            this.Indent();
+            var result = InvocationExpression( IdentifierName( nameof( TemplateVariableDeclarator ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
+            {
+                Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
+                Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+                Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
+                Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+                Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
+            } ) ) );
+            this.Unindent();
+            return result;
+        }
+
+        private ExpressionSyntax TransformTemplateIdentifier( SyntaxToken identifier )
+        {
+            if ( identifier.Kind() != SyntaxKind.IdentifierToken ) throw new AssertionFailedException();
+
+            return InvocationExpression(
+                    IdentifierName( nameof( TemplateIdentifier ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
+                    {
+                                Argument(this.CreateLiteralExpression(identifier.Text))
+                    } ) ) );
+        }
 
         public override SyntaxNode VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {

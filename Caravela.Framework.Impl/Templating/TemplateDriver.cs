@@ -73,6 +73,34 @@ namespace Caravela.Framework.Impl.Templating
                 //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
                 return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );
             }
+
+            public ITemplateLexicalScope OpenLexicalScope()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public SyntaxNode RewriteIdentifier( SyntaxNode identifierNode, ISymbol symbol )
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+        class TemplateLexicalScope : ITemplateLexicalScope
+        {
+            public void DefineLocalVariable( string name )
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public SyntaxNode RewriteLocalVariable( SyntaxNode identifierNode, ISymbol symbol )
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public void Dispose()
+            {
+                throw new System.NotImplementedException();
+            }
         }
     }
 }

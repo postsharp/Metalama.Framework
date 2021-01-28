@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class VariableAnalysisTests
+    public partial class LocalVariablesTests
     {
         private const string RunTimeDeclaratorInCompileTimeBlock_Template = @"  
 using System;
