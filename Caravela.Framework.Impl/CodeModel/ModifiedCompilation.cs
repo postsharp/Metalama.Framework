@@ -69,15 +69,17 @@ namespace Caravela.Framework.Impl.CodeModel
         sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
             private readonly List<OverriddenMethod> _overriddenMethods;
+            private readonly List<IntroducedMethod> _introducedMethods;
 
             public CompilationRewriter( IEnumerable<Transformation> transformations )
             {
                 transformations = transformations.ToList();
 
                 this._overriddenMethods = transformations.OfType<OverriddenMethod>().ToList();
+                this._introducedMethods = transformations.OfType<IntroducedMethod>().ToList();
 
                 // make sure all input transformations are accounted for
-                Debug.Assert( this._overriddenMethods.Count == transformations.Count() );
+                Debug.Assert( this._overriddenMethods.Count + this._introducedMethods.Count == transformations.Count() );
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
@@ -89,6 +91,14 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 var newMembers = new List<MemberDeclarationSyntax>( node.Members.Count );
 
+                foreach (var transformation in this._introducedMethods)
+                {
+                    if (transformation.TemplateMethod != null && transformation.ContainingElement!.GetSyntaxNode() == node)
+                    {
+                        newMembers.Add( (MemberDeclarationSyntax)transformation.Declaration );
+                    }
+                }
+
                 foreach ( var member in node.Members )
                 {
                     var newMember = member.WithAttributeLists( this.VisitList( member.AttributeLists ) );
@@ -96,18 +106,28 @@ namespace Caravela.Framework.Impl.CodeModel
                     switch ( newMember )
                     {
                         case BaseMethodDeclarationSyntax newMethod:
-                            OverriddenMethod? foundTransformation = null;
+                            OverriddenMethod? foundOverrideTransformation = null;
 
                             foreach ( var transformation in this._overriddenMethods )
                             {
                                 if ( transformation.OverriddenDeclaration.GetSyntaxNode() == member )
                                 {
-                                    foundTransformation = transformation;
+                                    foundOverrideTransformation = transformation;
                                     break;
                                 }
                             }
 
-                            if (foundTransformation != null)
+                            IntroducedMethod? foundIntroduceTransformation = null;
+                            foreach ( var transformation in this._introducedMethods )
+                            {
+                                if ( transformation.OverriddenMethod?.GetSyntaxNode() == member )
+                                {
+                                    foundIntroduceTransformation = transformation;
+                                    break;
+                                }
+                            }
+
+                            if ( foundOverrideTransformation != null )
                             {
                                 //// original method, but with _Original added to its name
                                 //members.Add(
@@ -115,7 +135,11 @@ namespace Caravela.Framework.Impl.CodeModel
                                 //        .WithTriviaFrom( newMethod.Identifier ) ) );
 
                                 // original method, but with its body replaced
-                                newMembers.Add( newMethod.WithBody( foundTransformation.MethodBody ) );
+                                newMembers.Add( newMethod.WithBody( foundOverrideTransformation.MethodBody ) );
+                            }
+                            else if ( foundIntroduceTransformation != null )
+                            {
+                                newMembers.Add( newMethod.WithBody( foundIntroduceTransformation.OverridenMethodBody ) );
                             }
                             else
                             {

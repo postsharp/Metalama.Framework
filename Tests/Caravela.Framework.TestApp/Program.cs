@@ -3,10 +3,13 @@ using System.Threading;
 
 namespace Caravela.Framework.TestApp
 {
+    [IntroduceSomeMethodAspect]
     class Program
     {
         static void Main()
         {
+            typeof( Program ).GetMethod( "SomeIntroducedMethod" )?.Invoke( null, null );
+
             PrintDebugInfo();
 
             PrintArray();

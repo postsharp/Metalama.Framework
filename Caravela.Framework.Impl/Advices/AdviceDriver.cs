@@ -10,7 +10,8 @@ namespace Caravela.Framework.Impl.Advices
         {
             Transformation transformation = adviceInstance.Advice switch
             {
-                OverrideMethodAdvice overrideMethod => new OverriddenMethod( overrideMethod.TargetDeclaration, overrideMethod.Transformation.MethodBody )
+                OverrideMethodAdvice overrideMethod => new OverriddenMethod( overrideMethod.TargetDeclaration, overrideMethod.Transformation.MethodBody ),
+                IntroduceMethodAdvice introducedMethod => new IntroducedMethod( introducedMethod.TargetDeclaration, introducedMethod.Transformation.OverriddenMethod, introducedMethod.Transformation.TemplateMethod, introducedMethod.Transformation.OverridenMethodBody )
             };
 
             return new( ImmutableArray.Create<Diagnostic>(), ImmutableArray.Create( transformation ) );

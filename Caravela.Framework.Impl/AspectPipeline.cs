@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl
                 bool.TryParse( flagString, out bool flagValue ) &&
                 flagValue;
 
-            if ( getFlag("DebugCaravela") )
+            if ( true)//getFlag("DebugCaravela") )
             {
                 Debugger.Launch();
             }
