@@ -13,8 +13,8 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         IEnumerable<int> array = Enumerable.Range(1, 2);
         foreach (var i in array)

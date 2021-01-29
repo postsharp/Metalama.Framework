@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     async Task<T> Template<T>()
     {
         await Task.Yield();

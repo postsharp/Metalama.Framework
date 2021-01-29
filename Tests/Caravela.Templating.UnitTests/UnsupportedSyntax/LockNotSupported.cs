@@ -17,8 +17,8 @@ class Aspect
 {
     private static readonly object o = new object();
     
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         dynamic result;
         lock (o)

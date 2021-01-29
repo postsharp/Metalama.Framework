@@ -12,8 +12,8 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         var n = target.Parameters.Count; // build-time
         //var n = runTime(target.Method.Parameters.Count); // run-time

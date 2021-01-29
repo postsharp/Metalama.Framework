@@ -13,8 +13,8 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
-    IEnumerable<int> OverrideMethod()
+    [TestTemplate]
+    IEnumerable<int> Template()
     {
         yield return 1;
         

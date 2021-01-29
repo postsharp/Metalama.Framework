@@ -13,8 +13,8 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         string text = """";
         short c = (short) target.Parameters.Count;

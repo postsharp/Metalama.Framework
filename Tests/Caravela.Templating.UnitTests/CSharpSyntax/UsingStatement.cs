@@ -14,8 +14,8 @@ using System.IO;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         using(new MemoryStream())
         {

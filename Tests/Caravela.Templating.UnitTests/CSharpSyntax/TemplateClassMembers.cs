@@ -21,8 +21,8 @@ class Aspect : BaseAspect
     {
     }
     
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         dynamic result = proceed();
         

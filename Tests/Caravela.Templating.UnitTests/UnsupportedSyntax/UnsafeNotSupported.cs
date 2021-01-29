@@ -15,8 +15,8 @@ using System.Linq;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         int i = target.Parameters.Count;
         unsafe

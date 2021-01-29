@@ -14,8 +14,8 @@ using System.Linq;
 
 class Aspect
 {
-  [Template]
-  dynamic OverrideMethod()
+  [TestTemplate]
+  dynamic Template()
   {
       IEnumerable<int> array = compileTime(Enumerable.Range(1, 2));
       

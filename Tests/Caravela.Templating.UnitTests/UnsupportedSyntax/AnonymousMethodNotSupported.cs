@@ -15,8 +15,8 @@ using System.Linq;
 
 class Aspect
 {
-    [Template]
-    dynamic OverrideMethod()
+    [TestTemplate]
+    dynamic Template()
     {
         Action<object> action =
         delegate (object p)
