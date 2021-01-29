@@ -10,12 +10,6 @@ namespace Caravela.Framework.Aspects
         //IEnumerable<IAdviceParameter> this[Type type] { get; }
     }
 
-    public interface IExposeRuntimeValue
-    {
-        // Gets read and write access to the parameter value.
-        dynamic Value { get; set; }
-    }
-
     public interface IAdviceParameter : IParameter, IExposeRuntimeValue
     {
     }
