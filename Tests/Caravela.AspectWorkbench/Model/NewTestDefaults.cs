@@ -11,8 +11,7 @@ class Aspect
     [Template]
     dynamic Template()
     {
-        dynamic result = AdviceContext.Proceed();
-        return result;
+        return proceed();
     }
 }
 ";
