@@ -71,16 +71,12 @@ namespace Caravela.TestFramework.Templating
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { transformedSyntaxRoot.SyntaxTree, targetSyntaxTree },
+                new[] { transformedSyntaxRoot.SyntaxTree.WithFilePath( string.Empty ), targetSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions );
 
             var buildTimeAssemblyStream = new MemoryStream();
-
-            // Temporarily disabled because it produces an error. It seems the error is only when the template compiler
-            // Does not do anything, in which case we have a weird error that hides the initial issue.
-            Stream buildTimeDebugStream = null; // new MemoryStream();
-
+            var buildTimeDebugStream = new MemoryStream();
 
             var emitResult = finalCompilation.Emit(
                 buildTimeAssemblyStream, buildTimeDebugStream,
