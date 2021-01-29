@@ -77,8 +77,11 @@ namespace Caravela.TestFramework.Templating
 
             var buildTimeAssemblyStream = new MemoryStream();
 
-            // Temporarily disabled because it produces an error.
+            // Temporarily disabled because it produces an error. It seems the error is only when the template compiler
+            // Does not do anything, in which case we have a weird error that hides the initial issue.
             Stream buildTimeDebugStream = null; // new MemoryStream();
+
+
             var emitResult = finalCompilation.Emit(
                 buildTimeAssemblyStream, buildTimeDebugStream,
                 options: new EmitOptions(
