@@ -13,6 +13,8 @@ namespace Caravela.Framework.Code
 
         bool IsOut { get; }
 
+        bool IsParams { get; }
+
         IType Type { get; }
 
         /// <remarks><see langword="null"/> for <see cref="IMethod.ReturnParameter"/></remarks>

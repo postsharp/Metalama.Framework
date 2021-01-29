@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
 
     public interface IExposeRuntimeValue
     {
-        // Gets read and write access to the parameter value.
+        // Gets read and write access to the value of a parameter, property or field.
         dynamic Value { get; set; }
     }
 

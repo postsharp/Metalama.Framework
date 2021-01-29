@@ -2,11 +2,14 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -93,6 +96,21 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public INamedType? DeclaringType => this._symbol.ContainingType == null ? null : this.SymbolMap.GetNamedType( this._symbol.ContainingType );
 
+        public dynamic Invoke( params object[] args ) => new MethodInvocation( this ).Invoke( args );
+
+        public bool HasBase => true;
+
+        public IMethodInvocation Base => new MethodInvocation( this ).Base;
+
+        public IMethod WithGenericArguments( params IType[] genericArguments )
+        {
+            var symbolWithGenericArguments = this._symbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() );
+
+            return new Method( symbolWithGenericArguments, this.Compilation );
+        }
+
+        public IMethodInvocation WithInstance( object instance ) => new MethodInvocation( this, (ExpressionSyntax) instance );
+
         public override string ToString() => this._symbol.ToString();
 
         internal sealed class MethodReturnParameter : ReturnParameter
@@ -110,6 +128,38 @@ namespace Caravela.Framework.Impl.CodeModel
             [Memo]
             public override IReactiveCollection<IAttribute> Attributes =>
                 this.Method._symbol.GetReturnTypeAttributes().Select( a => new Attribute( a, this.Method.SymbolMap ) ).ToImmutableReactive();
+        }
+
+        private struct MethodInvocation : IMethodInvocation
+        {
+            private readonly Method _method;
+            private readonly ExpressionSyntax? _instance;
+
+            public MethodInvocation( Method method, ExpressionSyntax? instance = null )
+            {
+                this._method = method;
+                this._instance = instance;
+            }
+
+            public bool HasBase => true;
+
+            public IMethodInvocation Base => throw new NotImplementedException();
+
+            public dynamic Invoke( params object[] args )
+            {
+                CheckArguments( this._method, this._method.Parameters, args );
+
+                ExpressionSyntax receiver;
+
+                if ( this._method.IsStatic )
+                    receiver = ParseTypeName( this._method.DeclaringType!.FullName );
+                else
+                    receiver = this._instance ?? ThisExpression();
+
+                return new DynamicMetaMember(
+                    InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, IdentifierName( this._method.Name ) ) )
+                        .AddArgumentListArguments( args.Select( arg => Argument( (ExpressionSyntax) arg ) ).ToArray() ) );
+            }
         }
     }
 }

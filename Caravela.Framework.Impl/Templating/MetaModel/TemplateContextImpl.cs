@@ -79,6 +79,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsOut => this._parameter.IsOut;
 
+        public bool IsParams => this._parameter.IsParams;
+
         public IType Type => this._parameter.Type;
 
         public string? Name => this._parameter.Name;

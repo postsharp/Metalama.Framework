@@ -1,8 +1,10 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -55,5 +57,19 @@ namespace Caravela.Framework.Impl.CodeModel
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
         public override CodeElementKind Kind => CodeElementKind.Field;
+
+        public dynamic Value
+        {
+            get => new Property.PropertyInvocation( this ).Value;
+            set => throw new InvalidOperationException();
+        }
+
+        public bool HasBase => true;
+
+        public IPropertyInvocation Base => new Property.PropertyInvocation( this ).Base;
+
+        public IPropertyInvocation WithIndex( params object[] args ) => new Property.PropertyInvocation( this, args: args );
+
+        public IPropertyInvocation WithInstance( object instance ) => new Property.PropertyInvocation( this, (ExpressionSyntax) instance );
     }
 }

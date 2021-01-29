@@ -37,6 +37,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOut => this.RefKind == RefKind.Out;
 
+        public bool IsParams => this._symbol.IsParams;
+
         [Memo]
         public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
 

@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPointerType MakePointerType() =>
             (IPointerType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this.TypeSymbol ) );
 
-        public INamedType MakeGenericType( params IType[] genericArguments ) =>
+        public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.SymbolMap.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
         public override string ToString() => this.TypeSymbol.ToString();

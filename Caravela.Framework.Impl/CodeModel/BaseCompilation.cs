@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 if ( genericArguments.Any( a => a == null ) )
                     return null;
 
-                return genericDefinition?.MakeGenericType( genericArguments! );
+                return genericDefinition?.WithGenericArguments( genericArguments! );
             }
 
             return this.GetTypeByReflectionName( type.FullName );

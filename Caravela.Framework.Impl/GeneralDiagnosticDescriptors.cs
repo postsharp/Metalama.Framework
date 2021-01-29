@@ -31,7 +31,11 @@ namespace Caravela.Framework.Impl
             new( "CR0010", "Custom equality comparers not supported.", "Build-time dictionary has an equality comparer {0} which is not supported. Only the default comparer and predefined string comparers are supported.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor TypeNotSerializable =
             new( "CR0011", "Type not serializable.", "Build-time Type value {0} is of a form that is not supported for serialization.", caravelaCategory, Error, true );
-        
+        public static DiagnosticDescriptor MethodRequiresNArguments =
+            new( "CR0012", "Method requires number of arguments.", "Method {0} requires {1} arguments.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor MethodRequiresAtLeastNArguments =
+            new( "CR0012", "Method requires more arguments.", "Method {0} requires at least {1} arguments.", caravelaCategory, Error, true );
+
         public static DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0099", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", caravelaCategory, Error, true );
     }
