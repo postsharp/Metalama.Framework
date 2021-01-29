@@ -13,7 +13,7 @@ using Caravela.Framework.Project;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         string s = compileTime(typeof(string).FullName);
