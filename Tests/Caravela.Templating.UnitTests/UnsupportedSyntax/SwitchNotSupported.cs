@@ -16,7 +16,7 @@ using System.Linq;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         dynamic result;
         switch( target.Parameters.Count )

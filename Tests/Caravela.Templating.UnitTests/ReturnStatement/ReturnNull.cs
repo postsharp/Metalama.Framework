@@ -14,7 +14,7 @@ using System.Collections.Generic;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         var a = target.Parameters[0];
         var b = target.Parameters[1];

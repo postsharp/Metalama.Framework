@@ -15,7 +15,7 @@ using System.Linq;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         for (int i = 0; i < target.Parameters.Count; i++)
         {

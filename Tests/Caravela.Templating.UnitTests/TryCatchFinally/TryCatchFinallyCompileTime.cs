@@ -14,7 +14,7 @@ using System.Collections.Generic;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         int n = 1;
         try

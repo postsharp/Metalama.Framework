@@ -14,7 +14,7 @@ using System.Collections.Generic;
 class Aspect
 {
   [Template]
-  dynamic Template()
+  dynamic OverrideMethod()
   {
       var p = target.Parameters[0];
       if (target.Method.Name == ""NotNullMethod"")

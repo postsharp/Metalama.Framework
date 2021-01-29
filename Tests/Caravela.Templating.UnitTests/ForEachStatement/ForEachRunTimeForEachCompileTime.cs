@@ -15,7 +15,7 @@ using System.Linq;
 class Aspect
 {
   [Template]
-  dynamic Template()
+  dynamic OverrideMethod()
   {
       IEnumerable<int> array = Enumerable.Range(1, 2);
       

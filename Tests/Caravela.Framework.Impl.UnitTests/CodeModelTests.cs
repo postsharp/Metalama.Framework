@@ -319,7 +319,7 @@ class C : IDisposable
             var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
 
             var methodKinds = new[] {
-                Ordinary,
+                Default,
                 Constructor, StaticConstructor, Finalizer,
                 PropertyGet, PropertySet,
                 EventAdd, EventRemove,

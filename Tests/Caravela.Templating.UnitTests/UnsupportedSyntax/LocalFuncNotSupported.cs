@@ -16,7 +16,7 @@ using System.Linq;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         void LocalFunc(dynamic p)
         {

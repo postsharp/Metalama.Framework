@@ -14,7 +14,7 @@ using System.Collections.Generic;
 class Aspect
 {
     [Template]
-    IEnumerable<int> Template()
+    IEnumerable<int> OverrideMethod()
     {
         yield return 1;
         

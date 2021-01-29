@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
         
         MethodKind IMethod.Kind => this._symbol.MethodKind switch
         {
-            RoslynMethodKind.Ordinary => MethodKind.Ordinary,
+            RoslynMethodKind.Ordinary => MethodKind.Default,
             RoslynMethodKind.Constructor => MethodKind.Constructor,
             RoslynMethodKind.StaticConstructor => MethodKind.StaticConstructor,
             RoslynMethodKind.Destructor => MethodKind.Finalizer,

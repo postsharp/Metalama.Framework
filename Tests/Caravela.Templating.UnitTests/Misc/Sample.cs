@@ -15,7 +15,7 @@ using System.Linq;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         var parameters = new object[target.Parameters.Count];
         var stringBuilder = compileTime(new StringBuilder());

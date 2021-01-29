@@ -13,7 +13,7 @@ using System.Collections.Generic;
 class Aspect
 {
     [Template]
-    dynamic Template()
+    dynamic OverrideMethod()
     {
         object x = target.Parameters[0].Value;
         return x;

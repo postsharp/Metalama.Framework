@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public INamedType DelegateType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
+        public INamedType EventType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
 
         [Memo]
         public IMethod Adder => this.SymbolMap.GetMethod( this._symbol.AddMethod! );
