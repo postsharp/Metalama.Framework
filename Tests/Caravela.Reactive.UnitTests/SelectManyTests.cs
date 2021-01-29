@@ -67,7 +67,7 @@ namespace Caravela.Reactive.UnitTests
 
             compilation.Types.Add( new( "C", null ) );
 
-            var codeElements = compilation.Types.SelectManyRecursive( type => type.NestedTypes.Where( m => true ) );
+            var codeElements = compilation.Types.SelectDescendants( type => type.NestedTypes.Where( m => true ) );
 
             Assert.Single( codeElements.GetValue() );
         }
@@ -78,7 +78,7 @@ namespace Caravela.Reactive.UnitTests
         {
             var types = new[] { new SourceType( "C", null ) }.ToImmutableReactive();
 
-            var codeElements = types.SelectManyRecursive( type => type.NestedTypes.Where( m => true ) );
+            var codeElements = types.SelectDescendants( type => type.NestedTypes.Where( m => true ) );
 
             Assert.Single( codeElements.GetValue() );
         }

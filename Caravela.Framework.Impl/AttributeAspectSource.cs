@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl
 
             var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
 
-            var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectManyRecursive( codeElement => codeElement switch
+            var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectDescendants( codeElement => codeElement switch
             {
                 ICompilation compilation => compilation.DeclaredTypes,
                 INamedType namedType => namedType.NestedTypes.Union<ICodeElement>( namedType.Methods ).Union( namedType.Properties ).Union( namedType.Events ),

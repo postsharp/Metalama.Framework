@@ -87,7 +87,7 @@ namespace Caravela.Reactive.Operators
 
         void IReactiveCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
         {
-            if (source.Source != this._source && source.Source != this)
+            if (source.Source != this._source )
             {
                 this._dependencies.Add(source, version);
             }

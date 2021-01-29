@@ -6,6 +6,9 @@
     /// </summary>
     public interface IHasReactiveSideValues
     {
+        /// <summary>
+        /// Gets the side values produced by the operator.
+        /// </summary>
         ReactiveSideValues SideValues { get; }
     }
 }

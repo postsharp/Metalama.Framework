@@ -9,20 +9,20 @@ using System.Collections.Immutable;
 
 namespace Caravela.Reactive.Operators
 {
-    internal class SelectManyRecursiveOperator<T> : ReactiveCollectionOperator<T, T>
+    internal class SelectDescendantsOperator<T> : ReactiveCollectionOperator<T, T>
         where T : class
     {
-        private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getRecursionValueFunc;
+        private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getChildrenFunc;
         private ImmutableDictionary<T, int>? _dictionary = null;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
             _subscriptions =
                 ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>.Empty;
 
-        public SelectManyRecursiveOperator(IReactiveCollection<T> source,
-            Func<T, IReactiveCollection<T>> getRecursionValueFunc) : base(source)
+        public SelectDescendantsOperator(IReactiveCollection<T> source,
+            Func<T, IReactiveCollection<T>> getChildrenFunc) : base(source)
         {
-            this._getRecursionValueFunc = ReactiveCollectorToken.WrapWithDefaultToken(getRecursionValueFunc);
+            this._getChildrenFunc = ReactiveCollectorToken.WrapWithDefaultToken(getChildrenFunc);
         }
 
         public override bool IsMaterialized => true;
@@ -36,7 +36,7 @@ namespace Caravela.Reactive.Operators
                 builder.TryGetValue(item, out int count );
                 builder[item] = count + 1;
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
 
                 if (this.Follow(recursiveSource))
                 {
@@ -104,7 +104,7 @@ namespace Caravela.Reactive.Operators
 
                 newResult = newResult.SetItem(item, count + 1);
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
 
                 if (this.Follow(recursiveSource))
                 {
@@ -142,7 +142,7 @@ namespace Caravela.Reactive.Operators
                     newResult = newResult.SetItem(item, count - 1);
                 }
 
-                var recursiveSource = this._getRecursionValueFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
 
                 if (this.Unfollow(recursiveSource))
                 {

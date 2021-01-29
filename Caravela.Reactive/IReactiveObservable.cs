@@ -13,7 +13,9 @@ namespace Caravela.Reactive
         /// </summary>
         int Version { get; }
 
-        // This is the original object, which may be different to the helper object that implements the interface.
+        /// <summary>
+        /// Gets the original object, which may be different to the helper object that implements the interface. 
+        /// </summary>
         IReactiveSource Source { get; }
         
         /// <summary>
