@@ -14,7 +14,7 @@ using System.IO;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         using(new MemoryStream())

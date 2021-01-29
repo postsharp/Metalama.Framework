@@ -52,7 +52,7 @@ namespace Caravela.TestFramework.Templating
 
         private bool IsTemplate( ISymbol symbol )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass.Name == nameof( TemplateAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass.Name == nameof( TestTemplateAttribute ) );
         }
 
         class Visitor : CSharpSyntaxWalker

@@ -17,7 +17,7 @@ class Aspect
 {
     private static readonly object o = new object();
     
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         dynamic result;

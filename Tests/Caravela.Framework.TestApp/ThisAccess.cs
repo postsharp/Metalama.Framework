@@ -35,7 +35,7 @@ namespace Caravela.Framework.TestApp
 
     class ThisAccessAspect : OverrideMethodAspect
     {
-        public override dynamic Template()
+        public override dynamic OverrideMethod()
         {
             string result = proceed();
 

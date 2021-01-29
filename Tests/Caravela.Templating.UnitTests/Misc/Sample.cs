@@ -14,7 +14,7 @@ using System.Linq;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         var parameters = new object[target.Parameters.Count];

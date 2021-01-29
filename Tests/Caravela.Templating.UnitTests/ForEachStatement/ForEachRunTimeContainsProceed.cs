@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         IEnumerable<int> array = Enumerable.Range(1, 2);

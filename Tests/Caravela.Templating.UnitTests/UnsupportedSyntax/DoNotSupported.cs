@@ -15,7 +15,7 @@ using System.Linq;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         int i = 0;
