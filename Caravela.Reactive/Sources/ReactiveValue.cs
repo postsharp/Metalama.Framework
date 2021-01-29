@@ -9,6 +9,12 @@ using System.Threading;
 
 namespace Caravela.Reactive.Sources
 {
+    /// <summary>
+    /// An implementation of <see cref="IReactiveSource{T}"/> that has a single value exposed on a writable
+    /// <see cref="Value"/> property. Modifying the value will raise the appropriate events to the
+    /// observers.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public sealed class ReactiveValue<T> : IReactiveSource<T, IReactiveObserver<T>>, IReactiveObservable<IReactiveObserver<T>>
     {
         private int _version;
@@ -16,6 +22,11 @@ namespace Caravela.Reactive.Sources
         private IReactiveVersionedValue<T> _value;
         private ObserverList<IReactiveObserver<T>> _observers;
 
+        /// <summary>
+        /// Initializes a new <see cref="ReactiveValue{T}"/> and sets the initial value.
+        /// </summary>
+        /// <param name="value">The initial value.</param>
+        /// <param name="comparer">A value comparer, to determine when the value has changed.</param>
         public ReactiveValue( T value, IEqualityComparer<T>? comparer = null )
         {
             this._value = new ReactiveVersionedValue<T>( value, 0 );
@@ -23,6 +34,10 @@ namespace Caravela.Reactive.Sources
             this._observers = new ObserverList<IReactiveObserver<T>>( this );
         }
 
+        /// <summary>
+        /// Get or sets the value encapsulated by the current object. Setting the value to a different value
+        /// will raise the appropriate event to all registered observers.
+        /// </summary>
         public T Value
         {
             get => this._value.Value;
