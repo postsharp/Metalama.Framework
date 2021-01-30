@@ -14,36 +14,42 @@ namespace Caravela.AspectWorkbench.CodeEditor
     {
         public static CustomRoslynHost Create()
         {
-            var host = new CustomRoslynHost(
-                additionalAssemblies: new[]
+            var host = new CustomRoslynHost( 
+                disabledDiagnostics: ImmutableArray.Create( 
+                    "IDE0051" // Private member is unused.
+                              )
+                , additionalAssemblies: new[]
                 {
                     Assembly.Load( "RoslynPad.Roslyn.Windows" ),
                     Assembly.Load( "RoslynPad.Editor.Windows" ),
                 },
                 references: RoslynHostReferences.Empty
-                .With(
-                    assemblyReferences: new[]
-                    {
-                        typeof(object).Assembly, typeof(DateTime).Assembly, typeof(Enumerable).Assembly,
-                        typeof(Console).Assembly,
-                        typeof(System.Runtime.CompilerServices.DynamicAttribute).Assembly,
-                        typeof(SyntaxFactory).Assembly,
-                        typeof(Framework.Aspects.TemplateContext).Assembly,
-                        typeof(Framework.Impl.Templating.TemplateHelper).Assembly
-                    },
-                    imports: new[]
-                    {
-                        "Caravela.Framework.Aspects",
-                        "Caravela.Framework.Aspects.TemplateContext"
-                    }
-                )
+                    .With(
+                        assemblyReferences: new[]
+                        {
+                            typeof(object).Assembly, typeof(DateTime).Assembly, typeof(Enumerable).Assembly,
+                            typeof(Console).Assembly,
+                            typeof(System.Runtime.CompilerServices.DynamicAttribute).Assembly,
+                            typeof(SyntaxFactory).Assembly,
+                            typeof(Framework.Aspects.TemplateContext).Assembly,
+                            typeof(Framework.Impl.Templating.TemplateHelper).Assembly
+                        },
+                        imports: new[]
+                        {
+                            "Caravela.Framework.Aspects",
+                            "Caravela.Framework.Aspects.TemplateContext"
+                        }
+                    )
+                
             );
 
             return host;
         }
 
-        public CustomRoslynHost( IEnumerable<Assembly> additionalAssemblies = null, RoslynHostReferences references = null ) : base( additionalAssemblies, references )
+        public CustomRoslynHost( ImmutableArray<string>? disabledDiagnostics = default,
+            IEnumerable<Assembly> additionalAssemblies = null, RoslynHostReferences references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
         {
+            
         }
 
         protected override Project CreateProject( Solution solution, DocumentCreationArgs args, CompilationOptions compilationOptions, Project previousProject = null )
