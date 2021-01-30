@@ -1,5 +1,4 @@
 using Caravela.Reactive;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
@@ -7,14 +6,23 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a class, struct, enum, or delegate.
     /// </summary>
+    /// <remarks>
+    /// <para>This code model represents both generic type definitions and generic type instances
+    /// with the <see cref="INamedType"/>. Generic types have a non-empty collection of <see cref="GenericParameters"/>.
+    /// Generic type definitions have an empty <see cref="GenericArguments"/> collection, while
+    /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
+    /// </para>
+    /// </remarks>
     public interface INamedType : IType, ICodeElement
     {
+        // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
+        // and be augmented by the names of tuple members.
+        
         // TODO: the default constructor should be represented as a pseudo-method.
         bool HasDefaultConstructor { get; }
 
         /// <summary>
-        /// Gets the type from which the current type derives. If the base type is a generic type,
-        /// the generic arguments are given by <see cref="GenericArguments"/>.
+        /// Gets the type from which the current type derives.
         /// </summary>
         INamedType? BaseType { get; }
 
@@ -39,12 +47,15 @@ namespace Caravela.Framework.Code
         string FullName { get; }
 
         /// <summary>
-        /// Gets the generic type arguments of the current type with respect to the base type.
+        /// Gets the generic type arguments of the current type, which are the type values
+        /// applied to the <see cref="GenericParameters"/> of the current type. Returns
+        /// an empty collection if the type an open generic type definition or if the type is non-generic.
         /// </summary>
         IImmutableList<IType> GenericArguments { get; }
 
         /// <summary>
-        /// Gets the generic parameters of the type.
+        /// Gets the generic parameters of the type, or an empty collection if the
+        /// type is not generic.
         /// </summary>
         IImmutableList<IGenericParameter> GenericParameters { get; }
 

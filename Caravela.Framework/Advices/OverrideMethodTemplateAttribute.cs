@@ -7,7 +7,7 @@ namespace Caravela.Framework.Advices
     /// Custom attributes that marks the target method as a template for <see cref="IOverrideMethodAdvice"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
-    public class OverrideMethodTemplateAttribute : TemplateAttribute
+    public sealed class OverrideMethodTemplateAttribute : TemplateAttribute, IAdviceAttribute
     {
         
     }

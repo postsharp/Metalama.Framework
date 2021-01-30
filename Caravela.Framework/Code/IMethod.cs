@@ -22,6 +22,9 @@ namespace Caravela.Framework.Code
         /// </summary>
         IImmutableList<IMethod> LocalFunctions { get; }
         
+        
+        // TODO: Consider exposing several return parameters in case we have named tuples. We don't have a good way to represent tuples.
+        
         /// <summary>
         /// Gets the list of parameters of the current method.
         /// </summary>
