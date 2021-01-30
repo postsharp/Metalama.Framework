@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -5,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -350,7 +352,15 @@ namespace Caravela.Framework.Impl.Templating
             var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName(node)!;
             var symbol = this._semanticAnnotationMap.GetSymbol(node)!;
             
-            return identifierNameSyntax.AddScopeAnnotation( this.GetSymbolScope(symbol, node));
+            var annotatedNode = identifierNameSyntax.AddScopeAnnotation( this.GetSymbolScope(symbol, node));
+            
+            if ( (symbol is ILocalSymbol localSymbol && this._localScopes.TryGetValue( localSymbol, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly ) ||
+                symbol.GetAttributes().Any(a=>a.AttributeClass.AnyBaseType(t => t.Name == nameof(TemplateKeywordAttribute) )))
+            {
+                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Keyword );
+            }
+
+            return annotatedNode;
         }
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
@@ -545,7 +555,7 @@ namespace Caravela.Framework.Impl.Templating
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type,
-                        node.Identifier,
+                        node.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ),
                         node.InKeyword,
                         annotatedExpression,
                         node.CloseParenToken,
@@ -612,11 +622,11 @@ namespace Caravela.Framework.Impl.Templating
                     else
                     {
                         // Inference the variable scope from the initializer.
-                        var transformedInitiazerValue = this.Visit( node.Initializer.Value );
-                        if ( transformedInitiazerValue != null )
+                        var transformedInitializerValue = this.Visit( node.Initializer.Value );
+                        if ( transformedInitializerValue != null )
                         {
-                            initializerScope = this.GetNodeScope( transformedInitiazerValue );
-                            transformedNode = transformedNode.WithInitializer( node.Initializer.WithValue( (ExpressionSyntax) transformedInitiazerValue ) );
+                            initializerScope = this.GetNodeScope( transformedInitializerValue );
+                            transformedNode = transformedNode.WithInitializer( node.Initializer.WithValue( (ExpressionSyntax) transformedInitializerValue ) );
                         }
                         else
                         {
@@ -660,6 +670,12 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     throw new AssertionFailedException();
                 }
+            }
+            else
+            {
+                transformedNode =
+                    transformedNode.WithIdentifier(
+                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

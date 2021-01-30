@@ -47,6 +47,9 @@ namespace Caravela.Framework.Impl.Templating
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
 
+            
+            // TODO: the algorihm should now work with a single iteration. However, just removing the code breaks it.
+            
             var changeIdBefore = -1;
 
             int iterations = 0;

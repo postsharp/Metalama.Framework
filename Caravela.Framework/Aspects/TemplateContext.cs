@@ -25,6 +25,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
 #pragma warning disable IDE1006 // Naming Styles
         [field: ThreadStatic] [AllowNull]
+        [TemplateKeyword]
         public static ITemplateContext target { get; internal set; }
 
         /// <summary>
@@ -45,6 +46,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="expression">An expression.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
+        [TemplateKeyword]
         public static T compileTime<T>( T expression ) => expression;
 
 #pragma warning restore IDE1006 // Naming Styles
