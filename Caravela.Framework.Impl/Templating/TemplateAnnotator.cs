@@ -351,13 +351,19 @@ namespace Caravela.Framework.Impl.Templating
         {
             var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName(node)!;
             var symbol = this._semanticAnnotationMap.GetSymbol(node)!;
-            
-            var annotatedNode = identifierNameSyntax.AddScopeAnnotation( this.GetSymbolScope(symbol, node));
+
+            var scope = this.GetSymbolScope(symbol, node);
+            var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope);
             
             if ( (symbol is ILocalSymbol localSymbol && this._localScopes.TryGetValue( localSymbol, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly ) ||
                 symbol.GetAttributes().Any(a=>a.AttributeClass.AnyBaseType(t => t.Name == nameof(TemplateKeywordAttribute) )))
             {
                 annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Keyword );
+            }
+            else if ( scope == SymbolDeclarationScope.RunTimeOnly && (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) )
+            {
+                // Annotate dynamic members differently for syntax coloring.
+                annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Dynamic );
             }
 
             return annotatedNode;
@@ -720,6 +726,13 @@ namespace Caravela.Framework.Impl.Templating
             var transformedNode = (LocalDeclarationStatementSyntax) base.VisitLocalDeclarationStatement(node)!;
             
             return transformedNode.AddScopeAnnotation(this.GetNodeScope(transformedNode.Declaration));
+        }
+
+        
+        public override SyntaxNode? VisitAttribute( AttributeSyntax node )
+        {
+            // Don't process attributes.
+            return node;
         }
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
