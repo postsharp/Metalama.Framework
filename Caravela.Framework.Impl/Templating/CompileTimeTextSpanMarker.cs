@@ -91,6 +91,10 @@ namespace Caravela.Framework.Impl.Templating
 
         public IMarkedTextSpanSet GetMarkedSpans() => this._textSpans;
 
+        public override void VisitLiteralExpression( LiteralExpressionSyntax node )
+        {
+            // We don't mark literals that are not a part of larger compile-time expressions because it does not bring anything useful.
+        }
 
         public override void VisitIfStatement( IfStatementSyntax node )
         {
