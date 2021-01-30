@@ -45,6 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Event;
+        public override CodeElementKind ElementKind => CodeElementKind.Event;
     }
 }

@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.Dynamic;
+        public Code.TypeKind TypeKind => Code.TypeKind.Dynamic;
 
         public bool Is( IType other ) =>
             this._compilation.RoslynCompilation.HasImplicitConversion( this._typeSymbol, other.GetSymbol() );

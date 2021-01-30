@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
-        public CodeElementKind Kind => CodeElementKind.Parameter;
+        public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
         public bool HasDefaultValue => false;
 

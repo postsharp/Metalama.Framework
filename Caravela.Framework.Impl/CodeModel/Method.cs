@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IParameter? ReturnParameter => ((IMethod)this).Kind is MethodKind.Constructor ? null : new MethodReturnParameter(this);
+        public IParameter? ReturnParameter => ((IMethod)this).MethodKind is MethodKind.Constructor ? null : new MethodReturnParameter(this);
 
         [Memo]
         public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IImmutableList<IGenericParameter> GenericParameters =>
             this._symbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
         
-        MethodKind IMethod.Kind => this._symbol.MethodKind switch
+        MethodKind IMethod.MethodKind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Default,
             RoslynMethodKind.Constructor => MethodKind.Constructor,
@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Method;
+        public override CodeElementKind ElementKind => CodeElementKind.Method;
 
         public bool IsVirtual => this._symbol.IsVirtual;
 

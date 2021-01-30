@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IReactiveCollection<IAttribute> Attributes => this._parameter.Attributes;
 
-        public CodeElementKind Kind => this._parameter.Kind;
+        public CodeElementKind ElementKind => this._parameter.ElementKind;
 
         public bool HasDefaultValue => this._parameter.HasDefaultValue;
 

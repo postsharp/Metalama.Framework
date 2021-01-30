@@ -23,8 +23,6 @@ namespace Caravela.Framework.Code
         IImmutableList<IMethod> LocalFunctions { get; }
         
         
-        // TODO: Consider exposing several return parameters in case we have named tuples. We don't have a good way to represent tuples.
-        
         /// <summary>
         /// Gets the list of parameters of the current method.
         /// </summary>
@@ -36,9 +34,9 @@ namespace Caravela.Framework.Code
         IImmutableList<IGenericParameter> GenericParameters { get; }
         
         /// <summary>
-        /// Gets the kind of method (such as <see cref="MethodKind.Default"/> or <see cref="MethodKind.PropertyGet"/>.
+        /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
         /// </summary>
-        new MethodKind Kind { get; }
+         MethodKind MethodKind { get; }
 
         //dynamic Invoke(params object[] args);
     }

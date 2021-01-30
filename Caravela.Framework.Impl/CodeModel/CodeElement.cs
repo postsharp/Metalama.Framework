@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
-        public abstract CodeElementKind Kind { get; }
+        public abstract CodeElementKind ElementKind { get; }
 
         protected internal abstract ISymbol Symbol { get; }
 

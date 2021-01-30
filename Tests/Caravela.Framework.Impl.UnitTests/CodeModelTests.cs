@@ -327,9 +327,9 @@ class C : IDisposable
                 ConversionOperator, UserDefinedOperator
             };
 
-            Assert.Equal( methodKinds, type.Methods.Select( m => m.Kind ).GetValue() );
+            Assert.Equal( methodKinds, type.Methods.Select( m => m.MethodKind ).GetValue() );
 
-            Assert.Equal( LocalFunction, type.Methods.GetValue().First().LocalFunctions.Single().Kind );
+            Assert.Equal( LocalFunction, type.Methods.GetValue().First().LocalFunctions.Single().MethodKind );
         }
 
         [Fact]
@@ -356,7 +356,7 @@ class C<T>
 
             var typeKinds = new[] { Array, Class, Delegate, Dynamic, Enum, GenericParameter, Interface, Pointer, Struct };
 
-            Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.Kind ).GetValue() );
+            Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ).GetValue() );
         }
 
         [Fact]

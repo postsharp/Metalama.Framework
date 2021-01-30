@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.Array;
+        public Code.TypeKind TypeKind => Code.TypeKind.Array;
 
         [Memo]
         public IType ElementType => this._compilation.SymbolMap.GetIType( this._typeSymbol.ElementType );

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the kind of type.
         /// </summary>
-        TypeKind Kind { get; }
+        TypeKind TypeKind { get; }
 
         
         /// <summary>
