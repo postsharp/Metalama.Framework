@@ -482,23 +482,24 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key )
+        public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key, bool returnsPrevious = false )
         {
             if ( !this.TryFindNode( key, out var node, out var position, false ) )
             {
                 yield break;
             }
-
-            while ( node != null )
-            {
-                if ( this._comparer.Compare(  node.Key, key  ) >= 0 )
-                {
-                    yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
-                }
-
-                node = node.GetNeighbor(0).TargetNode;
-            }
             
+            
+            if ( returnsPrevious || this._comparer.Compare(  node.Key, key  ) >= 0 )
+            {
+                yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
+            }
+
+            while ( (node = node.GetNeighbor(0)?.TargetNode) != null )
+            {
+                yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
+
+            }
             
         }
 

@@ -1,4 +1,5 @@
 ﻿using Caravela.AspectWorkbench.Model;
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
@@ -95,7 +96,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         #endregion
 
-        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IMarkedTextSpanSet metaSpans )
+        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, ITextSpanClassifier metaSpans )
         {
             static Color WithAlpha( Color brush, double alpha ) =>
                  Color.FromArgb( (byte) (255*alpha), brush.R, brush.G, brush.B ) ;

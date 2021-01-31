@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Linq;

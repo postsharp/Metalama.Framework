@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -8,21 +9,18 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public interface IMarkedTextSpanSet
-    {
-        TextSpanCategory GetCategory( in TextSpan textSpan );
-    }
+ 
     
     /// <summary>
     /// A set of <see cref="TextSpan"/>. 
     /// </summary>
-    sealed class MarkedTextSpanSet : IMarkedTextSpanSet
+    sealed class TextSpanClassifier : ITextSpanClassifier
     {
         
         
         private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new SkipListIndexedDictionary<int, MarkedTextSpan>();
 
-        public MarkedTextSpanSet()
+        public TextSpanClassifier()
         {
             // Start with a single default span. This avoid gaps in the partition later.
             this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanCategory.Default ) );
@@ -53,6 +51,12 @@ namespace Caravela.Framework.Impl.Templating
                             this._spans.Set( span.Start, new MarkedTextSpan( span, category ) );
                         }
 
+                        return;
+                    }
+
+                    // If the new span is contained in a span of weaker category, there is nothing to do.
+                    if ( previousStartSpan.Category > category && previousStartSpan.Span.Contains(span))
+                    {
                         return;
                     }
 
@@ -163,7 +167,28 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        
+        public IEnumerable<(TextSpan span, TextSpanCategory category)> GetClassifiedSpans( TextSpan textSpan)
+        {
+             
+            // TODO: Merge contiguous spans of the same category.
+            
+            foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
+            {
+                var classifiedSpan = pair.Value;
+                if (  classifiedSpan.Category != TextSpanCategory.Default )
+                {
+                    yield return (classifiedSpan.Span, classifiedSpan.Category);
+                }
+
+                if ( classifiedSpan.Span.End >= textSpan.End )
+                {
+                    yield break;
+                }
+            }
+                
+        }
+
+
         public override string ToString()
         {
             // Used for unit testing. Don't change the rendering logic.
@@ -198,14 +223,5 @@ namespace Caravela.Framework.Impl.Templating
         public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Category;
     }
 
-    public enum TextSpanCategory
-    {
-        // Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
-        Default,
-        CompileTime,
-        Dynamic,
-        Variable,
-        Keyword,
-        Conflict // A text span has several categories.
-    }
+    
 }

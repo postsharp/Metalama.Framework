@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

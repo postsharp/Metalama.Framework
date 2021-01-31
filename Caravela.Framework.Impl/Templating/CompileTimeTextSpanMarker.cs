@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using System;
 using System.Collections.Immutable;
 using Caravela.Framework.Impl.CompileTime;
@@ -10,12 +11,12 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
-    /// Produces a <see cref="MarkedTextSpanSet"/> with compile-time code given
+    /// Produces a <see cref="TextSpanClassifier"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
     public sealed class CompileTimeTextSpanMarker : CSharpSyntaxWalker
     {
-        private readonly MarkedTextSpanSet _textSpans = new MarkedTextSpanSet();
+        private readonly TextSpanClassifier _textSpans = new TextSpanClassifier();
         private readonly SourceText _sourceText;
 
         private bool _isInTemplate;
@@ -89,7 +90,7 @@ namespace Caravela.Framework.Impl.Templating
             this._textSpans.Mark( span, category );
         }
 
-        public IMarkedTextSpanSet GetMarkedSpans() => this._textSpans;
+        public ITextSpanClassifier Classifier => this._textSpans;
 
         public override void VisitLiteralExpression( LiteralExpressionSyntax node )
         {
