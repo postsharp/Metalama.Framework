@@ -124,8 +124,8 @@ namespace Caravela.AspectWorkbench.ViewModels
                 // Choose foreground.
                 switch ( category )
                 {
-                    case TextSpanCategory.Keyword:
-                    case TextSpanCategory.Variable:
+                    case TextSpanCategory.TemplateKeyword:
+                    case TextSpanCategory.TemplateVariable:
                     case TextSpanCategory.Dynamic:
                         foreground  = Colors.Fuchsia;
                         fontWeight = FontWeights.Heavy;
@@ -149,8 +149,8 @@ namespace Caravela.AspectWorkbench.ViewModels
                 // Choose background.
                 switch ( category )
                 {
-                    case TextSpanCategory.Keyword:
-                    case TextSpanCategory.Variable:
+                    case TextSpanCategory.TemplateKeyword:
+                    case TextSpanCategory.TemplateVariable:
                     case TextSpanCategory.CompileTime:
                     case TextSpanCategory.Dynamic:
                         background = WithAlpha( Colors.SlateGray, 0.2 );

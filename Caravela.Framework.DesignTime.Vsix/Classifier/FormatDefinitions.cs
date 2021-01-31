@@ -26,7 +26,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private sealed class CompileTimeFormatDefinition : FormatDefinition
         {
             public CompileTimeFormatDefinition()
-                : base( $"Compile-Time Code", background: Colors.LightSteelBlue, backgroundOpacity: 0.3 ) { }
+                : base( $"Compile-Time Code", background: Colors.LightSteelBlue, backgroundOpacity: 0.5 ) { }
         }
 
         [Export( typeof( EditorFormatDefinition ) ), Name( SpecialName ), UserVisible( true )]

@@ -153,8 +153,8 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             string name = category switch
             {
                 TextSpanCategory.Dynamic => FormatDefinitions.SpecialName,
-                TextSpanCategory.Keyword => FormatDefinitions.SpecialName,
-                TextSpanCategory.Variable => FormatDefinitions.SpecialName,
+                TextSpanCategory.TemplateKeyword => FormatDefinitions.SpecialName,
+                TextSpanCategory.TemplateVariable => FormatDefinitions.SpecialName,
                 TextSpanCategory.CompileTime => FormatDefinitions.CompileTimeName,
                 _ => null
             };

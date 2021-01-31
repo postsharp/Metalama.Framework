@@ -10,6 +10,8 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
+    // TODO: This class is essentially a UI concern so it should be moved into a different assembly e.g. DesignTime.
+
     /// <summary>
     /// Produces a <see cref="TextSpanClassifier"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
@@ -21,9 +23,21 @@ namespace Caravela.Framework.Impl.Templating
 
         private bool _isInTemplate;
 
-        public CompileTimeTextSpanMarker( SourceText sourceText )
+        public CompileTimeTextSpanMarker( SourceText sourceText)
         {
             this._sourceText = sourceText;
+        }
+
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+        {
+            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                base.VisitClassDeclaration( node );
+            }
+            else
+            {
+                // We don't process the type at all.
+            }
         }
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
@@ -36,6 +50,35 @@ namespace Caravela.Framework.Impl.Templating
 
                 this._isInTemplate = false;
             }
+            else
+            {
+                this.Mark( node, TextSpanCategory.CompileTime );
+            }
+        }
+
+        private void VisitMember( SyntaxNode node )
+        {
+        //    this.Mark( node, TextSpanCategory.CompileTime );
+        }
+
+        public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitEventDeclaration( EventDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+        {
+            this.VisitMember( node );
         }
 
         public override void VisitToken( SyntaxToken token )
@@ -49,6 +92,17 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
+        }
+
+        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
+        {
+            base.VisitVariableDeclarator( node );
+
+            var colorFromAnnotation = node.Identifier.GetColorFromAnnotation();
+            if ( colorFromAnnotation != TextSpanCategory.Default )
+            {
+                this.Mark( node.Identifier, colorFromAnnotation );
+            }
         }
 
         public override void DefaultVisit( SyntaxNode node )
@@ -122,7 +176,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanCategory.CompileTime );
-                this.Mark( node.Identifier, TextSpanCategory.Variable );
+                this.Mark( node.Identifier, TextSpanCategory.TemplateVariable );
                 this.Visit( node.Expression );
                 this.VisitCompileTimeStatementNode( node.Statement );
             }

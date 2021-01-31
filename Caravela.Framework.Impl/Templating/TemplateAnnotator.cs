@@ -342,6 +342,21 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+        {
+            var typeScope = this.GetSymbolScope( this._semanticAnnotationMap.GetDeclaredSymbol( node ), node );
+
+            if ( typeScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                return base.VisitClassDeclaration( node )?.AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
+            }
+            else
+            {
+                // This is not a build-time class so there's no need to analyze it.
+                return node;
+            }
+        }
+
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             // Literals are always compile-time (not really compile-time only but it does not matter).
@@ -364,7 +379,7 @@ namespace Caravela.Framework.Impl.Templating
                      symbol.GetAttributes().Any( a =>
                          a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Keyword );
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.TemplateKeyword );
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
                           (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) )
@@ -569,7 +584,7 @@ namespace Caravela.Framework.Impl.Templating
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ),
+                        node.Identifier.AddColoringAnnotation( TextSpanCategory.TemplateVariable ),
                         node.InKeyword,
                         annotatedExpression,
                         node.CloseParenToken,
@@ -641,6 +656,7 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             initializerScope = this.GetNodeScope( transformedInitializerValue );
                             transformedNode = transformedNode.WithInitializer( node.Initializer.WithValue( (ExpressionSyntax) transformedInitializerValue ) );
+
                         }
                         else
                         {
@@ -689,7 +705,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 transformedNode =
                     transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ) );
+                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.TemplateVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

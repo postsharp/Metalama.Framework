@@ -6,8 +6,8 @@ namespace Caravela.Framework.DesignTime.Contracts
         Default,
         CompileTime,
         Dynamic,
-        Variable,
-        Keyword,
+        TemplateVariable,
+        TemplateKeyword,
         Conflict // A text span has several categories.
     }
 }
