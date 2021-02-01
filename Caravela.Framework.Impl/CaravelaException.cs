@@ -20,7 +20,6 @@ namespace Caravela.Framework.Impl
 
     static class ExceptionExtensions
     {
-        public static string ToDiagnosticString( this Exception ex ) =>
-            ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ex.InnerException.ToDiagnosticString()}";
+        public static string ToDiagnosticString( this Exception ex ) => ex.ToString();
     }
 }
