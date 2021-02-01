@@ -1,12 +1,20 @@
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Caravela.Reactive
 {
+    /// <summary>
+    /// The weakly typed base of <see cref="IReactiveSource{T}"/>.
+    /// </summary>
     public interface IReactiveSource
     {
 
+        /// <summary>
+        /// Returns <c>true</c> if the current source can be enumerated without evaluating its own sources,
+        /// i.e. whether it is "cached".
+        /// </summary>
         bool IsMaterialized { get; }
+        
+        /// <summary>
+        /// Returns <c>true</c> if the source is immutable.
+        /// </summary>
         bool IsImmutable { get; }
     }
 
@@ -22,9 +30,19 @@ namespace Caravela.Reactive
     public interface IReactiveSource<out T> : IReactiveSource
     {
         
+        /// <summary>
+        /// Gets the value of the source. Use this method instead of <see cref="GetVersionedValue"/> when
+        /// you need the value but not the version or the side values.
+        /// </summary>
+        /// <param name="observerToken">A token to register additional dependencies and side values.</param>
+        /// <returns></returns>
         T GetValue(in ReactiveCollectorToken observerToken = default);
         
-        // Returns an interface because of covariance.
+        /// <summary>
+        /// Gets the value of the source, the value version, and the side values.
+        /// </summary>
+        /// <param name="observerToken">A token to register additional dependencies and side values.</param>
+        /// <returns></returns>
         IReactiveVersionedValue<T> GetVersionedValue(in ReactiveCollectorToken observerToken = default);
     }
     
@@ -38,28 +56,10 @@ namespace Caravela.Reactive
         IReactiveSource<TValue>
         where TObserver : IReactiveObserver<TValue>
     {
-        IReactiveObservable<TObserver> Observable { get; }
-    }
-
-    public interface IAsyncReactiveSource<T> : IReactiveSource
-    {
-
-        ValueTask<T> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken );
-
-        // Returns an interface because of covariance.
-        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken );
-    }
-
-
-    /// <summary>
-    /// Defines the semantics of a reactive object that can be observed by strongly-typed observers.
-    /// </summary>
-    /// <typeparam name="TValue">Type of the value.</typeparam>
-    /// <typeparam name="TObserver">Type of the observer.</typeparam>
-    public interface IAsyncReactiveSource<TValue, in TObserver> :
-        IAsyncReactiveSource<TValue>
-        where TObserver : IReactiveObserver<TValue>
-    {
+        /// <summary>
+        /// The implementation of the <see cref="IReactiveObservable{T}"/> interface. It may, but may not,
+        /// be the same object as the source itself.
+        /// </summary>
         IReactiveObservable<TObserver> Observable { get; }
     }
 }

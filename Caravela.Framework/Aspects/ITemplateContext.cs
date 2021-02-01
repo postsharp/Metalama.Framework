@@ -3,6 +3,10 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
 {
+    /// <summary>
+    /// Exposes information about the element of code to which a template was applied.
+    /// This interface is exposed by the <see cref="TemplateContext.target"/> member.
+    /// </summary>
     [CompileTime]
     public interface ITemplateContext
     {

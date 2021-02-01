@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Sdk
 {
-    public class AspectInstance
+    public sealed class AspectInstance
     {
         public IAspect Aspect { get; }
         public ICodeElement CodeElement { get; }

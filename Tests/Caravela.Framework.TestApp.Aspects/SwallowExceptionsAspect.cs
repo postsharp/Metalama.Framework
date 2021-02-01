@@ -6,7 +6,7 @@ namespace Caravela.Framework.TestApp
 {
     public class SwallowExceptionsAspect : OverrideMethodAspect
     {
-        public override dynamic Template()
+        public override dynamic OverrideMethod()
         {
             try
             {

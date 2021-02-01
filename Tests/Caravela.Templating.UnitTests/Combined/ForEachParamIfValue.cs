@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
+  [TestTemplate]
   dynamic Template()
   {
       foreach ( var p in target.Parameters )

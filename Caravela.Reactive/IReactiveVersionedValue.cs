@@ -7,8 +7,14 @@ namespace Caravela.Reactive
     /// <remarks></remarks>
     public interface IReactiveVersionedValue<out TValue> : IHasReactiveSideValues
     {
+        /// <summary>
+        /// Gets the version of the <see cref="Value"/>.
+        /// </summary>
         int Version { get; }
 
+        /// <summary>
+        /// Gets the value itself.
+        /// </summary>
         TValue Value { get; }
 
 

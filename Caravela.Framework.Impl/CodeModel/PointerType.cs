@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.Pointer;
+        public Code.TypeKind TypeKind => Code.TypeKind.Pointer;
 
         [Memo]
         public IType PointedAtType => this._compilation.SymbolMap.GetIType( this._typeSymbol.PointedAtType );

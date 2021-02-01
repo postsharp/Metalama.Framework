@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         A<Aspect, int, string> x = new C<object, int, string>();

@@ -5,7 +5,7 @@ namespace Caravela.Framework.TestApp
 {
     class PrintDebugInfoAspect : OverrideMethodAspect
     {
-        public override dynamic Template()
+        public override dynamic OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
             return TemplateContext.proceed();

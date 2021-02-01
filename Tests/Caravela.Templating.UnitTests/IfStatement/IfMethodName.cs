@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
+  [TestTemplate]
   dynamic Template()
   {
         int b = compileTime(0);

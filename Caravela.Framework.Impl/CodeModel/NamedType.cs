@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Compilation = compilation;
         }
 
-        TypeKind IType.Kind => this.TypeSymbol.TypeKind switch
+        TypeKind IType.TypeKind => this.TypeSymbol.TypeKind switch
         {
             RoslynTypeKind.Class => TypeKind.Class,
             RoslynTypeKind.Delegate => TypeKind.Delegate,
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override IReactiveCollection<IAttribute> Attributes =>
             this.TypeSymbol.GetAttributes().Select( a => new Attribute( a, this.Compilation.SymbolMap ) ).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Type;
+        public override CodeElementKind ElementKind => CodeElementKind.Type;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );

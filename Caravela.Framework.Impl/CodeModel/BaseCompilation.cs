@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICodeElement? ICodeElement.ContainingElement => null;
 
-        CodeElementKind ICodeElement.Kind => CodeElementKind.Compilation;
+        CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 

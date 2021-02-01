@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
+  [TestTemplate]
   dynamic Template()
   {
       var p = target.Parameters[0];

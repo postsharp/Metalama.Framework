@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public CodeElementKind Kind => CodeElementKind.Parameter;
+        public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
         public bool HasDefaultValue => this._symbol.HasExplicitDefaultValue;
 

@@ -7,13 +7,26 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    class OverrideMethodAdvice : IOverrideMethodAdvice, IAdviceImplementation
+    abstract class Advice : IAdvice
+    {
+        public IMethod TargetDeclaration { get; }
+
+
+        protected Advice( ICodeElement targetDeclaration )
+        {
+            this.TargetDeclaration = targetDeclaration;
+        }
+
+        public ICodeElement TargetDeclaration { get; }
+    }
+
+    class OverrideMethodAdvice : Advice, IOverrideMethodAdvice, IAdviceImplementation
     {
         public IAspect Aspect { get; } 
         public IMethod TemplateMethod { get; }
         public IMethod TargetDeclaration { get; }
 
-        public OverrideMethodAdvice( IAspect aspect, IMethod templateMethod, IMethod targetDeclaration )
+        public OverrideMethodAdvice( IAspect aspect, IMethod templateMethod, IMethod targetDeclaration ) : base(targetDeclaration)
         {
             this.Aspect = aspect;
             this.TemplateMethod = templateMethod;

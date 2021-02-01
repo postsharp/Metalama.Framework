@@ -8,23 +8,30 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal static class SyntaxAnnotationExtensions
     {
-        private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation( "scope", "buildtime" );
-        private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( "scope", "runtime" );
-        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation("scope", "template");
-        private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( "noindent" );
-        private static readonly SyntaxAnnotation proceedAnnotation = new SyntaxAnnotation( "proceed" );
+        private const string _scopeAnnotationKind = "scope";
+        private const string _proceedAnnotationKind = "proceed";
+        private const string _noindentAnnotationKind = "noindent";
+        private const string _colorAnnotationKind = "color";
 
-        private static readonly ImmutableList<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { "scope", "noindent" } );
+        private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
+        private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
+        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation(_scopeAnnotationKind, "template");
+        private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
+        private static readonly SyntaxAnnotation proceedAnnotation = new SyntaxAnnotation( _proceedAnnotationKind );
+        
+        
+
+        private static readonly ImmutableList<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
         {
-            return node.HasAnnotations( "scope" );
+            return node.HasAnnotations( _scopeAnnotationKind );
         }
 
         public static SymbolDeclarationScope GetScopeFromAnnotation( this SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( "scope" ).SingleOrDefault();
-            if ( annotation == null )
+            var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
+            if ( annotation == null  )
             {
                 return SymbolDeclarationScope.Default;
             }
@@ -45,6 +52,71 @@ namespace Caravela.Framework.Impl.Templating
                         throw new AssertionFailedException();
                 }
             }
+        }
+
+        public static TextSpanCategory GetColorFromAnnotation( this SyntaxNode node )
+        {
+            var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
+            if ( annotation == null )
+            {
+                return TextSpanCategory.Default;
+            }
+            else
+            {
+                if ( Enum.TryParse( annotation.Data, out TextSpanCategory color ) )
+                {
+                    return color;
+                }
+                else
+                {
+                    return TextSpanCategory.Default;
+                }
+            }
+        }
+        
+        public static TextSpanCategory GetColorFromAnnotation( this SyntaxToken node )
+        {
+            var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
+            if ( annotation == null )
+            {
+                return TextSpanCategory.Default;
+            }
+            else
+            {
+                if ( Enum.TryParse( annotation.Data, out TextSpanCategory color ) )
+                {
+                    return color;
+                }
+                else
+                {
+                    return TextSpanCategory.Default;
+                }
+            }
+        }
+        
+
+        public static T AddColoringAnnotation<T>( this T node, TextSpanCategory color ) where T : SyntaxNode
+        {
+            if ( color == TextSpanCategory.Default || node.GetColorFromAnnotation() >= color )
+            {
+                return node;
+            }
+
+            return node.WithoutAnnotations( _colorAnnotationKind )
+                .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
+
+        }
+        
+        public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanCategory color )  
+        {
+            if ( color == TextSpanCategory.Default || node.GetColorFromAnnotation() >= color )
+            {
+                return node;
+            }
+
+            return node.WithoutAnnotations( _colorAnnotationKind )
+                .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
+
         }
 
         public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope ) where T : SyntaxNode

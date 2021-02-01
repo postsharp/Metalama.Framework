@@ -5,16 +5,17 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
-    /// Produces a <see cref="MarkedSpanSet"/> with compile-time code given
+    /// Produces a <see cref="MarkedTextSpanSet"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
     public sealed class CompileTimeTextSpanMarker : CSharpSyntaxWalker
     {
-        private readonly MarkedSpanSet _spans = new MarkedSpanSet();
+        private readonly MarkedTextSpanSet _textSpans = new MarkedTextSpanSet();
         private readonly SourceText _sourceText;
 
         private bool _isInTemplate;
@@ -36,30 +37,46 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override void VisitToken( SyntaxToken token )
+        {
+            if ( this._isInTemplate )
+            {
+                var colorFromAnnotation = token.GetColorFromAnnotation();
+                if ( colorFromAnnotation != TextSpanCategory.Default )
+                {
+                    this.Mark( token, colorFromAnnotation );
+                }
+            }
+
+        }
+
         public override void DefaultVisit( SyntaxNode node )
         {
-            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._isInTemplate )
             {
-                this.Mark( node );
+                if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    // This could be overwritten later.
+                    this.Mark( node, TextSpanCategory.CompileTime );
+                }
+
+
+                var colorFromAnnotation = node.GetColorFromAnnotation();
+                if ( colorFromAnnotation != TextSpanCategory.Default )
+                {
+                    this.Mark( node, colorFromAnnotation );
+                }
             }
-            else
-            {
-                base.DefaultVisit( node );
-            }
+
+            base.DefaultVisit( node );
         }
 
-        private void Mark( SyntaxNode node )
-        {
-            if ( node != null )
-            {
-                this.Mark( node.Span );
-            }
-        }
+        private void Mark( SyntaxNode node , TextSpanCategory category) => this.Mark( node.Span, category );
 
-        private void Mark( SyntaxToken token ) => this.Mark( token.Span );
+        private void Mark( SyntaxToken token, TextSpanCategory category ) => this.Mark( token.Span, category );
 
 
-        private void Mark( TextSpan span )
+        private void Mark( TextSpan span, TextSpanCategory category )
         {
             if ( span.IsEmpty )
                 return;
@@ -69,22 +86,27 @@ namespace Caravela.Framework.Impl.Templating
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif
 
-            this._spans.Mark( span );
+            this._textSpans.Mark( span, category );
         }
 
-        public ImmutableList<TextSpan> GetMarkedSpans() => this._spans.GetMarkedSpans();
+        public IMarkedTextSpanSet GetMarkedSpans() => this._textSpans;
 
+        public override void VisitLiteralExpression( LiteralExpressionSyntax node )
+        {
+            // We don't mark literals that are not a part of larger compile-time expressions because it does not bring anything useful.
+        }
 
         public override void VisitIfStatement( IfStatementSyntax node )
         {
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
-                this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ) );
+                this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanCategory.CompileTime );
+                this.Visit( node.Condition );
                 this.VisitCompileTimeStatementNode( node.Statement );
 
                 if ( node.Else != null )
                 {
-                    this.Mark( node.Else.ElseKeyword );
+                    this.Mark( node.Else.ElseKeyword, TextSpanCategory.CompileTime );
                     this.VisitCompileTimeStatementNode( node.Else.Statement );
                 }
             }
@@ -98,7 +120,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
-                this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ) );
+                this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanCategory.CompileTime );
+                this.Mark( node.Identifier, TextSpanCategory.Variable );
+                this.Visit( node.Expression );
                 this.VisitCompileTimeStatementNode( node.Statement );
             }
             else
@@ -111,8 +135,8 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( statement is BlockSyntax block )
             {
-                this.Mark( block.OpenBraceToken );
-                this.Mark( block.CloseBraceToken );
+                this.Mark( block.OpenBraceToken, TextSpanCategory.CompileTime );
+                this.Mark( block.CloseBraceToken, TextSpanCategory.CompileTime );
             }
 
             this.Visit( statement );

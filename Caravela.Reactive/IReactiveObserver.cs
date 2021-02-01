@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Collections.Generic;
 
 #endregion
 
@@ -43,17 +42,5 @@ namespace Caravela.Reactive
         /// </param>
         void OnValueChanged(IReactiveSubscription subscription, T oldValue, T newValue, int newVersion,
             bool isBreakingChange = false);
-    }
-
-    /// <summary>
-    /// An observer specialized for <see cref="IEnumerable{T}"/>. Supports notifications of changes
-    /// in a collection: <see cref="OnItemAdded"/>, <see cref="OnItemRemoved"/> and <see cref="OnItemReplaced"/>.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IReactiveCollectionObserver<in T> : IReactiveObserver<IEnumerable<T>>
-    {
-        void OnItemAdded(IReactiveSubscription subscription, T item, int newVersion);
-        void OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion);
-        void OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem, int newVersion);
     }
 }

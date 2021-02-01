@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         object x = target.Parameters[0].Value;

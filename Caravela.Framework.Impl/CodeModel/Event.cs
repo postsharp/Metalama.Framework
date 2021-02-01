@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public INamedType DelegateType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
+        public INamedType EventType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
 
         [Memo]
         public IMethod Adder => this.SymbolMap.GetMethod( this._symbol.AddMethod! );
@@ -45,6 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Event;
+        public override CodeElementKind ElementKind => CodeElementKind.Event;
     }
 }

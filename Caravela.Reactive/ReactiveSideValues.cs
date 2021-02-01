@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 
 namespace Caravela.Reactive
 {
@@ -6,6 +7,12 @@ namespace Caravela.Reactive
     /// An immutable list of side values.
     /// Side values are guaranteed to be copied (combined), from source to result, for all operators.
     /// </summary>
+    /// <remarks>
+    ///<para>
+    /// By design, there can be only one side value of each <see cref="Type"/> in each <see cref="ReactiveSideValues"/>
+    /// instance. This avoids the use of value names.
+    /// </para>
+    /// </remarks>
     public readonly struct ReactiveSideValues
     {
         private readonly ImmutableArray<IReactiveSideValue> _sideValues;
@@ -15,9 +22,20 @@ namespace Caravela.Reactive
             this._sideValues = sideValues;
         }
 
+        /// <summary>
+        /// Creates a <see cref="ReactiveSideValues"/> object from a single <see cref="IReactiveSideValue"/>.
+        /// </summary>
+        /// <param name="sideValue"></param>
+        /// <returns></returns>
         public static ReactiveSideValues Create( IReactiveSideValue? sideValue ) => sideValue == null ? default : new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
         
+        /// <summary>
+        /// Gets the side value of a given type from the current instance.
+        /// </summary>
+        /// <param name="value">At output, the side value, or <c>null</c> if there is no side value of type <typeparamref name="T"/>.</param>
+        /// <typeparam name="T">The type of the side value to get.</typeparam>
+        /// <returns><c>true</c> if a side value was found, <c>false</c> otherwise.</returns>
         public bool TryGetValue<T>(out T? value) where T : class, IReactiveSideValue
         {
             if (this._sideValues.IsDefaultOrEmpty )
@@ -64,6 +82,13 @@ namespace Caravela.Reactive
         }
 
 
+        /// <summary>
+        /// Creates and returns a new <see cref="ReactiveSideValues"/> that combines the values of the current
+        /// object with one given other value.
+        /// </summary>
+        /// <param name="value">The additional value.</param>
+        /// <returns>A <see cref="ReactiveSideValues"/> instance that combines the values of the current object
+        /// with <paramref name="value"/>.</returns>
         public ReactiveSideValues Combine( IReactiveSideValue value )
         {
             if ( this._sideValues.IsDefaultOrEmpty )

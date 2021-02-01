@@ -21,7 +21,7 @@ class Aspect : BaseAspect
     {
     }
     
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         dynamic result = proceed();

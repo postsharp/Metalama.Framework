@@ -11,7 +11,7 @@ namespace Caravela.Reactive
         /// Gets a specific group. This indexer always returns a non-null group so that it is possible
         /// to register observers.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">The group key.</param>
         IReactiveGroup<TKey, TItem> this[TKey key] { get; }
     }
 }

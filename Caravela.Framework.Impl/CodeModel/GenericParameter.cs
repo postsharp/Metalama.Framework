@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.GenericParameter;
+        public Code.TypeKind TypeKind => Code.TypeKind.GenericParameter;
 
         public string Name => this._typeSymbol.Name;
 
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this._typeSymbol.GetAttributes().Select( a => new Attribute( a, this._compilation.SymbolMap ) ).ToImmutableReactive();
 
-        CodeElementKind ICodeElement.Kind => CodeElementKind.GenericParameter;
+        CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
         public bool Is( IType other ) =>
             this._compilation.RoslynCompilation.HasImplicitConversion( this._typeSymbol, other.GetSymbol() );
