@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl
     class AspectBuilder<T> : IAspectBuilder<T>
         where T : class, ICodeElement
     {
-        private readonly IImmutableList<AdviceInstance> _declarativeAdvices;
+        private readonly IImmutableList<IAdvice> _declarativeAdvices;
 
         public T TargetDeclaration { get; }
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 
-        public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices, AdviceFactory adviceFactory )
+        public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableList();

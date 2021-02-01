@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
@@ -45,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override CSharpCompilation GetPrimeCompilation() => this.RoslynCompilation;
 
-        internal override IReactiveCollection<AdviceInstance> CollectAdvices() => ImmutableArray.Create<AdviceInstance>().ToReactive();
+        internal override IReactiveCollection<IAdvice> CollectAdvices() => ImmutableArray.Create<IAdvice>().ToReactive();
 
         internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this.RoslynCompilation.AssemblyName;

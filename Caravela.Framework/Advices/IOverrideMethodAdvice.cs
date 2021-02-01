@@ -2,5 +2,7 @@
 
 namespace Caravela.Framework.Advices
 {
-    public interface IOverrideMethodAdvice : IAdvice<IMethod> { }
+    public interface IOverrideMethodAdvice : IAdvice<IMethod>
+    {
+    }
 }

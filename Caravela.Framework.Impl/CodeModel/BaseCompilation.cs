@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
@@ -57,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         internal abstract CSharpCompilation GetPrimeCompilation();
-        internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();
+        internal abstract IReactiveCollection<IAdvice> CollectAdvices();
 
         internal abstract CSharpCompilation GetRoslynCompilation();
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );

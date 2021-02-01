@@ -39,11 +39,9 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public override ICodeElement? ContainingElement { get; }
 
-        public IMethod? OverriddenMethod { get; }
-
-        public BlockSyntax? OverridenMethodBody { get; }
-
         public IMethod? TemplateMethod { get; }
+        public IMethod? OverriddenMethod { get; }
+        public BlockSyntax MethodBodyOverride { get; }
 
         [Memo]
         public IParameter? ReturnParameter => this.TemplateMethod!.ReturnParameter;
@@ -63,6 +61,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         CSharpSyntaxNode IToSyntax.GetSyntaxNode() => (CSharpSyntaxNode)this.Declaration;
         IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => new[] { (CSharpSyntaxNode) this.Declaration };
+
         public override SyntaxNode Declaration
         {
             get
@@ -72,7 +71,7 @@ namespace Caravela.Framework.Impl.Transformations
                 return MethodDeclaration(
                     List<AttributeListSyntax>(), // TODO: Copy some attributes?
                     templateSyntax.Modifiers, templateSyntax.ReturnType, templateSyntax.ExplicitInterfaceSpecifier!, templateSyntax.Identifier, templateSyntax.TypeParameterList!,
-                    templateSyntax.ParameterList, templateSyntax.ConstraintClauses, this.OverridenMethodBody!, null, templateSyntax.SemicolonToken 
+                    templateSyntax.ParameterList, templateSyntax.ConstraintClauses, this.MethodBodyOverride!, null, templateSyntax.SemicolonToken 
                     );
             }
         }
@@ -89,12 +88,12 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind Kind => CodeElementKind.Method;
 
-        public IntroducedMethod( INamedType containingType, IMethod? overriddenMethod, IMethod? templateMethod, BlockSyntax? methodBody )
+        public IntroducedMethod( INamedType targetType, IMethod? overriddenMethod, IMethod? templateMethod, BlockSyntax methodBodyOverride )
         {
-            this.ContainingElement = containingType;
+            this.ContainingElement = targetType;
             this.OverriddenMethod = overriddenMethod;
             this.TemplateMethod = templateMethod;
-            this.OverridenMethodBody = methodBody ?? Block();
+            this.MethodBodyOverride = methodBodyOverride;
         }
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )

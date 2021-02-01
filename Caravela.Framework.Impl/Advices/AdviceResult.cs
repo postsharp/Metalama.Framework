@@ -4,5 +4,5 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    record AdviceInstanceResult( ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<Transformation> Transformations );
+    record AdviceResult( ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<Transformation> Transformations );
 }

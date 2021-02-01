@@ -19,12 +19,12 @@ namespace Caravela.Framework.Advices
         Public
     }
 
-    public interface IIntroductionAdvice : IAdvice<INamedType> 
+    public interface IIntroductionAdvice : IAdvice<INamedType>
     {
-        //IntroductionScope Scope { get; }
-        //string Name { get; }
-        //bool IsStatic { get; }
-        //bool IsVirtual { get; }
-        //Visibility Visibility { get; }
+        IntroductionScope? Scope { get; set; }
+        string? Name { get; set; }
+        bool? IsStatic { get; set; }
+        bool? IsVirtual { get; set; }
+        Visibility? Visibility { get; set; }
     }
 }

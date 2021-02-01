@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Advices;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
@@ -17,9 +18,9 @@ namespace Caravela.Framework.Impl.CodeModel
     sealed class ModifiedCompilation : BaseCompilation
     {
         private readonly BaseCompilation _originalCompilation;
-        private readonly IReactiveCollection<AdviceInstance> _addedAdvices;
+        private readonly IReactiveCollection<IAdvice> _addedAdvices;
 
-        public ModifiedCompilation( BaseCompilation originalCompilation, IReactiveCollection<AdviceInstance> addedAdvices )
+        public ModifiedCompilation( BaseCompilation originalCompilation, IReactiveCollection<IAdvice> addedAdvices )
         {
             this._originalCompilation = originalCompilation;
             this._addedAdvices = addedAdvices;
@@ -35,7 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override CSharpCompilation GetPrimeCompilation() => this._originalCompilation.GetPrimeCompilation();
 
-        internal override IReactiveCollection<AdviceInstance> CollectAdvices() => this._originalCompilation.CollectAdvices().Union( this._addedAdvices );
+        internal override IReactiveCollection<IAdvice> CollectAdvices() => this._originalCompilation.CollectAdvices().Union( this._addedAdvices );
 
         internal override CSharpCompilation GetRoslynCompilation()
         {
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             // Modified compilations can form a linked list. First, find the Roslyn compilation at the start of the list and collect all advices from the list.
             var primeCompilation = this.GetPrimeCompilation();
-            var transformations = this.CollectAdvices().SelectMany( a => adviceDriver.GetResult( a ).Transformations ).GetValue();
+            var transformations = this.CollectAdvices().SelectMany( a => adviceDriver.GetResult( this._originalCompilation, a ).Transformations ).GetValue();
 
             var multiAdviceElements = transformations
                 .GroupBy( t => t is OverriddenElement oe ? oe.OverriddenDeclaration : null )
@@ -139,7 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             }
                             else if ( foundIntroduceTransformation != null )
                             {
-                                newMembers.Add( newMethod.WithBody( foundIntroduceTransformation.OverridenMethodBody ) );
+                                newMembers.Add( newMethod.WithBody( (BlockSyntax?)foundIntroduceTransformation.GetSyntaxNode() ) );
                             }
                             else
                             {
