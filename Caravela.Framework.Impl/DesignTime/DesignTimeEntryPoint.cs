@@ -14,7 +14,12 @@ namespace Caravela.Framework.DesignTime
 
         static ProjectDesignTimeEntryPoint()
         {
-            DesignTimeEntryPoints.RegisterEntryPoint( ProjectDesignTimeEntryPoint.Instance );
+            DesignTimeEntryPointManager.RegisterEntryPoint( Instance );
+        }
+
+        public ProjectDesignTimeEntryPoint()
+        {
+            this.Version = this.GetType().Assembly.GetName().Version;
         }
 
         public static void Initialize()
@@ -23,35 +28,14 @@ namespace Caravela.Framework.DesignTime
             Instance.GetType();
         }
 
-        public bool HasTemplateHighlightingUpdatedClient => this.TemplateHighlightingUpdated != null;
+      
+        public Version Version { get; }
+    
+        public T? GetCompilerService<T>() where T : class => typeof(T) == typeof(IProjectDesignTimeEntryPoint) ? (T) (object) this : null;
 
-        internal void SignalTemplateHighlightingUpdated( TemplateHighlightingInfo info )
-        {
-            this.TemplateHighlightingUpdated?.Invoke( info );
-        }
+        public event Action<IDesignTimeEntryPoint> Unloaded;
 
-        public event Action<TemplateHighlightingInfo> TemplateHighlightingUpdated;
-
-
-        public bool HandlesProject( Microsoft.CodeAnalysis.Project project )
-        {
-            // TODO: test version of references.
-            return project.MetadataReferences.Any( r => r switch
-                {
-                    CompilationReference cr => string.Equals( cr.Compilation.AssemblyName, "Caravela.Framework", StringComparison.OrdinalIgnoreCase ),
-                    PortableExecutableReference per => string.Equals( Path.GetFileNameWithoutExtension( per.FilePath ), "Caravela.Framework", StringComparison.OrdinalIgnoreCase ),
-                    _ => false
-                }
-                               ) ||
-                       project.ProjectReferences.Any( r => string.Equals( project.Solution.GetProject( r.ProjectId )!.AssemblyName, "Caravela.Framework", StringComparison.OrdinalIgnoreCase ) );
-        }
-
-        public T? GetService<T>() where T : class => typeof(T) == typeof(IProjectDesignTimeEntryPoint) ? (T) (object) this : null;
-
-
-        public event Action<IDesignTimeEntryPoint> Disposed;
-
-        public bool TryProvideClassifiedSpans( SemanticModel semanticModel, SyntaxNode root, out ITextSpanClassifier classifier )
+        public bool TryGetTextSpanClassifier( SemanticModel semanticModel, SyntaxNode root, out ITextSpanClassifier classifier )
         {
             // TODO: if the root is not "our", return false.
             

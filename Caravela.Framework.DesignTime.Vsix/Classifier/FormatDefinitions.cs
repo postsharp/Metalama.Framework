@@ -10,7 +10,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
     internal class FormatDefinitions
     {
-        private const string priority = PredefinedClassificationTypeNames.Identifier;
+        private const string _priority = PredefinedClassificationTypeNames.Identifier;
         public const string CompileTimeName = "Caravela/CompileTime";
         public const string SpecialName = "Caravela/Special";
 

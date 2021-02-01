@@ -11,8 +11,6 @@ using Microsoft.VisualStudio.Text.Classification;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,13 +19,13 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
     internal sealed partial class Classifier : IClassifier, IDisposable
     {
         private readonly IClassificationTypeRegistryService _registryService;
-        private static readonly IList<ClassificationSpan> emptyList = new List<ClassificationSpan>( 0 ).AsReadOnly();
+        private static readonly IList<ClassificationSpan> _emptyList = new List<ClassificationSpan>( 0 ).AsReadOnly();
 
-        private Document document;
-        private Task<ITextSpanClassifier> lastGetClassifierTask;
-        private ITextSnapshot snapshot;
-        ConcurrentQueue<SnapshotSpan> spansQueue = new ConcurrentQueue<SnapshotSpan>();
-        CancellationTokenSource cancellationTokenSource;
+        private Document _document;
+        private Task<ITextSpanClassifier> _lastGetClassifierTask;
+        private ITextSnapshot _snapshot;
+        readonly ConcurrentQueue<SnapshotSpan> _spansQueue = new ConcurrentQueue<SnapshotSpan>();
+        CancellationTokenSource _cancellationTokenSource;
 
         public Classifier( ITextBuffer textBuffer, IClassificationTypeRegistryService registryService )
         {
@@ -37,12 +35,12 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
         private void OnTextChanged( object sender, TextContentChangedEventArgs e )
         {
-            if ( this.snapshot != null && this.snapshot.Version != e.AfterVersion )
+            if ( this._snapshot != null && this._snapshot.Version != e.AfterVersion )
             {
-                this.cancellationTokenSource?.Cancel();
-                while ( !this.spansQueue.IsEmpty )
+                this._cancellationTokenSource?.Cancel();
+                while ( !this._spansQueue.IsEmpty )
                 {
-                    this.spansQueue.TryDequeue( out _ );
+                    this._spansQueue.TryDequeue( out _ );
                 }
             }
         }
@@ -59,36 +57,36 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
             if ( document == null )
             {
-                return emptyList;
+                return _emptyList;
             }
 
-            if ( !(this.document?.Id == document.Id && this.snapshot == snapshot) )
+            if ( !(this._document?.Id == document.Id && this._snapshot == snapshot) )
             {
-                this.cancellationTokenSource?.Cancel();
-                this.cancellationTokenSource = new CancellationTokenSource();
+                this._cancellationTokenSource?.Cancel();
+                this._cancellationTokenSource = new CancellationTokenSource();
 
-                this.document = document;
-                this.snapshot = snapshot;
+                this._document = document;
+                this._snapshot = snapshot;
 
-                this.lastGetClassifierTask = Task.Run( () => this.GetSpansAsync( document, this.cancellationTokenSource.Token ) );
+                this._lastGetClassifierTask = Task.Run( () => this.GetSpansAsync( document, this._cancellationTokenSource.Token ) );
                 
                 // We start a new task here. It will not be completed synchronously so we fall back to the next block.
             }
 
-            if ( !this.lastGetClassifierTask.IsCompleted )
+            if ( !this._lastGetClassifierTask.IsCompleted )
             {
                 // The task is not yet complete.
                 // We will raise ClassificationChanged when we will be done.
-                this.spansQueue.Enqueue( span );
-                return emptyList;
+                this._spansQueue.Enqueue( span );
+                return _emptyList;
             }
 
 
-            var classifier = this.lastGetClassifierTask.Result;
+            var classifier = this._lastGetClassifierTask.Result;
 
             if ( classifier == null )
             {
-                return emptyList;
+                return _emptyList;
             }
 
             List<ClassificationSpan> resultList = new List<ClassificationSpan>();
@@ -97,12 +95,98 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             {
                 var classificationType = this.GetClassificationType( classifiedSpan.category );
 
-                if ( classificationType != null )
+                if ( classificationType == null )
                 {
-                    var snapshotSpan = new SnapshotSpan( snapshot, classifiedSpan.span.Start, classifiedSpan.span.Length );
-
-                    resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
+                    continue;
                 }
+
+
+                // Please, if you suffer from boolean dislexia, don't edit the following code without seriously testing it after your changes!
+
+                string text = snapshot.GetText( classifiedSpan.span.Start, classifiedSpan.span.Length );
+
+                if ( string.IsNullOrWhiteSpace( text ) )
+                {
+                    // This is a trivia.
+                    continue;
+                }
+
+                int start = classifiedSpan.span.Start;
+                int length = classifiedSpan.span.Length;
+
+                int lineStart = start;
+                int lineLength = 0;
+                bool isNewLine = true;
+                bool ignoreUntilNewLine = false;
+
+
+                void AddSpanForLastLine()
+                {
+                    // Trim the end of the line.
+                    for ( int i = lineLength - 1; i >= 0; i-- )
+                    {
+                        if ( char.IsWhiteSpace( text[i] ) )
+                        {
+                            lineLength--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    // Emit a span for the line.
+                    if ( lineLength > 0 )
+                    {
+                        var snapshotSpan = new SnapshotSpan( snapshot, lineStart, lineLength );
+
+                        resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
+                    }
+                }
+
+
+                // Split the tagged text into lines and trim the spaces in the beginning of each line.
+                for ( int i = 0; i < length; i++ )
+                {
+                    // `i==0` corresponds to the beginning of the _span_.
+
+                    char c = text[i];
+
+                    if ( c == '\n' || c == '\r' )
+                    {
+                        AddSpanForLastLine();
+
+                        lineStart = start + i + 1;
+                        lineLength = 0;
+                        isNewLine = true;
+                        ignoreUntilNewLine = false;
+                    }
+                    else if ( isNewLine && char.IsWhiteSpace( c ) )
+                    {
+                        lineStart++;
+                    }
+                    else
+                    {
+                        isNewLine = false;
+
+                        if ( c == '/' && i < length - 1 && text[i] == '/' )
+                        {
+                            // Comment line. Ignore the rest of the line.
+                            AddSpanForLastLine();
+
+                            ignoreUntilNewLine = true;
+                        }
+                        else if ( !ignoreUntilNewLine )
+                        {
+                            lineLength++;
+                            isNewLine = false;
+                        }
+                    }
+
+                }
+
+                AddSpanForLastLine();
+
             }
 
 
@@ -112,10 +196,12 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             
         }
 
+        
+
         private async Task<ITextSpanClassifier> GetSpansAsync( Document document, CancellationToken cancellationToken )
         {
 
-            var entryPoint = await DesignTimeEntryPoints.GetDesignTimeEntryPoint( document.Project, cancellationToken );
+            var entryPoint = await DesignTimeEntryPointManager.GetDesignTimeEntryPoint( document.Project, cancellationToken );
 
             if ( entryPoint == null )
             {
@@ -126,14 +212,14 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             var model = await document.GetSemanticModelAsync( cancellationToken );
             var root = await document.GetSyntaxRootAsync( cancellationToken );
 
-            var projectEntryPoint = entryPoint.GetService<IProjectDesignTimeEntryPoint>();
+            var projectEntryPoint = entryPoint.GetCompilerService<IProjectDesignTimeEntryPoint>();
 
-            if ( projectEntryPoint.TryProvideClassifiedSpans( model, root, out var classifier ) )
+            if ( projectEntryPoint.TryGetTextSpanClassifier( model, root, out var classifier ) )
             {
                 // Notify that we now have data for these spans.
                 if ( this.ClassificationChanged != null )
                 {
-                    foreach ( var span in this.spansQueue )
+                    foreach ( var span in this._spansQueue )
                     {
                         this.ClassificationChanged?.Invoke( this, new ClassificationChangedEventArgs( span )  );
                     }
@@ -154,8 +240,8 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             {
                 TextSpanCategory.Dynamic => FormatDefinitions.SpecialName,
                 TextSpanCategory.TemplateKeyword => FormatDefinitions.SpecialName,
-                TextSpanCategory.TemplateVariable => FormatDefinitions.SpecialName,
-                TextSpanCategory.CompileTime => FormatDefinitions.CompileTimeName,
+                TextSpanCategory.CompileTimeVariable => FormatDefinitions.SpecialName,
+                TextSpanCategory.RunTime => FormatDefinitions.CompileTimeName,
                 _ => null
             };
 

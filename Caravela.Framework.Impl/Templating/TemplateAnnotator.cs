@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
-        public TemplateAnnotator(CSharpCompilation compilation, SemanticAnnotationMap semanticAnnotationMap)
+        public TemplateAnnotator(CSharpCompilation compilation, SemanticAnnotationMap semanticAnnotationMap) 
         {
             this._symbolScopeClassifier = new SymbolClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
@@ -584,7 +584,7 @@ namespace Caravela.Framework.Impl.Templating
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanCategory.TemplateVariable ),
+                        node.Identifier.AddColoringAnnotation( TextSpanCategory.CompileTimeVariable ),
                         node.InKeyword,
                         annotatedExpression,
                         node.CloseParenToken,
@@ -705,7 +705,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 transformedNode =
                     transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.TemplateVariable ) );
+                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.CompileTimeVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

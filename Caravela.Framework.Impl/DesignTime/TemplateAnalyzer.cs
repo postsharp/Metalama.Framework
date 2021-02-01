@@ -78,32 +78,7 @@ namespace Caravela.Framework.DesignTime
 
         private static void Analyze( SemanticModel semanticModel,  Action<Diagnostic> reportDiagnostic, CancellationToken cancellationToken )
         {
-            if ( !ProjectDesignTimeEntryPoint.Instance.HasTemplateHighlightingUpdatedClient )
-            {
-                // Nobody is interested.
-                return;
-            }
-
-            var diagnostics = new List<Diagnostic>();
-            var templateCompiler = new TemplateCompiler();
-
-
-            templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot( cancellationToken ),
-                semanticModel, diagnostics, out var annotatedSyntaxRoot );
-
-            if ( annotatedSyntaxRoot != null )
-            {
-                foreach ( var diagnostic in diagnostics )
-                {
-                    reportDiagnostic( diagnostic );
-                }
-
-                var text = semanticModel.SyntaxTree.GetText( cancellationToken );
-                CompileTimeTextSpanMarker marker = new CompileTimeTextSpanMarker( text );
-
-                ProjectDesignTimeEntryPoint.Instance.SignalTemplateHighlightingUpdated( new TemplateHighlightingInfo( text, marker.Classifier ) );
-
-            }
+           
         }
     }
 }

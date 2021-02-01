@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly SourceText _sourceText;
 
         private bool _isInTemplate;
-
+        
         public CompileTimeTextSpanMarker( SourceText sourceText)
         {
             this._sourceText = sourceText;
@@ -40,11 +40,16 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+       
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
             if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
             {
                 this._isInTemplate = true;
+
+                // The code is run-time by default in a template method.
+                this.Mark( node.Body, TextSpanCategory.RunTime );
+                this.Mark( node.ExpressionBody, TextSpanCategory.RunTime );
 
                 base.VisitMethodDeclaration( node );
 
@@ -55,10 +60,11 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node, TextSpanCategory.CompileTime );
             }
         }
+                
 
         private void VisitMember( SyntaxNode node )
         {
-        //    this.Mark( node, TextSpanCategory.CompileTime );
+            this.Mark( node, TextSpanCategory.CompileTime );
         }
 
         public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
@@ -111,22 +117,30 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
-                    // This could be overwritten later.
+                    // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanCategory.CompileTime );
                 }
 
-
+                // Mark the node.
                 var colorFromAnnotation = node.GetColorFromAnnotation();
                 if ( colorFromAnnotation != TextSpanCategory.Default )
                 {
                     this.Mark( node, colorFromAnnotation );
                 }
+
             }
 
             base.DefaultVisit( node );
         }
 
-        private void Mark( SyntaxNode node , TextSpanCategory category) => this.Mark( node.Span, category );
+
+        private void Mark( SyntaxNode? node, TextSpanCategory category )
+        {
+            if ( node != null )
+            {
+                this.Mark( node.Span, category );
+            }
+        }
 
         private void Mark( SyntaxToken token, TextSpanCategory category ) => this.Mark( token.Span, category );
 
@@ -176,7 +190,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanCategory.CompileTime );
-                this.Mark( node.Identifier, TextSpanCategory.TemplateVariable );
+                this.Mark( node.Identifier, TextSpanCategory.CompileTimeVariable );
                 this.Visit( node.Expression );
                 this.VisitCompileTimeStatementNode( node.Statement );
             }
@@ -196,5 +210,6 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Visit( statement );
         }
+
     }
 }
