@@ -100,92 +100,10 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                     continue;
                 }
 
+                var snapshotSpan = new SnapshotSpan( snapshot, classifiedSpan.span.Start, classifiedSpan.span.Length );
 
-                // Please, if you suffer from boolean dislexia, don't edit the following code without seriously testing it after your changes!
+                resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
 
-                string text = snapshot.GetText( classifiedSpan.span.Start, classifiedSpan.span.Length );
-
-                if ( string.IsNullOrWhiteSpace( text ) )
-                {
-                    // This is a trivia.
-                    continue;
-                }
-
-                int start = classifiedSpan.span.Start;
-                int length = classifiedSpan.span.Length;
-
-                int lineStart = start;
-                int lineLength = 0;
-                bool isNewLine = true;
-                bool ignoreUntilNewLine = false;
-
-
-                void AddSpanForLastLine()
-                {
-                    // Trim the end of the line.
-                    for ( int i = lineLength - 1; i >= 0; i-- )
-                    {
-                        if ( char.IsWhiteSpace( text[i] ) )
-                        {
-                            lineLength--;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    // Emit a span for the line.
-                    if ( lineLength > 0 )
-                    {
-                        var snapshotSpan = new SnapshotSpan( snapshot, lineStart, lineLength );
-
-                        resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
-                    }
-                }
-
-
-                // Split the tagged text into lines and trim the spaces in the beginning of each line.
-                for ( int i = 0; i < length; i++ )
-                {
-                    // `i==0` corresponds to the beginning of the _span_.
-
-                    char c = text[i];
-
-                    if ( c == '\n' || c == '\r' )
-                    {
-                        AddSpanForLastLine();
-
-                        lineStart = start + i + 1;
-                        lineLength = 0;
-                        isNewLine = true;
-                        ignoreUntilNewLine = false;
-                    }
-                    else if ( isNewLine && char.IsWhiteSpace( c ) )
-                    {
-                        lineStart++;
-                    }
-                    else
-                    {
-                        isNewLine = false;
-
-                        if ( c == '/' && i < length - 1 && text[i] == '/' )
-                        {
-                            // Comment line. Ignore the rest of the line.
-                            AddSpanForLastLine();
-
-                            ignoreUntilNewLine = true;
-                        }
-                        else if ( !ignoreUntilNewLine )
-                        {
-                            lineLength++;
-                            isNewLine = false;
-                        }
-                    }
-
-                }
-
-                AddSpanForLastLine();
 
             }
 
@@ -241,7 +159,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                 TextSpanCategory.Dynamic => FormatDefinitions.SpecialName,
                 TextSpanCategory.TemplateKeyword => FormatDefinitions.SpecialName,
                 TextSpanCategory.CompileTimeVariable => FormatDefinitions.SpecialName,
-                TextSpanCategory.RunTime => FormatDefinitions.CompileTimeName,
+                TextSpanCategory.CompileTime => FormatDefinitions.CompileTimeName,
                 _ => null
             };
 

@@ -20,18 +20,27 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly TextSpanClassifier _textSpans = new TextSpanClassifier();
         private readonly SourceText _sourceText;
+        private readonly string _sourceString;
 
         private bool _isInTemplate;
         
         public CompileTimeTextSpanMarker( SourceText sourceText)
         {
             this._sourceText = sourceText;
+            this._sourceString = sourceText.ToString();
         }
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
             if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
+                this.Mark( node.Modifiers, TextSpanCategory.CompileTime, true );
+                this.Mark( node.Keyword, TextSpanCategory.CompileTime, true );
+                this.Mark( node.OpenBraceToken, TextSpanCategory.CompileTime);
+                this.Mark( node.CloseBraceToken, TextSpanCategory.CompileTime);
+                this.Mark( node.ConstraintClauses, TextSpanCategory.CompileTime, true );
+                this.Mark( node.Identifier, TextSpanCategory.CompileTime, true );
+                this.Mark( node.BaseList, TextSpanCategory.CompileTime, true );
                 base.VisitClassDeclaration( node );
             }
             else
@@ -46,6 +55,17 @@ namespace Caravela.Framework.Impl.Templating
             if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
             {
                 this._isInTemplate = true;
+
+                this.Mark( node.ReturnType, TextSpanCategory.CompileTime, true );
+                this.Mark( node.Identifier, TextSpanCategory.CompileTime, true );
+                this.Mark( node.ParameterList, TextSpanCategory.CompileTime, true );
+                this.Mark( node.Modifiers, TextSpanCategory.CompileTime, true );
+                if ( node.Body != null )
+                {
+                    this.Mark( node.Body.OpenBraceToken, TextSpanCategory.CompileTime );
+                    this.Mark( node.Body.CloseBraceToken, TextSpanCategory.CompileTime );
+                }
+                
 
                 // The code is run-time by default in a template method.
                 this.Mark( node.Body, TextSpanCategory.RunTime );
@@ -134,16 +154,69 @@ namespace Caravela.Framework.Impl.Templating
         }
 
 
-        private void Mark( SyntaxNode? node, TextSpanCategory category )
+        private void Mark( SyntaxNode? node, TextSpanCategory category, bool includeTrivias = false )
         {
             if ( node != null )
             {
-                this.Mark( node.Span, category );
+                this.Mark(  node.Span, category );
+
+                if ( includeTrivias )
+                {
+                    this.Mark( node.GetLeadingTrivia(), category );
+                    this.Mark( node.GetTrailingTrivia(), category );
+                }
             }
         }
 
-        private void Mark( SyntaxToken token, TextSpanCategory category ) => this.Mark( token.Span, category );
+        private void Mark( SyntaxTokenList list, TextSpanCategory category, bool includeTrivias = false )
+        {
+            foreach ( var item in list)
+            {
+                this.Mark( item, category, includeTrivias );
+            }
+        }
 
+        private void Mark<T>( SyntaxList<T> list, TextSpanCategory category, bool includeTrivias = false ) where T : SyntaxNode
+        {
+            foreach ( var item in list )
+            {
+                this.Mark( item, category, includeTrivias );
+            }
+        }
+
+
+        private void Mark( SyntaxToken token, TextSpanCategory category, bool includeTrivias = false )
+        {
+                this.Mark( token.Span, category );
+
+            if ( includeTrivias )
+            {
+                this.Mark( token.LeadingTrivia, category );
+                this.Mark( token.TrailingTrivia, category );
+            }
+        }
+
+        private void Mark( SyntaxTriviaList triviaList, TextSpanCategory category )
+        {
+            foreach ( var trivia in triviaList )
+            {
+                char previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
+                int triviaStart = trivia.Span.Start;
+
+
+                // If we have an identing trivia, trim the start of the span.
+                if ( previousChar == '\n' || previousChar == '\r' )
+                {
+                    // Trim the trivia if it starts with an end line.
+                    for ( ; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
+                }
+
+                if ( triviaStart != trivia.Span.End )
+                {
+                    this._textSpans.Mark( TextSpan.FromBounds( triviaStart, trivia.Span.End ), category );
+                }
+            }
+        }
 
         private void Mark( TextSpan span, TextSpanCategory category )
         {
