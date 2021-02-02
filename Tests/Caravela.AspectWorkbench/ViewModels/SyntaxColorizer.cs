@@ -96,7 +96,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         #endregion
 
-        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, ITextSpanClassifier metaSpans )
+        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection metaSpans )
         {
             static Color WithAlpha( Color brush, double alpha ) =>
                  Color.FromArgb( (byte) (255*alpha), brush.R, brush.G, brush.B ) ;
@@ -119,14 +119,14 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 Color foreground, background;
                 FontWeight fontWeight;
-                var category =  metaSpans?.GetCategory( range.TextSpan ) ?? TextSpanCategory.Default;
+                var category =  metaSpans?.GetCategory( range.TextSpan ) ?? TextSpanClassification.Default;
 
                 // Choose foreground.
                 switch ( category )
                 {
-                    case TextSpanCategory.TemplateKeyword:
-                    case TextSpanCategory.CompileTimeVariable:
-                    case TextSpanCategory.Dynamic:
+                    case TextSpanClassification.TemplateKeyword:
+                    case TextSpanClassification.CompileTimeVariable:
+                    case TextSpanClassification.Dynamic:
                         foreground  = Colors.Fuchsia;
                         fontWeight = FontWeights.Heavy;
                         break;
@@ -149,10 +149,10 @@ namespace Caravela.AspectWorkbench.ViewModels
                 // Choose background.
                 switch ( category )
                 {
-                    case TextSpanCategory.TemplateKeyword:
-                    case TextSpanCategory.CompileTimeVariable:
-                    case TextSpanCategory.CompileTime:
-                    case TextSpanCategory.Dynamic:
+                    case TextSpanClassification.TemplateKeyword:
+                    case TextSpanClassification.CompileTimeVariable:
+                    case TextSpanClassification.CompileTime:
+                    case TextSpanClassification.Dynamic:
                         background = WithAlpha( Colors.SlateGray, 0.2 );
                         break;
                         

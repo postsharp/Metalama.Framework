@@ -1,6 +1,6 @@
 namespace Caravela.Framework.DesignTime.Contracts
 {
-    public enum TextSpanCategory
+    public enum TextSpanClassification
     {
         // Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
 
@@ -10,19 +10,14 @@ namespace Caravela.Framework.DesignTime.Contracts
         Default,
 
         /// <summary>
-        /// Run-time code in a template.
+        /// Run-time code.
         /// </summary>
         RunTime,
 
         /// <summary>
-        /// Compile-time in a template.
+        /// Compile-time code.
         /// </summary>
         CompileTime,
-
-        /// <summary>
-        /// COmment in a template.
-        /// </summary>
-        Comment,
 
         /// <summary>
         /// Dynamic member.
@@ -30,17 +25,17 @@ namespace Caravela.Framework.DesignTime.Contracts
         Dynamic,
 
         /// <summary>
-        /// Compile-time variable in a template.
+        /// Compile-time variable.
         /// </summary>
         CompileTimeVariable,
 
         /// <summary>
-        /// Keyword-like member in a template.
+        /// Keyword-like member.
         /// </summary>
         TemplateKeyword,
 
         /// <summary>
-        /// A text span has several categories.
+        /// A text span has several categories (not implemented).
         /// </summary>
         Conflict 
     }

@@ -7,6 +7,7 @@
     <RootNamespace>Caravela.Framework.DesignTime.Vsix</RootNamespace>
     <AssemblyName>Caravela.Framework.DesignTime.Vsix</AssemblyName>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,6 +25,7 @@
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="16.0.206" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.1.192" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+    <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs" />
   </ItemGroup>
 
   <PropertyGroup>

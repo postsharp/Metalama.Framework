@@ -379,13 +379,13 @@ namespace Caravela.Framework.Impl.Templating
                      symbol.GetAttributes().Any( a =>
                          a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.TemplateKeyword );
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
                           (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) )
                 {
                     // Annotate dynamic members differently for syntax coloring.
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Dynamic );
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
                 }
             }
 
@@ -584,7 +584,7 @@ namespace Caravela.Framework.Impl.Templating
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanCategory.CompileTimeVariable ),
+                        node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
                         node.InKeyword,
                         annotatedExpression,
                         node.CloseParenToken,
@@ -705,7 +705,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 transformedNode =
                     transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.CompileTimeVariable ) );
+                        transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

@@ -1,227 +1,353 @@
 using Caravela.Framework.DesignTime.Contracts;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Diagnostics;
-using System.Text;
+using System.Collections.Immutable;
+using Caravela.Framework.Impl.CompileTime;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
- 
-    
+    // TODO: This class is essentially a UI concern so it should be moved into a different assembly e.g. DesignTime.
+
     /// <summary>
-    /// A set of <see cref="TextSpan"/>. 
+    /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
+    /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    sealed class TextSpanClassifier : ITextSpanClassifier
+    public sealed class TextSpanClassifier : CSharpSyntaxWalker
     {
+        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new ClassifiedTextSpanCollection();
+        private readonly SourceText _sourceText;
+        private readonly string _sourceString;
+        private bool _isInTemplate;
+        private readonly MarkAllChildrenWalker _markAllChildrenWalker;
+        
+        public TextSpanClassifier( SourceText sourceText)
+        {
+            this._sourceText = sourceText;
+            this._sourceString = sourceText.ToString();
+            this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
+        }
         
         
-        private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new SkipListIndexedDictionary<int, MarkedTextSpan>();
+        public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;
 
-        public TextSpanClassifier()
-        {
-            // Start with a single default span. This avoid gaps in the partition later.
-            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanCategory.Default ) );
-        }
 
-        /// <summary>
-        /// Adds a marked <see cref="TextSpan"/>.
-        /// </summary>
-        /// <param name="span"></param>
-        internal void Mark( in TextSpan span, TextSpanCategory category )
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            for ( int i = 0; ;i++ )
+            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
-                if ( i > 4 )
-                    throw new AssertionFailedException();
-                    
-                if ( this._spans.TryGetClosestValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
-                {
-                    // Check if we have an exact span. If not, we will partition.
-                    if ( previousStartSpan.Span.Equals( span )  )
-                    {
-                        // We have an exact span, so no need to partition.
-                        
-                        if ( previousStartSpan.Category < category )
-                        {
-                            // The new span contains the old one and is stronger, so we replace the new one 
-                            // by the old one.
-                            this._spans.Set( span.Start, new MarkedTextSpan( span, category ) );
-                        }
-
-                        return;
-                    }
-
-                    // If the new span is contained in a span of weaker category, there is nothing to do.
-                    if ( previousStartSpan.Category > category && previousStartSpan.Span.Contains(span))
-                    {
-                        return;
-                    }
-
-                    // We need to partition the existing spans to the new span boundaries.
-                    if ( span.Start == previousStartSpan.Span.Start )
-                    {
-                        // We have hit an existing span start. Check if we need to partition the end.
-                        if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.End != span.End && previousEndSpan.Span.Start != span.End )
-                        {
-                            // We have to split the existing span that conflicts with the end of the new span.
-                            var (a, b) = Split( previousEndSpan, span.End );
-                            this._spans.Set( a.Span.Start, a );
-                            this._spans.Add( b.Span.Start, b );
-
-                        }
-                        else
-                        {
-                            // We have a partition of existing spans than matches the boundaries of the new span.
-                            // Check all
-
-                            foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( span.Start ) )
-                            {
-                                if ( pair.Value.Span.Start >= span.End )
-                                {
-                                    break;
-                                }
-                                
-                                if ( pair.Value.Category < category )
-                                {
-                                    // Replace the category of this node.
-                                    this._spans.Set( pair.Key, new MarkedTextSpan( pair.Value.Span, category ) );
-                                }
-                            }
-
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        // The situation is more complex. We will split the old span in a partition so
-                        // that we are back to a simple situation.
-
-                        var (a, b) = Split( previousStartSpan, span.Start );
-                        this._spans.Set( a.Span.Start, a );
-
-                        if ( b.Span.Contains( span.End ) )
-                        {
-                            var (c, d) = Split( b, span.End );
-                            this._spans.Add( c.Span.Start, c );
-                            this._spans.Add( d.Span.Start, d );
-                        }
-                        else
-                        {
-                            this._spans.Add( b.Span.Start, b );
-                        }
-                    }
-
-                    
-                }
-                else if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
-                {
-                    // An existing span intersects with the end. Split it and retry.
-
-                    var (a, b) = Split( previousStartSpan, span.Start );
-                    this._spans.Set( a.Span.Start, a );
-                    this._spans.Add( b.Span.Start, b );
-
-                }
-                else
-                {
-                    // We cannot get here because we start with a whole partition.
-                    throw new AssertionFailedException();
-                }
-
-               
-            }
-        }
-
-        private static ( MarkedTextSpan, MarkedTextSpan ) Split( in MarkedTextSpan textSpan, int splitPosition )
-        {
-            if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
-                throw new ArgumentException( nameof(splitPosition) );
-            
-            return (new MarkedTextSpan( TextSpan.FromBounds(  textSpan.Span.Start, splitPosition ), textSpan.Category ),
-                new MarkedTextSpan( TextSpan.FromBounds(  splitPosition, textSpan.Span.End ),
-                    textSpan.Category ));
-        }
-
-
-        public TextSpanCategory GetCategory( in TextSpan textSpan )
-        {
-            if ( this._spans.TryGetClosestValue( textSpan.Start, out var markedTextSpan ))
-            {
-                if ( markedTextSpan.Span.Contains( textSpan ) )
-                {
-                    return markedTextSpan.Category;
-                }
-                else
-                {
-                    return TextSpanCategory.Conflict;
-                }
-                
+                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+                this.Mark( node.Keyword, TextSpanClassification.CompileTime);
+                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime);
+                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime);
+                this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
+                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
+                this.Mark( node.BaseList, TextSpanClassification.CompileTime );
+                base.VisitClassDeclaration( node );
             }
             else
             {
-                // This should not happen because our partition covers [0,int.MaxValue]
-                return TextSpanCategory.Default;
+                // We don't process the type at all.
             }
         }
 
-        public IEnumerable<(TextSpan span, TextSpanCategory category)> GetClassifiedSpans( TextSpan textSpan)
+       
+        public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-             
-            // TODO: Merge contiguous spans of the same category.
-            
-            foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
+            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
             {
-                var classifiedSpan = pair.Value;
-                if (  classifiedSpan.Category != TextSpanCategory.Default )
-                {
-                    yield return (classifiedSpan.Span, classifiedSpan.Category);
-                }
+                this._isInTemplate = true;
 
-                if ( classifiedSpan.Span.End >= textSpan.End )
+                this.Mark( node.ReturnType, TextSpanClassification.CompileTime);
+                this.Mark( node.Identifier, TextSpanClassification.CompileTime);
+                this.Mark( node.ParameterList, TextSpanClassification.CompileTime);
+                this.Mark( node.Modifiers, TextSpanClassification.CompileTime);
+                if ( node.Body != null )
                 {
-                    yield break;
+                    this.Mark( node.Body.OpenBraceToken, TextSpanClassification.CompileTime );
+                    this.Mark( node.Body.CloseBraceToken, TextSpanClassification.CompileTime );
                 }
-            }
                 
+
+                // The code is run-time by default in a template method.
+                this.Mark( node.Body, TextSpanClassification.RunTime );
+                this.Mark( node.ExpressionBody, TextSpanClassification.RunTime );
+
+                base.VisitMethodDeclaration( node );
+
+                this._isInTemplate = false;
+            }
+            else
+            {
+                this.Mark( node, TextSpanClassification.CompileTime );
+            }
+        }
+                
+
+        private void VisitMember( SyntaxNode node )
+        {
+            this.Mark( node, TextSpanClassification.CompileTime );
         }
 
-
-        public override string ToString()
+        public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
         {
-            // Used for unit testing. Don't change the rendering logic.
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append( "{ " );
-            foreach ( var pair in this._spans )
+            this.VisitMember( node );
+        }
+
+        public override void VisitEventDeclaration( EventDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+        {
+            this.VisitMember( node );
+        }
+
+        public override void VisitToken( SyntaxToken token )
+        {
+            if ( this._isInTemplate )
             {
-                if ( stringBuilder.Length > 2 )
+                var colorFromAnnotation = token.GetColorFromAnnotation();
+                if ( colorFromAnnotation != TextSpanClassification.Default )
                 {
-                    stringBuilder.Append( ", " );
+                    this.Mark( token, colorFromAnnotation );
+                }
+            }
+
+        }
+
+        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
+        {
+            base.VisitVariableDeclarator( node );
+
+            var colorFromAnnotation = node.Identifier.GetColorFromAnnotation();
+            if ( colorFromAnnotation != TextSpanClassification.Default )
+            {
+                this.Mark( node.Identifier, colorFromAnnotation );
+            }
+        }
+
+        public override void DefaultVisit( SyntaxNode node )
+        {
+            if ( this._isInTemplate )
+            {
+                if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    // This can be overwritten later in a child node.
+                    this.Mark( node, TextSpanClassification.CompileTime );
                 }
 
-                stringBuilder.Append( pair.Value.ToString() );
+                // Mark the node.
+                var colorFromAnnotation = node.GetColorFromAnnotation();
+                if ( colorFromAnnotation != TextSpanClassification.Default )
+                {
+                    this.Mark( node, colorFromAnnotation );
+                }
+
             }
-            stringBuilder.Append( " } ");
 
-            return stringBuilder.ToString();
+            base.DefaultVisit( node );
         }
-    }
 
-    public readonly struct MarkedTextSpan
-    {
-        public TextSpan Span { get; }
-        public TextSpanCategory Category { get; }
 
-        internal MarkedTextSpan( in TextSpan span, TextSpanCategory category )
+        private void Mark( SyntaxNode? node, TextSpanClassification classification )
         {
-            this.Span = span;
-            this.Category = category;
+            if ( node != null )
+            {
+                this._markAllChildrenWalker.MarkAll( node, classification );
+            }
         }
 
-        public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Category;
-    }
+        private void Mark( SyntaxTokenList list, TextSpanClassification classification )
+        {
+            foreach ( var item in list)
+            {
+                this.Mark( item, classification );
+            }
+        }
 
-    
+        private void Mark<T>( SyntaxList<T> list, TextSpanClassification classification ) where T : SyntaxNode
+        {
+            foreach ( var item in list )
+            {
+                this.Mark( item, classification );
+            }
+        }
+
+
+        private void Mark( SyntaxToken token, TextSpanClassification classification )
+        {
+            this.Mark( token.Span, classification );
+
+            if ( ShouldMarkTrivias( classification ) )
+            {
+                this.Mark( token.LeadingTrivia, classification );
+                this.Mark( token.TrailingTrivia, classification );
+            }
+        }
+
+        private void Mark( SyntaxTriviaList triviaList, TextSpanClassification classification )
+        {
+            foreach ( var trivia in triviaList )
+            {
+                if ( trivia.Kind() == SyntaxKind.SingleLineCommentTrivia ||
+                     trivia.Kind() == SyntaxKind.MultiLineCommentTrivia )
+                {
+                    // Don't highlight comments.
+                    continue;
+                }
+                    
+                char previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
+                int triviaStart = trivia.Span.Start;
+                
+                
+
+
+                // If we have an indenting trivia, trim the start of the span.
+                if ( previousChar == '\n' || previousChar == '\r' )
+                {
+                    // Trim the trivia if it starts with an end line.
+                    for ( ; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
+                }
+
+                if ( triviaStart != trivia.Span.End )
+                {
+                    this._classifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, trivia.Span.End ), classification );
+                }
+            }
+        }
+
+        private void Mark( TextSpan span, TextSpanClassification classification )
+        {
+            if ( span.IsEmpty )
+            {
+                return;
+            }
+
+#if DEBUG
+
+            var text = this._sourceText.GetSubText( span ).ToString();
+#endif
+
+            this._classifiedTextSpans.Add( span, classification );
+        }
+
+        public override void VisitLiteralExpression( LiteralExpressionSyntax node )
+        {
+            // We don't mark literals that are not a part of larger compile-time expressions because it does not bring anything useful.
+        }
+
+        public override void VisitIfStatement( IfStatementSyntax node )
+        {
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
+                this.Visit( node.Condition );
+                this.VisitCompileTimeStatementNode( node.Statement );
+
+                if ( node.Else != null )
+                {
+                    this.Mark( node.Else.ElseKeyword, TextSpanClassification.CompileTime );
+                    this.VisitCompileTimeStatementNode( node.Else.Statement );
+                }
+            }
+            else
+            {
+                base.VisitIfStatement( node );
+            }
+        }
+
+        public override void VisitForEachStatement( ForEachStatementSyntax node )
+        {
+            if ( this._isInTemplate && node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
+                this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );
+                this.Visit( node.Expression );
+                this.VisitCompileTimeStatementNode( node.Statement );
+            }
+            else
+            {
+                base.VisitForEachStatement( node );
+            }
+        }
+
+        private void VisitCompileTimeStatementNode( StatementSyntax statement )
+        {
+            if ( statement is BlockSyntax block )
+            {
+                this.Mark( block.OpenBraceToken, TextSpanClassification.CompileTime );
+                this.Mark( block.CloseBraceToken, TextSpanClassification.CompileTime );
+            }
+
+            this.Visit( statement );
+        }
+
+        static bool ShouldMarkTrivias( TextSpanClassification classification ) =>
+            classification switch
+            {
+                TextSpanClassification.CompileTime => true,
+                TextSpanClassification.RunTime => true,
+                _ => false
+            };
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        class MarkAllChildrenWalker : CSharpSyntaxWalker
+        {
+            private TextSpanClassification _classification;
+            private TextSpanClassifier _parent;
+
+            public MarkAllChildrenWalker( TextSpanClassifier parent ) : base( SyntaxWalkerDepth.StructuredTrivia )
+            {
+                this._parent = parent;
+            }
+
+            public void MarkAll( SyntaxNode node, TextSpanClassification classification )
+            {
+                this._classification = classification;
+                this.Visit( node );
+            }
+
+            public override void DefaultVisit( SyntaxNode node )
+            {
+                foreach ( var child in node.ChildNodesAndTokens() )
+                {
+                    if ( child.IsNode )
+                    {
+                        this.Visit( child.AsNode() );
+                    }
+                    else
+                    {
+                        this._parent.Mark( child.AsToken(), this._classification );
+                    }
+                }
+
+                if ( ShouldMarkTrivias( this._classification ) )
+                {
+
+                    this._parent.Mark( node.GetLeadingTrivia(), this._classification );
+                    this._parent.Mark( node.GetTrailingTrivia(), this._classification );
+                }
+                else
+                {
+                    // We don't highlight the trivia of "special" spans because they are typically keyword-like.
+                }
+            }
+            
+        }
+
+    }
 }

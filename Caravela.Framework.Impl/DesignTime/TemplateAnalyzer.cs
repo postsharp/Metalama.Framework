@@ -23,7 +23,7 @@ namespace Caravela.Framework.DesignTime
 
         static TemplateAnalyzer()
         {
-            ProjectDesignTimeEntryPoint.Initialize();
+            CompilerServiceProvider.Initialize();
         }
 
         public TemplateAnalyzer()

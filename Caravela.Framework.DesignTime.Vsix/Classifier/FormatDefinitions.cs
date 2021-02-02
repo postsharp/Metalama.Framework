@@ -8,18 +8,17 @@ using System.Windows.Media;
 namespace Caravela.Framework.DesignTime.Vsix.Classifier
 {
 
-    internal class FormatDefinitions
+    internal static class FormatDefinitions
     {
-        private const string _priority = PredefinedClassificationTypeNames.Identifier;
         public const string CompileTimeName = "Caravela/CompileTime";
         public const string SpecialName = "Caravela/Special";
 
 
         [Export( typeof( ClassificationTypeDefinition ) ), Name( CompileTimeName )]
-        internal static ClassificationTypeDefinition CompileTime;
+        internal static ClassificationTypeDefinition? CompileTime;
 
         [Export( typeof( ClassificationTypeDefinition ) ), Name( SpecialName )]
-        internal static ClassificationTypeDefinition Special;
+        internal static ClassificationTypeDefinition? Special;
 
         [Export( typeof( EditorFormatDefinition ) ), Name( CompileTimeName ), UserVisible( true )]
         [ClassificationType( ClassificationTypeNames = CompileTimeName ), Order( Before = Priority.High )]
@@ -36,16 +35,12 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             public SpecialFormatDefinition()
                 : base( $"Magic Template Code", background: Colors.Yellow ) { }
         }
-
-
         
         private abstract class FormatDefinition : ClassificationFormatDefinition
         {
 
             protected FormatDefinition( string displayName,  Color? background = null, double? backgroundOpacity = null ) : base()
             {
-
-
                 // Foreground color and font weight is overwritten and I didn't find an order/priority that would prevent that.
                 // Specifically, color/font for static symbols is overwritten.
 

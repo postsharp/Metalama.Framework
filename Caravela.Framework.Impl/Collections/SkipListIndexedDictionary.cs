@@ -13,7 +13,7 @@ using System.Text;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 
-namespace Caravela.Framework.Impl.Templating
+namespace Caravela.Framework.Impl.Collections
 {
     /// <summary>
     /// Represents a SkipList.  A SkipList is a combination of a BST and a sorted link list, providing
@@ -648,13 +648,13 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         sb.Append(", ");
                     }
-                    if (GetNeighbor(i) == null)
+                    if (this.GetNeighbor(i) == null)
                     {
                         sb.Append("null");
                     }
                     else
                     {
-                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", GetNeighbor(i).TargetNode.Key, GetNeighbor(i).Width));
+                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", this.GetNeighbor(i).TargetNode.Key, this.GetNeighbor(i).Width));
                     }
                 }
                 sb.Append('}');

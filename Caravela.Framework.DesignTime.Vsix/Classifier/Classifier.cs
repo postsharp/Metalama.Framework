@@ -16,16 +16,16 @@ using System.Threading.Tasks;
 
 namespace Caravela.Framework.DesignTime.Vsix.Classifier
 {
-    internal sealed partial class Classifier : IClassifier, IDisposable
+    internal sealed class Classifier : IClassifier, IDisposable
     {
         private readonly IClassificationTypeRegistryService _registryService;
         private static readonly IList<ClassificationSpan> _emptyList = new List<ClassificationSpan>( 0 ).AsReadOnly();
 
-        private Document _document;
-        private Task<ITextSpanClassifier> _lastGetClassifierTask;
-        private ITextSnapshot _snapshot;
+        private Document? _document;
+        private Task<IReadOnlyClassifiedTextSpanCollection?>? _lastGetClassificationsTask;
+        private ITextSnapshot? _snapshot;
         readonly ConcurrentQueue<SnapshotSpan> _spansQueue = new ConcurrentQueue<SnapshotSpan>();
-        CancellationTokenSource _cancellationTokenSource;
+        CancellationTokenSource? _cancellationTokenSource;
 
         public Classifier( ITextBuffer textBuffer, IClassificationTypeRegistryService registryService )
         {
@@ -46,7 +46,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         }
 
 #pragma warning disable CS0067
-        public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
+        public event EventHandler<ClassificationChangedEventArgs>? ClassificationChanged;
 #pragma warning restore CS0067
 
         IList<ClassificationSpan> IClassifier.GetClassificationSpans( SnapshotSpan span )
@@ -68,12 +68,12 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                 this._document = document;
                 this._snapshot = snapshot;
 
-                this._lastGetClassifierTask = Task.Run( () => this.GetSpansAsync( document, this._cancellationTokenSource.Token ) );
+                this._lastGetClassificationsTask = Task.Run( () => this.GetClassificationsAsync( document, this._cancellationTokenSource.Token ) );
                 
                 // We start a new task here. It will not be completed synchronously so we fall back to the next block.
             }
 
-            if ( !this._lastGetClassifierTask.IsCompleted )
+            if ( this._lastGetClassificationsTask == null || !this._lastGetClassificationsTask.IsCompleted )
             {
                 // The task is not yet complete.
                 // We will raise ClassificationChanged when we will be done.
@@ -82,25 +82,25 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             }
 
 
-            var classifier = this._lastGetClassifierTask.Result;
+            var classifier = this._lastGetClassificationsTask.Result;
 
             if ( classifier == null )
             {
                 return _emptyList;
             }
 
-            List<ClassificationSpan> resultList = new List<ClassificationSpan>();
+            var resultList = new List<ClassificationSpan>();
 
             foreach ( var classifiedSpan in classifier.GetClassifiedSpans( new TextSpan( span.Start, span.Length ) ) )
             {
-                var classificationType = this.GetClassificationType( classifiedSpan.category );
+                var classificationType = this.GetClassificationType( classifiedSpan.Classification );
 
                 if ( classificationType == null )
                 {
                     continue;
                 }
 
-                var snapshotSpan = new SnapshotSpan( snapshot, classifiedSpan.span.Start, classifiedSpan.span.Length );
+                var snapshotSpan = new SnapshotSpan( snapshot, classifiedSpan.Span.Start, classifiedSpan.Span.Length );
 
                 resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
 
@@ -116,12 +116,14 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
         
 
-        private async Task<ITextSpanClassifier> GetSpansAsync( Document document, CancellationToken cancellationToken )
+        private async Task<IReadOnlyClassifiedTextSpanCollection?> GetClassificationsAsync( Document document, CancellationToken cancellationToken )
         {
 
-            var entryPoint = await DesignTimeEntryPointManager.GetDesignTimeEntryPoint( document.Project, cancellationToken );
+            var entryPoint = await DesignTimeEntryPointManager.GetServiceProviderAsync( document.Project, cancellationToken );
 
-            if ( entryPoint == null )
+            var classificationService = entryPoint?.GetCompilerService<IClassificationService>();
+            
+            if ( classificationService == null )
             {
                 // Unsupported project.
                 return null;
@@ -130,17 +132,18 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             var model = await document.GetSemanticModelAsync( cancellationToken );
             var root = await document.GetSyntaxRootAsync( cancellationToken );
 
-            var projectEntryPoint = entryPoint.GetCompilerService<IProjectDesignTimeEntryPoint>();
+            if ( model == null || root == null )
+            {
+                return null;
+            }
+          
 
-            if ( projectEntryPoint.TryGetTextSpanClassifier( model, root, out var classifier ) )
+            if ( classificationService.TryGetClassifiedTextSpans( model, root, out var classifier ) )
             {
                 // Notify that we now have data for these spans.
-                if ( this.ClassificationChanged != null )
+                foreach ( var span in this._spansQueue )
                 {
-                    foreach ( var span in this._spansQueue )
-                    {
-                        this.ClassificationChanged?.Invoke( this, new ClassificationChangedEventArgs( span )  );
-                    }
+                    this.ClassificationChanged?.Invoke( this, new ClassificationChangedEventArgs( span )  );
                 }
 
                 return classifier;
@@ -152,14 +155,14 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
         }
 
-        private IClassificationType GetClassificationType( TextSpanCategory category )
+        private IClassificationType? GetClassificationType( TextSpanClassification classification )
         {
-            string name = category switch
+            string? name = classification switch
             {
-                TextSpanCategory.Dynamic => FormatDefinitions.SpecialName,
-                TextSpanCategory.TemplateKeyword => FormatDefinitions.SpecialName,
-                TextSpanCategory.CompileTimeVariable => FormatDefinitions.SpecialName,
-                TextSpanCategory.CompileTime => FormatDefinitions.CompileTimeName,
+                TextSpanClassification.Dynamic => FormatDefinitions.SpecialName,
+                TextSpanClassification.TemplateKeyword => FormatDefinitions.SpecialName,
+                TextSpanClassification.CompileTimeVariable => FormatDefinitions.SpecialName,
+                TextSpanClassification.CompileTime => FormatDefinitions.CompileTimeName,
                 _ => null
             };
 
@@ -173,7 +176,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

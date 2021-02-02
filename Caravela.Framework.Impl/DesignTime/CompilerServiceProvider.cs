@@ -8,16 +8,16 @@ using System.Linq;
 
 namespace Caravela.Framework.DesignTime
 {
-    internal class ProjectDesignTimeEntryPoint : IDesignTimeEntryPoint, IProjectDesignTimeEntryPoint
+    internal class CompilerServiceProvider : ICompilerServiceProvider, IClassificationService
     {
-        public static readonly ProjectDesignTimeEntryPoint Instance = new ProjectDesignTimeEntryPoint();
+        public static readonly CompilerServiceProvider Instance = new CompilerServiceProvider();
 
-        static ProjectDesignTimeEntryPoint()
+        static CompilerServiceProvider()
         {
-            DesignTimeEntryPointManager.RegisterEntryPoint( Instance );
+            DesignTimeEntryPointManager.RegisterServiceProvider( Instance );
         }
 
-        public ProjectDesignTimeEntryPoint()
+        public CompilerServiceProvider()
         {
             this.Version = this.GetType().Assembly.GetName().Version;
         }
@@ -31,11 +31,11 @@ namespace Caravela.Framework.DesignTime
       
         public Version Version { get; }
     
-        public T? GetCompilerService<T>() where T : class => typeof(T) == typeof(IProjectDesignTimeEntryPoint) ? (T) (object) this : null;
+        public T? GetCompilerService<T>() where T : class, ICompilerService => typeof(T) == typeof(IClassificationService) ? (T) (object) this : null;
 
-        public event Action<IDesignTimeEntryPoint> Unloaded;
+        public event Action<ICompilerServiceProvider> Unloaded;
 
-        public bool TryGetTextSpanClassifier( SemanticModel semanticModel, SyntaxNode root, out ITextSpanClassifier classifier )
+        public bool TryGetClassifiedTextSpans( SemanticModel semanticModel, SyntaxNode root, out IReadOnlyClassifiedTextSpanCollection classifiedTextSpans )
         {
             // TODO: if the root is not "our", return false.
             
@@ -49,13 +49,13 @@ namespace Caravela.Framework.DesignTime
             {
               
                 var text = semanticModel.SyntaxTree.GetText( );
-                CompileTimeTextSpanMarker marker = new CompileTimeTextSpanMarker( text );
-                marker.Visit( annotatedSyntaxRoot );
-                classifier = marker.Classifier;
+                TextSpanClassifier classifier = new TextSpanClassifier( text );
+                classifier.Visit( annotatedSyntaxRoot );
+                classifiedTextSpans = classifier.ClassifiedTextSpans;
             }
             else
             {
-                classifier = null;
+                classifiedTextSpans = null;
                 return false;
             }
 
