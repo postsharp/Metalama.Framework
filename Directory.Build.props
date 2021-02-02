@@ -1,4 +1,4 @@
-<Project InitialTargets="CheckPrerequisites">
+<Project>
   <PropertyGroup>
     <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
     <!-- the above stopped working in VS for some reason -->
@@ -15,8 +15,6 @@
     <CaravelaCompilerVersion>3.8.0-preview</CaravelaCompilerVersion>
     <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
     <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
-
-    
 
   </PropertyGroup>
 
@@ -53,8 +51,8 @@
   </Target>
 
   
-  <Target Name="CheckPrerequisites">
-    <Error Text="This solution cannot be built using dotnet build. Use msbuild. This check can be removed after the Vsix project has been moved out of the solution"
+  <Target Name="CheckPrerequisites" BeforeTargets="CoreBuild">
+    <Error Text="This solution cannot be built or restored using 'dotnet'. Use 'msbuild' and 'msbuild /t:Restore'. This check can be removed after the Vsix project has been moved out of the solution"
            Condition="'$(DOTNET_HOST_PATH)'!=''" />
   </Target>
 </Project>
