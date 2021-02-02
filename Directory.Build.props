@@ -1,4 +1,4 @@
-<Project>
+<Project InitialTargets="CheckPrerequisites">
   <PropertyGroup>
     <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
     <!-- the above stopped working in VS for some reason -->
@@ -36,4 +36,9 @@
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>
+
+  <Target Name="CheckPrerequisites">
+    <Error Text="This solution cannot be built using dotnet build. Use msbuild. This check can be removed after the Vsix project has been moved out of the solution"
+           Condition="'$(DOTNET_HOST_PATH)'!=''" />
+  </Target>
 </Project>
