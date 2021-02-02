@@ -1,4 +1,4 @@
-<Project>
+<Project InitialTargets="CheckPrerequisites">
   <PropertyGroup>
     <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
     <!-- the above stopped working in VS for some reason -->
@@ -51,8 +51,8 @@
   </Target>
 
   
-  <Target Name="CheckPrerequisites" BeforeTargets="CoreBuild">
+  <Target Name="CheckPrerequisites">
     <Error Text="This solution cannot be built or restored using 'dotnet'. Use 'msbuild' and 'msbuild /t:Restore'. This check can be removed after the Vsix project has been moved out of the solution"
-           Condition="'$(DOTNET_HOST_PATH)'!=''" />
+           Condition="!Exists('$(MSBuildBinPath)\msbuild.exe')" />
   </Target>
 </Project>
