@@ -50,4 +50,8 @@
     <ProjectReference Update="@(ProjectReference)" Name="%(Filename)" />
   </ItemGroup>
 
+  <Target Name="Pack">
+          <!-- Intentionally disabling packaging for all tests. -->
+  </Target>
+
 </Project>

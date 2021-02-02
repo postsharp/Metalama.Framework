@@ -1,0 +1,5 @@
+<Project InitialTargets="CheckPrerequisites">
+    <Target Name="Pack">
+        <!-- Intentionally disabling packaging for all tests. -->
+    </Target>
+</Project>

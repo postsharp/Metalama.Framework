@@ -17,4 +17,8 @@
     <PackageReference Include="PostSharp.Compiler.Engine" Version="$(PostSharpPackageVersion)" />
   </ItemGroup>
 
+  <Target Name="Pack">
+          <!-- Intentionally disabling packaging for all tests. -->
+  </Target>
+  
 </Project>

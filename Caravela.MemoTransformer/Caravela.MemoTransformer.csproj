@@ -8,5 +8,9 @@
   <ItemGroup>
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
+
+    <Target Name="Pack">
+          <!-- Intentionally disabling packaging for all tests. -->
+    </Target>
   
 </Project>

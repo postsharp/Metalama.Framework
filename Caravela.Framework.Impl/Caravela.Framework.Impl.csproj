@@ -83,4 +83,6 @@ namespace Caravela.Framework.Impl.CompileTime
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
 
+  
+
 </Project>

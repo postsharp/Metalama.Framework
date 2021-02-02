@@ -4,22 +4,33 @@
     <!-- the above stopped working in VS for some reason -->
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
-    <Version>0.1.0-preview-dev.1</Version>
+    <!-- Setting the version. TeamCity defines the environment variable TeamCityBuildNumber -->
+    <MinorVersion>0.1.1</MinorVersion>
+    <Version Condition="'$(Configuration)'=='Release'">$(MinorVersion)-preview</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'==''">0.1.1-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'!=''">0.1.1-dev-$(TeamCityBuildNumber)</Version>
+
+    <!-- Version of dependencies -->
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>3.8.0-preview</CaravelaCompilerVersion>
     <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
     <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
 
+    
+
+  </PropertyGroup>
+
+  <!-- Properties of NuGet packages-->
+  <PropertyGroup>
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
     <PackageTags>PostSharp Caravela AOP</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <PackageIcon>PostSharpIcon.png</PackageIcon>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
+
+  <!-- Content of NuGet packages -->
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
@@ -37,6 +48,11 @@
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>
 
+  <Target Name="PrintVersion">
+    <Message Text="Version=$(Version)"/>
+  </Target>
+
+  
   <Target Name="CheckPrerequisites">
     <Error Text="This solution cannot be built using dotnet build. Use msbuild. This check can be removed after the Vsix project has been moved out of the solution"
            Condition="'$(DOTNET_HOST_PATH)'!=''" />
