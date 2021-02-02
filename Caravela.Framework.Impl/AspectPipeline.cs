@@ -11,6 +11,7 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.IO;
 
 namespace Caravela.Framework.Impl
 {
@@ -94,14 +95,29 @@ namespace Caravela.Framework.Impl
                 if (exception is DiagnosticsException diagnosticsException)
                 {
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
+                    {
                         context.ReportDiagnostic( diagnostic );
+                    }
                 }
 
                 return context.Compilation;
             }
             catch (Exception exception)
             {
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString() ) );
+                Guid guid = Guid.NewGuid();
+                string path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                try
+                {
+                    File.WriteAllText( path, exception.ToString() );
+                }
+                catch
+                {
+                    
+                }
+
+                Console.WriteLine(exception.ToString());
+                
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString(), path ) );
                 return context.Compilation;
             }
         }

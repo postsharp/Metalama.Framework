@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl
         private const string caravelaCategory = "Caravela";
 
         public static readonly DiagnosticDescriptor UncaughtException =
-            new( "CR0001", "Unexpected exception in Caravela.", "Unexpected exception occurred in Caravela: {0}", caravelaCategory, Error, true );
+            new( "CR0001", "Unexpected exception in Caravela.", "Unexpected exception occurred in Caravela: {0}. Exception details are in {1}.", caravelaCategory, Error, true );
         public static readonly DiagnosticDescriptor ErrorBuildingCompileTimeAssembly =
             new( "CR0002", "Error while building compile-time assembly.", "Error occurred while building compile-time assembly.", caravelaCategory, Error, true );
         public static readonly DiagnosticDescriptor AspectAppliedToIncorrectElement =
