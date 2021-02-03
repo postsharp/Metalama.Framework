@@ -24,7 +24,7 @@
         <Icon guid="ImageCatalogGuid" id="ButtonClick" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>My Command</ButtonText>
+          <ButtonText>Show aspected code</ButtonText>
         </Strings>
       </Button>
     </Buttons>
