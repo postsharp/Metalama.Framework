@@ -32,7 +32,7 @@
 
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />
-    <ProjectReference Include="..\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
   </ItemGroup>
   
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
   <ItemGroup>
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
-    <ProjectReference Include="..\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+    <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
