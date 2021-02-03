@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using System.IO;
+using Caravela.Framework.DesignTime.Vsix;
 using Microsoft;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -18,7 +19,7 @@ namespace CustomCommandSample
             Assumes.Present( commandService );
 
             // must match the button GUID and ID specified in the .vsct file
-            var cmdId = new CommandID(Guid.Parse( "3bb64001-1a69-46a1-b54c-e1ef2d4bc33a" ), 0x0100); 
+            var cmdId = new CommandID(PackageGuids.guidMyCommandPackageCmdSet, PackageIds.MyCommandId); 
             var cmd = new MenuCommand((s, e) => Execute(package), cmdId);
             commandService.AddCommand(cmd);
         }

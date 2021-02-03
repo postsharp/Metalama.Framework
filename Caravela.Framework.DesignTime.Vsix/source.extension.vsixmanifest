@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 	<Metadata>
-		<Identity Id="Caravela.731899e8-8d88-4bf2-8239-d8a2ec63e33d" Version="1.0" Language="en-US" Publisher="PostSharp Technologies"/>
+		<Identity Id="Caravela.731899e8-8d88-4bf2-8239-d8a2ec63e33d" Version="0.1" Language="en-US" Publisher="PostSharp Technologies"/>
 		<DisplayName>PostSharp 'Caravela'</DisplayName>
 		<Description xml:space="preserve">A research project.</Description>
 	</Metadata>
@@ -10,11 +10,11 @@
 	</Installation>
 	<Dependencies>
 		<Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.7.2,)" />
+		<Dependency Id="Microsoft.VisualStudio.MPF.15.0" DisplayName="Visual Studio MPF 15.0" d:Source="Installed" Version="[15.0]" />
 	</Dependencies>
 	<Assets>
 		<Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="Caravela.Framework.DesignTime.Vsix" Path="|Caravela.Framework.DesignTime.Vsix|"/>
-		<!--<Asset Type="Microsoft.VisualStudio.Analyzer" d:Source="Project" d:ProjectName="Caravela.Framework.DesignTime" Path="|Caravela.Framework.DesignTime|"/>-->
-		<Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="Caravela.Framework.DesignTime.Vsix" Path="|Caravela.Framework.DesignTime.Vsix|" />
+		<Asset Type="Microsoft.VisualStudio.VsPackage"  d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|"  />
 	</Assets>
 	<Prerequisites>
 		<Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,)" DisplayName="Visual Studio core editor" />

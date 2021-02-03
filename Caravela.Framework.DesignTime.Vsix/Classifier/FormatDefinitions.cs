@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using System.Drawing;
 using System.Windows.Media;
 
 namespace Caravela.Framework.DesignTime.Vsix.Classifier
