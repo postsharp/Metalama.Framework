@@ -48,9 +48,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Pac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.DesignTime.Vsix", "Caravela.Framework.DesignTime.Vsix\Caravela.Framework.DesignTime.Vsix.csproj", "{EA846309-C23D-4EFA-9B3F-CFC79B62EAAF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -122,10 +120,6 @@ Global
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA846309-C23D-4EFA-9B3F-CFC79B62EAAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA846309-C23D-4EFA-9B3F-CFC79B62EAAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA846309-C23D-4EFA-9B3F-CFC79B62EAAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA846309-C23D-4EFA-9B3F-CFC79B62EAAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.ActiveCfg = Release|Any CPU

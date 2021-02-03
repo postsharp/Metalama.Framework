@@ -28,7 +28,7 @@
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
-  <!-- Content of NuGet packages -->
+  <!-- Additional content of NuGet packages -->
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
@@ -50,9 +50,4 @@
     <Message Text="Version=$(Version)"/>
   </Target>
 
-  
-  <Target Name="CheckPrerequisites">
-    <Error Text="This solution cannot be built or restored using 'dotnet'. Use 'msbuild' and 'msbuild /t:Restore'. This check can be removed after the Vsix project has been moved out of the solution"
-           Condition="!Exists('$(MSBuildBinPath)\msbuild.exe')" />
-  </Target>
 </Project>
