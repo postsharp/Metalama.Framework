@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
-        public TemplateAnnotator(CSharpCompilation compilation, SemanticAnnotationMap semanticAnnotationMap)
+        public TemplateAnnotator(CSharpCompilation compilation, SemanticAnnotationMap semanticAnnotationMap) 
         {
             this._symbolScopeClassifier = new SymbolClassifier( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
@@ -341,6 +342,21 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+        {
+            var typeScope = this.GetSymbolScope( this._semanticAnnotationMap.GetDeclaredSymbol( node ), node );
+
+            if ( typeScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                return base.VisitClassDeclaration( node )?.AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
+            }
+            else
+            {
+                // This is not a build-time class so there's no need to analyze it.
+                return node;
+            }
+        }
+
         public override SyntaxNode? VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             // Literals are always compile-time (not really compile-time only but it does not matter).
@@ -363,13 +379,13 @@ namespace Caravela.Framework.Impl.Templating
                      symbol.GetAttributes().Any( a =>
                          a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Keyword );
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
                           (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) )
                 {
                     // Annotate dynamic members differently for syntax coloring.
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanCategory.Dynamic );
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
                 }
             }
 
@@ -568,7 +584,7 @@ namespace Caravela.Framework.Impl.Templating
                         node.ForEachKeyword,
                         node.OpenParenToken,
                         node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ),
+                        node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
                         node.InKeyword,
                         annotatedExpression,
                         node.CloseParenToken,
@@ -640,6 +656,7 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             initializerScope = this.GetNodeScope( transformedInitializerValue );
                             transformedNode = transformedNode.WithInitializer( node.Initializer.WithValue( (ExpressionSyntax) transformedInitializerValue ) );
+
                         }
                         else
                         {
@@ -688,7 +705,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 transformedNode =
                     transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanCategory.Variable ) );
+                        transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

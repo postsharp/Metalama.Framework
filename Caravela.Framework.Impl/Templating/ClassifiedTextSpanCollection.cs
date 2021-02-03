@@ -1,38 +1,37 @@
+using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public interface IMarkedTextSpanSet
-    {
-        TextSpanCategory GetCategory( in TextSpan textSpan );
-    }
     
     /// <summary>
     /// A set of <see cref="TextSpan"/>. 
     /// </summary>
-    sealed class MarkedTextSpanSet : IMarkedTextSpanSet
+    sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
         
         
         private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new SkipListIndexedDictionary<int, MarkedTextSpan>();
 
-        public MarkedTextSpanSet()
+        public ClassifiedTextSpanCollection()
         {
             // Start with a single default span. This avoid gaps in the partition later.
-            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanCategory.Default ) );
+            this._spans.Add( 0, new MarkedTextSpan( new TextSpan( 0, int.MaxValue ), TextSpanClassification.Default ) );
         }
 
         /// <summary>
         /// Adds a marked <see cref="TextSpan"/>.
         /// </summary>
         /// <param name="span"></param>
-        internal void Mark( in TextSpan span, TextSpanCategory category )
+        internal void Add( in TextSpan span, TextSpanClassification classification )
         {
             for ( int i = 0; ;i++ )
             {
@@ -46,13 +45,19 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         // We have an exact span, so no need to partition.
                         
-                        if ( previousStartSpan.Category < category )
+                        if ( previousStartSpan.Classification < classification )
                         {
                             // The new span contains the old one and is stronger, so we replace the new one 
                             // by the old one.
-                            this._spans.Set( span.Start, new MarkedTextSpan( span, category ) );
+                            this._spans.Set( span.Start, new MarkedTextSpan( span, classification ) );
                         }
 
+                        return;
+                    }
+
+                    // If the new span is contained in a span of weaker category, there is nothing to do.
+                    if ( previousStartSpan.Classification > classification && previousStartSpan.Span.Contains(span))
+                    {
                         return;
                     }
 
@@ -80,10 +85,10 @@ namespace Caravela.Framework.Impl.Templating
                                     break;
                                 }
                                 
-                                if ( pair.Value.Category < category )
+                                if ( pair.Value.Classification < classification )
                                 {
                                     // Replace the category of this node.
-                                    this._spans.Set( pair.Key, new MarkedTextSpan( pair.Value.Span, category ) );
+                                    this._spans.Set( pair.Key, new MarkedTextSpan( pair.Value.Span, classification ) );
                                 }
                             }
 
@@ -136,34 +141,77 @@ namespace Caravela.Framework.Impl.Templating
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
                 throw new ArgumentException( nameof(splitPosition) );
             
-            return (new MarkedTextSpan( TextSpan.FromBounds(  textSpan.Span.Start, splitPosition ), textSpan.Category ),
+            return (new MarkedTextSpan( TextSpan.FromBounds(  textSpan.Span.Start, splitPosition ), textSpan.Classification ),
                 new MarkedTextSpan( TextSpan.FromBounds(  splitPosition, textSpan.Span.End ),
-                    textSpan.Category ));
+                    textSpan.Classification ));
         }
 
 
-        public TextSpanCategory GetCategory( in TextSpan textSpan )
+        public TextSpanClassification GetCategory( in TextSpan textSpan )
         {
             if ( this._spans.TryGetClosestValue( textSpan.Start, out var markedTextSpan ))
             {
                 if ( markedTextSpan.Span.Contains( textSpan ) )
                 {
-                    return markedTextSpan.Category;
+                    return markedTextSpan.Classification;
                 }
                 else
                 {
-                    return TextSpanCategory.Conflict;
+                    return TextSpanClassification.Conflict;
                 }
                 
             }
             else
             {
                 // This should not happen because our partition covers [0,int.MaxValue]
-                return TextSpanCategory.Default;
+                return TextSpanClassification.Default;
             }
         }
 
-        
+        public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan)
+        {
+            var previousSpan = new ClassifiedTextSpan();
+
+            foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
+            {
+                var classifiedSpan = pair.Value;
+
+                if ( classifiedSpan.Classification == previousSpan.Classification &&
+                    classifiedSpan.Span.Start == previousSpan.Span.End )
+                {
+                    previousSpan = new ClassifiedTextSpan( TextSpan.FromBounds( previousSpan.Span.Start, classifiedSpan.Span.End ), classifiedSpan.Classification );
+                }
+                else
+                {
+                    // Emit the previous span if any.
+                    if ( previousSpan.Span.Length > 0 && previousSpan.Classification != TextSpanClassification.Default )
+                    {
+                        yield return previousSpan;
+                    }
+
+                    previousSpan = new ClassifiedTextSpan( pair.Value.Span, pair.Value.Classification );
+                }
+
+                if ( classifiedSpan.Span.End >= textSpan.End )
+                {
+                    // Emit the last span if any.
+                    if ( previousSpan.Span.Length > 0 && previousSpan.Classification != TextSpanClassification.Default )
+                    {
+                        yield return previousSpan;
+                    }
+
+
+                    yield break;
+                }
+            }
+                
+        }
+
+
+        public IEnumerator<ClassifiedTextSpan> GetEnumerator()
+            => this.GetClassifiedSpans( new TextSpan( 0, int.MaxValue ) ).GetEnumerator();
+    
+
         public override string ToString()
         {
             // Used for unit testing. Don't change the rendering logic.
@@ -182,30 +230,25 @@ namespace Caravela.Framework.Impl.Templating
 
             return stringBuilder.ToString();
         }
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        public int Count => this._spans.Count;
     }
 
     public readonly struct MarkedTextSpan
     {
         public TextSpan Span { get; }
-        public TextSpanCategory Category { get; }
+        public TextSpanClassification Classification { get; }
 
-        internal MarkedTextSpan( in TextSpan span, TextSpanCategory category )
+        internal MarkedTextSpan( in TextSpan span, TextSpanClassification classification )
         {
             this.Span = span;
-            this.Category = category;
+            this.Classification = classification;
         }
 
-        public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Category;
+        public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Classification;
     }
 
-    public enum TextSpanCategory
-    {
-        // Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
-        Default,
-        CompileTime,
-        Dynamic,
-        Variable,
-        Keyword,
-        Conflict // A text span has several categories.
-    }
+    
 }

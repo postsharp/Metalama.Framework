@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl
 
         private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
         {
-            throw new NotImplementedException();
+            throw new NotImplementedException($"No implementation for advice attribute {typeof(T).Name}.");
         }
     }
 }

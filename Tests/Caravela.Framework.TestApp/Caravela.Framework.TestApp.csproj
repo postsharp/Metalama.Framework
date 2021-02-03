@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <CaravelaEmitCompilerTransformedFiles>true</CaravelaEmitCompilerTransformedFiles>
-    <!--<CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>-->
+    <CaravelaDebugTransformedCode>true</CaravelaDebugTransformedCode>
   </PropertyGroup>
 
   <Import Project="CaravelaReference.props" />

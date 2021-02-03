@@ -13,6 +13,7 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
+            var advice =
             aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof( this.OverrideMethod ) );
         }
 
