@@ -5,10 +5,10 @@
     <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
 
     <!-- Setting the version. TeamCity defines the environment variable TeamCityBuildNumber -->
-    <MinorVersion>0.1.1</MinorVersion>
-    <Version Condition="'$(Configuration)'=='Release'">$(MinorVersion)-preview</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'==''">0.1.1-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'!=''">0.1.1-dev-$(TeamCityBuildNumber)</Version>
+    <MainVersion>0.1.1</MainVersion>
+    <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'!=''">$(MainVersion)-build-$(TeamCityBuildNumber)</Version>
 
     <!-- Version of dependencies -->
     <RoslynVersion>3.8.0</RoslynVersion>
