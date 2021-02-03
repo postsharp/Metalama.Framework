@@ -2,4 +2,7 @@
     <Target Name="Pack">
         <!-- Intentionally disabling packaging for all tests. -->
     </Target>
+    
+    <!-- Excludes the whole directory from being built if obfuscation is enabled -->
+    <Import Project="DisableBuild.targets" Condition="'$(Obfuscate)'=='True'"/>
 </Project>
