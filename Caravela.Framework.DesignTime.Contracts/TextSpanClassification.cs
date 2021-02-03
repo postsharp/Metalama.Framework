@@ -2,7 +2,8 @@ namespace Caravela.Framework.DesignTime.Contracts
 {
     public enum TextSpanClassification
     {
-        // Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
+        // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
+        // NOTE: Renaming these items will break the string-based tests.
 
         /// <summary>
         /// No category.
