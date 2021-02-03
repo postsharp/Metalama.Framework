@@ -1,4 +1,4 @@
-<Project InitialTargets="CheckPrerequisites">
+<Project>
   <PropertyGroup>
     <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
     <!-- the above stopped working in VS for some reason -->
