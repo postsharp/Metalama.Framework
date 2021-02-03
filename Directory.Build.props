@@ -7,8 +7,8 @@
     <!-- Setting the version. TeamCity defines the environment variable TeamCityBuildNumber -->
     <MainVersion>0.1.1</MainVersion>
     <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(TeamCityBuildNumber)'!=''">$(MainVersion)-build-$(TeamCityBuildNumber)</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
 
     <!-- Version of dependencies -->
     <RoslynVersion>3.8.0</RoslynVersion>
