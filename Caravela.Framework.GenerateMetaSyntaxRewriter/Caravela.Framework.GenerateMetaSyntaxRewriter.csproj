@@ -10,8 +10,6 @@
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
     </ItemGroup>
 
-  <Target Name="Pack">
-          <!-- Intentionally disabling packaging for all tests. -->
-  </Target>
+  
 
 </Project>

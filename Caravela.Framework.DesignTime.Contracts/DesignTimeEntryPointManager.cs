@@ -1,11 +1,9 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,38 +12,67 @@ namespace Caravela.Framework.DesignTime.Contracts
     /// <summary>
     /// Exposes a global connection point between compiler assemblies, included in NuGet packages and loaded by Roslyn,
     /// and the UI assemblies, included in the VSX and loaded by Visual Studio. Compiler assemblies register
-    /// themselves using <see cref="RegisterServiceProvider"/> and UI assemblies get the interface using <see cref="GetServiceProviderAsync"/>.
+    /// themselves using <see cref="IDesignTimeEntryPointManager.RegisterServiceProvider"/> and UI assemblies get the
+    /// interface using <see cref="IDesignTimeEntryPointManager.GetServiceProviderAsync"/>.
     /// Since VS session can contain projects with several versions of Caravela, this class has the responsibility
     /// to match versions.
     /// </summary>
-    public static class DesignTimeEntryPointManager
+    public class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
-        private static volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
-        private static readonly Version _matchAllVersion = new Version( 9999, 99 ); 
-        private static readonly object _sync = new object();
-        private static ImmutableHashSet<ICompilerServiceProvider> _entryPoints = ImmutableHashSet<ICompilerServiceProvider>.Empty;
+        private const string _appDomainDataName = "Caravela.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
+        private static readonly IDesignTimeEntryPointManager _instance;
+
+        public static IDesignTimeEntryPointManager Instance => _instance;
+
+        static DesignTimeEntryPointManager()
+        {
+            // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
+            // We're using a named AppDomain data slot for this. We have to synchronize access using a named semaphore.
+                
+            using Semaphore semaphore = new Semaphore( 1, 1, _appDomainDataName );
+            try
+            {
+                semaphore.WaitOne();
+                var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
+                if ( oldInstance != null )
+                {
+                    _instance = oldInstance;
+                }
+                else
+                {
+                    _instance = new DesignTimeEntryPointManager();
+                    AppDomain.CurrentDomain.SetData( _appDomainDataName, _instance );
+
+                }
+
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
+
+        private DesignTimeEntryPointManager()
+        {
+            
+        }
+        
+        
+        
+        private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
+        internal static Version MatchAllVersion { get; } = new Version( 9999, 99 );
+        
+        private readonly object _sync = new object();
+        private ImmutableHashSet<ICompilerServiceProvider> _entryPoints = ImmutableHashSet<ICompilerServiceProvider>.Empty;
 
         private static readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks =
             new ConcurrentDictionary<Version, Task<ICompilerServiceProvider>>();
-        
 
-        /// <summary>
-        /// Gets the <see cref="ICompilerService"/> for a specific project.
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public static async ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( Project project, CancellationToken cancellationToken )
+
+        async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
         {
-            // TODO: this design probably does not support the operation of adding a Caravela reference to a project, i.e. this function is modeled
-            // as a pure function but the project is not immutable.
 
-            if ( !TryGetReferencedVersion(project, out var frameworkVersion) )
-            {
-                return null;
-            }
-
-            var task = _getProviderTasks.GetOrAdd( frameworkVersion,  GetProviderForVersion );
+            var task = _getProviderTasks.GetOrAdd( version, this.GetProviderForVersion );
 
             if ( !task.IsCompleted )
             {
@@ -62,26 +89,58 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         }
 
-        private static async Task<ICompilerServiceProvider> GetProviderForVersion(Version version)
+        private  async Task<ICompilerServiceProvider> GetProviderForVersion(Version version)
         {
 
             while (true)
             {
-                lock ( _sync )
+                lock ( this._sync )
                 {
-                    foreach ( var entryPoint in _entryPoints )
+                    foreach ( var entryPoint in this._entryPoints )
                     {
-                        if ( version == _matchAllVersion || entryPoint.Version == version )
+                        if ( version == MatchAllVersion || entryPoint.Version == version )
                         {
                             return entryPoint;
                         }
                     }
                 }
 
-                await _registrationTask.Task;
+                await this._registrationTask.Task;
             }
         }
 
+
+        void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider entryPoint )
+        {
+            lock ( this._sync )
+            {
+                entryPoint.Unloaded += this.OnUnloaded;
+                this._entryPoints = this._entryPoints.Add( entryPoint );
+
+                // The order here is important.
+                var oldRegistrationTask = this._registrationTask;
+                this._registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
+                oldRegistrationTask.SetResult( entryPoint );
+
+            }
+        }
+
+        Version IDesignTimeEntryPointManager.Version =>  this.GetType().Assembly.GetName().Version;
+
+        private void OnUnloaded( ICompilerServiceProvider entryPoint )
+        {
+            lock ( this._sync )
+            {
+                this._entryPoints = this._entryPoints.Remove( entryPoint );
+            }
+        }
+
+    }
+
+    public static class DesignTimeEntryPointManagerExtensions
+    {
+        
+        
         private static bool IsOurReference( string? name )
             => string.Equals( name, "Caravela.Framework", StringComparison.OrdinalIgnoreCase );
 
@@ -95,7 +154,7 @@ namespace Caravela.Framework.DesignTime.Contracts
                         if ( IsOurReference(cr.Compilation.AssemblyName))
                         {
                             // TODO: Have the real version.
-                            version = _matchAllVersion;
+                            version = DesignTimeEntryPointManager.MatchAllVersion;
                             return true;
                         }
                         break;
@@ -109,7 +168,7 @@ namespace Caravela.Framework.DesignTime.Contracts
                             }
                             else
                             {
-                                version = _matchAllVersion;
+                                version = DesignTimeEntryPointManager.MatchAllVersion;
                             }
                             return true;
                         }
@@ -123,7 +182,8 @@ namespace Caravela.Framework.DesignTime.Contracts
                 var referencedProject = project.Solution.GetProject( reference.ProjectId );
                 if ( referencedProject != null && IsOurReference( referencedProject.AssemblyName ) )
                 {
-                    version = _matchAllVersion;
+                    // Matching all is intentional here. We are in the scenario when a Caravela developer builds Caravela.
+                    version = DesignTimeEntryPointManager.MatchAllVersion;
                     return true;
                 }
             }
@@ -131,29 +191,27 @@ namespace Caravela.Framework.DesignTime.Contracts
             version = null;
             return false;
         }
-
-        public static void RegisterServiceProvider( ICompilerServiceProvider entryPoint )
+        
+        /// <summary>
+        /// Gets the <see cref="ICompilerService"/> for a specific project.
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static async ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( this IDesignTimeEntryPointManager entryPointManager, Project project, CancellationToken cancellationToken )
         {
-            lock ( _sync )
+
+            if ( !TryGetReferencedVersion( project, out var version ) )
             {
-                entryPoint.Unloaded += OnUnloaded;
-                _entryPoints = _entryPoints.Add( entryPoint );
-
-                // The order here is important.
-                var oldRegistrationTask = _registrationTask;
-                _registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
-                oldRegistrationTask.SetResult( entryPoint );
-
+                return null;
             }
-        }
-
-        private static void OnUnloaded( ICompilerServiceProvider entryPoint )
-        {
-            lock ( _sync )
+            else
             {
-                _entryPoints =  _entryPoints.Remove( entryPoint );
+                return await entryPointManager.GetServiceProviderAsync( version, cancellationToken );
             }
-        }
 
+
+        }
+        
     }
 }

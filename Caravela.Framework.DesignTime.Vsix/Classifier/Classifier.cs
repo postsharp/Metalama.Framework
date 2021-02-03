@@ -119,7 +119,7 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private async Task<IReadOnlyClassifiedTextSpanCollection?> GetClassificationsAsync( Document document, CancellationToken cancellationToken )
         {
 
-            var entryPoint = await DesignTimeEntryPointManager.GetServiceProviderAsync( document.Project, cancellationToken );
+            var entryPoint = await DesignTimeEntryPointManager.Instance.GetServiceProviderAsync( document.Project, cancellationToken );
 
             var classificationService = entryPoint?.GetCompilerService<IClassificationService>();
             

@@ -1,21 +1,10 @@
-﻿using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Composition;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace Caravela.Framework.DesignTime
+namespace Caravela.Framework.Impl.DesignTime
 {
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class TemplateAnalyzer : DiagnosticAnalyzer

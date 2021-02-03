@@ -50,6 +50,14 @@
     <ProjectReference Update="@(ProjectReference)" Name="%(Filename)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Diff\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Design" />
+  </ItemGroup>
+
   <Target Name="Pack">
           <!-- Intentionally disabling packaging for all tests. -->
   </Target>

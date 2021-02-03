@@ -1,20 +1,14 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Caravela.Framework.DesignTime.Contracts
 {
-    public readonly struct ClassifiedTextSpan
-    {
-        public TextSpan Span { get; }
-        public TextSpanClassification Classification { get; }
+    // The type identifier cannot be modified even during refactoring. 
 
-        public ClassifiedTextSpan( TextSpan span, TextSpanClassification classification )
-        {
-            this.Span = span;
-            this.Classification = classification;
-        }
-    }
 
+    // The type identifier cannot be modified even during refactoring. 
+    [Guid("da58deff-93d5-4d5a-bf6e-11df8bdbd74d")]
     public interface IReadOnlyClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
         TextSpanClassification GetCategory( in TextSpan textSpan );

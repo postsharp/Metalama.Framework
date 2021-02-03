@@ -1,5 +1,8 @@
+using System.Runtime.InteropServices;
+
 namespace Caravela.Framework.DesignTime.Contracts
 {
+    // The type identifier cannot be modified even during refactoring. 
     public enum TextSpanClassification
     {
         // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.

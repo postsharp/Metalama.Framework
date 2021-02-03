@@ -11,7 +11,6 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
- 
     
     /// <summary>
     /// A set of <see cref="TextSpan"/>. 

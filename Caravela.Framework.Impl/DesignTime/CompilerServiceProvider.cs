@@ -3,10 +3,8 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
-namespace Caravela.Framework.DesignTime
+namespace Caravela.Framework.Impl.DesignTime
 {
     internal class CompilerServiceProvider : ICompilerServiceProvider, IClassificationService
     {
@@ -14,7 +12,7 @@ namespace Caravela.Framework.DesignTime
 
         static CompilerServiceProvider()
         {
-            DesignTimeEntryPointManager.RegisterServiceProvider( Instance );
+            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( Instance );
         }
 
         public CompilerServiceProvider()
