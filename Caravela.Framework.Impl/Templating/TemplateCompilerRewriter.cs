@@ -43,8 +43,8 @@ namespace Caravela.Framework.Impl.Templating
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
 
-            // The base implementation is very verbose, so we use this one:
-            return InvocationExpression( IdentifierName( nameof( IdentifierName ) ) )
+            // The base implementation is very verbose, so we use this one. Also we need to invoke our own genertor of unique identifier names.
+            return InvocationExpression( IdentifierName( nameof( TemplateIdentifierName ) ) )
                 .AddArgumentListArguments( Argument( this.CreateLiteralExpression( node.Identifier.Text ) ) )
                 .WithTemplateAnnotationsFrom( node );
         }
@@ -555,13 +555,12 @@ namespace Caravela.Framework.Impl.Templating
             return ForEachStatement(node.Type, node.Identifier, node.Expression, statement);
         }
 
-
         protected override ExpressionSyntax TransformVariableDeclarator( VariableDeclaratorSyntax node )
         {
             this.Indent();
-            var result = InvocationExpression( IdentifierName( nameof( TemplateVariableDeclarator ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
+            var result = InvocationExpression( IdentifierName( nameof( VariableDeclarator ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
             {
-                Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
+                Argument(this.TransformTemplateDeclaratorIdentifier(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
                 Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
                 Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
                 Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
@@ -571,15 +570,15 @@ namespace Caravela.Framework.Impl.Templating
             return result;
         }
 
-        private ExpressionSyntax TransformTemplateIdentifier( SyntaxToken identifier )
+        private ExpressionSyntax TransformTemplateDeclaratorIdentifier( SyntaxToken token )
         {
-            if ( identifier.Kind() != SyntaxKind.IdentifierToken ) throw new AssertionFailedException();
+            if ( token.Kind() != SyntaxKind.IdentifierToken ) throw new AssertionFailedException();
 
             return InvocationExpression(
-                    IdentifierName( nameof( TemplateIdentifier ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
-                    {
-                                Argument(this.CreateLiteralExpression(identifier.Text))
-                    } ) ) );
+                IdentifierName( nameof( TemplateDeclaratorIdentifier ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
+                {
+                    Argument(this.CreateLiteralExpression(token.Text))
+                } ) ) );
         }
 
         public override SyntaxNode VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)

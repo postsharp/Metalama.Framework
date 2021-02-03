@@ -441,7 +441,7 @@ namespace Caravela.Framework.Impl.Templating
                 // to the if and else statements but not to the blocks themselves.
 
                 StatementSyntax? annotatedStatement;
-                using ( this.EnterLocalVariableScope(SymbolDeclarationScope.CompileTimeOnly) )
+                //using ( this.EnterLocalVariableScope(SymbolDeclarationScope.CompileTimeOnly) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -467,7 +467,7 @@ namespace Caravela.Framework.Impl.Templating
                 // so we may want to live with that behavior anyway. Perhaps the same remark is true for `foreach`.
 
                 using ( this.EnterRuntimeConditionalBlock() )
-                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
+                //using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
                 {
                     var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                     var annotatedElse = (ElseClauseSyntax) this.Visit( node.Else )!;
@@ -534,7 +534,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 StatementSyntax annotatedStatement;
                 using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
-                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                //using ( this.EnterLocalVariableScope( SymbolDeclarationScope.CompileTimeOnly ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -560,7 +560,7 @@ namespace Caravela.Framework.Impl.Templating
                 // Run-time or default loop, we don't know.
 
                 using ( this.EnterRuntimeConditionalBlock() )
-                using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
+                //using ( this.EnterLocalVariableScope( SymbolDeclarationScope.Default ) )
                 {
                     StatementSyntax annotatedStatement;
                     using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )

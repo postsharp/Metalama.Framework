@@ -1,4 +1,3 @@
-using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,21 +13,12 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly SyntaxAnnotation flattenBlockAnnotation = new SyntaxAnnotation( "flatten" );
 
-        private static ITemplateExpansionContext TemplateExpansionContext
-        {
-            get
-            {
-                if ( TemplateContext.ExpansionContext == null )
-                {
-                    throw new InvalidOperationException( "TemplateContext.ExpansionContext cannot be null." );
-                }
+        [field: ThreadStatic]
+        internal static ITemplateExpansionContext? ExpansionContext { get; set; }
 
-                return (ITemplateExpansionContext) TemplateContext.ExpansionContext;
-            }
-        }
 
         public static BlockSyntax WithFlattenBlockAnnotation( this BlockSyntax block ) =>
-            block.WithAdditionalAnnotations( flattenBlockAnnotation );
+        block.WithAdditionalAnnotations( flattenBlockAnnotation );
 
         public static bool HasFlattenBlockAnnotation( this BlockSyntax block ) =>
             block.HasAnnotation( flattenBlockAnnotation );
@@ -37,21 +27,20 @@ namespace Caravela.Framework.Impl.Templating
         public static SeparatedSyntaxList<T> SeparatedList<T>( params T[] items ) where T : SyntaxNode
             => SyntaxFactory.SeparatedList( items );
 
-        public static SyntaxKind BooleanKeyword( bool value )
-        {
-            return value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
-        }
+        public static SyntaxKind BooleanKeyword( bool value ) =>
+            value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) =>
-            TemplateExpansionContext.CreateReturnStatement( returnExpression );
+            ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static IDisposable OpenTemplateLexicalScope() => TemplateExpansionContext.OpenLexicalScope();
-        
-        public static SyntaxToken TemplateIdentifier( string text ) => SyntaxFactory.Identifier( text );
+        public static IDisposable OpenTemplateLexicalScope() =>
+            ExpansionContext.CurrentLexicalScope.OpenNestedScope();
 
-        public static IdentifierNameSyntax TemplateIdentifierName( string name ) => SyntaxFactory.IdentifierName( name );
+        public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
+            ExpansionContext.CurrentLexicalScope.DefineIdentifier( text );
 
-        public static VariableDeclaratorSyntax? TemplateVariableDeclarator( SyntaxToken identifier, BracketedArgumentListSyntax argumentList, EqualsValueClauseSyntax initializer ) =>
-            SyntaxFactory.VariableDeclarator( identifier, argumentList, initializer );
+        public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
+            ExpansionContext.CurrentLexicalScope.CreateIdentifierName( name );
     }
 }
+

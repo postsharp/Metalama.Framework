@@ -10,9 +10,6 @@ namespace Caravela.Framework.Aspects
         [field: ThreadStatic]
         internal static object? ProceedImpl { get; set; }
 
-        [field: ThreadStatic]
-        internal static object? ExpansionContext { get; set; }
-
         private static InvalidOperationException NewInvalidOperationException() =>
             new InvalidOperationException( "Code calling this method has to be compiled using Caravela." );
 

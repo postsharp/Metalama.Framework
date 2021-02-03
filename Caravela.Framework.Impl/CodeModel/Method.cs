@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -10,7 +11,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Method : CodeElement, IMethod
+    internal class Method : CodeElement, IMethod, IMethodInternal
     {
         private readonly IMethodSymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
@@ -92,6 +93,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public INamedType? DeclaringType => this._symbol.ContainingType == null ? null : this.SymbolMap.GetNamedType( this._symbol.ContainingType );
+
+        IReadOnlyList<ISymbol> IMethodInternal.LookupSymbols()
+        {
+            if ( this._symbol.DeclaringSyntaxReferences.Length == 0 ) throw new InvalidOperationException();
+
+            var syntaxReference = this._symbol.DeclaringSyntaxReferences[0];
+            var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
+            var methodBodyNode = ((MethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
+            int lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
+
+            return semanticModel.LookupSymbols( lookupPosition );
+        }
 
         public override string ToString() => this._symbol.ToString();
 
