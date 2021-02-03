@@ -65,7 +65,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var document2 = testResult.TemplateDocument.WithSyntaxRoot( testResult.AnnotatedSyntaxRoot );
                 var text2 = await document2.GetTextAsync();
 
-                var marker = new TextSpanClassifier( text2 );
+                var marker = new TextSpanClassifier( text2, true );
                 marker.Visit( await document2.GetSyntaxRootAsync() );
                 var metaSpans = marker.ClassifiedTextSpans;
 
@@ -81,7 +81,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedSyntaxRoot, project3.Solution.Workspace, optionSet );
                 var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                var spanMarker = new TextSpanClassifier( text4 );
+                var spanMarker = new TextSpanClassifier( text4, true );
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
                 this.CompiledTemplateDocument = await this.syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }
