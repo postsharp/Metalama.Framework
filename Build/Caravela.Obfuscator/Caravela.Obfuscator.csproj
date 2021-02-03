@@ -4,7 +4,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NoWarn>IDE0009</NoWarn>
-    <IsPackable>False</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
