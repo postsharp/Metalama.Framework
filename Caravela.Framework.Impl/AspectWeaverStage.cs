@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -20,11 +22,12 @@ namespace Caravela.Framework.Impl
             this.aspectType = aspectType;
         }
 
-        public override AspectCompilation Transform(AspectCompilation input)
+        public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectsByAspectType[this.aspectType.FullName].GetValue().ToImmutableList();
+            // TODO: actual reactivity.
+            var aspectInstances = ((IList<AspectInstance>)input.AspectInstances.Where( x => x.AspectType.FullName == this.aspectType.FullName )).ToImmutableArray();
 
-            if ( aspectInstances.IsEmpty )
+            if ( !aspectInstances.Any() )
                 return input;
 
             var diagnosticSink = new DiagnosticSink();
@@ -33,6 +36,7 @@ namespace Caravela.Framework.Impl
 
             var context = new AspectWeaverContext(
                 this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
+
             CSharpCompilation newCompilation;
             try
             {
@@ -45,7 +49,12 @@ namespace Caravela.Framework.Impl
             }
 
             // TODO: update AspectCompilation.Aspects
-            return input.Update(diagnosticSink.Diagnostics, resources, new SourceCompilation(newCompilation));
+            return new PipelineStageResult( 
+                new SourceCompilationModel( newCompilation ), 
+                input.Diagnostics.Concat(diagnosticSink.Diagnostics).ToList(), 
+                input.Resources.Concat(resources).ToList(),
+                input.AspectInstances
+                );
         }
 
         class DiagnosticSink : IDiagnosticSink

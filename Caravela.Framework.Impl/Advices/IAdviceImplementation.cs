@@ -8,6 +8,6 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal interface IAdviceImplementation
     {
-        IEnumerable<Transformation> GetTransformations( ICompilation compilation );
+        AdviceResult ToResult( ICompilation compilation );
     }
 }

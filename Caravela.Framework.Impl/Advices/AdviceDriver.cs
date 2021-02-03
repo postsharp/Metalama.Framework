@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Advices
     {
         public AdviceResult GetResult( ICompilation compilation, IAdvice advice )
         {
-            return new( ImmutableArray.Create<Diagnostic>(), ((IAdviceImplementation)advice).GetTransformations( compilation ).ToImmutableArray() );
+            return ((IAdviceImplementation) advice).ToResult( compilation );
         }
     }
 }

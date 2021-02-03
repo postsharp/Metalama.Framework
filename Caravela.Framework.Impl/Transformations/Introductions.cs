@@ -6,41 +6,63 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
-using Microsoft.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
+using Caravela.Framework.Advices;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using CodeAnalysis = Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Transformations
 {
 
-    abstract class IntroducedElement : Transformation, ICodeElement
+    abstract class IntroducedElement : Transformation, ICodeElement, IToSyntax
     {
         public abstract ICodeElement? ContainingElement { get; }
 
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
-        public abstract CodeElementKind Kind { get; }
+        public abstract CodeElementKind ElementKind { get; }
 
-        public abstract SyntaxNode Declaration { get; }
+        public IntroducedElement( IAdvice advice ) : base( advice )
+        {
+        }
+
+        public abstract CSharpSyntaxNode GetSyntaxNode();
+        public abstract IEnumerable<CSharpSyntaxNode> GetSyntaxNodes();
+
+        public abstract MemberDeclarationSyntax GetDeclaration();
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );
     }
 
     abstract class IntroducedMember : IntroducedElement, IMember
     {
+        public INamedType TargetDeclaration { get; }
+
         public abstract string Name { get; }
         public abstract bool IsStatic { get; }
         public abstract bool IsVirtual { get; }
         public abstract INamedType? DeclaringType { get; }
+
+        public IntroducedMember(IAdvice advice, INamedType targetDeclaration) : base(advice)
+        {
+            this.TargetDeclaration = targetDeclaration;
+        }
     }
 
-    sealed class IntroducedMethod : IntroducedMember, IMethod, IToSyntax
+    sealed class IntroducedMethod : IntroducedMember, IMethod
     {
+        private readonly IntroductionScope? _scope;
+        private readonly string? _name;
+        private readonly bool? _isStatic;
+        private readonly bool? _isVirtual;
+        private readonly Visibility? _visibility;
+
         public override ICodeElement? ContainingElement { get; }
 
-        public IMethod? TemplateMethod { get; }
-        public IMethod? OverriddenMethod { get; }
+        public IMethod TemplateMethod { get; }
+
         public BlockSyntax MethodBodyOverride { get; }
 
         [Memo]
@@ -52,49 +74,58 @@ namespace Caravela.Framework.Impl.Transformations
         public IImmutableList<IMethod> LocalFunctions => this.TemplateMethod!.LocalFunctions;
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select(x => (IParameter)new IntroducedParameter(this, x)).ToImmutableList();
+        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select(x => (IParameter)new IntroducedParameter(this.Advice, this, x)).ToImmutableList();
 
         [Memo]
-        public IImmutableList<IGenericParameter> GenericParameters => this.TemplateMethod!.GenericParameters!.Select( x => (IGenericParameter) new IntroducedGenericParameter( this, x ) ).ToImmutableList();
+        public IImmutableList<IGenericParameter> GenericParameters => this.TemplateMethod!.GenericParameters!.Select( x => (IGenericParameter) new IntroducedGenericParameter( this.Advice, this, x ) ).ToImmutableList();
 
-        Code.MethodKind IMethod.Kind => this.OverriddenMethod?.Kind ?? this.TemplateMethod!.Kind;
+        public Code.MethodKind MethodKind => this.TemplateMethod!.MethodKind;
 
-        CSharpSyntaxNode IToSyntax.GetSyntaxNode() => (CSharpSyntaxNode)this.Declaration;
-        IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => new[] { (CSharpSyntaxNode) this.Declaration };
+        public override string Name => this._name ?? this.TemplateMethod!.Name;
 
-        public override SyntaxNode Declaration
-        {
-            get
-            {
-                var templateSyntax = (MethodDeclarationSyntax)this.TemplateMethod!.GetSyntaxNode()!;
+        public override bool IsStatic => this._isStatic ?? this.TemplateMethod!.IsStatic;
 
-                return MethodDeclaration(
-                    List<AttributeListSyntax>(), // TODO: Copy some attributes?
-                    templateSyntax.Modifiers, templateSyntax.ReturnType, templateSyntax.ExplicitInterfaceSpecifier!, templateSyntax.Identifier, templateSyntax.TypeParameterList!,
-                    templateSyntax.ParameterList, templateSyntax.ConstraintClauses, this.MethodBodyOverride!, null, templateSyntax.SemicolonToken 
-                    );
-            }
-        }
-
-        public override string Name => this.TemplateMethod!.Name;
-
-        public override bool IsStatic => this.TemplateMethod!.IsStatic;
-
-        public override bool IsVirtual => this.TemplateMethod!.IsVirtual;
+        public override bool IsVirtual => this._isVirtual ?? this.TemplateMethod!.IsVirtual;
 
         public override INamedType? DeclaringType => this.TemplateMethod!.DeclaringType;
 
         public override IReactiveCollection<IAttribute> Attributes => this.TemplateMethod!.Attributes;
 
-        public override CodeElementKind Kind => CodeElementKind.Method;
+        public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public IntroducedMethod( INamedType targetType, IMethod? overriddenMethod, IMethod? templateMethod, BlockSyntax methodBodyOverride )
+        public IntroducedMethod( IAdvice advice, INamedType targetType, IMethod templateMethod, IntroductionScope? scope, string? name, bool? isStatic, bool? isVirtual, Visibility? visibility )
+            : base(advice, targetType)
         {
             this.ContainingElement = targetType;
-            this.OverriddenMethod = overriddenMethod;
             this.TemplateMethod = templateMethod;
-            this.MethodBodyOverride = methodBodyOverride;
+            this._scope = scope;
+            this._name = name;
+            this._isStatic = isStatic;
+            this._isVirtual = isVirtual;
+            this._visibility = visibility;
         }
+
+        public override MemberDeclarationSyntax GetDeclaration()
+        {
+            var templateSyntax = (MethodDeclarationSyntax) this.TemplateMethod!.GetSyntaxNode()!;
+
+            return MethodDeclaration(
+                List<AttributeListSyntax>(), // TODO: Copy some attributes?
+                templateSyntax.Modifiers, 
+                templateSyntax.ReturnType, 
+                templateSyntax.ExplicitInterfaceSpecifier!, 
+                templateSyntax.Identifier, 
+                templateSyntax.TypeParameterList!,
+                templateSyntax.ParameterList, 
+                templateSyntax.ConstraintClauses, 
+                this.MethodBodyOverride!, 
+                null, 
+                templateSyntax.SemicolonToken
+                );
+        }
+
+        public override CSharpSyntaxNode GetSyntaxNode() => this.GetDeclaration();
+        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => new[] { (CSharpSyntaxNode) this.GetDeclaration() };
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )
         {
@@ -128,15 +159,21 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override IReactiveCollection<IAttribute> Attributes => this._template.Attributes;
 
-        public override CodeElementKind Kind => this._template.Kind;
+        public override CodeElementKind ElementKind => this._template.ElementKind;
 
-        public override SyntaxNode Declaration => this._template.GetSyntaxNode()!;
-
-        public IntroducedParameter( IMethod containingMethod, IParameter template )
+        public IntroducedParameter( IAdvice advice, IMethod containingMethod, IParameter template ) : base(advice)
         {
             this.ContainingElement = containingMethod;
             this._template = template;
         }
+
+        public override MemberDeclarationSyntax GetDeclaration()
+        {
+            throw new NotSupportedException();
+        }
+
+        public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode();
+        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )
         {
@@ -164,21 +201,27 @@ namespace Caravela.Framework.Impl.Transformations
 
         public bool HasNonNullableValueTypeConstraint => this._template.HasNonNullableValueTypeConstraint;
 
-        Code.TypeKind IType.Kind => Code.TypeKind.GenericParameter;
+        Code.TypeKind IType.TypeKind => Code.TypeKind.GenericParameter;
 
         public override ICodeElement? ContainingElement { get; }
 
         public override IReactiveCollection<IAttribute> Attributes => this._template.Attributes;
 
-        public override CodeElementKind Kind => CodeElementKind.GenericParameter;
+        public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        public override SyntaxNode Declaration => this._template.GetSyntaxNode()!;
-
-        public IntroducedGenericParameter( IMethod containingMethod, IGenericParameter template )
+        public IntroducedGenericParameter( IAdvice advice, IMethod containingMethod, IGenericParameter template ) : base( advice )
         {
             this.ContainingElement = containingMethod;
             this._template = template;
         }
+
+        public override MemberDeclarationSyntax GetDeclaration()
+        {
+            throw new NotSupportedException();
+        }
+
+        public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode()!;
+        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes()!;
 
         public bool Is( IType other )
         {

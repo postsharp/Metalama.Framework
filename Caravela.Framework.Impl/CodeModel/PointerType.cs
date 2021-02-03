@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
 
-        private readonly SourceCompilation _compilation;
+        private readonly SourceCompilationModel _compilation;
 
-        internal PointerType( IPointerTypeSymbol typeSymbol, SourceCompilation compilation )
+        internal PointerType( IPointerTypeSymbol typeSymbol, SourceCompilationModel compilation )
         {
             this._typeSymbol = typeSymbol;
             this._compilation = compilation;

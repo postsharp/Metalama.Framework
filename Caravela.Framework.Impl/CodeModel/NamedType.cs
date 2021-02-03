@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.CodeModel
         ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
         protected internal override ISymbol Symbol => this.TypeSymbol;
 
-        internal override SourceCompilation Compilation { get; }
+        internal override SourceCompilationModel Compilation { get; }
 
-        internal NamedType(INamedTypeSymbol typeSymbol, SourceCompilation compilation)
+        internal NamedType(INamedTypeSymbol typeSymbol, SourceCompilationModel compilation)
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;

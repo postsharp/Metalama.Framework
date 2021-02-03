@@ -14,9 +14,12 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    [Transformer]
-    sealed class AspectPipeline : ISourceTransformer
+    abstract class AspectPipeline : ISourceTransformer
     {
+        private List<PipelineStage> _stages;
+
+        public IList<PipelineStage> Stages { get; }
+
         public Compilation Execute(TransformerContext context)
         {
             bool getFlag( string flagName ) =>
@@ -39,12 +42,12 @@ namespace Caravela.Framework.Impl
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
-                var compilation = new SourceCompilation( roslynCompilation );
+                var compilation = new SourceCompilationModel( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var aspectCompilation = new AspectCompilation( compilation, compileTimeAssemblyLoader );
+                var pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>().ToImmutableReactive() );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
@@ -52,20 +55,20 @@ namespace Caravela.Framework.Impl
                         at => at.Parts,
                         ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
                     .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
-                    .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
+                    .Select( g => CreateStage( g.Key, g.GetValue(), compilation, compileTimeAssemblyLoader ) )
                     .GetValue( default );
 
                 foreach ( var stage in stages )
                 {
-                    aspectCompilation = stage.Transform( aspectCompilation );
+                    pipelineStageResult = stage.ToResult( pipelineStageResult );
                 }
 
-                foreach ( var diagnostic in aspectCompilation.Diagnostics )
+                foreach ( var diagnostic in pipelineStageResult.Diagnostics )
                 {
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                foreach (var resource in aspectCompilation.Resources)
+                foreach (var resource in pipelineStageResult.Resources)
                 {
                     context.ManifestResources.Add( resource );
                 }
@@ -81,7 +84,7 @@ namespace Caravela.Framework.Impl
                     }
                 }
 
-                var resultCompilation = aspectCompilation.Compilation.GetRoslynCompilation();
+                var resultCompilation = pipelineStageResult.Compilation.GetRoslynCompilation();
 
                 resultCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( resultCompilation );
 
@@ -106,7 +109,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
+        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilationModel compilation)
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
@@ -129,7 +132,7 @@ namespace Caravela.Framework.Impl
 
         record AspectPartData( AspectType AspectType, AspectPart AspectPart );
 
-        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
+        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch (groupKey)
             {
@@ -141,7 +144,7 @@ namespace Caravela.Framework.Impl
 
                 case nameof( AspectDriver ):
 
-                    return new AdviceWeaverStage(partsData.Select(pd => pd.AspectPart));
+                    return new AdviceWeaverStage( partsData.Select(pd => pd.AspectPart), compileTimeAssemblyLoader );
 
                 default:
 

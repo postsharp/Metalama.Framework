@@ -36,7 +36,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
         /// </summary>
-         MethodKind MethodKind { get; }
+        MethodKind MethodKind { get; }
 
         //dynamic Invoke(params object[] args);
     }

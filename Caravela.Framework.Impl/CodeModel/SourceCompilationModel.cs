@@ -4,19 +4,20 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class SourceCompilation : BaseCompilation
+    class SourceCompilationModel : CompilationModel
     {
         internal CSharpCompilation RoslynCompilation { get; }
 
         internal SymbolMap SymbolMap { get; }
 
-        public SourceCompilation(CSharpCompilation roslynCompilation)
+        public SourceCompilationModel(CSharpCompilation roslynCompilation)
         {
             this.RoslynCompilation = roslynCompilation;
 
@@ -46,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override CSharpCompilation GetPrimeCompilation() => this.RoslynCompilation;
 
-        internal override IReactiveCollection<IAdvice> CollectAdvices() => ImmutableArray.Create<IAdvice>().ToReactive();
+        internal override IReactiveCollection<Transformation> CollectTransformations() => ImmutableArray.Create<Transformation>().ToReactive();
 
         internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this.RoslynCompilation.AssemblyName;
@@ -54,7 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
     internal static class Factory
     {
-        internal static IType CreateIType(ITypeSymbol typeSymbol, SourceCompilation compilation) =>
+        internal static IType CreateIType(ITypeSymbol typeSymbol, SourceCompilationModel compilation) =>
             typeSymbol switch
             {
                 INamedTypeSymbol namedType => new NamedType(namedType, compilation),
@@ -69,6 +70,6 @@ namespace Caravela.Framework.Impl.CodeModel
     // for testing
     static class CompilationFactory
     {
-        public static ICompilation CreateCompilation(CSharpCompilation roslynCompilation) => new SourceCompilation(roslynCompilation);
+        public static ICompilation CreateCompilation(CSharpCompilation roslynCompilation) => new SourceCompilationModel(roslynCompilation);
     }
 }

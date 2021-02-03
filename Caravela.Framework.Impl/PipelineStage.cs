@@ -2,6 +2,6 @@
 {
     abstract class PipelineStage
     {
-        public abstract AspectCompilation Transform(AspectCompilation input);
+        public abstract PipelineStageResult ToResult( PipelineStageResult input );
     }
 }

@@ -13,15 +13,15 @@ namespace Caravela.Framework.Impl
             this.Name = name;
         }
 
-        internal AspectCompilation Transform( AspectCompilation compilation )
+        internal AspectPartResult ToResult( AspectPartResult input )
         {
             var aspectDriver = (AspectDriver) this.AspectType.AspectDriver;
 
-            var aspectInstances = compilation.AspectsByAspectType[this.AspectType.Name];
+            var aspectInstances = input.AspectsByAspectType[this.AspectType.Name];
 
             var instanceResults = aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) );
 
-            return compilation.Update( instanceResults );
+            return input.Update( instanceResults );
         }
     }
 }

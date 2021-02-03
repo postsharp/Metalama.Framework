@@ -3,12 +3,13 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    abstract class BaseCompilation : ICompilation
+    abstract class CompilationModel : ICompilation
     {
         public abstract IReactiveCollection<INamedType> DeclaredTypes { get; }
         public abstract IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
@@ -58,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         internal abstract CSharpCompilation GetPrimeCompilation();
-        internal abstract IReactiveCollection<IAdvice> CollectAdvices();
+        internal abstract IReactiveCollection<Transformation> CollectTransformations();
 
         internal abstract CSharpCompilation GetRoslynCompilation();
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );

@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly IMethodSymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
 
-        internal override SourceCompilation Compilation { get; }
+        internal override SourceCompilationModel Compilation { get; }
 
-        public Method(IMethodSymbol symbol, SourceCompilation compilation)
+        public Method(IMethodSymbol symbol, SourceCompilationModel compilation)
         {
             this._symbol = symbol;
             this.Compilation = compilation;

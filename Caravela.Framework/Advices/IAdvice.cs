@@ -11,6 +11,11 @@ namespace Caravela.Framework.Advices
     public interface IAdvice
     {
         /// <summary>
+        /// Gets the aspect that contains the advice.
+        /// </summary>
+        IAspect Aspect { get; }
+
+        /// <summary>
         /// Gets the element of code to which the current advice has been applied.
         /// </summary>
         ICodeElement TargetDeclaration { get; }

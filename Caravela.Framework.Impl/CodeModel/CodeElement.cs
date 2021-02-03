@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     abstract class CodeElement : ICodeElement, IToSyntax
     {
-        internal abstract SourceCompilation Compilation { get; }
+        internal abstract SourceCompilationModel Compilation { get; }
         internal SymbolMap SymbolMap => this.Compilation.SymbolMap;
 
         public abstract ICodeElement? ContainingElement { get; }
