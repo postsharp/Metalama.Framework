@@ -62,9 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
         public override ICodeElement? ContainingElement { get; }
 
         public IMethod TemplateMethod { get; }
-
-        public BlockSyntax MethodBodyOverride { get; }
-
+        
         [Memo]
         public IParameter? ReturnParameter => this.TemplateMethod!.ReturnParameter;
 
@@ -118,7 +116,7 @@ namespace Caravela.Framework.Impl.Transformations
                 templateSyntax.TypeParameterList!,
                 templateSyntax.ParameterList, 
                 templateSyntax.ConstraintClauses, 
-                this.MethodBodyOverride!, 
+                Block( ThrowStatement( ObjectCreationExpression( ParseTypeName("System.NotImplementedException")))), 
                 null, 
                 templateSyntax.SemicolonToken
                 );

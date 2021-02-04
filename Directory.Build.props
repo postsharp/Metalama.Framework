@@ -1,8 +1,10 @@
 <Project>
   <PropertyGroup>
-    <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
-    <!-- the above stopped working in VS for some reason -->
-    <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
+    <!-- This forces the Sdk to set default value of Configuration property early (in Microsoft.Common.props). -->
+    <DefaultProjectConfiguration>Debug</DefaultProjectConfiguration>
+
+    <!-- Hooks our file into AfterMicrosoftCommonProps import extension point, which is imported after default configuration is set. -->
+    <CustomAfterMicrosoftCommonProps>$(MSBuildThisFileDirectory)\Directory.AfterCommonProps.props</CustomAfterMicrosoftCommonProps>
 
     <!-- Setting the version. TeamCity defines the environment variable TeamCityBuildNumber -->
     <MainVersion>0.1.1</MainVersion>

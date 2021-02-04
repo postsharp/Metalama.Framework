@@ -8,5 +8,6 @@ namespace Caravela.Framework.Impl
     [Transformer]
     class ImmutableAspectPipeline : AspectPipeline, ISourceTransformer
     {
+        // TODO.
     }
 }

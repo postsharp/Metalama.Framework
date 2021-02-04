@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
@@ -24,17 +25,18 @@ namespace Caravela.Framework.Impl
 
         public IReactiveCollection<AspectInstance> Aspects { get; }
 
-        public IReactiveCollection<Transformation> Transformations { get; }
+        public IReadOnlyList<Transformation> Transformations { get; }
 
         public IReactiveGroupBy<string, AspectInstance> AspectsByAspectType { get; }
 
         public AspectPartResult( CompilationModel compilation, CompileTimeAssemblyLoader loader )
             : this(
                   Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), compilation,
-                  ImmutableList.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
+                  ImmutableList.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ),
+                  Array.Empty<Transformation>() ) { }
 
         private AspectPartResult(
-            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, CompilationModel compilation, IImmutableList<AspectSource> aspectSources)
+            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, CompilationModel compilation, IImmutableList<AspectSource> aspectSources, IReadOnlyList<Transformation> transformations)
         {
             this.Diagnostics = diagnostics;
             this.Resources = resources;
@@ -43,6 +45,7 @@ namespace Caravela.Framework.Impl
 
             this.Aspects = aspectSources.ToReactive().SelectMany(s => s.GetAspects());
             this.AspectsByAspectType = this.Aspects.GroupBy( ai => ai.AspectType.FullName );
+            this.Transformations = transformations;
         }
 
         public AspectPartResult Update( IReadOnlyList<Diagnostic> addedDiagnostics, IReadOnlyList<ResourceDescription> addedResources, CompilationModel newCompilation )
@@ -50,7 +53,7 @@ namespace Caravela.Framework.Impl
             var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableList();
             var newResources = this.Resources.Concat( addedResources ).ToImmutableList();
 
-            return new( newDiagnostics, newResources, newCompilation, this._aspectSources );
+            return new( newDiagnostics, newResources, newCompilation, this._aspectSources, this.Transformations );
         }
 
         internal AspectPartResult Update( IReactiveCollection<AspectInstanceResult> instanceResults )
@@ -58,14 +61,20 @@ namespace Caravela.Framework.Impl
             instanceResults = instanceResults.Materialize();
 
             var addedDiagnostics = instanceResults.SelectMany( air => air.Diagnostics );
-            var addedAdvices = instanceResults.SelectMany( air => air.Advices );
             var addedAspects = instanceResults.SelectMany( air => air.Aspects );
+            var addedAdvices = instanceResults.SelectMany( air => air.Advices );
 
-            var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).ToImmutableList();
-            var newCompilation = this.Compilation;
+            var adviceResults = addedAdvices.Select( a => (IAdviceImplementation) a ).Select( ai => ai.ToResult( this.Compilation ) );
+
+            var addedAdviceDiagnostics = adviceResults.SelectMany( ar => ar.Diagnostics );
+            var addedAdviceTransformations = adviceResults.SelectMany( ar => ar.Transformations );
+
+            var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).Concat( addedAdviceDiagnostics.GetValue() ).ToImmutableList();
+            var newTransformations = this.Transformations.Concat( addedAdviceTransformations.GetValue() ).ToImmutableList();
+            var newCompilation = new ModifiedCompilationModel( this.Compilation, addedAdviceTransformations );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
-            return new( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources );
+            return new( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources, newTransformations );
         }
     }
 }

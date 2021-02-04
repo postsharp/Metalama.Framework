@@ -58,12 +58,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
-            private readonly List<OverriddenMethod> _overriddenMethods;
             private readonly List<IntroducedMethod> _introducedMethods;
 
             public CompilationRewriter( IReactiveCollection<Transformation> transformations )
             {
-                IList<Transformation> transformationList = (IList<Transformation>)transformations.Materialize();
+                IList<Transformation> transformationList = (IList<Transformation>) transformations.Materialize().GetValue().ToList();
 
                 this._introducedMethods = transformationList.OfType<IntroducedMethod>().ToList();
             }
