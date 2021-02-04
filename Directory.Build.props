@@ -41,6 +41,24 @@
     <!-- Disable XML doc warnings in the debug build -->
     <NoWarn Condition="'$(Configuration)'=='Debug'">1591</NoWarn>
   </PropertyGroup>
+  
+  <!-- Source Link  -->
+  <PropertyGroup>
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
+
+    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
