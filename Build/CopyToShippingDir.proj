@@ -2,6 +2,11 @@
      Don't include private packages in this directory -->
 <Project DefaultTargets="Build">
 
+    <PropertyGroup>
+        <!-- We only publish release builds -->
+        <Configuration>Release</Configuration>
+    </PropertyGroup>
+
     <Import Project="..\Versions.props"/>
     <Import Project="..\Directories.props"/>
 
