@@ -5,7 +5,7 @@
     <PropertyGroup>
         <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
         <!-- the above stopped working in VS for some reason -->
-        <OutputPath>$(MSBuildThisFileDirectory)\artifacts\bin\$(Configuration)</OutputPath>
+        <OutputPath>$(MSBuildThisFileDirectory)artifacts\bin\$(Configuration)</OutputPath>
     </PropertyGroup>
 
 </Project>
