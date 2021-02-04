@@ -1,3 +1,4 @@
+using Caravela.Framework.DesignTime.Contracts;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -54,50 +55,50 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public static TextSpanCategory GetColorFromAnnotation( this SyntaxNode node )
+        public static TextSpanClassification GetColorFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
             if ( annotation == null )
             {
-                return TextSpanCategory.Default;
+                return TextSpanClassification.Default;
             }
             else
             {
-                if ( Enum.TryParse( annotation.Data, out TextSpanCategory color ) )
+                if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
                 {
                     return color;
                 }
                 else
                 {
-                    return TextSpanCategory.Default;
+                    return TextSpanClassification.Default;
                 }
             }
         }
         
-        public static TextSpanCategory GetColorFromAnnotation( this SyntaxToken node )
+        public static TextSpanClassification GetColorFromAnnotation( this SyntaxToken node )
         {
             var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
             if ( annotation == null )
             {
-                return TextSpanCategory.Default;
+                return TextSpanClassification.Default;
             }
             else
             {
-                if ( Enum.TryParse( annotation.Data, out TextSpanCategory color ) )
+                if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
                 {
                     return color;
                 }
                 else
                 {
-                    return TextSpanCategory.Default;
+                    return TextSpanClassification.Default;
                 }
             }
         }
         
 
-        public static T AddColoringAnnotation<T>( this T node, TextSpanCategory color ) where T : SyntaxNode
+        public static T AddColoringAnnotation<T>( this T node, TextSpanClassification color ) where T : SyntaxNode
         {
-            if ( color == TextSpanCategory.Default || node.GetColorFromAnnotation() >= color )
+            if ( color == TextSpanClassification.Default || node.GetColorFromAnnotation() >= color )
             {
                 return node;
             }
@@ -107,9 +108,9 @@ namespace Caravela.Framework.Impl.Templating
 
         }
         
-        public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanCategory color )  
+        public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanClassification color )  
         {
-            if ( color == TextSpanCategory.Default || node.GetColorFromAnnotation() >= color )
+            if ( color == TextSpanClassification.Default || node.GetColorFromAnnotation() >= color )
             {
                 return node;
             }

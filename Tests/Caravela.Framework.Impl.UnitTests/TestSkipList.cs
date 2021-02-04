@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Impl.Templating;
+﻿using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Templating;
 using System;
 using System.Collections.Generic;
 using Xunit;

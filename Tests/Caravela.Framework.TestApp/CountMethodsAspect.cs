@@ -15,6 +15,7 @@ namespace Caravela.Framework.TestApp
         [OverrideMethodTemplate]
         public dynamic Template()
         {
+            Console.WriteLine( "Hello, world." );
             Console.WriteLine( $"This is {++this.i} of {this.methodCount} methods." );
             return proceed();
         }

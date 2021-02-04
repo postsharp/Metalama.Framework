@@ -8,5 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
+
   
 </Project>

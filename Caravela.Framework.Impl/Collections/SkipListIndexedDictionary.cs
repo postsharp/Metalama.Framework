@@ -13,7 +13,7 @@ using System.Text;
 
 #pragma warning disable CA1034 // Nested types should not be visible
 
-namespace Caravela.Framework.Impl.Templating
+namespace Caravela.Framework.Impl.Collections
 {
     /// <summary>
     /// Represents a SkipList.  A SkipList is a combination of a BST and a sorted link list, providing
@@ -482,23 +482,24 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key )
+        public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key, bool returnsPrevious = false )
         {
             if ( !this.TryFindNode( key, out var node, out var position, false ) )
             {
                 yield break;
             }
-
-            while ( node != null )
-            {
-                if ( this._comparer.Compare(  node.Key, key  ) >= 0 )
-                {
-                    yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
-                }
-
-                node = node.GetNeighbor(0).TargetNode;
-            }
             
+            
+            if ( returnsPrevious || this._comparer.Compare(  node.Key, key  ) >= 0 )
+            {
+                yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
+            }
+
+            while ( (node = node.GetNeighbor(0)?.TargetNode) != null )
+            {
+                yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
+
+            }
             
         }
 
@@ -647,13 +648,13 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         sb.Append(", ");
                     }
-                    if (GetNeighbor(i) == null)
+                    if (this.GetNeighbor(i) == null)
                     {
                         sb.Append("null");
                     }
                     else
                     {
-                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", GetNeighbor(i).TargetNode.Key, GetNeighbor(i).Width));
+                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", this.GetNeighbor(i).TargetNode.Key, this.GetNeighbor(i).Width));
                     }
                 }
                 sb.Append('}');

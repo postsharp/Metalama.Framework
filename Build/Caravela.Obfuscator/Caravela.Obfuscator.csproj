@@ -17,4 +17,5 @@
     <PackageReference Include="PostSharp.Compiler.Engine" Version="$(PostSharpPackageVersion)" />
   </ItemGroup>
 
+  
 </Project>
