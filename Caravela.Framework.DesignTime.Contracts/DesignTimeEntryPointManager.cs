@@ -146,6 +146,16 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         private static bool TryGetReferencedVersion( Project project, [NotNullWhen(true)] out Version? version )
         {
+            // Note that it is not enough that this method returns true for a project to get Caravela UI services.
+            // The other condition is that at least one other project in the solution references the Caravela analyzer,
+            // and that this analyzer is loaded by Visual Studio.
+
+            if ( IsOurReference(project.AssemblyName))
+            {
+                version = DesignTimeEntryPointManager.MatchAllVersion;
+                return true;
+            }
+
             foreach ( var reference in project.MetadataReferences )
             {
                 switch ( reference )
