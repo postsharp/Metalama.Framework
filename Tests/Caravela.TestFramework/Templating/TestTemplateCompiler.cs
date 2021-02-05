@@ -86,10 +86,12 @@ namespace Caravela.TestFramework.Templating
                 this._item = item;
             }
 
-#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
-            public override SyntaxNode Visit( SyntaxNode node )
-#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
+            public override SyntaxNode? Visit( SyntaxNode? node )
             {
+                if ( node == null )
+                {
+                    return null;
+                }
 
                 if ( this._parent._transformedNodes.TryGetValue( node, out var transformedNodes ) )
                 {
