@@ -13,6 +13,7 @@ namespace Caravela.Reactive.Sources
     /// <typeparam name="T"></typeparam>
     public sealed class ReactiveValue<T> : IReactiveSource<T, IReactiveObserver<T>>, IReactiveObservable<IReactiveObserver<T>>
     {
+        private readonly IEqualityComparer<T> _comparer;
         private IReactiveVersionedValue<T> _value;
         private int _version;
         private ObserverList<IReactiveObserver<T>> _observers;
