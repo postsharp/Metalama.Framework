@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
 
-                return method.WithBody( null ).WithExpressionBody( ArrowExpressionClause( body ) );
+                return method.WithBody( null ).WithExpressionBody( ArrowExpressionClause( body ) ).WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
             }
         }
 

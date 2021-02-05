@@ -123,7 +123,13 @@ namespace Caravela.Framework.Impl.CompileTime
             var stream = new MemoryStream();
 
 #if DEBUG
+            SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
+
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+            foreach (var tree in compilation.SyntaxTrees)
+            {
+                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithChangedText( GetEmbeddableText( tree.GetText() ) ) );
+            }
 
             var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
             var compilationForDebugging = this._debugTransformedCode ? compilation : input;
@@ -132,11 +138,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
 
-                    var text = tree.GetText();
-                    if ( !text.CanBeEmbedded )
-                        text = SourceText.From( text.ToString(), Encoding.UTF8 );
-
-                    return EmbeddedText.FromSource( filePath, text );
+                    return EmbeddedText.FromSource( filePath, GetEmbeddableText( tree.GetText() ) );
                 } );
 
             var result = compilation.Emit( stream, manifestResources: this._resources, options: options, embeddedTexts: embeddedTexts );
