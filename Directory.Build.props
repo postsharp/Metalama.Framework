@@ -1,22 +1,7 @@
 <Project>
-  <PropertyGroup>
-    <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
-    <!-- the above stopped working in VS for some reason -->
-    <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
-
-    <!-- Setting the version. TeamCity defines the environment variable TeamCityBuildNumber -->
-    <MainVersion>0.1.1</MainVersion>
-    <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
-
-    <!-- Version of dependencies -->
-    <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>3.8.1-preview</CaravelaCompilerVersion>
-    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
-    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
-
-  </PropertyGroup>
+  
+  <Import Project="Versions.props"/>
+  <Import Project="Directories.props"/>
 
   <!-- Properties of NuGet packages-->
   <PropertyGroup>
@@ -41,13 +26,27 @@
     <!-- Disable XML doc warnings in the debug build -->
     <NoWarn Condition="'$(Configuration)'=='Debug'">1591</NoWarn>
   </PropertyGroup>
+  
+  <!-- Source Link  -->
+  <PropertyGroup>
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
+
+    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>
-
-  <Target Name="PrintVersion">
-    <Message Text="Version=$(Version)"/>
-  </Target>
 
 </Project>

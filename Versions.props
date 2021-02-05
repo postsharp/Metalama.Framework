@@ -1,0 +1,33 @@
+<Project InitialTargets="CheckVersionsPrerequisites">
+
+  <PropertyGroup>
+    
+    <!-- We need the Configuration property to be defined at this point.-->
+    <_ConfigurationPropertyMissing Condition="'$(Configuration)'==''">True</_ConfigurationPropertyMissing>
+  
+    <!-- TeamCity defines the environment variable VersionSuffix -->
+    <MainVersion>0.1.1</MainVersion>
+    <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
+    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
+
+    <!-- Version of dependencies -->
+    <RoslynVersion>3.8.0</RoslynVersion>
+    <CaravelaCompilerVersion>3.8.1-preview</CaravelaCompilerVersion>
+    
+    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
+    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+
+  </PropertyGroup>
+
+
+  <Target Name="PrintVersion">
+    <Message Text="Version=$(Version)"/>
+  </Target>
+
+  <Target Name="CheckVersionsPrerequisites">
+    <Error Text="The Configuration property was not set when Versions.props was imported." 
+           Condition="'$(_ConfigurationPropertyMissing)'=='True'"/>
+  </Target>
+
+</Project>
