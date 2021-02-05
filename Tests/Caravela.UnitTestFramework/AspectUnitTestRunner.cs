@@ -1,16 +1,15 @@
 ﻿using Caravela.TestFramework;
-using Caravela.TestFramework.Templating;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Aspects.UnitTests
+namespace Caravela.UnitTestFramework
 {
     public class AspectUnitTestRunner : AspectTestRunner
     {
         private readonly ITestOutputHelper _logger;
-        
+
         public AspectUnitTestRunner( ITestOutputHelper logger )
         {
             this._logger = logger;

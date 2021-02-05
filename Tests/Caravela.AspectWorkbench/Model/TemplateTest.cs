@@ -1,4 +1,4 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.AspectWorkbench.Model

@@ -1,4 +1,4 @@
-﻿namespace Caravela.TestFramework.Templating
+﻿namespace Caravela.TestFramework
 {
     public static class CommonSnippets
     {

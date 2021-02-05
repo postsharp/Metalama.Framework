@@ -1,9 +1,0 @@
-﻿{
-    var a0 = a;
-    var x = 0;
-    Console.WriteLine(1);
-    Console.WriteLine(a0);
-    Console.WriteLine(x);
-    Console.WriteLine(0);
-    return a;
-}
