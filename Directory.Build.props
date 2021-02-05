@@ -6,7 +6,7 @@
 
     <Version>0.1.0-preview-dev.1</Version>
     <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>3.8.0-preview</CaravelaCompilerVersion>
+    <CaravelaCompilerVersion>3.8.4-preview</CaravelaCompilerVersion>
     <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
     <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
 

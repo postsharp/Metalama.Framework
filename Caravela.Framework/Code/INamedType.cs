@@ -21,6 +21,11 @@ namespace Caravela.Framework.Code
 
         IImmutableList<IGenericParameter> GenericParameters { get; }
 
+        /// <summary>
+        /// Indicates whether this type or any of its containers does not have generic arguments set.
+        /// </summary>
+        bool IsOpenGeneric { get; }
+
         IReactiveCollection<INamedType> NestedTypes { get; }
 
         IReactiveCollection<IProperty> Properties { get; }

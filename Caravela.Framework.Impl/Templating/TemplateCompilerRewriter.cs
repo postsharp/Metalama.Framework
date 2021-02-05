@@ -135,13 +135,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // TODO: We need to transform null and default values though. How to do this right then?
                 case SyntaxKind.NullLiteralExpression:
-                    return
-                        InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
-                            Argument( this.Transform( SyntaxKind.NullLiteralExpression ) ) );
                 case SyntaxKind.DefaultLiteralExpression:
-                    return
-                        InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
-                            Argument( this.Transform( SyntaxKind.DefaultLiteralExpression ) ) );
+                    // new RuntimeExpression(LiteralExpression(Null/DefaultLiteralExpression), true)
+                    return ObjectCreationExpression( IdentifierName( nameof( RuntimeExpression ) ) )
+                        .AddArgumentListArguments(
+                            Argument( InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) )
+                                .AddArgumentListArguments( Argument( this.Transform( expression.Kind() ) ) ) ),
+                            Argument( this.Transform( true ) ) );
 
                 case SyntaxKind.DefaultExpression:
                 //case SyntaxKind.NullLiteralExpression:
@@ -151,21 +151,23 @@ namespace Caravela.Framework.Impl.Templating
                     return expression;
             }
 
+            var type = this._semanticAnnotationMap.GetType( expression );
+
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateLiteralExpressionFactory(SyntaxKind syntaxKind)
             {
-                return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
-                        Argument( this.Transform( syntaxKind ) ),
-                        Argument( InvocationExpression( IdentifierName( nameof( Literal ) ) ).AddArgumentListArguments(
-                            Argument( expression )
-                            ) )
-                        );
+                // new RuntimeExpression(LiteralExpression(syntaxKind, Literal(expression)), type)
+                return ObjectCreationExpression( IdentifierName( nameof( RuntimeExpression ) ) )
+                    .AddArgumentListArguments(
+                        Argument( InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) )
+                            .AddArgumentListArguments(
+                                Argument( this.Transform( syntaxKind ) ),
+                                Argument( InvocationExpression( IdentifierName( nameof( Literal ) ) )
+                                    .AddArgumentListArguments( Argument( expression ) ) ) ) ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
             }
 
-
-            var type = this._semanticAnnotationMap.GetType(expression)!;
-
-            if (type is IErrorTypeSymbol)
+            if ( type is IErrorTypeSymbol)
             {
                 // There is a compile-time error. Return default.
                 return LiteralExpression(
@@ -210,11 +212,13 @@ namespace Caravela.Framework.Impl.Templating
                     return CreateLiteralExpressionFactory(SyntaxKind.CharacterLiteralExpression);
 
                 case nameof( Boolean ):
-                    return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
-                        Argument( InvocationExpression( IdentifierName (nameof( BooleanKeyword ) ) ).AddArgumentListArguments(
-                            Argument( expression )
-                            ) )
-                        );
+                    // new RuntimeExpression(LiteralExpression(BooleanKeyword(expression)), "System.Boolean")
+                    return ObjectCreationExpression( IdentifierName( nameof( RuntimeExpression ) ) )
+                        .AddArgumentListArguments(
+                            Argument( InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) )
+                                .AddArgumentListArguments( Argument( InvocationExpression( IdentifierName (nameof( BooleanKeyword ) ) )
+                                    .AddArgumentListArguments( Argument( expression ) ) ) ) ),
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 default:
                     //TODO: emit an error. We don't know how to serialize this into syntax.
@@ -226,20 +230,40 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
             if ( this.GetTransformationKind( node.Expression ) != TransformationKind.Transform &&
-                this._semanticAnnotationMap.GetType( node.Expression )?.Name == "dynamic" )
+                this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol &&
+                // methods that don't return dynamic can appear dynamic because of dynamic arguments
+                // in such cases, don't treat them as dynamic
+                this._semanticAnnotationMap.GetSymbol( node.Expression ) is not IMethodSymbol { ReturnType: not IDynamicTypeSymbol } )
             {
                 return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastFromDynamic(
-                                IdentifierName( nameof( IDynamicMetaMember ) ), node.Expression ) ),
-                        IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
-                    .AddArgumentListArguments( Argument( LiteralExpression(
-                        SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
+                                IdentifierName( nameof( IDynamicMetaMember ) ), (ExpressionSyntax) this.Visit( node.Expression ) ) ),
+                         IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
+                     .AddArgumentListArguments( Argument( LiteralExpression(
+                         SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
             }
 
             return base.VisitMemberAccessExpression( node );
+        }
+
+        public override SyntaxNode VisitInvocationExpression( InvocationExpressionSyntax node )
+        {
+            bool argumentIsDynamic( ArgumentSyntax argument ) =>
+                this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+
+            if ( this.GetTransformationKind( node ) != TransformationKind.Transform &&
+                node.ArgumentList.Arguments.Any( argumentIsDynamic ) )
+            {
+                return node.Update(
+                    (ExpressionSyntax) this.Visit( node.Expression ),
+                    ArgumentList( SeparatedList( node.ArgumentList.Arguments.Select(
+                        a => argumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a ) ) ) ) );
+            }
+
+            return base.VisitInvocationExpression( node );
         }
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)

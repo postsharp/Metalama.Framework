@@ -7,6 +7,8 @@ namespace Caravela.Templating.UnitTests
     {
         public static void AssertOutput( this TestResult testResult, string expectedOuput )
         {
+            Assert.Null( testResult.TestErrorMessage );
+            Assert.Null( testResult.TestException );
             Assert.Equal( expectedOuput.Trim(), testResult.TemplateOutputSource?.ToString()?.Trim() );
         }
 

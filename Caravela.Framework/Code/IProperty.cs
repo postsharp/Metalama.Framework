@@ -7,17 +7,28 @@ namespace Caravela.Framework.Code
         dynamic Value { get; set; }
 
         /// <summary>
-        /// Determines if the method existed before the current aspect was advice
-        /// (<see langword="false" /> if it was introduced by the current aspect).
+        /// Get the value for a different instance;
         /// </summary>
-        bool HasBase { get; }
+        dynamic GetValue( dynamic? instance );
 
         /// <summary>
-        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Set the value for a different instance;
         /// </summary>
-        IPropertyInvocation Base { get; }
+        dynamic SetValue( dynamic? instance, dynamic value );
 
-        IPropertyInvocation WithIndex( params dynamic[] args );
+        /// <summary>
+        /// Get the value for an indexer.
+        /// </summary>
+        dynamic GetIndexerValue( dynamic? instance, params dynamic[] args );
+
+        /// <summary>
+        /// Set the value for an indexer.
+        /// </summary>
+        /// <remarks>
+        /// Note: the order of parameters is different than in C# code:
+        /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
+        /// </remarks>
+        dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args );
     }
 
     /// <summary>
@@ -48,8 +59,14 @@ namespace Caravela.Framework.Code
         IMethod? Setter { get; }
 
         /// <summary>
-        /// Allows to access the property on another instance than <see langword="this" />.
+        /// Determines if the method existed before the current aspect was advice
+        /// (<see langword="false" /> if it was introduced by the current aspect).
         /// </summary>
-        IPropertyInvocation WithInstance( dynamic instance );
+        bool HasBase { get; }
+
+        /// <summary>
+        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// </summary>
+        IPropertyInvocation Base { get; }
     }
 }

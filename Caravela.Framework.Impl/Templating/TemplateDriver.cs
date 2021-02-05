@@ -5,7 +5,9 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -31,7 +33,16 @@ namespace Caravela.Framework.Impl.Templating
             TemplateContext.target = templateContext;
             TemplateContext.ExpansionContext = new TemplateDriverExpansionContext( this, templateContext );
 
-            var output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );
+            SyntaxNode output;
+            try
+            {
+                output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
+            }
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
             TemplateContext.ProceedImpl = null;

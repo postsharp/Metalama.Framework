@@ -72,6 +72,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IImmutableList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
 
+        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
+
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
         {

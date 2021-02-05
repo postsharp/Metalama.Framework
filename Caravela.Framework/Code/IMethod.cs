@@ -7,18 +7,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Allows invocation of the method.
         /// </summary>
-        dynamic Invoke( params dynamic[] args );
-
-        /// <summary>
-        /// Determines if the method existed before the current aspect was advice
-        /// (<see langword="false" /> if it was introduced by the current aspect).
-        /// </summary>
-        bool HasBase { get; }
-
-        /// <summary>
-        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
-        /// </summary>
-        IMethodInvocation Base { get; }
+        dynamic Invoke( dynamic? instance, params dynamic[] args );
     }
 
     public interface IMethod : IMember, IMethodInvocation
@@ -32,6 +21,13 @@ namespace Caravela.Framework.Code
         IImmutableList<IMethod> LocalFunctions { get; }
         IImmutableList<IParameter> Parameters { get; }
         IImmutableList<IGenericParameter> GenericParameters { get; }
+        IImmutableList<IType> GenericArguments { get; }
+
+        /// <summary>
+        /// Indicates whether this method or any of its containers does not have generic arguments set.
+        /// </summary>
+        bool IsOpenGeneric { get; }
+
         new MethodKind Kind { get; }
 
         /// <summary>
@@ -41,8 +37,14 @@ namespace Caravela.Framework.Code
         IMethod WithGenericArguments( params IType[] genericArguments );
 
         /// <summary>
-        /// Allows to invoke the method on another instance than <see langword="this" />.
+        /// Determines if the method existed before the current aspect was advice
+        /// (<see langword="false" /> if it was introduced by the current aspect).
         /// </summary>
-        IMethodInvocation WithInstance( dynamic instance );
+        bool HasBase { get; }
+
+        /// <summary>
+        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// </summary>
+        IMethodInvocation Base { get; }
     }
 }

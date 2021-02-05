@@ -4,15 +4,11 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Caravela.Framework.Code.RefKind;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Property : CodeElement, IProperty
+    internal sealed partial class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol _symbol;
         protected internal override ISymbol Symbol => this._symbol;
@@ -64,62 +60,24 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override CodeElementKind Kind => CodeElementKind.Property;
 
-        public dynamic Value
+        public object Value
         {
-            get => new PropertyInvocation( this ).Value;
+            get => new PropertyInvocation<Property>( this ).Value;
             set => throw new InvalidOperationException();
         }
 
+        public object GetValue( object? instance ) => new PropertyInvocation<Property>( this ).GetValue( instance );
+
+        public object SetValue( object? instance, object value ) => new PropertyInvocation<Property>( this ).SetValue( instance, value );
+
+        public object GetIndexerValue( object? instance, params object[] args ) => new PropertyInvocation<Property>( this ).GetIndexerValue( instance, args );
+
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => new PropertyInvocation<Property>( this ).SetIndexerValue( instance, value, args );
+
         public bool HasBase => true;
 
-        public IPropertyInvocation Base => new PropertyInvocation( this ).Base;
+        public IPropertyInvocation Base => new PropertyInvocation<Property>( this ).Base;
 
-        public IPropertyInvocation WithIndex( params object[] args ) => new PropertyInvocation( this, args: args );
-
-        public IPropertyInvocation WithInstance( object instance ) => new PropertyInvocation( this, (ExpressionSyntax) instance );
-
-
-        internal struct PropertyInvocation : IPropertyInvocation
-        {
-            private readonly IProperty _property;
-            private readonly ExpressionSyntax? _instance;
-            private readonly object[]? _args;
-
-            public PropertyInvocation( IProperty property, ExpressionSyntax? instance = null, object[]? args = null )
-            {
-                this._property = property;
-                this._instance = instance;
-                this._args = args;
-            }
-
-            public dynamic Value
-            {
-                get
-                {
-                    CheckArguments( this._property, this._property.Parameters, this._args ?? Array.Empty<IParameter>() );
-
-                    ExpressionSyntax receiver;
-
-                    if ( this._property.IsStatic )
-                        receiver = ParseTypeName( this._property.DeclaringType!.FullName );
-                    else
-                        receiver = this._instance ?? ThisExpression();
-
-                    ExpressionSyntax expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, IdentifierName( this._property.Name ) );
-
-                    if ( this._args?.Length > 0)
-                        expression = ElementAccessExpression( expression ).AddArgumentListArguments( this._args.Select( arg => Argument( (ExpressionSyntax) arg ) ).ToArray() );
-
-                    return new DynamicMetaMember( expression );
-                }
-                set => throw new NotImplementedException();
-            }
-
-            public bool HasBase => true;
-
-            public IPropertyInvocation Base => throw new NotImplementedException();
-
-            public IPropertyInvocation WithIndex( params object[] args ) => new PropertyInvocation( this._property, this._instance, args );
-        }
+        public override string ToString() => this._symbol.ToString();
     }
 }

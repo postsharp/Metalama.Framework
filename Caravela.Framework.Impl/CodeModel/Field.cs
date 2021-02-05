@@ -4,7 +4,6 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -60,16 +59,22 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public dynamic Value
         {
-            get => new Property.PropertyInvocation( this ).Value;
+            get => new PropertyInvocation<Field>( this ).Value;
             set => throw new InvalidOperationException();
         }
 
+        public object GetValue( object? instance ) => new PropertyInvocation<Field>( this ).GetValue( instance );
+
+        public object SetValue( object? instance, object value ) => new PropertyInvocation<Field>( this ).SetValue( instance, value );
+
+        public object GetIndexerValue( object? instance, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+
         public bool HasBase => true;
 
-        public IPropertyInvocation Base => new Property.PropertyInvocation( this ).Base;
+        public IPropertyInvocation Base => new PropertyInvocation<Field>( this ).Base;
 
-        public IPropertyInvocation WithIndex( params object[] args ) => new Property.PropertyInvocation( this, args: args );
-
-        public IPropertyInvocation WithInstance( object instance ) => new Property.PropertyInvocation( this, (ExpressionSyntax) instance );
+        public override string ToString() => this._symbol.ToString();
     }
 }

@@ -31,10 +31,20 @@ namespace Caravela.Framework.Impl
             new( "CR0010", "Custom equality comparers not supported.", "Build-time dictionary has an equality comparer {0} which is not supported. Only the default comparer and predefined string comparers are supported.", caravelaCategory, Error, true );
         public static DiagnosticDescriptor TypeNotSerializable =
             new( "CR0011", "Type not serializable.", "Build-time Type value {0} is of a form that is not supported for serialization.", caravelaCategory, Error, true );
-        public static DiagnosticDescriptor MethodRequiresNArguments =
-            new( "CR0012", "Method requires number of arguments.", "Method {0} requires {1} arguments.", caravelaCategory, Error, true );
-        public static DiagnosticDescriptor MethodRequiresAtLeastNArguments =
-            new( "CR0012", "Method requires more arguments.", "Method {0} requires at least {1} arguments.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor MemberRequiresNArguments =
+            new( "CR0012", "Member requires number of arguments.", "Member {0} requires {1} arguments.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor MemberRequiresAtLeastNArguments =
+            new( "CR0013", "Member requires more arguments.", "Member {0} requires at least {1} arguments.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor CantProvideInstanceForStaticMember =
+            new( "CR0014", "Can't provide instance for a static member.", "Member {0} is static, but has been used with a non-null instance.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor HasToProvideInstanceForInstanceMember =
+            new( "CR0015", "Has to provide instance for an instance member.", "Member {0} is not static, but has been used with a null instance.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor CantAccessOpenGenericMember =
+            new( "CR0016", "Can't access an open generic member.", "Member {0} can't be accessed without specifying generic arguments.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor CantInvokeLocalFunctionFromAnotherMethod =
+            new( "CR0017", "Can't invoke local function from another method.", "Local function {0} can't be invoked from method {1}, only from {2}.", caravelaCategory, Error, true );
+        public static DiagnosticDescriptor CantProvideInstanceForLocalFunction =
+            new( "CR0018", "Can't provide instance for a local function.", "{0} is a local function, so it can't be invoked with a non-null instance.", caravelaCategory, Error, true );
 
         public static DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0099", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", caravelaCategory, Error, true );
