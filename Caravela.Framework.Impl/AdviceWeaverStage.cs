@@ -1,4 +1,8 @@
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Transformations;
+using Caravela.Reactive;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -29,10 +33,13 @@ namespace Caravela.Framework.Impl
             }
 
             // TODO: Aspect Linker goes here.
+            AspectLinker linker = new AspectLinker();
+            AdviceLinkerContext linkerContext = new AdviceLinkerContext( aspectPartResult.Compilation, aspectPartResult.Transformations.Where( x => x is OverriddenElement ).ToImmutableReactive() );
+            AdviceLinkerResult linkerResult = linker.ToResult( linkerContext );
 
             return new PipelineStageResult(
-                aspectPartResult.Compilation,
-                aspectPartResult.Diagnostics,
+                linkerResult.Compilation,
+                aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics.GetValue() ).ToList(),
                 aspectPartResult.Resources,
                 aspectPartResult.Aspects
                 );

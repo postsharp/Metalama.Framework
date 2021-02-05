@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public ICodeElement OverridenDeclaration { get; }
 
-        public abstract IList<MemberDeclarationSyntax> GetOverrides();
+        public abstract IList<MemberDeclarationSyntax> GetOverrides(ICompilation compilation);
 
         public OverriddenElement(IAdvice advice, ICodeElement overridenDeclaration ) : base(advice)
         {
@@ -32,13 +32,14 @@ namespace Caravela.Framework.Impl.Transformations
             this.TemplateMethod = templateMethod;
         }
 
-        public override IList<MemberDeclarationSyntax> GetOverrides()
+        public override IList<MemberDeclarationSyntax> GetOverrides(ICompilation compilation)
         {
             // TODO: This is temporary.
             string compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            var newMethodBody = new TemplateDriver( this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName) ).ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, GetCompilation( this.OverridenDeclaration ) );
+            var newMethodBody = new TemplateDriver( this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName) ).ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, compilation );
 
-            var originalSyntax = (MethodDeclarationSyntax) ((IToSyntax) this.OverridenDeclaration).GetSyntaxNode();
+            // TODO: other method kinds (constructors).
+            var originalSyntax = (MethodDeclarationSyntax) ((IToSyntax) this.OverridenDeclaration).GetSyntaxNode();            
 
             return new[] {
                 MethodDeclaration(
@@ -46,7 +47,7 @@ namespace Caravela.Framework.Impl.Transformations
                     originalSyntax.Modifiers,
                     originalSyntax.ReturnType,
                     originalSyntax.ExplicitInterfaceSpecifier,
-                    Identifier(originalSyntax.Identifier.ValueText + "_" + Guid.NewGuid().ToString()), // TODO: This should be deterministic.
+                    Identifier(originalSyntax.Identifier.ValueText + "_Override_" + Guid.NewGuid().ToString()), // TODO: This should be deterministic.
                     originalSyntax.TypeParameterList,
                     originalSyntax.ParameterList,
                     originalSyntax.ConstraintClauses,
@@ -55,15 +56,6 @@ namespace Caravela.Framework.Impl.Transformations
                     originalSyntax.SemicolonToken
                     )
             };
-        }
-
-        static ICompilation GetCompilation(ICodeElement element)
-        {
-            // This is temporary.
-            while ( element is not ICompilation )
-                element = element.ContainingElement!;
-
-            return (ICompilation)element;
         }
     }
 }

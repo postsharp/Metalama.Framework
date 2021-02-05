@@ -64,14 +64,15 @@ namespace Caravela.Framework.Impl
             var addedAspects = instanceResults.SelectMany( air => air.Aspects );
             var addedAdvices = instanceResults.SelectMany( air => air.Advices );
 
-            var adviceResults = addedAdvices.Select( a => (IAdviceImplementation) a ).Select( ai => ai.ToResult( this.Compilation ) );
+            // TODO: Is materialize here needed? Without it ToResult is called twice resulting into multiple instances.
+            var adviceResults = addedAdvices.Select( a => (IAdviceImplementation) a ).Select( ai => ai.ToResult( this.Compilation ) ).Materialize();
 
             var addedAdviceDiagnostics = adviceResults.SelectMany( ar => ar.Diagnostics );
-            var addedAdviceTransformations = adviceResults.SelectMany( ar => ar.Transformations );
+            var addedAdviceTransformations = adviceResults.SelectMany( ar => ar.Transformations ).Materialize();
 
             var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).Concat( addedAdviceDiagnostics.GetValue() ).ToImmutableList();
             var newTransformations = this.Transformations.Concat( addedAdviceTransformations.GetValue() ).ToImmutableList();
-            var newCompilation = new ModifiedCompilationModel( this.Compilation, addedAdviceTransformations );
+            var newCompilation = new ModifiedCompilationModel( this.Compilation, addedAdviceTransformations.Where(x => x is IntroducedElement) );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
             return new( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources, newTransformations );

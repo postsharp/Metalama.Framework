@@ -103,11 +103,17 @@ namespace Caravela.Framework.Impl.Transformations
             this._visibility = visibility;
         }
 
+        //TODO: Memo for methods?
+        private MemberDeclarationSyntax declaration;
+
         public override MemberDeclarationSyntax GetDeclaration()
         {
+            if ( this.declaration != null )
+                return this.declaration;
+
             var templateSyntax = (MethodDeclarationSyntax) this.TemplateMethod!.GetSyntaxNode()!;
 
-            return MethodDeclaration(
+            this.declaration = MethodDeclaration(
                 List<AttributeListSyntax>(), // TODO: Copy some attributes?
                 templateSyntax.Modifiers, 
                 templateSyntax.ReturnType, 
@@ -120,6 +126,8 @@ namespace Caravela.Framework.Impl.Transformations
                 null, 
                 templateSyntax.SemicolonToken
                 );
+
+            return this.declaration;
         }
 
         public override CSharpSyntaxNode GetSyntaxNode() => this.GetDeclaration();

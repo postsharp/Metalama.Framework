@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate )
         {
             var templateMethod = this._aspectType.Methods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
-            var advice = new OverrideMethodAdvice( this._aspect, templateMethod, targetMethod );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod );
             this._advices.Add( advice );
 
             return advice;

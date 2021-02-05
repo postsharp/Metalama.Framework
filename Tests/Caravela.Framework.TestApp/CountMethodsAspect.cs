@@ -24,7 +24,7 @@ namespace Caravela.Framework.TestApp
         {
             var methods = aspectBuilder.TargetDeclaration.Methods.GetValue();
             this.methodCount = methods.Count();
-            foreach ( var method in methods )
+            foreach ( var method in methods.Where(x => x.MethodKind != Caravela.Framework.Code.MethodKind.Constructor) )
             {
                 aspectBuilder.AdviceFactory.OverrideMethod( method, nameof( Template ) );
             }

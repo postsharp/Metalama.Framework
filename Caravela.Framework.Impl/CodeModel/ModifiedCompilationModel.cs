@@ -39,13 +39,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override CSharpCompilation GetRoslynCompilation()
         {
-            var adviceDriver = new AdviceDriver();
-
             // Modified compilations can form a linked list. First, find the Roslyn compilation at the start of the list and collect all advices from the list.
             var primeCompilation = this.GetPrimeCompilation();
             var transformations = this.CollectTransformations();
 
-            var rewriter = new CompilationRewriter( transformations );
+            var rewriter = new CompilationRewriter( this._originalCompilation, transformations );
 
             // TODO: make this and the rewriter more efficient by avoiding unnecessary work
             var result = rewriter.VisitAllTrees( primeCompilation );
@@ -58,13 +56,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
+            private ICompilation _baseCompilation;
             private readonly List<IntroducedMethod> _introducedMethods;
+            private readonly List<OverriddenMethod> _overriddenMethods;
 
-            public CompilationRewriter( IReactiveCollection<Transformation> transformations )
+            public CompilationRewriter( ICompilation baseCompilation, IReactiveCollection<Transformation> transformations )
             {
                 IList<Transformation> transformationList = (IList<Transformation>) transformations.Materialize().GetValue().ToList();
 
+                this._baseCompilation = baseCompilation;
                 this._introducedMethods = transformationList.OfType<IntroducedMethod>().ToList();
+                this._overriddenMethods = transformationList.OfType<OverriddenMethod>().ToList();
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
@@ -84,17 +86,27 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                 }
 
-                foreach ( var member in node.Members )
+                var introducedMembers = new List<MemberDeclarationSyntax>( newMembers );
+
+                foreach ( var member in node.Members.Concat( introducedMembers ) )
                 {
                     var newMember = member.WithAttributeLists( this.VisitList( member.AttributeLists ) );
 
-                    switch ( newMember )
+                    foreach(var transformation in this._overriddenMethods)
                     {
-                        default:
-                            newMembers.Add( newMember );
-                            break;
+                        var overridenSyntax = transformation.OverridenDeclaration!.GetSyntaxNodes().FirstOrDefault();
+
+                        if ( overridenSyntax == member )
+                        {
+                            foreach (var overridingSyntax in transformation.GetOverrides(this._baseCompilation))
+                            {
+                                newMembers.Add( overridingSyntax );
+                            }
+                        }
                     }
                 }
+
+                newMembers.AddRange( node.Members );
 
                 return node
                     .WithMembers( SyntaxFactory.List( newMembers ) )
