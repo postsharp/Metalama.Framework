@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public unsafe void TestUIntPtr()
         {
-            int* pointer = (int*)300;
+            var pointer = (int*)300;
             var serializer = new UIntPtrSerializer();
             Assert.Equal( "new System.UIntPtr(400UL)", serializer.Serialize( new UIntPtr( 400UL ) ).NormalizeWhitespace(  ).ToString() );
             Assert.Equal( "new System.UIntPtr(200UL)", serializer.Serialize( new UIntPtr( 200 ) ).NormalizeWhitespace(  ).ToString() );
@@ -144,7 +144,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public unsafe void TestIntPtr()
         {
-            int* pointer = (int*)300;
+            var pointer = (int*)300;
             var serializer = new IntPtrSerializer();
             Assert.Equal( "new System.IntPtr(-400L)", serializer.Serialize( new IntPtr( -400L ) ).NormalizeWhitespace(  ).ToString() );
             Assert.Equal( "new System.IntPtr(-200L)", serializer.Serialize( new IntPtr( -200 ) ).NormalizeWhitespace(  ).ToString() );

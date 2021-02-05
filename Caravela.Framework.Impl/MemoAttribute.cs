@@ -3,5 +3,5 @@
 namespace Caravela.Framework.Impl
 {
     [AttributeUsage(AttributeTargets.Property)]
-    class MemoAttribute : System.Attribute { }
+    class MemoAttribute : Attribute { }
 }

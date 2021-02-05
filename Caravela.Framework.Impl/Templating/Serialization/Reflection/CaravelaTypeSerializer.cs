@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 var makeArrayTypeArguments = arraySymbol.IsSZArray
                     ? new ArgumentSyntax[0]
                     : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
-                ExpressionSyntax innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
+                var innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -61,10 +61,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 !SymbolEqualityComparer.Default.Equals( namedSymbol.OriginalDefinition, namedSymbol ) )
             {
                 var basicType = namedSymbol.ConstructUnboundGenericType();
-                List<ExpressionSyntax> arguments = new List<ExpressionSyntax>();
-                bool hasTypeParameterSymbols = false;
-                INamedTypeSymbol self = namedSymbol;
-                List<INamedTypeSymbol> chain = new List<INamedTypeSymbol>();
+                var arguments = new List<ExpressionSyntax>();
+                var self = namedSymbol;
+                var chain = new List<INamedTypeSymbol>();
                 while ( self != null )
                 {
                     chain.Add( self );
@@ -72,9 +71,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 }
 
                 chain.Reverse();
-                foreach ( INamedTypeSymbol layer in chain )
+                foreach ( var layer in chain )
                 {
-                    foreach ( ITypeSymbol typeSymbol in layer.TypeArguments )
+                    foreach ( var typeSymbol in layer.TypeArguments )
                     {
                         arguments.Add( this.CreateTypeCreationExpressionFromSymbolRecursive( typeSymbol ) );
                     }
@@ -94,7 +93,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         private static ExpressionSyntax CreateTypeCreationExpressionFromSymbolLeaf( ITypeSymbol typeSymbol )
         {
-            string documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
+            var documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
             var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Compiler.Intrinsics.GetRuntimeTypeHandle), documentationId );
             return InvocationExpression(
                     MemberAccessExpression(

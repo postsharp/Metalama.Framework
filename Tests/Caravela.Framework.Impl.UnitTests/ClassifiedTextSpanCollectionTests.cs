@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void ZeroSpan()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             
             Assert.Equal( "{ [0..inf)=>Default } ", c.ToString() );
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void OneSpan()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 0, 10 ), TextSpanClassification.TemplateKeyword );
             
             Assert.Equal( "{ [0..10)=>TemplateKeyword, [10..inf)=>Default } ", c.ToString() );
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_Disjoint()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 0, 10 ), TextSpanClassification.TemplateKeyword );
             c.Add( new TextSpan( 15, 10 ), TextSpanClassification.TemplateKeyword );
             
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_SecondOverlapping()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 0, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 5, 10 ), TextSpanClassification.TemplateKeyword );
             
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_SecondSuperset()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 5, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 0, 20 ), TextSpanClassification.TemplateKeyword );
             
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_Subset_Inner()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 12, 3 ), TextSpanClassification.TemplateKeyword );
             
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_Subset_LeftAligned()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 10, 3 ), TextSpanClassification.TemplateKeyword );
             
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_Subset_RightAligned()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 17, 3 ), TextSpanClassification.TemplateKeyword );
             
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TwoSpans_Subset_Weaker()
         {
-            ClassifiedTextSpanCollection c = new ClassifiedTextSpanCollection();
+            var c = new ClassifiedTextSpanCollection();
             c.Add( new TextSpan( 10, 10 ), TextSpanClassification.CompileTimeVariable );
             c.Add( new TextSpan( 12, 3 ), TextSpanClassification.Default );
 

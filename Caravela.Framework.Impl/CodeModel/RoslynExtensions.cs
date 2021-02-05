@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Code;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -10,10 +9,12 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {
-            for ( INamedTypeSymbol? t = type; t != null; t = t.BaseType )
+            for ( var t = type; t != null; t = t.BaseType )
             {
                 if ( predicate( t ) )
+                {
                     return true;
+                }
             }
 
             return false;

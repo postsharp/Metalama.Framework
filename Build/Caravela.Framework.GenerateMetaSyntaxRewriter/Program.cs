@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace GenerateMetaSyntaxRewriter
+namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 {
     class Program
     {
@@ -14,7 +13,7 @@ namespace GenerateMetaSyntaxRewriter
         {
             return s.EndsWith(suffix) ? s.Substring(0, s.Length - suffix.Length) : s;
         }
-        static void Main(string[] args)
+        static void Main()
         {
             using var writer = File.CreateText("MetaSyntaxRewriter.g.cs");
             
@@ -47,7 +46,11 @@ namespace GenerateMetaSyntaxRewriter
                     {
                         // Prefer tokens to strings and lists to arrays.
                         var p = m.GetParameters();
-                        if (p.Length == 0) return 0;
+                        if (p.Length == 0)
+                        {
+                            return 0;
+                        }
+
                         return p[0].ParameterType == typeof(string) || p[0].ParameterType.IsArray ? 1 : 2;
                     })
                     .FirstOrDefault();

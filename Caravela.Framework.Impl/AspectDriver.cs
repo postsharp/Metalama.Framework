@@ -71,7 +71,9 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
+        // ReSharper disable UnusedParameter.Local
         private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
+        // ReSharper restore UnusedParameter.Local
         {
             throw new NotImplementedException($"No implementation for advice attribute {typeof(T).Name}.");
         }

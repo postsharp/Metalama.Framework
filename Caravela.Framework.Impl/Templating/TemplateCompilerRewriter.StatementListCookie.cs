@@ -22,6 +22,9 @@ namespace Caravela.Framework.Impl.Templating
 
             public void Dispose()
             {
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                //    Would be true in the default instance.
+                
                 if (this._parent != null)
                 {
                     this._parent._currentStatementListVariableName = this._initialVariableName;

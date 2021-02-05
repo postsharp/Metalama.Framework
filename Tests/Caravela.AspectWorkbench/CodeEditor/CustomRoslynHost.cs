@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Caravela.AspectWorkbench.CodeEditor
 {
@@ -47,17 +46,17 @@ namespace Caravela.AspectWorkbench.CodeEditor
         }
 
         public CustomRoslynHost( ImmutableArray<string>? disabledDiagnostics = default,
-            IEnumerable<Assembly> additionalAssemblies = null, RoslynHostReferences references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
+            IEnumerable<Assembly>? additionalAssemblies = null, RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
         {
             
         }
 
-        protected override Project CreateProject( Solution solution, DocumentCreationArgs args, CompilationOptions compilationOptions, Project previousProject = null )
+        protected override Project CreateProject( Solution solution, DocumentCreationArgs args, CompilationOptions compilationOptions, Project? previousProject = null )
         {
-            string name = args.Name ?? "Template";
-            ProjectId id = ProjectId.CreateNewId( name );
+            var name = args.Name ?? "Template";
+            var id = ProjectId.CreateNewId( name );
 
-            CSharpParseOptions parseOptions = new CSharpParseOptions( kind: SourceCodeKind.Script, languageVersion: LanguageVersion.Latest );
+            var parseOptions = new CSharpParseOptions( kind: SourceCodeKind.Script, languageVersion: LanguageVersion.Latest );
 
             solution = solution.AddProject( ProjectInfo.Create(
                 id,
@@ -71,7 +70,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                 metadataReferences: previousProject != null ? ImmutableArray<MetadataReference>.Empty : this.DefaultReferences,
                 projectReferences: previousProject != null ? new[] { new ProjectReference( previousProject.Id ) } : null ) );
 
-            Project project = solution.GetProject( id );
+            var project = solution.GetProject( id )!;
 
             return project;
         }

@@ -1,5 +1,4 @@
 using Microsoft.CodeAnalysis.Text;
-using System.Runtime.InteropServices;
 
 namespace Caravela.Framework.DesignTime.Contracts
 {

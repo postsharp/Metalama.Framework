@@ -18,7 +18,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public static ExpressionSyntax CreateMemberAccessExpression(this IDynamicMetaMember metaMember, string member)
         {
             if ( metaMember is IDynamicMetaMemberDifferentiated metaMemberDifferentiated )
+            {
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
+            }
 
             return SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, metaMember.CreateExpression(), SyntaxFactory.IdentifierName( member ) );
         }

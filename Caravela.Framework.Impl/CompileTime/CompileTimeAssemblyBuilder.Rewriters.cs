@@ -1,4 +1,5 @@
 ﻿using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,17 +17,17 @@ namespace Caravela.Framework.Impl.CompileTime
         abstract class Rewriter : CSharpSyntaxRewriter
         {
             private readonly ISymbolClassifier _symbolClassifier;
-            protected readonly Compilation _compilation;
+            protected readonly Compilation Compilation;
 
             protected Rewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
             {
                 this._symbolClassifier = symbolClassifier;
-                this._compilation = compilation;
+                this.Compilation = compilation;
             }
 
             protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
             {
-                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.Compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
                 return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
             }
 
@@ -34,7 +35,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace
                 if ( method.Body == null && method.ExpressionBody == null )
+                {
                     return method;
+                }
 
                 // throw new System.NotSupportedException("message")
                 var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
@@ -57,7 +60,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             private bool _addTemplateUsings;
-            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = SyntaxFactory.ParseCompilationUnit(@"
+            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = ParseCompilationUnit(@"
 using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
@@ -125,7 +128,7 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
                             }
                         }
 
-                        return (T)node.WithMembers(SyntaxFactory.List(members));
+                        return (T)node.WithMembers(List(members));
 
                     default:
                         throw new NotImplementedException();
@@ -137,8 +140,8 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
                 if (this.GetSymbolDeclarationScope(node) == SymbolDeclarationScope.Template)
                 {
                     var diagnostics = new List<Diagnostic>();
-                    bool success =
-                        this._templateCompiler.TryCompile(node, this._compilation.GetSemanticModel(node.SyntaxTree), diagnostics, out _, out var transformedNode);
+                    var success =
+                        this._templateCompiler.TryCompile(node, this.Compilation.GetSemanticModel(node.SyntaxTree), diagnostics, out _, out var transformedNode);
 
                     Debug.Assert(success || diagnostics.Any(d => d.Severity >= DiagnosticSeverity.Error));
 
@@ -150,7 +153,9 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
                         this._addTemplateUsings = true;
                     }
                     else
+                    {
                         throw new DiagnosticsException(GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray());
+                    }
 
                     yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     yield return (MethodDeclarationSyntax)transformedNode!;
@@ -169,14 +174,19 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
         {
             private readonly Compilation _compilation;
 
-            public RemoveInvalidUsingsRewriter(Compilation compilation) => this._compilation = compilation;
+            public RemoveInvalidUsingsRewriter( Compilation compilation )
+            {
+                this._compilation = compilation;
+            }
 
             public override SyntaxNode? VisitUsingDirective(UsingDirectiveSyntax node)
             {
                 var symbolInfo = this._compilation.GetSemanticModel(node.SyntaxTree).GetSymbolInfo(node.Name);
 
                 if (symbolInfo.Symbol == null)
+                {
                     return null;
+                }
 
                 return node;
             }
@@ -188,11 +198,13 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
             public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
                 : base( symbolClassifier, compilation )
-                => this._aspectDriverSymbol = compilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
+            {
+                this._aspectDriverSymbol = compilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
+            }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                var symbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.Compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
                 // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
                 // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.
@@ -205,10 +217,12 @@ using static Caravela.Framework.Impl.Templating.TemplateHelper;
                 return base.VisitClassDeclaration( node );
             }
 
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly or SymbolDeclarationScope.Template )
+                {
                     return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
+                }
 
                 return node;
             }

@@ -14,6 +14,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public DictionarySerializer( ObjectSerializers serializers ) => this._serializers = serializers;
         
+        // ReSharper disable once UnusedParameter.Local
+        // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
         static object GetDefaultComparer<TK, TV>(Dictionary<TK, TV> dictionary) => EqualityComparer<TK>.Default;
 
         public override ExpressionSyntax SerializeObject( object o )
@@ -108,8 +110,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 // Unknown custom comparer
                 throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
             }
-            List<InitializerExpressionSyntax> lt = new List<InitializerExpressionSyntax>();
-            IDictionary nonGenericDictionary = (IDictionary) o;
+            var lt = new List<InitializerExpressionSyntax>();
+            var nonGenericDictionary = (IDictionary) o;
             foreach ( var key in nonGenericDictionary.Keys)
             {
                 ThrowIfStackTooDeep( o );
@@ -127,7 +129,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             creationExpression = creationExpression.WithInitializer(
                 InitializerExpression(
                     SyntaxKind.CollectionInitializerExpression, 
-                    SyntaxFactory.SeparatedList<ExpressionSyntax>( lt ) )
+                    SeparatedList<ExpressionSyntax>( lt ) )
                     )
                 .NormalizeWhitespace( );
             return creationExpression;

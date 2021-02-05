@@ -1,12 +1,10 @@
 using Caravela.Framework.DesignTime.Contracts;
 using System;
-using System.Collections.Immutable;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -25,7 +23,10 @@ namespace Caravela.Framework.Impl.Templating
         private bool _isInTemplate;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
 
+#pragma warning disable 618
+        // ReSharper disable once IntroduceOptionalParameters.Global
         public TextSpanClassifier( SourceText sourceText ) : this( sourceText, false )
+#pragma warning restore 618
         {
             
         }
@@ -224,8 +225,8 @@ namespace Caravela.Framework.Impl.Templating
                     continue;
                 }
                     
-                char previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
-                int triviaStart = trivia.Span.Start;
+                var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
+                var triviaStart = trivia.Span.Start;
                 
                 
 
@@ -252,7 +253,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
 #if DEBUG
-
+            // ReSharper disable once UnusedVariable
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif
 
@@ -326,7 +327,7 @@ namespace Caravela.Framework.Impl.Templating
         class MarkAllChildrenWalker : CSharpSyntaxWalker
         {
             private TextSpanClassification _classification;
-            private TextSpanClassifier _parent;
+            private readonly TextSpanClassifier _parent;
 
             public MarkAllChildrenWalker( TextSpanClassifier parent ) : base( SyntaxWalkerDepth.StructuredTrivia )
             {

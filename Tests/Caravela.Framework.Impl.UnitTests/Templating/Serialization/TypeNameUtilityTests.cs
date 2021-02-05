@@ -2,6 +2,8 @@ using Caravela.Framework.Impl.Templating.Serialization;
 using System;
 using System.Collections.Generic;
 using Xunit;
+// ReSharper disable UnusedTypeParameter
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {
@@ -10,7 +12,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestTypeNameUtility()
         {
-            Dictionary<string, Type> typesToTest = new Dictionary<string, Type>();
+            var typesToTest = new Dictionary<string, Type>();
             typesToTest.Add( "System.String", typeof(string) );
             typesToTest.Add( "System.String[]", typeof(string[]) );
             typesToTest.Add( "System.Object[]", typeof(object[]) );
@@ -25,7 +27,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             typesToTest.Add("System.Decimal", typeof(decimal));
             typesToTest.Add("System.Nullable<System.Decimal>[]", typeof(decimal?[]));
             typesToTest.Add("System.Nullable<System.Decimal>[][]", typeof(decimal?[][]));
-            typesToTest.Add("System.Int64", typeof(Int64));
+            typesToTest.Add("System.Int64", typeof(long));
             typesToTest.Add("System.Guid", typeof(Guid));
             typesToTest.Add("System.Nullable<System.Int32>", typeof(int?));
             typesToTest.Add("System.Nullable<System.Double>", typeof(double?));
@@ -33,7 +35,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             typesToTest.Add("System.Nullable<System.Boolean>", typeof(bool?));
             typesToTest.Add("System.Nullable<System.Char>",typeof(char?));
             typesToTest.Add("System.Nullable<System.Decimal>", typeof(decimal?));
-            typesToTest.Add("System.Nullable<System.Int64>", typeof(Int64?));
+            typesToTest.Add("System.Nullable<System.Int64>", typeof(long?));
             typesToTest.Add("System.Nullable<System.Guid>", typeof(Guid?));
             typesToTest.Add("System.Collections.Generic.List<System.String>", typeof(List<string>));
             typesToTest.Add("System.Collections.Generic.Dictionary<System.String, System.Guid>", typeof(Dictionary<string, Guid>));
@@ -63,7 +65,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             
             foreach ( var t in typesToTest )
             {
-                string? actualName = TypeNameUtility.ToCSharpQualifiedName( t.Value );
+                var actualName = TypeNameUtility.ToCSharpQualifiedName( t.Value );
                 Assert.Equal( t.Key, actualName );
             }
         }

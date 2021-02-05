@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Caravela
+namespace Caravela.Framework.Sdk
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class CompilerPluginAttribute : Attribute { }

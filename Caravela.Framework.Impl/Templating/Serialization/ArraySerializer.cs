@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -16,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public ExpressionSyntax Serialize( Array array )
         {
-            Type elementType = array.GetType().GetElementType()!;
+            var elementType = array.GetType().GetElementType()!;
             if ( array.Rank > 1 )
             {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.MultidimensionalArray, array );
@@ -31,10 +30,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
             return ArrayCreationExpression(
                     ArrayType(
-                            SyntaxFactory.ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) )
+                            ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) )
                         )
                         .WithRankSpecifiers(
-                            SingletonList<ArrayRankSpecifierSyntax>(
+                            SingletonList(
                                 ArrayRankSpecifier(
                                     SingletonSeparatedList<ExpressionSyntax>(
                                         OmittedArraySizeExpression()))))
@@ -42,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.ArrayInitializerExpression,
-                        SyntaxFactory.SeparatedList( lt ) ) )
+                        SeparatedList( lt ) ) )
                 .NormalizeWhitespace();
         }
     }

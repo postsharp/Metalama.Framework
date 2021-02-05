@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 namespace Caravela.Framework.DesignTime.Contracts
 {
     // The type identifier cannot be modified even during refactoring. 

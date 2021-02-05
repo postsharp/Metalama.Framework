@@ -1,8 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -34,40 +32,8 @@ namespace Caravela.Framework.Impl.DesignTime
             // Don't enable concurrent execution. It does not make sense just for templates.
             context.EnableConcurrentExecution();
 
-            context.RegisterCodeBlockAction( this.AnalyzeCodeBlock );
-            context.RegisterOperationBlockStartAction( this.OperationBlockStart );
-
         }
 
-        private void Operation( OperationAnalysisContext context )
-        {
-            Analyze( context.Operation.SemanticModel, context.ReportDiagnostic, context.CancellationToken );
-        }
-
-        private void OperationBlockStart( OperationBlockStartAnalysisContext context )
-        {
-            context.RegisterOperationAction( this.Operation, OperationKind.Loop, OperationKind.VariableDeclarator, OperationKind.Conditional, OperationKind.MethodReference );
-        }
-
-        private void AnalyzeCodeBlock( CodeBlockAnalysisContext context )
-        {
-            Analyze( context.SemanticModel, context.ReportDiagnostic, context.CancellationToken );
-        }
-
-        private void AnalyzeSymbol( SymbolAnalysisContext context )
-        {
-            
-        }
-
-        private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
-        {
-            
-
-        }
-
-        private static void Analyze( SemanticModel semanticModel,  Action<Diagnostic> reportDiagnostic, CancellationToken cancellationToken )
-        {
-           
-        }
+      
     }
 }

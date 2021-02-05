@@ -44,7 +44,9 @@ namespace Caravela.Reactive.Operators
                     tuple.subscription?.Dispose();
                     this._subscriptions.Remove(source);
                     if (tuple.subscription != null)
+                    {
                         this._subscriptionsReverse.Remove(tuple.subscription);
+                    }
                 }
                 else
                 {
@@ -75,7 +77,7 @@ namespace Caravela.Reactive.Operators
     {
         public SelectManyObservableOperator(
             IReactiveCollection<TSource> source, Func<TSource, IReactiveCollection<TResult>> collectionSelector)
-            : base(source, collectionSelector, (source, result) => result)
+            : base(source, collectionSelector, (_, result) => result)
         {
         }
 

@@ -1,4 +1,3 @@
-using Caravela.Framework.Impl;
 using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
 using Xunit;

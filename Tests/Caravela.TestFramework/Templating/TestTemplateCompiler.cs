@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -12,8 +11,8 @@ namespace Caravela.TestFramework.Templating
     internal class TestTemplateCompiler
     {
         readonly TemplateCompiler _compiler = new TemplateCompiler();
-        SemanticModel _semanticModel;
-        Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
+        readonly SemanticModel _semanticModel;
+        readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
 
         public TestTemplateCompiler( SemanticModel semanticModel )
         {
@@ -31,8 +30,8 @@ namespace Caravela.TestFramework.Templating
             var visitor = new Visitor( this );
             visitor.Visit( rootNode );
 
-            annotatedNode = new Rewriter( this, 0 ).Visit( rootNode );
-            transformedNode = new Rewriter( this, 1 ).Visit( rootNode );
+            annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
+            transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!;
 
             return !this.HasError;
         }
@@ -52,7 +51,7 @@ namespace Caravela.TestFramework.Templating
 
         private bool IsTemplate( ISymbol symbol )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass.Name == nameof( TestTemplateAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
         }
 
         class Visitor : CSharpSyntaxWalker
@@ -73,7 +72,7 @@ namespace Caravela.TestFramework.Templating
                         this._parent.HasError = true;
                     }
 
-                    this._parent._transformedNodes.Add( node, new[] { annotatedNode, transformedNode } );
+                    this._parent._transformedNodes.Add( node, new[] { annotatedNode!, transformedNode! } );
                 }
             }
         }
@@ -90,7 +89,7 @@ namespace Caravela.TestFramework.Templating
                 this._item = item;
             }
 
-            public override SyntaxNode Visit( SyntaxNode node )
+            public override SyntaxNode? Visit( SyntaxNode node )
             {
                 if ( node == null )
                 {

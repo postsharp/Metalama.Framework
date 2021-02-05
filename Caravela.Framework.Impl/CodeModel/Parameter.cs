@@ -55,6 +55,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object? DefaultValue => this._symbol.ExplicitDefaultValue;
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._symbol.ToDisplayString( );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString( );
     }
 }

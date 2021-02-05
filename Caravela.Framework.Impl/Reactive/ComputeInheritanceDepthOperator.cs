@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Reactive;
 using Caravela.Reactive.Implementation;
 using Microsoft.CodeAnalysis;
@@ -10,8 +11,8 @@ namespace Caravela.Framework.Impl.Reactive
 {
     class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>
     {
-        const int computePendingMarker = -1;
-        const int cycleMarker = int.MaxValue;
+        const int _computePendingMarker = -1;
+        const int _cycleMarker = int.MaxValue;
 
         public ComputeInheritanceDepthOperator( IReactiveCollection<INamedType> source ) : base( source )
         {
@@ -20,27 +21,25 @@ namespace Caravela.Framework.Impl.Reactive
       
         protected override ReactiveOperatorResult<IEnumerable<(INamedType type, int depth)>> EvaluateFunction( IEnumerable<INamedType> source )
         {
-            Dictionary<INamedType, int> depthDictionary = new Dictionary<INamedType, int>( EqualityComparerFactory.GetEqualityComparer<INamedType>() );
-            List<Diagnostic> diagnostics = new List<Diagnostic>();
+            var depthDictionary = new Dictionary<INamedType, int>( EqualityComparerFactory.GetEqualityComparer<INamedType>() );
+            var diagnostics = new List<Diagnostic>();
 
             int ComputeDepth( INamedType type )
             {
                 if ( !depthDictionary.TryGetValue( type, out var myDepth ) )
                 {
                     // Detect cycles.
-                    if ( myDepth == computePendingMarker )
+                    if ( myDepth == _computePendingMarker )
                     {
                         // TODO: add proper diagnostic.
-                        diagnostics.Add( null );
-                        return cycleMarker;
-
+                        return _cycleMarker;
                     }
 
 
-                    depthDictionary[type] = computePendingMarker;
+                    depthDictionary[type] = _computePendingMarker;
 
 
-                    int baseDepth = -1;
+                    var baseDepth = -1;
 
                     // Nested types are processed after their containing type.
                     if ( type.ContainingElement is INamedType containingType )
@@ -49,15 +48,15 @@ namespace Caravela.Framework.Impl.Reactive
                     }
 
                     // Base types are processed before derived types.
-                    if ( type.BaseType != null && type.BaseType is INamedType namedType )
+                    if ( type.BaseType != null)
                     {
-                        baseDepth = Max( baseDepth, ComputeDepth( namedType ) );
+                        baseDepth = Max( baseDepth, ComputeDepth(  type.BaseType ) );
 
                         // We require nested types of the base type to be processed before derived types.
                         // This can cause cycles in computing the inheritance depth. The cycle could be addressed
                         // by taking an arbitrary decision and emitting a warning, however this interface does
                         // not support emitting warnings.
-                        foreach ( var nestedType in namedType.NestedTypes.GetValue() )
+                        foreach ( var nestedType in  type.BaseType.NestedTypes.GetValue() )
                         {
                             baseDepth = Max( baseDepth, ComputeDepth( nestedType ) );
                         }
@@ -70,7 +69,7 @@ namespace Caravela.Framework.Impl.Reactive
                         baseDepth = Max( baseDepth, ComputeDepth( interfaceImplementation ) );
                     }
 
-                    myDepth = baseDepth == cycleMarker ? cycleMarker : baseDepth + 1;
+                    myDepth = baseDepth == _cycleMarker ? _cycleMarker : baseDepth + 1;
 
                     depthDictionary[type] = myDepth;
 
@@ -87,8 +86,8 @@ namespace Caravela.Framework.Impl.Reactive
             {
                 foreach ( var type in source )
                 {
-                    int depth = ComputeDepth( type );
-                    if ( depth != cycleMarker )
+                    var depth = ComputeDepth( type );
+                    if ( depth != _cycleMarker )
                     {
                         yield return (type, depth);
                     }

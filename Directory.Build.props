@@ -20,11 +20,17 @@
     <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <!-- C# Compiler options-->
+  <PropertyGroup>
+      <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
+  </PropertyGroup>
+
   <!-- XML doc config -->
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Disable XML doc warnings in the debug build -->
-    <NoWarn Condition="'$(Configuration)'=='Debug'">1591</NoWarn>
+    <NoWarn Condition="'$(Configuration)'=='Debug'">1591,1572,1573</NoWarn>
   </PropertyGroup>
   
   <!-- Source Link  -->

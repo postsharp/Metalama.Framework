@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Templating
         protected virtual ExpressionSyntax TransformExpression(ExpressionSyntax expression) => expression;
 
 
-        protected ExpressionSyntax Transform<T>(T node) where T : SyntaxNode?
+        protected ExpressionSyntax Transform<T>(T? node) where T : SyntaxNode?
         {
             if (node == null)
             {
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedNode = this.Visit(node);
 
-                if (this.GetTransformationKind(node) != TransformationKind.Transform)
+                if (this.GetTransformationKind(node!) != TransformationKind.Transform)
                 {
                     return this.TransformExpression((ExpressionSyntax) transformedNode);
                 }
@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected ExpressionSyntax Transform(BracketedArgumentListSyntax list)
+        protected ExpressionSyntax Transform(BracketedArgumentListSyntax? list)
         {
             if (list == null)
             {
@@ -367,12 +367,12 @@ namespace Caravela.Framework.Impl.Templating
 
         
         #if DEBUG
-        public override TNode VisitListElement<TNode>(TNode node)
+        public override TNode? VisitListElement<TNode>(TNode? node) where TNode : class
         {
             // This method does not change the behavior of the base method, but it allows for easier debugging
             // of InvalidCastException.
             var transformedNode = this.Visit(node);
-            return (TNode) transformedNode;
+            return (TNode?) transformedNode;
         }
         #endif
 

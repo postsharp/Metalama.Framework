@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPointerType MakePointerType() =>
             (IPointerType) this._compilation.SymbolMap.GetIType( this._compilation.RoslynCompilation.CreatePointerTypeSymbol( this._typeSymbol ) );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._typeSymbol.ToDisplayString();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._typeSymbol.ToDisplayString();
 
         public override string ToString() => this._typeSymbol.ToString();
     }

@@ -15,19 +15,19 @@ namespace Caravela.Reactive.UnitTests
 
             source.Add( 1 );
 
-            Assert.Equal( 1, some.GetValue( default ) );
+            Assert.Equal( 1, some.GetValue() );
 
             source.Replace( 1, 2 );
 
-            Assert.Equal( 2, some.GetValue( default ) );
+            Assert.Equal( 2, some.GetValue() );
 
             source.Add( 3 );
 
-            Assert.Equal( 2, some.GetValue( default ) );
+            Assert.Equal( 2, some.GetValue() );
 
             source.Remove( 2 );
 
-            Assert.Equal( 3, some.GetValue( default ) );
+            Assert.Equal( 3, some.GetValue() );
         }
     }
 

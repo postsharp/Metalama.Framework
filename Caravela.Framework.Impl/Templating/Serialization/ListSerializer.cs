@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public override ExpressionSyntax SerializeObject( object o )
         {
-            Type argument = o.GetType().GetGenericArguments()[0];
+            var argument = o.GetType().GetGenericArguments()[0];
             
-            List<ExpressionSyntax> lt = new List<ExpressionSyntax>();
+            var lt = new List<ExpressionSyntax>();
             foreach ( var obj in (IEnumerable) o)
             {
                 ThrowIfStackTooDeep(obj);
@@ -34,14 +34,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         GenericName(
                                 Identifier("List"))
                         .WithTypeArgumentList(
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SingletonSeparatedList(
-                                    SyntaxFactory.ParseTypeName( TypeNameUtility.ToCSharpQualifiedName(argument) )
+                            TypeArgumentList(
+                                SingletonSeparatedList(
+                                    ParseTypeName( TypeNameUtility.ToCSharpQualifiedName(argument) )
                                 )))))
                     .WithInitializer(
-                    SyntaxFactory.InitializerExpression(
+                    InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        SyntaxFactory.SeparatedList( lt ) ) )
+                        SeparatedList( lt ) ) )
                 .NormalizeWhitespace(  );
         }
     }

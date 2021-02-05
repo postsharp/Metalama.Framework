@@ -94,7 +94,7 @@ namespace Caravela.Reactive.Implementation
             return this._observers.AddObserver( observer );
         }
 
-        bool IReactiveObservable<TResultObserver>.RemoveObserver( IReactiveSubscription subscription )
+        bool IReactiveObservable<TResultObserver>.RemoveObserver( IReactiveSubscription? subscription )
         {
             if ( subscription == null )
             {
@@ -123,7 +123,7 @@ namespace Caravela.Reactive.Implementation
                 this._dependencies.Add( source, version );
             }
         }
-        void IReactiveCollector.AddSideValue( IReactiveSideValue value )
+        void IReactiveCollector.AddSideValue( IReactiveSideValue? value )
         {
             if ( value != null )
             {
@@ -138,7 +138,7 @@ namespace Caravela.Reactive.Implementation
 
         protected abstract IReactiveSubscription? SubscribeToSource();
 
-        protected internal void EnsureSubscribedToSource()
+        protected void EnsureSubscribedToSource()
         {
             if ( this._subscriptionToSource == null )
             {
@@ -154,7 +154,7 @@ namespace Caravela.Reactive.Implementation
 
 
         /// <summary>
-        /// Determines whether two return values of <see cref="EvaluateFunction"/> are equal.
+        /// Determines whether two return values of <see cref="ReactiveOperator{TSource, TSourceObserver, TResult, TResultObserver}.EvaluateFunction"/> are equal.
         /// </summary>
         /// <param name="first"></param>
         /// <param name="second"></param>
@@ -215,12 +215,7 @@ namespace Caravela.Reactive.Implementation
 
         protected BaseReactiveOperator( IReactiveSource source)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            this.Source = source;
+            this.Source = source ?? throw new ArgumentNullException(nameof(source));
             this._observers = new ObserverList<TResultObserver>(this);
             this._dependencies = new DependencyList(this);
         }

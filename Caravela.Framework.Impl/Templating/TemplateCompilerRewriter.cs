@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+// ReSharper disable once RedundantUsingDirective
+//    Resharper's bug
 using static Caravela.Framework.Impl.Templating.TemplateHelper;
 
 namespace Caravela.Framework.Impl.Templating
@@ -115,7 +117,7 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-            return symbol.GetAttributes().Any(a => a.AttributeClass.Name == nameof(ProceedAttribute));
+            return symbol.GetAttributes().Any(a =>  a.AttributeClass?.Name == nameof(ProceedAttribute));
         }
 
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
@@ -251,6 +253,12 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: templates may support build-time parameters, which must to the compiled template method.
             
             // TODO: also compile templates for properties and so on.
+
+            if ( node.Body == null )
+            {
+                throw new NotImplementedException( "Expression-bodied templates are not supported." );
+            }
+            
             
             var body = (BlockSyntax) this.VisitBlock(node.Body, TransformationKind.None, true);
 
@@ -526,7 +534,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedStatement = this.ToMetaStatement(node.Statement);
                 var transformedElseStatement = node.Else != null ? this.ToMetaStatement(node.Else.Statement) : null;
-                return IfStatement(node.Condition, transformedStatement,
+                return IfStatement( node.AttributeLists,
+                    node.Condition, transformedStatement,
                     (transformedElseStatement != null ? ElseClause(transformedElseStatement) : null));
             }
         }
@@ -611,10 +620,7 @@ namespace Caravela.Framework.Impl.Templating
                                                                                                         nameof(
                                                                                                             IProceedImpl
                                                                                                         )),
-                                                                                                    proceedAssignments[
-                                                                                                            0]
-                                                                                                        .Initializer
-                                                                                                        .Value)),
+                                                                                                    proceedAssignments[0].Initializer!.Value)),
                                                                                             IdentifierName(
                                                                                                 nameof(IProceedImpl
                                                                                                     .CreateTypeSyntax
@@ -659,7 +665,7 @@ namespace Caravela.Framework.Impl.Templating
                                         ParenthesizedExpression(
                                             CastFromDynamic(
                                                 IdentifierName(nameof(IProceedImpl)),
-                                                proceedAssignments[0].Initializer.Value)),
+                                                proceedAssignments[0].Initializer!.Value)),
                                         IdentifierName(nameof(IProceedImpl.CreateAssignStatement))),
                                     ArgumentList(
                                         SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
@@ -706,7 +712,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateHelper.TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
                         Argument( this.Transform( node.Expression ) )
                     );
             }

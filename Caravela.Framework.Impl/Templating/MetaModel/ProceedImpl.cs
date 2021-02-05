@@ -37,26 +37,33 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public StatementSyntax CreateAssignStatement(string returnValue)
         {
+            if ( this._method.Body == null )
+            {
+                throw new NotImplementedException("Expression-bodied methods not implemented.");
+            }
+            
+            var methodBody = this._method.Body!;
+                
             var returnCounter = new CountReturnStatements();
-            returnCounter.Visit(this._method.Body);
+            returnCounter.Visit(methodBody);
             if (returnCounter.Count == 0)
             {
-                return this._method.Body;
+                    return methodBody;
             }
-            else if (returnCounter.Count == 1 && this.IsLastStatement(this._method, returnCounter.LastReturnStatement))
+            else if (returnCounter.Count == 1 && this.IsLastStatement( returnCounter.LastReturnStatement!))
             {
                 // There is a single return statement at the end. We don't need to generate the label and the goto.
                 
                 var rewriter = new ReturnToAssignmentRewriter(returnValue,null);
                 
-                return (BlockSyntax) rewriter.Visit(this._method.Body);
+                return (BlockSyntax) rewriter.Visit(methodBody);
                 
             }
             else
             {
                 var rewriter = new ReturnToAssignmentRewriter(returnValue,"__continue");
                 
-                var body = (BlockSyntax) rewriter.Visit(this._method.Body);
+                var body = (BlockSyntax) rewriter.Visit(methodBody);
                 
                 return Block(
                     body,
@@ -66,9 +73,17 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        private bool IsLastStatement(BaseMethodDeclarationSyntax method, SyntaxNode node)
+        private bool IsLastStatement( SyntaxNode node)
         {
-            if (node.Parent == method.Body)
+            if ( this._method.Body == null )
+            {
+                throw new NotImplementedException("Expression-bodied methods not implemented.");
+            }
+            
+            var methodBody = this._method.Body!;
+
+            
+            if (node.Parent == methodBody)
             {
                 // Termination of the loop.
                 return true;
@@ -77,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 if (node.Parent is BlockSyntax parentBlock && parentBlock.Statements.Last() == node)
                 {
-                    return this.IsLastStatement(method, parentBlock);
+                    return this.IsLastStatement( parentBlock);
                 }
                 else
                 {
@@ -90,13 +105,18 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public StatementSyntax CreateReturnStatement()
         {
-            return this._method.Body;
+            if ( this._method.Body == null )
+            {
+                throw new NotImplementedException("Expression-bodied methods not implemented.");
+            }
+            
+            return this._method.Body!;
         }
 
         private class CountReturnStatements : CSharpSyntaxWalker
         {
             public int Count { get; private set; }
-            public ReturnStatementSyntax LastReturnStatement { get; private set; }
+            public ReturnStatementSyntax? LastReturnStatement { get; private set; }
             
             public override void VisitReturnStatement(ReturnStatementSyntax node)
             {
@@ -117,7 +137,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 this._returnLabelName = returnLabelName;
             }
 
-            public override SyntaxNode? VisitReturnStatement(ReturnStatementSyntax node)
+            public override SyntaxNode VisitReturnStatement(ReturnStatementSyntax node)
             {
                 if (node.Expression != null)
                 {

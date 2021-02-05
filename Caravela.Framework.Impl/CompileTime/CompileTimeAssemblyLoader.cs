@@ -38,37 +38,61 @@ namespace Caravela.Framework.Impl.CompileTime
         private Assembly? CurrentDomain_AssemblyResolve( object sender, ResolveEventArgs args )
         {
             if ( !this._assemblyMap.ContainsValue( args.RequestingAssembly ) )
+            {
                 return null;
+            }
 
             var reference = this._compilation.References.SingleOrDefault(
                 r => r is PortableExecutableReference { FilePath: string path } && Path.GetFileNameWithoutExtension( path ) == new AssemblyName( args.Name ).Name );
             if ( reference == null )
+            {
                 return null;
+            }
 
             if ( this._compilation.GetAssemblyOrModuleSymbol( reference ) is not IAssemblySymbol symbol )
+            {
                 return null;
+            }
 
             return this.LoadCompileTimeAssembly( symbol );
         }
 
         public object CreateAttributeInstance ( Code.IAttribute attribute )
         {
+            // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
+            
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var constructor = this.GetCompileTimeConstructor( constructorSymbol );
 
             if ( constructor == null )
+            {
                 throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
+            }
 
             var parameters = attribute.ConstructorArguments.Select(
                 ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) ).ToArray();
             var result = constructor.Invoke( parameters );
 
-            var type = constructor.DeclaringType;
+            var type = constructor.DeclaringType!;
 
             foreach (var (name, value) in attribute.NamedArguments)
             {
-                var property = type.GetProperty( name );
-                property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
+                PropertyInfo? property;
+                FieldInfo? field;
+                
+                if ( (property = type.GetProperty( name ))  != null )
+                {
+                    property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
+                }
+                else if ( (field = type.GetField( name )) != null )
+                {
+                    field.SetValue( result, this.TranslateAttributeArgument( value, field.FieldType ) );
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot find a field or property {name} in type {constructorSymbol.ContainingType.ToDisplayString()}" );
+                }
             }
 
             return result;
@@ -87,7 +111,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 var elementType = this.GetCompileTimeType( arrayType.ElementType );
 
                 if ( arrayType.IsSZArray )
+                {
                     return elementType?.MakeArrayType();
+                }
 
                 return elementType?.MakeArrayType( arrayType.Rank );
             }
@@ -108,36 +134,52 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private object? TranslateAttributeArgument( object? roslynArgument, Type targetType )
         {
+            if ( roslynArgument == null )
+            {
+                return null;
+            }
+            
             switch ( roslynArgument )
             {
                 case Code.IType type:
                     if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
+                    {
                         throw new InvalidOperationException( $"System.Type can't be assigned to {targetType}" );
+                    }
 
                     var translatedType = this.GetCompileTimeType( type.GetSymbol() );
                     if ( translatedType == null )
+                    {
                         throw new InvalidOperationException( $"Could not load type {type}." );
+                    }
+
                     return translatedType;
+                
                 case IReadOnlyList<object?> list:
                     if ( !targetType.IsArray )
-                        throw new InvalidOperationException( $"Array can't be assigned to {targetType}" );
-
-                    var array = Array.CreateInstance( targetType.GetElementType(), list.Count );
-
-                    for ( int i = 0; i < list.Count; i++ )
                     {
-                        array.SetValue( this.TranslateAttributeArgument( list[i], targetType.GetElementType() ), i );
+                        throw new InvalidOperationException( $"Array can't be assigned to {targetType}" );
+                    }
+
+                    var array = Array.CreateInstance( targetType.GetElementType()!, list.Count );
+
+                    for ( var i = 0; i < list.Count; i++ )
+                    {
+                        array.SetValue( this.TranslateAttributeArgument( list[i], targetType.GetElementType()! ), i );
                     }
 
                     return array;
+                
                 default:
                     if (targetType.IsEnum)
                     {
                         return Enum.ToObject( targetType, roslynArgument );
                     }
 
-                    if ( roslynArgument != null && !targetType.IsAssignableFrom( roslynArgument.GetType() ) )
+                    if ( roslynArgument != null && !targetType.IsInstanceOfType( roslynArgument ) )
+                    {
                         throw new InvalidOperationException( $"{roslynArgument.GetType()} can't be assigned to {targetType}" );
+                    }
 
                     return roslynArgument;
             }
@@ -146,12 +188,16 @@ namespace Caravela.Framework.Impl.CompileTime
         private bool ParametersMatch( ParameterInfo[] reflectionParameters, ImmutableArray<IParameterSymbol> roslynParameters )
         {
             if ( reflectionParameters.Length != roslynParameters.Length )
+            {
                 return false;
+            }
 
-            for ( int i = 0; i < reflectionParameters.Length; i++ )
+            for ( var i = 0; i < reflectionParameters.Length; i++ )
             {
                 if ( reflectionParameters[i].ParameterType != this.GetCompileTimeType( roslynParameters[i].Type ) )
+                {
                     return false;
+                }
             }
 
             return true;
@@ -166,7 +212,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var sb = new StringBuilder();
-            bool first = true;
+            var first = true;
 
             do
             {
@@ -210,12 +256,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private byte[]? GetResourceBytes( string assemblyPath, string resourceName )
         {
-            var resolver = new PathAssemblyResolver( new string[] { typeof( object ).Assembly.Location } );
+            var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );
             using var mlc = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
 
             // LoadFromAssemblyPath throws for mscorlib
             if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
+            {
                 return null;
+            }
 
             var runtimeAssembly = mlc.LoadFromAssemblyPath( assemblyPath );
 
@@ -223,18 +271,27 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 using var resourceStream = runtimeAssembly.GetManifestResourceStream( resourceName );
 
-                var memoryStream = new MemoryStream( (int) resourceStream.Length );
+                if ( resourceName == null )
+                {
+                    throw new FileNotFoundException();
+                }
+
+                var memoryStream = new MemoryStream( (int) resourceStream!.Length );
                 resourceStream.CopyTo( memoryStream );
                 return memoryStream.ToArray();
             }
             else
+            {
                 return null;
+            }
         }
 
         public byte[]? GetCompileTimeAssembly( string path )
         {
             if ( this._assemblyBytesMap.TryGetValue( path, out var assemblyBytes ) )
+            {
                 return assemblyBytes;
+            }
 
             assemblyBytes = this.GetResourceBytes( path, this._compileTimeAssemblyBuilder.GetResourceName() );
 
@@ -253,7 +310,9 @@ namespace Caravela.Framework.Impl.CompileTime
             else
             {
                 if ( this._compilation.GetMetadataReference( assemblySymbol ) is not { } reference )
+                {
                     throw new InvalidOperationException( $"Could not find reference for assembly {assemblySymbol}." );
+                }
 
                 if ( reference is CompilationReference compilationReference )
                 {
@@ -264,20 +323,28 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     if ( reference is not PortableExecutableReference peReference )
+                    {
                         throw new InvalidOperationException( $"The assembly {assemblySymbol} does not correspond to a known kind of reference." );
+                    }
 
                     if ( peReference.FilePath is not { } path )
+                    {
                         throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
+                    }
 
                     if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
+                    {
                         throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly resource." );
+                    }
 
                     return assemblyBytes;
                 }
             }
 
             if ( assemblyStream == null )
+            {
                 throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
+            }
 
             return assemblyStream.ToArray();
         }

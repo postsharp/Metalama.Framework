@@ -11,11 +11,11 @@ namespace Caravela.Reactive.Implementation
 {
 
     public abstract class AsyncReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
-       IAsyncReactiveSource<TResult, TResultObserver>,
-       IReactiveObserver<TSource>,
-       IReactiveCollector
-       where TSourceObserver : class, IReactiveObserver<TSource>
-       where TResultObserver : class, IReactiveObserver<TResult>
+        IAsyncReactiveSource<TResult, TResultObserver>,
+        IReactiveObserver<TSource>,
+        IReactiveCollector
+        where TSourceObserver : class, IReactiveObserver<TSource>
+        where TResultObserver : class, IReactiveObserver<TResult>
 
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim( 1 );
@@ -36,6 +36,7 @@ namespace Caravela.Reactive.Implementation
         /// Evaluates the function (i.e. the operator) and returns its value.
         /// </summary>
         /// <param name="source">Source value.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns>Result value.</returns>
         protected abstract ValueTask<ReactiveOperatorResult<TResult>> EvaluateFunctionAsync( TSource source, CancellationToken cancellationToken );
 
@@ -80,8 +81,8 @@ namespace Caravela.Reactive.Implementation
         protected async ValueTask EnsureFunctionEvaluatedAsync(CancellationToken cancellationToken)
         {
             if ( this._isFunctionResultDirty )
-            // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
+                // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
                
                 try
                 {
@@ -137,7 +138,7 @@ namespace Caravela.Reactive.Implementation
 
 
         /// <summary>
-        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
+        /// Gets an <c>IncrementalUpdateToken</c>, which allows to represent incremental changes.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>

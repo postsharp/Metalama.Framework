@@ -45,7 +45,7 @@ namespace Caravela.Reactive.Sources
             {
                 if ( !this._comparer.Equals( value, this._value.Value ) )
                 {
-                    int version = Interlocked.Increment( ref this._version );
+                    var version = Interlocked.Increment( ref this._version );
                     var oldValue = this._value;
 
                     this._value = new ReactiveVersionedValue<T>( value, this._version );

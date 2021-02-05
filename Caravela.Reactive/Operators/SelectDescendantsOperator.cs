@@ -13,7 +13,7 @@ namespace Caravela.Reactive.Operators
         where T : class
     {
         private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getChildrenFunc;
-        private ImmutableDictionary<T, int>? _dictionary = null;
+        private ImmutableDictionary<T, int>? _dictionary;
 
         private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
             _subscriptions =
@@ -33,7 +33,7 @@ namespace Caravela.Reactive.Operators
 
             void Iterate(T item)
             {
-                builder.TryGetValue(item, out int count );
+                builder.TryGetValue(item, out var count );
                 builder[item] = count + 1;
 
                 var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
@@ -92,25 +92,26 @@ namespace Caravela.Reactive.Operators
       
         private void AddItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
         {
-            void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
+            // We need to duplicate the newResult parameter because local methods cannot access ref params of the parent method.
+            void Iterate(T parentItem, ref ImmutableDictionary<T, int> result)
             {
-                if (!newResult.TryGetValue(item, out int count ))
+                if (!result.TryGetValue(parentItem, out var count ))
                 {
                     foreach (var subscription in this.Observers)
                     {
-                        subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
+                        subscription.Observer.OnItemAdded(subscription.Subscription, parentItem, updateToken.NextVersion);
                     }
                 }
 
-                newResult = newResult.SetItem(item, count + 1);
+                result = result.SetItem(parentItem, count + 1);
 
-                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc(parentItem, this.ObserverToken);
 
                 if (this.Follow(recursiveSource))
                 {
                     foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
                     {
-                        Iterate(recursiveItem, ref newResult);
+                        Iterate(recursiveItem, ref result);
                     }
                 }
             }
@@ -120,9 +121,10 @@ namespace Caravela.Reactive.Operators
 
         private void RemoveItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
         {
-            void Iterate(T item, ref ImmutableDictionary<T, int> newResult)
+            // We need to duplicate the newResult parameter because local methods cannot access ref params of the parent method.
+            void Iterate(T parentItem, ref ImmutableDictionary<T, int> result)
             {
-                if (!newResult.TryGetValue(item, out int count ))
+                if (!result.TryGetValue(parentItem, out var count ))
                 {
                     return;
                 }
@@ -132,23 +134,23 @@ namespace Caravela.Reactive.Operators
                     
                     foreach (var subscription in this.Observers)
                     {
-                        subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
+                        subscription.Observer.OnItemRemoved(subscription.Subscription, parentItem, updateToken.NextVersion);
                     }
 
-                    newResult = newResult.Remove(item);
+                    result = result.Remove(parentItem);
                 }
                 else
                 {
-                    newResult = newResult.SetItem(item, count - 1);
+                    result = result.SetItem(parentItem, count - 1);
                 }
 
-                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc(parentItem, this.ObserverToken);
 
                 if (this.Unfollow(recursiveSource))
                 {
                     foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
                     {
-                        Iterate(recursiveItem, ref newResult);
+                        Iterate(recursiveItem, ref result);
                     }
                 }
             }

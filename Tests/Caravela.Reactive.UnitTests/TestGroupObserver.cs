@@ -1,8 +1,8 @@
-﻿using Caravela.Reactive;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using static Caravela.Reactive.UnitTests.TestGroupObserver.EventKind;
+// ReSharper disable ObjectCreationAsStatement
 
 namespace Caravela.Reactive.UnitTests
 {
@@ -44,7 +44,9 @@ namespace Caravela.Reactive.UnitTests
         public void ReconnectGroups()
         {
             foreach ( var g in this._source.GetValue() )
+            {
                 new GroupObserver( this, g );
+            }
         }
 
         public void Dispose() { }

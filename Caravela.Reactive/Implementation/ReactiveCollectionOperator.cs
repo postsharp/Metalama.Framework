@@ -37,7 +37,9 @@ namespace Caravela.Reactive.Implementation
         void IReactiveCollectionObserver<TSource>.OnItemAdded( IReactiveSubscription subscription, TSource item, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
+            {
                 return;
+            }
 
             using var token = this.GetIncrementalUpdateToken( newVersion );
 
@@ -48,7 +50,9 @@ namespace Caravela.Reactive.Implementation
             int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
+            {
                 return;
+            }
 
             using var token = this.GetIncrementalUpdateToken( newVersion );
 
@@ -59,7 +63,9 @@ namespace Caravela.Reactive.Implementation
             TSource newItem, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
+            {
                 return;
+            }
 
             using var token = this.GetIncrementalUpdateToken( newVersion );
 

@@ -1,6 +1,5 @@
 using Caravela.Framework.Impl.Templating.Serialization;
 using Microsoft.CodeAnalysis;
-using System;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization

@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl
         {
             var templateMethod = this._aspectType.Methods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
 
-            string templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
+            var templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
             var methodBody = new TemplateDriver( this._aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( this._aspect, targetMethod, this._compilation );
 

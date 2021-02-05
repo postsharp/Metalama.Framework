@@ -49,7 +49,6 @@ namespace Caravela.Framework.Impl.Templating
         /// Specifies that the current expression is obliged to be compile-time-only.
         /// </summary>
         private bool _forceCompileTimeOnlyExpression;
-        private MethodDeclarationSyntax? _currentMethod;
         private readonly SymbolClassifier _symbolScopeClassifier;
         
         /// <summary>
@@ -73,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     this.Diagnostics.Add( Diagnostic.Create(
                         TemplatingDiagnosticDescriptors.LocalVariableAmbiguousCoercion,
-                        local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation(),
+                        local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation(),
                         local.Name ) );
                     
                     return false;
@@ -176,7 +175,10 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private SymbolDeclarationScope GetNodeScope(SyntaxNode? node)
         {
-            if ( node == null ) return SymbolDeclarationScope.Default;
+            if ( node == null )
+            {
+                return SymbolDeclarationScope.Default;
+            }
 
             // If the node is dynamic, it is run-time only.
             if (this.IsDynamic(node))
@@ -207,6 +209,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
  
+        // ReSharper disable once UnusedMember.Local
         private SymbolDeclarationScope GetCombinedScope(params SymbolDeclarationScope[] scopes) => this.GetCombinedScope((IEnumerable<SymbolDeclarationScope>) scopes);
 
         private SymbolDeclarationScope GetCombinedScope(params SyntaxNode?[] nodes) => this.GetCombinedScope((IEnumerable<SyntaxNode?>) nodes);
@@ -366,18 +369,18 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName(node)!;
-            var symbol = this._semanticAnnotationMap.GetSymbol(node)!;
-
-            var scope = this.GetSymbolScope(symbol, node);
-            var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope);
-
+            var symbol = this._semanticAnnotationMap.GetSymbol(node);
+            
             if ( symbol != null )
             {
+                var scope = this.GetSymbolScope(symbol, node);
+                var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope);
+
                 if ( (symbol is ILocalSymbol localSymbol &&
                       this._localScopes.TryGetValue( localSymbol, out var localScope ) &&
                       localScope == SymbolDeclarationScope.CompileTimeOnly) ||
                      symbol.GetAttributes().Any( a =>
-                         a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
+                         a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -387,9 +390,15 @@ namespace Caravela.Framework.Impl.Templating
                     // Annotate dynamic members differently for syntax coloring.
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
                 }
+                
+                return annotatedNode;
+            }
+            else
+            {
+                return identifierNameSyntax;
             }
 
-            return annotatedNode;
+         
         }
 
         public override SyntaxNode? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
@@ -471,7 +480,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitIfStatement(IfStatementSyntax node)
         {
-            var annotatedCondition = (ExpressionSyntax) this.Visit(node.Condition);
+            var annotatedCondition = (ExpressionSyntax) this.Visit(node.Condition)!;
             var conditionScope = this.GetNodeScope(annotatedCondition);
 
             if (conditionScope == SymbolDeclarationScope.CompileTimeOnly)
@@ -492,7 +501,7 @@ namespace Caravela.Framework.Impl.Templating
                     ).AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly).WithTriviaFrom(node.Else)
                     : null;
 
-                return node.Update(node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
+                return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
                     annotatedStatement, annotatedElse).AddScopeAnnotation(SymbolDeclarationScope.CompileTimeOnly);
             }
             else
@@ -531,7 +540,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node)
         {
-            bool callsProceed = node.HasCallsProceedAnnotation();
+            var callsProceed = node.HasCallsProceedAnnotation();
 
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol(node)!;
             
@@ -544,7 +553,7 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
             // compile-time. 
 
-            bool isBuildTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
+            var isBuildTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
 
             ExpressionSyntax? annotatedExpression;
 
@@ -560,7 +569,7 @@ namespace Caravela.Framework.Impl.Templating
                 annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
             }
 
-            bool isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
+            var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
             
             if ( (isBuildTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
             {
@@ -680,7 +689,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            SymbolDeclarationScope forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : this._requiredVariableDeclarationScope;
+            var forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : this._requiredVariableDeclarationScope;
             if ( forcedScope != SymbolDeclarationScope.Default )
             {
                 if ( this.TrySetLocalVariableScope( local, forcedScope ) )
@@ -727,7 +736,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
 
-                var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct();
+                // TODO: We are no longer relying on other assignments than initialization, so this code should be removed.
+                var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
                 if ( variableScopes.Count() == 1 )
                 {
@@ -761,15 +771,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            this._currentMethod = node;
-            try
-            {
-                node = (MethodDeclarationSyntax) base.VisitMethodDeclaration(node)!;
-            }
-            finally
-            {
-                this._currentMethod = null;
-            }
+            node = (MethodDeclarationSyntax) base.VisitMethodDeclaration(node)!;
 
             var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
@@ -851,21 +853,28 @@ namespace Caravela.Framework.Impl.Templating
         {
             // This is a quick-and-dirty implementation that all for statements runtime.
 
-            foreach ( var localDeclaration in node.Declaration.Variables )
+            if ( node.Declaration != null )
             {
-                var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( localDeclaration ); 
-                this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly );
+                foreach ( var localDeclaration in node.Declaration.Variables )
+                {
+                    var local = (ILocalSymbol?) this._semanticAnnotationMap.GetDeclaredSymbol( localDeclaration );
+
+                    if ( local != null )
+                    {
+                        this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly );
+                    }
+                }
             }
-            
-            var transformedVariableDeclaration = (VariableDeclarationSyntax) this.Visit( node.Declaration );
-            var transformedInitializers =  node.Initializers.Select( i => (ExpressionSyntax) this.Visit( i ) );
-            var transformedCondition = (ExpressionSyntax) this.Visit( node.Condition );
-            var transformedIncrementors = node.Incrementors.Select( i => this.Visit( i ) );
+
+            var transformedVariableDeclaration = (VariableDeclarationSyntax) this.Visit( node.Declaration )!;
+            var transformedInitializers =  node.Initializers.Select( i => (ExpressionSyntax) this.Visit( i )! );
+            var transformedCondition = (ExpressionSyntax) this.Visit( node.Condition )!;
+            var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
 
             StatementSyntax transformedStatement;
             using ( this.EnterRuntimeConditionalBlock() )
             {
-                transformedStatement = (StatementSyntax) this.Visit( node.Statement );
+                transformedStatement = (StatementSyntax) this.Visit( node.Statement )!;
             }
 
             return ForStatement( node.ForKeyword, node.OpenParenToken, transformedVariableDeclaration,

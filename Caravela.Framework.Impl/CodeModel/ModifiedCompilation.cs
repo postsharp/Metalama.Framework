@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
+﻿using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -52,7 +51,9 @@ namespace Caravela.Framework.Impl.CodeModel
             foreach (var element in multiAdviceElements)
             {
                 if ( element.Key != null )
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode().GetLocation(), element.Key );
+                {
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode()?.GetLocation(), element.Key );
+                }
             }
 
             var rewriter = new CompilationRewriter( transformations );
@@ -63,7 +64,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return result;
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._originalCompilation.ToDisplayString( format, context );
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._originalCompilation.ToDisplayString( format, context );
 
 
         sealed class CompilationRewriter : CSharpSyntaxRewriter

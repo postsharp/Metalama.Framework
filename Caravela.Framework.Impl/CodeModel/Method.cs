@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override IType Type => this.Method.ReturnType;
 
-            public override ICodeElement? ContainingElement => this.Method;
+            public override ICodeElement ContainingElement => this.Method;
 
             [Memo]
             public override IReactiveCollection<IAttribute> Attributes =>

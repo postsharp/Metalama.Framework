@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 
         public ListSerializerTests()
         {
-            ObjectSerializers os = new ObjectSerializers();
+            var os = new ObjectSerializers();
             this._serializer = new ListSerializer( os );
         }
 
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 
         private void AssertSerialization<T>( string expected, List<T> o )
         {
-            string creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

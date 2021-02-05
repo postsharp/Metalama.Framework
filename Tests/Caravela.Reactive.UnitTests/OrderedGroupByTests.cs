@@ -1,5 +1,4 @@
-﻿using Caravela.Reactive;
-using Caravela.Reactive.Sources;
+﻿using Caravela.Reactive.Sources;
 using ComparerExtensions;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +14,7 @@ namespace Caravela.Reactive.UnitTests
         {
             var source = new ReactiveHashSet<int>();
 
-            var groups = ((IReactiveCollection<int>)source).GroupBy( x => x % 10 );
+            var groups = source.GroupBy( x => x % 10 );
 
             Assert.Equal( new object[0], getGroups() );
 
@@ -43,7 +42,7 @@ namespace Caravela.Reactive.UnitTests
         {
             var source = new[] { 1, 11, 12, 21 }.ToImmutableReactive();
 
-            var groups = source.OrderedGroupBy( KeyComparer<int>.OrderBy(i => 0), i => i % 10 ).GetValue();
+            var groups = source.OrderedGroupBy( KeyComparer<int>.OrderBy(_ => 0), i => i % 10 ).GetValue();
 
             Assert.Equal( new[] { new[] { 1, 11 }, new[] { 12 }, new[] { 21 } }, groups.Select( g => g.GetValue() ) );
         }

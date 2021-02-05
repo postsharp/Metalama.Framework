@@ -1,5 +1,12 @@
-﻿using System;
+﻿using Caravela.Framework.TestApp.Aspects;
+using System;
 using System.Threading;
+// ReSharper disable ObjectCreationAsStatement
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable MemberCanBeMadeStatic.Local
+// ReSharper disable UnusedMethodReturnValue.Local
+// ReSharper disable UnusedParameter.Local
+// ReSharper disable UnusedMember.Local
 
 namespace Caravela.Framework.TestApp
 {
@@ -25,7 +32,7 @@ namespace Caravela.Framework.TestApp
         {
             var a = new[] { 1, 2, 3, 4 };
 
-            for ( int i = 0; i < 10; i++ )
+            for ( var i = 0; i < 10; i++ )
             {
                 PrintArrayAtIndex( a, i );
             }

@@ -38,7 +38,7 @@ namespace Caravela.Reactive.Operators
 
                 if (!this._groups.TryGetValue(key, out var group))
                 {
-                    using var token = this.GetIncrementalUpdateToken(-1);
+                    using var token = this.GetIncrementalUpdateToken();
 
                     if (!this._groups.TryGetValue(key, out group))
                     {

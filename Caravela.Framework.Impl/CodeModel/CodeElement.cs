@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
         CSharpSyntaxNode IToSyntax.GetSyntaxNode() => this.ToSyntaxNodes().Single();
         IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => this.ToSyntaxNodes();
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) =>
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();
     }
 }

@@ -3,6 +3,7 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.DesignTime
         public static void Initialize()
         {
             // Make sure the type is initialized.
-            Instance.GetType();
+            _ = Instance.GetType();
         }
 
       
@@ -31,9 +32,9 @@ namespace Caravela.Framework.Impl.DesignTime
     
         public T? GetCompilerService<T>() where T : class, ICompilerService => typeof(T) == typeof(IClassificationService) ? (T) (object) this : null;
 
-        public event Action<ICompilerServiceProvider> Unloaded;
+        event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded { add { } remove { } }
 
-        public bool TryGetClassifiedTextSpans( SemanticModel semanticModel, SyntaxNode root, out IReadOnlyClassifiedTextSpanCollection classifiedTextSpans )
+        public bool TryGetClassifiedTextSpans( SemanticModel semanticModel, SyntaxNode root,  [NotNullWhen(true)] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
         {
             // TODO: if the root is not "our", return false.
             
@@ -47,7 +48,7 @@ namespace Caravela.Framework.Impl.DesignTime
             {
               
                 var text = semanticModel.SyntaxTree.GetText( );
-                TextSpanClassifier classifier = new TextSpanClassifier( text );
+                var classifier = new TextSpanClassifier( text );
                 classifier.Visit( annotatedSyntaxRoot );
                 classifiedTextSpans = classifier.ClassifiedTextSpans;
             }

@@ -3,7 +3,6 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol assembly )
+        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {

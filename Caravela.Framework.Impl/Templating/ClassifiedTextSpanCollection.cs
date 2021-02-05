@@ -1,12 +1,9 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Templating
@@ -33,11 +30,13 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="span"></param>
         internal void Add( in TextSpan span, TextSpanClassification classification )
         {
-            for ( int i = 0; ;i++ )
+            for ( var i = 0; ;i++ )
             {
                 if ( i > 4 )
+                {
                     throw new AssertionFailedException();
-                    
+                }
+
                 if ( this._spans.TryGetClosestValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
                 {
                     // Check if we have an exact span. If not, we will partition.
@@ -139,8 +138,10 @@ namespace Caravela.Framework.Impl.Templating
         private static ( MarkedTextSpan, MarkedTextSpan ) Split( in MarkedTextSpan textSpan, int splitPosition )
         {
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
+            {
                 throw new ArgumentException( nameof(splitPosition) );
-            
+            }
+
             return (new MarkedTextSpan( TextSpan.FromBounds(  textSpan.Span.Start, splitPosition ), textSpan.Classification ),
                 new MarkedTextSpan( TextSpan.FromBounds(  splitPosition, textSpan.Span.End ),
                     textSpan.Classification ));
@@ -215,7 +216,7 @@ namespace Caravela.Framework.Impl.Templating
         public override string ToString()
         {
             // Used for unit testing. Don't change the rendering logic.
-            StringBuilder stringBuilder = new StringBuilder();
+            var stringBuilder = new StringBuilder();
             stringBuilder.Append( "{ " );
             foreach ( var pair in this._spans )
             {

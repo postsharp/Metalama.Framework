@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         }
         public static CaravelaEventInfo Create( IEvent @event )
         {
-            Event fullEvent = @event as Event;
-            return new CaravelaEventInfo( fullEvent.Symbol, fullEvent.ContainingElement as IType );
+            var fullEvent = (Event) @event;
+            return new CaravelaEventInfo( fullEvent.Symbol, fullEvent.DeclaringType  );
         }
 
         public ISymbol Symbol { get; }

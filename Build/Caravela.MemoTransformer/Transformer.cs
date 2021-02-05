@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Compiler;
@@ -25,21 +25,27 @@ namespace Caravela.MemoTransformer
 
         class Rewriter : CSharpSyntaxRewriter
         {
-            List<FieldDeclarationSyntax> fieldsToAdd;
+            List<FieldDeclarationSyntax>? _fieldsToAdd;
 
             public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
             {
                 if (!node.AttributeLists.SelectMany(al => al.Attributes)
                     .Any(a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute"))
+                {
                     return node;
+                }
 
                 if (node.ExpressionBody == null)
+                {
                     throw new NotSupportedException("Only expression-bodied properties are supported.");
+                }
 
                 if (node.Modifiers.Any(SyntaxKind.StaticKeyword))
+                {
                     throw new NotSupportedException("Static properties are not supported.");
+                }
 
-                string fieldName = "@" + char.ToLowerInvariant(node.Identifier.ValueText[0]) + node.Identifier.ValueText.Substring(1);
+                var fieldName = "@" + char.ToLowerInvariant( node.Identifier.ValueText[0] ) + node.Identifier.ValueText.Substring( 1 );
 
                 var expression = node.ExpressionBody.Expression;
 
@@ -63,30 +69,33 @@ namespace Caravela.MemoTransformer
                     .AddAccessorListAccessors(AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, block));
 
                 // PropertyType? field;
-                this.fieldsToAdd.Add(FieldDeclaration(VariableDeclaration(NullableType(node.Type)).AddVariables(VariableDeclarator(fieldName))));
+                this._fieldsToAdd!.Add(FieldDeclaration(VariableDeclaration(NullableType(node.Type)).AddVariables(VariableDeclarator(fieldName))));
 
                 return newNode;
             }
 
             public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
             {
-                var parentFieldsToAdd = this.fieldsToAdd;
-                this.fieldsToAdd = new();
+                var parentFieldsToAdd = this._fieldsToAdd;
+                this._fieldsToAdd = new();
 
-                var result = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
+                var result = (ClassDeclarationSyntax)base.VisitClassDeclaration(node)!;
 
-                result = result.AddMembers( this.fieldsToAdd.ToArray());
-                this.fieldsToAdd = parentFieldsToAdd;
+                result = result.AddMembers( this._fieldsToAdd.ToArray<MemberDeclarationSyntax>());
+                
+                this._fieldsToAdd = parentFieldsToAdd;
 
                 return result;
             }
 
-            public override SyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
+            public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
             {
-                string usingSystemThreading = "using System.Threading;";
+                const string usingSystemThreading = "using System.Threading;";
 
-                if (!node.Usings.Any(u => u.ToString() == usingSystemThreading))
+                if ( node.Usings.All( u => u.ToString() != usingSystemThreading ) )
+                {
                     node = node.AddUsings(ParseCompilationUnit(usingSystemThreading).Usings.Single());
+                }
 
                 return base.VisitCompilationUnit(node);
             }

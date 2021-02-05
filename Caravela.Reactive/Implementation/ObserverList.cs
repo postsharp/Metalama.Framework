@@ -62,7 +62,7 @@ namespace Caravela.Reactive.Implementation
         {
             get
             {
-                int count = 0;
+                var count = 0;
                 for (var node = this._first; node != null; node = node.Next)
                 {
                     count++;
@@ -75,11 +75,15 @@ namespace Caravela.Reactive.Implementation
         public IReactiveSubscription<T>? AddObserver(IReactiveObserver observer)
         {
             if (observer == null)
+            {
                 throw new ArgumentNullException();
+            }
 
             // this happens when SelectManyRecursive uses its Follow and then GetValue
             if ( this.ContainsObserver( observer ) )
+            {
                 return null;
+            }
 
             var node = new ObserverListItem<T>(this._owner, observer);
 

@@ -20,9 +20,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             return this.ExpandDeclaration(
                 templateInstance,
-                new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode() ),
+                new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode()! ),
                 new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation )
-                );
+            );
         }
 
         internal BlockSyntax ExpandDeclaration( object templateInstance, IProceedImpl proceedImpl, ITemplateContext templateContext )

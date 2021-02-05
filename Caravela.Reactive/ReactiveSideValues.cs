@@ -67,7 +67,7 @@ namespace Caravela.Reactive
 
         void Combine(ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
         {
-            for ( int i = 0; i < builder.Count; i++ )
+            for ( var i = 0; i < builder.Count; i++ )
             {
                 if ( builder[i].TryCombine( value, out var combinedValue ) )
                 {

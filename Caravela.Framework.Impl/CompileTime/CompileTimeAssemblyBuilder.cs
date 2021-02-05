@@ -2,7 +2,6 @@
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -73,7 +72,9 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
+            {
                 return null;
+            }
 
             compilation = compilation.AddSyntaxTrees(
                 SyntaxFactory.ParseSyntaxTree( $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
@@ -89,7 +90,9 @@ namespace Caravela.Framework.Impl.CompileTime
                         var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
 
                         if ( assemblyBytes != null )
+                        {
                             return MetadataReference.CreateFromImage( assemblyBytes );
+                        }
                     }
 
                     return null!;
@@ -110,10 +113,10 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             int GetVersionComponent() => this._random.Next( 0, ushort.MaxValue );
 
-            int major = GetVersionComponent();
-            int minor = GetVersionComponent();
-            int build = GetVersionComponent();
-            int revision = GetVersionComponent();
+            var major = GetVersionComponent();
+            var minor = GetVersionComponent();
+            var build = GetVersionComponent();
+            var revision = GetVersionComponent();
 
             return new Version( major, minor, build, revision ).ToString();
         }
@@ -130,11 +133,13 @@ namespace Caravela.Framework.Impl.CompileTime
             var embeddedTexts = compilationForDebugging.SyntaxTrees.Select(
                 tree =>
                 {
-                    string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
+                    var filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
 
                     var text = tree.GetText();
                     if ( !text.CanBeEmbedded )
+                    {
                         text = SourceText.From( text.ToString(), Encoding.UTF8 );
+                    }
 
                     return EmbeddedText.FromSource( filePath, text );
                 } );
@@ -166,7 +171,9 @@ namespace Caravela.Framework.Impl.CompileTime
             var compileTimeCompilation = this.CreateCompileTimeAssembly( compilation );
 
             if ( compileTimeCompilation == null )
+            {
                 return null;
+            }
 
             var stream = this.Emit( compileTimeCompilation, compilation );
 

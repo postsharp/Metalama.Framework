@@ -1,8 +1,10 @@
 ﻿using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Templating;
 using System;
 using System.Collections.Generic;
 using Xunit;
+
+#pragma warning disable xUnit1006 // Theory methods should have parameters
+
 
 namespace Caravela.Framework.Impl.UnitTests
 {
@@ -15,17 +17,17 @@ namespace Caravela.Framework.Impl.UnitTests
         [Repeat(repeat)]
         public void TestOrdering()
         {
-            SkipListIndexedDictionary<int, uint> skipList = new SkipListIndexedDictionary<int, uint>();
+            var skipList = new SkipListIndexedDictionary<int, uint>();
 
-            Random random = new Random();
+            var random = new Random();
 
-            for (int i = 0; i < 10000; i++)
+            for (var i = 0; i < 10000; i++)
             {
                 skipList.Set(random.Next(), 0xdeadbeef );
             }
 
-            int old = int.MinValue;
-            foreach (KeyValuePair<int, uint> pair in skipList)
+            var old = int.MinValue;
+            foreach (var pair in skipList)
             {
                 Assert.True(old < pair.Key);
                 old = pair.Key;
@@ -36,8 +38,8 @@ namespace Caravela.Framework.Impl.UnitTests
         [Repeat(repeat)]
         public void TestConflict()
         {
-            SkipListIndexedDictionary<int, int> skipList = new SkipListIndexedDictionary<int, int>();
-            for ( int i = 0; i < 100; i++ )
+            var skipList = new SkipListIndexedDictionary<int, int>();
+            for ( var i = 0; i < 100; i++ )
             {
                 skipList.Add( i, i );
             }
@@ -49,7 +51,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Repeat(repeat)]
         public void TestCount()
         {
-            SkipListIndexedDictionary<int, uint> skipList = new SkipListIndexedDictionary<int, uint>();
+            var skipList = new SkipListIndexedDictionary<int, uint>();
             Assert.Empty(skipList);
             skipList.Set( 1, 1 );
             Assert.Single(skipList);
@@ -63,7 +65,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Repeat(repeat)]
         public void TestRemove()
         {
-            SkipListIndexedDictionary<int, int> skipList = new SkipListIndexedDictionary<int, int>();
+            var skipList = new SkipListIndexedDictionary<int, int>();
             Assert.Empty(skipList);
             skipList.Add( 1, 1 );
             Assert.Equal( new[] { 1},   skipList.Values );
@@ -86,13 +88,13 @@ namespace Caravela.Framework.Impl.UnitTests
         public void TestIndexOf()
         {
             const int n = 100;
-            SkipListIndexedDictionary<int, int> skipList = new SkipListIndexedDictionary<int, int>();
-            for ( int i = 0; i < n; i++)
+            var skipList = new SkipListIndexedDictionary<int, int>();
+            for ( var i = 0; i < n; i++)
             {
                 skipList.Add( i,i );
             }
 
-            for (int j = 0; j < n; j++)
+            for (var j = 0; j < n; j++)
             {
                 Assert.Equal(j, skipList.IndexOf(j));
             }
@@ -103,13 +105,13 @@ namespace Caravela.Framework.Impl.UnitTests
         public void TestGetByIndex()
         {
             const int n = 100;
-            SkipListIndexedDictionary<int, int> skipList = new SkipListIndexedDictionary<int, int>();
-            for (int i = 0; i < n; i++)
+            var skipList = new SkipListIndexedDictionary<int, int>();
+            for (var i = 0; i < n; i++)
             {
                 skipList.Add(i, i);
             }
 
-            for (int j = 0; j < n; j++)
+            for (var j = 0; j < n; j++)
             {
                 Assert.Equal(j, skipList.GetAt( j ).Key);
             }

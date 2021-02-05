@@ -1,4 +1,5 @@
 ﻿using Caravela.Framework.Aspects;
+using Caravela.Framework.TestApp.Aspects;
 using System;
 
 namespace Caravela.Framework.TestApp

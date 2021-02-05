@@ -52,7 +52,9 @@ namespace Caravela.Reactive.Implementation
                 // the increment and breaksObservers is false.
 
                 if ( this._parent == null )
+                {
                     throw new InvalidOperationException();
+                }
 
 
                 if ( this._parent._currentUpdateStatus == IncrementalUpdateStatus.Default )
@@ -62,7 +64,9 @@ namespace Caravela.Reactive.Implementation
 
                 this._parent._isFunctionResultDirty = true;
                 if (breaksObservers)
+                {
                     this._parent._currentUpdateBreaksObservers = true;
+                }
 
                 // We don't nullify the old result now because the current result may eventually be still valid if all versions 
                 // end up being identical.
@@ -73,7 +77,9 @@ namespace Caravela.Reactive.Implementation
             public void SetValue( TResult newResult )
             {
                 if ( this._parent == null )
+                {
                     throw new InvalidOperationException();
+                }
 
 
                 this._parent._currentUpdateStatus = IncrementalUpdateStatus.HasNewValue;
@@ -97,6 +103,8 @@ namespace Caravela.Reactive.Implementation
 
             public void Dispose()
             {
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                //   Can be null in default instance.
                 if (this._parent == null || this._parent._currentUpdateStatus == IncrementalUpdateStatus.Disposed)
                 {
                     return;

@@ -21,6 +21,7 @@ using System.Linq;
 // limitations under the License.
 #endregion
 
+// ReSharper disable once CheckNamespace
 namespace MoreLinq
 {
     static class MoreEnumerable
@@ -84,8 +85,15 @@ namespace MoreLinq
             Func<TSource, TKey> keySelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
 
             return GroupAdjacent( source, keySelector, e => e, comparer );
         }
@@ -161,9 +169,20 @@ namespace MoreLinq
             Func<TSource, TElement> elementSelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( elementSelector == null ) throw new ArgumentNullException( nameof( elementSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( elementSelector == null )
+            {
+                throw new ArgumentNullException( nameof( elementSelector ) );
+            }
 
             return GroupAdjacentImpl( source, keySelector, elementSelector, CreateGroupAdjacentGrouping,
                                      comparer ?? EqualityComparer<TKey>.Default );
@@ -201,9 +220,20 @@ namespace MoreLinq
             Func<TSource, TKey> keySelector,
             Func<TKey, IEnumerable<TSource>, TResult> resultSelector )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( resultSelector == null ) throw new ArgumentNullException( nameof( resultSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( resultSelector == null )
+            {
+                throw new ArgumentNullException( nameof( resultSelector ) );
+            }
 
             // This should be removed once the target framework is bumped to something that supports covariance
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
@@ -247,9 +277,20 @@ namespace MoreLinq
             Func<TKey, IEnumerable<TSource>, TResult> resultSelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( resultSelector == null ) throw new ArgumentNullException( nameof( resultSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( resultSelector == null )
+            {
+                throw new ArgumentNullException( nameof( resultSelector ) );
+            }
 
             // This should be removed once the target framework is bumped to something that supports covariance
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
@@ -291,7 +332,9 @@ namespace MoreLinq
 
             {
                 if ( group is ({ } k, { } members ) )
+                {
                     yield return resultSelector( k, members );
+                }
             }
         }
 

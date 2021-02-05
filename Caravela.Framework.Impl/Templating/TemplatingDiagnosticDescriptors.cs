@@ -1,8 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Templating
 {
-    static partial class TemplatingDiagnosticDescriptors
+    static class TemplatingDiagnosticDescriptors
     {
         // Templating errors (alex).
         // Reserved range 100-199

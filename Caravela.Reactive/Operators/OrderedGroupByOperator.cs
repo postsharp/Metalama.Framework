@@ -56,7 +56,9 @@ namespace Caravela.Reactive.Operators
             var group = this.FindGroupForNewItem( item, keyGroups );
 
             if (group == null)
+            {
                 throw new InvalidOperationException();
+            }
 
             group.Add( element );
         }
@@ -130,7 +132,9 @@ namespace Caravela.Reactive.Operators
             foreach ( var (newGroup, oldGroup) in newGroups.Zip( oldGroups, ( ng, og ) => (ng, og) ) )
             {
                 if ( newGroup.Contains( newItem ) )
+                {
                     return oldGroup;
+                }
             }
 
             return null;

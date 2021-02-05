@@ -14,7 +14,7 @@ namespace Caravela.Reactive.UnitTests
             var source = new[] { 1, 2, 11 }.ToImmutableReactive();
 
             // with using System.Linq, LINQ on ReactiveHashSet above is ambiguous
-            var grouped = System.Linq.Enumerable.ToList( source.GroupBy( i => i % 10 ).GetValue() );
+            var grouped = Enumerable.ToList( source.GroupBy( i => i % 10 ).GetValue() );
 
             Assert.Equal( 2, grouped.Count );
 
@@ -41,7 +41,7 @@ namespace Caravela.Reactive.UnitTests
         {
             var source = new ReactiveHashSet<int>();
 
-            var groups = ((IReactiveCollection<int>) source).GroupBy( x => x % 10 );
+            var groups = source.GroupBy( x => x % 10 );
 
             Assert.Equal( new object[0], getGroups() );
 

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         public override ExpressionSyntax Serialize( DateTimeOffset o )
         {
-            string isoTime = o.ToString( "o" );
+            var isoTime = o.ToString( "o" );
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

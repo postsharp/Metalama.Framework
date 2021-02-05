@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
@@ -21,8 +20,6 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<AspectInstance> GetAspects()
         {
-            var results = ImmutableArray.CreateBuilder<AspectInstance>();
-
             var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
 
             var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectDescendants( codeElement => codeElement switch

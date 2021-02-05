@@ -6,6 +6,7 @@ using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.TypeKind;
 using static Caravela.Framework.Code.RefKind;
+// ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Caravela.Framework.Impl.UnitTests
 {
@@ -14,7 +15,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void ObjectIdentity()
         {
-            string code = "";
+            var code = "";
             var compilation = CreateCompilation(code);
 
             Assert.Same(compilation.DeclaredTypes, compilation.DeclaredTypes);
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void TypeInfos()
         {
-            string code = @"
+            var code = @"
 class C
 {
     class D { }
@@ -36,7 +37,7 @@ namespace NS
 
             var compilation = CreateCompilation(code);
 
-            var types = compilation.DeclaredTypes.GetValue(default).ToList();
+            var types = compilation.DeclaredTypes.GetValue().ToList();
             Assert.Equal(2, types.Count);
 
             var c1 = types[0];
@@ -58,7 +59,7 @@ namespace NS
         [Fact]
         public void LocalFunctions()
         {
-            string code = @"
+            var code = @"
 class C
 {
     void M()
@@ -72,7 +73,7 @@ class C
 
             var compilation = CreateCompilation(code);
 
-            var type = compilation.DeclaredTypes.GetValue(default).Single();
+            var type = compilation.DeclaredTypes.GetValue().Single();
             Assert.Equal("C", type.Name);
 
             var methods = type.Methods.GetValue().ToList();
@@ -93,7 +94,7 @@ class C
         [Fact]
         public void AttributeData()
         {
-            string code = @"
+            var code = @"
 using System;
 
 enum E
@@ -111,7 +112,7 @@ class TestAttribute : Attribute
 }";
             var compilation = CreateCompilation(code);
 
-            var attribute = compilation.DeclaredTypes.GetValue(default).ElementAt(1).Attributes.GetValue(default).Single();
+            var attribute = compilation.DeclaredTypes.GetValue().ElementAt(1).Attributes.GetValue().Single();
             Assert.Equal("TestAttribute", attribute.Type.FullName);
             Assert.Equal(new object?[] { 42, "foo", null }, attribute.ConstructorArguments);
             var namedArguments = attribute.NamedArguments;
@@ -129,7 +130,7 @@ class TestAttribute : Attribute
         [Fact]
         public void Parameters()
         {
-            string code = @"
+            var code = @"
 using System;
 
 interface I<T>
@@ -173,7 +174,7 @@ interface I<T>
         [Fact]
         public void GenericArguments()
         {
-            string code = @"
+            var code = @"
 class C<T1, T2>
 {
     static C<int, string> GetInstance() => null;
@@ -194,7 +195,7 @@ class C<T1, T2>
         [Fact]
         public void GlobalAttributes()
         {
-            string code = @"
+            var code = @"
 using System;
 
 [module: MyAttribute(""m"")]
@@ -222,7 +223,7 @@ class MyAttribute : Attribute
         [Fact]
         public void Arrays()
         {
-            string code = @"
+            var code = @"
 class C
 {
     void M(int[] i) {}
@@ -235,7 +236,7 @@ class C
                                  from method in type.Methods
                                  from parameter in method.Parameters
                                  select parameter.Type;
-            var parameterType = Assert.Single( parameterTypes.GetValue() );
+            var parameterType = Assert.Single( parameterTypes.GetValue() )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
             Assert.True( parameterType.Is( typeof( int[] ) ) );
@@ -251,7 +252,7 @@ class C
         [Fact]
         public void Properties()
         {
-            string code = @"
+            var code = @"
 class C
 {
     int Auto { get; set; }
@@ -274,7 +275,7 @@ class C
         [Fact]
         public void RefProperties()
         {
-            string code = @"
+            var code = @"
 class C
 {
     int field;
@@ -296,7 +297,7 @@ class C
         [Fact]
         public void MethodKinds()
         {
-            string code = @"
+            var code = @"
 using System;
 class C : IDisposable
 {
@@ -335,7 +336,7 @@ class C : IDisposable
         [Fact]
         public void TypeKinds()
         {
-            string code = @"
+            var code = @"
 using System;
 class C<T>
 {
@@ -362,7 +363,7 @@ class C<T>
         [Fact]
         public void ParameterKinds()
         {
-            string code = @"
+            var code = @"
 class C
 {
     int i;
@@ -383,7 +384,7 @@ class C
         [Fact]
         public void ParameterDefaultValue()
         {
-            string code = @"
+            var code = @"
 using System;
 
 class C
@@ -431,7 +432,7 @@ class C
         [Fact]
         public void TypeName()
         {
-            string code = @"
+            var code = @"
 using System.Collections.Generic;
 
 class C<T>

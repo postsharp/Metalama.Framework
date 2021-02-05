@@ -60,15 +60,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             this.RegisterSerializer( typeof(Dictionary<,>), new DictionarySerializer(this) ); 
             
             // Reflection types
-            CaravelaTypeSerializer typeSerializer = new CaravelaTypeSerializer();
-            CaravelaMethodInfoSerializer methodInfoSerializer = new CaravelaMethodInfoSerializer(typeSerializer);
+            var typeSerializer = new CaravelaTypeSerializer();
+            var methodInfoSerializer = new CaravelaMethodInfoSerializer(typeSerializer);
             this.RegisterSerializer( typeof(CaravelaType), typeSerializer );
             this.RegisterSerializer( typeof(CaravelaMethodInfo), methodInfoSerializer );
             this.RegisterSerializer( typeof(CaravelaConstructorInfo), new CaravelaConstructorInfoSerializer(typeSerializer) );
             this.RegisterSerializer( typeof(CaravelaEventInfo), new CaravelaEventInfoSerializer(typeSerializer) );
             this.RegisterSerializer( typeof(CaravelaParameterInfo), new CaravelaParameterInfoSerializer(methodInfoSerializer) );
             this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer(methodInfoSerializer) );
-            this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this, typeSerializer) );
+            this.RegisterSerializer( typeof(CaravelaLocationInfo), new CaravelaLocationInfoSerializer(this) );
         }
         
         /// <summary>
@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             {
                 return this._arraySerializer.Serialize( a );
             }
-            Type t = o.GetType();
+            var t = o.GetType();
             Type mainType;
             if ( t.IsGenericType )
             {
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             {
                 mainType = t;
             }
-            if (!this._serializers.TryGetValue( mainType, out ObjectSerializer serializer))
+            if (!this._serializers.TryGetValue( mainType, out var serializer))
             {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedSerialization, mainType );
             }

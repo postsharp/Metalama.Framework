@@ -1,6 +1,5 @@
 #region
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -139,7 +138,7 @@ namespace Caravela.Reactive.Sources
 
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
 
-        IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
+        IReactiveSubscription? IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
             IReactiveCollectionObserver<T> observer )
         {
             return this._observers.AddObserver( observer );

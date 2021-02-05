@@ -25,8 +25,10 @@ namespace Caravela.Reactive.Operators
             int newVersion)
         {
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             using var updateToken = this.GetIncrementalUpdateToken();
 
             this.AddItem( this.SelectResult(subscription, item), updateToken);
@@ -36,8 +38,10 @@ namespace Caravela.Reactive.Operators
             int newVersion)
         {
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
             this.RemoveItem( this.SelectResult(subscription, item), updateToken);
@@ -47,8 +51,10 @@ namespace Caravela.Reactive.Operators
             TCollection newItem, int newVersion)
         {
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             using var updateToken = this.GetIncrementalUpdateToken(newVersion);
 
             this.RemoveItem( this.SelectResult(subscription, oldItem), updateToken);

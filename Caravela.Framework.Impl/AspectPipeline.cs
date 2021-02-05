@@ -20,12 +20,12 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute(TransformerContext context)
         {
-            bool getFlag( string flagName ) =>
+            bool GetFlag( string flagName ) =>
                 context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
-                bool.TryParse( flagString, out bool flagValue ) &&
+                bool.TryParse( flagString, out var flagValue ) &&
                 flagValue;
 
-            if ( getFlag("DebugCaravela") )
+            if ( GetFlag("DebugCaravela") )
             {
                 Debugger.Launch();
             }
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
+                var debugTransformedCode = GetFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl
                         ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
                     .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
                     .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
-                    .GetValue( default );
+                    .GetValue();
 
                 foreach ( var stage in stages )
                 {
@@ -104,15 +104,15 @@ namespace Caravela.Framework.Impl
             }
             catch (Exception exception)
             {
-                Guid guid = Guid.NewGuid();
-                string path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                var guid = Guid.NewGuid();
+                var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
                 try
                 {
                     File.WriteAllText( path, exception.ToString() );
                 }
                 catch
                 {
-                    
+                    // ignored
                 }
 
                 Console.WriteLine(exception.ToString());
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl
                 default:
 
                     throw new NotSupportedException();
-            };
+            }
         }
 
         class AspectPartDataComparer : IComparer<AspectPartData>

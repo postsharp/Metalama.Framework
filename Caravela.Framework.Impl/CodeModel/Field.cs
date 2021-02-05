@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel
         protected internal override ISymbol Symbol => this._symbol;
 
         private readonly NamedType _containingElement;
-        public override ICodeElement? ContainingElement => this._containingElement;
+        public override ICodeElement ContainingElement => this._containingElement;
 
         internal override SourceCompilation Compilation => this._containingElement.Compilation;
 

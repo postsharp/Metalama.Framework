@@ -118,14 +118,15 @@ namespace Caravela.Framework.Impl.Templating
 
             return annotatedNode;
         }
-        
+
         /// <summary>
-        /// Returns the result of <see cref="SemanticModel.GetSymbolInfo"/>.
+        /// Returns the result of <c>Microsoft.CodeAnalysis.SemanticModel.GetSymbolInfo</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
         public ISymbol? GetSymbol(SyntaxNode node)
         {
+            
             var annotation = node.GetAnnotations("symbol").SingleOrDefault();
             if (annotation is not null)
             {
@@ -154,9 +155,9 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
         }
-        
+
         /// <summary>
-        /// Returns the result of <see cref="SemanticModel.GetTypeInfo"/>.
+        /// Returns the result of <c>SemanticModel.GetTypeInfo</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
@@ -209,7 +210,7 @@ namespace Caravela.Framework.Impl.Templating
                 return this._map.GetAnnotatedNode( node,base.Visit(node), this._semanticModel);
             }
 
-            public override SyntaxNode? VisitVariableDeclarator(VariableDeclaratorSyntax node)
+            public override SyntaxNode VisitVariableDeclarator(VariableDeclaratorSyntax node)
             {
                 // We need annotations.
                 var annotated =
@@ -225,7 +226,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            public override SyntaxNode? VisitAssignmentExpression(AssignmentExpressionSyntax node)
+            public override SyntaxNode VisitAssignmentExpression(AssignmentExpressionSyntax node)
             {
                 var annotated = (AssignmentExpressionSyntax) base.VisitAssignmentExpression(node)!;
                 if (this._map.GetSymbol(annotated.Left) is ILocalSymbol local)

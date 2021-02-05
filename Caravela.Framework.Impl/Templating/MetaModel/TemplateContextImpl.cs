@@ -40,7 +40,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             public ExpressionSyntax CreateExpression()
             {
                 if ( this._allowExpression )
+                {
                     return ThisExpression();
+                }
 
                 // TODO: diagnostic
                 throw new InvalidOperationException("Can't directly access 'this' on a static method.");
@@ -101,7 +103,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotImplementedException();
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._parameter.ToDisplayString( format, context );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
     }
 
     class DynamicMetaMember : IDynamicMetaMember

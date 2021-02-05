@@ -29,7 +29,7 @@ namespace Caravela.Reactive.Operators
         {
             var builder = ImmutableList.CreateBuilder<TResult>();
 
-            foreach ( TSource item in source )
+            foreach ( var item in source )
             {
                 builder.Add( await this._func( item, this.ObserverToken, cancellationToken ) );
             }

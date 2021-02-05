@@ -1,10 +1,8 @@
 ﻿using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,16 +14,16 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     class SyntaxColorizer
     {
-        private readonly WorkbenchTestRunner testRunner;
+        private readonly WorkbenchTestRunner _testRunner;
 
         public SyntaxColorizer( WorkbenchTestRunner testRunner )
         {
-            this.testRunner = testRunner;
+            this._testRunner = testRunner;
         }
 
         #region Colors
 
-        private static readonly Dictionary<string, Color> classificationToColor = new Dictionary<string, Color>
+        private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             {ClassificationTypeNames.Comment, Colors.Green},
             {ClassificationTypeNames.ExcludedCode, Colors.Black},
@@ -96,19 +94,20 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         #endregion
 
-        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection metaSpans )
+        public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
         {
-            static Color WithAlpha( Color brush, double alpha ) =>
-                 Color.FromArgb( (byte) (255*alpha), brush.R, brush.G, brush.B ) ;
+            static Color WithAlpha( Color brush, double alpha )
+            {
+                return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
+            }
 
-                
-            var project = testRunner.CreateProject();
+            var project = this._testRunner.CreateProject();
             var document = project.AddDocument( "name.cs", text.ToString() );
 
-            var classifiedSpans =
+            var roslynClassifiedSpans =
                 await Classifier.GetClassifiedSpansAsync( document, TextSpan.FromBounds( 0, text.Length ) );
 
-            var ranges = classifiedSpans.Select( classifiedSpan =>
+            var ranges = roslynClassifiedSpans.Select( classifiedSpan =>
                  new TextRange( classifiedSpan, text.GetSubText( classifiedSpan.TextSpan ).ToString() ) );
 
             ranges = TextRange.FillGaps( text, ranges );
@@ -119,7 +118,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 Color foreground, background;
                 FontWeight fontWeight;
-                var category =  metaSpans?.GetCategory( range.TextSpan ) ?? TextSpanClassification.Default;
+                var category =  compileTimeSpans?.GetCategory( range.TextSpan ) ?? TextSpanClassification.Default;
 
                 // Choose foreground.
                 switch ( category )
@@ -136,7 +135,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         {
                             foreground  = Colors.Black;
                         }
-                        else if ( range.ClassificationType == null || !classificationToColor.TryGetValue( range.ClassificationType, out foreground ) )
+                        else if ( range.ClassificationType == null || !_classificationToColor.TryGetValue( range.ClassificationType, out foreground ) )
                         {
                             // A good point to have a breakpoint.
                             foreground  = Colors.Green;

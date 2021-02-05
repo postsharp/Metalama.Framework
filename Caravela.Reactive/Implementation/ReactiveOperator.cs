@@ -19,7 +19,7 @@ namespace Caravela.Reactive.Implementation
        where TResultObserver : class, IReactiveObserver<TResult>
 
     {
-        private protected SpinLock _lock = default;
+        private SpinLock _lock;
 
         protected ReactiveOperator( IReactiveSource<TSource, TSourceObserver> source ) : base( source )
         {
@@ -74,7 +74,7 @@ namespace Caravela.Reactive.Implementation
 
 
         /// <summary>
-        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
+        /// Gets an <c>IncrementalUpdateToken</c>, which allows to represent incremental changes.
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>

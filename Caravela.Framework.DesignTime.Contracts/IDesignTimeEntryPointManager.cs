@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,7 +11,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// <summary>
         /// Gets the <see cref="ICompilerService"/> for a specific project.
         /// </summary>
-        /// <param name="project"></param>
+        /// <param name="version">Version of Caravela for which the service is required.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( Version version, CancellationToken cancellationToken );

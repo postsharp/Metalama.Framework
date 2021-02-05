@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         } 
         public static CaravelaConstructorInfo Create( IMethod method )
         {
-            return new CaravelaConstructorInfo( method as Method );
+            return new CaravelaConstructorInfo( (Method) method  );
         }
         
         public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();

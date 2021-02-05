@@ -26,7 +26,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType? GetTypeByReflectionType( Type type )
         {
             if ( type.IsByRef )
+            {
                 throw new ArgumentException( "Ref types can't be represented as Caravela types." );
+            }
 
             if ( type.IsArray )
             {
@@ -48,7 +50,9 @@ namespace Caravela.Framework.Impl.CodeModel
                 var genericArguments = type.GenericTypeArguments.Select( this.GetTypeByReflectionType ).ToArray();
 
                 if ( genericArguments.Any( a => a == null ) )
+                {
                     return null;
+                }
 
                 return genericDefinition?.MakeGenericType( genericArguments! );
             }
@@ -60,6 +64,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();
 
         internal abstract CSharpCompilation GetRoslynCompilation();
-        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );
+        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
     }
 }

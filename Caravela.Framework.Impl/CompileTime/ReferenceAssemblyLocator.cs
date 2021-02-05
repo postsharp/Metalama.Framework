@@ -27,17 +27,19 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static IEnumerable<string> GetReferenceAssemblies()
         {
-            string hash = ComputeHash( project );
-            string tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );
+            var hash = ComputeHash( project );
+            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );
 
-            string referenceAssemlyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+            var referenceAssemlyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
             if ( File.Exists( referenceAssemlyListFile ) )
             {
                 var referenceAssemblies = File.ReadAllLines( referenceAssemlyListFile );
 
                 if ( referenceAssemblies.All( File.Exists ) )
+                {
                     return referenceAssemblies;
+                }
             }
 
             Directory.CreateDirectory( tempProjectDirectory );
@@ -60,7 +62,9 @@ namespace Caravela.Framework.Impl.CompileTime
             process.WaitForExit();
 
             if ( process.ExitCode != 0 )
+            {
                 throw new InvalidOperationException( "Error while building temporary project to locate reference assemblies:" + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+            }
 
             return File.ReadAllLines( referenceAssemlyListFile );
         }

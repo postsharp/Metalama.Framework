@@ -9,13 +9,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {
     public class DictionarySerializerTests
     {
-        private readonly ObjectSerializers _serializers;
         private readonly DictionarySerializer _serializer;
 
         public DictionarySerializerTests()
         {
-            this._serializers = new ObjectSerializers();
-            this._serializer = new DictionarySerializer( this._serializers );
+            this._serializer = new DictionarySerializer( new ObjectSerializers() );
         }
         
         [Fact]
@@ -40,20 +38,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             var d = new Dictionary<object, object>();
             d.Add( d, "20" );
-            Assert.Throws<CaravelaException>( () =>
-            {
-                this._serializer.SerializeObject( d );
-            } );
+            Assert.Throws<CaravelaException>( () => this._serializer.SerializeObject( d ) );
         }
         [Fact]
         public void TestRecursiveDictionary_InValue()
         {
             var d = new Dictionary<object, object>();
             d.Add( "20", d );
-            Assert.Throws<CaravelaException>( () =>
-            {
-                this._serializer.SerializeObject( d );
-            } );
+            Assert.Throws<CaravelaException>( () => this._serializer.SerializeObject( d ) );
         }
         
         [Fact]
@@ -89,45 +81,38 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         public void TestStringDictionaryWithUnknownComparer()
         {   
             // fallback to default comparer
-            Assert.Throws<CaravelaException>( () =>
-            {
-                this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
-                    new Dictionary<string, object>( StringComparer.Create( new CultureInfo( "sk-SK" ), false ) ) );
-            } );
+            Assert.Throws<CaravelaException>( () => this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
+                    new Dictionary<string, object>( StringComparer.Create( new CultureInfo( "sk-SK" ), false ) ) ) );
         }
         [Fact]
         public void TestStringDictionaryWithUnknownComparer2()
         {
             Assert.Throws<CaravelaException>( () =>
-            {
                 // fallback to default comparer
                 this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
-                    new Dictionary<string, object>( new CustomComparer<string>() ) );
-            } );
+                    new Dictionary<string, object>( new CustomComparer<string>() ) ) );
         }
         [Fact]
         public void TestIntDictionaryWithUnknownComparer()
         {
             Assert.Throws<CaravelaException>( () =>
-            {
                 // fallback to default comparer
                 this.AssertSerialization( "new System.Collections.Generic.Dictionary<System.Int32, System.Object>{}",
-                    new Dictionary<int, object>( new CustomComparer<int>() ) {{2, 8}} );
-            } );
+                    new Dictionary<int, object>( new CustomComparer<int>() ) { { 2, 8 } } ) );
         }
 
 
 
         private void AssertSerialization( string expected, object o )
         {
-            string creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializer.SerializeObject(o).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }
 
     public class CustomComparer<T> : IEqualityComparer<T>
     {
-        public bool Equals( T x, T y ) => true;
+        public bool Equals( T? x, T? y ) => true;
 
         public int GetHashCode( T obj ) => 0;
     }

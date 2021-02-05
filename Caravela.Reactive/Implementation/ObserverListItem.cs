@@ -1,8 +1,3 @@
-#region
-
-using System;
-
-#endregion
 
 namespace Caravela.Reactive.Implementation
 {
@@ -18,11 +13,6 @@ namespace Caravela.Reactive.Implementation
 
         public ObserverListItem(IReactiveObservable<T> source, IReactiveObserver observer)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
             this.Sender = source;
             this.WeaklyTypedObserver = observer;
         }
@@ -36,11 +26,7 @@ namespace Caravela.Reactive.Implementation
 
         public void Dispose()
         {
-            if (this.Sender != null)
-            {
-                this.Sender.RemoveObserver(this);
-                this.Sender = null!;
-            }
+            this.Sender.RemoveObserver(this);
         }
 
         public override string ToString()

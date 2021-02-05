@@ -23,8 +23,8 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         }
         public static ITypeSymbol? FindDeclaringTypeSymbol( Method method )
         {
-            ITypeInternal methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
-            ITypeSymbol typeSymbol = methodDeclaringType.TypeSymbol;
+            var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
+            var typeSymbol = methodDeclaringType.TypeSymbol;
             if ( typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeParameters.Length > 0)
             {
                 return namedTypeSymbol;

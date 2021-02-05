@@ -33,13 +33,15 @@ namespace Caravela.Reactive.Operators
         void IReactiveCollectionObserver<T>.OnItemAdded(IReactiveSubscription subscription, T item, int newVersion)
         {
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             var oldResult = this.CachedValue;
             
             if (_equalityComparer.Equals(oldResult, default) && this._predicate(item, this.ObserverToken))
             {
-                using IncrementalUpdateToken token = this.GetIncrementalUpdateToken(newVersion);
+                using var token = this.GetIncrementalUpdateToken(newVersion);
 
                 token.SetValue(item);
 
@@ -53,8 +55,10 @@ namespace Caravela.Reactive.Operators
         void IReactiveCollectionObserver<T>.OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion)
         {
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             var oldResult = this.CachedValue;
             
             if (_equalityComparer.Equals(oldResult, item) && this._predicate(item, this.ObserverToken))
@@ -67,8 +71,10 @@ namespace Caravela.Reactive.Operators
         {
             
             if (!this.ShouldProcessIncrementalChange)
+            {
                 return;
-            
+            }
+
             var oldResult = this.CachedValue;
             
             if (_equalityComparer.Equals(oldResult, oldItem)

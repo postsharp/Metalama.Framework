@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Templating
             
             var changeIdBefore = -1;
 
-            int iterations = 0;
+            var iterations = 0;
 
             while ( true )
             {
@@ -79,9 +79,7 @@ namespace Caravela.Framework.Impl.Templating
                 changeIdBefore = annotatorRewriter.ChangeId;
             }
 
-            // Unreachable.
-            throw new AssertionFailedException();
-
+        
         }
 
 

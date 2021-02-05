@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             Assert.Throws<CaravelaException>( () =>
             {
-                List<object> o = new List<object>();
+                var o = new List<object>();
                 o.Add( o );
                 this._serializers.SerializeToRoslynCreationExpression( o );
             } );
@@ -58,12 +58,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestNull()
         {
-            this.AssertSerialization( "null", null );
+            this.AssertSerialization( "null",  (object?) null );
         }
        
-        private void AssertSerialization( string expected, object o )
+        private void AssertSerialization<T>( string expected, T? o )
         {
-            string creationExpression = this._serializers.SerializeToRoslynCreationExpression(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.SerializeToRoslynCreationExpression(o).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
         
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestArray()
         {
-            this.AssertSerialization( "new System.Int32[]{1, 2}", new int[] { 1,2} );
+            this.AssertSerialization( "new System.Int32[]{1, 2}", new[] { 1,2} );
         }
 
         [Fact]
@@ -133,6 +133,8 @@ namespace EnumSpace
 
     class Box<T>
     {
+        public T? Value { get; set; }
+        
         public class InnerBox
         {
             public enum Shiny
@@ -141,6 +143,7 @@ namespace EnumSpace
                 No
             }
         }
+        [Flags]
         public enum Color
         {
             Blue = 4,

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            string csproj = $@"
+            var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             WriteFile( "test.csproj", csproj );
 
-            for ( int i = 0; i < sourceFiles.Length; i++ )
+            for ( var i = 0; i < sourceFiles.Length; i++ )
             {
                 WriteFile( $"file{i}.cs", sourceFiles[i] );
             }
@@ -43,8 +43,8 @@ namespace Caravela.Framework.Impl.UnitTests
                 RedirectStandardOutput = true
             };
             var process = Process.Start( psi )!;
-            Task completion = process.WaitForExitAsync();
-            Task<string> outputPromise = process.StandardOutput.ReadToEndAsync();
+            var completion = process.WaitForExitAsync();
+            var outputPromise = process.StandardOutput.ReadToEndAsync();
 
             Task.WhenAll( completion, outputPromise ).Wait();
 

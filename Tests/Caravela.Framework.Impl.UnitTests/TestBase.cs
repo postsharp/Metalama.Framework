@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
         public static object? ExecuteExpression(string context, string expression)
         {
-            string expressionContainer = $@"
+            var expressionContainer = $@"
 class Expression
 {{
     public static object Execute() => {expression};
@@ -86,7 +86,7 @@ class Expression
         {
             if ( DoCodeExecutionTests )
             {
-                T t = (T) ExecuteExpression( context, expression )!;
+                var t = (T) ExecuteExpression( context, expression )!;
                 withResult( t );
             }
         }

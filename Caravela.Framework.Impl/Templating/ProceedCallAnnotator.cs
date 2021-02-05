@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-            return symbol.GetAttributes().Any(a => a.AttributeClass.Name == nameof(ProceedAttribute));
+            return symbol.GetAttributes().Any(a => a.AttributeClass?.Name == nameof(ProceedAttribute));
         }
 
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )

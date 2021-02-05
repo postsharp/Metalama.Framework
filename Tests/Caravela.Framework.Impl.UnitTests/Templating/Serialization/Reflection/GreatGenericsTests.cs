@@ -1,13 +1,13 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Caravela.Framework.Impl.Templating.Serialization.Reflection;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
+// ReSharper disable RedundantTypeArgumentsOfMethod
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
     {
         private readonly ObjectSerializers _serializers;
         private readonly string _code;
-        private IEnumerable<INamedType>? _topLevelTypes;
+        private readonly IEnumerable<INamedType> _topLevelTypes;
 
         public GreatGenericsTests( ITestOutputHelper helper ) : base(helper)
         {
@@ -60,7 +60,7 @@ class User {
                 Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).TypeHandle)");
 
-            this.TestSerializable( this._code, descendant.BaseType.Method( "Method21" ), ( m ) =>
+            this.TestSerializable( this._code, descendant.BaseType!.Method( "Method21" ), ( m ) =>
             {
                 Assert.Equal( "T3", m.ReturnType.Name );
                 Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
@@ -70,10 +70,10 @@ class User {
         public void TestGenericInstances()
         {
             // Generic instances
-            var user = this._topLevelTypes.Single( t => t.Name == "User" );
-            var instantiatedDescendant = user.Properties.GetValue().Single().Type as INamedType;
-            var instantiatedNested = instantiatedDescendant.BaseType;
-            var instantiatedBaseOrigin = instantiatedNested.BaseType;
+            var user = this._topLevelTypes.Single( t => t.Name == "User" )!;
+            var instantiatedDescendant = (INamedType) user.Properties.GetValue().Single().Type;
+            var instantiatedNested = instantiatedDescendant.BaseType!;
+            var instantiatedBaseOrigin = instantiatedNested.BaseType!;
 
             this.TestSerializable( this._code, instantiatedNested.Method("Method21" ),  ( m ) =>
             {
@@ -82,11 +82,11 @@ class User {
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)");
             this.TestSerializable( this._code, instantiatedNested.Method(".ctor" ),  ( ConstructorInfo c ) =>
             {
-                Assert.Equal( typeof(string), c.DeclaringType.GenericTypeArguments[0] );
+                Assert.Equal( typeof(string), c.DeclaringType!.GenericTypeArguments[0] );
                 Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
-                Assert.Equal( typeof(int), c.DeclaringType.BaseType.GenericTypeArguments[0] );
+                Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)");
-            this.TestSerializable( this._code, (instantiatedNested.ContainingElement as INamedType).Method("Method" ),  ( MethodInfo m ) =>
+            this.TestSerializable( this._code, ((INamedType) instantiatedNested.ContainingElement!).Method("Method" ), m =>
             {
                 Assert.Equal( typeof(string), m.ReturnType );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String""))).TypeHandle)");
@@ -110,12 +110,12 @@ class User {
             {
                 Assert.Equal( typeof(int), p.PropertyType );
             }, @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetProperty(""privateProperty"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)");
-            this.TestSerializable( this._code, instantiatedBaseOrigin,  ( Type t ) =>
+            this.TestSerializable( this._code, instantiatedBaseOrigin, t =>
             {
                 Assert.Equal( "Origin`1", t.Name );
                 Assert.Equal( typeof(int), t.GenericTypeArguments[0] );
             }, @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")))");
-            this.TestSerializable( this._code, instantiatedBaseOrigin.Event( "Actioned" ),  ( EventInfo e ) =>
+            this.TestSerializable( this._code, instantiatedBaseOrigin.Event( "Actioned" ), e =>
             {
                 Assert.Equal( "Actioned", e.Name );
                 Assert.Equal( typeof(Action<int>), e.EventHandlerType );

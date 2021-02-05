@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Caravela.Reactive.Implementation;
+using System.Diagnostics;
 
 namespace Caravela.Reactive
 {
@@ -19,28 +20,25 @@ namespace Caravela.Reactive
         private static readonly ThreadLocal<IReactiveCollector> _defaultCollector =
             new ThreadLocal<IReactiveCollector>(() => _nullCollector);
 
-        internal static IReactiveCollector CurrentCollector
-        {
-            get => _defaultCollector.Value;
-        }
+        private static IReactiveCollector? CurrentCollector => _defaultCollector.Value;
 
         /// <summary>
         /// Modified the value of the <see cref="CurrentCollector"/> property for the current scope.
         /// </summary>
         /// <param name="collector"></param>
         /// <returns></returns>
-        public static WithDefaultObserverToken WithDefaultCollector(IReactiveCollector collector)
+        public static WithDefaultObserverToken WithDefaultCollector(IReactiveCollector? collector)
         {
             var previousCollector = CurrentCollector;
-            _defaultCollector.Value = collector;
+            _defaultCollector.Value = collector!;
             return new WithDefaultObserverToken(previousCollector);
         }
         
         
 
-        private readonly IReactiveCollector _collector;
+        private readonly IReactiveCollector? _collector;
 
-        internal IReactiveCollector Collector => this._collector ?? CurrentCollector;
+        internal IReactiveCollector? Collector => this._collector ?? CurrentCollector;
 
         internal ReactiveCollectorToken(IReactiveCollector collector)
         {
@@ -55,15 +53,16 @@ namespace Caravela.Reactive
         /// <typeparam name="TIn"></typeparam>
         /// <typeparam name="TOut"></typeparam>
         /// <returns></returns>
-        internal static Func<TIn, ReactiveCollectorToken, TOut> WrapWithDefaultToken<TIn, TOut>(
-            Func<TIn, TOut> func)
+        internal static Func<TIn, ReactiveCollectorToken, TOut> WrapWithDefaultToken<TIn, TOut>( Func<TIn, TOut> func)
             => delegate(TIn value, ReactiveCollectorToken collectorToken)
             {
+                Debug.Assert( collectorToken._collector != null );
+                
                 using var tk = WithDefaultCollector(collectorToken._collector);
                 var result = func(value);
                 if ( result is IHasReactiveSideValues hasReactiveSideValues )
                 {
-                    collectorToken._collector.AddSideValues( hasReactiveSideValues.SideValues );
+                    collectorToken._collector!.AddSideValues( hasReactiveSideValues.SideValues );
                 }
                 return result;
             };
@@ -73,11 +72,13 @@ namespace Caravela.Reactive
         {
             return async delegate ( TIn value, ReactiveCollectorToken collectorToken, CancellationToken cancellationToken )
                       {
+                          Debug.Assert( collectorToken._collector != null );
+                          
                           using var tk = WithDefaultCollector( collectorToken._collector );
                           var result = await func( value, cancellationToken );
                           if ( result is IHasReactiveSideValues hasReactiveSideValues )
                           {
-                              collectorToken._collector.AddSideValues( hasReactiveSideValues.SideValues );
+                              collectorToken._collector!.AddSideValues( hasReactiveSideValues.SideValues );
                           }
                           return result;
                       };
@@ -126,9 +127,9 @@ namespace Caravela.Reactive
         /// </summary>
         public struct WithDefaultObserverToken : IDisposable
         {
-            private  IReactiveCollector _previousCollector;
+            private  IReactiveCollector? _previousCollector;
 
-            internal WithDefaultObserverToken(IReactiveCollector previousCollector)
+            internal WithDefaultObserverToken(IReactiveCollector? previousCollector)
             {
                 this._previousCollector = previousCollector;
             }

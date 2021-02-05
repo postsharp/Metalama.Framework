@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void Attributes()
         {
-            string code = @"
+            var code = @"
 using System;
 using Caravela.Framework.Project;
 

@@ -47,7 +47,7 @@ namespace Caravela.Reactive.Operators
             var builder = ImmutableDictionary.CreateBuilder<TItem, int>(_equalityComparer);
             foreach (var item in items)
             {
-                builder.TryGetValue(item, out int count);
+                builder.TryGetValue(item, out var count);
                 builder[item] = count + 1;
             }
 
@@ -80,7 +80,7 @@ namespace Caravela.Reactive.Operators
 
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<TItem>>.Source => this;
 
-        IReactiveSubscription IReactiveObservable<IReactiveCollectionObserver<TItem>>.AddObserver(
+        IReactiveSubscription? IReactiveObservable<IReactiveCollectionObserver<TItem>>.AddObserver(
             IReactiveCollectionObserver<TItem> observer)
         {
 
@@ -98,7 +98,7 @@ namespace Caravela.Reactive.Operators
         {
             var oldItems = this._items;
 
-            this._items.TryGetValue(item, out int count );
+            this._items.TryGetValue(item, out var count );
             this._items = this._items.SetItem(item, count + 1);
 
             if (count == 0)
@@ -126,7 +126,7 @@ namespace Caravela.Reactive.Operators
 
         internal bool AddRange(IEnumerable<TItem> items)
         {
-            bool hasChange = false;
+            var hasChange = false;
             foreach (var item in items)
             {
                 hasChange |= this.Add(item);
@@ -139,7 +139,7 @@ namespace Caravela.Reactive.Operators
         {
             var oldItems = this._items;
 
-            this._items.TryGetValue(item, out int count );
+            this._items.TryGetValue(item, out var count );
 
             if (count == 1)
             {

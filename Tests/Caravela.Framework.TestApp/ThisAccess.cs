@@ -1,6 +1,7 @@
 ﻿using Caravela.Framework.Aspects;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
+// ReSharper disable UnusedMember.Local
 
 namespace Caravela.Framework.TestApp
 {

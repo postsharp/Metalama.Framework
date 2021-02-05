@@ -4,7 +4,6 @@ using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,11 +35,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         
         private void AssertFieldType(string code, Type expectedType, string expected)
         {
-            IEnumerable<INamedType> allTypes = CreateCompilation(code).DeclaredTypes.GetValue();
-            IEnumerable<INamedType> nestedTypes = allTypes.Single().NestedTypes.GetValue();
-            INamedType innerType = nestedTypes.Single();
-            IEnumerable<IProperty> allProperties = innerType.Properties.GetValue();
-            string serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var allTypes = CreateCompilation(code).DeclaredTypes.GetValue();
+            var nestedTypes = allTypes.Single().NestedTypes.GetValue();
+            var innerType = nestedTypes.Single();
+            var allProperties = innerType.Properties.GetValue();
+            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
                     CaravelaType.Create(
                         allProperties.Single().Type))
                 .ToString();

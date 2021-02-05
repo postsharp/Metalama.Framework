@@ -57,7 +57,7 @@ namespace Caravela.Reactive.Implementation
         /// <param name="version">The version of the source when it was evaluated.</param>
         /// <typeparam name="T">An <see cref="IReactiveObservable{T}"/>.</typeparam>
         /// <exception cref="InvalidOperationException"></exception>
-        public void Add<T>(T source, int version)
+        public void Add<T>(T? source, int version)
             where T : IReactiveObservable<IReactiveObserver>
         {
             if (source == null)
@@ -67,7 +67,9 @@ namespace Caravela.Reactive.Implementation
 
 #if DEBUG
             if (this._parent == null)
+            {
                 throw new InvalidOperationException();
+            }
 #endif
 
             // Try to find an existing node.
@@ -126,7 +128,9 @@ namespace Caravela.Reactive.Implementation
         public bool IsDirty()
         {
             if (this._dependencies == null)
+            {
                 return false;
+            }
 
             // No lock is necessary for reading.
             for (var node = this._dependencies; node != null; node = node.Next)

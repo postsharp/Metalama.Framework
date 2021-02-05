@@ -2,7 +2,7 @@
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.TestApp
+namespace Caravela.Framework.TestApp.Aspects
 {
     public class SwallowExceptionsAspect : OverrideMethodAspect
     {

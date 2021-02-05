@@ -41,7 +41,7 @@ namespace Caravela.Reactive.Operators
     {
         public SelectManyImmutableOperator(
             IReactiveCollection<TSource> source, Func<TSource, IImmutableList<TResult>> collectionSelector)
-            : base(source, collectionSelector, (source, result) => result)
+            : base(source, collectionSelector, (_, result) => result)
         {
         }
 

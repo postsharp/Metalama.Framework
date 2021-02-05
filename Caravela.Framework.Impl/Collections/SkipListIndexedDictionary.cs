@@ -1,4 +1,4 @@
-﻿
+
 #region Using directives
 
 using System;
@@ -11,7 +11,6 @@ using System.Text;
 
 #endregion
 
-#pragma warning disable CA1034 // Nested types should not be visible
 
 namespace Caravela.Framework.Impl.Collections
 {
@@ -28,10 +27,9 @@ namespace Caravela.Framework.Impl.Collections
 
         private Node _head; // a reference to the head of the SkipList
         private const double _prob = 0.5; // the probability used in determining the heights of the SkipListNodes
-        private int _count;
         private readonly Random _random;
         private readonly IComparer<TKey> _comparer;
-        private ValueCollection _valueCollection;
+        private ValueCollection? _valueCollection;
 
         #endregion
 
@@ -90,7 +88,7 @@ namespace Caravela.Framework.Impl.Collections
         {
             // create a new head
             this._head = Node.CreateHead();
-            this._count = 0;
+            this.Count = 0;
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) => this.ContainsKey(item.Key);
@@ -107,6 +105,7 @@ namespace Caravela.Framework.Impl.Collections
         /// <returns>True if value is found in the SkipList; false otherwise.</returns>
         public bool ContainsKey(TKey value)
         {
+    
             var current = this._head;
 
             // first, determine the nodes that need to be updated at each level
@@ -114,7 +113,7 @@ namespace Caravela.Framework.Impl.Collections
             {
                 while (current.GetNeighbor(i) != null)
                 {
-                    var results = this._comparer.Compare(current.GetNeighbor(i)!.TargetNode.Key, value);
+                    var results = this._comparer.Compare(current.GetNeighbor(i)!.TargetNode.Key!, value);
                     if (results == 0)
                     {
                         return true; // we found the item
@@ -153,7 +152,7 @@ namespace Caravela.Framework.Impl.Collections
             var current = updates[0].Node;
 
             // see if a duplicate is being inserted
-            if (current.GetNeighbor(0) != null && this._comparer.Compare(current.GetNeighbor(0)!.TargetNode.Key, key) == 0)
+            if (current.GetNeighbor(0) != null && this._comparer.Compare(current.GetNeighbor(0)!.TargetNode.Key!, key) == 0)
             {
                 if (replace)
                 {
@@ -168,7 +167,7 @@ namespace Caravela.Framework.Impl.Collections
 
             // create a new node
             var newNode = new Node(key, value, this.ChooseRandomHeight(this._head.Height + 1));
-            this._count++;
+            this.Count++;
 
             // if the node's level is greater than the head's level, increase the head's level
             if (newNode.Height > this._head.Height)
@@ -215,6 +214,8 @@ namespace Caravela.Framework.Impl.Collections
             // There's a bug in Remove so let's try not to use it until necessary.
             throw new NotImplementedException();
             
+            #if FALSE
+            
             var updates = this.BuildUpdateTable(value, out _);
             var current = updates[0].Node.GetNeighbor(0);
 
@@ -259,18 +260,21 @@ namespace Caravela.Framework.Impl.Collections
             {
                 return false;
             }
+#endif
         }
 
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         public bool TryGetValue(TKey key, [NotNullWhen(true)]  out TValue? value)
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         {
             if (this.TryFindNode(key, out var node, out _))
             {
-                value = node.Value;
+                value = node.Value!;
                 return true;
             }
             else
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
         }
@@ -279,12 +283,12 @@ namespace Caravela.Framework.Impl.Collections
         {
             if (this.TryFindNode(key, out var node, out _, false))
             {
-                value = node.Value;
+                value = node.Value!;
                 return true;
             }
             else
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
         }
@@ -313,14 +317,14 @@ namespace Caravela.Framework.Impl.Collections
 
         public ICollection<TKey> Keys => throw new NotImplementedException();
 
-        public ValueCollection Values => this._valueCollection ?? (this._valueCollection = new ValueCollection( this ));
+        public ValueCollection Values => this._valueCollection ??= new ValueCollection( this );
 
         ICollection<TValue> IDictionary<TKey, TValue>.Values => throw new NotImplementedException();
 
         /// <summary>
         /// Returns the number of elements in the SkipList
         /// </summary>
-        public int Count => this._count;
+        public int Count { get; private set; }
 
         public bool IsReadOnly => false;
 
@@ -452,7 +456,7 @@ namespace Caravela.Framework.Impl.Collections
                 throw new ArithmeticException("index is greater than the length of array");
             }
 
-            if (array.Length - index <= this._count)
+            if (array.Length - index <= this.Count)
             {
                 throw new ArgumentException("insufficient space in array to store skip list starting at specified index");
             }
@@ -484,7 +488,7 @@ namespace Caravela.Framework.Impl.Collections
 
         public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key, bool returnsPrevious = false )
         {
-            if ( !this.TryFindNode( key, out var node, out var position, false ) )
+            if ( !this.TryFindNode( key, out var node, out _, false ) )
             {
                 yield break;
             }
@@ -517,7 +521,7 @@ namespace Caravela.Framework.Impl.Collections
             {
 
                 sb.Append("[ ");
-                sb.Append(current.ToString());
+                sb.Append(current);
                 sb.Append("];  ");
 
 
@@ -526,7 +530,7 @@ namespace Caravela.Framework.Impl.Collections
                     break;
                 }
 
-                current = current.GetNeighbor(0).TargetNode;
+                current = current.GetNeighbor(0)?.TargetNode;
             }
 
             return sb.ToString();
@@ -555,7 +559,7 @@ namespace Caravela.Framework.Impl.Collections
 
         public KeyValuePair<TKey,TValue>  GetAt(int index)
         {
-            if (index < 0 || index >= this._count )
+            if (index < 0 || index >= this.Count )
             {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
@@ -583,11 +587,17 @@ namespace Caravela.Framework.Impl.Collections
         /// </summary>
         private sealed class Node
         {
-            private Node()
+            private Node( NodeList neighbors )
             {
+                this.Neighbors = neighbors;
+                
+                // This constructor is used for the head node only, the Key and Value properties are
+                // never accessed for the head.
+                this.Key = default!;
+                this.Value = default!;
             }
 
-            public static Node CreateHead() => new Node { Neighbors = new NodeList(1) };
+            public static Node CreateHead() => new Node( new NodeList( 1 ) );
 
             public Node(TKey key, TValue value, int height)
             {
@@ -614,6 +624,8 @@ namespace Caravela.Framework.Impl.Collections
                 // Increase height by 1
                 this.Neighbors.IncrementHeight();
 
+            
+            /*
             /// <summary>
             /// Decreases the height of the SkipListNode by 1.
             /// </summary>
@@ -621,6 +633,7 @@ namespace Caravela.Framework.Impl.Collections
                 // Decrease height by 1
                 this.Neighbors.DecrementHeight();
 
+            */
 
             /// <summary>
             /// Returns the height of the SkipListNode
@@ -628,12 +641,12 @@ namespace Caravela.Framework.Impl.Collections
             public int Height => this.Neighbors.Count;
 
             /// <summary>
-            /// Provides ordinally-indexed access to the neighbors of the SkipListNode.
+            /// Provides indexed access to the neighbors of the SkipListNode.
             /// </summary>
             public void SetNeighbor(int index, NodeLink? value) => this.Neighbors[index] = value;
 
             /// <summary>
-            /// Provides ordinally-indexed access to the neighbors of the SkipListNode.
+            /// Provides indexed access to the neighbors of the SkipListNode.
             /// </summary>
             public NodeLink? GetNeighbor(int index) => this.Neighbors[index];
 
@@ -648,13 +661,16 @@ namespace Caravela.Framework.Impl.Collections
                     {
                         sb.Append(", ");
                     }
-                    if (this.GetNeighbor(i) == null)
+
+                    var neighbor = this.GetNeighbor(i);
+                    
+                    if (neighbor == null)
                     {
                         sb.Append("null");
                     }
                     else
                     {
-                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", this.GetNeighbor(i).TargetNode.Key, this.GetNeighbor(i).Width));
+                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", neighbor.TargetNode.Key, neighbor.Width));
                     }
                 }
                 sb.Append('}');
@@ -699,12 +715,14 @@ namespace Caravela.Framework.Impl.Collections
             public NodeList(int height)
             {
                 if ( height <= 0 )
+                {
                     throw new ArgumentOutOfRangeException( nameof(height) );
-                
+                }
+
                 // Add the specified number of items
                 for (var i = 0; i < height; i++)
                 {
-                    base.Add(null);
+                    this.Add(null);
                 }
             }
 
@@ -714,25 +732,32 @@ namespace Caravela.Framework.Impl.Collections
             /// </summary>
             internal void IncrementHeight() =>
                 // add a dummy entry
-                base.Add(null);
+                this.Add(null);
 
+            /*
             /// <summary>
             /// Decreases the size of the SkipListNodeList by one, removing the "top-most" SkipListNode.
             /// </summary>
             internal void DecrementHeight()
             {
-                if ( base.Count == 1 )
+                if ( this.Count == 1 )
+                {
                     throw new InvalidOperationException();
-                
-                base.RemoveAt( base.Count - 1 );
+                }
+
+                this.RemoveAt( this.Count - 1 );
             }
+            */
         }
 
         public class ValueCollection : IReadOnlyList<TValue>
         {
             private readonly SkipListIndexedDictionary<TKey, TValue> _parent;
 
-            public ValueCollection( SkipListIndexedDictionary<TKey, TValue> parent ) => this._parent = parent;
+            public ValueCollection( SkipListIndexedDictionary<TKey, TValue> parent )
+            {
+                this._parent = parent;
+            }
 
             public IEnumerator<TValue> GetEnumerator()
             {
@@ -748,13 +773,11 @@ namespace Caravela.Framework.Impl.Collections
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
        
-            public bool Contains( TValue item ) => throw new NotSupportedException();
-
+            
             public void CopyTo( TValue[] array, int arrayIndex ) => throw new NotImplementedException();
 
-            public bool Remove( TValue item ) => throw new NotImplementedException();
 
-            public int Count => this._parent._count;
+            public int Count => this._parent.Count;
 
        
             public TValue this[ int index ]

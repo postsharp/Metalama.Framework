@@ -10,8 +10,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         public void TestTimeSpan()
         {
             var serializer = new TimeSpanSerializer();
-            TimeSpan ts = TimeSpan.FromMinutes( 38 );
-            long ticks = 38 * TimeSpan.TicksPerMinute;
+            var ts = TimeSpan.FromMinutes( 38 );
+            var ticks = 38 * TimeSpan.TicksPerMinute;
             Assert.Equal("new System.TimeSpan(" + ticks.ToString() + "L)", serializer.Serialize(ts).ToString());
         }
 

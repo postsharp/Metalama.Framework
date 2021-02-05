@@ -20,28 +20,27 @@ namespace Caravela.Framework.DesignTime.Contracts
     public class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
         private const string _appDomainDataName = "Caravela.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
-        private static readonly IDesignTimeEntryPointManager _instance;
 
-        public static IDesignTimeEntryPointManager Instance => _instance;
+        public static IDesignTimeEntryPointManager Instance { get; private set; }
 
         static DesignTimeEntryPointManager()
         {
             // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
             // We're using a named AppDomain data slot for this. We have to synchronize access using a named semaphore.
                 
-            using Semaphore semaphore = new Semaphore( 1, 1, _appDomainDataName );
+            using var semaphore = new Semaphore( 1, 1, _appDomainDataName );
             try
             {
                 semaphore.WaitOne();
                 var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
                 if ( oldInstance != null )
                 {
-                    _instance = oldInstance;
+                    Instance = oldInstance;
                 }
                 else
                 {
-                    _instance = new DesignTimeEntryPointManager();
-                    AppDomain.CurrentDomain.SetData( _appDomainDataName, _instance );
+                    Instance = new DesignTimeEntryPointManager();
+                    AppDomain.CurrentDomain.SetData( _appDomainDataName, Instance );
 
                 }
 
@@ -205,6 +204,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// <summary>
         /// Gets the <see cref="ICompilerService"/> for a specific project.
         /// </summary>
+        /// <param name="entryPointManager"></param>
         /// <param name="project"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>

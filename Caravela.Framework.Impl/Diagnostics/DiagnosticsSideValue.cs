@@ -9,13 +9,13 @@ namespace Caravela.Framework.Impl.Diagnostics
 
     class DiagnosticsSideValue : IReactiveSideValue
     {
-        private DiagnosticsSideValue( IImmutableList<Diagnostic> diagnostics )
+        private DiagnosticsSideValue( IImmutableList<Diagnostic>? diagnostics )
         {
             this.Diagnostics = diagnostics ?? ImmutableList<Diagnostic>.Empty;
         }
 
-        public static DiagnosticsSideValue? Get( IReadOnlyList<Diagnostic> list ) => list == null || list.Count == 0 ? null : new DiagnosticsSideValue( list.ToImmutableList() );
-        public static DiagnosticsSideValue? Get( IImmutableList<Diagnostic> list ) => list == null || list.Count == 0 ? null : new DiagnosticsSideValue( list );
+        public static DiagnosticsSideValue? Get( IReadOnlyList<Diagnostic>? list ) => list == null || list.Count == 0 ? null : new DiagnosticsSideValue( list.ToImmutableList() );
+        public static DiagnosticsSideValue? Get( IImmutableList<Diagnostic>? list ) => list == null || list.Count == 0 ? null : new DiagnosticsSideValue( list );
 
 
         public IImmutableList<Diagnostic> Diagnostics { get; }
@@ -24,11 +24,11 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             if ( sideValue is DiagnosticsSideValue diagnosticsResult )
             {
-                if ( diagnosticsResult.Diagnostics == null || diagnosticsResult.Diagnostics.Count == 0)
+                if (  diagnosticsResult.Diagnostics.Count == 0)
                 {
                     combinedValue = this;
                 }
-                else if ( this.Diagnostics == null || this.Diagnostics.Count == 0 )
+                else if ( this.Diagnostics.Count == 0 )
                 {
                     combinedValue = diagnosticsResult;
                 }
