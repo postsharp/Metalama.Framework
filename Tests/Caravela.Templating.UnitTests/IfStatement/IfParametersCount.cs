@@ -1,5 +1,5 @@
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework.Templating;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -56,4 +56,3 @@ class TargetCode
         }
     }
 }
-

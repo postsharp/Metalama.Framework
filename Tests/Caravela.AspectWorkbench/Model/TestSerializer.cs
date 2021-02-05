@@ -1,18 +1,18 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Caravela.TestFramework.Templating;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.TestFramework.Templating;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using System.Text;
 
 namespace Caravela.AspectWorkbench.Model
 {
-    class TestSerializer
+    internal class TestSerializer
     {
         public async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {
@@ -60,11 +60,13 @@ namespace Caravela.AspectWorkbench.Model
             {
                 throw new ArgumentOutOfRangeException( nameof( filePath ) );
             }
+
             var parentDirectory2 = Path.GetDirectoryName( parentDirectory1 );
             if ( parentDirectory2 == null )
             {
                 throw new ArgumentOutOfRangeException( nameof( filePath ) );
             }
+
             var testCategorySourcePath = Path.Combine( parentDirectory2, $"{testCategoryName}Tests.cs" );
             if ( !File.Exists( testCategorySourcePath ) )
             {
@@ -92,8 +94,7 @@ namespace Caravela.AspectWorkbench.Model
         private static SyntaxNode GetField( IEnumerable<SyntaxNode> fields, string fieldName )
         {
             return fields.FirstOrDefault(
-                f => f.DescendantNodes().OfType<VariableDeclaratorSyntax>().Any( n => n.Identifier.Text.Equals( fieldName ) )
-            );
+                f => f.DescendantNodes().OfType<VariableDeclaratorSyntax>().Any( n => n.Identifier.Text.Equals( fieldName, StringComparison.Ordinal ) ) );
         }
 
         private static string? GetFieldValue( SyntaxNode fieldNode )
@@ -113,8 +114,7 @@ namespace Caravela.AspectWorkbench.Model
                 value != null ?
                     LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "@\"" + value.Replace( "\"", "\"\"" ) + "\"", value ) )
                     :
-                    LiteralExpression( SyntaxKind.NullLiteralExpression )
-            );
+                    LiteralExpression( SyntaxKind.NullLiteralExpression ) );
         }
     }
 }

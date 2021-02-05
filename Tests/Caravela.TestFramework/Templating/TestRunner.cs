@@ -22,7 +22,7 @@ namespace Caravela.TestFramework.Templating
     {
         public virtual async Task<TestResult> Run( TestInput testInput )
         {
-            
+
             var templateSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
             var targetSource = CommonSnippets.CaravelaUsings + testInput.TargetSource;
 
@@ -80,9 +80,10 @@ namespace Caravela.TestFramework.Templating
             var buildTimeDebugStream = new MemoryStream();
 
             var emitResult = finalCompilation.Emit(
-                buildTimeAssemblyStream, buildTimeDebugStream,
+                buildTimeAssemblyStream,
+                buildTimeDebugStream,
                 options: new EmitOptions(
-                    defaultSourceFileEncoding: Encoding.UTF8, 
+                    defaultSourceFileEncoding: Encoding.UTF8,
                     fallbackSourceFileEncoding: Encoding.UTF8 ) );
 
             if ( !emitResult.Success )
@@ -103,7 +104,7 @@ namespace Caravela.TestFramework.Templating
                 var aspectInstance = Activator.CreateInstance( aspectType )!;
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                Debug.Assert( templateMethod != null );
+                Debug.Assert( templateMethod != null, "Cannot find the template method." );
 
                 var targetType = compilationForInitialDiagnostics.Assembly.GetTypeByMetadataName( "TargetCode" )!;
                 var targetMethod = (IMethodSymbol) targetType.GetMembers().SingleOrDefault( m => m.Name == "Method" )!;

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Reactive;
 using Caravela.Reactive.Implementation;
 using Microsoft.CodeAnalysis;
@@ -9,16 +8,15 @@ using static System.Math;
 
 namespace Caravela.Framework.Impl.Reactive
 {
-    class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>
+    internal class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>
     {
-        const int _computePendingMarker = -1;
-        const int _cycleMarker = int.MaxValue;
+        private const int _computePendingMarker = -1;
+        private const int _cycleMarker = int.MaxValue;
 
         public ComputeInheritanceDepthOperator( IReactiveCollection<INamedType> source ) : base( source )
         {
         }
 
-      
         protected override ReactiveOperatorResult<IEnumerable<(INamedType type, int depth)>> EvaluateFunction( IEnumerable<INamedType> source )
         {
             var depthDictionary = new Dictionary<INamedType, int>( EqualityComparerFactory.GetEqualityComparer<INamedType>() );
@@ -35,9 +33,7 @@ namespace Caravela.Framework.Impl.Reactive
                         return _cycleMarker;
                     }
 
-
                     depthDictionary[type] = _computePendingMarker;
-
 
                     var baseDepth = -1;
 
@@ -48,19 +44,18 @@ namespace Caravela.Framework.Impl.Reactive
                     }
 
                     // Base types are processed before derived types.
-                    if ( type.BaseType != null)
+                    if ( type.BaseType != null )
                     {
-                        baseDepth = Max( baseDepth, ComputeDepth(  type.BaseType ) );
+                        baseDepth = Max( baseDepth, ComputeDepth( type.BaseType ) );
 
                         // We require nested types of the base type to be processed before derived types.
                         // This can cause cycles in computing the inheritance depth. The cycle could be addressed
                         // by taking an arbitrary decision and emitting a warning, however this interface does
                         // not support emitting warnings.
-                        foreach ( var nestedType in  type.BaseType.NestedTypes.GetValue() )
+                        foreach ( var nestedType in type.BaseType.NestedTypes.GetValue() )
                         {
                             baseDepth = Max( baseDepth, ComputeDepth( nestedType ) );
                         }
-
                     }
 
                     // Implemented interfaces are processed before their implementations.
@@ -72,13 +67,10 @@ namespace Caravela.Framework.Impl.Reactive
                     myDepth = baseDepth == _cycleMarker ? _cycleMarker : baseDepth + 1;
 
                     depthDictionary[type] = myDepth;
-
                 }
 
                 return myDepth;
-
             }
-
 
             // TODO: add dependencies to BaseType and ImplementedInterfaces. This is not necessary until we support really reactive sources.
 
@@ -93,14 +85,13 @@ namespace Caravela.Framework.Impl.Reactive
                     }
                     else
                     {
-                        // We have a cycle for this type, so we skip it. 
+                        // We have a cycle for this type, so we skip it.
                         // TODO: implement better handing for nesting/base cycles or change the ordering rules.
                     }
                 }
             }
 
-            return new(Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get(diagnostics)));
-
+            return new( Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get( diagnostics ) ) );
         }
 
         protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, INamedType item, in IncrementalUpdateToken updateToken )

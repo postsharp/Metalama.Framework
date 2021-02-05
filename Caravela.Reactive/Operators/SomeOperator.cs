@@ -11,74 +11,73 @@ namespace Caravela.Reactive.Operators
         private readonly Func<T, ReactiveCollectorToken, bool> _predicate;
         private readonly bool _orDefault;
 
-        public SomeOperator(IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>> source, Func<T, bool> predicate, bool orDefault) : base(source)
+        public SomeOperator( IReactiveSource<IEnumerable<T>, IReactiveCollectionObserver<T>> source, Func<T, bool> predicate, bool orDefault ) : base( source )
         {
-            this._predicate = ReactiveCollectorToken.WrapWithDefaultToken(predicate);
+            this._predicate = ReactiveCollectorToken.WrapWithDefaultToken( predicate );
             this._orDefault = orDefault;
         }
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            return this.Source.Observable.AddObserver(this);
+            return this.Source.Observable.AddObserver( this );
         }
 
-        protected override ReactiveOperatorResult<T> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<T> EvaluateFunction( IEnumerable<T> source )
         {
-            return this._orDefault 
-                ? source.FirstOrDefault(arg => this._predicate(arg, this.ObserverToken))
-                : source.First(arg => this._predicate(arg, this.ObserverToken));
-
+            return this._orDefault
+                ? source.FirstOrDefault( arg => this._predicate( arg, this.ObserverToken ) )
+                : source.First( arg => this._predicate( arg, this.ObserverToken ) );
         }
 
-        void IReactiveCollectionObserver<T>.OnItemAdded(IReactiveSubscription subscription, T item, int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemAdded( IReactiveSubscription subscription, T item, int newVersion )
         {
-            if (!this.ShouldProcessIncrementalChange)
+            if ( !this.ShouldProcessIncrementalChange )
             {
                 return;
             }
 
             var oldResult = this.CachedValue;
-            
-            if (_equalityComparer.Equals(oldResult, default) && this._predicate(item, this.ObserverToken))
+
+            if ( _equalityComparer.Equals( oldResult, default ) && this._predicate( item, this.ObserverToken ) )
             {
-                using var token = this.GetIncrementalUpdateToken(newVersion);
+                using var token = this.GetIncrementalUpdateToken( newVersion );
 
-                token.SetValue(item);
+                token.SetValue( item );
 
-                foreach (var observer in this.Observers )
+                foreach ( var observer in this.Observers )
                 {
-                    observer.Observer.OnValueChanged(observer.Subscription, oldResult, item, token.NextVersion);
+                    observer.Observer.OnValueChanged( observer.Subscription, oldResult, item, token.NextVersion );
                 }
             }
         }
 
-        void IReactiveCollectionObserver<T>.OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemRemoved( IReactiveSubscription subscription, T item, int newVersion )
         {
-            if (!this.ShouldProcessIncrementalChange)
+            if ( !this.ShouldProcessIncrementalChange )
             {
                 return;
             }
 
             var oldResult = this.CachedValue;
-            
-            if (_equalityComparer.Equals(oldResult, item) && this._predicate(item, this.ObserverToken))
+
+            if ( _equalityComparer.Equals( oldResult, item ) && this._predicate( item, this.ObserverToken ) )
             {
                 this.OnObserverBreakingChange();
             }
         }
 
-        void IReactiveCollectionObserver<T>.OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem, int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemReplaced( IReactiveSubscription subscription, T oldItem, T newItem, int newVersion )
         {
-            
-            if (!this.ShouldProcessIncrementalChange)
+
+            if ( !this.ShouldProcessIncrementalChange )
             {
                 return;
             }
 
             var oldResult = this.CachedValue;
-            
-            if (_equalityComparer.Equals(oldResult, oldItem)
-                && this._predicate(oldItem, this.ObserverToken))
+
+            if ( _equalityComparer.Equals( oldResult, oldItem )
+                && this._predicate( oldItem, this.ObserverToken ) )
             {
                 this.OnObserverBreakingChange();
             }

@@ -1,16 +1,16 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Reactive;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    class TemplateContextImpl : ITemplateContext
+    internal class TemplateContextImpl : ITemplateContext
     {
         public IMethod Method { get; }
 
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Compilation = compilation;
         }
 
-        class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
+        private class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
         {
             private readonly bool _allowExpression;
 
@@ -45,14 +45,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 }
 
                 // TODO: diagnostic
-                throw new InvalidOperationException("Can't directly access 'this' on a static method.");
+                throw new InvalidOperationException( "Can't directly access 'this' on a static method." );
             }
 
             public ExpressionSyntax CreateMemberAccessExpression( string member ) => IdentifierName( Identifier( member ) );
         }
     }
 
-    class AdviceParameterList : IAdviceParameterList
+    internal class AdviceParameterList : IAdviceParameterList
     {
         private readonly AdviceParameter[] _parameters;
 
@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
-    class AdviceParameter : IAdviceParameter
+    internal class AdviceParameter : IAdviceParameter
     {
         private readonly IParameter _parameter;
 
@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
     }
 
-    class DynamicMetaMember : IDynamicMetaMember
+    internal class DynamicMetaMember : IDynamicMetaMember
     {
         private readonly ExpressionSyntax _expression;
 

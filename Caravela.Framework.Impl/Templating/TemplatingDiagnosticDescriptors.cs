@@ -2,7 +2,7 @@
 
 namespace Caravela.Framework.Impl.Templating
 {
-    static class TemplatingDiagnosticDescriptors
+    internal static class TemplatingDiagnosticDescriptors
     {
         // Templating errors (alex).
         // Reserved range 100-199

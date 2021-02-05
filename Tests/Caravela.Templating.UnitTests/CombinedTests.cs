@@ -10,7 +10,7 @@ namespace Caravela.Templating.UnitTests
         public CombinedTests( ITestOutputHelper logger )
         {
             this._logger = logger;
-            this._testRunner = new UnitTestRunner(logger );
+            this._testRunner = new UnitTestRunner( logger );
         }
     }
 }

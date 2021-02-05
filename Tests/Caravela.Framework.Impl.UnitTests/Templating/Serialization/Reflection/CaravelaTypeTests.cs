@@ -1,14 +1,14 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
-    public class CaravelaTypeTests: ReflectionTestBase
-    {  
+    public class CaravelaTypeTests : ReflectionTestBase
+    {
         [Fact]
         public void TestType()
         {
@@ -16,11 +16,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
 
-            TestExpression<Type>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target", info.Name );
-            } );
+            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Target", info.Name ) );
         }
+
         [Fact]
         public void TestGenericType()
         {
@@ -45,7 +43,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<Type>( code, serialized, ( info ) =>
             {
                 Assert.Equal( "System.Int32[]", info.FullName );
-                Assert.Equal( typeof(int[]), info );
+                Assert.Equal( typeof( int[] ), info );
             } );
         }
 
@@ -67,20 +65,21 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
         private string SerializeType( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
             var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
             return actual;
         }
+
         private string SerializeTypeOfProperty( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" ).Type;
-            var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single )  ).ToString();
+            var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
             return actual;
         }
 
-        public CaravelaTypeTests(ITestOutputHelper helper) : base(helper)
+        public CaravelaTypeTests( ITestOutputHelper helper ) : base( helper )
         {
         }
     }

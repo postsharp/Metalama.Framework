@@ -1,14 +1,14 @@
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
     internal class EnumSerializer
     {
-        private static readonly Type[] _unsignedTypes = new[] {typeof(ushort), typeof(uint), typeof(ulong), typeof(byte)};
+        private static readonly Type[] _unsignedTypes = new[] { typeof( ushort ), typeof( uint ), typeof( ulong ), typeof( byte ) };
 
         public ExpressionSyntax Serialize( Enum o )
         {

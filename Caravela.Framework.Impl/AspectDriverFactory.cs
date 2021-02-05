@@ -6,7 +6,7 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectDriverFactory
+    internal class AspectDriverFactory
     {
         private readonly ICompilation _compilation;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;

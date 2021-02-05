@@ -2,14 +2,14 @@ namespace Caravela.Reactive
 {
     /// <summary>
     /// Represents a versioned reactive value: a <see cref="Value"/>, <see cref="SideValues"/> and a <see cref="Version"/>
-    /// number. 
+    /// number.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public readonly struct ReactiveVersionedValue<T> : IReactiveVersionedValue<T>
     {
 
         /// <summary>
-        /// Initializes a new <see cref="ReactiveVersionedValue{T}"/>.
+        /// Initializes a new instance of the <see cref="ReactiveVersionedValue{T}"/> struct.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <param name="version">The version number.</param>
@@ -22,8 +22,9 @@ namespace Caravela.Reactive
         }
 
         public int Version { get; }
-        public T Value { get; }
-        public ReactiveSideValues SideValues { get; }
 
+        public T Value { get; }
+
+        public ReactiveSideValues SideValues { get; }
     }
 }

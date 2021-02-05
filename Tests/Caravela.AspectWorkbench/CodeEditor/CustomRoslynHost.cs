@@ -1,11 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using RoslynPad.Roslyn;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using RoslynPad.Roslyn;
 
 namespace Caravela.AspectWorkbench.CodeEditor
 {
@@ -13,11 +13,9 @@ namespace Caravela.AspectWorkbench.CodeEditor
     {
         public static CustomRoslynHost Create()
         {
-            var host = new CustomRoslynHost( 
-                disabledDiagnostics: ImmutableArray.Create( 
-                    "IDE0051" // Private member is unused.
-                              )
-                , additionalAssemblies: new[]
+            var host = new CustomRoslynHost(
+                disabledDiagnostics: ImmutableArray.Create( "IDE0051" /* Private member is unused. */ ),
+                additionalAssemblies: new[]
                 {
                     Assembly.Load( "RoslynPad.Roslyn.Windows" ),
                     Assembly.Load( "RoslynPad.Editor.Windows" ),
@@ -36,19 +34,17 @@ namespace Caravela.AspectWorkbench.CodeEditor
                         imports: new[]
                         {
                             "Caravela.Framework.Aspects",
-                            "Caravela.Framework.Aspects.TemplateContext"
-                        }
-                    )
-                
-            );
+                            "Caravela.Framework.Aspects.TemplateContext",
+                        } ) );
 
             return host;
         }
 
-        public CustomRoslynHost( ImmutableArray<string>? disabledDiagnostics = default,
-            IEnumerable<Assembly>? additionalAssemblies = null, RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
+        public CustomRoslynHost(
+            ImmutableArray<string>? disabledDiagnostics = default,
+            IEnumerable<Assembly>? additionalAssemblies = null,
+            RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
         {
-            
         }
 
         protected override Project CreateProject( Solution solution, DocumentCreationArgs args, CompilationOptions compilationOptions, Project? previousProject = null )

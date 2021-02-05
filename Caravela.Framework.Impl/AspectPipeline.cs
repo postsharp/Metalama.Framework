@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
@@ -11,21 +12,20 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.IO;
 
 namespace Caravela.Framework.Impl
 {
     [Transformer]
-    sealed class AspectPipeline : ISourceTransformer
+    internal sealed class AspectPipeline : ISourceTransformer
     {
-        public Compilation Execute(TransformerContext context)
+        public Compilation Execute( TransformerContext context )
         {
             bool GetFlag( string flagName ) =>
                 context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
                 bool.TryParse( flagString, out var flagValue ) &&
                 flagValue;
 
-            if ( GetFlag("DebugCaravela") )
+            if ( GetFlag( "DebugCaravela" ) )
             {
                 Debugger.Launch();
             }
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                foreach (var resource in aspectCompilation.Resources)
+                foreach ( var resource in aspectCompilation.Resources )
                 {
                     context.ManifestResources.Add( resource );
                 }
@@ -88,11 +88,11 @@ namespace Caravela.Framework.Impl
 
                 return resultCompilation;
             }
-            catch (CaravelaException exception)
+            catch ( CaravelaException exception )
             {
                 context.ReportDiagnostic( exception.Diagnostic );
 
-                if (exception is DiagnosticsException diagnosticsException)
+                if ( exception is DiagnosticsException diagnosticsException )
                 {
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
                     {
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl
 
                 return context.Compilation;
             }
-            catch (Exception exception)
+            catch ( Exception exception )
             {
                 var guid = Guid.NewGuid();
                 var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
@@ -115,14 +115,14 @@ namespace Caravela.Framework.Impl
                     // ignored
                 }
 
-                Console.WriteLine(exception.ToString());
-                
+                Console.WriteLine( exception.ToString() );
+
                 context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString(), path ) );
                 return context.Compilation;
             }
         }
 
-        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
+        private static IReactiveCollection<INamedType> GetAspectTypes( SourceCompilation compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
@@ -142,12 +142,11 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-
-        record AspectPartData( AspectType AspectType, AspectPart AspectPart );
+        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
 
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
         {
-            switch (groupKey)
+            switch ( groupKey )
             {
                 case IAspectWeaver weaver:
 
@@ -157,7 +156,7 @@ namespace Caravela.Framework.Impl
 
                 case nameof( AspectDriver ):
 
-                    return new AdviceWeaverStage(partsData.Select(pd => pd.AspectPart));
+                    return new AdviceWeaverStage( partsData.Select( pd => pd.AspectPart ) );
 
                 default:
 
@@ -165,7 +164,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        class AspectPartDataComparer : IComparer<AspectPartData>
+        private class AspectPartDataComparer : IComparer<AspectPartData>
         {
             private readonly AspectPartComparer _partComparer;
 

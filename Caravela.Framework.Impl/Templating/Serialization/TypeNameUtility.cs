@@ -7,12 +7,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     /// <summary>
     /// Has <see cref="ToCSharpQualifiedName"/>.
     /// </summary>
-    static class TypeNameUtility
+    internal static class TypeNameUtility
     {
         // TODO Multidimensional arrays, such as "int[,]", are not well-supported.
-        
+
         /// <summary>
-        /// Returns the fully-qualified name of a type as it would be written in C#, rather than the CLR name. Supports nested types and generics. 
+        /// Returns the fully-qualified name of a type as it would be written in C#, rather than the CLR name. Supports nested types and generics.
         /// </summary>
         /// <param name="type">A type, such as "int".</param>
         /// <returns>The type's fully qualified name, such as "System.Int32".</returns>
@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         }
 
         /// <summary>
-        ///     Gets the CS Type Code for a type
+        ///     Gets the CS Type Code for a type.
         /// </summary>
         /// <param name="type">The type.</param>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">type</exception>
+        /// <exception cref="System.ArgumentNullException">type.</exception>
         private static string GetCSTypeName( this Type type )
         {
             // https://stackoverflow.com/a/45718771/1580088
@@ -96,7 +96,6 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 {
                     return type.Name;
                 }
-
             }
         }
 
@@ -142,6 +141,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             {
                 genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '`' ) );
                 var genericArgs = string.Join( ", ", arguments.Select( a => a.ToGenericTypeString() ).ToArray() );
+
                 //Recursive
                 genericTypeName = genericTypeName + "<" + genericArgs + ">";
                 if ( isArray )
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
             if ( genericTypeName.IndexOf( '[' ) >= 0 && genericTypeName.IndexOf( ']' ) != genericTypeName.IndexOf( '[' ) + 1 )
             {
-                genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '[' ) ); //For a non generic class nested in a generic class we will still have the type parameters at the end 
+                genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '[' ) ); //For a non generic class nested in a generic class we will still have the type parameters at the end
             }
 
             return genericTypeName;

@@ -1,6 +1,6 @@
 namespace Caravela.Framework.DesignTime.Contracts
 {
-    // The type identifier cannot be modified even during refactoring. 
+    // The type identifier cannot be modified even during refactoring.
     public enum TextSpanClassification
     {
         // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
@@ -39,6 +39,6 @@ namespace Caravela.Framework.DesignTime.Contracts
         /// <summary>
         /// A text span has several categories (not implemented).
         /// </summary>
-        Conflict 
+        Conflict
     }
 }

@@ -1,21 +1,20 @@
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Collections;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
+using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    
+
     /// <summary>
-    /// A set of <see cref="TextSpan"/>. 
+    /// A set of <see cref="TextSpan"/>.
     /// </summary>
-    sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
+    internal sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
-        
-        
+
         private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new SkipListIndexedDictionary<int, MarkedTextSpan>();
 
         public ClassifiedTextSpanCollection()
@@ -30,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="span"></param>
         internal void Add( in TextSpan span, TextSpanClassification classification )
         {
-            for ( var i = 0; ;i++ )
+            for ( var i = 0; ; i++ )
             {
                 if ( i > 4 )
                 {
@@ -40,13 +39,13 @@ namespace Caravela.Framework.Impl.Templating
                 if ( this._spans.TryGetClosestValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
                 {
                     // Check if we have an exact span. If not, we will partition.
-                    if ( previousStartSpan.Span.Equals( span )  )
+                    if ( previousStartSpan.Span.Equals( span ) )
                     {
                         // We have an exact span, so no need to partition.
-                        
+
                         if ( previousStartSpan.Classification < classification )
                         {
-                            // The new span contains the old one and is stronger, so we replace the new one 
+                            // The new span contains the old one and is stronger, so we replace the new one
                             // by the old one.
                             this._spans.Set( span.Start, new MarkedTextSpan( span, classification ) );
                         }
@@ -55,7 +54,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
 
                     // If the new span is contained in a span of weaker category, there is nothing to do.
-                    if ( previousStartSpan.Classification > classification && previousStartSpan.Span.Contains(span))
+                    if ( previousStartSpan.Classification > classification && previousStartSpan.Span.Contains( span ) )
                     {
                         return;
                     }
@@ -70,7 +69,6 @@ namespace Caravela.Framework.Impl.Templating
                             var (a, b) = Split( previousEndSpan, span.End );
                             this._spans.Set( a.Span.Start, a );
                             this._spans.Add( b.Span.Start, b );
-
                         }
                         else
                         {
@@ -83,7 +81,7 @@ namespace Caravela.Framework.Impl.Templating
                                 {
                                     break;
                                 }
-                                
+
                                 if ( pair.Value.Classification < classification )
                                 {
                                     // Replace the category of this node.
@@ -113,8 +111,6 @@ namespace Caravela.Framework.Impl.Templating
                             this._spans.Add( b.Span.Start, b );
                         }
                     }
-
-                    
                 }
                 else if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.IntersectsWith( span ) )
                 {
@@ -123,34 +119,31 @@ namespace Caravela.Framework.Impl.Templating
                     var (a, b) = Split( previousStartSpan, span.Start );
                     this._spans.Set( a.Span.Start, a );
                     this._spans.Add( b.Span.Start, b );
-
                 }
                 else
                 {
                     // We cannot get here because we start with a whole partition.
                     throw new AssertionFailedException();
                 }
-
-               
             }
         }
 
-        private static ( MarkedTextSpan, MarkedTextSpan ) Split( in MarkedTextSpan textSpan, int splitPosition )
+        private static (MarkedTextSpan, MarkedTextSpan) Split( in MarkedTextSpan textSpan, int splitPosition )
         {
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
             {
-                throw new ArgumentException( nameof(splitPosition) );
+                throw new ArgumentException( nameof( splitPosition ) );
             }
 
-            return (new MarkedTextSpan( TextSpan.FromBounds(  textSpan.Span.Start, splitPosition ), textSpan.Classification ),
-                new MarkedTextSpan( TextSpan.FromBounds(  splitPosition, textSpan.Span.End ),
+            return (new MarkedTextSpan( TextSpan.FromBounds( textSpan.Span.Start, splitPosition ), textSpan.Classification ),
+                new MarkedTextSpan(
+                    TextSpan.FromBounds( splitPosition, textSpan.Span.End ),
                     textSpan.Classification ));
         }
 
-
         public TextSpanClassification GetCategory( in TextSpan textSpan )
         {
-            if ( this._spans.TryGetClosestValue( textSpan.Start, out var markedTextSpan ))
+            if ( this._spans.TryGetClosestValue( textSpan.Start, out var markedTextSpan ) )
             {
                 if ( markedTextSpan.Span.Contains( textSpan ) )
                 {
@@ -160,7 +153,6 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return TextSpanClassification.Conflict;
                 }
-                
             }
             else
             {
@@ -169,7 +161,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan)
+        public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )
         {
             var previousSpan = new ClassifiedTextSpan();
 
@@ -201,17 +193,13 @@ namespace Caravela.Framework.Impl.Templating
                         yield return previousSpan;
                     }
 
-
                     yield break;
                 }
             }
-                
         }
-
 
         public IEnumerator<ClassifiedTextSpan> GetEnumerator()
             => this.GetClassifiedSpans( new TextSpan( 0, int.MaxValue ) ).GetEnumerator();
-    
 
         public override string ToString()
         {
@@ -227,7 +215,8 @@ namespace Caravela.Framework.Impl.Templating
 
                 stringBuilder.Append( pair.Value.ToString() );
             }
-            stringBuilder.Append( " } ");
+
+            stringBuilder.Append( " } " );
 
             return stringBuilder.ToString();
         }
@@ -240,6 +229,7 @@ namespace Caravela.Framework.Impl.Templating
     public readonly struct MarkedTextSpan
     {
         public TextSpan Span { get; }
+
         public TextSpanClassification Classification { get; }
 
         internal MarkedTextSpan( in TextSpan span, TextSpanClassification classification )
@@ -250,6 +240,4 @@ namespace Caravela.Framework.Impl.Templating
 
         public override string ToString() => this.Span.ToString().Replace( "2147483647", "inf" ) + "=>" + this.Classification;
     }
-
-    
 }

@@ -30,7 +30,4 @@ namespace Caravela.Reactive.UnitTests
             Assert.Equal( 3, some.GetValue() );
         }
     }
-
-
 }
-

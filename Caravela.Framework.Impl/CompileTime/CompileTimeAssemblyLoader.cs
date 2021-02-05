@@ -1,16 +1,16 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    sealed class CompileTimeAssemblyLoader : IDisposable
+    internal sealed class CompileTimeAssemblyLoader : IDisposable
     {
         private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
@@ -57,10 +57,10 @@ namespace Caravela.Framework.Impl.CompileTime
             return this.LoadCompileTimeAssembly( symbol );
         }
 
-        public object CreateAttributeInstance ( Code.IAttribute attribute )
+        public object CreateAttributeInstance( Code.IAttribute attribute )
         {
             // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
-            
+
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var constructor = this.GetCompileTimeConstructor( constructorSymbol );
 
@@ -75,12 +75,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var type = constructor.DeclaringType!;
 
-            foreach (var (name, value) in attribute.NamedArguments)
+            foreach ( var (name, value) in attribute.NamedArguments )
             {
                 PropertyInfo? property;
                 FieldInfo? field;
-                
-                if ( (property = type.GetProperty( name ))  != null )
+
+                if ( (property = type.GetProperty( name )) != null )
                 {
                     property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
                 }
@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private Type? GetCompileTimeType( ITypeSymbol typeSymbol )
         {
-            if (typeSymbol is IArrayTypeSymbol arrayType)
+            if ( typeSymbol is IArrayTypeSymbol arrayType )
             {
                 var elementType = this.GetCompileTimeType( arrayType.ElementType );
 
@@ -138,7 +138,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return null;
             }
-            
+
             switch ( roslynArgument )
             {
                 case Code.IType type:
@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     return translatedType;
-                
+
                 case IReadOnlyList<object?> list:
                     if ( !targetType.IsArray )
                     {
@@ -169,9 +169,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     return array;
-                
+
                 default:
-                    if (targetType.IsEnum)
+                    if ( targetType.IsEnum )
                     {
                         return Enum.ToObject( targetType, roslynArgument );
                     }
@@ -227,6 +227,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         sb.Insert( 0, '.' );
                     }
                 }
+
                 first = false;
 
                 //sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));

@@ -1,10 +1,6 @@
-#region
-
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
-#endregion
 
 namespace Caravela.Reactive.Implementation
 {
@@ -21,9 +17,6 @@ namespace Caravela.Reactive.Implementation
         {
         }
 
-        
-
-
         async void IReactiveCollectionObserver<TSource>.OnItemAdded( IReactiveSubscription subscription, TSource item, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
@@ -36,8 +29,7 @@ namespace Caravela.Reactive.Implementation
             await this.OnSourceItemAddedAsync( subscription, item, token, default );
         }
 
-        async void IReactiveCollectionObserver<TSource>.OnItemRemoved( IReactiveSubscription subscription, TSource item,
-            int newVersion )
+        async void IReactiveCollectionObserver<TSource>.OnItemRemoved( IReactiveSubscription subscription, TSource item, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
             {
@@ -49,8 +41,7 @@ namespace Caravela.Reactive.Implementation
             await this.OnSourceItemRemovedAsync( subscription, item, token, default );
         }
 
-        async void IReactiveCollectionObserver<TSource>.OnItemReplaced( IReactiveSubscription subscription, TSource oldItem,
-            TSource newItem, int newVersion )
+        async void IReactiveCollectionObserver<TSource>.OnItemReplaced( IReactiveSubscription subscription, TSource oldItem, TSource newItem, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
             {
@@ -67,14 +58,10 @@ namespace Caravela.Reactive.Implementation
             return this.Source.Observable.AddObserver( this );
         }
 
+        protected abstract ValueTask OnSourceItemAddedAsync( IReactiveSubscription sourceSubscription, TSource item, IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
 
-        protected abstract ValueTask OnSourceItemAddedAsync( IReactiveSubscription sourceSubscription, TSource item,
-            IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
+        protected abstract ValueTask OnSourceItemRemovedAsync( IReactiveSubscription sourceSubscription, TSource item, IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
 
-        protected abstract ValueTask OnSourceItemRemovedAsync( IReactiveSubscription sourceSubscription, TSource item,
-            IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
-
-        protected abstract ValueTask OnSourceItemReplacedAsync( IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
+        protected abstract ValueTask OnSourceItemReplacedAsync( IReactiveSubscription sourceSubscription, TSource oldItem, TSource newItem, IncrementalUpdateToken updateToken, CancellationToken cancellationToken );
     }
 }

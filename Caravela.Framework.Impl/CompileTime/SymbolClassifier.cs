@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    class SymbolClassifier : ISymbolClassifier
+    internal class SymbolClassifier : ISymbolClassifier
     {
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
@@ -154,7 +154,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                     }
                 }
-
             }
 
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );

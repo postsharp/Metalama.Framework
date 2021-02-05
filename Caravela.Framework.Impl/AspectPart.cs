@@ -5,6 +5,7 @@ namespace Caravela.Framework.Impl
     internal class AspectPart
     {
         public AspectType AspectType { get; }
+
         public string? Name { get; }
 
         public AspectPart( AspectType aspectType, string? name )

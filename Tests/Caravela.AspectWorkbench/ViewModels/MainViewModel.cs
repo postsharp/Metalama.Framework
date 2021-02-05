@@ -1,15 +1,15 @@
-﻿using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Formatting;
-using PostSharp.Patterns.Model;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
+using Caravela.AspectWorkbench.Model;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework.Templating;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Formatting;
+using PostSharp.Patterns.Model;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
@@ -28,7 +28,6 @@ namespace Caravela.AspectWorkbench.ViewModels
             this._testSerializer = new TestSerializer();
         }
 
-        
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
         public string? TemplateText { get; set; }
@@ -48,7 +47,6 @@ namespace Caravela.AspectWorkbench.ViewModels
         public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
 
         private string? CurrentPath { get; set; }
-
 
         public async Task RunTestAsync()
         {
@@ -135,8 +133,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         {
             this._currentTest = await this._testSerializer.LoadFromFileAsync( filePath );
 
-            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." ); 
-            
+            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." );
 
             this.TemplateText = input.TemplateSource;
             this.TargetText = input.TargetSource;
@@ -149,7 +146,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task SaveTestAsync( string? filePath )
         {
-            filePath ??= this.CurrentPath ?? throw new ArgumentNullException(nameof(filePath));
+            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof( filePath ) );
 
             if ( string.IsNullOrEmpty( filePath ) )
             {
@@ -166,7 +163,6 @@ namespace Caravela.AspectWorkbench.ViewModels
                 throw new InvalidOperationException( $"The {nameof( this.TargetText )} property cannot be null." );
             }
 
-
             if ( this._currentTest == null )
             {
                 this._currentTest = new TemplateTest();
@@ -175,7 +171,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             this._currentTest.Input = new TestInput( this.TemplateText, this.TargetText );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
-            if ( !string.Equals( filePath, this.CurrentPath ) )
+            if ( !string.Equals( filePath, this.CurrentPath, StringComparison.Ordinal ) )
             {
                 this._currentTest.OriginalSyntaxRoot = null;
             }

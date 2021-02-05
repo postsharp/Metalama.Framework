@@ -1,10 +1,10 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class DynamicType : IDynamicType, ITypeInternal
+    internal class DynamicType : IDynamicType, ITypeInternal
     {
         private readonly IDynamicTypeSymbol _typeSymbol;
 

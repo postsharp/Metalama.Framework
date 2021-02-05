@@ -1,10 +1,10 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class PointerType : IPointerType, ITypeInternal
+    internal class PointerType : IPointerType, ITypeInternal
     {
         private readonly IPointerTypeSymbol _typeSymbol;
 

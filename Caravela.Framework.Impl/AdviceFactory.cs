@@ -1,22 +1,23 @@
-﻿using Caravela.Framework.Advices;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-    class AdviceFactory : IAdviceFactory
+    internal class AdviceFactory : IAdviceFactory
     {
         private readonly ICompilation _compilation;
         private readonly INamedType _aspectType;
         private readonly IAspect _aspect;
 
         private readonly List<AdviceInstance> _advices = new();
+
         internal IReadOnlyList<AdviceInstance> Advices => this._advices;
 
         public AdviceFactory( ICompilation compilation, INamedType aspectType, IAspect aspect )

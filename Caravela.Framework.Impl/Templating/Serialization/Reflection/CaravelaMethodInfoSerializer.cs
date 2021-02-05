@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             this._typeSerializer = typeSerializer;
         }
-        
+
         public override ExpressionSyntax Serialize( CaravelaMethodInfo o )
         {
             return CreateMethodBase( this._typeSerializer, o );
@@ -26,10 +26,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             methodSymbol = methodSymbol.OriginalDefinition;
             var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
-            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Compiler.Intrinsics.GetRuntimeMethodHandle), documentationId );
+            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof( Compiler.Intrinsics.GetRuntimeMethodHandle ), documentationId );
             if ( declaringGenericTypeSymbol != null )
             {
-                var typeHandle = CreateTypeHandleExpression(typeSerializer, declaringGenericTypeSymbol );
+                var typeHandle = CreateTypeHandleExpression( typeSerializer, declaringGenericTypeSymbol );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -58,18 +58,18 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                     IdentifierName( "Reflection" ) ),
                                 IdentifierName( "MethodBase" ) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( Argument( methodToken ) ) 
+                    .AddArgumentListArguments( Argument( methodToken ) )
                     .NormalizeWhitespace();
             }
         }
 
-        private static ExpressionSyntax CreateTypeHandleExpression(CaravelaTypeSerializer typeSerializer, ITypeSymbol type )
+        private static ExpressionSyntax CreateTypeHandleExpression( CaravelaTypeSerializer typeSerializer, ITypeSymbol type )
         {
-            var typeExpression = typeSerializer.CreateTypeCreationExpressionFromSymbolRecursive(type);
+            var typeExpression = typeSerializer.CreateTypeCreationExpressionFromSymbolRecursive( type );
             ExpressionSyntax typeHandle = MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 typeExpression,
-                IdentifierName("TypeHandle"));
+                IdentifierName( "TypeHandle" ) );
             return typeHandle;
         }
     }

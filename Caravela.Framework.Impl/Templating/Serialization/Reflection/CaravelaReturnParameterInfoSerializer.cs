@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaReturnParameterInfoSerializer : TypedObjectSerializer<CaravelaReturnParameterInfo>
@@ -19,11 +20,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                         CastExpression(
                             QualifiedName(
                                 QualifiedName(
-                                    IdentifierName("System"),
-                                    IdentifierName("Reflection")),
-                                IdentifierName("MethodInfo")),
-                            methodBaseExpression)),
-                    IdentifierName("ReturnParameter"))
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "MethodInfo" ) ),
+                            methodBaseExpression ) ),
+                    IdentifierName( "ReturnParameter" ) )
                 .NormalizeWhitespace();
         }
     }

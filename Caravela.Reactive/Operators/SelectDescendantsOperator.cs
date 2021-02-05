@@ -1,11 +1,7 @@
-#region
-
-using Caravela.Reactive.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-
-#endregion
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
@@ -19,181 +15,177 @@ namespace Caravela.Reactive.Operators
             _subscriptions =
                 ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>.Empty;
 
-        public SelectDescendantsOperator(IReactiveCollection<T> source,
-            Func<T, IReactiveCollection<T>> getChildrenFunc) : base(source)
+        public SelectDescendantsOperator(
+            IReactiveCollection<T> source,
+            Func<T, IReactiveCollection<T>> getChildrenFunc ) : base( source )
         {
-            this._getChildrenFunc = ReactiveCollectorToken.WrapWithDefaultToken(getChildrenFunc);
+            this._getChildrenFunc = ReactiveCollectorToken.WrapWithDefaultToken( getChildrenFunc );
         }
 
         public override bool IsMaterialized => true;
 
-        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction( IEnumerable<T> source )
         {
             var builder = ImmutableDictionary.CreateBuilder<T, int>();
 
-            void Iterate(T item)
+            void Iterate( T item )
             {
-                builder.TryGetValue(item, out var count );
+                builder.TryGetValue( item, out var count );
                 builder[item] = count + 1;
 
-                var recursiveSource = this._getChildrenFunc(item, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc( item, this.ObserverToken );
 
-                if (this.Follow(recursiveSource))
+                if ( this.Follow( recursiveSource ) )
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
+                    foreach ( var recursiveItem in recursiveSource.GetValue( this.ObserverToken ) )
                     {
-                        Iterate(recursiveItem);
+                        Iterate( recursiveItem );
                     }
                 }
             }
 
-            foreach (var item in source)
+            foreach ( var item in source )
             {
-                Iterate(item);
+                Iterate( item );
             }
 
             this._dictionary = builder.ToImmutable();
             return new( this._dictionary.Keys );
         }
 
-        private bool Follow(IReactiveCollection<T> source)
+        private bool Follow( IReactiveCollection<T> source )
         {
-            if (!this._subscriptions.TryGetValue(source, out var existing))
+            if ( !this._subscriptions.TryGetValue( source, out var existing ) )
             {
-                this._subscriptions = this._subscriptions.Add(source, (source.Observable.AddObserver(this), 1));
+                this._subscriptions = this._subscriptions.Add( source, (source.Observable.AddObserver( this ), 1) );
                 return true;
             }
             else
             {
-                this._subscriptions = this._subscriptions.SetItem(source, (existing.subscription, existing.count + 1));
+                this._subscriptions = this._subscriptions.SetItem( source, (existing.subscription, existing.count + 1) );
                 return false;
             }
         }
 
-        private bool Unfollow(IReactiveCollection<T> source)
+        private bool Unfollow( IReactiveCollection<T> source )
         {
-            if (!this._subscriptions.TryGetValue(source, out var existing))
+            if ( !this._subscriptions.TryGetValue( source, out var existing ) )
             {
                 return false;
             }
 
-            if (existing.count == 1)
+            if ( existing.count == 1 )
             {
-                this._subscriptions = this._subscriptions.Remove(source);
+                this._subscriptions = this._subscriptions.Remove( source );
                 return true;
             }
             else
             {
-                this._subscriptions = this._subscriptions.SetItem(source, (existing.subscription, existing.count - 1));
+                this._subscriptions = this._subscriptions.SetItem( source, (existing.subscription, existing.count - 1) );
                 return false;
             }
         }
 
-      
-        private void AddItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
+        private void AddItem( T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken )
         {
             // We need to duplicate the newResult parameter because local methods cannot access ref params of the parent method.
-            void Iterate(T parentItem, ref ImmutableDictionary<T, int> result)
+            void Iterate( T parentItem, ref ImmutableDictionary<T, int> result )
             {
-                if (!result.TryGetValue(parentItem, out var count ))
+                if ( !result.TryGetValue( parentItem, out var count ) )
                 {
-                    foreach (var subscription in this.Observers)
+                    foreach ( var subscription in this.Observers )
                     {
-                        subscription.Observer.OnItemAdded(subscription.Subscription, parentItem, updateToken.NextVersion);
+                        subscription.Observer.OnItemAdded( subscription.Subscription, parentItem, updateToken.NextVersion );
                     }
                 }
 
-                result = result.SetItem(parentItem, count + 1);
+                result = result.SetItem( parentItem, count + 1 );
 
-                var recursiveSource = this._getChildrenFunc(parentItem, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc( parentItem, this.ObserverToken );
 
-                if (this.Follow(recursiveSource))
+                if ( this.Follow( recursiveSource ) )
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
+                    foreach ( var recursiveItem in recursiveSource.GetValue( this.ObserverToken ) )
                     {
-                        Iterate(recursiveItem, ref result);
+                        Iterate( recursiveItem, ref result );
                     }
                 }
             }
 
-            Iterate(item, ref newResult);
+            Iterate( item, ref newResult );
         }
 
-        private void RemoveItem(T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken)
+        private void RemoveItem( T item, ref ImmutableDictionary<T, int> newResult, IncrementalUpdateToken updateToken )
         {
             // We need to duplicate the newResult parameter because local methods cannot access ref params of the parent method.
-            void Iterate(T parentItem, ref ImmutableDictionary<T, int> result)
+            void Iterate( T parentItem, ref ImmutableDictionary<T, int> result )
             {
-                if (!result.TryGetValue(parentItem, out var count ))
+                if ( !result.TryGetValue( parentItem, out var count ) )
                 {
                     return;
                 }
 
-                if (count == 1)
+                if ( count == 1 )
                 {
-                    
-                    foreach (var subscription in this.Observers)
+
+                    foreach ( var subscription in this.Observers )
                     {
-                        subscription.Observer.OnItemRemoved(subscription.Subscription, parentItem, updateToken.NextVersion);
+                        subscription.Observer.OnItemRemoved( subscription.Subscription, parentItem, updateToken.NextVersion );
                     }
 
-                    result = result.Remove(parentItem);
+                    result = result.Remove( parentItem );
                 }
                 else
                 {
-                    result = result.SetItem(parentItem, count - 1);
+                    result = result.SetItem( parentItem, count - 1 );
                 }
 
-                var recursiveSource = this._getChildrenFunc(parentItem, this.ObserverToken);
+                var recursiveSource = this._getChildrenFunc( parentItem, this.ObserverToken );
 
-                if (this.Unfollow(recursiveSource))
+                if ( this.Unfollow( recursiveSource ) )
                 {
-                    foreach (var recursiveItem in recursiveSource.GetValue(this.ObserverToken))
+                    foreach ( var recursiveItem in recursiveSource.GetValue( this.ObserverToken ) )
                     {
-                        Iterate(recursiveItem, ref result);
+                        Iterate( recursiveItem, ref result );
                     }
                 }
             }
 
-            Iterate(item, ref newResult);
+            Iterate( item, ref newResult );
         }
 
-        protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             var newResult = this._dictionary!;
 
-            this.AddItem(item, ref newResult, updateToken);
+            this.AddItem( item, ref newResult, updateToken );
 
             this._dictionary = newResult;
-            
-            updateToken.SetValue(newResult.Keys);
+
+            updateToken.SetValue( newResult.Keys );
         }
 
-
-        protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             var newResult = this._dictionary!;
 
-            this.RemoveItem(item, ref newResult, updateToken);
+            this.RemoveItem( item, ref newResult, updateToken );
 
             this._dictionary = newResult;
-            
-            updateToken.SetValue(newResult.Keys);
+
+            updateToken.SetValue( newResult.Keys );
         }
 
-        protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, T oldItem, T newItem, in IncrementalUpdateToken updateToken )
         {
             var newResult = this._dictionary!;
 
-            this.RemoveItem(oldItem, ref newResult, updateToken);
-            this.AddItem(newItem, ref newResult, updateToken);
+            this.RemoveItem( oldItem, ref newResult, updateToken );
+            this.AddItem( newItem, ref newResult, updateToken );
 
             this._dictionary = newResult;
-            
-            updateToken.SetValue(newResult.Keys);
+
+            updateToken.SetValue( newResult.Keys );
         }
     }
 }

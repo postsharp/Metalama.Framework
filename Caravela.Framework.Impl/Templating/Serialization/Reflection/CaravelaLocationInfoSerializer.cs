@@ -1,9 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
         // binding flags for private indexers, and that overload is complicated.
-        
+
         private readonly ObjectSerializers _serializers;
 
         public CaravelaLocationInfoSerializer( ObjectSerializers serializers )
@@ -111,22 +111,21 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 .NormalizeWhitespace();
         }
 
-        static ExpressionSyntax MemberAccess(params string[] names)
+        private static ExpressionSyntax MemberAccess( params string[] names )
         {
-            ExpressionSyntax result = IdentifierName(names[0]);
-            for (var i = 1; i < names.Length; i++)
+            ExpressionSyntax result = IdentifierName( names[0] );
+            for ( var i = 1; i < names.Length; i++ )
             {
-                result = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName(names[i]));
+                result = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName( names[i] ) );
             }
+
             return result!;
         }
 
-
         private static ExpressionSyntax CreateBindingFlags()
         {
-            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance"}.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
+            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
                 .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
     }
 }
-

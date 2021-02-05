@@ -1,8 +1,7 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System.Linq;
 using System.Reflection;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,11 +9,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
     public class CaravelaParameterInfoTests : ReflectionTestBase
     {
-        private CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;
+        private readonly CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;
 
-        public CaravelaParameterInfoTests( ITestOutputHelper helper ) : base(helper)
+        public CaravelaParameterInfoTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._caravelaMethodInfoSerializer = new CaravelaMethodInfoSerializer(new CaravelaTypeSerializer());
+            this._caravelaMethodInfoSerializer = new CaravelaMethodInfoSerializer( new CaravelaTypeSerializer() );
         }
 
         [Fact]
@@ -23,22 +22,22 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var code = "class Target { public static int Method(int target) => 2*target; }";
             var serialized = this.SerializeParameter( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Int32)~System.Int32"")).GetParameters()[0]", serialized );
-            
+
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( "target", parameterInfo.Name );
                 Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( typeof(int), parameterInfo.ParameterType );
+                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
-        
+
         [Fact]
         public void TestGenericParameter_GenericInMethod()
         {
             var code = "class Target { public static int Method<T>(T target) => 4; }";
             var serialized = this.SerializeParameter( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method``1(``0)~System.Int32"")).GetParameters()[0]", serialized );
-            
+
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( "target", parameterInfo.Name );
@@ -46,13 +45,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.Equal( "T", parameterInfo.ParameterType.Name );
             } );
         }
+
         [Fact]
         public void TestGenericParameter_GenericInTypeAndMethod()
         {
             var code = "class Target<T> { public static int Method<U>(System.Tuple<T,U> target) => 4; }";
             var serialized = this.SerializeParameter( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle).GetParameters()[0]", serialized );
-            
+
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( "target", parameterInfo.Name );
@@ -72,10 +72,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             {
                 Assert.Equal( "target", parameterInfo.Name );
                 Assert.Equal( 1, parameterInfo.Position );
-                Assert.Equal( typeof(int), parameterInfo.ParameterType );
+                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
-        
+
         [Fact]
         public void TestReturnParameter()
         {
@@ -86,10 +86,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( -1, parameterInfo.Position );
-                Assert.Equal( typeof(string), parameterInfo.ParameterType );
+                Assert.Equal( typeof( string ), parameterInfo.ParameterType );
             } );
         }
-        
+
         [Fact]
         public void TestReturnParameterOfProperty()
         {
@@ -100,56 +100,59 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( -1, parameterInfo.Position );
-                Assert.Equal( typeof(string), parameterInfo.ParameterType );
+                Assert.Equal( typeof( string ), parameterInfo.ParameterType );
             } );
         }
-        
+
         [Fact]
         public void TestParameterOfIndexer()
         {
             var code = "class Target { public int this[int target] { get {return 0;} set{} }}";
             var serialized = this.SerializeIndexerParameter( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.set_Item(System.Int32,System.Int32)"")).GetParameters()[0]", serialized );
-            
+
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
                 Assert.Equal( "target", parameterInfo.Name );
                 Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( typeof(int), parameterInfo.ParameterType );
+                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
-        
+
         private string SerializeIndexerParameter( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var targetType = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
-            var single = targetType.Properties.GetValue().Single( m => m.Name == "this[]" ).Parameters.First(p => p.Name=="target");
+            var single = targetType.Properties.GetValue().Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = (Parameter) single;
-            var actual = new CaravelaParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
+            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
             return actual;
         }
+
         private string SerializeParameter( string code )
         {
-            var compilation  = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).Parameters.First(p => p.Name=="target");
+            var compilation = CreateCompilation( code );
+            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).Parameters.First( p => p.Name == "target" );
             var parameter = (Parameter) single;
-            var actual = new CaravelaParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
+            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
             return actual;
         }
+
         private string SerializeReturnParameter( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).ReturnParameter!;
             var p = (Method.MethodReturnParameter) single;
-            var actual = new CaravelaReturnParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
+            var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;
         }
+
         private string SerializeReturnParameterOfProperty( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( m => m.Name == "Property" ).Getter!.ReturnParameter!;
             var p = (Method.MethodReturnParameter) single;
-            var actual = new CaravelaReturnParameterInfoSerializer(this._caravelaMethodInfoSerializer).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
+            var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;
         }
     }

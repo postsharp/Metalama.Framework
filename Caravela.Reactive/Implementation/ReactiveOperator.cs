@@ -1,8 +1,3 @@
-#region
-
-
-#endregion
-
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -10,14 +5,13 @@ using System.Threading;
 namespace Caravela.Reactive.Implementation
 {
 
-    public abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : 
+    public abstract class ReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> :
         BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
        IReactiveSource<TResult, TResultObserver>,
        IReactiveObserver<TSource>,
        IReactiveCollector
        where TSourceObserver : class, IReactiveObserver<TSource>
        where TResultObserver : class, IReactiveObserver<TResult>
-
     {
         private SpinLock _lock;
 
@@ -25,15 +19,13 @@ namespace Caravela.Reactive.Implementation
         {
         }
 
-
         IReactiveVersionedValue<TResult> IReactiveSource<TResult>.GetVersionedValue(
             in ReactiveCollectorToken observerToken )
         {
             return this.GetVersionedValue( observerToken );
         }
 
-        protected new IReactiveSource<TSource,TSourceObserver> Source => (IReactiveSource < TSource,TSourceObserver>) base.Source;
-
+        protected new IReactiveSource<TSource, TSourceObserver> Source => (IReactiveSource<TSource, TSourceObserver>) base.Source;
 
         /// <summary>
         /// Evaluates the function (i.e. the operator) and returns its value.
@@ -54,7 +46,7 @@ namespace Caravela.Reactive.Implementation
                 if ( this._result.Value.Version == 0 )
                 {
                     // We're already evaluating the function so we can't do it again.
-                    // To be safe, say we're mutable for now. 
+                    // To be safe, say we're mutable for now.
                     if ( this._lock.IsHeldByCurrentThread )
                     {
                         return false;
@@ -64,20 +56,16 @@ namespace Caravela.Reactive.Implementation
                     this.EnsureFunctionEvaluated();
                 }
 
-
                 return this._dependencies.IsEmpty;
             }
         }
 
         IReactiveObservable<TResultObserver> IReactiveSource<TResult, TResultObserver>.Observable => this;
 
-
-
         /// <summary>
         /// Gets an <c>IncrementalUpdateToken</c>, which allows to represent incremental changes.
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         protected IncrementalUpdateToken GetIncrementalUpdateToken( int sourceVersion = -1 )
         {
             if ( this._currentUpdateStatus != IncrementalUpdateStatus.Default && this._currentUpdateStatus != IncrementalUpdateStatus.Disposed )
@@ -88,7 +76,7 @@ namespace Caravela.Reactive.Implementation
             var lockTaken = false;
             this._lock.Enter( ref lockTaken );
 
-            Debug.Assert( lockTaken );
+            Debug.Assert( lockTaken, "The lock could not be acquired." );
 
             return new IncrementalUpdateToken( this, sourceVersion );
         }
@@ -97,9 +85,6 @@ namespace Caravela.Reactive.Implementation
         {
             this._lock.Exit();
         }
-
-
-
 
         public ReactiveVersionedValue<TResult> GetVersionedValue( in ReactiveCollectorToken observerToken = default )
         {
@@ -120,8 +105,8 @@ namespace Caravela.Reactive.Implementation
         protected void EnsureFunctionEvaluated()
         {
             if ( this._isFunctionResultDirty )
-            // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
+                // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
                 var lockHeld = false;
                 try
                 {
@@ -150,7 +135,6 @@ namespace Caravela.Reactive.Implementation
 
                                 sideValues = sideValues.Combine( newResult.SideValues );
 
-
                                 this._result.Value =
                                     new ReactiveVersionedValue<TResult>( newResult.Value, currentResult.Version + 1, sideValues );
                             }
@@ -177,6 +161,5 @@ namespace Caravela.Reactive.Implementation
                 }
             }
         }
-
     }
 }

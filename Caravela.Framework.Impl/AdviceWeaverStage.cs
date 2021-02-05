@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AdviceWeaverStage : PipelineStage
+    internal sealed class AdviceWeaverStage : PipelineStage
     {
         private readonly ImmutableArray<AspectPart> _aspectParts;
 

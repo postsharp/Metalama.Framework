@@ -1,13 +1,13 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Reactive;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class GenericParameter : IGenericParameter, ITypeInternal
+    internal class GenericParameter : IGenericParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 

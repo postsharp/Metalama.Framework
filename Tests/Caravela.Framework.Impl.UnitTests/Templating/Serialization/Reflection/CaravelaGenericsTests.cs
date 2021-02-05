@@ -1,8 +1,8 @@
-using Caravela.Framework.Impl.Templating.Serialization;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System;
 using System.Linq;
 using System.Reflection;
+using Caravela.Framework.Impl.Templating.Serialization;
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
     public class CaravelaGenericsTests : ReflectionTestBase
     {
-        private ObjectSerializers _objectSerializers;
+        private readonly ObjectSerializers _objectSerializers;
 
-        public CaravelaGenericsTests( ITestOutputHelper helper ) : base(helper)
+        public CaravelaGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
             this._objectSerializers = new ObjectSerializers();
         }
@@ -31,12 +31,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 Assert.Equal( "Dictionary`2", info.FieldType.Name );
             } );
         }
-        
+
         [Fact]
         public void MethodInDerivedType()
         {
             var code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single(t => t.Name == "Target").Methods.GetValue().First() ) )
+            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().First() ) )
                 .ToString();
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)", serialized );
 
@@ -53,16 +53,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaType.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
-            TestExpression<Type>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target`1[T2]", info.ToString() );
-            } );
+            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Target`1[T2]", info.ToString() ) );
             var serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaType.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "Target" ) ) )
                 .ToString();
-            TestExpression<Type>( code, serialized2, ( info ) =>
-            {
-                Assert.Equal( "Target`1[T1]", info.ToString() );
-            } );
+            TestExpression<Type>( code, serialized2, ( info ) => Assert.Equal( "Target`1[T1]", info.ToString() ) );
         }
 
         [Fact]
@@ -71,17 +65,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType!.Methods.GetValue().First() ) )
                 .ToString();
-            TestExpression<MethodInfo>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() );
-            } );
+            TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
             var serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.GetValue().Single( t => t.Name == "User" ).BaseType!.Methods.GetValue().First() ) )
                 .ToString();
-            TestExpression<MethodInfo>( code2, serialized2, ( info ) =>
-            {
-                Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() );
-            } );
+            TestExpression<MethodInfo>( code2, serialized2, ( info ) => Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );
         }
     }
 }

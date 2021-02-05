@@ -1,40 +1,45 @@
+using System;
+using System.Collections.Generic;
 using Caravela.Framework.Impl.Templating.Serialization;
 using EnumSpace;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using Xunit;
+
+#pragma warning disable SA1201 // Elements should appear in the correct order
+#pragma warning disable SA1402 
+#pragma warning disable SA1403 
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {
     public class ObjectSerializersTests
     {
-        readonly ObjectSerializers _serializers = new ObjectSerializers();
+        private readonly ObjectSerializers _serializers = new ObjectSerializers();
 
         [Fact]
         public void TestInt()
         {
-            this.AssertSerialization( "42", 42);
+            this.AssertSerialization( "42", 42 );
         }
-        
+
         [Fact]
         public void TestNullable()
         {
             int? i = 42;
-            this.AssertSerialization( "42", i);
+            this.AssertSerialization( "42", i );
         }
 
         [Fact]
         public void TestListInt()
         {
-           this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>{4, 6, 8}", new List<int>() { 4, 6, 8} );
+            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>{4, 6, 8}", new List<int>() { 4, 6, 8 } );
         }
+
         [Fact]
         public void TestString()
         {
             this.AssertSerialization( "\"hello\"", "hello" );
         }
-        
+
         [Fact]
         public void TestInfiniteRecursion()
         {
@@ -45,39 +50,36 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
                 this._serializers.SerializeToRoslynCreationExpression( o );
             } );
         }
-        
+
         [Fact]
         public void TestUnsupportedAnonymousType()
         {
-            Assert.Throws<CaravelaException>( () =>
-            {
-                this._serializers.SerializeToRoslynCreationExpression( new {A = "F"} );
-            } );
+            Assert.Throws<CaravelaException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
         }
 
         [Fact]
         public void TestNull()
         {
-            this.AssertSerialization( "null",  (object?) null );
+            this.AssertSerialization( "null", (object?) null );
         }
-       
+
         private void AssertSerialization<T>( string expected, T? o )
         {
-            var creationExpression = this._serializers.SerializeToRoslynCreationExpression(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
-        
+
         [Fact]
         public void TestEnumsBasic()
         {
             this.AssertSerialization( "EnumSpace.World.Venus", World.Venus );
             this.AssertSerialization( "EnumSpace.Mars.Moon.Phobos", Mars.Moon.Phobos );
         }
-        
+
         [Fact]
         public void TestNegativeEnum()
         {
-            this.AssertSerialization( "(EnumSpace.LongEnum)(-1L)", (LongEnum) (- 1) );
+            this.AssertSerialization( "(EnumSpace.LongEnum)(-1L)", (LongEnum) (-1) );
         }
 
         [Fact]
@@ -95,11 +97,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             this.AssertSerialization( "EnumSpace.Box<System.Int32>.Color.Blue", Box<int>.Color.Blue );
             this.AssertSerialization( "EnumSpace.Box<System.Int32>.InnerBox.Shiny.Yes", Box<int>.InnerBox.Shiny.Yes );
         }
-        
+
         [Fact]
         public void TestArray()
         {
-            this.AssertSerialization( "new System.Int32[]{1, 2}", new[] { 1,2} );
+            this.AssertSerialization( "new System.Int32[]{1, 2}", new[] { 1, 2 } );
         }
 
         [Fact]
@@ -122,7 +124,8 @@ namespace EnumSpace
         First,
         Second
     }
-    class Mars
+
+    internal class Mars
     {
         public enum Moon
         {
@@ -131,10 +134,10 @@ namespace EnumSpace
         }
     }
 
-    class Box<T>
+    internal class Box<T>
     {
         public T? Value { get; set; }
-        
+
         public class InnerBox
         {
             public enum Shiny
@@ -143,6 +146,7 @@ namespace EnumSpace
                 No
             }
         }
+
         [Flags]
         public enum Color
         {
@@ -152,22 +156,24 @@ namespace EnumSpace
     }
 
     [Flags]
-    enum WorldFeatures : ulong
+    internal enum WorldFeatures : ulong
     {
         Icy = 1,
         Edenlike = 2,
         Poisonous = 4,
         Volcanic = 8
-    } 
+    }
+
     [Flags]
-    enum HumanFeatures : byte
+    internal enum HumanFeatures : byte
     {
         Tall = 1,
         Old = 2,
         Smart = 4,
         Wise = 8
     }
-    enum World
+
+    internal enum World
     {
         Mercury,
         Venus

@@ -5,31 +5,31 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    abstract partial class MetaSyntaxRewriter
+    internal abstract partial class MetaSyntaxRewriter
     {
         private class IndentRewriter : CSharpSyntaxRewriter
         {
             private readonly MetaSyntaxRewriter _parent;
             private const int limit = 80;
-            
-            public IndentRewriter(MetaSyntaxRewriter parent)
+
+            public IndentRewriter( MetaSyntaxRewriter parent )
             {
                 this._parent = parent;
             }
 
-            public override SyntaxNode? VisitArgumentList(ArgumentListSyntax node)
+            public override SyntaxNode? VisitArgumentList( ArgumentListSyntax node )
             {
-                if (node.Arguments.Count > 1 || node.Arguments.Span.Length > limit)
+                if ( node.Arguments.Count > 1 || node.Arguments.Span.Length > limit )
                 {
                     this._parent.Indent();
                     try
                     {
                         var indentedArguments =
-                            node.Arguments.Select(a => this.Visit(a)!.WithLeadingTrivia(this._parent.GetIndentation()));
-                    
+                            node.Arguments.Select( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
 
-                        return SyntaxFactory.ArgumentList(node.OpenParenToken.WithTrailingTrivia(this._parent.GetIndentation(false)),
-                            SyntaxFactory.SeparatedList(indentedArguments), node.CloseParenToken);
+                        return SyntaxFactory.ArgumentList(
+                            node.OpenParenToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
+                            SyntaxFactory.SeparatedList( indentedArguments ), node.CloseParenToken );
                     }
                     finally
                     {
@@ -38,23 +38,24 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
-                    return base.VisitArgumentList(node);
+                    return base.VisitArgumentList( node );
                 }
             }
 
-            public override SyntaxNode? VisitInitializerExpression(InitializerExpressionSyntax node)
+            public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
             {
-                if (node.Expressions.Count > 1 || node.Span.Length > limit)
+                if ( node.Expressions.Count > 1 || node.Span.Length > limit )
                 {
                     this._parent.Indent();
                     try
                     {
                         var indentedExpressions =
-                            node.Expressions.Select(a => this.Visit(a)!.WithLeadingTrivia(this._parent.GetIndentation()));
-                    
-                        return SyntaxFactory.InitializerExpression(node.Kind(),
-                            node.OpenBraceToken.WithTrailingTrivia(this._parent.GetIndentation(false)),
-                            SyntaxFactory.SeparatedList(indentedExpressions), node.CloseBraceToken);
+                            node.Expressions.Select( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
+
+                        return SyntaxFactory.InitializerExpression(
+                            node.Kind(),
+                            node.OpenBraceToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
+                            SyntaxFactory.SeparatedList( indentedExpressions ), node.CloseBraceToken );
                     }
                     finally
                     {
@@ -63,19 +64,19 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
-                    return base.VisitInitializerExpression(node);
+                    return base.VisitInitializerExpression( node );
                 }
             }
 
-            public override SyntaxNode? Visit(SyntaxNode? node)
+            public override SyntaxNode? Visit( SyntaxNode? node )
             {
-                if (node == null || node.Span.Length < limit || node.HasNoDeepIndentAnnotation() )
+                if ( node == null || node.Span.Length < limit || node.HasNoDeepIndentAnnotation() )
                 {
                     return node;
                 }
                 else
                 {
-                    return base.Visit(node);
+                    return base.Visit( node );
                 }
             }
         }

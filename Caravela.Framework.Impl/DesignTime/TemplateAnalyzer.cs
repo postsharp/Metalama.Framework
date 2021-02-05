@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -19,10 +19,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 .ToImmutableArray();
         }
 
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
-            
-            
 
         public override void Initialize( AnalysisContext context )
         {
@@ -31,9 +28,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Don't enable concurrent execution. It does not make sense just for templates.
             context.EnableConcurrentExecution();
-
         }
-
-      
     }
 }

@@ -1,13 +1,13 @@
-﻿using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Immutable;
+using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    sealed class AdviceDriver
+    internal sealed class AdviceDriver
     {
-        public AdviceInstanceResult GetResult(AdviceInstance adviceInstance)
+        public AdviceInstanceResult GetResult( AdviceInstance adviceInstance )
         {
             Transformation transformation = adviceInstance.Advice switch
             {

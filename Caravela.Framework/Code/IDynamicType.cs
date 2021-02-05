@@ -5,6 +5,5 @@
     /// </summary>
     public interface IDynamicType : IType
     {
-        
     }
 }

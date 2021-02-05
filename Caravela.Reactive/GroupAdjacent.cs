@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable SA1008, SA1649, SA1600, SA1400, IDE0061, SA1506, SA1117, SA1012, SA1516, SA1124, SA1515
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,7 +26,7 @@ using System.Linq;
 // ReSharper disable once CheckNamespace
 namespace MoreLinq
 {
-    static class MoreEnumerable
+    internal static class MoreEnumerable
     {
         /// <summary>
         /// Groups the adjacent elements of a sequence according to a
@@ -298,7 +300,7 @@ namespace MoreLinq
                                      comparer ?? EqualityComparer<TKey>.Default );
         }
 
-        static IEnumerable<TResult> GroupAdjacentImpl<TSource, TKey, TElement, TResult>(
+        private static IEnumerable<TResult> GroupAdjacentImpl<TSource, TKey, TElement, TResult>(
             this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector,
             Func<TSource, TElement> elementSelector,
@@ -338,10 +340,10 @@ namespace MoreLinq
             }
         }
 
-        static IGrouping<TKey, TElement> CreateGroupAdjacentGrouping<TKey, TElement>( TKey key, IList<TElement> members ) =>
+        private static IGrouping<TKey, TElement> CreateGroupAdjacentGrouping<TKey, TElement>( TKey key, IList<TElement> members ) =>
             Grouping.Create( key, members.IsReadOnly ? members : new ReadOnlyCollection<TElement>( members ) );
 
-        static class Grouping
+        private static class Grouping
         {
             public static Grouping<TKey, TElement> Create<TKey, TElement>( TKey key, IEnumerable<TElement> members ) =>
                 new Grouping<TKey, TElement>( key, members );
@@ -349,10 +351,11 @@ namespace MoreLinq
 
 #if !NO_SERIALIZATION_ATTRIBUTES
         [Serializable]
+        private
 #endif
         sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
         {
-            readonly IEnumerable<TElement> _members;
+            private readonly IEnumerable<TElement> _members;
 
             public Grouping( TKey key, IEnumerable<TElement> members )
             {

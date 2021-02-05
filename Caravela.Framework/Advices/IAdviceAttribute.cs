@@ -5,6 +5,5 @@ namespace Caravela.Framework.Advices
     /// </summary>
     public interface IAdviceAttribute
     {
-        
     }
 }

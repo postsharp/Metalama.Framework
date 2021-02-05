@@ -1,16 +1,12 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-
-#endregion
 
 namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation of a reactive operation, i.e. a function that maps an input to an output
     /// and reacts to changes of the input by invalidating the output and/or processing incremental
-    /// change notifications. 
+    /// change notifications.
     /// </summary>
     /// <typeparam name="TSource">Type of the source value.</typeparam>
     /// <typeparam name="TSourceObserver">Type of source observers.</typeparam>
@@ -23,26 +19,28 @@ namespace Caravela.Reactive.Implementation
     IReactiveCollector
     where TSourceObserver : class, IReactiveObserver<TSource>
     where TResultObserver : class, IReactiveObserver<TResult>
-
     {
 
+#pragma warning disable SA1401 // Fields should be private
         private protected DependencyList _dependencies;
         private protected volatile int _sourceVersion = -1;
         private protected volatile bool _isFunctionResultDirty = true;
         private protected AtomicValue<ReactiveVersionedValue<TResult>> _result;
-        private DependencyObservable? _dependencyObservable;
         private protected IReactiveSubscription? _subscriptionToSource;
-        private ObserverList<TResultObserver> _observers;
 
         // The following fields logically belong to IncrementalUpdateToken but this
         // type needs to be immutable so that we can use it with the 'using' statement.
         // Since there is one or zero update concurrently, we're storing the state here.
         private protected IncrementalUpdateStatus _currentUpdateStatus;
+#pragma warning restore SA1401 // Fields should be private
+
+        private ObserverList<TResultObserver> _observers;
+        private DependencyObservable? _dependencyObservable;
+
         private bool _currentUpdateBreaksObservers;
         private int _currentUpdateNewSourceVersion;
         private TResult? _currentUpdateResult;
         private ReactiveSideValues _currentUpdateSideValues;
-
 
         public abstract bool IsImmutable { get; }
 
@@ -50,11 +48,9 @@ namespace Caravela.Reactive.Implementation
 
         protected IReactiveSource Source { get; }
 
-
         protected ReactiveCollectorToken ObserverToken => new ReactiveCollectorToken( this );
 
         protected TResult CachedValue => this._result.Value.Value;
-
 
         void IReactiveObserver.OnValueInvalidated( IReactiveSubscription subscription, bool isBreakingChange )
         {
@@ -68,9 +64,7 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-
-        void IReactiveObserver<TSource>.OnValueChanged( IReactiveSubscription subscription, TSource oldValue,
-            TSource newValue, int newVersion, bool isBreakingChange )
+        void IReactiveObserver<TSource>.OnValueChanged( IReactiveSubscription subscription, TSource oldValue, TSource newValue, int newVersion, bool isBreakingChange )
         {
             this.OnSourceValueChanged( isBreakingChange, oldValue, newValue );
         }
@@ -80,7 +74,6 @@ namespace Caravela.Reactive.Implementation
             this._dependencies.Clear();
             this.UnsubscribeFromSource();
         }
-
 
         IReactiveSubscription? IReactiveObservable<TResultObserver>.AddObserver( TResultObserver observer )
         {
@@ -104,10 +97,7 @@ namespace Caravela.Reactive.Implementation
             return this._observers.RemoveObserver( subscription );
         }
 
-      
-
         public int Version => this._result.Value.Version;
-
 
         public virtual bool IsMaterialized => false;
 
@@ -123,6 +113,7 @@ namespace Caravela.Reactive.Implementation
                 this._dependencies.Add( source, version );
             }
         }
+
         void IReactiveCollector.AddSideValue( IReactiveSideValue? value )
         {
             if ( value != null )
@@ -152,9 +143,8 @@ namespace Caravela.Reactive.Implementation
             this._subscriptionToSource = default;
         }
 
-
         /// <summary>
-        /// Determines whether two return values of <see cref="ReactiveOperator{TSource, TSourceObserver, TResult, TResultObserver}.EvaluateFunction"/> are equal.
+        /// Gets a value indicating whether two return values of <see cref="ReactiveOperator{TSource, TSourceObserver, TResult, TResultObserver}.EvaluateFunction"/> are equal.
         /// </summary>
         /// <param name="first"></param>
         /// <param name="second"></param>
@@ -162,24 +152,19 @@ namespace Caravela.Reactive.Implementation
         protected virtual bool AreEqual( TResult first, TResult second ) =>
             EqualityComparer<TResult>.Default.Equals( first, second );
 
-
         /// <summary>
-        /// Determines whether the current operator should process incremental changes.
+        /// Gets a value indicating whether the current operator should process incremental changes.
         /// This is  useless only if the operator has not yet been evaluated. It can be useful even if
         /// the current operator has a breaking change because the operators downstream may still be
         /// able to process incremental changes.
         /// </summary>
         protected bool ShouldProcessIncrementalChange => this._result.Value.Version > 0;
 
-
-     
-
         private protected void CollectDependencies( ReactiveCollectorToken observerToken, int version )
         {
             // Collect after evaluation so that the version number is updated.
-            observerToken.Collector?.AddDependency( (this._dependencyObservable ??= new DependencyObservable( this )), version );
+            observerToken.Collector?.AddDependency( this._dependencyObservable ??= new DependencyObservable( this ), version );
         }
-
 
         protected virtual void OnSourceValueChanged( bool isBreakingChange )
         {
@@ -211,16 +196,11 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-     
-
-        protected BaseReactiveOperator( IReactiveSource source)
+        protected BaseReactiveOperator( IReactiveSource source )
         {
-            this.Source = source ?? throw new ArgumentNullException(nameof(source));
-            this._observers = new ObserverList<TResultObserver>(this);
-            this._dependencies = new DependencyList(this);
+            this.Source = source ?? throw new ArgumentNullException( nameof( source ) );
+            this._observers = new ObserverList<TResultObserver>( this );
+            this._dependencies = new DependencyList( this );
         }
-
-
-
     }
 }

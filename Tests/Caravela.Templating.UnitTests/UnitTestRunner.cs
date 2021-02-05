@@ -1,13 +1,13 @@
-﻿using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework.Templating;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Xunit.Abstractions;
 
 namespace Caravela.Templating.UnitTests
@@ -35,7 +35,7 @@ namespace Caravela.Templating.UnitTests
                         .Select( s => this._unsupportedSyntaxKinds.Contains( s ) ? $"{s}*" : $"{s}" )
                         .OrderBy( s => s ) );
 
-                var dirPath = Path.GetFullPath(@"..\..\..\tests\SyntaxCover");
+                var dirPath = Path.GetFullPath( @"..\..\..\tests\SyntaxCover" );
                 var filePath = Path.Combine( dirPath, callerName + ".txt" ); // TODO: file name should include test class name in addition to the test method name.
                 Directory.CreateDirectory( dirPath );
                 File.WriteAllText( filePath, syntaxKindsText );

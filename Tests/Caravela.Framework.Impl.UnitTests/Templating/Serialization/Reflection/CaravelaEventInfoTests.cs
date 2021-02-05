@@ -1,9 +1,9 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using System;
 using System.Linq;
 using System.Reflection;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             {
                 Assert.NotNull( info.AddMethod );
                 Assert.NotNull( info.RemoveMethod );
-                Assert.Equal( typeof(Action), info.EventHandlerType );
+                Assert.Equal( typeof( Action ), info.EventHandlerType );
                 Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }
-        
+
         [Fact]
         public void TestCustomEvent()
         {
@@ -38,11 +38,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             {
                 Assert.NotNull( info.AddMethod );
                 Assert.NotNull( info.RemoveMethod );
-                Assert.Equal( typeof(Action), info.EventHandlerType );
+                Assert.Equal( typeof( Action ), info.EventHandlerType );
                 Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }
-        
+
         [Fact]
         public void TestCustomGenericEvent()
         {
@@ -61,14 +61,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
         private string SerializeEvent( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Events.GetValue().Single( m => m.Name == "Activated" );
             var e = (single as Event)!;
-            var actual = new CaravelaEventInfoSerializer(new CaravelaTypeSerializer()).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
+            var actual = new CaravelaEventInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
             return actual;
         }
 
-        public CaravelaEventInfoTests(ITestOutputHelper helper) : base(helper)
+        public CaravelaEventInfoTests( ITestOutputHelper helper ) : base( helper )
         {
         }
     }

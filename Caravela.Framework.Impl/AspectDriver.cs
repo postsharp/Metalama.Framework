@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectDriver : IAspectDriver
+    internal class AspectDriver : IAspectDriver
     {
         public INamedType AspectType { get; }
 
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl
         private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
             where T : class, ICodeElement
         {
-            if (aspect is not IAspect<T> aspectOfT)
+            if ( aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl
 
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
 
-            var aspectBuilder = new AspectBuilder<T>( 
+            var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
@@ -72,10 +72,10 @@ namespace Caravela.Framework.Impl
         public const string OriginalMemberSuffix = "_Original";
 
         // ReSharper disable UnusedParameter.Local
-        private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
-        // ReSharper restore UnusedParameter.Local
+        private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod )
+            where T : ICodeElement
         {
-            throw new NotImplementedException($"No implementation for advice attribute {typeof(T).Name}.");
+            throw new NotImplementedException( $"No implementation for advice attribute {typeof( T ).Name}." );
         }
     }
 }

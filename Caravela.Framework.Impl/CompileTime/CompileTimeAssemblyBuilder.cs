@@ -1,19 +1,19 @@
-﻿using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
@@ -54,9 +54,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public CompileTimeAssemblyBuilder(
             Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
-            : this( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode ) { }
+            : this( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode )
+        {
+        }
 
-        public CompileTimeAssemblyBuilder( 
+        public CompileTimeAssemblyBuilder(
             ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
@@ -77,8 +79,9 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             compilation = compilation.AddSyntaxTrees(
-                SyntaxFactory.ParseSyntaxTree( $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
-                compilation.SyntaxTrees.First().Options ) );
+                SyntaxFactory.ParseSyntaxTree(
+                    $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
+                    compilation.SyntaxTrees.First().Options ) );
 
             compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
 

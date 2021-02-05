@@ -1,13 +1,9 @@
-#region
-
-using Caravela.Reactive.Implementation;
-using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-
-#endregion
+using Caravela.Reactive.Implementation;
+using MoreLinq;
 
 namespace Caravela.Reactive.Operators
 {
@@ -26,11 +22,11 @@ namespace Caravela.Reactive.Operators
             IComparer<TSource> sourceComparer,
             Func<TSource, TKey> getKeyFunc,
             Func<TSource, TElement> getElementFunc,
-            IEqualityComparer<TKey>? equalityComparer) : base(source)
+            IEqualityComparer<TKey>? equalityComparer ) : base( source )
         {
             this._sourceComparer = sourceComparer;
             this._equalityComparer = equalityComparer ?? EqualityComparer<TKey>.Default;
-            this._getKeyFunc = ReactiveCollectorToken.WrapWithDefaultToken(getKeyFunc);
+            this._getKeyFunc = ReactiveCollectorToken.WrapWithDefaultToken( getKeyFunc );
             this._getElementFunc = getElementFunc;
             this._groups = ImmutableArray<Group<TKey, TElement>>.Empty;
             this._sourceMap = ImmutableDictionary<TSource, Group<TKey, TElement>>.Empty;
@@ -51,11 +47,11 @@ namespace Caravela.Reactive.Operators
                 return;
             }
 
-            var element = this._getElementFunc(item);
+            var element = this._getElementFunc( item );
 
             var group = this.FindGroupForNewItem( item, keyGroups );
 
-            if (group == null)
+            if ( group == null )
             {
                 throw new InvalidOperationException();
             }
@@ -79,8 +75,7 @@ namespace Caravela.Reactive.Operators
             this._sourceMap[removedItem].Remove( element );
         }
 
-
-        protected override ReactiveOperatorResult<IEnumerable<IReactiveGroup<TKey, TElement>>> EvaluateFunction(IEnumerable<TSource> source)
+        protected override ReactiveOperatorResult<IEnumerable<IReactiveGroup<TKey, TElement>>> EvaluateFunction( IEnumerable<TSource> source )
         {
             // When re-evaluating, do complete reset.
             // TODO: don't do complete reset
@@ -107,7 +102,7 @@ namespace Caravela.Reactive.Operators
             // and a map from source item to group
             this._sourceMap = newGroups.SelectMany( x => x.sourceItems, ( x, sourceItem ) => (x.group, sourceItem) ).ToImmutableDictionary( x => x.sourceItem, x => x.group );
 
-            return new(this._groups);
+            return new( this._groups );
         }
 
         private ImmutableArray<IGrouping<TKey, TSource>> ComputeKeyGroups( IEnumerable<TSource> newSource ) =>
@@ -140,24 +135,21 @@ namespace Caravela.Reactive.Operators
             return null;
         }
 
-        protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, TSource item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, TSource item, in IncrementalUpdateToken updateToken )
         {
             this.AddItem( item, in updateToken );
 
             updateToken.SetValue( this._groups );
         }
 
-        protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, TSource item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, TSource item, in IncrementalUpdateToken updateToken )
         {
             this.RemoveItem( item, in updateToken );
-            
+
             updateToken.SetValue( this._groups );
         }
 
-        protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, TSource oldItem, TSource newItem, in IncrementalUpdateToken updateToken )
         {
             this.RemoveItem( oldItem, in updateToken );
             this.AddItem( newItem, in updateToken );

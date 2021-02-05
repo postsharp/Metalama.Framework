@@ -2,11 +2,14 @@
 
 namespace Caravela.Framework.Sdk
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public sealed class AspectWeaverAttribute : Attribute
     {
         public Type AspectType { get; }
 
-        public AspectWeaverAttribute(Type aspectType) => this.AspectType = aspectType;
+        public AspectWeaverAttribute( Type aspectType )
+        {
+            this.AspectType = aspectType;
+        }
     }
 }

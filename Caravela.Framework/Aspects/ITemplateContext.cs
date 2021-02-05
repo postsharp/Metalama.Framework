@@ -15,7 +15,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <remarks>
         /// To invoke the method, use <c>Invoke</c>.
-        /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>
+        /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
         IMethod Method { get; }
 
@@ -30,13 +30,14 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         IEvent? Event { get; }
 */
+
         /// <summary>
         /// Gets the list of parameters of <see cref="Method"/>.
         /// </summary>
         IAdviceParameterList Parameters { get; }
 
         // Gets the project configuration.
-        //IProject Project { get; }
+        // IProject Project { get; }
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
@@ -50,7 +51,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gives access to the current type including members introduced by the current aspect.
-        /// Both instance and static members are made accessible. For instance members, 
+        /// Both instance and static members are made accessible. For instance members,
         /// the <c>this</c> instance is assumed.
         /// </summary>
         dynamic This { get; }
@@ -65,6 +66,4 @@ namespace Caravela.Framework.Aspects
         //IReadOnlyDictionary<string, object> Properties { get; }
         */
     }
-
-    
 }

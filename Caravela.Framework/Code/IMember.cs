@@ -11,12 +11,12 @@ namespace Caravela.Framework.Code
         string Name { get; }
 
         /// <summary>
-        /// Determines whether the member is <c>static</c>.
+        /// Gets a value indicating whether the member is <c>static</c>.
         /// </summary>
         bool IsStatic { get; }
 
         /// <summary>
-        /// Determines whether the member is <c>virtual</c>.
+        /// Gets a value indicating whether the member is <c>virtual</c>.
         /// </summary>
         bool IsVirtual { get; }
 

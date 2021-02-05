@@ -7,7 +7,7 @@ using Caravela.Reactive.Sources;
 
 namespace Caravela.Framework.Impl
 {
-    class AttributeAspectSource : AspectSource
+    internal class AttributeAspectSource : AspectSource
     {
         private readonly ICompilation _compilation;
         private readonly CompileTimeAssemblyLoader _loader;
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<AspectInstance> GetAspects()
         {
-            var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
+            var iAspect = this._compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
             var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectDescendants( codeElement => codeElement switch
             {

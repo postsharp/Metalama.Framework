@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -12,7 +12,7 @@ namespace Caravela.TestFramework.Templating
 
         public string? TestException { get; set; }
 
-        public Document TemplateDocument { get;  }
+        public Document TemplateDocument { get; }
 
         public TestResult( Document templateDocument )
         {
@@ -22,7 +22,7 @@ namespace Caravela.TestFramework.Templating
         public SyntaxNode? AnnotatedSyntaxRoot { get; set; }
 
         public SyntaxNode? TransformedSyntaxRoot { get; set; }
-        
+
         public SourceText? TemplateOutputSource { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -15,6 +15,7 @@ namespace Caravela.TestFramework.Templating
             {
                 throw new ArgumentNullException( nameof( node ) );
             }
+
             base.Visit( node );
             this.CollectedSyntaxKinds.Add( node.Kind() );
         }

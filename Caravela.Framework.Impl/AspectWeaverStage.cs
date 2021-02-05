@@ -9,18 +9,18 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectWeaverStage : PipelineStage
+    internal sealed class AspectWeaverStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
         private readonly INamedType _aspectType;
 
-        public AspectWeaverStage(IAspectWeaver aspectWeaver, INamedType aspectType)
+        public AspectWeaverStage( IAspectWeaver aspectWeaver, INamedType aspectType )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
         }
 
-        public override AspectCompilation Transform(AspectCompilation input)
+        public override AspectCompilation Transform( AspectCompilation input )
         {
             var aspectInstances = input.AspectsByAspectType[this._aspectType.FullName].GetValue().ToImmutableList();
 
@@ -40,21 +40,21 @@ namespace Caravela.Framework.Impl
             {
                 newCompilation = this._aspectWeaver.Transform( context );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
                 diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
-            return input.Update(diagnosticSink.Diagnostics, resources, new SourceCompilation(newCompilation));
+            return input.Update( diagnosticSink.Diagnostics, resources, new SourceCompilation( newCompilation ) );
         }
 
-        class DiagnosticSink : IDiagnosticSink
+        private class DiagnosticSink : IDiagnosticSink
         {
             public List<Diagnostic> Diagnostics { get; } = new();
 
-            public void AddDiagnostic(Diagnostic diagnostic) => this.Diagnostics.Add(diagnostic);
+            public void AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
         }
     }
 }

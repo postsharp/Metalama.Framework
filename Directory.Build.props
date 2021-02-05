@@ -26,8 +26,10 @@
       <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <!-- XML doc config -->
+  <!-- Code quality and documentation -->
   <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Disable XML doc warnings in the debug build -->
     <NoWarn Condition="'$(Configuration)'=='Debug'">1591,1572,1573</NoWarn>
@@ -49,6 +51,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
+    <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"  Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
   </ItemGroup>
 
   <ItemGroup>

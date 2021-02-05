@@ -1,26 +1,22 @@
-#region
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-
-#endregion
 
 namespace Caravela.Reactive.Implementation
 {
     /// <summary>
     /// A base implementation for <see cref="IReactiveObservable{T}"/>.
     /// </summary>
-    /// <typeparam name="T">Type of observers/</typeparam>
+    /// <typeparam name="T">Type of observers/.</typeparam>
     public struct ObserverList<T> : IEnumerable<ObserverListEnumeratedItem<T>>
         where T : class, IReactiveObserver
     {
-        private SpinLock _spinLock;
         private readonly IReactiveObservable<T> _owner;
+        private SpinLock _spinLock;
         private volatile ObserverListItem<T>? _first;
 
-        public ObserverList(IReactiveObservable<T> owner)
+        public ObserverList( IReactiveObservable<T> owner )
         {
             this._owner = owner;
             this._first = null;
@@ -29,27 +25,26 @@ namespace Caravela.Reactive.Implementation
 
         public bool IsEmpty => this._first == null;
 
-
         public ObserverListEnumerator<T, IReactiveObserver> WeaklyTyped()
-            => new ObserverListEnumerator<T, IReactiveObserver>(this._first);
+            => new ObserverListEnumerator<T, IReactiveObserver>( this._first );
 
         public ObserverListEnumerator<T, IReactiveObserver<TOut>> OfType<TOut>()
-            => new ObserverListEnumerator<T, IReactiveObserver<TOut>>(this._first);
+            => new ObserverListEnumerator<T, IReactiveObserver<TOut>>( this._first );
 
         IEnumerator<ObserverListEnumeratedItem<T>> IEnumerable<ObserverListEnumeratedItem<T>>.GetEnumerator() => this.GetEnumerator();
-       
+
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public ObserverListEnumerator<T, T> GetEnumerator()
         {
-            return new ObserverListEnumerator<T, T>(this._first);
+            return new ObserverListEnumerator<T, T>( this._first );
         }
 
-        private bool ContainsObserver(IReactiveObserver observer)
+        private bool ContainsObserver( IReactiveObserver observer )
         {
-            for (var node = this._first; node != null; node = node.Next)
+            for ( var node = this._first; node != null; node = node.Next )
             {
-                if (ReferenceEquals(node.Observer, observer))
+                if ( ReferenceEquals( node.Observer, observer ) )
                 {
                     return true;
                 }
@@ -63,7 +58,7 @@ namespace Caravela.Reactive.Implementation
             get
             {
                 var count = 0;
-                for (var node = this._first; node != null; node = node.Next)
+                for ( var node = this._first; node != null; node = node.Next )
                 {
                     count++;
                 }
@@ -72,9 +67,9 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-        public IReactiveSubscription<T>? AddObserver(IReactiveObserver observer)
+        public IReactiveSubscription<T>? AddObserver( IReactiveObserver observer )
         {
-            if (observer == null)
+            if ( observer == null )
             {
                 throw new ArgumentNullException();
             }
@@ -85,12 +80,12 @@ namespace Caravela.Reactive.Implementation
                 return null;
             }
 
-            var node = new ObserverListItem<T>(this._owner, observer);
+            var node = new ObserverListItem<T>( this._owner, observer );
 
             var lockHeld = false;
             try
             {
-                this._spinLock.Enter(ref lockHeld);
+                this._spinLock.Enter( ref lockHeld );
 
                 node.Next = this._first;
                 this._first = node;
@@ -98,26 +93,26 @@ namespace Caravela.Reactive.Implementation
             }
             finally
             {
-                if (lockHeld)
+                if ( lockHeld )
                 {
                     this._spinLock.Exit();
                 }
             }
         }
 
-        public bool RemoveObserver(IReactiveSubscription subscription)
+        public bool RemoveObserver( IReactiveSubscription subscription )
         {
             var lockHeld = false;
             try
             {
-                this._spinLock.Enter(ref lockHeld);
+                this._spinLock.Enter( ref lockHeld );
 
                 ObserverListItem<T>? previous = null;
-                for (var node = this._first; node != null; node = node.Next)
+                for ( var node = this._first; node != null; node = node.Next )
                 {
-                    if (ReferenceEquals(node, subscription))
+                    if ( ReferenceEquals( node, subscription ) )
                     {
-                        if (previous == null)
+                        if ( previous == null )
                         {
                             this._first = node.Next;
                         }
@@ -134,7 +129,7 @@ namespace Caravela.Reactive.Implementation
             }
             finally
             {
-                if (lockHeld)
+                if ( lockHeld )
                 {
                     this._spinLock.Exit();
                 }
@@ -143,7 +138,6 @@ namespace Caravela.Reactive.Implementation
             // Not found.
             return false;
         }
-
 
         public override string ToString() => $"ObserverList Count={this.Count}";
     }

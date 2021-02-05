@@ -1,7 +1,7 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -11,10 +11,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         public override ExpressionSyntax Serialize( Guid o )
         {
             var b = o.ToByteArray();
-            
+
             var a = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
-            var b2 = (short)((b[5] << 8) | b[4]);
-            var c = (short)((b[7] << 8) | b[6]);
+            var b2 = (short) ((b[5] << 8) | b[4]);
+            var c = (short) ((b[7] << 8) | b[6]);
             var d = b[8];
             var e = b[9];
             var f = b[10];

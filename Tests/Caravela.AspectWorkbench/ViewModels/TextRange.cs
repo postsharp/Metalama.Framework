@@ -4,9 +4,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
-    class TextRange
+    internal class TextRange
     {
         public ClassifiedSpan ClassifiedSpan { get; }
+
         public string Text { get; }
 
         public TextRange( string classification, TextSpan span, SourceText text ) :
@@ -24,12 +25,6 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ClassifiedSpan = classifiedSpan;
             this.Text = text;
         }
-
-        public string ClassificationType => this.ClassifiedSpan.ClassificationType;
-
-        public TextSpan TextSpan => this.ClassifiedSpan.TextSpan;
-
-        public override string ToString() => this.ClassificationType ?? "null" + ":" + this.Text;
 
         public static IEnumerable<TextRange> FillGaps( SourceText text, IEnumerable<TextRange> ranges )
         {
@@ -60,5 +55,10 @@ namespace Caravela.AspectWorkbench.ViewModels
             }
         }
 
+        public string ClassificationType => this.ClassifiedSpan.ClassificationType;
+
+        public TextSpan TextSpan => this.ClassifiedSpan.TextSpan;
+
+        public override string ToString() => this.ClassificationType ?? "null" + ":" + this.Text;
     }
 }

@@ -1,10 +1,6 @@
-#region
-
-using Caravela.Reactive.Implementation;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-
-#endregion
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
@@ -12,80 +8,73 @@ namespace Caravela.Reactive.Operators
     {
         private ImmutableList<T> _list = null!;
 
-        public ToListOperator(IReactiveCollection<T> source) : base(source)
+        public ToListOperator( IReactiveCollection<T> source ) : base( source )
         {
         }
 
         public override bool IsMaterialized => true;
 
-        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction( IEnumerable<T> source )
         {
-            this._list = ImmutableList.CreateRange(source);
+            this._list = ImmutableList.CreateRange( source );
             return this._list;
         }
 
-
-        protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             var oldList = this._list;
-            
-            this._list = this._list.Add(item);
 
+            this._list = this._list.Add( item );
 
-            foreach (var subscription in this.Observers)
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
+                subscription.Observer.OnItemAdded( subscription.Subscription, item, updateToken.NextVersion );
             }
-            
-            foreach (var subscription in this.Observers.OfEnumerableType<T>())
+
+            foreach ( var subscription in this.Observers.OfEnumerableType<T>() )
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
+                subscription.Observer.OnValueChanged( subscription.Subscription, oldList, this._list, updateToken.NextVersion );
             }
-            
-            updateToken.SetValue(this._list);
+
+            updateToken.SetValue( this._list );
         }
 
-        protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             var oldList = this._list;
-            
-            this._list = this._list.Remove(item);
 
+            this._list = this._list.Remove( item );
 
-            foreach (var subscription in this.Observers)
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
+                subscription.Observer.OnItemRemoved( subscription.Subscription, item, updateToken.NextVersion );
             }
-            
-            foreach (var subscription in this.Observers.OfEnumerableType<T>())
+
+            foreach ( var subscription in this.Observers.OfEnumerableType<T>() )
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
+                subscription.Observer.OnValueChanged( subscription.Subscription, oldList, this._list, updateToken.NextVersion );
             }
-            
-            updateToken.SetValue(this._list);
+
+            updateToken.SetValue( this._list );
         }
 
-        protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, T oldItem, T newItem, in IncrementalUpdateToken updateToken )
         {
             var oldList = this._list;
-            
-            this._list = this._list.Replace(oldItem, newItem);
 
-            
-            foreach (var subscription in this.Observers)
+            this._list = this._list.Replace( oldItem, newItem );
+
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemReplaced(subscription.Subscription, oldItem, newItem, updateToken.NextVersion);
+                subscription.Observer.OnItemReplaced( subscription.Subscription, oldItem, newItem, updateToken.NextVersion );
             }
-            
-            foreach (var subscription in this.Observers.OfEnumerableType<T>())
+
+            foreach ( var subscription in this.Observers.OfEnumerableType<T>() )
             {
-                subscription.Observer.OnValueChanged(subscription.Subscription, oldList, this._list, updateToken.NextVersion);
+                subscription.Observer.OnValueChanged( subscription.Subscription, oldList, this._list, updateToken.NextVersion );
             }
-            
-            updateToken.SetValue(this._list);
+
+            updateToken.SetValue( this._list );
         }
     }
 }

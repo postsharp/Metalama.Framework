@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             if ( symbol.TypeKind == TypeKind.Array )
             {
-                var arraySymbol = (IArrayTypeSymbol)symbol;
+                var arraySymbol = (IArrayTypeSymbol) symbol;
                 var makeArrayTypeArguments = arraySymbol.IsSZArray
                     ? new ArgumentSyntax[0]
                     : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
@@ -36,11 +36,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
             {
                 ExpressionSyntax declaringExpression;
 
-                if (typeParameterSymbol.DeclaringMethod is { } method)
+                if ( typeParameterSymbol.DeclaringMethod is { } method )
                 {
                     declaringExpression = CaravelaMethodInfoSerializer.CreateMethodBase( this, method.OriginalDefinition, method.ContainingType.TypeParameters.Any() ? method.ContainingType : null );
                 }
-                else 
+                else
                 {
                     var type = typeParameterSymbol.DeclaringType!.OriginalDefinition;
                     declaringExpression = this.CreateTypeCreationExpressionFromSymbolRecursive( type );
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                         Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
             }
 
-            if ( symbol is INamedTypeSymbol {IsGenericType: true, IsUnboundGenericType: false} namedSymbol &&
+            if ( symbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedSymbol &&
                 !SymbolEqualityComparer.Default.Equals( namedSymbol.OriginalDefinition, namedSymbol ) )
             {
                 var basicType = namedSymbol.ConstructUnboundGenericType();
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         private static ExpressionSyntax CreateTypeCreationExpressionFromSymbolLeaf( ITypeSymbol typeSymbol )
         {
             var documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
-            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Compiler.Intrinsics.GetRuntimeTypeHandle), documentationId );
+            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof( Compiler.Intrinsics.GetRuntimeTypeHandle ), documentationId );
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

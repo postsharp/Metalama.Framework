@@ -1,6 +1,6 @@
+using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -17,11 +17,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             IdentifierName( "System" ),
                             IdentifierName( "DateTime" ) ),
                         IdentifierName( "FromBinary" ) ) )
-                .AddArgumentListArguments( 
+                .AddArgumentListArguments(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.ToBinary() ) ) ) ) ;
+                                    Literal( o.ToBinary() ) ) ) );
         }
     }
 }

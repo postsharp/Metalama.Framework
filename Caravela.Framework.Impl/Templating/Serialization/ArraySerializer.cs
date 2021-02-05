@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             var lt = new List<ExpressionSyntax>();
             foreach ( var o in array )
             {
-                ObjectSerializer.ThrowIfStackTooDeep(o);
+                ObjectSerializer.ThrowIfStackTooDeep( o );
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( o ) );
             }
 
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                             SingletonList(
                                 ArrayRankSpecifier(
                                     SingletonSeparatedList<ExpressionSyntax>(
-                                        OmittedArraySizeExpression()))))
+                                        OmittedArraySizeExpression() ) ) ) )
                     )
                 .WithInitializer(
                     InitializerExpression(

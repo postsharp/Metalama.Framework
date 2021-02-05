@@ -1,10 +1,8 @@
-using Caravela.Framework.Code;
+using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Caravela.Framework.Impl.Templating.Serialization.Reflection;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,11 +10,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 {
     public class CaravelaPropertyInfoTests : ReflectionTestBase
     {
-        private CaravelaLocationInfoSerializer _caravelaLocationInfoSerializer;
+        private readonly CaravelaLocationInfoSerializer _caravelaLocationInfoSerializer;
 
-        public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base(helper)
+        public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._caravelaLocationInfoSerializer = new CaravelaLocationInfoSerializer(new ObjectSerializers());
+            this._caravelaLocationInfoSerializer = new CaravelaLocationInfoSerializer( new ObjectSerializers() );
         }
 
         [Fact]
@@ -29,12 +27,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Property", info.Name );
-                Assert.Equal( typeof(int), info.PropertyType );
+                Assert.Equal( typeof( int ), info.PropertyType );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
             } );
         }
-        
+
         [Fact]
         public void TestGenericProperty()
         {
@@ -45,12 +43,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Property", info.Name );
-                Assert.Equal("T", info.PropertyType.Name );
+                Assert.Equal( "T", info.PropertyType.Name );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
             } );
         }
-        
+
         [Fact]
         public void TestNonAutomaticProperty()
         {
@@ -61,12 +59,12 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Property", info.Name );
-                Assert.Equal( typeof(string), info.PropertyType );
+                Assert.Equal( typeof( string ), info.PropertyType );
                 Assert.NotNull( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
             } );
         }
-        
+
         [Fact]
         public void TestIndexer()
         {
@@ -78,13 +76,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Item", info.Name );
-                Assert.Equal( typeof(string), info.PropertyType );
+                Assert.Equal( typeof( string ), info.PropertyType );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
-                Assert.Single( info.GetIndexParameters());
+                Assert.Single( info.GetIndexParameters() );
             } );
         }
-        
+
         [Fact]
         public void TestIndexerOnString()
         {
@@ -94,23 +92,23 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var stringType = referencedTypes.Single( t => t.Name == "String" );
             var properties = stringType.Properties.GetValue();
             var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( (Property) property  ) ).ToString();
+            var serialized = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( (Property) property ) ).ToString();
             this.AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Chars", info.Name );
-                Assert.Equal( typeof(char), info.PropertyType );
+                Assert.Equal( typeof( char ), info.PropertyType );
                 Assert.Null( info.SetMethod );
                 Assert.NotNull( info.GetMethod );
-                Assert.Single( info.GetIndexParameters());
+                Assert.Single( info.GetIndexParameters() );
             } );
         }
 
         private string SerializeIndexerWithTarget( string code )
         {
-            var compilation  = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Parameters.Any(pp => pp.Name == "target") );
+            var compilation = CreateCompilation( code );
+            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
             var actual = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( property ) ).ToString();
             return actual;
@@ -123,7 +121,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
         private string SerializeProperty( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" );
             var property = (Property) single;
             var actual = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( property ) ).ToString();

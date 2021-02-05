@@ -67,6 +67,7 @@ namespace Caravela.AspectWorkbench.Views
         {
             this._viewModel.TemplateText = this.sourceTextBox.Text;
             this._viewModel.TargetText = this.targetSourceTextBox.Text;
+
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
         }
@@ -114,6 +115,7 @@ namespace Caravela.AspectWorkbench.Views
             {
                 return;
             }
+
             await this._viewModel.SaveTestAsync( dlg.FileName );
         }
 

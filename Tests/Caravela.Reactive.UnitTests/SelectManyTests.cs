@@ -1,5 +1,5 @@
-﻿using Caravela.Reactive.Sources;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Caravela.Reactive.Sources;
 using Xunit;
 
 namespace Caravela.Reactive.UnitTests
@@ -58,7 +58,6 @@ namespace Caravela.Reactive.UnitTests
             Assert.Empty( groups );
         }
 
-
         [Fact]
         public void SelectManyReactiveWithWhereTest()
         {
@@ -70,7 +69,6 @@ namespace Caravela.Reactive.UnitTests
 
             Assert.Single( codeElements.GetValue() );
         }
-
 
         [Fact]
         public void SelectManyImmutableWithWhereTest()

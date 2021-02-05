@@ -1,15 +1,15 @@
-﻿using Caravela.Reactive.Implementation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
-    class SelectManyFromScalarOperator<TSource, TResult> : ReactiveOperator<TSource, IReactiveObserver<TSource>, IEnumerable<TResult>, IReactiveCollectionObserver<TResult>>,
+    internal class SelectManyFromScalarOperator<TSource, TResult> : ReactiveOperator<TSource, IReactiveObserver<TSource>, IEnumerable<TResult>, IReactiveCollectionObserver<TResult>>,
         IReactiveCollection<TResult>
     {
-        IEnumerable<TResult>? _cachedResult;
-        readonly Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> _func;
+        private readonly Func<TSource, ReactiveCollectorToken, IImmutableList<TResult>> _func;
+        private IEnumerable<TResult>? _cachedResult;
 
         public SelectManyFromScalarOperator( IReactiveSource<TSource, IReactiveObserver<TSource>> source, Func<TSource, IImmutableList<TResult>> func ) : base( source )
         {
@@ -26,14 +26,14 @@ namespace Caravela.Reactive.Operators
 
         protected override void OnSourceValueChanged( bool isBreakingChange )
         {
-            var newResult = this._func( this.Source.GetValue(this.ObserverToken), this.ObserverToken );
+            var newResult = this._func( this.Source.GetValue( this.ObserverToken ), this.ObserverToken );
 
             this.OnSourceValueChanged( newResult );
         }
 
         protected override void OnSourceValueChanged( bool isBreakingChange, TSource oldValue, TSource newValue )
         {
-            
+
             var newResult = this._func( newValue, this.ObserverToken );
 
             this.OnSourceValueChanged( newResult );

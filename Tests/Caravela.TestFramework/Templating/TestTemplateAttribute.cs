@@ -1,5 +1,3 @@
 namespace Caravela.TestFramework.Templating
 {
-    
-    
 }

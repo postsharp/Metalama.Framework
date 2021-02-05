@@ -1,9 +1,5 @@
-#region
-
 using System.Collections;
 using System.Collections.Generic;
-
-#endregion
 
 namespace Caravela.Reactive.Implementation
 {
@@ -21,8 +17,6 @@ namespace Caravela.Reactive.Implementation
         {
         }
 
-        
-
         IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator()
         {
             return this.GetValue( this.ObserverToken ).GetEnumerator();
@@ -32,7 +26,6 @@ namespace Caravela.Reactive.Implementation
         {
             return this.GetValue( this.ObserverToken ).GetEnumerator();
         }
-
 
         void IReactiveCollectionObserver<TSource>.OnItemAdded( IReactiveSubscription subscription, TSource item, int newVersion )
         {
@@ -46,8 +39,7 @@ namespace Caravela.Reactive.Implementation
             this.OnSourceItemAdded( subscription, item, in token );
         }
 
-        void IReactiveCollectionObserver<TSource>.OnItemRemoved( IReactiveSubscription subscription, TSource item,
-            int newVersion )
+        void IReactiveCollectionObserver<TSource>.OnItemRemoved( IReactiveSubscription subscription, TSource item, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
             {
@@ -59,8 +51,7 @@ namespace Caravela.Reactive.Implementation
             this.OnSourceItemRemoved( subscription, item, in token );
         }
 
-        void IReactiveCollectionObserver<TSource>.OnItemReplaced( IReactiveSubscription subscription, TSource oldItem,
-            TSource newItem, int newVersion )
+        void IReactiveCollectionObserver<TSource>.OnItemReplaced( IReactiveSubscription subscription, TSource oldItem, TSource newItem, int newVersion )
         {
             if ( !this.ShouldProcessIncrementalChange )
             {
@@ -77,14 +68,10 @@ namespace Caravela.Reactive.Implementation
             return this.Source.Observable.AddObserver( this );
         }
 
+        protected abstract void OnSourceItemAdded( IReactiveSubscription sourceSubscription, TSource item, in IncrementalUpdateToken updateToken );
 
-        protected abstract void OnSourceItemAdded( IReactiveSubscription sourceSubscription, TSource item,
-            in IncrementalUpdateToken updateToken );
+        protected abstract void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, TSource item, in IncrementalUpdateToken updateToken );
 
-        protected abstract void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, TSource item,
-            in IncrementalUpdateToken updateToken );
-
-        protected abstract void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, TSource oldItem,
-            TSource newItem, in IncrementalUpdateToken updateToken );
+        protected abstract void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, TSource oldItem, TSource newItem, in IncrementalUpdateToken updateToken );
     }
 }

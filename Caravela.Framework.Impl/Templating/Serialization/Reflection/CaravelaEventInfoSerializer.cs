@@ -19,9 +19,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         typeCreation,
-                        IdentifierName("GetEvent")))
-                .AddArgumentListArguments( 
-                            Argument(LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ))
+                        IdentifierName( "GetEvent" ) ) )
+                .AddArgumentListArguments(
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
                 .NormalizeWhitespace();
         }
     }

@@ -1,9 +1,9 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -13,10 +13,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         private readonly ObjectSerializers _serializers;
 
         public DictionarySerializer( ObjectSerializers serializers ) => this._serializers = serializers;
-        
+
         // ReSharper disable once UnusedParameter.Local
         // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
-        static object GetDefaultComparer<TK, TV>(Dictionary<TK, TV> dictionary) => EqualityComparer<TK>.Default;
+        private static object GetDefaultComparer<TK, TV>( Dictionary<TK, TV> dictionary ) => EqualityComparer<TK>.Default;
 
         public override ExpressionSyntax SerializeObject( object o )
         {
@@ -38,15 +38,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                                     new SyntaxNodeOrToken[]
                                     {
                                         ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( keyType ) ),
-                                        Token( SyntaxKind.CommaToken ), 
+                                        Token( SyntaxKind.CommaToken ),
                                         ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) ),
                                     } ) ) ) ) );
-            
+
             dynamic dictionary = o;
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;
-            
-            if ( keyType == typeof(string) )
+
+            if ( keyType == typeof( string ) )
             {
                 string? comparerName = null;
                 if ( dictionary.Comparer is StringComparer sc )
@@ -59,15 +59,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     {
                         comparerName = "OrdinalIgnoreCase";
                     }
-                    else if (sc == StringComparer.InvariantCulture)
+                    else if ( sc == StringComparer.InvariantCulture )
                     {
                         comparerName = "InvariantCulture";
                     }
-                    else if (sc == StringComparer.InvariantCultureIgnoreCase)
+                    else if ( sc == StringComparer.InvariantCultureIgnoreCase )
                     {
                         comparerName = "InvariantCultureIgnoreCase";
                     }
-                    else if ( sc.Equals( StringComparer.CurrentCulture ) ) 
+                    else if ( sc.Equals( StringComparer.CurrentCulture ) )
                     {
                         comparerName = "CurrentCulture";
                     }
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, sc );
                     }
                 }
-                else if (dictionary.Comparer.Equals( EqualityComparer<string>.Default ))
+                else if ( dictionary.Comparer.Equals( EqualityComparer<string>.Default ) )
                 {
                     // It's the default string comparer.
                 }
@@ -106,13 +106,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 }
             }
             else if ( actualComparer != defaultComparer )
-            {             
+            {
                 // Unknown custom comparer
                 throw new CaravelaException( GeneralDiagnosticDescriptors.UnsupportedDictionaryComparer, actualComparer );
             }
+
             var lt = new List<InitializerExpressionSyntax>();
             var nonGenericDictionary = (IDictionary) o;
-            foreach ( var key in nonGenericDictionary.Keys)
+            foreach ( var key in nonGenericDictionary.Keys )
             {
                 ThrowIfStackTooDeep( o );
 
@@ -120,18 +121,18 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 lt.Add( InitializerExpression(
                     SyntaxKind.ComplexElementInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
-                        new SyntaxNodeOrToken[]{
+                        new SyntaxNodeOrToken[] {
                             this._serializers.SerializeToRoslynCreationExpression( key ),
                             Token(SyntaxKind.CommaToken),
-                            this._serializers.SerializeToRoslynCreationExpression( value )})) );
+                            this._serializers.SerializeToRoslynCreationExpression( value ) } ) ) );
             }
 
             creationExpression = creationExpression.WithInitializer(
                 InitializerExpression(
-                    SyntaxKind.CollectionInitializerExpression, 
+                    SyntaxKind.CollectionInitializerExpression,
                     SeparatedList<ExpressionSyntax>( lt ) )
                     )
-                .NormalizeWhitespace( );
+                .NormalizeWhitespace();
             return creationExpression;
         }
     }

@@ -7,9 +7,10 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    abstract class BaseCompilation : ICompilation
+    internal abstract class BaseCompilation : ICompilation
     {
         public abstract IReactiveCollection<INamedType> DeclaredTypes { get; }
+
         public abstract IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
 
         [Memo]
@@ -37,14 +38,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 return elementType?.MakeArrayType( type.GetArrayRank() );
             }
 
-            if (type.IsPointer)
+            if ( type.IsPointer )
             {
                 var pointedToType = this.GetTypeByReflectionType( type.GetElementType() );
 
                 return pointedToType?.MakePointerType();
             }
 
-            if (type.IsConstructedGenericType)
+            if ( type.IsConstructedGenericType )
             {
                 var genericDefinition = this.GetTypeByReflectionName( type.GetGenericTypeDefinition().FullName );
                 var genericArguments = type.GenericTypeArguments.Select( this.GetTypeByReflectionType ).ToArray();
@@ -61,9 +62,11 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         internal abstract CSharpCompilation GetPrimeCompilation();
+
         internal abstract IReactiveCollection<AdviceInstance> CollectAdvices();
 
         internal abstract CSharpCompilation GetRoslynCompilation();
+
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
     }
 }

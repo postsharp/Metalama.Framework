@@ -8,7 +8,7 @@ namespace Caravela.Reactive
     /// Side values are guaranteed to be copied (combined), from source to result, for all operators.
     /// </summary>
     /// <remarks>
-    ///<para>
+    /// <para>
     /// By design, there can be only one side value of each <see cref="Type"/> in each <see cref="ReactiveSideValues"/>
     /// instance. This avoids the use of value names.
     /// </para>
@@ -29,16 +29,16 @@ namespace Caravela.Reactive
         /// <returns></returns>
         public static ReactiveSideValues Create( IReactiveSideValue? sideValue ) => sideValue == null ? default : new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
-        
         /// <summary>
         /// Gets the side value of a given type from the current instance.
         /// </summary>
         /// <param name="value">At output, the side value, or <c>null</c> if there is no side value of type <typeparamref name="T"/>.</param>
         /// <typeparam name="T">The type of the side value to get.</typeparam>
         /// <returns><c>true</c> if a side value was found, <c>false</c> otherwise.</returns>
-        public bool TryGetValue<T>(out T? value) where T : class, IReactiveSideValue
+        public bool TryGetValue<T>( out T? value )
+            where T : class, IReactiveSideValue
         {
-            if (this._sideValues.IsDefaultOrEmpty )
+            if ( this._sideValues.IsDefaultOrEmpty )
             {
                 value = null;
                 return false;
@@ -57,7 +57,7 @@ namespace Caravela.Reactive
             return false;
         }
 
-        ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
+        private ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
         {
             // There's typically just one item so this is optimized for this situation.
             var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this._sideValues.Length );
@@ -65,7 +65,7 @@ namespace Caravela.Reactive
             return builder;
         }
 
-        void Combine(ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
+        private void Combine( ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
         {
             for ( var i = 0; i < builder.Count; i++ )
             {
@@ -78,9 +78,7 @@ namespace Caravela.Reactive
 
             // We could not combine, so we append it.
             builder.Add( value );
-
         }
-
 
         /// <summary>
         /// Creates and returns a new <see cref="ReactiveSideValues"/> that combines the values of the current
@@ -104,8 +102,6 @@ namespace Caravela.Reactive
                 return new ReactiveSideValues( builder.MoveToImmutable() );
             }
         }
-
-
 
         /// <summary>
         /// Combines the current side values (typically stemming from the source) with other side values (typically coming from the valuation of the

@@ -8,14 +8,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         ExpressionSyntax CreateExpression();
     }
 
-    interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
+    internal interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
     {
         ExpressionSyntax CreateMemberAccessExpression( string member );
     }
 
     public static class DynamicMetaMemberExtensions
     {
-        public static ExpressionSyntax CreateMemberAccessExpression(this IDynamicMetaMember metaMember, string member)
+        public static ExpressionSyntax CreateMemberAccessExpression( this IDynamicMetaMember metaMember, string member )
         {
             if ( metaMember is IDynamicMetaMemberDifferentiated metaMemberDifferentiated )
             {
@@ -29,7 +29,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     public interface IProceedImpl
     {
         TypeSyntax CreateTypeSyntax();
-        StatementSyntax CreateAssignStatement(string returnValueLocalName);
+
+        StatementSyntax CreateAssignStatement( string returnValueLocalName );
+
         StatementSyntax CreateReturnStatement();
     }
 }

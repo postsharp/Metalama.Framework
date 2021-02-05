@@ -9,7 +9,7 @@ using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    static class ReferenceAssemblyLocator
+    internal static class ReferenceAssemblyLocator
     {
         private static readonly string project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return File.ReadAllLines( referenceAssemlyListFile );
         }
 
-        private static string ComputeHash(string input)
+        private static string ComputeHash( string input )
         {
             using var sha1 = SHA1.Create();
             var hash = sha1.ComputeHash( Encoding.UTF8.GetBytes( input ) );

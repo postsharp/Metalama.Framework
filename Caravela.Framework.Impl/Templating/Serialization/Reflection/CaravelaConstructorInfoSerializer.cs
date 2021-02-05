@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             this._typeSerializer = typeSerializer;
         }
+
         public override ExpressionSyntax Serialize( CaravelaConstructorInfo o )
         {
             return CaravelaMethodInfoSerializer.CreateMethodBase( this._typeSerializer, o );

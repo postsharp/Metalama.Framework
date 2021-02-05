@@ -1,15 +1,10 @@
-#region
-
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Caravela.Reactive.Implementation;
 
-#endregion
-
 namespace Caravela.Reactive.Sources
 {
-
 
     /// <summary>
     /// A reactive hash set.
@@ -28,7 +23,6 @@ namespace Caravela.Reactive.Sources
 
         public ReactiveHashSet( params T[] items ) : this( (IEnumerable<T>) items )
         {
-
         }
 
         public ReactiveHashSet( IEnumerable<T> items ) : this()
@@ -41,18 +35,15 @@ namespace Caravela.Reactive.Sources
         private ReactiveVersionedValue<IEnumerable<T>> VersionedValue =>
             new ReactiveVersionedValue<IEnumerable<T>>( this, this._version );
 
-
         public IEnumerator<T> GetEnumerator()
         {
             return this._items.GetEnumerator();
         }
 
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }
-
 
         void ICollection<T>.Add( T item )
         {
@@ -73,8 +64,7 @@ namespace Caravela.Reactive.Sources
 
                     foreach ( var subscription in this._observers )
                     {
-                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, this._items, this._version,
-                            true );
+                        subscription.Observer.OnValueChanged( subscription.Subscription, oldItems, this._items, this._version, true );
                     }
                 }
             }
@@ -84,7 +74,6 @@ namespace Caravela.Reactive.Sources
         {
             return this._items.Contains( item );
         }
-
 
         public void CopyTo( T[] array, int arrayIndex )
         {
@@ -134,8 +123,6 @@ namespace Caravela.Reactive.Sources
 
         public bool IsReadOnly => false;
 
-
-
         IReactiveSource IReactiveObservable<IReactiveCollectionObserver<T>>.Source => this;
 
         IReactiveSubscription? IReactiveObservable<IReactiveCollectionObserver<T>>.AddObserver(
@@ -143,7 +130,6 @@ namespace Caravela.Reactive.Sources
         {
             return this._observers.AddObserver( observer );
         }
-
 
         bool IReactiveObservable<IReactiveCollectionObserver<T>>.RemoveObserver( IReactiveSubscription subscription )
         {
@@ -180,7 +166,6 @@ namespace Caravela.Reactive.Sources
             {
                 return false;
             }
-
 
             lock ( this.WriteSync )
             {

@@ -1,10 +1,10 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class ArrayType : IArrayType, ITypeInternal
+    internal class ArrayType : IArrayType, ITypeInternal
     {
         private readonly IArrayTypeSymbol _typeSymbol;
 

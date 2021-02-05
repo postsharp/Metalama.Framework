@@ -1,9 +1,9 @@
+using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Caravela.Framework.Impl.Templating.Serialization.Reflection;
-using System.Linq;
-using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,9 +21,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
             {
                 Assert.Equal( "Field", info.Name );
-                Assert.Equal( typeof(int), info.FieldType );
+                Assert.Equal( typeof( int ), info.FieldType );
             } );
         }
+
         [Fact]
         public void TestFieldGeneric()
         {
@@ -40,13 +41,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
         private string SerializeField( string code )
         {
-            var compilation  = CreateCompilation( code );
+            var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( m => m.Name == "Field" );
-            var actual = new CaravelaLocationInfoSerializer(new ObjectSerializers()).Serialize( new CaravelaLocationInfo( (Field) single ) ).ToString();
+            var actual = new CaravelaLocationInfoSerializer( new ObjectSerializers() ).Serialize( new CaravelaLocationInfo( (Field) single ) ).ToString();
             return actual;
         }
 
-        public CaravelaFieldInfoTests(ITestOutputHelper helper) : base(helper)
+        public CaravelaFieldInfoTests( ITestOutputHelper helper ) : base( helper )
         {
         }
     }

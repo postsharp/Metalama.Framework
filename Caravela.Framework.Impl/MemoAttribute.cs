@@ -2,6 +2,8 @@
 
 namespace Caravela.Framework.Impl
 {
-    [AttributeUsage(AttributeTargets.Property)]
-    class MemoAttribute : Attribute { }
+    [AttributeUsage( AttributeTargets.Property )]
+    internal class MemoAttribute : Attribute
+    {
+    }
 }
