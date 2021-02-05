@@ -1,5 +1,5 @@
 
-using Caravela.TestFramework.Templating;
+using Caravela.TestFramework;
 using System.Threading.Tasks;
 using Xunit;
 

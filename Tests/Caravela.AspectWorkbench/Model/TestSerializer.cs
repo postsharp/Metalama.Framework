@@ -9,6 +9,7 @@ using Caravela.TestFramework.Templating;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using System.Text;
+using Caravela.TestFramework;
 
 namespace Caravela.AspectWorkbench.Model
 {

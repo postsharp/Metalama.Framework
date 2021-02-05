@@ -1,5 +1,6 @@
 ﻿using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
 using Caravela.TestFramework.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
