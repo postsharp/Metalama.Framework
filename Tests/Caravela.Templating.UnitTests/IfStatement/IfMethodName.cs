@@ -1,5 +1,6 @@
 using Caravela.TestFramework;
 using System.Threading.Tasks;
+using Caravela.TestFramework.Templating;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -45,7 +46,6 @@ class TargetCode
         private const string IfMethodName_ExpectedOutput = @"{
     Console.WriteLine(1);
 }";
-
 
         [Fact]
         public async Task IfMethodName()

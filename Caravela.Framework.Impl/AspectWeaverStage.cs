@@ -9,50 +9,52 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectWeaverStage : PipelineStage
+    internal sealed class AspectWeaverStage : PipelineStage
     {
-        private readonly IAspectWeaver aspectWeaver;
-        private readonly INamedType aspectType;
+        private readonly IAspectWeaver _aspectWeaver;
+        private readonly INamedType _aspectType;
 
-        public AspectWeaverStage(IAspectWeaver aspectWeaver, INamedType aspectType)
+        public AspectWeaverStage( IAspectWeaver aspectWeaver, INamedType aspectType )
         {
-            this.aspectWeaver = aspectWeaver;
-            this.aspectType = aspectType;
+            this._aspectWeaver = aspectWeaver;
+            this._aspectType = aspectType;
         }
 
-        public override AspectCompilation Transform(AspectCompilation input)
+        public override AspectCompilation Transform( AspectCompilation input )
         {
-            var aspectInstances = input.AspectsByAspectType[this.aspectType.FullName].GetValue().ToImmutableList();
+            var aspectInstances = input.AspectsByAspectType[this._aspectType.FullName].GetValue().ToImmutableList();
 
             if ( aspectInstances.IsEmpty )
+            {
                 return input;
+            }
 
             var diagnosticSink = new DiagnosticSink();
 
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext(
-                this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
+                this._aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
             CSharpCompilation newCompilation;
             try
             {
-                newCompilation = this.aspectWeaver.Transform( context );
+                newCompilation = this._aspectWeaver.Transform( context );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this.aspectType, ex.ToDiagnosticString() ) );
+                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
-            return input.Update(diagnosticSink.Diagnostics, resources, new SourceCompilation(newCompilation));
+            return input.Update( diagnosticSink.Diagnostics, resources, new SourceCompilation( newCompilation ) );
         }
 
-        class DiagnosticSink : IDiagnosticSink
+        private class DiagnosticSink : IDiagnosticSink
         {
             public List<Diagnostic> Diagnostics { get; } = new();
 
-            public void AddDiagnostic(Diagnostic diagnostic) => this.Diagnostics.Add(diagnostic);
+            public void AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
         }
     }
 }

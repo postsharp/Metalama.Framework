@@ -1,9 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    class DiagnosticsException : CaravelaException
+    internal class DiagnosticsException : CaravelaException
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 

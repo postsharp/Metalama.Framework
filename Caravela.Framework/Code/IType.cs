@@ -1,5 +1,5 @@
-using Caravela.Framework.Project;
 using System;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
 {
@@ -16,10 +16,9 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
 
-        
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
-        /// given as an <see cref="IType"/>. 
+        /// given as an <see cref="IType"/>.
         /// </summary>
         /// <param name="other">Another type.</param>
         /// <returns></returns>
@@ -27,19 +26,19 @@ namespace Caravela.Framework.Code
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
-        /// given as a reflection <see cref="Type"/>. 
+        /// given as a reflection <see cref="Type"/>.
         /// </summary>
         /// <param name="other">Another type.</param>
         /// <returns></returns>
         bool Is( Type other );
-        
+
         // TODO: Define Is(string)
         // TODO: Define Equals
 
         /// <summary>
         /// Creates an array type from the current type.
         /// </summary>
-        /// <param name="rank">Rank of the array/</param>
+        /// <param name="rank">Rank of the array/.</param>
         /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
         IArrayType MakeArrayType( int rank = 1 );
 

@@ -1,13 +1,9 @@
-using Caravela.Compiler;
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -16,14 +12,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
         // binding flags for private indexers, and that overload is complicated.
-        
-        private readonly ObjectSerializers _serializers;
-        private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
 
-        public CaravelaLocationInfoSerializer( ObjectSerializers serializers, CaravelaTypeSerializer caravelaTypeSerializer )
+        private readonly ObjectSerializers _serializers;
+
+        public CaravelaLocationInfoSerializer( ObjectSerializers serializers )
         {
             this._serializers = serializers;
-            this._caravelaTypeSerializer = caravelaTypeSerializer;
         }
 
         public override ExpressionSyntax Serialize( CaravelaLocationInfo o )
@@ -50,13 +44,13 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 else
                 {
                     var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Property.Type ) );
-                    List<ExpressionSyntax> parameterTypes = new List<ExpressionSyntax>();
-                    foreach ( IParameter parameter in o.Property.Parameters )
+                    var parameterTypes = new List<ExpressionSyntax>();
+                    foreach ( var parameter in o.Property.Parameters )
                     {
                         parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( parameter.Type ) ) );
                     }
 
-                    string propertyName = o.Property.Symbol.MetadataName;
+                    var propertyName = o.Property.Symbol.MetadataName;
 
                     propertyInfo = InvocationExpression(
                                 MemberAccessExpression(
@@ -84,14 +78,14 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                         .WithInitializer(
                                             InitializerExpression(
                                                 SyntaxKind.ArrayInitializerExpression,
-                                                SyntaxFactory.SeparatedList( parameterTypes ) ) ) )
+                                                SeparatedList( parameterTypes ) ) ) )
                             )
                         ;
                 }
             }
             else
             {
-                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Field.DeclaringType ) );
+                var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( o.Field!.DeclaringType ) );
                 propertyInfo = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -117,22 +111,21 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                 .NormalizeWhitespace();
         }
 
-        static ExpressionSyntax MemberAccess(params string[] names)
+        private static ExpressionSyntax MemberAccess( params string[] names )
         {
-            ExpressionSyntax result = IdentifierName(names[0]);
-            for (int i = 1; i < names.Length; i++)
+            ExpressionSyntax result = IdentifierName( names[0] );
+            for ( var i = 1; i < names.Length; i++ )
             {
-                result = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName(names[i]));
+                result = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName( names[i] ) );
             }
+
             return result!;
         }
 
-
         private static ExpressionSyntax CreateBindingFlags()
         {
-            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance"}.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
+            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
                 .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
     }
 }
-

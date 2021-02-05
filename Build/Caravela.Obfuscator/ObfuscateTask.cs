@@ -1,89 +1,112 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using PostSharp.Extensibility;
 using PostSharp.Reflection;
 using PostSharp.Sdk.CodeModel;
 using PostSharp.Sdk.CodeModel.Helpers;
 using PostSharp.Sdk.Collections;
-using PostSharp.Extensibility;
 using PostSharp.Sdk.Extensibility;
-using PostSharp.Sdk.Extensibility.Configuration;
 
 namespace Caravela.Obfuscator
 {
+    /// <summary>
+    /// A PostSharp SDK task that obfuscates the input assembly.
+    /// </summary>
     public sealed class ObfuscateTask : Task
     {
-        private readonly Dictionary<NamedMetadataDeclaration, string> obfuscatedDeclarations = new Dictionary<NamedMetadataDeclaration, string>(4096);
+        private readonly Dictionary<NamedMetadataDeclaration, string> _obfuscatedDeclarations = new Dictionary<NamedMetadataDeclaration, string>( 4096 );
+        private readonly Set<TypeDefDeclaration> _obfuscatedTypes = new Set<TypeDefDeclaration>( 1024 );
 
-        private IType obfuscationAttributeType;
-        private readonly Set<TypeDefDeclaration> obfuscatedTypes = new Set<TypeDefDeclaration>( 1024 );
-        private ObfuscationTable currentObfuscationTable;
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        private IType _obfuscationAttributeType;
+        private ObfuscationTable _currentObfuscationTable;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
+        /// <summary>
+        /// Initializes the task.
+        /// </summary>
         protected override void Initialize()
         {
             base.Initialize();
 
-            this.currentObfuscationTable = new ObfuscationTable();
+            this._currentObfuscationTable = new ObfuscationTable();
         }
 
+        /// <summary>
+        /// Gets or sets the path to the file where the obfuscation map will be written.
+        /// </summary>
         [ConfigurableProperty]
-        public string MapFile { get; set; }
+        public string? MapFile { get; set; }
 
+        /// <summary>
+        /// Gets or sets the project path.
+        /// </summary>
         [ConfigurableProperty]
-        public string RootPath { get; set; }
+        public string? RootPath { get; set; }
 
+        /// <summary>
+        /// Executes the task.
+        /// </summary>
+        /// <returns></returns>
         public override bool Execute()
         {
-            this.obfuscationAttributeType = (IType)this.Project.Module.Cache.GetType(typeof(ObfuscationAttribute));
+            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof( ObfuscationAttribute ) );
 
             // IMPORTANT: Pdb obfuscation has to be done before changing declaration names.
             // Obfuscate source documents in the PDB.
-            ObfuscatePdb();
+            this.ObfuscatePdb();
 
             // Obfuscate types and their members.
-            IEnumerator<MetadataDeclaration> typeEnumerator = this.Project.Module.GetDeclarationEnumerator(TokenType.TypeDef);
+            var typeEnumerator = this.Project.Module.GetDeclarationEnumerator( TokenType.TypeDef );
 
             // Scan all types to find out what must be obfuscated.
-            while (typeEnumerator.MoveNext())
+            while ( typeEnumerator.MoveNext() )
             {
-                TypeDefDeclaration type = (TypeDefDeclaration)typeEnumerator.Current;
+                var type = (TypeDefDeclaration) typeEnumerator.Current;
 
                 // Ignore the type if public or serializable.
-                PrepareType(type);
+                this.PrepareType( type );
             }
 
             // Obfuscate.
-            foreach (KeyValuePair<NamedMetadataDeclaration, string> pair in obfuscatedDeclarations)
+            foreach ( var pair in this._obfuscatedDeclarations )
             {
                 pair.Key.Name = pair.Value;
-
             }
 
-            foreach (TypeDefDeclaration obfuscatedType in obfuscatedTypes)
+            foreach ( var obfuscatedType in this._obfuscatedTypes )
             {
-                this.UpdateMemberRefs(obfuscatedType);
+                this.UpdateMemberRefs( obfuscatedType );
             }
 
             // Correct MemberRefs in TypeSpecs
-            foreach (TypeSpecDeclaration typeSpec in this.Project.Module.TypeSpecs)
+            foreach ( var typeSpec in this.Project.Module.TypeSpecs )
             {
-                TypeDefDeclaration typeDef = typeSpec.GetTypeDefinition(BindingOptions.DontThrowException);
-                if (typeDef == null || typeDef.Module != this.Project.Module)
+                var typeDef = typeSpec.GetTypeDefinition( BindingOptions.DontThrowException );
+                if ( typeDef == null || typeDef.Module != this.Project.Module )
+                {
                     continue;
+                }
 
-                this.UpdateMemberRefs(typeSpec);
+                this.UpdateMemberRefs( typeSpec );
             }
 
-            Message.Write(MessageLocation.Unknown, SeverityType.Info, "OB001", "{0} names hashed, {1} conflicts", this.currentObfuscationTable.Count,
-                           this.currentObfuscationTable.ConflictCount);
+            Message.Write(
+                MessageLocation.Unknown,
+                SeverityType.Info,
+                "OB001",
+                "{0} names hashed, {1} conflicts",
+                this._currentObfuscationTable.Count,
+                this._currentObfuscationTable.ConflictCount );
 
-            if (!string.IsNullOrEmpty(this.MapFile))
+            if ( !string.IsNullOrEmpty( this.MapFile ) )
             {
-                Message.Write(MessageLocation.Unknown, SeverityType.Info, "OB001", "Writing obfuscation map to {0}.", this.MapFile);
-                using (TextWriter writer = File.CreateText(this.MapFile))
+                Message.Write( MessageLocation.Unknown, SeverityType.Info, "OB001", "Writing obfuscation map to {0}.", this.MapFile );
+                using ( TextWriter writer = File.CreateText( this.MapFile ) )
                 {
-                    this.currentObfuscationTable.Write(writer);
+                    this._currentObfuscationTable.Write( writer );
                 }
             }
 
@@ -92,119 +115,122 @@ namespace Caravela.Obfuscator
 
         private void ObfuscatePdb()
         {
-            if (this.Project.Module.SourceDocuments != null)
+            if ( this.Project.Module.SourceDocuments != null )
             {
-                string rootFullPath = String.IsNullOrEmpty(this.RootPath) ? null : Path.GetFullPath(this.RootPath);
+                var rootFullPath = string.IsNullOrEmpty( this.RootPath ) ? null : Path.GetFullPath( this.RootPath );
 
-                foreach (ISourceDocument sourceDocument in this.Project.Module.SourceDocuments)
+                foreach ( var sourceDocument in this.Project.Module.SourceDocuments )
                 {
-                    IMutableSourceDocument mutableSourceDocument = (IMutableSourceDocument) sourceDocument;
-                    if (!string.IsNullOrEmpty(mutableSourceDocument.FileName))
+                    var mutableSourceDocument = (IMutableSourceDocument) sourceDocument;
+                    if ( !string.IsNullOrEmpty( mutableSourceDocument.FileName ) )
                     {
                         string hashablePath;
-                        if (rootFullPath != null)
+                        if ( rootFullPath != null )
                         {
-                            string fileFullPath = Path.GetFullPath(mutableSourceDocument.FileName);
+                            var fileFullPath = Path.GetFullPath( mutableSourceDocument.FileName );
 
-                            if (fileFullPath.StartsWith(rootFullPath))
-                                hashablePath = fileFullPath.Substring(rootFullPath.Length);
-                            else
-                                hashablePath = fileFullPath;
+                            hashablePath = fileFullPath.StartsWith( rootFullPath, StringComparison.Ordinal ) ? fileFullPath.Substring( rootFullPath.Length ) : fileFullPath;
                         }
                         else
+                        {
                             hashablePath = mutableSourceDocument.FileName;
+                        }
 
-                        mutableSourceDocument.FileName = this.currentObfuscationTable.CreateHash(hashablePath);
+                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath );
                     }
                 }
             }
 
-            IMethodBodyVisitor[] visitors = new[] { new InstructionBlockVisitor() };
-           
-            IEnumerator<MetadataDeclaration> methodEnumerator = this.Project.Module.GetDeclarationEnumerator(TokenType.MethodDef);
-            while (methodEnumerator.MoveNext())
+            IMethodBodyVisitor[] visitors = { new InstructionBlockVisitor() };
+
+            var methodEnumerator = this.Project.Module.GetDeclarationEnumerator( TokenType.MethodDef );
+            while ( methodEnumerator.MoveNext() )
             {
-                MethodDefDeclaration method = (MethodDefDeclaration)methodEnumerator.Current;
-                if (method.HasBody)
+                var method = (MethodDefDeclaration) methodEnumerator.Current!;
+                if ( method.HasBody )
                 {
                     method.MethodBody.CustomDebuggingInformation = null;
-                    method.MethodBody.Visit(visitors, MethodBodyVisitLevel.Block );
+                    method.MethodBody.Visit( visitors, MethodBodyVisitLevel.Block );
                 }
             }
         }
 
-        class InstructionBlockVisitor : IMethodBodyVisitor
+        private class InstructionBlockVisitor : IMethodBodyVisitor
         {
-            public void EnterInstructionBlock(InstructionBlock instructionBlock)
+            public void EnterInstructionBlock( InstructionBlock instructionBlock )
             {
                 instructionBlock.CustomDebuggingInformation = null;
-                for ( int i = 0; i < instructionBlock.LocalConstantSymbolCount; i++ )
+                for ( var i = 0; i < instructionBlock.LocalConstantSymbolCount; i++ )
                 {
-                    instructionBlock.GetLocalConstantSymbol(i).Name = "c" + i;
+                    instructionBlock.GetLocalConstantSymbol( i ).Name = "c" + i;
                 }
-                for (int i = 0; i < instructionBlock.LocalVariableSymbolCount; i++)
+
+                for ( var i = 0; i < instructionBlock.LocalVariableSymbolCount; i++ )
                 {
-                    instructionBlock.GetLocalVariableSymbol(i).Name = "v" + i;
+                    instructionBlock.GetLocalVariableSymbol( i ).Name = "v" + i;
                 }
             }
 
-            public void EnterInstructionSequence(InstructionSequence instructionSequence)
+            public void EnterInstructionSequence( InstructionSequence instructionSequence )
             {
-                
             }
 
-            public void LeaveInstructionBlock(InstructionBlock instructionBlock)
+            public void LeaveInstructionBlock( InstructionBlock instructionBlock )
             {
-                
             }
 
-            public void LeaveInstructionSequence(InstructionSequence instructionSequence)
+            public void LeaveInstructionSequence( InstructionSequence instructionSequence )
             {
-                
             }
 
-            public void VisitInstruction(InstructionReader instructionReader)
+            public void VisitInstruction( InstructionReader instructionReader )
             {
-                
             }
         }
 
-        private readonly TagId excludeObfuscationTag = TagId.Register( "1F50C631-989F-48F9-B680-D64D374ED9F3" );
-        private void ExcludeObfuscation(MetadataDeclaration declaration)
+        private readonly TagId _excludeObfuscationTag = TagId.Register( "1F50C631-989F-48F9-B680-D64D374ED9F3" );
+
+        private void ExcludeObfuscation( MetadataDeclaration declaration )
         {
-            declaration.SetTag<object>( excludeObfuscationTag, "exclude" );
+            declaration.SetTag<object>( this._excludeObfuscationTag, "exclude" );
         }
 
-        private bool IsObfuscationExcluded(MetadataDeclaration declaration)
+        private bool IsObfuscationExcluded( MetadataDeclaration declaration )
         {
-            return IsObfuscationExcluded( declaration, false );
+            return this.IsObfuscationExcluded( declaration, false );
         }
 
-        private bool IsObfuscationExcluded(MetadataDeclaration declaration, bool inherited)
+        private bool IsObfuscationExcluded( MetadataDeclaration declaration, bool inherited )
         {
-            if (declaration.GetTag<object>(excludeObfuscationTag) != null)
+            if ( declaration.GetTag<object>( this._excludeObfuscationTag ) != null )
+            {
                 return true;
+            }
 
-            IEnumerator<CustomAttributeDeclaration> e = declaration.CustomAttributes.GetByTypeEnumerator( this.obfuscationAttributeType );
+            var e = declaration.CustomAttributes.GetByTypeEnumerator( this._obfuscationAttributeType );
             if ( e.MoveNext() )
             {
-                ObfuscationAttribute obfuscationAttribute = (ObfuscationAttribute) e.Current.ConstructRuntimeObject();
-                if (obfuscationAttribute.Exclude)
+                var obfuscationAttribute = (ObfuscationAttribute) e.Current!.ConstructRuntimeObject();
+                if ( obfuscationAttribute.Exclude )
                 {
-                    if (inherited)
+                    if ( inherited )
+                    {
                         return obfuscationAttribute.ApplyToMembers;
-                    else 
+                    }
+                    else
+                    {
                         return true;
+                    }
                 }
             }
 
-            switch ( declaration.GetTokenType())
+            switch ( declaration.GetTokenType() )
             {
                 case TokenType.MethodDef:
                 case TokenType.FieldDef:
                 case TokenType.Property:
                 case TokenType.Event:
-                    return IsObfuscationExcluded( (MetadataDeclaration) ((IMember) declaration).DeclaringType, true );
+                    return this.IsObfuscationExcluded( (MetadataDeclaration) ((IMember) declaration).DeclaringType, true );
             }
 
             return false;
@@ -213,135 +239,148 @@ namespace Caravela.Obfuscator
         private void PrepareType( TypeDefDeclaration type )
         {
             // Obfuscate base types first.
-            if ( !this.obfuscatedTypes.AddIfAbsent( type ) )
-                return;
-
-
-            TypeDefDeclaration baseType = type.BaseTypeDef;
-            if ( baseType != null && baseType.Module == type.Module )
-                this.PrepareType( baseType );
-
-            foreach ( InterfaceImplementationDeclaration interfaceImplementation in type.InterfaceImplementations )
+            if ( !this._obfuscatedTypes.AddIfAbsent( type ) )
             {
-                TypeDefDeclaration interfaceTypeDef = interfaceImplementation.ImplementedInterface.GetTypeDefinition();
+                return;
+            }
+
+            var baseType = type.BaseTypeDef;
+            if ( baseType != null && baseType.Module == type.Module )
+            {
+                this.PrepareType( baseType );
+            }
+
+            foreach ( var interfaceImplementation in type.InterfaceImplementations )
+            {
+                var interfaceTypeDef = interfaceImplementation.ImplementedInterface.GetTypeDefinition();
                 if ( interfaceTypeDef.Module == this.Project.Module )
                 {
-                    this.PrepareType(interfaceTypeDef);
+                    this.PrepareType( interfaceTypeDef );
                 }
             }
 
-            bool isEnum = type.IsEnum();
-            
+            var isEnum = type.IsEnum();
 
             // Analyze implemented public interfaces.
-            Set<ITypeSignature> implementedInterfaces = InterfaceHelper.GetAllImplementedInterfaces( type );
+            var implementedInterfaces = InterfaceHelper.GetAllImplementedInterfaces( type );
 
             // Obfuscate type names.
             if ( !type.IsPublic() &&
                  (type.Attributes & TypeAttributes.Serializable) == 0 &&
-                 !IsObfuscationExcluded( type ))
+                 !this.IsObfuscationExcluded( type ) )
             {
-                obfuscatedDeclarations.Add( type, this.currentObfuscationTable.CreateHash( type.Name ) );
+                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name ) );
             }
 
             // Obfuscate generic parameter names.
-            foreach ( GenericParameterDeclaration genericParameter in type.GenericParameters )
+            foreach ( var genericParameter in type.GenericParameters )
             {
                 genericParameter.Name = string.Format( "!{0:x}", genericParameter.Ordinal );
             }
 
             // Don't do anything else for delegates.
-            if (type.IsDelegate())
+            if ( type.IsDelegate() )
+            {
                 return;
+            }
 
             // Obfuscate properties.
-            foreach (PropertyDeclaration property in type.Properties.ToArray())
+            foreach ( var property in type.Properties.ToArray() )
             {
-                if (!property.IsPublic())
+                if ( !property.IsPublic() )
                 {
-                    if (IsObfuscationExcluded(property))
+                    if ( this.IsObfuscationExcluded( property ) )
                     {
-                        foreach (MethodSemanticDeclaration member in property.Members)
+                        foreach ( var member in property.Members )
                         {
-                            ExcludeObfuscation(member.Method);
+                            this.ExcludeObfuscation( member.Method );
                         }
+
                         continue;
                     }
 
-
-                    type.Properties.Remove(property);
+                    type.Properties.Remove( property );
                 }
             }
 
             // Obfuscate events.
-            foreach (EventDeclaration @event in type.Events.ToArray())
+            foreach ( var @event in type.Events.ToArray() )
             {
-                if (!@event.IsPublic())
+                if ( !@event.IsPublic() )
                 {
-                    if (IsObfuscationExcluded(@event))
+                    if ( this.IsObfuscationExcluded( @event ) )
                     {
-                        foreach (MethodSemanticDeclaration member in @event.Members)
+                        foreach ( var member in @event.Members )
                         {
-                            ExcludeObfuscation(member.Method);
+                            this.ExcludeObfuscation( member.Method );
                         }
+
                         continue;
                     }
 
-                    type.Events.Remove(@event);
+                    type.Events.Remove( @event );
                 }
             }
 
             // Obfuscate methods.
-            foreach ( MethodDefDeclaration method in type.Methods )
+            foreach ( var method in type.Methods )
             {
 
-             
                 // Ignore methods with special names.
                 if ( (method.Attributes & MethodAttributes.RTSpecialName) != 0 )
+                {
                     continue;
+                }
 
-                bool mustNotRename = false;
-                List<IMethod> methodsRequiringExplicitOverrideIfNotRenamed = new List<IMethod>();
+                var mustNotRename = false;
+                var methodsRequiringExplicitOverrideIfNotRenamed = new List<IMethod>();
 
-                if (method.IsVirtual)
+                if ( method.IsVirtual )
                 {
                     // Do not obfuscate virtual methods that override a public or an external method.
-                    MethodDefDeclaration baseMethod = method.GetParentDefinition( true );
+                    var baseMethod = method.GetParentDefinition( true );
                     if ( baseMethod.Module != this.Project.Module ||
-                         (baseMethod != method && !obfuscatedDeclarations.ContainsKey( baseMethod )) )
+                         (baseMethod != method && !this._obfuscatedDeclarations.ContainsKey( baseMethod )) )
                     {
                         mustNotRename = true;
                     }
 
-
-                    // If the method is an implicit implementation of a public interface, 
+                    // If the method is an implicit implementation of a public interface,
                     if ( method.Visibility == Visibility.Public )
                     {
-                     
-                        foreach (ITypeSignature implementedInterfaceType in implementedInterfaces)
+
+                        foreach ( var implementedInterfaceType in implementedInterfaces )
                         {
-                            TypeDefDeclaration implementedInterfaceTypeDef = implementedInterfaceType.GetTypeDefinition();
+                            var implementedInterfaceTypeDef = implementedInterfaceType.GetTypeDefinition();
 
-                            if ( implementedInterfaceTypeDef == type ) continue;
-
-                            foreach ( MethodDefDeclaration interfaceMethod in implementedInterfaceTypeDef.Methods.GetByName( method.Name ) )
+                            if ( implementedInterfaceTypeDef == type )
                             {
+                                continue;
+                            }
 
+                            foreach ( var interfaceMethod in implementedInterfaceTypeDef.Methods.GetByName( method.Name ) )
+                            {
 
                                 // Compare the signature.
                                 if ( interfaceMethod.Parameters.Count != method.Parameters.Count )
+                                {
                                     continue;
+                                }
 
-                                IGenericMethodDefinition translatedInterfaceMethod = (IGenericMethodDefinition) interfaceMethod.Translate( this.Project.Module );
-                                GenericMap genericMap = new GenericMap( this.Project.Module, implementedInterfaceType.GetGenericContext(),
-                                                                        translatedInterfaceMethod.GetGenericContext().
-                                                                            GetGenericMethodParameters() );
+                                var translatedInterfaceMethod = (IGenericMethodDefinition) interfaceMethod.Translate( this.Project.Module );
+                                var genericMap = new GenericMap(
+                                    this.Project.Module,
+                                    implementedInterfaceType.GetGenericContext(),
+                                    translatedInterfaceMethod.GetGenericContext()
+                                                             .GetGenericMethodParameters() );
 
                                 if ( !translatedInterfaceMethod.MapGenericArguments( genericMap ).DefinitionMatchesReference( method ) )
+                                {
                                     continue;
+                                }
 
                                 // If this interface method is renamed, we may just rename the current method.
-                                if ( this.obfuscatedDeclarations.ContainsKey( interfaceMethod ) )
+                                if ( this._obfuscatedDeclarations.ContainsKey( interfaceMethod ) )
                                 {
                                     methodsRequiringExplicitOverrideIfNotRenamed.Add( translatedInterfaceMethod.GetGenericInstance( genericMap ) );
                                 }
@@ -350,73 +389,74 @@ namespace Caravela.Obfuscator
                                     mustNotRename = true;
                                 }
                             }
-
                         }
-
-                    
-
                     }
                 }
 
-                if (!mustNotRename)
+                if ( !mustNotRename )
                 {
                     // Ignore the member if it is public.
                     if ( method.IsPublic() )
+                    {
                         mustNotRename = true;
+                    }
 
-                    if (IsObfuscationExcluded(method))
+                    if ( this.IsObfuscationExcluded( method ) )
+                    {
                         mustNotRename = true;
+                    }
 
                     // Dont obfuscate P-Invoke.
-                    if ((method.Attributes & MethodAttributes.PinvokeImpl) != 0)
+                    if ( (method.Attributes & MethodAttributes.PinvokeImpl) != 0 )
+                    {
                         mustNotRename = true;
+                    }
                 }
 
-                if (mustNotRename)
+                if ( mustNotRename )
                 {
-                    foreach (IMethod interfaceMethod in methodsRequiringExplicitOverrideIfNotRenamed)
+                    foreach ( var interfaceMethod in methodsRequiringExplicitOverrideIfNotRenamed )
                     {
-                        method.InterfaceImplementations.Add(interfaceMethod);
+                        method.InterfaceImplementations.Add( interfaceMethod );
                     }
                 }
                 else
                 {
                     // Obfuscate the name of the current method.
-                    obfuscatedDeclarations.Add(method, this.currentObfuscationTable.CreateHash(method.Name));
-
+                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name ) );
                 }
 
-
-                if (!method.IsPublic())
+                if ( !method.IsPublic() )
                 {
                     // Obfuscate parameter names.
-                    foreach (ParameterDeclaration parameter in method.Parameters)
+                    foreach ( var parameter in method.Parameters )
                     {
-                        parameter.Name = string.Format("_{0:x}", parameter.Ordinal);
+                        parameter.Name = string.Format( "_{0:x}", parameter.Ordinal );
                     }
 
                     // Obfuscate generic parameter names.
-                    foreach (GenericParameterDeclaration genericParameter in method.GenericParameters)
+                    foreach ( var genericParameter in method.GenericParameters )
                     {
-                        genericParameter.Name = string.Format("??{0:x}", genericParameter.Ordinal);
+                        genericParameter.Name = string.Format( "??{0:x}", genericParameter.Ordinal );
                     }
                 }
-
-          
             }
 
-        
             // Obfuscate fields.
-            foreach ( FieldDefDeclaration field in type.Fields.ToArray() )
+            foreach ( var field in type.Fields.ToArray() )
             {
-                if ( IsObfuscationExcluded(field) )
+                if ( this.IsObfuscationExcluded( field ) )
+                {
                     continue;
+                }
 
                 // Ignore public fields and fields of serializable types, or fields with a special name.
                 if ( field.IsPublic() ||
-                     ((((field.DeclaringType.Attributes & TypeAttributes.Serializable) != 0)) &&
+                     (((field.DeclaringType.Attributes & TypeAttributes.Serializable) != 0) &&
                       (field.Attributes & (FieldAttributes.NotSerialized | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName)) != 0) )
+                {
                     continue;
+                }
 
                 if ( field.IsConst )
                 {
@@ -425,42 +465,44 @@ namespace Caravela.Obfuscator
                 }
 
                 if ( isEnum )
+                {
                     continue;
+                }
 
-                obfuscatedDeclarations.Add( field, this.currentObfuscationTable.CreateHash( field.Name ) );
+                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name ) );
             }
-
-            
         }
-
-     
 
         private void UpdateMemberRefs( IMemberRefResolutionScope scope )
         {
-            List<MemberRefDeclaration> refDeclarations = new List<MemberRefDeclaration>();
-            
+            var refDeclarations = new List<MemberRefDeclaration>();
+
             // Collect FieldRefs.
-            foreach ( FieldRefDeclaration fieldRef in scope.FieldRefs )
+            foreach ( var fieldRef in scope.FieldRefs )
             {
                 if ( fieldRef.GetFieldDefinition( BindingOptions.DontThrowException ) != null )
+                {
                     continue;
+                }
 
                 refDeclarations.Add( fieldRef );
             }
 
             // Collect MethodRefs.
-            foreach ( MethodRefDeclaration methodRef in scope.MethodRefs )
+            foreach ( var methodRef in scope.MethodRefs )
             {
                 if ( methodRef.GetMethodDefinition( BindingOptions.DontThrowException ) != null )
+                {
                     continue;
+                }
 
                 refDeclarations.Add( methodRef );
             }
-            
+
             // Update them afterwards to avoid "collection modified" exceptions.
-            foreach (MemberRefDeclaration memberRef in refDeclarations)
+            foreach ( var memberRef in refDeclarations )
             {
-                memberRef.Name = this.currentObfuscationTable.GetHash( memberRef.Name );
+                memberRef.Name = this._currentObfuscationTable.GetHash( memberRef.Name );
             }
         }
     }

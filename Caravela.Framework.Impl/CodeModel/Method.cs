@@ -13,40 +13,42 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class Method : CodeElement, IMethod
     {
         private readonly IMethodSymbol _symbol;
+
         protected internal override ISymbol Symbol => this._symbol;
 
         internal override SourceCompilation Compilation { get; }
 
-        public Method(IMethodSymbol symbol, SourceCompilation compilation)
+        public Method( IMethodSymbol symbol, SourceCompilation compilation )
         {
             this._symbol = symbol;
             this.Compilation = compilation;
         }
 
         [Memo]
-        public IParameter? ReturnParameter => ((IMethod)this).MethodKind is MethodKind.Constructor ? null : new MethodReturnParameter(this);
+        public IParameter? ReturnParameter => ((IMethod) this).MethodKind is MethodKind.Constructor ? null : new MethodReturnParameter( this );
 
         [Memo]
-        public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType);
+        public IType ReturnType => this.SymbolMap.GetIType( this._symbol.ReturnType );
 
         [Memo]
         public IImmutableList<IMethod> LocalFunctions =>
             this._symbol.DeclaringSyntaxReferences
-                .Select(r => r.GetSyntax())
+                .Select( r => r.GetSyntax() )
+
                 // don't descend into nested local functions
-                .SelectMany(n => n.DescendantNodes(descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax))
+                .SelectMany( n => n.DescendantNodes( descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax ) )
                 .OfType<LocalFunctionStatementSyntax>()
-                .Select(f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel(f.SyntaxTree).GetDeclaredSymbol(f)!)
-                .Select(s => this.SymbolMap.GetMethod(s))
+                .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
+                .Select( s => this.SymbolMap.GetMethod( s ) )
                 .ToImmutableList();
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select(p => new Parameter(p, this)).ToImmutableList<IParameter>();
+        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableList<IParameter>();
 
         [Memo]
         public IImmutableList<IGenericParameter> GenericParameters =>
             this._symbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
-        
+
         MethodKind IMethod.MethodKind => this._symbol.MethodKind switch
         {
             RoslynMethodKind.Ordinary => MethodKind.Default,
@@ -78,13 +80,13 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override ICodeElement ContainingElement => this._symbol.ContainingSymbol switch
         {
-            INamedTypeSymbol type => this.SymbolMap.GetNamedType(type),
-            IMethodSymbol method => this.SymbolMap.GetMethod(method),
+            INamedTypeSymbol type => this.SymbolMap.GetNamedType( type ),
+            IMethodSymbol method => this.SymbolMap.GetMethod( method ),
             _ => throw new InvalidOperationException()
         };
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -105,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override IType Type => this.Method.ReturnType;
 
-            public override ICodeElement? ContainingElement => this.Method;
+            public override ICodeElement ContainingElement => this.Method;
 
             [Memo]
             public override IReactiveCollection<IAttribute> Attributes =>

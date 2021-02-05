@@ -1,6 +1,3 @@
-﻿
-#region Using directives
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,10 +5,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
-
-#endregion
-
-#pragma warning disable CA1034 // Nested types should not be visible
 
 namespace Caravela.Framework.Impl.Collections
 {
@@ -24,44 +17,33 @@ namespace Caravela.Framework.Impl.Collections
     /// <typeparam name="TValue">Type of values.</typeparam>
     internal sealed class SkipListIndexedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IList<KeyValuePair<TKey, TValue>>
     {
-        #region Private Member Variables
-
-        private Node _head; // a reference to the head of the SkipList
         private const double _prob = 0.5; // the probability used in determining the heights of the SkipListNodes
-        private int _count;
         private readonly Random _random;
         private readonly IComparer<TKey> _comparer;
-        private ValueCollection _valueCollection;
-
-        #endregion
-
-        #region Constructors
+        private Node _head; // a reference to the head of the SkipList
+        private ValueCollection? _valueCollection;
 
         public SkipListIndexedDictionary()
-            : this(null, 0)
-        {
-
-        }
-
-        internal SkipListIndexedDictionary(int seed)
-            : this(null, seed)
+            : this( null, 0 )
         {
         }
 
-        public SkipListIndexedDictionary(IComparer<TKey>? comparer) : this(comparer,0)
+        internal SkipListIndexedDictionary( int seed )
+            : this( null, seed )
         {
-            
         }
-        public SkipListIndexedDictionary(IComparer<TKey>? comparer, int seed)
+
+        public SkipListIndexedDictionary( IComparer<TKey>? comparer ) : this( comparer, 0 )
+        {
+        }
+
+        public SkipListIndexedDictionary( IComparer<TKey>? comparer, int seed )
         {
             this._head = Node.CreateHead();
-            this._random = seed == 0 ? new Random() : new Random(seed);
+            this._random = seed == 0 ? new Random() : new Random( seed );
 
             this._comparer = comparer ?? Comparer<TKey>.Default;
         }
-
-        #endregion
-
 
         /// <summary>
         /// Selects a height for a new SkipListNode using the "loaded dice" technique.
@@ -69,11 +51,11 @@ namespace Caravela.Framework.Impl.Collections
         /// </summary>
         /// <param name="maxLevel">The maximum value ChooseRandomHeight can return.</param>
         /// <returns>A randomly chosen integer value between 1 and maxLevel.</returns>
-        private int ChooseRandomHeight(int maxLevel)
+        private int ChooseRandomHeight( int maxLevel )
         {
             var level = 1;
 
-            while (this._random.NextDouble() < _prob && level < maxLevel)
+            while ( this._random.NextDouble() < _prob && level < maxLevel )
             {
                 level++;
             }
@@ -81,47 +63,45 @@ namespace Caravela.Framework.Impl.Collections
             return level;
         }
 
-
-
-        void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item) => this.Add(item.Key, item.Value);
+        void ICollection<KeyValuePair<TKey, TValue>>.Add( KeyValuePair<TKey, TValue> item ) => this.Add( item.Key, item.Value );
 
         // Clears out the contents of the SkipList and creates a new head, with height 1.
         public void Clear()
         {
             // create a new head
             this._head = Node.CreateHead();
-            this._count = 0;
+            this.Count = 0;
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> item) => this.ContainsKey(item.Key);
+        bool ICollection<KeyValuePair<TKey, TValue>>.Contains( KeyValuePair<TKey, TValue> item ) => this.ContainsKey( item.Key );
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex) => throw new NotImplementedException();
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex ) => throw new NotImplementedException();
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item) => this.Remove(item.Key);
-
+        bool ICollection<KeyValuePair<TKey, TValue>>.Remove( KeyValuePair<TKey, TValue> item ) => this.Remove( item.Key );
 
         /// <summary>
         /// Determines if a particular element is contained within the SkipList.
         /// </summary>
         /// <param name="value">The value to search for.</param>
         /// <returns>True if value is found in the SkipList; false otherwise.</returns>
-        public bool ContainsKey(TKey value)
+        public bool ContainsKey( TKey value )
         {
+
             var current = this._head;
 
             // first, determine the nodes that need to be updated at each level
-            for (var i = this._head.Height - 1; i >= 0; i--)
+            for ( var i = this._head.Height - 1; i >= 0; i-- )
             {
-                while (current.GetNeighbor(i) != null)
+                while ( current.GetNeighbor( i ) != null )
                 {
-                    var results = this._comparer.Compare(current.GetNeighbor(i)!.TargetNode.Key, value);
-                    if (results == 0)
+                    var results = this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key!, value );
+                    if ( results == 0 )
                     {
                         return true; // we found the item
                     }
-                    else if (results < 0)
+                    else if ( results < 0 )
                     {
-                        current = current.GetNeighbor(i)!.TargetNode; // move on to the next neighbor
+                        current = current.GetNeighbor( i )!.TargetNode; // move on to the next neighbor
                     }
                     else
                     {
@@ -134,7 +114,6 @@ namespace Caravela.Framework.Impl.Collections
             return false;
         }
 
-
         /// <summary>
         /// Adds a new element to the SkipList.
         /// </summary>
@@ -143,66 +122,63 @@ namespace Caravela.Framework.Impl.Collections
         /// <remarks>This SkipList implementation does not allow for duplicates.  Attempting to add a
         /// duplicate value will not raise an exception, it will simply exit the method without
         /// changing the SkipList.</remarks>
-        void IDictionary<TKey, TValue>.Add(TKey key, TValue value) => this.AddOrUpdate(key, value, false);
+        void IDictionary<TKey, TValue>.Add( TKey key, TValue value ) => this.AddOrUpdate( key, value, false );
 
-        public int Add(TKey key, TValue value) => this.AddOrUpdate( key, value, false );
+        public int Add( TKey key, TValue value ) => this.AddOrUpdate( key, value, false );
 
-        private int AddOrUpdate(TKey key, TValue value, bool replace)
+        private int AddOrUpdate( TKey key, TValue value, bool replace )
         {
-            var updates = this.BuildUpdateTable(key, out var distanceFromHead);
+            var updates = this.BuildUpdateTable( key, out var distanceFromHead );
             var current = updates[0].Node;
 
             // see if a duplicate is being inserted
-            if (current.GetNeighbor(0) != null && this._comparer.Compare(current.GetNeighbor(0)!.TargetNode.Key, key) == 0)
+            if ( current.GetNeighbor( 0 ) != null && this._comparer.Compare( current.GetNeighbor( 0 )!.TargetNode.Key!, key ) == 0 )
             {
-                if (replace)
+                if ( replace )
                 {
-                    current.GetNeighbor(0)!.TargetNode.Value = value;
+                    current.GetNeighbor( 0 )!.TargetNode.Value = value;
                     return -1;
                 }
                 else
                 {
-                    throw new ArgumentException("An element with the same key already exists.");
+                    throw new ArgumentException( "An element with the same key already exists." );
                 }
             }
 
             // create a new node
-            var newNode = new Node(key, value, this.ChooseRandomHeight(this._head.Height + 1));
-            this._count++;
+            var newNode = new Node( key, value, this.ChooseRandomHeight( this._head.Height + 1 ) );
+            this.Count++;
 
             // if the node's level is greater than the head's level, increase the head's level
-            if (newNode.Height > this._head.Height)
+            if ( newNode.Height > this._head.Height )
             {
                 this._head.IncrementHeight();
-                this._head.SetNeighbor(this._head.Height - 1, new NodeLink(newNode, distanceFromHead));
+                this._head.SetNeighbor( this._head.Height - 1, new NodeLink( newNode, distanceFromHead ) );
             }
 
             // splice the new node into the list
-            for (var i = 0; i < updates.Length; i++)
+            for ( var i = 0; i < updates.Length; i++ )
             {
                 var update = updates[i];
 
-                if (i < newNode.Height)
+                if ( i < newNode.Height )
                 {
-                    var replacedLink = update.Node.GetNeighbor(i);
-                    if (replacedLink != null)
+                    var replacedLink = update.Node.GetNeighbor( i );
+                    if ( replacedLink != null )
                     {
-                        newNode.SetNeighbor(i, new NodeLink( replacedLink.TargetNode, 1 + replacedLink.Width - update.Distance ));
+                        newNode.SetNeighbor( i, new NodeLink( replacedLink.TargetNode, 1 + replacedLink.Width - update.Distance ) );
                     }
-                    
 
-                    update.Node.SetNeighbor(i, new NodeLink(newNode, update.Distance));
+                    update.Node.SetNeighbor( i, new NodeLink( newNode, update.Distance ) );
                 }
-                else if (update.Node.GetNeighbor(i) != null)
+                else if ( update.Node.GetNeighbor( i ) != null )
                 {
-                    update.Node.GetNeighbor(i)!.Width++;
+                    update.Node.GetNeighbor( i )!.Width++;
                 }
             }
 
             return distanceFromHead - 1;
         }
-
-
 
         /// <summary>
         /// Attempts to remove a value from the SkipList.
@@ -210,10 +186,12 @@ namespace Caravela.Framework.Impl.Collections
         /// <param name="value">The value to remove from the SkipList.</param>
         /// <returns>True if the value is found and removed; false if the value is not found
         /// in the SkipList.</returns>
-        public bool Remove(TKey value)
+        public bool Remove( TKey value )
         {
             // There's a bug in Remove so let's try not to use it until necessary.
             throw new NotImplementedException();
+
+#if FALSE
             
             var updates = this.BuildUpdateTable(value, out _);
             var current = updates[0].Node.GetNeighbor(0);
@@ -259,32 +237,35 @@ namespace Caravela.Framework.Impl.Collections
             {
                 return false;
             }
+#endif
         }
 
-        public bool TryGetValue(TKey key, [NotNullWhen(true)]  out TValue? value)
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+        public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value )
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         {
-            if (this.TryFindNode(key, out var node, out _))
+            if ( this.TryFindNode( key, out var node, out _ ) )
             {
-                value = node.Value;
+                value = node.Value!;
                 return true;
             }
             else
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
         }
-        
-        public bool TryGetClosestValue(TKey key, [NotNullWhen(true)]  out TValue? value)
+
+        public bool TryGetClosestValue( TKey key, [NotNullWhen( true )] out TValue? value )
         {
-            if (this.TryFindNode(key, out var node, out _, false))
+            if ( this.TryFindNode( key, out var node, out _, false ) )
             {
-                value = node.Value;
+                value = node.Value!;
                 return true;
             }
             else
             {
-                value = default(TValue);
+                value = default;
                 return false;
             }
         }
@@ -298,7 +279,7 @@ namespace Caravela.Framework.Impl.Collections
 
         public TValue Get( TKey key )
         {
-            if (this.TryFindNode(key, out var node, out _))
+            if ( this.TryFindNode( key, out var node, out _ ) )
             {
                 return node.Value;
             }
@@ -308,22 +289,20 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
-        public void Set( TKey key, TValue value ) => this.AddOrUpdate(key, value, true);
-
+        public void Set( TKey key, TValue value ) => this.AddOrUpdate( key, value, true );
 
         public ICollection<TKey> Keys => throw new NotImplementedException();
 
-        public ValueCollection Values => this._valueCollection ?? (this._valueCollection = new ValueCollection( this ));
+        public ValueCollection Values => this._valueCollection ??= new ValueCollection( this );
 
         ICollection<TValue> IDictionary<TKey, TValue>.Values => throw new NotImplementedException();
 
         /// <summary>
-        /// Returns the number of elements in the SkipList
+        /// Gets the number of elements in the SkipList.
         /// </summary>
-        public int Count => this._count;
+        public int Count { get; private set; }
 
         public bool IsReadOnly => false;
-
 
         /// <summary>
         /// Creates a table of the SkipListNode instances that will need to be updated when an item is
@@ -334,29 +313,29 @@ namespace Caravela.Framework.Impl.Collections
         /// <returns>An array of SkipListNode instances, as many as the height of the head node.
         /// A SkipListNode instance in array index k represents the SkipListNode at height k that must
         /// be updated following the addition/deletion.</returns>
-        private NodeDistance[] BuildUpdateTable(TKey key, out int distanceFromHead)
+        private NodeDistance[] BuildUpdateTable( TKey key, out int distanceFromHead )
         {
             var height = this._head.Height;
-            
-            Debug.Assert( height > 0 );
-           
+
+            Debug.Assert( height > 0, "Height must be strictly positive." );
+
             var updates = new NodeDistance[height];
             distanceFromHead = 1;
-            
+
             var current = this._head;
-            
+
             // determine the nodes that need to be updated at each level
-            for (var i = height-1; i >= 0; i--)
+            for ( var i = height - 1; i >= 0; i-- )
             {
                 var width = 0;
-                while (current.GetNeighbor(i) != null && this._comparer.Compare(current.GetNeighbor(i)!.TargetNode.Key, key) < 0)
+                while ( current.GetNeighbor( i ) != null && this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key, key ) < 0 )
                 {
-                    width += current.GetNeighbor(i)!.Width;
-                    current = current.GetNeighbor(i)!.TargetNode;
+                    width += current.GetNeighbor( i )!.Width;
+                    current = current.GetNeighbor( i )!.TargetNode;
                 }
 
                 distanceFromHead += width;
-                for (var j = height-1; j > i; j--)
+                for ( var j = height - 1; j > i; j-- )
                 {
                     updates[j].Distance += width;
                 }
@@ -368,42 +347,42 @@ namespace Caravela.Framework.Impl.Collections
             return updates;
         }
 
-        private Node GetNodeByIndex(int index)
+        private Node GetNodeByIndex( int index )
         {
             index++;
 
             var currentNode = this._head;
             var currentIndex = 0;
 
-            for ( var i = this._head.Height - 1; i >= 0; i--)
+            for ( var i = this._head.Height - 1; i >= 0; i-- )
             {
-                while (currentNode.GetNeighbor(i) != null && currentIndex + currentNode.GetNeighbor(i)!.Width <= index )
+                while ( currentNode.GetNeighbor( i ) != null && currentIndex + currentNode.GetNeighbor( i )!.Width <= index )
                 {
-                    currentIndex += currentNode.GetNeighbor(i)!.Width;
-                    currentNode = currentNode.GetNeighbor(i)!.TargetNode;
+                    currentIndex += currentNode.GetNeighbor( i )!.Width;
+                    currentNode = currentNode.GetNeighbor( i )!.TargetNode;
                 }
             }
 
             return currentNode;
         }
 
-        private bool TryFindNode(TKey key, [NotNullWhen(true)]  out Node? node, out int position, bool exactMatchRequired = true )
+        private bool TryFindNode( TKey key, [NotNullWhen( true )] out Node? node, out int position, bool exactMatchRequired = true )
         {
             var current = this._head;
             position = 0;
-            
-            for (var i = this._head.Height - 1; i >= 0; i--)
+
+            for ( var i = this._head.Height - 1; i >= 0; i-- )
             {
                 int comparisonResult;
-                while (current.GetNeighbor(i) != null && (comparisonResult = this._comparer.Compare(current.GetNeighbor(i)!.TargetNode.Key, key)) <= 0)
+                while ( current.GetNeighbor( i ) != null && (comparisonResult = this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key, key )) <= 0 )
                 {
-                    position += current.GetNeighbor(i)!.Width;
-                    current = current.GetNeighbor(i)!.TargetNode;
+                    position += current.GetNeighbor( i )!.Width;
+                    current = current.GetNeighbor( i )!.TargetNode;
 
-                    if (comparisonResult == 0)
+                    if ( comparisonResult == 0 )
                     {
                         node = current;
-                        position = position - 1;
+                        position -= 1;
                         return true;
                     }
                 }
@@ -415,58 +394,55 @@ namespace Caravela.Framework.Impl.Collections
                 position = -1;
                 return false;
             }
-            else 
+            else
             {
                 // We did not find the exact item, but we would one before.
                 node = current;
                 position--;
                 return true;
             }
-
-      
         }
 
         /// <summary>
         /// Copies the contents of the SkipList to the passed-in array.
         /// </summary>
-        public void CopyTo(TKey[] array) => this.CopyTo(array, 0);
+        public void CopyTo( TKey[] array ) => this.CopyTo( array, 0 );
 
         /// <summary>
         /// Copies the contents of the SkipList to the passed-in array.
         /// </summary>
-        public void CopyTo(TKey[] array, int index)
+        public void CopyTo( TKey[] array, int index )
         {
             // copy the values from the skip list to array
-            if (array == null)
+            if ( array == null )
             {
-                throw new ArgumentNullException(nameof(array));
+                throw new ArgumentNullException( nameof( array ) );
             }
 
-            if (index < 0)
+            if ( index < 0 )
             {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                throw new ArgumentOutOfRangeException( nameof( index ) );
             }
 
-            if (index >= array.Length)
+            if ( index >= array.Length )
             {
-                throw new ArithmeticException("index is greater than the length of array");
+                throw new ArithmeticException( "index is greater than the length of array" );
             }
 
-            if (array.Length - index <= this._count)
+            if ( array.Length - index <= this.Count )
             {
-                throw new ArgumentException("insufficient space in array to store skip list starting at specified index");
+                throw new ArgumentException( "insufficient space in array to store skip list starting at specified index" );
             }
 
-            var current = this._head.GetNeighbor(0);
+            var current = this._head.GetNeighbor( 0 );
             var i = 0;
-            while (current != null)
+            while ( current != null )
             {
                 array[i + index] = current.TargetNode.Key;
                 i++;
-                current = current.TargetNode.GetNeighbor(0);
+                current = current.TargetNode.GetNeighbor( 0 );
             }
         }
-
 
         /// <summary>
         /// Returns an enumerator to access the contents of the SkipList.
@@ -474,36 +450,31 @@ namespace Caravela.Framework.Impl.Collections
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             // enumerate through the skip list one element at a time
-            var current = this._head.GetNeighbor(0);
-            while (current != null)
+            var current = this._head.GetNeighbor( 0 );
+            while ( current != null )
             {
-                yield return new KeyValuePair<TKey, TValue>(current.TargetNode.Key, current.TargetNode.Value);
-                current = current.TargetNode.GetNeighbor(0);
+                yield return new KeyValuePair<TKey, TValue>( current.TargetNode.Key, current.TargetNode.Value );
+                current = current.TargetNode.GetNeighbor( 0 );
             }
         }
 
         public IEnumerable<KeyValuePair<TKey, TValue>> GetItemsGreaterOrEqualThan( TKey key, bool returnsPrevious = false )
         {
-            if ( !this.TryFindNode( key, out var node, out var position, false ) )
+            if ( !this.TryFindNode( key, out var node, out _, false ) )
             {
                 yield break;
             }
-            
-            
-            if ( returnsPrevious || this._comparer.Compare(  node.Key, key  ) >= 0 )
+
+            if ( returnsPrevious || this._comparer.Compare( node.Key, key ) >= 0 )
             {
                 yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
             }
 
-            while ( (node = node.GetNeighbor(0)?.TargetNode) != null )
+            while ( (node = node.GetNeighbor( 0 )?.TargetNode) != null )
             {
                 yield return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
-
             }
-            
         }
-
-
 
         /// <summary>
         /// This overridden form of ToString() is simply for displaying detailed information
@@ -513,20 +484,19 @@ namespace Caravela.Framework.Impl.Collections
         {
             var current = this._head;
             var sb = new StringBuilder();
-            while (current != null)
+            while ( current != null )
             {
 
-                sb.Append("[ ");
-                sb.Append(current.ToString());
-                sb.Append("];  ");
+                sb.Append( "[ " );
+                sb.Append( current );
+                sb.Append( "];  " );
 
-
-                if (current.GetNeighbor(0) == null)
+                if ( current.GetNeighbor( 0 ) == null )
                 {
                     break;
                 }
 
-                current = current.GetNeighbor(0).TargetNode;
+                current = current.GetNeighbor( 0 )?.TargetNode;
             }
 
             return sb.ToString();
@@ -534,10 +504,9 @@ namespace Caravela.Framework.Impl.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-
-        public int IndexOf(TKey key)
+        public int IndexOf( TKey key )
         {
-            if (this.TryFindNode(key, out _, out var index))
+            if ( this.TryFindNode( key, out _, out var index ) )
             {
                 return index;
             }
@@ -547,21 +516,21 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
-        public int IndexOf(KeyValuePair<TKey, TValue> item) => this.IndexOf(item.Key);
+        public int IndexOf( KeyValuePair<TKey, TValue> item ) => this.IndexOf( item.Key );
 
-        void IList<KeyValuePair<TKey, TValue>>.Insert(int index, KeyValuePair<TKey, TValue> item) => throw new NotSupportedException();
+        void IList<KeyValuePair<TKey, TValue>>.Insert( int index, KeyValuePair<TKey, TValue> item ) => throw new NotSupportedException();
 
-        public void RemoveAt(int index) => throw new NotImplementedException();
+        public void RemoveAt( int index ) => throw new NotImplementedException();
 
-        public KeyValuePair<TKey,TValue>  GetAt(int index)
+        public KeyValuePair<TKey, TValue> GetAt( int index )
         {
-            if (index < 0 || index >= this._count )
+            if ( index < 0 || index >= this.Count )
             {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                throw new ArgumentOutOfRangeException( nameof( index ) );
             }
 
-            var node = this.GetNodeByIndex(index);
-            return new KeyValuePair<TKey, TValue>(node.Key, node.Value);
+            var node = this.GetNodeByIndex( index );
+            return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
         }
 
         public KeyValuePair<TKey, TValue> this[int index]
@@ -578,31 +547,37 @@ namespace Caravela.Framework.Impl.Collections
 
         /// <summary>
         /// Represents a node in a SkipList.  A SkipListNode has a Height and a set of neighboring
-        /// SkipListNodes (precisely as many neighbor references as its Height, although some neighbor 
+        /// SkipListNodes (precisely as many neighbor references as its Height, although some neighbor
         /// references may be null).  Also, a SkipListNode contains some piece of data associated with it.
         /// </summary>
         private sealed class Node
         {
-            private Node()
+            private Node( NodeList neighbors )
             {
+                this.Neighbors = neighbors;
+
+                // This constructor is used for the head node only, the Key and Value properties are
+                // never accessed for the head.
+                this.Key = default!;
+                this.Value = default!;
             }
 
-            public static Node CreateHead() => new Node { Neighbors = new NodeList(1) };
+            public static Node CreateHead() => new Node( new NodeList( 1 ) );
 
-            public Node(TKey key, TValue value, int height)
+            public Node( TKey key, TValue value, int height )
             {
                 if ( height <= 0 )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(height) );
+                    throw new ArgumentOutOfRangeException( nameof( height ) );
                 }
 
-                this.Neighbors = new NodeList(height);
+                this.Neighbors = new NodeList( height );
                 this.Key = key;
                 this.Value = value;
             }
 
-
             public TKey Key { get; }
+
             public TValue Value { get; set; }
 
             private NodeList Neighbors { get; init; }
@@ -611,9 +586,11 @@ namespace Caravela.Framework.Impl.Collections
             /// Increases the height of the SkipListNode by 1.
             /// </summary>
             internal void IncrementHeight() =>
+
                 // Increase height by 1
                 this.Neighbors.IncrementHeight();
 
+            /*
             /// <summary>
             /// Decreases the height of the SkipListNode by 1.
             /// </summary>
@@ -621,57 +598,64 @@ namespace Caravela.Framework.Impl.Collections
                 // Decrease height by 1
                 this.Neighbors.DecrementHeight();
 
+            */
 
             /// <summary>
-            /// Returns the height of the SkipListNode
+            /// Gets the height of the SkipListNode.
             /// </summary>
             public int Height => this.Neighbors.Count;
 
             /// <summary>
-            /// Provides ordinally-indexed access to the neighbors of the SkipListNode.
+            /// Provides indexed access to the neighbors of the SkipListNode.
             /// </summary>
-            public void SetNeighbor(int index, NodeLink? value) => this.Neighbors[index] = value;
+            public void SetNeighbor( int index, NodeLink? value ) => this.Neighbors[index] = value;
 
             /// <summary>
-            /// Provides ordinally-indexed access to the neighbors of the SkipListNode.
+            /// Provides indexed access to the neighbors of the SkipListNode.
             /// </summary>
-            public NodeLink? GetNeighbor(int index) => this.Neighbors[index];
+            public NodeLink? GetNeighbor( int index ) => this.Neighbors[index];
 
             public override string ToString()
             {
                 var sb = new StringBuilder();
 
-                sb.AppendFormat(CultureInfo.InvariantCulture, "Key={{{0}}}, Height={{{1}}}, Nodes={{", this.Key, this.Height);
-                for (var i = 0; i < this.Height; i++)
+                sb.AppendFormat( CultureInfo.InvariantCulture, "Key={{{0}}}, Height={{{1}}}, Nodes={{", this.Key, this.Height );
+                for ( var i = 0; i < this.Height; i++ )
                 {
-                    if (i != 0)
+                    if ( i != 0 )
                     {
-                        sb.Append(", ");
+                        sb.Append( ", " );
                     }
-                    if (this.GetNeighbor(i) == null)
+
+                    var neighbor = this.GetNeighbor( i );
+
+                    if ( neighbor == null )
                     {
-                        sb.Append("null");
+                        sb.Append( "null" );
                     }
                     else
                     {
-                        sb.Append(string.Format(CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", this.GetNeighbor(i).TargetNode.Key, this.GetNeighbor(i).Width));
+                        sb.Append( string.Format( CultureInfo.InvariantCulture, "(Key={{{0}}}, Width={1})", neighbor.TargetNode.Key, neighbor.Width ) );
                     }
                 }
-                sb.Append('}');
+
+                sb.Append( '}' );
                 return sb.ToString();
             }
         }
 
         private sealed class NodeLink
         {
-            public NodeLink(Node targetNode, int width)
+            public NodeLink( Node targetNode, int width )
             {
                 this.TargetNode = targetNode;
                 this.Width = width;
             }
+
             public Node TargetNode { get; }
-            
+
             private int _width;
+
             public int Width
             {
                 get => this._width;
@@ -679,7 +663,7 @@ namespace Caravela.Framework.Impl.Collections
                 {
                     if ( value == 0 )
                     {
-                        throw new ArgumentOutOfRangeException(nameof(value));
+                        throw new ArgumentOutOfRangeException( nameof( value ) );
                     }
 
                     this._width = value;
@@ -689,80 +673,82 @@ namespace Caravela.Framework.Impl.Collections
 
         /// <summary>
         /// Represents a collection of SkipListNodes.  This class differs from the base class - NodeList -
-        /// in that it contains an internal method to increment or decrement the height of the SkipListNodeList. 
+        /// in that it contains an internal method to increment or decrement the height of the SkipListNodeList.
         /// Incrementing the height adds a new neighbor to the list, decrementing the height removes the
         /// top-most neighbor.
         /// </summary>
         private sealed class NodeList : List<NodeLink?>
         {
 
-            public NodeList(int height)
+            public NodeList( int height )
             {
                 if ( height <= 0 )
-                    throw new ArgumentOutOfRangeException( nameof(height) );
-                
-                // Add the specified number of items
-                for (var i = 0; i < height; i++)
                 {
-                    base.Add(null);
+                    throw new ArgumentOutOfRangeException( nameof( height ) );
+                }
+
+                // Add the specified number of items
+                for ( var i = 0; i < height; i++ )
+                {
+                    this.Add( null );
                 }
             }
-
 
             /// <summary>
             /// Increases the size of the SkipListNodeList by one, adding a default SkipListNode.
             /// </summary>
             internal void IncrementHeight() =>
-                // add a dummy entry
-                base.Add(null);
 
+                // add a dummy entry
+                this.Add( null );
+
+            /*
             /// <summary>
             /// Decreases the size of the SkipListNodeList by one, removing the "top-most" SkipListNode.
             /// </summary>
             internal void DecrementHeight()
             {
-                if ( base.Count == 1 )
+                if ( this.Count == 1 )
+                {
                     throw new InvalidOperationException();
-                
-                base.RemoveAt( base.Count - 1 );
+                }
+
+                this.RemoveAt( this.Count - 1 );
             }
+            */
         }
 
         public class ValueCollection : IReadOnlyList<TValue>
         {
             private readonly SkipListIndexedDictionary<TKey, TValue> _parent;
 
-            public ValueCollection( SkipListIndexedDictionary<TKey, TValue> parent ) => this._parent = parent;
+            public ValueCollection( SkipListIndexedDictionary<TKey, TValue> parent )
+            {
+                this._parent = parent;
+            }
 
             public IEnumerator<TValue> GetEnumerator()
             {
                 // enumerate through the skip list one element at a time
-                var current = this._parent._head.GetNeighbor(0);
-                while (current != null)
+                var current = this._parent._head.GetNeighbor( 0 );
+                while ( current != null )
                 {
                     yield return current.TargetNode.Value;
-                    current = current.TargetNode.GetNeighbor(0);
+                    current = current.TargetNode.GetNeighbor( 0 );
                 }
             }
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-       
-            public bool Contains( TValue item ) => throw new NotSupportedException();
-
             public void CopyTo( TValue[] array, int arrayIndex ) => throw new NotImplementedException();
 
-            public bool Remove( TValue item ) => throw new NotImplementedException();
+            public int Count => this._parent.Count;
 
-            public int Count => this._parent._count;
-
-       
-            public TValue this[ int index ]
+            public TValue this[int index]
             {
                 get => this._parent[index].Value;
                 set => throw new NotSupportedException();
             }
         }
     }
-
 }

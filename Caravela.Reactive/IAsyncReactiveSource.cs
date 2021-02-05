@@ -20,7 +20,8 @@ namespace Caravela.Reactive
         ValueTask<T> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken );
 
         // Returns an interface because of covariance.
-        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync( ReactiveCollectorToken observerToken,
+        ValueTask<IReactiveVersionedValue<T>> GetVersionedValueAsync(
+            ReactiveCollectorToken observerToken,
             CancellationToken cancellationToken );
     }
 }

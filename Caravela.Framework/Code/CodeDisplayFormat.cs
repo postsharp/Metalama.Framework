@@ -8,6 +8,5 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public sealed class CodeDisplayFormat
     {
-        
     }
 }

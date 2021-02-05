@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectCompilation
+    internal sealed class AspectCompilation
     {
         private readonly IImmutableList<AspectSource> _aspectSources;
 
@@ -28,23 +28,25 @@ namespace Caravela.Framework.Impl
         public AspectCompilation( BaseCompilation compilation, CompileTimeAssemblyLoader loader )
             : this(
                   Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), compilation,
-                  ImmutableList.Create<AspectSource> ( new AttributeAspectSource( compilation, loader ) ) ) { }
+                  ImmutableList.Create<AspectSource>( new AttributeAspectSource( compilation, loader ) ) )
+        {
+        }
 
         private AspectCompilation(
-            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, BaseCompilation compilation, IImmutableList<AspectSource> aspectSources)
+            IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, BaseCompilation compilation, IImmutableList<AspectSource> aspectSources )
         {
             this.Diagnostics = diagnostics;
             this.Resources = resources;
             this.Compilation = compilation;
             this._aspectSources = aspectSources;
 
-            this.Aspects = aspectSources.ToReactive().SelectMany(s => s.GetAspects());
+            this.Aspects = aspectSources.ToReactive().SelectMany( s => s.GetAspects() );
             this.AspectsByAspectType = this.Aspects.GroupBy( ai => ai.AspectType.FullName );
         }
 
         public AspectCompilation Update( IReadOnlyList<Diagnostic> addedDiagnostics, IReadOnlyList<ResourceDescription> addedResources, BaseCompilation newCompilation )
         {
-            var newDiagnostics = this.Diagnostics.Concat(addedDiagnostics).ToImmutableList();
+            var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics ).ToImmutableList();
             var newResources = this.Resources.Concat( addedResources ).ToImmutableList();
 
             return new( newDiagnostics, newResources, newCompilation, this._aspectSources );

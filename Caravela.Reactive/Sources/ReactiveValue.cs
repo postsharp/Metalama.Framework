@@ -1,11 +1,7 @@
-﻿#region
-
-using Caravela.Reactive.Implementation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-
-#endregion
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Sources
 {
@@ -17,13 +13,13 @@ namespace Caravela.Reactive.Sources
     /// <typeparam name="T"></typeparam>
     public sealed class ReactiveValue<T> : IReactiveSource<T, IReactiveObserver<T>>, IReactiveObservable<IReactiveObserver<T>>
     {
-        private int _version;
         private readonly IEqualityComparer<T> _comparer;
         private IReactiveVersionedValue<T> _value;
+        private int _version;
         private ObserverList<IReactiveObserver<T>> _observers;
 
         /// <summary>
-        /// Initializes a new <see cref="ReactiveValue{T}"/> and sets the initial value.
+        /// Initializes a new instance of the <see cref="ReactiveValue{T}"/> class and sets the initial value.
         /// </summary>
         /// <param name="value">The initial value.</param>
         /// <param name="comparer">A value comparer, to determine when the value has changed.</param>
@@ -35,7 +31,7 @@ namespace Caravela.Reactive.Sources
         }
 
         /// <summary>
-        /// Get or sets the value encapsulated by the current object. Setting the value to a different value
+        /// Gets or sets the value encapsulated by the current object. Setting the value to a different value
         /// will raise the appropriate event to all registered observers.
         /// </summary>
         public T Value
@@ -45,7 +41,7 @@ namespace Caravela.Reactive.Sources
             {
                 if ( !this._comparer.Equals( value, this._value.Value ) )
                 {
-                    int version = Interlocked.Increment( ref this._version );
+                    var version = Interlocked.Increment( ref this._version );
                     var oldValue = this._value;
 
                     this._value = new ReactiveVersionedValue<T>( value, this._version );
@@ -60,7 +56,6 @@ namespace Caravela.Reactive.Sources
                     {
                         observer.Observer.OnValueInvalidated( observer.Subscription, false );
                     }
-                    
                 }
             }
         }
@@ -87,8 +82,6 @@ namespace Caravela.Reactive.Sources
 
         T IReactiveSource<T>.GetValue( in ReactiveCollectorToken observerToken ) => this._value.Value;
 
-
         IReactiveVersionedValue<T> IReactiveSource<T>.GetVersionedValue( in ReactiveCollectorToken observerToken ) => this._value;
-
     }
 }

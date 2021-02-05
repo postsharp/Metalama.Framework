@@ -1,8 +1,4 @@
-#region
-
 using System;
-
-#endregion
 
 namespace Caravela.Reactive
 {
@@ -16,14 +12,13 @@ namespace Caravela.Reactive
         /// Gets the source object (but not necessarily the implementation of <see cref="IReactiveObservable{T}"/>.
         /// </summary>
         object Sender { get; }
-        
+
         /// <summary>
         /// Gets the <see cref="IReactiveObserver"/>.
         /// </summary>
         IReactiveObserver Observer { get; }
     }
 
-    
     /// <summary>
     /// Represents a subscription to an <see cref="IReactiveObservable{T}"/>. The main feature
     /// is that a subscription can be disposed. This is a strongly typed variant of <see cref="IReactiveSubscription"/>.

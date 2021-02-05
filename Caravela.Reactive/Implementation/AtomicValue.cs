@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 
 namespace Caravela.Reactive.Implementation
@@ -13,13 +10,14 @@ namespace Caravela.Reactive.Implementation
     /// <typeparam name="T"></typeparam>
     public struct AtomicValue<T>
     {
+        private static readonly bool _needsLock = TypeNeedsLock( typeof( T ) );
+
         private T _value;
         private SpinLock _lock;
-        static readonly bool _needsLock = TypeNeedsLock( typeof( T ) );
 
-        private static bool TypeNeedsLock(Type type)
+        private static bool TypeNeedsLock( Type type )
         {
-            return type.IsValueType && ( type.IsGenericType || Marshal.SizeOf( type ) > IntPtr.Size );
+            return type.IsValueType && (type.IsGenericType || Marshal.SizeOf( type ) > IntPtr.Size);
         }
 
         public T Value

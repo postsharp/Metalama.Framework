@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Advices;
+﻿using System;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
-using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -13,7 +13,6 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
-            var advice =
             aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof( this.OverrideMethod ) );
         }
 
@@ -22,6 +21,6 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [OverrideMethodTemplate]
-        public abstract dynamic OverrideMethod();
+        public abstract dynamic? OverrideMethod();
     }
 }

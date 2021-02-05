@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
@@ -7,14 +9,11 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     // TODO: introductions
-    sealed class ModifiedCompilation : BaseCompilation
+    internal sealed class ModifiedCompilation : BaseCompilation
     {
         private readonly BaseCompilation _originalCompilation;
         private readonly IReactiveCollection<AdviceInstance> _addedAdvices;
@@ -49,10 +48,12 @@ namespace Caravela.Framework.Impl.CodeModel
                 .GroupBy( t => t is OverriddenElement oe ? oe.OverriddenDeclaration : null )
                 .Where( g => g.Count() > 1 );
 
-            foreach (var element in multiAdviceElements)
+            foreach ( var element in multiAdviceElements )
             {
                 if ( element.Key != null )
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode().GetLocation(), element.Key );
+                {
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.MoreThanOneAdvicePerElement, element.Key.GetSyntaxNode()?.GetLocation(), element.Key );
+                }
             }
 
             var rewriter = new CompilationRewriter( transformations );
@@ -63,10 +64,9 @@ namespace Caravela.Framework.Impl.CodeModel
             return result;
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._originalCompilation.ToDisplayString( format, context );
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._originalCompilation.ToDisplayString( format, context );
 
-
-        sealed class CompilationRewriter : CSharpSyntaxRewriter
+        private sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
             private readonly List<OverriddenMethod> _overriddenMethods;
 
@@ -81,8 +81,11 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
             private TypeDeclarationSyntax VisitTypeDeclaration( TypeDeclarationSyntax node )
@@ -107,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel
                                 }
                             }
 
-                            if (foundTransformation != null)
+                            if ( foundTransformation != null )
                             {
                                 //// original method, but with _Original added to its name
                                 //members.Add(

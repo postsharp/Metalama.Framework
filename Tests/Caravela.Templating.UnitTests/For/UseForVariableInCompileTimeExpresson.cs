@@ -1,5 +1,6 @@
 using Caravela.TestFramework;
 using System.Threading.Tasks;
+using Caravela.TestFramework.Templating;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -40,7 +41,7 @@ class TargetCode
 
         private const string UseForVariableInCompileTimeExpresson_ExpectedOutput = @"";
 
-        [Fact(Skip = "#28016 For: support for build - time loops")]
+        [Fact( Skip = "#28016 For: support for build - time loops" )]
         public async Task UseForVariableInCompileTimeExpresson()
         {
             var testResult = await this._testRunner.Run( new TestInput( UseForVariableInCompileTimeExpresson_Template, UseForVariableInCompileTimeExpresson_Target ) );

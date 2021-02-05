@@ -1,9 +1,9 @@
-﻿using Caravela.Framework.Code;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectTypeFactory
+    internal class AspectTypeFactory
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 

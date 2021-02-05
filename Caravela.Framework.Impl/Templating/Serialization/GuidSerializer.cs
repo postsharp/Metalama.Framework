@@ -1,7 +1,7 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -10,19 +10,19 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         public override ExpressionSyntax Serialize( Guid o )
         {
-            byte[] b = o.ToByteArray();
-            
-            int a = ((int)b[3] << 24) | ((int)b[2] << 16) | ((int)b[1] << 8) | b[0];
-            short b2 = (short)(((int)b[5] << 8) | b[4]);
-            short c = (short)(((int)b[7] << 8) | b[6]);
-            byte d = b[8];
-            byte e = b[9];
-            byte f = b[10];
-            byte g = b[11];
-            byte h = b[12];
-            byte i = b[13];
-            byte j = b[14];
-            byte k = b[15];
+            var b = o.ToByteArray();
+
+            var a = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
+            var b2 = (short) ((b[5] << 8) | b[4]);
+            var c = (short) ((b[7] << 8) | b[6]);
+            var d = b[8];
+            var e = b[9];
+            var f = b[10];
+            var g = b[11];
+            var h = b[12];
+            var i = b[13];
+            var j = b[14];
+            var k = b[15];
             return ObjectCreationExpression(
                     QualifiedName(
                         IdentifierName( "System" ),

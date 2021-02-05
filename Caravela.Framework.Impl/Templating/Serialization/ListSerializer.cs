@@ -1,9 +1,9 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -16,33 +16,34 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
         public override ExpressionSyntax SerializeObject( object o )
         {
-            Type argument = o.GetType().GetGenericArguments()[0];
-            
-            List<ExpressionSyntax> lt = new List<ExpressionSyntax>();
-            foreach ( var obj in (IEnumerable) o)
+            var argument = o.GetType().GetGenericArguments()[0];
+
+            var lt = new List<ExpressionSyntax>();
+            foreach ( var obj in (IEnumerable) o )
             {
-                ThrowIfStackTooDeep(obj);
+                ThrowIfStackTooDeep( obj );
                 lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
             }
+
             return ObjectCreationExpression(
                 QualifiedName(
                         QualifiedName(
                             QualifiedName(
-                                IdentifierName("System"),
-                                IdentifierName("Collections")),
-                            IdentifierName("Generic")),
+                                IdentifierName( "System" ),
+                                IdentifierName( "Collections" ) ),
+                            IdentifierName( "Generic" ) ),
                         GenericName(
-                                Identifier("List"))
+                                Identifier( "List" ) )
                         .WithTypeArgumentList(
-                            SyntaxFactory.TypeArgumentList(
-                                SyntaxFactory.SingletonSeparatedList(
-                                    SyntaxFactory.ParseTypeName( TypeNameUtility.ToCSharpQualifiedName(argument) )
-                                )))))
+                            TypeArgumentList(
+                                SingletonSeparatedList(
+                                    ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) )
+                                ) ) ) ) )
                     .WithInitializer(
-                    SyntaxFactory.InitializerExpression(
+                    InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        SyntaxFactory.SeparatedList( lt ) ) )
-                .NormalizeWhitespace(  );
+                        SeparatedList( lt ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

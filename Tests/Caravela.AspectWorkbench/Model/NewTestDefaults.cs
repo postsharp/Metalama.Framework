@@ -1,6 +1,6 @@
 ﻿namespace Caravela.AspectWorkbench.Model
 {
-    static class NewTestDefaults
+    internal static class NewTestDefaults
     {
         public const string TemplateSource = @"  
 using System;

@@ -1,6 +1,5 @@
-﻿using Caravela.Reactive;
+﻿using System.Collections.Immutable;
 using Caravela.Reactive.Sources;
-using System.Collections.Immutable;
 using Xunit;
 
 namespace Caravela.Reactive.UnitTests
@@ -22,19 +21,19 @@ namespace Caravela.Reactive.UnitTests
                                 from baseType in type.BaseTypes
                                 select $"{type.Name} : {baseType}";
 
-            Assert.Empty( memberNames.GetValue( default ) );
-            Assert.Empty( baseTypeNames.GetValue( default ) );
+            Assert.Empty( memberNames.GetValue() );
+            Assert.Empty( baseTypeNames.GetValue() );
 
             var c = new SourceType( "C", ImmutableList.Create( "B" ) );
 
             compilation.Types.Add( c );
 
-            Assert.Empty( memberNames.GetValue( default ) );
-            Assert.Equal( new[] { "C : B" }, baseTypeNames.GetValue( default ) );
+            Assert.Empty( memberNames.GetValue() );
+            Assert.Equal( new[] { "C : B" }, baseTypeNames.GetValue() );
 
             c.Members.Add( new Member( "M" ) );
 
-            Assert.Equal( new[] { "C.M" }, memberNames.GetValue( default ) );
+            Assert.Equal( new[] { "C.M" }, memberNames.GetValue() );
         }
 
         [Fact]
@@ -59,7 +58,6 @@ namespace Caravela.Reactive.UnitTests
             Assert.Empty( groups );
         }
 
-
         [Fact]
         public void SelectManyReactiveWithWhereTest()
         {
@@ -67,18 +65,17 @@ namespace Caravela.Reactive.UnitTests
 
             compilation.Types.Add( new( "C", null ) );
 
-            var codeElements = compilation.Types.SelectDescendants( type => type.NestedTypes.Where( m => true ) );
+            var codeElements = compilation.Types.SelectDescendants( type => type.NestedTypes.Where( _ => true ) );
 
             Assert.Single( codeElements.GetValue() );
         }
-
 
         [Fact]
         public void SelectManyImmutableWithWhereTest()
         {
             var types = new[] { new SourceType( "C", null ) }.ToImmutableReactive();
 
-            var codeElements = types.SelectDescendants( type => type.NestedTypes.Where( m => true ) );
+            var codeElements = types.SelectDescendants( type => type.NestedTypes.Where( _ => true ) );
 
             Assert.Single( codeElements.GetValue() );
         }

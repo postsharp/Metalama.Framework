@@ -3,18 +3,19 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    abstract class Transformation
+    internal abstract class Transformation
     {
     }
 
-    abstract class OverriddenElement : Transformation
+    internal abstract class OverriddenElement : Transformation
     {
         public abstract ICodeElement OverriddenDeclaration { get; }
     }
 
-    class OverriddenMethod : OverriddenElement
+    internal class OverriddenMethod : OverriddenElement
     {
         public override ICodeElement OverriddenDeclaration { get; }
+
         public BlockSyntax MethodBody { get; }
 
         public OverriddenMethod( IMethod overriddenDeclaration, BlockSyntax methodBody )

@@ -1,8 +1,4 @@
-#region
-
 using System;
-
-#endregion
 
 namespace Caravela.Reactive
 {
@@ -19,7 +15,7 @@ namespace Caravela.Reactive
         ///     Specifies that the value cannot be reconstructed
         ///     by reacting to incremental events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
-        void OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange);
+        void OnValueInvalidated( IReactiveSubscription subscription, bool isBreakingChange );
     }
 
     /// <summary>
@@ -40,7 +36,6 @@ namespace Caravela.Reactive
         ///     Specifies that <paramref name="newValue" /> cannot be incrementally evaluated
         ///     by reacting to incremental  events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
-        void OnValueChanged(IReactiveSubscription subscription, T oldValue, T newValue, int newVersion,
-            bool isBreakingChange = false);
+        void OnValueChanged( IReactiveSubscription subscription, T oldValue, T newValue, int newVersion, bool isBreakingChange = false );
     }
 }

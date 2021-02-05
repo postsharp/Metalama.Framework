@@ -1,6 +1,6 @@
+using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         public override ExpressionSyntax Serialize( bool o )
         {
-            return LiteralExpression(o ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression);
+            return LiteralExpression( o ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression );
         }
     }
 
@@ -113,6 +113,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         Token( SyntaxKind.FloatKeyword ) ),
                     IdentifierName( "NaN" ) );
             }
+
             return LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( o ) );
         }
     }
@@ -120,7 +121,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     internal class DoubleSerializer : TypedObjectSerializer<double>
     {
         public override ExpressionSyntax Serialize( double o )
-        { 
+        {
             if ( double.IsPositiveInfinity( o ) )
             {
                 return MemberAccessExpression(
@@ -145,6 +146,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         Token( SyntaxKind.DoubleKeyword ) ),
                     IdentifierName( "NaN" ) );
             }
+
             return LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( o ) );
         }
     }
@@ -163,9 +165,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         {
             return ObjectCreationExpression(
                     QualifiedName(
-                        IdentifierName("System"),
-                        IdentifierName("UIntPtr")))
-                .AddArgumentListArguments( 
+                        IdentifierName( "System" ),
+                        IdentifierName( "UIntPtr" ) ) )
+                .AddArgumentListArguments(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
@@ -179,9 +181,9 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         {
             return ObjectCreationExpression(
                     QualifiedName(
-                        IdentifierName("System"),
-                        IdentifierName("IntPtr")))
-                .AddArgumentListArguments( 
+                        IdentifierName( "System" ),
+                        IdentifierName( "IntPtr" ) ) )
+                .AddArgumentListArguments(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,

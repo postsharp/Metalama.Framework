@@ -1,5 +1,5 @@
-using Caravela.Reactive;
 using System.Collections.Immutable;
+using Caravela.Reactive;
 
 namespace Caravela.Framework.Code
 {
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Code
     {
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
-        
+
         // TODO: the default constructor should be represented as a pseudo-method.
         bool HasDefaultConstructor { get; }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 
@@ -8,16 +9,21 @@ namespace Caravela.TestFramework
     {
         public List<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
 
-        public string TestErrorMessage { get; set; }
+        public string? TestErrorMessage { get; set; }
 
-        public string TestException { get; set; }
+        public string? TestException { get; set; }
 
-        public Document TemplateDocument { get; set; }
+        public Document TemplateDocument { get; }
 
-        public SyntaxNode AnnotatedSyntaxRoot { get; set; }
+        public TestResult( Document templateDocument )
+        {
+            this.TemplateDocument = templateDocument;
+        }
 
-        public SyntaxNode TransformedSyntaxRoot { get; set; }
+        public SyntaxNode? AnnotatedSyntaxRoot { get; set; }
 
-        public SourceText TemplateOutputSource { get; set; }
+        public SyntaxNode? TransformedSyntaxRoot { get; set; }
+
+        public SourceText? TemplateOutputSource { get; set; }
     }
 }

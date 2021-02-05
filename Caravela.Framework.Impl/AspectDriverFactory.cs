@@ -6,7 +6,7 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectDriverFactory
+    internal class AspectDriverFactory
     {
         private readonly ICompilation _compilation;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;
@@ -24,10 +24,14 @@ namespace Caravela.Framework.Impl
             var weavers = this._weaverTypes[type.FullName].ToList();
 
             if ( weavers.Count > 1 )
+            {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver, type, string.Join( ", ", weavers ) );
+            }
 
             if ( weavers.Count == 1 )
+            {
                 return weavers.Single();
+            }
 
             return new AspectDriver( type, this._compilation );
         }

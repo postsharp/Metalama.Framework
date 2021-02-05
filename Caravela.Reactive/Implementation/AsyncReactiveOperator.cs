@@ -1,8 +1,3 @@
-#region
-
-
-#endregion
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,12 +6,11 @@ namespace Caravela.Reactive.Implementation
 {
 
     public abstract class AsyncReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> : BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>,
-       IAsyncReactiveSource<TResult, TResultObserver>,
-       IReactiveObserver<TSource>,
-       IReactiveCollector
-       where TSourceObserver : class, IReactiveObserver<TSource>
-       where TResultObserver : class, IReactiveObserver<TResult>
-
+        IAsyncReactiveSource<TResult, TResultObserver>,
+        IReactiveObserver<TSource>,
+        IReactiveCollector
+        where TSourceObserver : class, IReactiveObserver<TSource>
+        where TResultObserver : class, IReactiveObserver<TResult>
     {
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim( 1 );
 
@@ -30,14 +24,6 @@ namespace Caravela.Reactive.Implementation
         }
 
         protected new IAsyncReactiveSource<TSource, TSourceObserver> Source => (IAsyncReactiveSource<TSource, TSourceObserver>) base.Source;
-
-
-        /// <summary>
-        /// Evaluates the function (i.e. the operator) and returns its value.
-        /// </summary>
-        /// <param name="source">Source value.</param>
-        /// <returns>Result value.</returns>
-        protected abstract ValueTask<ReactiveOperatorResult<TResult>> EvaluateFunctionAsync( TSource source, CancellationToken cancellationToken );
 
         public override bool IsImmutable
         {
@@ -58,9 +44,16 @@ namespace Caravela.Reactive.Implementation
 
         bool IReactiveSource.IsImmutable => throw new NotImplementedException();
 
+        /// <summary>
+        /// Evaluates the function (i.e. the operator) and returns its value.
+        /// </summary>
+        /// <param name="source">Source value.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Result value.</returns>
+        protected abstract ValueTask<ReactiveOperatorResult<TResult>> EvaluateFunctionAsync( TSource source, CancellationToken cancellationToken );
+
         public async ValueTask<TResult> GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
             => (await this.GetVersionedValueAsync( observerToken, cancellationToken )).Value;
-        
 
         public async ValueTask<IReactiveVersionedValue<TResult>> GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
         {
@@ -73,16 +66,15 @@ namespace Caravela.Reactive.Implementation
             return currentValue;
         }
 
-
         /// <summary>
         /// Evaluates the operator if necessary.
         /// </summary>
-        protected async ValueTask EnsureFunctionEvaluatedAsync(CancellationToken cancellationToken)
+        protected async ValueTask EnsureFunctionEvaluatedAsync( CancellationToken cancellationToken )
         {
             if ( this._isFunctionResultDirty )
-            // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
             {
-               
+                // This lock will avoid concurrent evaluations and evaluations concurrent to updates.
+
                 try
                 {
                     await this._semaphore.WaitAsync( cancellationToken );
@@ -110,7 +102,6 @@ namespace Caravela.Reactive.Implementation
 
                                 sideValues = sideValues.Combine( newResult.SideValues );
 
-
                                 this._result.Value =
                                     new ReactiveVersionedValue<TResult>( newResult.Value, currentValue.Version + 1, sideValues );
                             }
@@ -135,12 +126,10 @@ namespace Caravela.Reactive.Implementation
             }
         }
 
-
         /// <summary>
-        /// Gets an <see cref="IncrementalUpdateToken"/>, which allows to represent incremental changes.
+        /// Gets an <c>IncrementalUpdateToken</c>, which allows to represent incremental changes.
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
         protected async ValueTask<IncrementalUpdateToken> GetIncrementalUpdateTokenAsync( int sourceVersion = -1, CancellationToken cancellationToken = default )
         {
             if ( this._currentUpdateStatus != IncrementalUpdateStatus.Default && this._currentUpdateStatus != IncrementalUpdateStatus.Disposed )
@@ -149,7 +138,6 @@ namespace Caravela.Reactive.Implementation
             }
 
             await this._semaphore.WaitAsync( cancellationToken );
-
 
             return new IncrementalUpdateToken( this, sourceVersion );
         }

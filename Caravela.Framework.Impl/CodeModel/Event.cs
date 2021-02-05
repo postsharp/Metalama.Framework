@@ -8,21 +8,23 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class Event : CodeElement, IEvent
     {
         private readonly IEventSymbol _symbol;
+
         protected internal override ISymbol Symbol => this._symbol;
 
         private readonly NamedType _containingElement;
-        public override ICodeElement? ContainingElement => this._containingElement;
+
+        public override ICodeElement ContainingElement => this._containingElement;
 
         internal override SourceCompilation Compilation => this._containingElement.Compilation;
 
-        public Event( IEventSymbol symbol, NamedType containingElement)
+        public Event( IEventSymbol symbol, NamedType containingElement )
         {
             this._symbol = symbol;
             this._containingElement = containingElement;
         }
 
         [Memo]
-        public INamedType EventType => this.SymbolMap.GetNamedType( (INamedTypeSymbol)this._symbol.Type );
+        public INamedType EventType => this.SymbolMap.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
 
         [Memo]
         public IMethod Adder => this.SymbolMap.GetMethod( this._symbol.AddMethod! );
@@ -43,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType DeclaringType => this._containingElement;
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
     }
