@@ -23,7 +23,7 @@ namespace Caravela.Reactive.UnitTests
             ItemsInvalidated,
         }
 
-        private readonly List<(EventKind, object)> _events = new();
+        private readonly List<(EventKind, object)> _events = new ();
 
         private readonly IReactiveCollection<IReactiveGroup<int, int>> _source;
 

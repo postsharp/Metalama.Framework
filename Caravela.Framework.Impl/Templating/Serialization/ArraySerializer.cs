@@ -30,14 +30,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
             return ArrayCreationExpression(
                     ArrayType(
-                            ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) )
-                        )
+                            ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
                         .WithRankSpecifiers(
                             SingletonList(
                                 ArrayRankSpecifier(
                                     SingletonSeparatedList<ExpressionSyntax>(
-                                        OmittedArraySizeExpression() ) ) ) )
-                    )
+                                        OmittedArraySizeExpression() ) ) ) ) )
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.ArrayInitializerExpression,

@@ -50,7 +50,7 @@ namespace Caravela.Reactive.Operators
             }
 
             this._dictionary = builder.ToImmutable();
-            return new( this._dictionary.Keys );
+            return new ( this._dictionary.Keys );
         }
 
         private bool Follow( IReactiveCollection<T> source )

@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._overriddenMethods = transformations.OfType<OverriddenMethod>().ToList();
 
                 // make sure all input transformations are accounted for
-                Debug.Assert( this._overriddenMethods.Count == transformations.Count() );
+                Debug.Assert( this._overriddenMethods.Count == transformations.Count(), "Unexpected number of transformations." );
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             if ( foundTransformation != null )
                             {
                                 //// original method, but with _Original added to its name
-                                //members.Add(
+                                // members.Add(
                                 //    newMethod.WithIdentifier( SyntaxFactory.Identifier( newMethod.Identifier.ValueText + AspectDriver.OriginalMemberSuffix )
                                 //        .WithTriviaFrom( newMethod.Identifier ) ) );
 

@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Reactive
                 }
             }
 
-            return new( Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get( diagnostics ) ) );
+            return new ( Impl(), ReactiveSideValues.Create( DiagnosticsSideValue.Get( diagnostics ) ) );
         }
 
         protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, INamedType item, in IncrementalUpdateToken updateToken )

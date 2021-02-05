@@ -27,8 +27,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             innerTypeCreation,
-                            IdentifierName( "MakeArrayType" ) )
-                        ).AddArgumentListArguments( makeArrayTypeArguments )
+                            IdentifierName( "MakeArrayType" ) ) ).AddArgumentListArguments( makeArrayTypeArguments )
                     .NormalizeWhitespace();
             }
 

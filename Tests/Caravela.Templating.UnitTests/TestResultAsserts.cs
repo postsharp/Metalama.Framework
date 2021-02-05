@@ -1,7 +1,7 @@
-﻿using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Linq;
+using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests

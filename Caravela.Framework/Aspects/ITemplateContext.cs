@@ -50,7 +50,7 @@ namespace Caravela.Framework.Aspects
         ICompilation Compilation { get; }
 
         /// <summary>
-        /// Gives access to the current type including members introduced by the current aspect.
+        /// Gets an object that gives access to the current type including members introduced by the current aspect.
         /// Both instance and static members are made accessible. For instance members,
         /// the <c>this</c> instance is assumed.
         /// </summary>

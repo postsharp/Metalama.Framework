@@ -130,8 +130,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             creationExpression = creationExpression.WithInitializer(
                 InitializerExpression(
                     SyntaxKind.CollectionInitializerExpression,
-                    SeparatedList<ExpressionSyntax>( lt ) )
-                    )
+                    SeparatedList<ExpressionSyntax>( lt ) ) )
                 .NormalizeWhitespace();
             return creationExpression;
         }

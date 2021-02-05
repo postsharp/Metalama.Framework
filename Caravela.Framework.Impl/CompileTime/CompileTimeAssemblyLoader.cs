@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
 
-        private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
-        private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
+        private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new ();
+        private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new ();
 
         public CompileTimeAssemblyLoader( CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {
@@ -27,6 +27,64 @@ namespace Caravela.Framework.Impl.CompileTime
             this._assemblyMap.Add( compilation.ObjectType.ContainingAssembly, typeof( object ).Assembly );
 
             AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
+        }
+
+        // https://stackoverflow.com/a/27106959/41071
+        private static string GetFullMetadataName( ISymbol? s )
+        {
+            if ( s == null || IsRootNamespace( s ) )
+            {
+                return string.Empty;
+            }
+
+            var sb = new StringBuilder();
+            var first = true;
+
+            do
+            {
+                if ( !first )
+                {
+                    if ( s is ITypeSymbol )
+                    {
+                        sb.Insert( 0, '+' );
+                    }
+                    else if ( s is INamespaceSymbol )
+                    {
+                        sb.Insert( 0, '.' );
+                    }
+                }
+
+                first = false;
+
+                sb.Insert( 0, s.MetadataName );
+
+                s = s.ContainingSymbol;
+            }
+            while ( !IsRootNamespace( s ) );
+
+            return sb.ToString();
+        }
+
+        private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
+        {
+            var typeArguments = new List<ITypeSymbol>();
+
+            while ( s != null )
+            {
+                typeArguments.InsertRange( 0, s.TypeArguments );
+
+                s = s.ContainingSymbol as INamedTypeSymbol;
+            }
+
+            return typeArguments;
+        }
+
+        private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
+
+        private static Assembly Load( byte[] assembly )
+        {
+            // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targetting)
+            return Assembly.Load( assembly );
         }
 
         public void Dispose()
@@ -203,58 +261,6 @@ namespace Caravela.Framework.Impl.CompileTime
             return true;
         }
 
-        // https://stackoverflow.com/a/27106959/41071
-        private static string GetFullMetadataName( ISymbol? s )
-        {
-            if ( s == null || IsRootNamespace( s ) )
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder();
-            var first = true;
-
-            do
-            {
-                if ( !first )
-                {
-                    if ( s is ITypeSymbol )
-                    {
-                        sb.Insert( 0, '+' );
-                    }
-                    else if ( s is INamespaceSymbol )
-                    {
-                        sb.Insert( 0, '.' );
-                    }
-                }
-
-                first = false;
-
-                //sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-                sb.Insert( 0, s.MetadataName );
-
-                s = s.ContainingSymbol;
-            } while ( !IsRootNamespace( s ) );
-
-            return sb.ToString();
-        }
-
-        private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
-        {
-            var typeArguments = new List<ITypeSymbol>();
-
-            while ( s != null )
-            {
-                typeArguments.InsertRange( 0, s.TypeArguments );
-
-                s = s.ContainingSymbol as INamedTypeSymbol;
-            }
-
-            return typeArguments;
-        }
-
-        private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
-
         private byte[]? GetResourceBytes( string assemblyPath, string resourceName )
         {
             var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );
@@ -359,12 +365,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return assembly;
-        }
-
-        private static Assembly Load( byte[] assembly )
-        {
-            // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targetting)
-            return Assembly.Load( assembly );
         }
     }
 }

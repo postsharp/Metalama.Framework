@@ -77,8 +77,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                         .WithInitializer(
                                             InitializerExpression(
                                                 SyntaxKind.ArrayInitializerExpression,
-                                                SeparatedList( parameterTypes ) ) ) )
-                            )
+                                                SeparatedList( parameterTypes ) ) ) ) )
                         ;
                 }
             }
@@ -95,8 +94,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                             LiteralExpression(
                                 SyntaxKind.StringLiteralExpression,
                                 Literal( o.Field.Name ) ) ),
-                        Argument( allBindingFlags )
-                    )
+                        Argument( allBindingFlags ) )
                     .NormalizeWhitespace();
             }
 

@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectPipeline
+    internal sealed class AspectPipeline
     {
         public Compilation Execute( IAspectPipelineContext context )
         {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
+                var debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
@@ -135,8 +135,6 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
-
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
         {
             switch ( groupKey )
@@ -161,9 +159,14 @@ namespace Caravela.Framework.Impl
         {
             private readonly AspectPartComparer _partComparer;
 
-            public AspectPartDataComparer( AspectPartComparer partComparer ) => this._partComparer = partComparer;
+            public AspectPartDataComparer( AspectPartComparer partComparer )
+            {
+                this._partComparer = partComparer;
+            }
 
             public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
         }
+
+        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
     }
 }

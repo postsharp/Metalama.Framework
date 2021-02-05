@@ -29,6 +29,6 @@ namespace Caravela.Framework.Impl
         }
 
         internal AspectInstanceResult ToResult() =>
-            new( ImmutableList.Create<Diagnostic>(), this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), ImmutableList.Create<AspectInstance>() );
+            new ( ImmutableList.Create<Diagnostic>(), this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), ImmutableList.Create<AspectInstance>() );
     }
 }

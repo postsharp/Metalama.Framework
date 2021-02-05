@@ -19,12 +19,8 @@ namespace Caravela.Framework.Impl
 
         private CaravelaException( Diagnostic diagnostic )
             : base( diagnostic.ToString() )
-            => this.Diagnostic = diagnostic;
-    }
-
-    internal static class ExceptionExtensions
-    {
-        public static string ToDiagnosticString( this Exception ex ) =>
-            ex.InnerException == null ? $"{ex.GetType()}: {ex.Message}" : $"{ex.GetType()}: {ex.Message} -> {ex.InnerException.ToDiagnosticString()}";
+        {
+            this.Diagnostic = diagnostic;
+        }
     }
 }

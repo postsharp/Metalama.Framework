@@ -66,8 +66,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return Block(
                     body,
-                    LabeledStatement( "__continue", EmptyStatement() )
-                );
+                    LabeledStatement( "__continue", EmptyStatement() ) );
             }
         }
 
@@ -144,8 +143,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         return Block(
 
                             assignment,
-                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) )
-                        );
+                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
                     {
@@ -158,8 +156,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     {
                         return Block(
 
-                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) )
-                        );
+                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
                     {

@@ -1,14 +1,14 @@
-﻿using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
+using Caravela.TestFramework.Templating;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Xunit.Abstractions;
 
 namespace Caravela.Templating.UnitTests

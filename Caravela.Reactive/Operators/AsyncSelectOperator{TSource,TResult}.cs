@@ -21,7 +21,7 @@ namespace Caravela.Reactive.Operators
             this._func = ReactiveCollectorToken.WrapWithDefaultToken( func );
         }
 
-        protected async override ValueTask<ReactiveOperatorResult<IEnumerable<TResult>>> EvaluateFunctionAsync( IEnumerable<TSource> source, CancellationToken cancellationToken )
+        protected override async ValueTask<ReactiveOperatorResult<IEnumerable<TResult>>> EvaluateFunctionAsync( IEnumerable<TSource> source, CancellationToken cancellationToken )
         {
             var builder = ImmutableList.CreateBuilder<TResult>();
 
@@ -30,7 +30,7 @@ namespace Caravela.Reactive.Operators
                 builder.Add( await this._func( item, this.ObserverToken, cancellationToken ) );
             }
 
-            return new( builder.ToImmutable() );
+            return new ( builder.ToImmutable() );
         }
 
         protected override async ValueTask OnSourceItemAddedAsync( IReactiveSubscription sourceSubscription, TSource item, IncrementalUpdateToken updateToken, CancellationToken cancellationToken )

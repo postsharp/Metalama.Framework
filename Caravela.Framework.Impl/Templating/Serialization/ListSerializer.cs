@@ -36,8 +36,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                         .WithTypeArgumentList(
                             TypeArgumentList(
                                 SingletonSeparatedList(
-                                    ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) )
-                                ) ) ) ) )
+                                    ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
                     .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,

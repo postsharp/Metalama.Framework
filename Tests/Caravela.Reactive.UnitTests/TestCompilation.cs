@@ -4,6 +4,6 @@ namespace Caravela.Reactive.UnitTests
 {
     internal class TestCompilation
     {
-        public ReactiveHashSet<SourceType> Types { get; } = new();
+        public ReactiveHashSet<SourceType> Types { get; } = new ();
     }
 }

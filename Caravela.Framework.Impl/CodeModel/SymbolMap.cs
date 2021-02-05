@@ -14,10 +14,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SymbolMap( SourceCompilation compilation ) => this.compilation = compilation;
 
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
-        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new();
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new ();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new ();
 
-        internal IType GetIType( ITypeSymbol typeSymbol ) => this.typeCache.GetOrAdd( typeSymbol, ts => Factory.CreateIType( ts, this.compilation ) );
+        internal IType GetIType( ITypeSymbol typeSymbol ) => this.typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this.compilation ) );
 
         internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this.typeCache.GetOrAdd( typeSymbol, ts => new NamedType( (INamedTypeSymbol) ts, this.compilation ) );
 

@@ -95,7 +95,7 @@ namespace Caravela.Reactive
         /// <returns></returns>
         internal static Func<T1, T2, ReactiveCollectorToken, TOut> WrapWithDefaultToken<T1, T2, TOut>(
             Func<T1, T2, TOut> func )
-            => delegate ( T1 x1, T2 x2, ReactiveCollectorToken collectorToken )
+            => ( x1, x2, collectorToken ) =>
             {
                 using var tk = WithDefaultCollector( collectorToken._collector );
                 return func( x1, x2 );

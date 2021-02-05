@@ -22,7 +22,8 @@ namespace Caravela.Reactive
         /// <typeparam name="TItem">Type of items.</typeparam>
         /// <returns></returns>
         public static IReactiveGroupBy<TKey, TItem> GroupBy<TKey, TItem>(
-            this IReactiveCollection<TItem> source, Func<TItem, TKey> getKeyFunc,
+            this IReactiveCollection<TItem> source,
+            Func<TItem, TKey> getKeyFunc,
             IEqualityComparer<TKey>? equalityComparer = default )
         {
             return new GroupByOperator<TItem, TKey, TItem>( source, getKeyFunc, item => item, equalityComparer );
@@ -41,7 +42,9 @@ namespace Caravela.Reactive
         /// <typeparam name="TResult">Type of output items.</typeparam>
         /// <returns></returns>
         public static IReactiveGroupBy<TKey, TResult> GroupBy<TSource, TKey, TResult>(
-            this IReactiveCollection<TSource> source, Func<TSource, TKey> getKeyFunc, Func<TSource, TResult> getElementFunc,
+            this IReactiveCollection<TSource> source,
+            Func<TSource, TKey> getKeyFunc,
+            Func<TSource, TResult> getElementFunc,
             IEqualityComparer<TKey>? equalityComparer = default )
         {
             return new GroupByOperator<TSource, TKey, TResult>( source, getKeyFunc, getElementFunc, equalityComparer );
@@ -59,7 +62,8 @@ namespace Caravela.Reactive
         /// <typeparam name="TItem">Type of items.</typeparam>
         /// <returns></returns>
         public static IReactiveCollection<IReactiveGroup<TKey, TItem>> OrderedGroupBy<TKey, TItem>(
-            this IReactiveCollection<TItem> source, IComparer<TItem> sourceComparer,
+            this IReactiveCollection<TItem> source,
+            IComparer<TItem> sourceComparer,
             Func<TItem, TKey> getKeyFunc )
         {
             return new OrderedGroupByOperator<TItem, TKey, TItem>( source, sourceComparer, getKeyFunc, item => item, null );
@@ -79,8 +83,10 @@ namespace Caravela.Reactive
         /// <typeparam name="TResult">Type of result items.</typeparam>
         /// <returns></returns>
         public static IReactiveCollection<IReactiveGroup<TKey, TResult>> OrderedGroupBy<TSource, TKey, TResult>(
-            this IReactiveCollection<TSource> source, IComparer<TSource> sourceComparer,
-            Func<TSource, TKey> getKeyFunc, Func<TSource, TResult> getElementFunc )
+            this IReactiveCollection<TSource> source,
+            IComparer<TSource> sourceComparer,
+            Func<TSource, TKey> getKeyFunc,
+            Func<TSource, TResult> getElementFunc )
         {
             return new OrderedGroupByOperator<TSource, TKey, TResult>( source, sourceComparer, getKeyFunc, getElementFunc, null );
         }

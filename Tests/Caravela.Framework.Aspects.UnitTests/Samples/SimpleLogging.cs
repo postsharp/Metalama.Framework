@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable SA1649 // File name should match first type name
+
+using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
@@ -25,12 +27,16 @@ namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
         }
     }
 
-    class TargetClass
+    internal class TargetClass
     {
         [Log]
         public static int Add( int a, int b )
         {
-            if ( a == 0 ) throw new ArgumentOutOfRangeException( nameof( a ) );
+            if ( a == 0 )
+            {
+                throw new ArgumentOutOfRangeException( nameof( a ) );
+            }
+
             return a + b;
         }
     }

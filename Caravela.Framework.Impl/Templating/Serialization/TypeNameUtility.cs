@@ -106,11 +106,13 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 return t.Name; // Generic argument stub
             }
 
-            var isGeneric = t.IsGenericType || t.FullName.IndexOf( '`' ) >= 0; //an array of generic types is not considered a generic type although it still have the genetic notation
+            var isGeneric = t.IsGenericType || t.FullName.IndexOf( '`' ) >= 0; // an array of generic types is not considered a generic type although it still have the genetic notation
             var isArray = !t.IsGenericType && t.FullName.IndexOf( '`' ) >= 0;
             var genericType = t;
-            while ( genericType.IsNested && genericType.DeclaringType.GetGenericArguments().Count() == t.GetGenericArguments().Count() ) //Non generic class in a generic class is also considered in Type as being generic
+            while ( genericType.IsNested && genericType.DeclaringType.GetGenericArguments().Count() == t.GetGenericArguments().Count() )
             {
+                // Non generic class in a generic class is also considered in Type as being generic
+
                 genericType = genericType.DeclaringType;
             }
 
@@ -122,19 +124,19 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             var
                 arguments = arg.Any()
                     ? arg
-                    : t.GetGenericArguments(); //if arg has any then we are in the recursive part, note that we always must take arguments from t, since only t (the last one) will actually have the constructed type arguments and all others will just contain the generic parameters
+                    : t.GetGenericArguments(); // if arg has any then we are in the recursive part, note that we always must take arguments from t, since only t (the last one) will actually have the constructed type arguments and all others will just contain the generic parameters
             var genericTypeName = genericType.ToCSReservatedWord( true );
             if ( genericType.IsNested )
             {
                 var argumentsToPass = arguments.Take( genericType.DeclaringType.GetGenericArguments().Count() )
-                    .ToArray(); //Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDfintion, and only when all parameters including of the innermost are set
+                    .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDfintion, and only when all parameters including of the innermost are set
                 arguments = arguments.Skip( argumentsToPass.Count() ).ToArray();
-                genericTypeName = genericType.DeclaringType.ToGenericTypeString( argumentsToPass ) + "." + ToCSReservatedWord( genericType, false ); //Recursive
+                genericTypeName = genericType.DeclaringType.ToGenericTypeString( argumentsToPass ) + "." + ToCSReservatedWord( genericType, false ); // Recursive
             }
 
             if ( isArray )
             {
-                genericTypeName = t.GetElementType().ToGenericTypeString() + "[]"; //this should work even for multidimensional arrays
+                genericTypeName = t.GetElementType().ToGenericTypeString() + "[]"; // this should work even for multidimensional arrays
             }
 
             if ( genericTypeName.IndexOf( '`' ) >= 0 )
@@ -142,7 +144,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '`' ) );
                 var genericArgs = string.Join( ", ", arguments.Select( a => a.ToGenericTypeString() ).ToArray() );
 
-                //Recursive
+                // Recursive
                 genericTypeName = genericTypeName + "<" + genericArgs + ">";
                 if ( isArray )
                 {
@@ -157,7 +159,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
 
             if ( genericTypeName.IndexOf( '[' ) >= 0 && genericTypeName.IndexOf( ']' ) != genericTypeName.IndexOf( '[' ) + 1 )
             {
-                genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '[' ) ); //For a non generic class nested in a generic class we will still have the type parameters at the end
+                genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '[' ) ); // For a non generic class nested in a generic class we will still have the type parameters at the end
             }
 
             return genericTypeName;

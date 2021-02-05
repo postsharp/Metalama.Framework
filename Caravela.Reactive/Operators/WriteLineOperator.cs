@@ -63,7 +63,9 @@ namespace Caravela.Reactive.Operators
 
         void IReactiveObserver<IEnumerable<T>>.OnValueChanged(
             IReactiveSubscription subscription,
-            IEnumerable<T> oldValue, IEnumerable<T> newValue, int newVersion,
+            IEnumerable<T> oldValue,
+            IEnumerable<T> newValue,
+            int newVersion,
             bool isBreakingChange )
         {
             if ( isBreakingChange )

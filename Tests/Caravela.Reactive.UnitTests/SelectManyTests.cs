@@ -50,7 +50,7 @@ namespace Caravela.Reactive.UnitTests
         [Fact]
         public void ReactiveNestedSelectManyTest()
         {
-            var groups = new ReactiveHashSet<TestCompilation> { new() }
+            var groups = new ReactiveHashSet<TestCompilation> { new () }
                 .SelectMany( c => c.Types.SelectMany( t => t.Members ) )
                 .GroupBy( a => a.Name )
                 .GetValue();
@@ -63,7 +63,7 @@ namespace Caravela.Reactive.UnitTests
         {
             var compilation = new TestCompilation();
 
-            compilation.Types.Add( new( "C", null ) );
+            compilation.Types.Add( new ( "C", null ) );
 
             var codeElements = compilation.Types.SelectDescendants( type => type.NestedTypes.Where( _ => true ) );
 

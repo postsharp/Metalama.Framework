@@ -42,8 +42,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 IdentifierName( "MethodBase" ) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
                     .AddArgumentListArguments(
-                        Argument( methodToken ), Argument( typeHandle )
-                    ).NormalizeWhitespace();
+                        Argument( methodToken ), Argument( typeHandle ) ).NormalizeWhitespace();
             }
             else
             {

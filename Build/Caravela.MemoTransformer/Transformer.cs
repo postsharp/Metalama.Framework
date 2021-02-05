@@ -77,7 +77,7 @@ namespace Caravela.MemoTransformer
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 var parentFieldsToAdd = this._fieldsToAdd;
-                this._fieldsToAdd = new();
+                this._fieldsToAdd = new ();
 
                 var result = (ClassDeclarationSyntax) base.VisitClassDeclaration( node )!;
 

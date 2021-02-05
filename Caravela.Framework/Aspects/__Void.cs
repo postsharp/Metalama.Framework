@@ -8,9 +8,9 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     [EditorBrowsable( EditorBrowsableState.Never )]
     [Obsolete( "Don't use __Void in user code." )]
-#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006, SA1300 // Naming Styles
     public readonly struct __Void
-#pragma warning restore IDE1006 // Naming Styles
+#pragma warning restore IDE1006, SA1300 // Naming Styles
     {
         public override string ToString() => "void";
     }

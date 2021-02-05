@@ -21,8 +21,7 @@ namespace Caravela.Framework.Impl.Templating
             return this.ExpandDeclaration(
                 templateInstance,
                 new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode()! ),
-                new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation )
-            );
+                new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation ) );
         }
 
         internal BlockSyntax ExpandDeclaration( object templateInstance, IProceedImpl proceedImpl, ITemplateContext templateContext )
@@ -68,7 +67,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 // TODO: validate the returnExpression according to the method's return type.
                 // TODO: how to report diagnostics from the template invocation?
-                //throw new CaravelaException(
+                // throw new CaravelaException(
                 //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
                 //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
                 return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );

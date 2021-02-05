@@ -110,8 +110,7 @@ class User {
                 Assert.Equal( "Actioned", e.Name );
                 Assert.Equal( typeof( Action<int> ), e.EventHandlerType );
             },
-            @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")"
-            );
+            @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")" );
         }
 
         private void TestSerializable( string context, IType type, Action<Type> withResult, string expectedCode )

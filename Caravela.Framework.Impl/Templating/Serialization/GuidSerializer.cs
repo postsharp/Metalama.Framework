@@ -38,8 +38,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) )
-                ).NormalizeWhitespace();
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) ).NormalizeWhitespace();
         }
     }
 }

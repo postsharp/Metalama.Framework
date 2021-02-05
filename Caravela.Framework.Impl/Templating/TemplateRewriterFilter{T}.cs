@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

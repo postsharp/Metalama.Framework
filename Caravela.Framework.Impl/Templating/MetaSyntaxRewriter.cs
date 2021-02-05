@@ -147,8 +147,7 @@ namespace Caravela.Framework.Impl.Templating
                     .WithArgumentList(
                         ArgumentList(
                             SingletonSeparatedList(
-                                Argument( this.Transform( list[0] )
-                                    ) ) ) );
+                                Argument( this.Transform( list[0] ) ) ) ) );
             }
             else
             {
@@ -229,8 +228,7 @@ namespace Caravela.Framework.Impl.Templating
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         DefaultExpression(
-                            IdentifierName( "SyntaxTokenList" )
-                        ),
+                            IdentifierName( "SyntaxTokenList" ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
@@ -241,8 +239,7 @@ namespace Caravela.Framework.Impl.Templating
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
                                         SeparatedList(
-                                            list.Select( this.Transform )
-                                        ) ) ) ) ) ) );
+                                            list.Select( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected ExpressionSyntax Transform<T>( SyntaxList<T> list )
@@ -279,8 +276,7 @@ namespace Caravela.Framework.Impl.Templating
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
                                         SeparatedList(
-                                            list.Select( this.Transform )
-                                        ) ) ) ) ) ) );
+                                            list.Select( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected ExpressionSyntax Transform( SyntaxToken token )

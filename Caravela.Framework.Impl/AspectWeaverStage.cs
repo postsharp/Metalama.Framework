@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl
 
         private class DiagnosticSink : IDiagnosticSink
         {
-            public List<Diagnostic> Diagnostics { get; } = new();
+            public List<Diagnostic> Diagnostics { get; } = new ();
 
             public void AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
         }

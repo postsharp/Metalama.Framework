@@ -490,8 +490,7 @@ namespace Caravela.Framework.Impl.Templating
                 var annotatedElse = node.Else != null
                     ? ElseClause(
                         node.Else.ElseKeyword,
-                        (StatementSyntax) this.Visit( node.Else.Statement )!
-                    ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly ).WithTriviaFrom( node.Else )
+                        (StatementSyntax) this.Visit( node.Else.Statement )! ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly ).WithTriviaFrom( node.Else )
                     : null;
 
                 return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,

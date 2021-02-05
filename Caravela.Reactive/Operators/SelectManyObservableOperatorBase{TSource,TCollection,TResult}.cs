@@ -9,9 +9,9 @@ namespace Caravela.Reactive.Operators
         protected Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
 
         private readonly Dictionary<TSource, (IReactiveSubscription? subscription, int count)> _subscriptions
-            = new( EqualityComparerFactory.GetEqualityComparer<TSource>() );
+            = new ( EqualityComparerFactory.GetEqualityComparer<TSource>() );
 
-        private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new();
+        private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new ();
 
         public SelectManyObservableOperatorBase(
             IReactiveCollection<TSource> source,

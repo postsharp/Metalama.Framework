@@ -16,9 +16,9 @@ namespace Caravela.Reactive.UnitTests
 
         public IImmutableList<string> BaseTypes { get; }
 
-        public ReactiveHashSet<Member> Members { get; } = new();
+        public ReactiveHashSet<Member> Members { get; } = new ();
 
-        public ReactiveHashSet<SourceType> NestedTypes { get; } = new();
+        public ReactiveHashSet<SourceType> NestedTypes { get; } = new ();
     }
 
     internal record Member( string Name );

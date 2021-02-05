@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {
     public class ListSerializerTests
     {
-        private ListSerializer _serializer;
+        private readonly ListSerializer _serializer;
 
         public ListSerializerTests()
         {

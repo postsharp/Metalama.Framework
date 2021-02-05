@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
     public interface ICodeElement : IDisplayable
     {
         /// <summary>
-        /// Containing element of code, such as a <see cref="INamedType"/> for nested
+        /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
         /// types or for methods. If the containing element is a namespace or
         /// a compilation, <c>null</c> is returned.
         /// </summary>

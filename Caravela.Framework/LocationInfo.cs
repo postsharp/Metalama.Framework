@@ -8,12 +8,12 @@ namespace Caravela.Framework
     public class LocationInfo
     {
         /// <summary>
-        /// If this represents a field, returns the <see cref="FieldInfo"/>, otherwise returns null.
+        /// Gets the <see cref="FieldInfo"/> if this represents a field, otherwise returns null.
         /// </summary>
         public FieldInfo? FieldInfo { get; }
 
         /// <summary>
-        /// If this represents a property, returns the <see cref="PropertyInfo"/>, otherwise returns null.
+        /// Gets the <see cref="PropertyInfo"/> if this represents a property, otherwise returns null.
         /// </summary>
         public PropertyInfo? PropertyInfo { get; }
 

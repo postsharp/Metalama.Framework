@@ -1,11 +1,11 @@
-using Caravela.TestFramework;
-using Caravela.UnitTestFramework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
+using Caravela.UnitTestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,6 +28,7 @@ namespace Caravela.Framework.Aspects.UnitTests
             var projectDir = GetProjectDirectory();
             var sourcePath = Path.Combine( projectDir, relativeSourcePath );
             var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourcePath )!, Path.GetFileNameWithoutExtension( sourcePath ) + ".transformed.txt" );
+            var actualTransformedPath = Path.Combine( Path.GetDirectoryName( sourcePath )!, Path.GetFileNameWithoutExtension( sourcePath ) + ".actual_transformed.txt" );
 
             var testSource = await File.ReadAllTextAsync( sourcePath );
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Aspects.UnitTests
 
             await SaveTransformedSourceAsync( projectDir, relativeSourcePath, testResult );
 
-            testResult.AssertTransformedSource( expectedTransformedSource );
+            testResult.AssertTransformedSourceEquals( expectedTransformedSource, actualTransformedPath );
         }
 
         private static string GetProjectDirectory()
@@ -46,7 +47,7 @@ namespace Caravela.Framework.Aspects.UnitTests
                 .Single( a => a.Key == "ProjectDirectory" ).Value!;
         }
 
-        private static async Task SaveTransformedSourceAsync(string projectDir, string relativeSourcePath, TestResult testResult)
+        private static async Task SaveTransformedSourceAsync( string projectDir, string relativeSourcePath, TestResult testResult )
         {
             var outputDirPath = Path.Combine(
                 projectDir,
@@ -67,7 +68,7 @@ namespace Caravela.Framework.Aspects.UnitTests
         public AspectTestsListTheoryData( string projectDir )
         {
             this._projectDir = projectDir;
-            
+
             foreach ( var dir in Directory.EnumerateDirectories( projectDir ) )
             {
                 this.AddTestsInDirectory( dir );

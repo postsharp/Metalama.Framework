@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Xunit;
 
-#pragma warning disable SA1402 // File may only contain a single type
-
 // ReSharper disable UnusedTypeParameter
 // ReSharper disable ClassNeverInstantiated.Global
 

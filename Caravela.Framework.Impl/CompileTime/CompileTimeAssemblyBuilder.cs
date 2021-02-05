@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
 
-        private readonly Random _random = new();
+        private readonly Random _random = new ();
 
         public CompileTimeAssemblyBuilder(
             Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.CompileTime
             SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
 
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
-            foreach (var tree in compilation.SyntaxTrees)
+            foreach ( var tree in compilation.SyntaxTrees )
             {
                 compilation = compilation.ReplaceSyntaxTree( tree, tree.WithChangedText( GetEmbeddableText( tree.GetText() ) ) );
             }

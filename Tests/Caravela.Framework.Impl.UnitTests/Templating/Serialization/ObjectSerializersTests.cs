@@ -6,8 +6,8 @@ using Microsoft.CodeAnalysis;
 using Xunit;
 
 #pragma warning disable SA1201 // Elements should appear in the correct order
-#pragma warning disable SA1402 
-#pragma warning disable SA1403 
+#pragma warning disable SA1402
+#pragma warning disable SA1403
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {

@@ -4,8 +4,8 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using TypeKind = Caravela.Framework.Code.TypeKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {

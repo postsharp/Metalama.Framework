@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#pragma warning disable SA1642, SA1028, IDE0021, SA1649
+#pragma warning disable SA1642, SA1028, IDE0021, SA1649, SA1623
 
 namespace System.Diagnostics.CodeAnalysis
 {
