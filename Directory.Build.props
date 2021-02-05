@@ -29,7 +29,7 @@
   <!-- Code quality and documentation -->
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Disable XML doc warnings in the debug build -->
     <NoWarn Condition="'$(Configuration)'=='Debug'">1591,1572,1573</NoWarn>
