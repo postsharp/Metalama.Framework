@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl
 {

@@ -11,7 +11,6 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.IO;
 
 namespace Caravela.Framework.Impl
 {

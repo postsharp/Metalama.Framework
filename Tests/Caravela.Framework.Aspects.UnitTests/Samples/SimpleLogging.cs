@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging

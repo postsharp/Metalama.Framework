@@ -22,7 +22,7 @@ namespace Caravela.UnitTestFramework
 
         public static void AssertDiagnosticId( this TestResult testResult, string expectedId )
         {
-            Assert.Contains( testResult.Diagnostics, d => d.Id.Equals( expectedId ) );
+            Assert.Contains( testResult.Diagnostics, d => d.Id.Equals( expectedId, StringComparison.Ordinal ) );
         }
     }
 }

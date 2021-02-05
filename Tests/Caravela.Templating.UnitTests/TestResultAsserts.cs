@@ -2,8 +2,6 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests

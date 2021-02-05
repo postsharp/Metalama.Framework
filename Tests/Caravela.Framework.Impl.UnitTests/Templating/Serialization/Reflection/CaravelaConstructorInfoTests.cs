@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.Serialization.Reflection;
 using Xunit;

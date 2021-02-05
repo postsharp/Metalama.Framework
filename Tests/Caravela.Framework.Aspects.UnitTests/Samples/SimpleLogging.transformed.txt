@@ -10,9 +10,6 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateHelper;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging

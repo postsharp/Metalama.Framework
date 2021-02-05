@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Caravela.Framework.Impl.Templating.Serialization;
-using Microsoft.CodeAnalysis;
-using Xunit;
+﻿using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
 {

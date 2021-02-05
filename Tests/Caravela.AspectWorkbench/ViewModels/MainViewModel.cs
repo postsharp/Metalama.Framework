@@ -1,7 +1,6 @@
 ﻿using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
-using Caravela.TestFramework.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
@@ -11,12 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
-using Caravela.AspectWorkbench.Model;
-using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Formatting;
-using PostSharp.Patterns.Model;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {

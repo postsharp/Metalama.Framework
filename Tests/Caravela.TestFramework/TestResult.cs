@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 
 namespace Caravela.TestFramework
 {

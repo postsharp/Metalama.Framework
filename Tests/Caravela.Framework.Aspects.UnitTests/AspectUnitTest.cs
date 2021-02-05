@@ -25,12 +25,12 @@ namespace Caravela.Framework.Aspects.UnitTests
         [MemberData( nameof( AspectTestsList ) )]
         public async Task RunTestAsync( string relativeSourcePath )
         {
-            string projectDir = GetProjectDirectory();
-            string sourcePath = Path.Combine( projectDir, relativeSourcePath );
-            string expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourcePath ), Path.GetFileNameWithoutExtension( sourcePath ) + ".transformed.txt" );
+            var projectDir = GetProjectDirectory();
+            var sourcePath = Path.Combine( projectDir, relativeSourcePath );
+            var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourcePath )!, Path.GetFileNameWithoutExtension( sourcePath ) + ".transformed.txt" );
 
-            string testSource = await File.ReadAllTextAsync( sourcePath );
-            string expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
+            var testSource = await File.ReadAllTextAsync( sourcePath );
+            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
             var testRunner = new AspectUnitTestRunner( this._logger );
             var testResult = await testRunner.Run( testSource );
@@ -43,25 +43,25 @@ namespace Caravela.Framework.Aspects.UnitTests
         private static string GetProjectDirectory()
         {
             return Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
-                .Single( a => a.Key == "ProjectDirectory" ).Value;
+                .Single( a => a.Key == "ProjectDirectory" ).Value!;
         }
 
         private static async Task SaveTransformedSourceAsync(string projectDir, string relativeSourcePath, TestResult testResult)
         {
-            string outputDirPath = Path.Combine(
+            var outputDirPath = Path.Combine(
                 projectDir,
                 "obj\\transformed",
-                Path.GetDirectoryName( relativeSourcePath ) );
+                Path.GetDirectoryName( relativeSourcePath )! );
             Directory.CreateDirectory( outputDirPath );
 
-            string outputPath = Path.Combine( outputDirPath, Path.GetFileNameWithoutExtension( relativeSourcePath ) + ".transformed.txt" );
+            var outputPath = Path.Combine( outputDirPath, Path.GetFileNameWithoutExtension( relativeSourcePath ) + ".transformed.txt" );
             await File.WriteAllTextAsync( outputPath, testResult.TemplateOutputSource?.ToString()?.Trim() );
         }
     }
 
     public class AspectTestsListTheoryData : TheoryData<string>
     {
-        private static readonly HashSet<string> ExcludedDirectoryNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
+        private static readonly HashSet<string> _excludedDirectoryNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly string _projectDir;
 
         public AspectTestsListTheoryData( string projectDir )
@@ -76,7 +76,10 @@ namespace Caravela.Framework.Aspects.UnitTests
 
         private void AddTestsInDirectory( string dirPath )
         {
-            if ( ExcludedDirectoryNames.Contains( Path.GetFileName( dirPath ) ) ) return;
+            if ( _excludedDirectoryNames.Contains( Path.GetFileName( dirPath ) ) )
+            {
+                return;
+            }
 
             foreach ( var nestedDir in Directory.EnumerateDirectories( dirPath ) )
             {

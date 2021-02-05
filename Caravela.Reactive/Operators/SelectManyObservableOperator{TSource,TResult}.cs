@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {

@@ -19,19 +19,20 @@ namespace Caravela.TestFramework
     {
         public virtual async Task<TestResult> Run( string testSource )
         {
-            TestResult result = new TestResult();
+           
             testSource = CommonSnippets.CaravelaUsings + testSource;
 
             // Source.
             var project = this.CreateProject();
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
-            result.TemplateDocument = testDocument;
 
+            var result = new TestResult( testDocument );
+            
             var initialCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { await testDocument.GetSyntaxTreeAsync() },
+                new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
-                (CSharpCompilationOptions) project.CompilationOptions );
+                (CSharpCompilationOptions?) project.CompilationOptions );
             var diagnostics = initialCompilation.GetDiagnostics();
             this.ReportDiagnostics( result, diagnostics );
 
@@ -84,7 +85,7 @@ namespace Caravela.TestFramework
             result.Diagnostics.AddRange( diagnostics );
         }
 
-        class AspectTestPipelineContext : IAspectPipelineContext
+        private class AspectTestPipelineContext : IAspectPipelineContext
         {
             private readonly TestResult _testResult;
 
