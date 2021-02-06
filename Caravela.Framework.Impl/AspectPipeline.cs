@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Caravela.Compiler;
 using Caravela.Framework.Aspects;
@@ -11,24 +12,16 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.IO;
 
 namespace Caravela.Framework.Impl
 {
-    abstract class AspectPipeline : ISourceTransformer
+    internal abstract class AspectPipeline
     {
-        private List<PipelineStage> _stages;
+        public IList<PipelineStage> Stages { get; } = new List<PipelineStage>();
 
-        public IList<PipelineStage> Stages { get; }
-
-        public Compilation Execute(TransformerContext context)
+        public virtual Compilation Execute( IAspectPipelineContext context )
         {
-            bool getFlag( string flagName ) =>
-                context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
-                bool.TryParse( flagString, out bool flagValue ) &&
-                flagValue;
-
-            if ( getFlag("DebugCaravela") )
+            if ( context.GetOptionsFlag( "DebugCaravela" ) )
             {
                 Debugger.Launch();
             }
@@ -37,7 +30,7 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
+                var debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
@@ -69,7 +62,7 @@ namespace Caravela.Framework.Impl
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                foreach (var resource in pipelineStageResult.Resources)
+                foreach ( var resource in pipelineStageResult.Resources )
                 {
                     context.ManifestResources.Add( resource );
                 }
@@ -91,11 +84,11 @@ namespace Caravela.Framework.Impl
 
                 return resultCompilation;
             }
-            catch (CaravelaException exception)
+            catch ( CaravelaException exception )
             {
                 context.ReportDiagnostic( exception.Diagnostic );
 
-                if (exception is DiagnosticsException diagnosticsException)
+                if ( exception is DiagnosticsException diagnosticsException )
                 {
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
                     {
@@ -105,27 +98,26 @@ namespace Caravela.Framework.Impl
 
                 return context.Compilation;
             }
-            catch (Exception exception)
+            catch ( Exception exception )
             {
-                Guid guid = Guid.NewGuid();
-                string path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                var guid = Guid.NewGuid();
+                var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
                 try
                 {
                     File.WriteAllText( path, exception.ToString() );
                 }
                 catch
                 {
-                    
                 }
 
-                Console.WriteLine(exception.ToString());
-                
+                Console.WriteLine( exception.ToString() );
+
                 context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString(), path ) );
                 return context.Compilation;
             }
         }
 
-        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilationModel compilation)
+        private static IReactiveCollection<INamedType> GetAspectTypes( SourceCompilationModel compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
@@ -145,12 +137,11 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-
-        record AspectPartData( AspectType AspectType, AspectPart AspectPart );
+        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
 
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
-            switch (groupKey)
+            switch ( groupKey )
             {
                 case IAspectWeaver weaver:
 
@@ -160,19 +151,22 @@ namespace Caravela.Framework.Impl
 
                 case nameof( AspectDriver ):
 
-                    return new AdviceWeaverStage( partsData.Select(pd => pd.AspectPart), compileTimeAssemblyLoader );
+                    return new AdviceWeaverStage( partsData.Select( pd => pd.AspectPart ), compileTimeAssemblyLoader );
 
                 default:
 
                     throw new NotSupportedException();
-            };
+            }
         }
 
-        class AspectPartDataComparer : IComparer<AspectPartData>
+        private class AspectPartDataComparer : IComparer<AspectPartData>
         {
             private readonly AspectPartComparer _partComparer;
 
-            public AspectPartDataComparer( AspectPartComparer partComparer ) => this._partComparer = partComparer;
+            public AspectPartDataComparer( AspectPartComparer partComparer )
+            {
+                this._partComparer = partComparer;
+            }
 
             public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
         }

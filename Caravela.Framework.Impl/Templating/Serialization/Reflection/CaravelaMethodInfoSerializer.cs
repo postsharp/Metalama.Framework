@@ -1,9 +1,6 @@
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -16,7 +13,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         {
             this._typeSerializer = typeSerializer;
         }
-        
+
         public override ExpressionSyntax Serialize( CaravelaMethodInfo o )
         {
             return CreateMethodBase( this._typeSerializer, o );
@@ -28,11 +25,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
         public static ExpressionSyntax CreateMethodBase( CaravelaTypeSerializer typeSerializer, IMethodSymbol methodSymbol, ITypeSymbol? declaringGenericTypeSymbol )
         {
             methodSymbol = methodSymbol.OriginalDefinition;
-            string documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
-            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle), documentationId );
+            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
+            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof( Compiler.Intrinsics.GetRuntimeMethodHandle ), documentationId );
             if ( declaringGenericTypeSymbol != null )
             {
-                var typeHandle = CreateTypeHandleExpression(typeSerializer, declaringGenericTypeSymbol );
+                var typeHandle = CreateTypeHandleExpression( typeSerializer, declaringGenericTypeSymbol );
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -45,34 +42,33 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                                 IdentifierName( "MethodBase" ) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
                     .AddArgumentListArguments(
-                        Argument( methodToken ), Argument( typeHandle )
-                    ).NormalizeWhitespace();
+                        Argument( methodToken ), Argument( typeHandle ) ).NormalizeWhitespace();
             }
             else
             {
-                return SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
+                return InvocationExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            SyntaxFactory.MemberAccessExpression(
+                            MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.MemberAccessExpression(
+                                MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
-                                    SyntaxFactory.IdentifierName( "System" ),
-                                    SyntaxFactory.IdentifierName( "Reflection" ) ),
-                                SyntaxFactory.IdentifierName( "MethodBase" ) ),
-                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) ) 
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "MethodBase" ) ),
+                            IdentifierName( "GetMethodFromHandle" ) ) )
+                    .AddArgumentListArguments( Argument( methodToken ) )
                     .NormalizeWhitespace();
             }
         }
 
-        private static ExpressionSyntax CreateTypeHandleExpression(CaravelaTypeSerializer typeSerializer, ITypeSymbol? type )
+        private static ExpressionSyntax CreateTypeHandleExpression( CaravelaTypeSerializer typeSerializer, ITypeSymbol type )
         {
-            ExpressionSyntax typeExpression = typeSerializer.CreateTypeCreationExpressionFromSymbolRecursive(type);
+            var typeExpression = typeSerializer.CreateTypeCreationExpressionFromSymbolRecursive( type );
             ExpressionSyntax typeHandle = MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 typeExpression,
-                IdentifierName("TypeHandle"));
+                IdentifierName( "TypeHandle" ) );
             return typeHandle;
         }
     }

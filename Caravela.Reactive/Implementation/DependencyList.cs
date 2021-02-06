@@ -14,12 +14,12 @@ namespace Caravela.Reactive.Implementation
         private IReactiveObserver? _parent;
 
         /// <summary>
-        /// Creates a new <see cref="DependencyList"/>.
+        /// Initializes a new instance of the <see cref="DependencyList"/> struct.
         /// </summary>
         /// <param name="parent">The implementation of <see cref="IReactiveObserver"/>,
         /// which should receive change notifications.
         /// </param>
-        public DependencyList(IReactiveObserver parent)
+        public DependencyList( IReactiveObserver parent )
         {
             this._parent = parent;
             this._dependencies = null;
@@ -29,18 +29,16 @@ namespace Caravela.Reactive.Implementation
 
         public bool IsDisabled => this._parent == null;
 
-
         /// <summary>
         /// Prevents dependencies to be added.
         /// </summary>
         public void Disable() => this._parent = null;
 
-
-        private Node? FindNode(IReactiveObservable<IReactiveObserver> source)
+        private Node? FindNode( IReactiveObservable<IReactiveObserver> source )
         {
-            for (var node = this._dependencies; node != null; node = node.Next)
+            for ( var node = this._dependencies; node != null; node = node.Next )
             {
-                if (node.Source == source)
+                if ( node.Source == source )
                 {
                     return node;
                 }
@@ -49,59 +47,57 @@ namespace Caravela.Reactive.Implementation
             return null;
         }
 
-
         /// <summary>
         /// Adds a dependency to the list and starts observing changes.
         /// </summary>
         /// <param name="source">The dependent source.</param>
         /// <param name="version">The version of the source when it was evaluated.</param>
         /// <typeparam name="T">An <see cref="IReactiveObservable{T}"/>.</typeparam>
-        /// <exception cref="InvalidOperationException"></exception>
-        public void Add<T>(T source, int version)
+        public void Add<T>( T? source, int version )
             where T : IReactiveObservable<IReactiveObserver>
         {
-            if (source == null)
+            if ( source == null )
             {
                 return;
             }
 
 #if DEBUG
-            if (this._parent == null)
+            if ( this._parent == null )
+            {
                 throw new InvalidOperationException();
+            }
 #endif
 
             // Try to find an existing node.
-            var existingNode = this.FindNode(source);
-            if (existingNode != null)
+            var existingNode = this.FindNode( source );
+            if ( existingNode != null )
             {
-                // Not sure what to do if the version if different. 
-                Debug.Assert(existingNode.Version == version);
+                // Not sure what to do if the version if different.
+                Debug.Assert( existingNode.Version == version, "Unexpected version." );
                 return;
             }
-            
+
             // No existing node. Add an observer and create a new node.
-            var subscription = source.AddObserver(this._parent);
+            var subscription = source.AddObserver( this._parent );
 
             if ( subscription == null )
             {
                 return;
             }
 
-            var node = new Node(source, subscription, version);
+            var node = new Node( source, subscription, version );
 
-            while (true)
+            while ( true )
             {
                 var head = this._dependencies;
                 node.Next = head;
 
-                if (Interlocked.CompareExchange(ref this._dependencies, node, head) == head)
+                if ( Interlocked.CompareExchange( ref this._dependencies, node, head ) == head )
                 {
                     // Success.
                     return;
                 }
             }
-
-
         }
 
         /// <summary>
@@ -109,7 +105,7 @@ namespace Caravela.Reactive.Implementation
         /// </summary>
         public void Clear()
         {
-            for (var node = this._dependencies; node != null; node = node.Next)
+            for ( var node = this._dependencies; node != null; node = node.Next )
             {
                 node.Subscription?.Dispose();
             }
@@ -117,7 +113,6 @@ namespace Caravela.Reactive.Implementation
             this._dependencies = null;
         }
 
-        
         /// <summary>
         /// Determines if any dependency is out of date, based on the cached version number
         /// and the current version number of the dependent source.
@@ -125,13 +120,15 @@ namespace Caravela.Reactive.Implementation
         /// <returns></returns>
         public bool IsDirty()
         {
-            if (this._dependencies == null)
+            if ( this._dependencies == null )
+            {
                 return false;
+            }
 
             // No lock is necessary for reading.
-            for (var node = this._dependencies; node != null; node = node.Next)
+            for ( var node = this._dependencies; node != null; node = node.Next )
             {
-                if (node.Version > node.Source.Version)
+                if ( node.Version > node.Source.Version )
                 {
                     return true;
                 }
@@ -146,19 +143,16 @@ namespace Caravela.Reactive.Implementation
 
             public IReactiveSubscription? Subscription { get; }
 
-            public int Version { get;  }
+            public int Version { get; }
 
             public Node? Next { get; set; }
 
-            public Node(IReactiveObservable<IReactiveObserver> source, IReactiveSubscription? subscription, int version)
+            public Node( IReactiveObservable<IReactiveObserver> source, IReactiveSubscription? subscription, int version )
             {
                 this.Source = source;
                 this.Subscription = subscription;
                 this.Version = version;
             }
         }
-
-
-
     }
 }

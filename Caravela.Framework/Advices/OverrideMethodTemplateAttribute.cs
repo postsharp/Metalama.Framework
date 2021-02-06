@@ -1,5 +1,5 @@
-﻿using Caravela.Framework.Aspects;
-using System;
+﻿using System;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Advices
 {
@@ -9,6 +9,5 @@ namespace Caravela.Framework.Advices
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
     public class OverrideMethodTemplateAttribute : TemplateAttribute
     {
-        
     }
 }

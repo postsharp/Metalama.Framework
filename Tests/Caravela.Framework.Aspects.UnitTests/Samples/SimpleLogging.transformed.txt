@@ -1,0 +1,49 @@
+using System.Collections.Generic;
+
+using Caravela.Framework.Aspects;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateHelper;
+#pragma warning disable SA1649 // File name should match first type name
+
+using System;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
+{
+    public class LogAttribute : OverrideMethodAspect
+    {
+        public override dynamic OverrideMethod() => throw new System.NotSupportedException("Compile-time only code cannot be called at run-time.");
+    }
+
+    internal class TargetClass
+    {
+        [Log]
+        public static int Add(int a, int b)
+        {
+            Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
+            try
+            {
+                int result;
+                if (a == 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(a));
+                }
+
+                result = a + b;
+                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
+                return (int)result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
+                throw;
+            }
+        }
+    }
+}

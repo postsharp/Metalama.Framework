@@ -3,13 +3,10 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    class LinkedCompilationModel : CompilationModel
+    internal class LinkedCompilationModel : CompilationModel
     {
         private CompilationModel _originalCompilation;
 
@@ -30,6 +27,6 @@ namespace Caravela.Framework.Impl.Linking
             return this._originalCompilation.GetRoslynCompilation();
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._originalCompilation.ToDisplayString( format, context );
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._originalCompilation.ToDisplayString( format, context );
     }
 }

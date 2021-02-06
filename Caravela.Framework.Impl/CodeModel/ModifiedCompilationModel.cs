@@ -1,20 +1,16 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    sealed class ModifiedCompilationModel : CompilationModel
+    internal sealed class ModifiedCompilationModel : CompilationModel
     {
         private readonly CompilationModel _originalCompilation;
         private readonly IReactiveCollection<Transformation> _transformations;
@@ -51,10 +47,9 @@ namespace Caravela.Framework.Impl.CodeModel
             return result;
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._originalCompilation.ToDisplayString( format, context );
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._originalCompilation.ToDisplayString( format, context );
 
-
-        sealed class CompilationRewriter : CSharpSyntaxRewriter
+        private sealed class CompilationRewriter : CSharpSyntaxRewriter
         {
             private ICompilation _baseCompilation;
             private readonly List<IntroducedMethod> _introducedMethods;
@@ -62,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public CompilationRewriter( ICompilation baseCompilation, IReactiveCollection<Transformation> transformations )
             {
-                IList<Transformation> transformationList = (IList<Transformation>) transformations.Materialize().GetValue().ToList();
+                var transformationList = (IList<Transformation>) transformations.Materialize().GetValue().ToList();
 
                 this._baseCompilation = baseCompilation;
                 this._introducedMethods = transformationList.OfType<IntroducedMethod>().ToList();
@@ -70,17 +65,20 @@ namespace Caravela.Framework.Impl.CodeModel
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
             public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
             private TypeDeclarationSyntax VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 var newMembers = new List<MemberDeclarationSyntax>( node.Members.Count );
 
-                foreach (var transformation in this._introducedMethods)
+                foreach ( var transformation in this._introducedMethods )
                 {
-                    if (transformation.ContainingElement!.GetSyntaxNode() == node)
+                    if ( transformation.ContainingElement!.GetSyntaxNode() == node )
                     {
                         newMembers.Add( transformation.GetDeclaration() );
                     }
@@ -92,13 +90,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     var newMember = member.WithAttributeLists( this.VisitList( member.AttributeLists ) );
 
-                    foreach(var transformation in this._overriddenMethods)
+                    foreach ( var transformation in this._overriddenMethods )
                     {
                         var overridenSyntax = transformation.OverridenDeclaration!.GetSyntaxNodes().FirstOrDefault();
 
                         if ( overridenSyntax == member )
                         {
-                            foreach (var overridingSyntax in transformation.GetOverrides(this._baseCompilation))
+                            foreach ( var overridingSyntax in transformation.GetOverrides( this._baseCompilation ) )
                             {
                                 newMembers.Add( overridingSyntax );
                             }

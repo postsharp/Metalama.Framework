@@ -1,9 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+﻿using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -11,14 +7,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         private const string annotationKind = "CaravelaAspectLinker";
 
-        public static LinkerAnnotation? GetCodeVersionFromAnnotation(this SyntaxNode node)
+        public static LinkerAnnotation? GetCodeVersionFromAnnotation( this SyntaxNode node )
         {
-            string? annotationValue = node.GetAnnotations( annotationKind ).SingleOrDefault()?.Data;
+            var annotationValue = node.GetAnnotations( annotationKind ).SingleOrDefault()?.Data;
 
             return annotationValue != null ? LinkerAnnotation.FromString( annotationValue ) : null;
         }
 
-        public static SyntaxNode AddCodeVersionAnnotation(this SyntaxNode node, LinkerAnnotation annotation)
+        public static SyntaxNode AddCodeVersionAnnotation( this SyntaxNode node, LinkerAnnotation annotation )
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( annotationKind, annotation.ToString() ) );
         }

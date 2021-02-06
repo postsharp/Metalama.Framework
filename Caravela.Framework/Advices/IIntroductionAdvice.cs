@@ -9,6 +9,7 @@ namespace Caravela.Framework.Advices
         Static,
         Target
     }
+
     public enum Visibility
     {
         Private,
@@ -22,9 +23,13 @@ namespace Caravela.Framework.Advices
     public interface IIntroductionAdvice : IAdvice<INamedType>
     {
         IntroductionScope? Scope { get; set; }
+
         string? Name { get; set; }
+
         bool? IsStatic { get; set; }
+
         bool? IsVirtual { get; set; }
+
         Visibility? Visibility { get; set; }
     }
 }

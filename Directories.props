@@ -1,0 +1,9 @@
+<Project>
+  <!-- Output path -->
+  <PropertyGroup>
+    <!-- This forces the Sdk to set default value of Configuration property early (in Microsoft.Common.props). -->
+    <DefaultProjectConfiguration>Debug</DefaultProjectConfiguration>
+    <!-- Hooks our file into AfterMicrosoftCommonProps import extension point, which is imported after default configuration is set. -->        
+    <CustomAfterMicrosoftCommonProps>$(MSBuildThisFileDirectory)\Directory.AfterCommonProps.props</CustomAfterMicrosoftCommonProps>
+  </PropertyGroup>
+</Project>

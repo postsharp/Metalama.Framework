@@ -12,22 +12,23 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly SourceCompilationModel compilation;
 
-        public SymbolMap(SourceCompilationModel compilation) => this.compilation = compilation;
+        public SymbolMap( SourceCompilationModel compilation ) => this.compilation = compilation;
 
-        readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new();
-        readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new();
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new ();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new ();
 
-        internal IType GetIType(ITypeSymbol typeSymbol) => this.typeCache.GetOrAdd(typeSymbol, ts => Factory.CreateIType(ts, this.compilation ));
+        internal IType GetIType( ITypeSymbol typeSymbol ) => this.typeCache.GetOrAdd( typeSymbol, ts => Factory.CreateIType( ts, this.compilation ) );
 
-        internal NamedType GetNamedType(INamedTypeSymbol typeSymbol) => (NamedType) this.typeCache.GetOrAdd(typeSymbol, ts => new NamedType((INamedTypeSymbol)ts, this.compilation ));
+        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this.typeCache.GetOrAdd( typeSymbol, ts => new NamedType( (INamedTypeSymbol) ts, this.compilation ) );
 
         internal IGenericParameter GetGenericParameter( ITypeParameterSymbol typeSymbol ) =>
             (GenericParameter) this.typeCache.GetOrAdd( typeSymbol, ts => new GenericParameter( (ITypeParameterSymbol) ts, this.compilation ) );
 
-        internal IMethod GetMethod(IMethodSymbol methodSymbol) => this.methodCache.GetOrAdd(methodSymbol, ms => new Method(ms, this.compilation ));
+        internal IMethod GetMethod( IMethodSymbol methodSymbol ) => this.methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this.compilation ) );
 
         internal ICodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
-            symbol switch {
+            symbol switch
+            {
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method => this.GetMethod( method ),
                 _ => throw new ArgumentException( nameof( symbol ) )

@@ -1,16 +1,16 @@
-﻿using Caravela.Framework.Advices;
+﻿using System;
+using System.Linq;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using System;
-using System.Linq;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp
 {
     public class CountMethodsAspect : Attribute, IAspect<INamedType>
     {
-        int i;
-        int methodCount;
+        private int i;
+        private int methodCount;
 
         [OverrideMethodTemplate]
         public dynamic Template()
@@ -24,9 +24,9 @@ namespace Caravela.Framework.TestApp
         {
             var methods = aspectBuilder.TargetDeclaration.Methods.GetValue();
             this.methodCount = methods.Count();
-            foreach ( var method in methods.Where(x => x.MethodKind != Caravela.Framework.Code.MethodKind.Constructor) )
+            foreach ( var method in methods.Where( x => x.MethodKind != Caravela.Framework.Code.MethodKind.Constructor ) )
             {
-                aspectBuilder.AdviceFactory.OverrideMethod( method, nameof( Template ) );
+                aspectBuilder.AdviceFactory.OverrideMethod( method, nameof( this.Template ) );
             }
         }
     }

@@ -4,14 +4,13 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectDriver : IAspectDriver
+    internal class AspectDriver : IAspectDriver
     {
         public INamedType AspectType { get; }
 
@@ -50,18 +49,18 @@ namespace Caravela.Framework.Impl
         private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
             where T : class, ICodeElement
         {
-            if (aspect is not IAspect<T> aspectOfT)
+            if ( aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new( ImmutableList.Create( diagnostic ), ImmutableList.Create<IAdvice>(), ImmutableList.Create<AspectInstance>() );
+                return new ( ImmutableList.Create( diagnostic ), ImmutableList.Create<IAdvice>(), ImmutableList.Create<AspectInstance>() );
             }
 
             var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
 
-            var aspectBuilder = new AspectBuilder<T>( 
+            var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
@@ -73,7 +72,7 @@ namespace Caravela.Framework.Impl
 
         private IAdvice CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
         {
-            throw new NotImplementedException($"No implementation for advice attribute {typeof(T).Name}.");
+            throw new NotImplementedException( $"No implementation for advice attribute {typeof( T ).Name}." );
         }
     }
 }

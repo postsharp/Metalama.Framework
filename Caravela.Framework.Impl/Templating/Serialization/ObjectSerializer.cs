@@ -1,12 +1,12 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
 {
     /// <summary>
     /// An object serializer can be registered with <see cref="ObjectSerializers"/> to serialize objects of a specific type into Roslyn creation expressions.
     /// </summary>
-    abstract class ObjectSerializer
+    internal abstract class ObjectSerializer
     {
         /// <summary>
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         /// <summary>
         /// Throws a <see cref="CaravelaException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
         /// </summary>
-        protected internal static void ThrowIfStackTooDeep(object obj)
+        protected internal static void ThrowIfStackTooDeep( object obj )
         {
             try
             {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
             }
             catch
             {
-                throw new CaravelaException(GeneralDiagnosticDescriptors.CycleInSerialization, obj);
+                throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
             }
         }
     }

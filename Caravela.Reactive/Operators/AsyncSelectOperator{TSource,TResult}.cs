@@ -1,13 +1,9 @@
-#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Caravela.Reactive.Implementation;
-
-#endregion
 
 namespace Caravela.Reactive.Operators
 {
@@ -20,25 +16,22 @@ namespace Caravela.Reactive.Operators
         private readonly Func<TSource, ReactiveCollectorToken, CancellationToken, ValueTask<TResult>> _func;
 
         public AsyncSelectOperator( IAsyncReactiveCollection<TSource> source, Func<TSource, CancellationToken, ValueTask<TResult>> func, bool hasReactiveDependencies )
-            : base(source, hasReactiveDependencies )
+            : base( source, hasReactiveDependencies )
         {
-            this._func = ReactiveCollectorToken.WrapWithDefaultToken(func);
+            this._func = ReactiveCollectorToken.WrapWithDefaultToken( func );
         }
 
-        protected async override ValueTask<ReactiveOperatorResult<IEnumerable<TResult>>> EvaluateFunctionAsync( IEnumerable<TSource> source, CancellationToken cancellationToken )
+        protected override async ValueTask<ReactiveOperatorResult<IEnumerable<TResult>>> EvaluateFunctionAsync( IEnumerable<TSource> source, CancellationToken cancellationToken )
         {
             var builder = ImmutableList.CreateBuilder<TResult>();
 
-            foreach ( TSource item in source )
+            foreach ( var item in source )
             {
                 builder.Add( await this._func( item, this.ObserverToken, cancellationToken ) );
             }
 
-
-            return new( builder.ToImmutable() );
-            
+            return new ( builder.ToImmutable() );
         }
-
 
         protected override async ValueTask OnSourceItemAddedAsync( IReactiveSubscription sourceSubscription, TSource item, IncrementalUpdateToken updateToken, CancellationToken cancellationToken )
         {
@@ -87,6 +80,5 @@ namespace Caravela.Reactive.Operators
                 subscription.Observer.OnItemAdded( subscription.Subscription, newItemResult, updateToken.NextVersion );
             }
         }
-
     }
 }

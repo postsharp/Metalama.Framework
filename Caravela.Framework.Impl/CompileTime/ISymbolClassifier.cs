@@ -2,7 +2,7 @@
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    interface ISymbolClassifier
+    internal interface ISymbolClassifier
     {
         SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol );
     }

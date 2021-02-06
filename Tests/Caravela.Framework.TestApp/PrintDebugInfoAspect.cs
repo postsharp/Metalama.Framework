@@ -1,9 +1,10 @@
-﻿using Caravela.Framework.Aspects;
-using System;
+﻿using System;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    class PrintDebugInfoAspect : OverrideMethodAspect
+    internal class PrintDebugInfoAspect : OverrideMethodAspect
     {
         public override dynamic OverrideMethod()
         {

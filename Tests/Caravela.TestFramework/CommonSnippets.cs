@@ -1,9 +1,11 @@
-﻿namespace Caravela.TestFramework.Templating
+﻿namespace Caravela.TestFramework
 {
     public static class CommonSnippets
     {
         // TODO: Remove the namespaces that are required only in the compiled template. They should be added automatically during template compilation.
         public const string CaravelaUsings = @"
+using System.Collections.Generic;
+
 using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 

@@ -1,13 +1,8 @@
-﻿using Caravela.Framework.Aspects;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Advices
 {
-    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
-    public class IntroduceMethodTemplateAttribute : TemplateAttribute { }
-
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
     public class IntroduceMethodAttribute : IntroduceMethodTemplateAttribute, IAdviceAttribute<IIntroductionAdvice>
     {
@@ -20,5 +15,10 @@ namespace Caravela.Framework.Advices
         public bool IsVirtual { get; set; }
 
         public Visibility? Visibility { get; set; }
+    }
+
+    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
+    public class IntroduceMethodTemplateAttribute : TemplateAttribute
+    {
     }
 }

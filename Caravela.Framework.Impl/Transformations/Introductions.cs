@@ -1,22 +1,18 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using System.Linq;
 using Caravela.Framework.Advices;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Code;
+using Caravela.Framework.Sdk;
+using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
-using CodeAnalysis = Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-
-    abstract class IntroducedElement : Transformation, ICodeElement, IToSyntax
+    internal abstract class IntroducedElement : Transformation, ICodeElement, IToSyntax
     {
         public abstract ICodeElement? ContainingElement { get; }
 
@@ -29,29 +25,33 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public abstract CSharpSyntaxNode GetSyntaxNode();
+
         public abstract IEnumerable<CSharpSyntaxNode> GetSyntaxNodes();
 
         public abstract MemberDeclarationSyntax GetDeclaration();
 
-        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null );
+        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
     }
 
-    abstract class IntroducedMember : IntroducedElement, IMember
+    internal abstract class IntroducedMember : IntroducedElement, IMember
     {
         public INamedType TargetDeclaration { get; }
 
         public abstract string Name { get; }
+
         public abstract bool IsStatic { get; }
+
         public abstract bool IsVirtual { get; }
+
         public abstract INamedType? DeclaringType { get; }
 
-        public IntroducedMember(IAdvice advice, INamedType targetDeclaration) : base(advice)
+        public IntroducedMember( IAdvice advice, INamedType targetDeclaration ) : base( advice )
         {
             this.TargetDeclaration = targetDeclaration;
         }
     }
 
-    sealed class IntroducedMethod : IntroducedMember, IMethod
+    internal sealed class IntroducedMethod : IntroducedMember, IMethod
     {
         private readonly IntroductionScope? _scope;
         private readonly string? _name;
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
         public override ICodeElement? ContainingElement { get; }
 
         public IMethod TemplateMethod { get; }
-        
+
         [Memo]
         public IParameter? ReturnParameter => this.TemplateMethod!.ReturnParameter;
 
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Transformations
         public IImmutableList<IMethod> LocalFunctions => this.TemplateMethod!.LocalFunctions;
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select(x => (IParameter)new IntroducedParameter(this.Advice, this, x)).ToImmutableList();
+        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select( x => (IParameter) new IntroducedParameter( this.Advice, this, x ) ).ToImmutableList();
 
         [Memo]
         public IImmutableList<IGenericParameter> GenericParameters => this.TemplateMethod!.GenericParameters!.Select( x => (IGenericParameter) new IntroducedGenericParameter( this.Advice, this, x ) ).ToImmutableList();
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Transformations
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
         public IntroducedMethod( IAdvice advice, INamedType targetType, IMethod templateMethod, IntroductionScope? scope, string? name, bool? isStatic, bool? isVirtual, Visibility? visibility )
-            : base(advice, targetType)
+            : base( advice, targetType )
         {
             this.ContainingElement = targetType;
             this.TemplateMethod = templateMethod;
@@ -109,37 +109,39 @@ namespace Caravela.Framework.Impl.Transformations
         public override MemberDeclarationSyntax GetDeclaration()
         {
             if ( this.declaration != null )
+            {
                 return this.declaration;
+            }
 
             var templateSyntax = (MethodDeclarationSyntax) this.TemplateMethod!.GetSyntaxNode()!;
 
             this.declaration = MethodDeclaration(
                 List<AttributeListSyntax>(), // TODO: Copy some attributes?
-                templateSyntax.Modifiers, 
-                templateSyntax.ReturnType, 
-                templateSyntax.ExplicitInterfaceSpecifier!, 
-                templateSyntax.Identifier, 
+                templateSyntax.Modifiers,
+                templateSyntax.ReturnType,
+                templateSyntax.ExplicitInterfaceSpecifier!,
+                templateSyntax.Identifier,
                 templateSyntax.TypeParameterList!,
-                templateSyntax.ParameterList, 
-                templateSyntax.ConstraintClauses, 
-                Block( ThrowStatement( ObjectCreationExpression( ParseTypeName("System.NotImplementedException")))), 
-                null, 
-                templateSyntax.SemicolonToken
-                );
+                templateSyntax.ParameterList,
+                templateSyntax.ConstraintClauses,
+                Block( ThrowStatement( ObjectCreationExpression( ParseTypeName( "System.NotImplementedException" ) ) ) ),
+                null,
+                templateSyntax.SemicolonToken );
 
             return this.declaration;
         }
 
         public override CSharpSyntaxNode GetSyntaxNode() => this.GetDeclaration();
+
         public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => new[] { (CSharpSyntaxNode) this.GetDeclaration() };
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             throw new NotImplementedException();
         }
     }
 
-    sealed class IntroducedParameter : IntroducedElement, IParameter
+    internal sealed class IntroducedParameter : IntroducedElement, IParameter
     {
         private readonly IParameter _template;
 
@@ -167,7 +169,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind ElementKind => this._template.ElementKind;
 
-        public IntroducedParameter( IAdvice advice, IMethod containingMethod, IParameter template ) : base(advice)
+        public IntroducedParameter( IAdvice advice, IMethod containingMethod, IParameter template ) : base( advice )
         {
             this.ContainingElement = containingMethod;
             this._template = template;
@@ -179,15 +181,16 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode();
+
         public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes();
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             throw new NotImplementedException();
         }
     }
 
-    sealed class IntroducedGenericParameter : IntroducedElement, IGenericParameter
+    internal sealed class IntroducedGenericParameter : IntroducedElement, IGenericParameter
     {
         private readonly IGenericParameter _template;
 
@@ -227,6 +230,7 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode()!;
+
         public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes()!;
 
         public bool Is( IType other )
@@ -249,7 +253,7 @@ namespace Caravela.Framework.Impl.Transformations
             return this._template.MakePointerType();
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null )
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             throw new NotImplementedException();
         }

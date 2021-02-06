@@ -1,8 +1,9 @@
-﻿using Caravela.Reactive;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using static Caravela.Reactive.UnitTests.TestGroupObserver.EventKind;
+
+// ReSharper disable ObjectCreationAsStatement
 
 namespace Caravela.Reactive.UnitTests
 {
@@ -22,7 +23,7 @@ namespace Caravela.Reactive.UnitTests
             ItemsInvalidated,
         }
 
-        private readonly List<(EventKind, object)> _events = new();
+        private readonly List<(EventKind, object)> _events = new ();
 
         private readonly IReactiveCollection<IReactiveGroup<int, int>> _source;
 
@@ -44,10 +45,14 @@ namespace Caravela.Reactive.UnitTests
         public void ReconnectGroups()
         {
             foreach ( var g in this._source.GetValue() )
+            {
                 new GroupObserver( this, g );
+            }
         }
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         public void OnItemAdded( IReactiveSubscription subscription, IReactiveGroup<int, int> item, int newVersion )
         {
@@ -74,7 +79,7 @@ namespace Caravela.Reactive.UnitTests
             this._events.Add( (GroupsInvalidated, isBreakingChange) );
         }
 
-        class GroupObserver : IReactiveCollectionObserver<int>
+        private class GroupObserver : IReactiveCollectionObserver<int>
         {
             private readonly TestGroupObserver _parent;
             private readonly int _i;
@@ -90,7 +95,9 @@ namespace Caravela.Reactive.UnitTests
                 source.Observable.AddObserver( this );
             }
 
-            public void Dispose() { }
+            public void Dispose()
+            {
+            }
 
             public void OnItemAdded( IReactiveSubscription subscription, int item, int newVersion )
             {

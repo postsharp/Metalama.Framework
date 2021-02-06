@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Templating
             private readonly TemplateAnnotator _parent;
             private readonly bool _initialValue;
 
-            public ConditionalBranchCookie(TemplateAnnotator parent, bool initialValue)
+            public ConditionalBranchCookie( TemplateAnnotator parent, bool initialValue )
             {
                 this._parent = parent;
                 this._initialValue = initialValue;

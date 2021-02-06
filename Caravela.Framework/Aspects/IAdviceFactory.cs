@@ -15,6 +15,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <returns>An advice.</returns>
         IOverrideMethodAdvice OverrideMethod( IMethod method, string defaultTemplate );
+
         IIntroductionAdvice IntroduceMethod( INamedType type, string template );
     }
 }

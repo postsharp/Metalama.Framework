@@ -11,12 +11,12 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectWeaverStage : PipelineStage
+    internal sealed class AspectWeaverStage : PipelineStage
     {
         private readonly IAspectWeaver aspectWeaver;
         private readonly INamedType aspectType;
 
-        public AspectWeaverStage(IAspectWeaver aspectWeaver, INamedType aspectType)
+        public AspectWeaverStage( IAspectWeaver aspectWeaver, INamedType aspectType )
         {
             this.aspectWeaver = aspectWeaver;
             this.aspectType = aspectType;
@@ -25,10 +25,12 @@ namespace Caravela.Framework.Impl
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
             // TODO: actual reactivity.
-            var aspectInstances = ((IList<AspectInstance>)input.AspectInstances.Where( x => x.AspectType.FullName == this.aspectType.FullName )).ToImmutableArray();
+            var aspectInstances = ((IList<AspectInstance>) input.AspectInstances.Where( x => x.AspectType.FullName == this.aspectType.FullName )).ToImmutableArray();
 
             if ( !aspectInstances.Any() )
+            {
                 return input;
+            }
 
             var diagnosticSink = new DiagnosticSink();
 
@@ -42,26 +44,25 @@ namespace Caravela.Framework.Impl
             {
                 newCompilation = this.aspectWeaver.Transform( context );
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
                 diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this.aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
-            return new PipelineStageResult( 
-                new SourceCompilationModel( newCompilation ), 
-                input.Diagnostics.Concat(diagnosticSink.Diagnostics).ToList(), 
-                input.Resources.Concat(resources).ToList(),
-                input.AspectInstances
-                );
+            return new PipelineStageResult(
+                new SourceCompilationModel( newCompilation ),
+                input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
+                input.Resources.Concat( resources ).ToList(),
+                input.AspectInstances );
         }
 
-        class DiagnosticSink : IDiagnosticSink
+        private class DiagnosticSink : IDiagnosticSink
         {
-            public List<Diagnostic> Diagnostics { get; } = new();
+            public List<Diagnostic> Diagnostics { get; } = new ();
 
-            public void AddDiagnostic(Diagnostic diagnostic) => this.Diagnostics.Add(diagnostic);
+            public void AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
         }
     }
 }

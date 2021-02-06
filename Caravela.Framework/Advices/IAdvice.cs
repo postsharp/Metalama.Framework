@@ -21,13 +21,13 @@ namespace Caravela.Framework.Advices
         ICodeElement TargetDeclaration { get; }
     }
 
-    
     /// <summary>
     /// The base interface for all advices with a strongly-typed <see cref="TargetDeclaration"/>.
     /// Instances of <see cref="IAdvice{T}"/> can be instantiated thanks to the <see cref="IAdviceFactory"/> interface.
     /// </summary>
     /// <typeparam name="T">Type of code element to which the advice can be added.</typeparam>
-    public interface IAdvice<out T> : IAdvice where T : ICodeElement
+    public interface IAdvice<out T> : IAdvice
+        where T : ICodeElement
     {
         /// <summary>
         /// Gets the element of code to which the current advice has been applied.

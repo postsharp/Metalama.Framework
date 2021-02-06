@@ -1,18 +1,19 @@
-﻿using Caravela.Framework.Impl.CodeModel;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-
-    sealed class PipelineStageResult
+    internal sealed class PipelineStageResult
     {
         public CompilationModel Compilation { get; }
+
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
+
         public IReadOnlyList<ResourceDescription> Resources { get; }
+
         public IReactiveCollection<AspectInstance> AspectInstances { get; }
 
         public PipelineStageResult( CompilationModel compilation, IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, IReactiveCollection<AspectInstance> aspectInstances )

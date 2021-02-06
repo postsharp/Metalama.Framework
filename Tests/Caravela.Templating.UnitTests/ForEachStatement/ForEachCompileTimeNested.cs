@@ -1,6 +1,5 @@
-
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests

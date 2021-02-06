@@ -14,7 +14,7 @@ namespace Caravela.Framework.Aspects
 
     /// <summary>
     /// The base interface for all aspects, with the type parameter indicating to which types
-    /// of declarations the aspect can be added. 
+    /// of declarations the aspect can be added.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface IAspect<in T> : IAspect

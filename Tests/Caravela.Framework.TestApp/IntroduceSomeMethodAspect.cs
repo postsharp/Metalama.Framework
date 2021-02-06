@@ -2,8 +2,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp

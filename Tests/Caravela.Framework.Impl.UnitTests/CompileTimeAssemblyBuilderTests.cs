@@ -1,5 +1,5 @@
-﻿using Caravela.Framework.Impl.CompileTime;
-using System.Linq;
+﻿using System.Linq;
+using Caravela.Framework.Impl.CompileTime;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -9,7 +9,8 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void RemoveInvalidUsingsRewriterTest()
         {
-            var compilation = CreateRoslynCompilation( @"
+            var compilation = CreateRoslynCompilation(
+                @"
 using System;
 using Nonsense;
 using Foo;
@@ -20,7 +21,7 @@ namespace Foo
 }
 ", ignoreErrors: true );
 
-            string expected = @"
+            var expected = @"
 using System;
 using Foo;
 
@@ -32,7 +33,7 @@ namespace Foo
 
             var rewriter = new CompileTimeAssemblyBuilder.RemoveInvalidUsingsRewriter( compilation );
 
-            string? actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
+            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
 
             Assert.Equal( expected, actual );
         }

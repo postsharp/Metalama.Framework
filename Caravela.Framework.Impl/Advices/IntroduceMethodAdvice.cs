@@ -1,16 +1,9 @@
-﻿using Caravela.Framework.Advices;
+﻿using System.Collections.Immutable;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -45,33 +38,7 @@ namespace Caravela.Framework.Impl.Advices
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray.Create<Transformation>(
                     introducedMethod,
-                    overridenMethod
-                    )
-                );
-
-            //string templateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            //var templateReflectionMethod = this.Aspect.GetType().GetMethod( templateMethodName );
-            //var targetMethod = this.TargetDeclaration.Methods.Where( m => m.Name == this.TemplateMethod.Name ).GetValue().SingleOrDefault();
-
-            //IntroducedMethod introducedMethod;
-            //BlockSyntax methodBody;
-
-            //if ( targetMethod != null )
-            //{
-            //    // TODO: This should return just OverridenMethod transformation.
-            //    methodBody = new TemplateDriver( templateReflectionMethod ).ExpandDeclaration( this.Aspect, targetMethod, compilation );
-            //    introducedMethod = new IntroducedMethod( this.TargetDeclaration, targetMethod, this.TemplateMethod, methodBody );
-            //}
-            //else
-            //{
-            //    // TODO: This should return IntroducedMethod and OverridenMethod.
-            //    introducedMethod = new IntroducedMethod( this.TargetDeclaration, targetMethod, this.TemplateMethod, null );
-            //    methodBody = new TemplateDriver( templateReflectionMethod ).ExpandDeclaration( this.Aspect, introducedMethod, compilation );
-            //    introducedMethod = new IntroducedMethod( this.TargetDeclaration, targetMethod, this.TemplateMethod, methodBody );
-            //}
-
-            //yield return introducedMethod;
+                    overridenMethod ) );
         }
-
     }
 }

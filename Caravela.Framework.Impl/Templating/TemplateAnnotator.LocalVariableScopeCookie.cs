@@ -1,5 +1,5 @@
-﻿using Caravela.Framework.Impl.CompileTime;
-using System;
+﻿using System;
+using Caravela.Framework.Impl.CompileTime;
 
 namespace Caravela.Framework.Impl.Templating
 {
