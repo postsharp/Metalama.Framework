@@ -43,35 +43,35 @@ namespace Caravela.TestFramework.Templating
 
             if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
-                result.TestErrorMessage = "Initial diagnostics failed.";
+                result.ErrorMessage = "Initial diagnostics failed.";
                 return result;
             }
 
             var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
             var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
 
-            foreach ( var templateAnalyzer in this.GetTemplateAnalyzers() )
+            foreach ( var templateAnalyzer in this.GetTestAnalyzers() )
             {
                 templateAnalyzer.Visit( templateSyntaxRoot );
             }
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            bool success = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedSyntaxRoot, out var transformedSyntaxRoot );
-            result.AnnotatedSyntaxRoot = annotatedSyntaxRoot;
-            result.TransformedSyntaxRoot = transformedSyntaxRoot;
+            bool success = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
             if ( !success )
             {
-                result.TestErrorMessage = "Template compiler failed.";
+                result.ErrorMessage = "Template compiler failed.";
                 return result;
             }
 
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { transformedSyntaxRoot.SyntaxTree.WithFilePath( string.Empty ), targetSyntaxTree },
+                new[] { transformedTemplateSyntax.SyntaxTree.WithFilePath( string.Empty ), targetSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions );
 
@@ -87,7 +87,7 @@ namespace Caravela.TestFramework.Templating
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
-                result.TestErrorMessage = "Final compilation failed.";
+                result.ErrorMessage = "Final compilation failed.";
                 return result;
             }
 
@@ -116,11 +116,11 @@ namespace Caravela.TestFramework.Templating
                 var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
-                result.TemplateOutputSource = formattedOutput.GetText();
+                result.TransformedTargetSource = formattedOutput.GetText();
             }
             catch ( Exception exception )
             {
-                result.TestErrorMessage = exception.ToString();
+                result.ErrorMessage = exception.ToString();
                 return result;
             }
             finally
@@ -147,7 +147,7 @@ namespace Caravela.TestFramework.Templating
             return project;
         }
 
-        protected virtual IEnumerable<CSharpSyntaxVisitor> GetTemplateAnalyzers()
+        protected virtual IEnumerable<CSharpSyntaxVisitor> GetTestAnalyzers()
         {
             yield break;
         }

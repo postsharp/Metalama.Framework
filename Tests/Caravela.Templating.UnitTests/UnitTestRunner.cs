@@ -46,7 +46,7 @@ namespace Caravela.Templating.UnitTests
             return result;
         }
 
-        protected override IEnumerable<CSharpSyntaxVisitor> GetTemplateAnalyzers()
+        protected override IEnumerable<CSharpSyntaxVisitor> GetTestAnalyzers()
         {
             yield return this._usedSyntaxKindsCollector;
         }

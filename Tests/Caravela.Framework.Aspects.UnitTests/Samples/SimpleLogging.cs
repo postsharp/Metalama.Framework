@@ -22,12 +22,12 @@ namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
             catch ( Exception e )
             {
                 Console.WriteLine( target.Method.ToDisplayString() + " failed: " + e.Message );
-
                 throw;
             }
         }
     }
 
+    #region Target
     class TargetClass
     {
         [Log]
@@ -37,4 +37,5 @@ namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
             return a + b;
         }
     }
+    #endregion
 }
