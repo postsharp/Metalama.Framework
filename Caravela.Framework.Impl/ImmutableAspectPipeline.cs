@@ -1,6 +1,4 @@
-﻿using Caravela.Compiler;
-
-namespace Caravela.Framework.Impl
+﻿namespace Caravela.Framework.Impl
 {
     internal class ImmutableAspectPipeline : AspectPipeline
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -55,6 +56,29 @@ namespace Caravela.Framework.Impl.Transformations
                     null,
                     originalSyntax.SemicolonToken)
             };
+        }
+
+        private class LinkerProceed : IProceedImpl
+        {
+            public LinkerProceed()
+            {
+            }
+
+            public StatementSyntax CreateAssignStatement( string returnValueLocalName )
+            {
+                // Assign result
+                throw new NotImplementedException();
+            }
+
+            public StatementSyntax CreateReturnStatement()
+            {
+                throw new NotImplementedException();
+            }
+
+            public TypeSyntax CreateTypeSyntax()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

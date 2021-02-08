@@ -103,19 +103,19 @@ namespace Caravela.Framework.Impl.Transformations
             this._visibility = visibility;
         }
 
-        //TODO: Memo for methods?
-        private MemberDeclarationSyntax declaration;
+        // TODO: Memo for methods?
+        private MemberDeclarationSyntax? _declaration;
 
         public override MemberDeclarationSyntax GetDeclaration()
         {
-            if ( this.declaration != null )
+            if ( this._declaration != null )
             {
-                return this.declaration;
+                return this._declaration;
             }
 
             var templateSyntax = (MethodDeclarationSyntax) this.TemplateMethod!.GetSyntaxNode()!;
 
-            this.declaration = MethodDeclaration(
+            this._declaration = MethodDeclaration(
                 List<AttributeListSyntax>(), // TODO: Copy some attributes?
                 templateSyntax.Modifiers,
                 templateSyntax.ReturnType,
@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Transformations
                 null,
                 templateSyntax.SemicolonToken );
 
-            return this.declaration;
+            return this._declaration;
         }
 
         public override CSharpSyntaxNode GetSyntaxNode() => this.GetDeclaration();
@@ -180,9 +180,9 @@ namespace Caravela.Framework.Impl.Transformations
             throw new NotSupportedException();
         }
 
-        public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode();
+        public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode()!;
 
-        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes();
+        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes()!;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {

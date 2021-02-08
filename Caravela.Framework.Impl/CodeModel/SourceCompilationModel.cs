@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -49,20 +47,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName;
-    }
-
-    internal static class Factory
-    {
-        internal static IType CreateIType( ITypeSymbol typeSymbol, SourceCompilationModel compilation ) =>
-            typeSymbol switch
-            {
-                INamedTypeSymbol namedType => new NamedType( namedType, compilation ),
-                IArrayTypeSymbol arrayType => new ArrayType( arrayType, compilation ),
-                IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
-                ITypeParameterSymbol typeParameter => new GenericParameter( typeParameter, compilation ),
-                IDynamicTypeSymbol dynamicType => new DynamicType( dynamicType, compilation ),
-                _ => throw new NotImplementedException()
-            };
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
     }
 }

@@ -10,6 +10,11 @@ namespace Caravela.Framework.Impl.Linking
     {
         private CompilationModel _originalCompilation;
 
+        public LinkedCompilationModel(CompilationModel originalCompilation)
+        {
+            this._originalCompilation = originalCompilation;
+        }
+
         public override IReactiveCollection<INamedType> DeclaredTypes => this._originalCompilation.DeclaredTypes;
 
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;

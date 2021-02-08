@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -137,7 +136,9 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
+#pragma warning disable SA1313 // Parameter names should begin with lower-case letter
         private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
+#pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {

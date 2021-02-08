@@ -12,7 +12,6 @@ namespace Caravela.Framework.Impl.Linking
         {
             var compilationToBeLinked = new ModifiedCompilationModel( context.Compilation, context.Transformations );
 
-
             return new AdviceLinkerResult( compilationToBeLinked, Array.Empty<Diagnostic>().ToImmutableReactive() );
         }
 
