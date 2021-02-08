@@ -1,6 +1,5 @@
-
-using Caravela.TestFramework;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -65,7 +64,7 @@ class TargetCode
     return result;
 }";
 
-        [Fact(Skip = "#28034 Template compiler: compile-time variable is not replaced with a value in the final code")]
+        [Fact( Skip = "#28034 Template compiler: compile-time variable is not replaced with a value in the final code" )]
         public async Task IfCompileTimeNested()
         {
             var testResult = await this._testRunner.Run( new TestInput( IfCompileTimeNested_Template, IfCompileTimeNested_Target ) );

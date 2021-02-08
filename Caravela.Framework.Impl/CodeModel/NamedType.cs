@@ -4,20 +4,22 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using TypeKind = Caravela.Framework.Code.TypeKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
     {
         internal INamedTypeSymbol TypeSymbol { get; }
+
         ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
+
         protected internal override ISymbol Symbol => this.TypeSymbol;
 
         internal override SourceCompilation Compilation { get; }
 
-        internal NamedType(INamedTypeSymbol typeSymbol, SourceCompilation compilation)
+        internal NamedType( INamedTypeSymbol typeSymbol, SourceCompilation compilation )
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;
@@ -30,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
             RoslynTypeKind.Enum => TypeKind.Enum,
             RoslynTypeKind.Interface => TypeKind.Interface,
             RoslynTypeKind.Struct => TypeKind.Struct,
-            _ => throw new InvalidOperationException($"Unexpected type kind {this.TypeSymbol.TypeKind}.")
+            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
         public bool HasDefaultConstructor =>
@@ -55,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<IEvent> Events => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => this.SymbolMap.GetMethod(m)).ToImmutableReactive();
+        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select( m => this.SymbolMap.GetMethod( m ) ).ToImmutableReactive();
 
         [Memo]
         public IImmutableList<IGenericParameter> GenericParameters =>

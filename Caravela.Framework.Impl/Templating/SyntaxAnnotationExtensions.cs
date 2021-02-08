@@ -1,7 +1,7 @@
-using Caravela.Framework.DesignTime.Contracts;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 
@@ -16,11 +16,9 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
         private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
-        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation(_scopeAnnotationKind, "template");
+        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
         private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
         private static readonly SyntaxAnnotation proceedAnnotation = new SyntaxAnnotation( _proceedAnnotationKind );
-        
-        
 
         private static readonly ImmutableList<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
@@ -32,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
         public static SymbolDeclarationScope GetScopeFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
-            if ( annotation == null  )
+            if ( annotation == null )
             {
                 return SymbolDeclarationScope.Default;
             }
@@ -74,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
-        
+
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxToken node )
         {
             var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
@@ -94,9 +92,9 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
         }
-        
 
-        public static T AddColoringAnnotation<T>( this T node, TextSpanClassification color ) where T : SyntaxNode
+        public static T AddColoringAnnotation<T>( this T node, TextSpanClassification color )
+            where T : SyntaxNode
         {
             if ( color == TextSpanClassification.Default || node.GetColorFromAnnotation() >= color )
             {
@@ -105,10 +103,9 @@ namespace Caravela.Framework.Impl.Templating
 
             return node.WithoutAnnotations( _colorAnnotationKind )
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
-
         }
-        
-        public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanClassification color )  
+
+        public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanClassification color )
         {
             if ( color == TextSpanClassification.Default || node.GetColorFromAnnotation() >= color )
             {
@@ -117,10 +114,10 @@ namespace Caravela.Framework.Impl.Templating
 
             return node.WithoutAnnotations( _colorAnnotationKind )
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
-
         }
 
-        public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope ) where T : SyntaxNode
+        public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )
+            where T : SyntaxNode
         {
             if ( scope == SymbolDeclarationScope.Default )
             {
@@ -144,35 +141,43 @@ namespace Caravela.Framework.Impl.Templating
                     return node.WithAdditionalAnnotations( runTimeOnlyAnnotation );
 
                 case SymbolDeclarationScope.Template:
-                    return node.WithAdditionalAnnotations(templateAnnotation);
+                    return node.WithAdditionalAnnotations( templateAnnotation );
 
                 default:
                     return node;
             }
         }
 
-        public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode
+        public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
+            where T : SyntaxNode
             => node.AddScopeAnnotation( source.GetScopeFromAnnotation() );
 
-        public static T WithSymbolAnnotationsFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode =>
+        public static T WithSymbolAnnotationsFrom<T>( this T node, SyntaxNode source )
+            where T : SyntaxNode
+            =>
             node.WithAdditionalAnnotations( source.GetAnnotations( SemanticAnnotationMap.AnnotationKinds ) );
 
-        public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode =>
+        public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source )
+            where T : SyntaxNode
+            =>
             node.WithAdditionalAnnotations( source.GetAnnotations( templateAnnotationKinds ) );
-        
-        public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source ) where T : SyntaxNode
+
+        public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source )
+            where T : SyntaxNode
             => source.HasCallsProceedAnnotation() ? node.AddCallsProceedAnnotation() : node;
 
-
-        public static T AddNoDeepIndentAnnotation<T>( this T node ) where T : SyntaxNode =>
+        public static T AddNoDeepIndentAnnotation<T>( this T node )
+            where T : SyntaxNode
+            =>
             node.WithAdditionalAnnotations( noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( noDeepIndentAnnotation );
-        
-       public static bool HasCallsProceedAnnotation( this SyntaxNode node ) 
-           => node.HasAnnotation( proceedAnnotation );
 
-       public static T AddCallsProceedAnnotation<T>(this T node ) where T : SyntaxNode
+        public static bool HasCallsProceedAnnotation( this SyntaxNode node )
+            => node.HasAnnotation( proceedAnnotation );
+
+        public static T AddCallsProceedAnnotation<T>( this T node )
+            where T : SyntaxNode
         {
             if ( node.HasCallsProceedAnnotation() )
             {

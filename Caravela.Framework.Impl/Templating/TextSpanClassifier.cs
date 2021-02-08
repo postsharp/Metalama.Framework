@@ -1,12 +1,10 @@
-using Caravela.Framework.DesignTime.Contracts;
 using System;
-using System.Collections.Immutable;
+using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -16,47 +14,56 @@ namespace Caravela.Framework.Impl.Templating
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    public sealed class TextSpanClassifier : CSharpSyntaxWalker
+    public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
         private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new ClassifiedTextSpanCollection();
         private readonly SourceText _sourceText;
         private readonly bool _visitUnmarkedTypes;
         private readonly string _sourceString;
-        private bool _isInTemplate;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
+        private bool _isInTemplate;
 
+#pragma warning disable 618
+
+        // ReSharper disable once IntroduceOptionalParameters.Global
         public TextSpanClassifier( SourceText sourceText ) : this( sourceText, false )
+#pragma warning restore 618
         {
-            
         }
-        
+
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
         /// </summary>
         /// <param name="sourceText"></param>
         /// <param name="visitUnmarkedTypes">This is for backward compatibility with AspectWorkbench because
         /// test aspect classes are not marked at compile time.</param>
-        [Obsolete("Mark test classes as compile time and call the other constructor.")]
-        public TextSpanClassifier( SourceText sourceText, bool visitUnmarkedTypes  )
+        [Obsolete( "Mark test classes as compile time and call the other constructor." )]
+        public TextSpanClassifier( SourceText sourceText, bool visitUnmarkedTypes )
         {
             this._sourceText = sourceText;
             this._visitUnmarkedTypes = visitUnmarkedTypes;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
         }
-        
-        
+
         public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;
 
+        private static bool ShouldMarkTrivias( TextSpanClassification classification ) =>
+            classification switch
+            {
+                TextSpanClassification.CompileTime => true,
+                TextSpanClassification.RunTime => true,
+                _ => false
+            };
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
             if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
-                this.Mark( node.Keyword, TextSpanClassification.CompileTime);
-                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime);
-                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime);
+                this.Mark( node.Keyword, TextSpanClassification.CompileTime );
+                this.Mark( node.OpenBraceToken, TextSpanClassification.CompileTime );
+                this.Mark( node.CloseBraceToken, TextSpanClassification.CompileTime );
                 this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTime );
                 this.Mark( node.BaseList, TextSpanClassification.CompileTime );
@@ -72,23 +79,21 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-       
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
             if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
             {
                 this._isInTemplate = true;
 
-                this.Mark( node.ReturnType, TextSpanClassification.CompileTime);
-                this.Mark( node.Identifier, TextSpanClassification.CompileTime);
-                this.Mark( node.ParameterList, TextSpanClassification.CompileTime);
-                this.Mark( node.Modifiers, TextSpanClassification.CompileTime);
+                this.Mark( node.ReturnType, TextSpanClassification.CompileTime );
+                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
+                this.Mark( node.ParameterList, TextSpanClassification.CompileTime );
+                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
                 if ( node.Body != null )
                 {
                     this.Mark( node.Body.OpenBraceToken, TextSpanClassification.CompileTime );
                     this.Mark( node.Body.CloseBraceToken, TextSpanClassification.CompileTime );
                 }
-                
 
                 // The code is run-time by default in a template method.
                 this.Mark( node.Body, TextSpanClassification.RunTime );
@@ -103,7 +108,6 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node, TextSpanClassification.CompileTime );
             }
         }
-                
 
         private void VisitMember( SyntaxNode node )
         {
@@ -140,7 +144,6 @@ namespace Caravela.Framework.Impl.Templating
                     this.Mark( token, colorFromAnnotation );
                 }
             }
-
         }
 
         public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
@@ -170,12 +173,10 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     this.Mark( node, colorFromAnnotation );
                 }
-
             }
 
             base.DefaultVisit( node );
         }
-
 
         private void Mark( SyntaxNode? node, TextSpanClassification classification )
         {
@@ -187,20 +188,20 @@ namespace Caravela.Framework.Impl.Templating
 
         private void Mark( SyntaxTokenList list, TextSpanClassification classification )
         {
-            foreach ( var item in list)
-            {
-                this.Mark( item, classification );
-            }
-        }
-
-        private void Mark<T>( SyntaxList<T> list, TextSpanClassification classification ) where T : SyntaxNode
-        {
             foreach ( var item in list )
             {
                 this.Mark( item, classification );
             }
         }
 
+        private void Mark<T>( SyntaxList<T> list, TextSpanClassification classification )
+            where T : SyntaxNode
+        {
+            foreach ( var item in list )
+            {
+                this.Mark( item, classification );
+            }
+        }
 
         private void Mark( SyntaxToken token, TextSpanClassification classification )
         {
@@ -223,18 +224,17 @@ namespace Caravela.Framework.Impl.Templating
                     // Don't highlight comments.
                     continue;
                 }
-                    
-                char previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
-                int triviaStart = trivia.Span.Start;
-                
-                
 
+                var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
+                var triviaStart = trivia.Span.Start;
 
                 // If we have an indenting trivia, trim the start of the span.
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for ( ; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
+                    for (; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
+                    {
+                    }
                 }
 
                 if ( triviaStart != trivia.Span.End )
@@ -252,7 +252,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
 #if DEBUG
-
+            // ReSharper disable once UnusedVariable
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif
 
@@ -309,63 +309,5 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Visit( statement );
         }
-
-        static bool ShouldMarkTrivias( TextSpanClassification classification ) =>
-            classification switch
-            {
-                TextSpanClassification.CompileTime => true,
-                TextSpanClassification.RunTime => true,
-                _ => false
-            };
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        class MarkAllChildrenWalker : CSharpSyntaxWalker
-        {
-            private TextSpanClassification _classification;
-            private TextSpanClassifier _parent;
-
-            public MarkAllChildrenWalker( TextSpanClassifier parent ) : base( SyntaxWalkerDepth.StructuredTrivia )
-            {
-                this._parent = parent;
-            }
-
-            public void MarkAll( SyntaxNode node, TextSpanClassification classification )
-            {
-                this._classification = classification;
-                this.Visit( node );
-            }
-
-            public override void DefaultVisit( SyntaxNode node )
-            {
-                foreach ( var child in node.ChildNodesAndTokens() )
-                {
-                    if ( child.IsNode )
-                    {
-                        this.Visit( child.AsNode() );
-                    }
-                    else
-                    {
-                        this._parent.Mark( child.AsToken(), this._classification );
-                    }
-                }
-
-                if ( ShouldMarkTrivias( this._classification ) )
-                {
-
-                    this._parent.Mark( node.GetLeadingTrivia(), this._classification );
-                    this._parent.Mark( node.GetTrailingTrivia(), this._classification );
-                }
-                else
-                {
-                    // We don't highlight the trivia of "special" spans because they are typically keyword-like.
-                }
-            }
-            
-        }
-
     }
 }

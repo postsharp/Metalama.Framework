@@ -9,19 +9,19 @@ namespace Caravela.Framework.Code
         /// Gets the type of the event, i.e. the type of the delegate.
         /// </summary>
         INamedType EventType { get; }
-        
+
         /// <summary>
         /// Gets the method implementing the <c>add</c> semantic. In case of field-like events, this property returns
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method.
         /// </summary>
         IMethod Adder { get; }
-        
+
         /// <summary>
         /// Gets the method implementing the <c>remove</c> semantic. In case of field-like events, this property returns
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method.
         /// </summary>
         IMethod Remover { get; }
-        
+
         /// <summary>
         /// Gets an object that represents the <c>raise</c> semantic and allows to add aspects and advices
         /// as with a normal method.

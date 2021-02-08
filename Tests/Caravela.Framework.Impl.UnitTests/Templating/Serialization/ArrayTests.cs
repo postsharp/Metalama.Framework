@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using Caravela.Framework.Impl.Templating.Serialization;
 using EnumSpace;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
@@ -13,36 +13,36 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestBasicArray()
         {
-            this.AssertSerialization( "new System.Int32[]{0, 0, 0, 0}", new int[4]);
-            this.AssertSerialization( "new System.Int32[]{10, 20, 30}", new int[3] { 10, 20, 30 });
-            this.AssertSerialization( "new EnumSpace.Mars.Moon[]{EnumSpace.Mars.Moon.Deimos}", new[] {Mars.Moon.Deimos });
+            this.AssertSerialization( "new System.Int32[]{0, 0, 0, 0}", new int[4] );
+            this.AssertSerialization( "new System.Int32[]{10, 20, 30}", new[] { 10, 20, 30 } );
+            this.AssertSerialization( "new EnumSpace.Mars.Moon[]{EnumSpace.Mars.Moon.Deimos}", new[] { Mars.Moon.Deimos } );
         }
-        
+
         [Fact]
         public void TestArrayOfLists()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>[]{new System.Collections.Generic.List<System.Int32>{2}}",
-                new List<int>[]{new List<int>(){2}});
+            this.AssertSerialization(
+                "new System.Collections.Generic.List<System.Int32>[]{new System.Collections.Generic.List<System.Int32>{2}}",
+                new[] { new List<int>() { 2 } } );
         }
+
         [Fact]
         public void TestArrayOfArrays()
         {
-            this.AssertSerialization( "new System.Int32[][]{new System.Int32[]{1, 2}}",
-                new int[][] {new int[] {1, 2}} );
+            this.AssertSerialization(
+                "new System.Int32[][]{new System.Int32[]{1, 2}}",
+                new[] { new[] { 1, 2 } } );
         }
-        
+
         [Fact]
         public void TestMultiArray()
         {
-            Assert.Throws<CaravelaException>( () =>
-            {
-                this.AssertSerialization( "new System.Int32[,]{{2}}", new int[1, 1] {{2}} );
-            } );
+            Assert.Throws<CaravelaException>( () => this.AssertSerialization( "new System.Int32[,]{{2}}", new[,] { { 2 } } ) );
         }
-        
+
         private void AssertSerialization( string expected, object o )
         {
-            string creationExpression = this._serializers.SerializeToRoslynCreationExpression(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

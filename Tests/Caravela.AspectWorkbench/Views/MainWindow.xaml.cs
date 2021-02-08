@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,11 +13,11 @@ namespace Caravela.AspectWorkbench.Views
 {
     public partial class MainWindow
     {
-        private const string TestsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
-        private const string FileDialogueExt = ".cs";
-        private const string FileDialogueFilter = "C# Files (*.cs)|*.cs";
+        private const string _testsProjectPath = @"c:\src\Caravela\Tests\Caravela.Templating.UnitTests\";
+        private const string _fileDialogueExt = ".cs";
+        private const string _fileDialogueFilter = "C# Files (*.cs)|*.cs";
 
-        private readonly MainViewModel viewModel;
+        private readonly MainViewModel _viewModel;
 
         public MainWindow()
         {
@@ -26,7 +25,7 @@ namespace Caravela.AspectWorkbench.Views
             this.InitializeRoslynEditors();
 
             var newViewModel = new MainViewModel();
-            this.viewModel = newViewModel;
+            this._viewModel = newViewModel;
             this.DataContext = newViewModel;
             Post.Cast<MainViewModel, INotifyPropertyChanged>( newViewModel ).PropertyChanged += this.ViewModel_PropertyChanged;
         }
@@ -35,7 +34,7 @@ namespace Caravela.AspectWorkbench.Views
         {
             var roslynHost = CustomRoslynHost.Create();
             var highlightColors = new ClassificationHighlightColors();
-            string workingDirectory = Directory.GetCurrentDirectory();
+            var workingDirectory = Directory.GetCurrentDirectory();
 
             this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
             this.targetSourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
@@ -47,81 +46,83 @@ namespace Caravela.AspectWorkbench.Views
             switch ( e.PropertyName )
             {
                 case nameof( MainViewModel.TemplateText ):
-                    this.sourceTextBox.Text = this.viewModel.TemplateText;
+                    this.sourceTextBox.Text = this._viewModel.TemplateText;
                     break;
                 case nameof( MainViewModel.TargetText ):
-                    this.targetSourceTextBox.Text = this.viewModel.TargetText;
+                    this.targetSourceTextBox.Text = this._viewModel.TargetText;
                     break;
                 case nameof( MainViewModel.ColoredTemplateDocument ):
-                    this.highlightedSourceRichBox.Document = this.viewModel.ColoredTemplateDocument ?? new FlowDocument();
+                    this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
                     break;
                 case nameof( MainViewModel.CompiledTemplateDocument ):
-                    this.compiledTemplateRichBox.Document = this.viewModel.CompiledTemplateDocument ?? new FlowDocument();
+                    this.compiledTemplateRichBox.Document = this._viewModel.CompiledTemplateDocument ?? new FlowDocument();
                     break;
                 case nameof( MainViewModel.TransformedTargetDocument ):
-                    this.transformedCodeRichBox.Document = this.viewModel.TransformedTargetDocument ?? new FlowDocument();
+                    this.transformedCodeRichBox.Document = this._viewModel.TransformedTargetDocument ?? new FlowDocument();
                     break;
             }
         }
 
         private void UpdateViewModel()
         {
-            this.viewModel.TemplateText = this.sourceTextBox.Text;
-            this.viewModel.TargetText = this.targetSourceTextBox.Text;
+            this._viewModel.TemplateText = this.sourceTextBox.Text;
+            this._viewModel.TargetText = this.targetSourceTextBox.Text;
+
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
         }
 
         private void NewButton_Click( object sender, RoutedEventArgs e )
         {
-            this.viewModel.NewTest();
+            this._viewModel.NewTest();
         }
 
         private async void OpenButton_Click( object sender, RoutedEventArgs e )
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = FileDialogueExt;
-            dlg.Filter = FileDialogueFilter;
-            dlg.InitialDirectory = TestsProjectPath;
+            var dlg = new OpenFileDialog();
+            dlg.DefaultExt = _fileDialogueExt;
+            dlg.Filter = _fileDialogueFilter;
+            dlg.InitialDirectory = _testsProjectPath;
 
             if ( dlg.ShowDialog() == true )
             {
-                await this.viewModel.LoadTestAsync( dlg.FileName );
+                await this._viewModel.LoadTestAsync( dlg.FileName );
             }
         }
 
         private async void SaveButton_Click( object sender, RoutedEventArgs e )
         {
-            if ( this.viewModel.IsNewTest )
+            if ( this._viewModel.IsNewTest )
             {
                 this.SaveAsButton_Click( sender, e );
                 return;
             }
 
             this.UpdateViewModel();
-            await this.viewModel.SaveTestAsync( null );
+            await this._viewModel.SaveTestAsync( null );
         }
 
         private async void SaveAsButton_Click( object sender, RoutedEventArgs e )
         {
             this.UpdateViewModel();
 
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.DefaultExt = FileDialogueExt;
-            dlg.Filter = FileDialogueFilter;
-            dlg.InitialDirectory = TestsProjectPath;
+            var dlg = new SaveFileDialog();
+            dlg.DefaultExt = _fileDialogueExt;
+            dlg.Filter = _fileDialogueFilter;
+            dlg.InitialDirectory = _testsProjectPath;
 
             if ( dlg.ShowDialog() == false )
             {
                 return;
             }
-            await this.viewModel.SaveTestAsync( dlg.FileName );
+
+            await this._viewModel.SaveTestAsync( dlg.FileName );
         }
 
         private async void RunButton_Click( object sender, RoutedEventArgs e )
         {
             this.UpdateViewModel();
-            await this.viewModel.RunTestAsync();
+            await this._viewModel.RunTestAsync();
         }
     }
 }

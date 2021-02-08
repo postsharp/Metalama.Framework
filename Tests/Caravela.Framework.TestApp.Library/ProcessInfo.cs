@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Project;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.TestApp.Library
 {

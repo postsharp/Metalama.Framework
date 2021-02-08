@@ -7,13 +7,13 @@ namespace Caravela.Reactive
     {
 
         /// <summary>
-        /// Returns <c>true</c> if the current source can be enumerated without evaluating its own sources,
+        /// Gets a value indicating whether the current source can be enumerated without evaluating its own sources,
         /// i.e. whether it is "cached".
         /// </summary>
         bool IsMaterialized { get; }
-        
+
         /// <summary>
-        /// Returns <c>true</c> if the source is immutable.
+        /// Gets a value indicating whether the source is immutable. If <c>false</c>, adding observers will have no effect.
         /// </summary>
         bool IsImmutable { get; }
     }
@@ -29,35 +29,34 @@ namespace Caravela.Reactive
     /// <typeparam name="T">Type of the value.</typeparam>
     public interface IReactiveSource<out T> : IReactiveSource
     {
-        
+
         /// <summary>
         /// Gets the value of the source. Use this method instead of <see cref="GetVersionedValue"/> when
         /// you need the value but not the version or the side values.
         /// </summary>
         /// <param name="observerToken">A token to register additional dependencies and side values.</param>
         /// <returns></returns>
-        T GetValue(in ReactiveCollectorToken observerToken = default);
-        
+        T GetValue( in ReactiveCollectorToken observerToken = default );
+
         /// <summary>
         /// Gets the value of the source, the value version, and the side values.
         /// </summary>
         /// <param name="observerToken">A token to register additional dependencies and side values.</param>
         /// <returns></returns>
-        IReactiveVersionedValue<T> GetVersionedValue(in ReactiveCollectorToken observerToken = default);
+        IReactiveVersionedValue<T> GetVersionedValue( in ReactiveCollectorToken observerToken = default );
     }
-    
- 
+
     /// <summary>
     /// Defines the semantics of a reactive object that can be observed by strongly-typed observers.
     /// </summary>
     /// <typeparam name="TValue">Type of the value.</typeparam>
     /// <typeparam name="TObserver">Type of the observer.</typeparam>
-    public interface IReactiveSource<out TValue, in TObserver> : 
+    public interface IReactiveSource<out TValue, in TObserver> :
         IReactiveSource<TValue>
         where TObserver : IReactiveObserver<TValue>
     {
         /// <summary>
-        /// The implementation of the <see cref="IReactiveObservable{T}"/> interface. It may, but may not,
+        /// Gets the implementation of the <see cref="IReactiveObservable{T}"/> interface. It may, but may not,
         /// be the same object as the source itself.
         /// </summary>
         IReactiveObservable<TObserver> Observable { get; }

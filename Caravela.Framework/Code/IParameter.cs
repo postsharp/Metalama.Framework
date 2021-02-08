@@ -1,3 +1,5 @@
+#pragma warning disable SA1623 // Property summary documentation should match accessors
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -41,7 +43,7 @@ namespace Caravela.Framework.Code
         int Index { get; }
 
         /// <summary>
-        /// Determines whether the parameter has a default value.
+        /// Gets a value indicating whether the parameter has a default value.
         /// </summary>
         bool HasDefaultValue { get; }
 

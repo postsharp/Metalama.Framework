@@ -1,6 +1,6 @@
 namespace Caravela.Reactive.Implementation
 {
-    partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
+    public partial class BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver>
     {
         /// <summary>
         /// Implementation of <see cref="IReactiveObservable{T}"/> used for <see cref="ReactiveCollectorToken"/>.
@@ -10,7 +10,7 @@ namespace Caravela.Reactive.Implementation
         {
             private readonly BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> _parent;
 
-            public DependencyObservable( BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent)
+            public DependencyObservable( BaseReactiveOperator<TSource, TSourceObserver, TResult, TResultObserver> parent )
             {
                 this._parent = parent;
             }
@@ -19,14 +19,14 @@ namespace Caravela.Reactive.Implementation
 
             public IReactiveSource Source => this._parent;
 
-            IReactiveSubscription IReactiveObservable<IReactiveObserver>.AddObserver(IReactiveObserver observer)
+            IReactiveSubscription? IReactiveObservable<IReactiveObserver>.AddObserver( IReactiveObserver observer )
             {
-                return this._parent._observers.AddObserver(observer);
+                return this._parent._observers.AddObserver( observer );
             }
 
-            bool IReactiveObservable<IReactiveObserver>.RemoveObserver(IReactiveSubscription subscription)
+            bool IReactiveObservable<IReactiveObserver>.RemoveObserver( IReactiveSubscription subscription )
             {
-                return this._parent._observers.RemoveObserver(subscription);
+                return this._parent._observers.RemoveObserver( subscription );
             }
         }
     }

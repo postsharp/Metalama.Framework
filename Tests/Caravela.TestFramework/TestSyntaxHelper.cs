@@ -1,20 +1,25 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Linq;
 
 namespace Caravela.TestFramework
 {
     public static class TestSyntaxHelper
     {
-        public static TextSpan? FindRegionSpan( SyntaxNode node, string regionName )
+        public static TextSpan? FindRegionSpan( SyntaxNode? node, string regionName )
         {
-            int regionStart = -1;
-            int regionEnd = -1;
-            int regionCounter = 0;
-            int foundRegion = -1;
+            if ( node == null )
+            {
+                return null;
+            }
+
+            var regionStart = -1;
+            var regionEnd = -1;
+            var regionCounter = 0;
+            var foundRegion = -1;
 
             var allRegionsTrivia = node.DescendantTrivia()
                 .Where( i => i.Kind() == SyntaxKind.RegionDirectiveTrivia || i.Kind() == SyntaxKind.EndRegionDirectiveTrivia );
@@ -27,15 +32,17 @@ namespace Caravela.TestFramework
                         regionCounter++;
                         if ( regionStart < 0 )
                         {
-                            var regionDirectiveTriviaSyntax = (RegionDirectiveTriviaSyntax) trivia.GetStructure();
-                            string currentRegionName = regionDirectiveTriviaSyntax.EndOfDirectiveToken.LeadingTrivia[0].ToString();
-                            if ( currentRegionName.Equals( regionName, StringComparison.OrdinalIgnoreCase ) )
+                            var regionDirectiveTriviaSyntax = (RegionDirectiveTriviaSyntax?) trivia.GetStructure();
+                            var currentRegionName = regionDirectiveTriviaSyntax?.EndOfDirectiveToken.LeadingTrivia[0].ToString();
+                            if ( regionName.Equals( currentRegionName, StringComparison.OrdinalIgnoreCase ) )
                             {
                                 foundRegion = regionCounter;
                                 regionStart = trivia.Span.End;
                             }
                         }
+
                         break;
+
                     case SyntaxKind.EndRegionDirectiveTrivia:
                         if ( regionEnd < 0 )
                         {
@@ -44,6 +51,7 @@ namespace Caravela.TestFramework
                                 regionEnd = trivia.Span.Start;
                             }
                         }
+
                         regionCounter--;
                         break;
                 }

@@ -3,11 +3,10 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    class SymbolClassifier : ISymbolClassifier
+    internal class SymbolClassifier : ISymbolClassifier
     {
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
@@ -37,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol assembly )
+        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
@@ -155,7 +154,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
                     }
                 }
-
             }
 
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );

@@ -1,7 +1,7 @@
-﻿using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Xunit.Abstractions;
 
 namespace Caravela.UnitTestFramework

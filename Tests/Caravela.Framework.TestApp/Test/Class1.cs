@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 
 namespace Caravela.Framework.TestApp.Test
 {
-    class Class1
+    internal class Class1
     {
         [CancelAspect]
-        public void Test(CancellationToken cancellationToken)
+#pragma warning disable IDE0060 // Remove unused parameter
+        public void Test( CancellationToken cancellationToken )
+#pragma warning restore IDE0060 // Remove unused parameter
         {
-
         }
     }
 }

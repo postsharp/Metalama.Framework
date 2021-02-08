@@ -4,9 +4,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
-    class TextRange
+    internal class TextRange
     {
         public ClassifiedSpan ClassifiedSpan { get; }
+
         public string Text { get; }
 
         public TextRange( string classification, TextSpan span, SourceText text ) :
@@ -25,24 +26,18 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.Text = text;
         }
 
-        public string ClassificationType => this.ClassifiedSpan.ClassificationType;
-
-        public TextSpan TextSpan => this.ClassifiedSpan.TextSpan;
-
-        public override string ToString() => this.ClassificationType ?? "null" + ":" + this.Text;
-
         public static IEnumerable<TextRange> FillGaps( SourceText text, IEnumerable<TextRange> ranges )
         {
-            const string WhitespaceClassification = null;
+            const string whitespaceClassification = "";
             var current = 0;
-            TextRange previous = null;
+            TextRange? previous = null;
 
             foreach ( var range in ranges )
             {
                 var start = range.TextSpan.Start;
                 if ( start > current )
                 {
-                    yield return new TextRange( WhitespaceClassification, TextSpan.FromBounds( current, start ), text );
+                    yield return new TextRange( whitespaceClassification, TextSpan.FromBounds( current, start ), text );
                 }
 
                 if ( previous == null || range.TextSpan != previous.TextSpan )
@@ -56,9 +51,14 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             if ( current < text.Length )
             {
-                yield return new TextRange( WhitespaceClassification, TextSpan.FromBounds( current, text.Length ), text );
+                yield return new TextRange( whitespaceClassification, TextSpan.FromBounds( current, text.Length ), text );
             }
         }
 
+        public string ClassificationType => this.ClassifiedSpan.ClassificationType;
+
+        public TextSpan TextSpan => this.ClassifiedSpan.TextSpan;
+
+        public override string ToString() => this.ClassificationType ?? "null" + ":" + this.Text;
     }
 }

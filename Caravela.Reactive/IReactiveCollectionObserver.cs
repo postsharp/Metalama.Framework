@@ -15,16 +15,16 @@ namespace Caravela.Reactive
         /// <param name="subscription"></param>
         /// <param name="item"></param>
         /// <param name="newVersion">Version of the source after the item was added.</param>
-        void OnItemAdded(IReactiveSubscription subscription, T item, int newVersion);
-        
+        void OnItemAdded( IReactiveSubscription subscription, T item, int newVersion );
+
         /// <summary>
         /// Signals that an item from the collection.
         /// </summary>
         /// <param name="subscription"></param>
         /// <param name="item"></param>
         /// <param name="newVersion">Version of the source after the item was removed.</param>
-        void OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion);
-        
+        void OnItemRemoved( IReactiveSubscription subscription, T item, int newVersion );
+
         /// <summary>
         /// Signals that an item was replaced in the collection.
         /// </summary>
@@ -32,6 +32,6 @@ namespace Caravela.Reactive
         /// <param name="oldItem"></param>
         /// <param name="newItem"></param>
         /// <param name="newVersion">Version of the source after the item was replaced.</param>
-        void OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem, int newVersion);
+        void OnItemReplaced( IReactiveSubscription subscription, T oldItem, T newItem, int newVersion );
     }
 }

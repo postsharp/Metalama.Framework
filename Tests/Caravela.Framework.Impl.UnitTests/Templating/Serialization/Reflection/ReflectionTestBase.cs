@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             this._helper = helper;
         }
-        
 
         /// <summary>
         /// As <see cref="Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,

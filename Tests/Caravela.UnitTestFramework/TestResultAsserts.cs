@@ -1,9 +1,11 @@
-﻿using Caravela.TestFramework;
+﻿using System;
+using System.IO;
+using System.Linq;
+using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Caravela.UnitTestFramework
 {
@@ -20,26 +22,42 @@ namespace Caravela.UnitTestFramework
             }
         }
 
-        public static void AssertTransformedSource( this TestResult testResult, string expectedTransformedSource )
+        public static void AssertTransformedSourceEqual( this TestResult testResult, string expectedTransformedSource, string? actualOutputPath = null )
+        {
+            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, null, actualOutputPath );
+        }
+
+        public static void AssertTransformedSourceSpanEqual( this TestResult testResult, string expectedTransformedSource, TextSpan? textSpan, string? actualOutputPath = null )
         {
             // Don't test output if we have an error.
             testResult.AssertNoErrors();
 
-            Assert.Equal( expectedTransformedSource.Trim(), testResult.TransformedTargetSource?.ToString()?.Trim() );
+            var regionText = textSpan != null
+                ? testResult.TransformedTargetSource?.GetSubText( textSpan.Value ).ToString()?.Trim()
+                : testResult.TransformedTargetSource?.ToString()?.Trim();
+            AssertSourceEqual( expectedTransformedSource.Trim(), regionText, actualOutputPath );
         }
 
-        public static void AssertTransformedSourceSpan( this TestResult testResult, string expectedTransformedSource, TextSpan textSpan )
+        private static void AssertSourceEqual(string expected, string? actual, string? actualOutputPath = null )
         {
-            // Don't test output if we have an error.
-            testResult.AssertNoErrors();
+            try
+            {
+                Assert.Equal( expected, actual );
+            }
+            catch ( EqualException )
+            {
+                if ( actualOutputPath != null )
+                {
+                    File.WriteAllText( actualOutputPath, actual );
+                }
 
-            string regionText = testResult.TransformedTargetSource.GetSubText( textSpan ).ToString()?.Trim();
-            Assert.Equal( expectedTransformedSource.Trim(), regionText );
+                throw;
+            }
         }
 
-        public static void AssertDiagnosticId( this TestResult testResult, string expectedId )
+        public static void AssertContainsDiagnosticId( this TestResult testResult, string expectedId )
         {
-            Assert.Contains( testResult.Diagnostics, d => d.Id.Equals( expectedId ) );
+            Assert.Contains( testResult.Diagnostics, d => d.Id.Equals( expectedId, StringComparison.Ordinal ) );
         }
     }
 }

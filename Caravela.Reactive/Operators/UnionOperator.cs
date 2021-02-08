@@ -1,10 +1,6 @@
-#region
-
-using Caravela.Reactive.Implementation;
 using System.Collections.Generic;
 using System.Linq;
-
-#endregion
+using Caravela.Reactive.Implementation;
 
 namespace Caravela.Reactive.Operators
 {
@@ -13,20 +9,20 @@ namespace Caravela.Reactive.Operators
         private readonly IReactiveCollection<T> _second;
         private IReactiveSubscription? _secondSubscription;
 
-        public UnionOperator(IReactiveCollection<T> source, IReactiveCollection<T> second)
-            : base(source)
+        public UnionOperator( IReactiveCollection<T> source, IReactiveCollection<T> second )
+            : base( source )
         {
             this._second = second;
         }
 
-        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction(IEnumerable<T> source)
+        protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction( IEnumerable<T> source )
         {
-            return new(source.Union(this._second.GetValue(this.ObserverToken)));
+            return new ( source.Union( this._second.GetValue( this.ObserverToken ) ) );
         }
 
         protected override IReactiveSubscription? SubscribeToSource()
         {
-            this._secondSubscription = this._second.Observable.AddObserver(this);
+            this._secondSubscription = this._second.Observable.AddObserver( this );
             return base.SubscribeToSource();
         }
 
@@ -37,42 +33,38 @@ namespace Caravela.Reactive.Operators
             this._secondSubscription = null;
         }
 
-     
-        protected override void OnSourceItemAdded(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             updateToken.SetBreakingChange();
 
-            foreach (var subscription in this.Observers)
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemAdded(subscription.Subscription, item, updateToken.NextVersion);
+                subscription.Observer.OnItemAdded( subscription.Subscription, item, updateToken.NextVersion );
             }
         }
 
-        protected override void OnSourceItemRemoved(IReactiveSubscription sourceSubscription, T item,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemRemoved( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )
         {
             updateToken.SetBreakingChange();
 
-            foreach (var subscription in this.Observers)
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, item, updateToken.NextVersion);
+                subscription.Observer.OnItemRemoved( subscription.Subscription, item, updateToken.NextVersion );
             }
         }
 
-        protected override void OnSourceItemReplaced(IReactiveSubscription sourceSubscription, T oldItem, T newItem,
-            in IncrementalUpdateToken updateToken)
+        protected override void OnSourceItemReplaced( IReactiveSubscription sourceSubscription, T oldItem, T newItem, in IncrementalUpdateToken updateToken )
         {
             updateToken.SetBreakingChange();
 
-            foreach (var subscription in this.Observers)
+            foreach ( var subscription in this.Observers )
             {
-                subscription.Observer.OnItemRemoved(subscription.Subscription, oldItem, updateToken.NextVersion);
-                subscription.Observer.OnItemAdded(subscription.Subscription, newItem, updateToken.NextVersion);
+                subscription.Observer.OnItemRemoved( subscription.Subscription, oldItem, updateToken.NextVersion );
+                subscription.Observer.OnItemAdded( subscription.Subscription, newItem, updateToken.NextVersion );
             }
         }
 
-        protected override bool ShouldTrackDependency(IReactiveObservable<IReactiveObserver> source)
-            => base.ShouldTrackDependency(source) && source.Source != this._second;
+        protected override bool ShouldTrackDependency( IReactiveObservable<IReactiveObserver> source )
+            => base.ShouldTrackDependency( source ) && source.Source != this._second;
     }
 }

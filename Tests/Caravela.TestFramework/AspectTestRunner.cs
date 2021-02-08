@@ -1,4 +1,10 @@
-﻿using Caravela.Framework.Impl;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
@@ -6,12 +12,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Caravela.TestFramework
 {
@@ -19,19 +19,20 @@ namespace Caravela.TestFramework
     {
         public virtual async Task<TestResult> Run( string testSource )
         {
-            TestResult result = new TestResult();
+
             testSource = CommonSnippets.CaravelaUsings + testSource;
 
             // Source.
             var project = this.CreateProject();
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
-            result.TemplateDocument = testDocument;
+
+            var result = new TestResult( testDocument );
 
             var initialCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { await testDocument.GetSyntaxTreeAsync() },
+                new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
-                (CSharpCompilationOptions) project.CompilationOptions );
+                (CSharpCompilationOptions?) project.CompilationOptions );
             var diagnostics = initialCompilation.GetDiagnostics();
             this.ReportDiagnostics( result, diagnostics );
 
@@ -84,7 +85,7 @@ namespace Caravela.TestFramework
             result.Diagnostics.AddRange( diagnostics );
         }
 
-        class AspectTestPipelineContext : IAspectPipelineContext
+        private class AspectTestPipelineContext : IAspectPipelineContext
         {
             private readonly TestResult _testResult;
 
@@ -96,7 +97,9 @@ namespace Caravela.TestFramework
             }
 
             public Compilation Compilation { get; }
+
             public ImmutableArray<object> Plugins => ImmutableArray<object>.Empty;
+
             public IList<ResourceDescription> ManifestResources { get; }
 
             public bool GetOptionsFlag( string flagName ) => false;
@@ -108,4 +111,3 @@ namespace Caravela.TestFramework
         }
     }
 }
-

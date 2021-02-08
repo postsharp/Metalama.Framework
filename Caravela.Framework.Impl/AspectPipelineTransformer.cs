@@ -1,20 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Caravela.Framework.Impl
 {
     [Transformer]
-    sealed class AspectPipelineTransformer : ISourceTransformer
+    internal sealed class AspectPipelineTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
             return new AspectPipeline().Execute( new AspectPipelineContext( transformerContext ) );
         }
 
-        class AspectPipelineContext : IAspectPipelineContext
+        private class AspectPipelineContext : IAspectPipelineContext
         {
             private readonly TransformerContext _transformerContext;
 

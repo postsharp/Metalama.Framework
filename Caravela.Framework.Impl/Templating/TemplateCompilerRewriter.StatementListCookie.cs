@@ -12,8 +12,8 @@ namespace Caravela.Framework.Impl.Templating
             private readonly string _initialVariableName;
             private readonly List<StatementSyntax> _initialList;
 
-            public StatementListCookie(TemplateCompilerRewriter parent, string initialVariableName,
-                List<StatementSyntax> initialList)
+            public StatementListCookie( TemplateCompilerRewriter parent, string initialVariableName,
+                List<StatementSyntax> initialList )
             {
                 this._parent = parent;
                 this._initialVariableName = initialVariableName;
@@ -22,7 +22,10 @@ namespace Caravela.Framework.Impl.Templating
 
             public void Dispose()
             {
-                if (this._parent != null)
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                //    Would be true in the default instance.
+
+                if ( this._parent != null )
                 {
                     this._parent._currentStatementListVariableName = this._initialVariableName;
                     this._parent._currentMetaStatementList = this._initialList;

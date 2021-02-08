@@ -10,19 +10,21 @@ namespace Caravela.Framework.Impl.UnitTests
     {
         private readonly int _count;
 
-        public RepeatAttribute(int count)
+        public RepeatAttribute( int count )
         {
-            if (count < 1)
+            if ( count < 1 )
             {
-                throw new ArgumentOutOfRangeException(nameof(count), 
-                    "Repeat count must be greater than 0.");
+                throw new ArgumentOutOfRangeException(
+                    nameof( count ),
+                    "Repeat count must be greater than 0." );
             }
+
             this._count = count;
         }
 
-        public override IEnumerable<object[]> GetData(MethodInfo testMethod)
+        public override IEnumerable<object[]> GetData( MethodInfo testMethod )
         {
-            return Enumerable.Repeat(new object[0], this._count);
+            return Enumerable.Repeat( new object[0], this._count );
         }
     }
 }
