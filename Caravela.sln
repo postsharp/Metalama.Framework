@@ -14,9 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
+		Versions.props = Versions.props
+		Directories.props = Directories.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.MemoTransformer", "Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.UnitTests", "Tests\Caravela.Framework.Impl.UnitTests\Caravela.Framework.Impl.UnitTests.csproj", "{B74D3758-0E43-405F-B7C3-8EF444090E86}"
 EndProject
@@ -30,11 +32,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Aspects", "Tests\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj", "{522FB0EC-9534-40D7-95F8-F9C7D246CC85}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.GenerateMetaSyntaxRewriter", "Caravela.Framework.GenerateMetaSyntaxRewriter\Caravela.Framework.GenerateMetaSyntaxRewriter.csproj", "{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.GenerateMetaSyntaxRewriter", "Build\Caravela.Framework.GenerateMetaSyntaxRewriter\Caravela.Framework.GenerateMetaSyntaxRewriter.csproj", "{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
+ProjectSection(SolutionItems) = preProject
+	Build\CopyToPublish.proj = Build\CopyToPublish.proj
+EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Tests\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
 EndProject
@@ -46,7 +51,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.AspectWorkbench", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj", "{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Aspects.UnitTests", "Tests\Caravela.Framework.Aspects.UnitTests\Caravela.Framework.Aspects.UnitTests.csproj", "{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.UnitTestFramework", "Tests\Caravela.UnitTestFramework\Caravela.UnitTestFramework.csproj", "{65A2AE97-2B1D-466F-A872-921E08CFC45C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,6 +129,18 @@ Global
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65A2AE97-2B1D-466F-A872-921E08CFC45C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65A2AE97-2B1D-466F-A872-921E08CFC45C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65A2AE97-2B1D-466F-A872-921E08CFC45C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65A2AE97-2B1D-466F-A872-921E08CFC45C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,6 +156,9 @@ Global
 		{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{973ED0F5-A1F3-44A9-9BF1-204DFEB862E5} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{5D2A08C6-9F80-4C58-B5A6-51349078A78B} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B} = {19660464-978E-4457-846E-B399BB6A3884}
+		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{65A2AE97-2B1D-466F-A872-921E08CFC45C} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

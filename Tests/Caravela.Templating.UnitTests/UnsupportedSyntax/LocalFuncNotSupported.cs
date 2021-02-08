@@ -1,6 +1,6 @@
-using Caravela.Framework.Impl;
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -15,7 +15,7 @@ using System.Linq;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         void LocalFunc(dynamic p)

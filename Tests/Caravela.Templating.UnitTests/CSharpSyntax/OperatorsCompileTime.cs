@@ -1,6 +1,5 @@
-using Caravela.Framework.Impl;
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -13,7 +12,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         int i = target.Parameters.Count;
@@ -99,9 +98,9 @@ class TargetCode
 }
 ";
 
-        [Fact(Skip = "#28025 Template compiler: simple variable analysis. "
+        [Fact( Skip = "#28025 Template compiler: simple variable analysis. "
             + "#28114 Template compiler: C# features requiring framework > netstandard 2.0 should not be evaluated at compile time. "
-            + "#28116 Template compiler: support for compile - time tuples.")]
+            + "#28116 Template compiler: support for compile - time tuples." )]
         public async Task OperatorsCompileTime()
         {
             var testResult = await this._testRunner.Run( new TestInput( OperatorsCompileTime_Template, OperatorsCompileTime_Target ) );

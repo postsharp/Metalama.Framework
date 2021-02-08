@@ -10,16 +10,34 @@ namespace Caravela.Framework.Code
         dynamic Invoke( dynamic? instance, params dynamic[] args );
     }
 
+    /// <summary>
+    /// Represents a method.
+    /// </summary>
     public interface IMethod : IMember, IMethodInvocation
     {
         /// <remarks>
-        /// Returns <c>null</c> for methods that don't have return types: constructors and finalizers.
+        /// Gets an object representing the method return type and custom attributes, or  <c>null</c> for methods that don't have return types: constructors and finalizers.
         /// </remarks>
         IParameter? ReturnParameter { get; }
-        // for convenience
+
+        /// <summary>
+        /// Gets the method return type.
+        /// </summary>
         IType ReturnType { get; }
+
+        /// <summary>
+        /// Gets the list of local functions declared by the current method.
+        /// </summary>
         IImmutableList<IMethod> LocalFunctions { get; }
+
+        /// <summary>
+        /// Gets the list of parameters of the current method.
+        /// </summary>
         IImmutableList<IParameter> Parameters { get; }
+
+        /// <summary>
+        /// Gets the generic parameters of the current method.
+        /// </summary>
         IImmutableList<IGenericParameter> GenericParameters { get; }
         IImmutableList<IType> GenericArguments { get; }
 
@@ -28,7 +46,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsOpenGeneric { get; }
 
-        new MethodKind Kind { get; }
+        /// <summary>
+        /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
+        /// </summary>
+        MethodKind MethodKind { get; }
 
         /// <summary>
         /// Used for generic invocations. It returns an IMethod, not an IMethodInvocation, because

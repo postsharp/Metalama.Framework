@@ -11,10 +11,12 @@ namespace Caravela.Framework.Impl.CodeModel
     internal sealed class Field : CodeElement, IProperty
     {
         private readonly IFieldSymbol _symbol;
+
         protected internal override ISymbol Symbol => this._symbol;
 
         private readonly NamedType _containingElement;
-        public override ICodeElement? ContainingElement => this._containingElement;
+
+        public override ICodeElement ContainingElement => this._containingElement;
 
         internal override SourceCompilation Compilation => this._containingElement.Compilation;
 
@@ -33,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsRefReadonly => false;
 
         [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
+        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
 
         public IImmutableList<IParameter> Parameters => ImmutableList<IParameter>.Empty;
 
@@ -53,9 +55,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType DeclaringType => this._containingElement;
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Field;
+        public override CodeElementKind ElementKind => CodeElementKind.Field;
 
         public dynamic Value
         {

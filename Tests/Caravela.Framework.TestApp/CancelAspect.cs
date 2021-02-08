@@ -1,16 +1,18 @@
-﻿using Caravela.Framework.Aspects;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
+using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp
 {
-    class CancelAspect : OverrideMethodAspect
+    internal class CancelAspect : OverrideMethodAspect
     {
-        static bool TypeIsCancellationToken( IAdviceParameter p ) => p.Type.Is( typeof( CancellationToken ) );
+        private static bool TypeIsCancellationToken( IAdviceParameter p ) => p.Type.Is( typeof( CancellationToken ) );
 
-        public override dynamic Template()
+        public override dynamic OverrideMethod()
         {
+            System.Console.WriteLine( "Hello, world." );
+
             // error CR0101: This C# language feature is not supported by the template compiler - ParenthesizedLambdaExpression.
             // var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
 

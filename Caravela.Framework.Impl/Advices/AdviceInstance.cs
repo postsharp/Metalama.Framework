@@ -2,7 +2,7 @@
 
 namespace Caravela.Framework.Impl.Advices
 {
-    readonly struct AdviceInstance
+    internal readonly struct AdviceInstance
     {
         public IAdvice Advice { get; }
 

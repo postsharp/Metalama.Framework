@@ -1,5 +1,5 @@
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-  [Template]
+  [TestTemplate]
   dynamic Template()
   {
         int b = compileTime(0);
@@ -45,7 +45,6 @@ class TargetCode
         private const string IfMethodName_ExpectedOutput = @"{
     Console.WriteLine(1);
 }";
-
 
         [Fact]
         public async Task IfMethodName()

@@ -3,8 +3,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
@@ -17,11 +15,11 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         public override ExpressionSyntax Serialize( CaravelaParameterInfo o )
         {
-            ICodeElement container = o.ContainingMember;
-            IMember containerAsMember = container as IMember;
+            var container = o.ContainingMember;
+            var containerAsMember = container as IMember;
             var method = containerAsMember as Method;
             var property = containerAsMember as Property;
-            int ordinal = o.Symbol.Ordinal;
+            var ordinal = o.Symbol.Ordinal;
 
             if ( method == null && property != null )
             {
@@ -38,7 +36,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
                             IdentifierName( "GetParameters" ) ) ) )
                 .WithArgumentList(
                     BracketedArgumentList(
-                        SingletonSeparatedList<ArgumentSyntax>(
+                        SingletonSeparatedList(
                             Argument(
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,

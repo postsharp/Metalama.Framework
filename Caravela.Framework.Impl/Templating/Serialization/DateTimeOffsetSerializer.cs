@@ -1,7 +1,7 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.Serialization
@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         public override ExpressionSyntax Serialize( DateTimeOffset o )
         {
-            string isoTime = o.ToString( "o" );
+            var isoTime = o.ToString( "o" );
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

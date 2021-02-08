@@ -1,39 +1,62 @@
 <Project>
+  
+  <Import Project="Versions.props"/>
+  <Import Project="Directories.props"/>
+
+  <!-- Properties of NuGet packages-->
   <PropertyGroup>
-    <!--<OutputPath>$(SolutionDir)artifacts\bin\$(Configuration)</OutputPath>-->
-    <!-- the above stopped working in VS for some reason -->
-    <OutputPath Condition="$(SolutionPath) != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))\artifacts\bin\$(Configuration)</OutputPath>
-
-    <Version>0.1.0-preview-dev.1</Version>
-    <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>3.8.4-preview</CaravelaCompilerVersion>
-    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
-    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
-
     <Authors>PostSharp Technologies</Authors>
     <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
     <PackageTags>PostSharp Caravela AOP</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <PackageIcon>PostSharpIcon.png</PackageIcon>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
+
+  <!-- Additional content of NuGet packages -->
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
   </ItemGroup>
 
-  <!-- XML doc config -->
+  <!-- C# Compiler options-->
   <PropertyGroup>
+      <LangVersion>latest</LangVersion>
+      <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Code quality and documentation -->
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- Disable XML doc warnings in the debug build -->
-    <NoWarn Condition="'$(Configuration)'=='Debug'">1591</NoWarn>
+    <NoWarn Condition="'$(Configuration)'=='Debug'">1591,1572,1573</NoWarn>
   </PropertyGroup>
+  
+  <!-- Source Link  -->
+  <PropertyGroup>
+    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+    <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
+
+    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
+    <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"  Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
+  </ItemGroup>
 
   <ItemGroup>
     <CompilerVisibleProperty Include="DebugCaravela" />
   </ItemGroup>
+
 </Project>

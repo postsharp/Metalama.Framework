@@ -3,10 +3,10 @@ using System.Threading.Tasks;
 
 namespace Caravela.Reactive.Operators
 {
-    class ToAsyncOperator<TValue, TObserver> : IAsyncReactiveSource<TValue, TObserver>, IReactiveObservable<TObserver>
+    internal class ToAsyncOperator<TValue, TObserver> : IAsyncReactiveSource<TValue, TObserver>, IReactiveObservable<TObserver>
          where TObserver : IReactiveObserver<TValue>
     {
-        readonly IReactiveSource<TValue, TObserver> _source;
+        private readonly IReactiveSource<TValue, TObserver> _source;
 
         public ToAsyncOperator( IReactiveSource<TValue, TObserver> source )
         {
@@ -27,14 +27,10 @@ namespace Caravela.Reactive.Operators
 
         bool IReactiveObservable<TObserver>.RemoveObserver( IReactiveSubscription subscription ) => this._source.Observable.RemoveObserver( subscription );
 
-
-        ValueTask<TValue> IAsyncReactiveSource<TValue>.GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken ) 
+        ValueTask<TValue> IAsyncReactiveSource<TValue>.GetValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
             => new ValueTask<TValue>( this._source.GetValue( observerToken ) );
 
-
-        ValueTask<IReactiveVersionedValue<TValue>> IAsyncReactiveSource<TValue>.GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken ) 
+        ValueTask<IReactiveVersionedValue<TValue>> IAsyncReactiveSource<TValue>.GetVersionedValueAsync( ReactiveCollectorToken observerToken, CancellationToken cancellationToken )
             => new ValueTask<IReactiveVersionedValue<TValue>>( this._source.GetVersionedValue( observerToken ) );
-        
-
     }
 }

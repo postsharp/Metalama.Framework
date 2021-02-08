@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -11,9 +10,9 @@ namespace Caravela.TestFramework.Templating
 {
     internal class TestTemplateCompiler
     {
-        readonly TemplateCompiler _compiler = new TemplateCompiler();
-        SemanticModel _semanticModel;
-        Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
+        private readonly TemplateCompiler _compiler = new TemplateCompiler();
+        private readonly SemanticModel _semanticModel;
+        private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new ();
 
         public TestTemplateCompiler( SemanticModel semanticModel )
         {
@@ -22,17 +21,15 @@ namespace Caravela.TestFramework.Templating
 
         public bool HasError { get; private set; }
 
-        public List<Diagnostic> Diagnostics { get; } = new();
-
-
+        public List<Diagnostic> Diagnostics { get; } = new ();
 
         public bool TryCompile( SyntaxNode rootNode, out SyntaxNode annotatedNode, out SyntaxNode transformedNode )
         {
             var visitor = new Visitor( this );
             visitor.Visit( rootNode );
 
-            annotatedNode = new Rewriter( this, 0 ).Visit( rootNode );
-            transformedNode = new Rewriter( this, 1 ).Visit( rootNode );
+            annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
+            transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!;
 
             return !this.HasError;
         }
@@ -52,12 +49,12 @@ namespace Caravela.TestFramework.Templating
 
         private bool IsTemplate( ISymbol symbol )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass.Name == nameof( TemplateAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
         }
 
-        class Visitor : CSharpSyntaxWalker
+        private class Visitor : CSharpSyntaxWalker
         {
-            readonly TestTemplateCompiler _parent;
+            private readonly TestTemplateCompiler _parent;
 
             public Visitor( TestTemplateCompiler parent )
             {
@@ -73,16 +70,15 @@ namespace Caravela.TestFramework.Templating
                         this._parent.HasError = true;
                     }
 
-                    this._parent._transformedNodes.Add( node, new[] { annotatedNode, transformedNode } );
+                    this._parent._transformedNodes.Add( node, new[] { annotatedNode!, transformedNode! } );
                 }
             }
         }
 
-
-        class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : CSharpSyntaxRewriter
         {
-            readonly TestTemplateCompiler _parent;
-            readonly int _item;
+            private readonly TestTemplateCompiler _parent;
+            private readonly int _item;
 
             public Rewriter( TestTemplateCompiler parent, int item )
             {
@@ -90,7 +86,7 @@ namespace Caravela.TestFramework.Templating
                 this._item = item;
             }
 
-            public override SyntaxNode Visit( SyntaxNode node )
+            public override SyntaxNode? Visit( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -109,6 +105,5 @@ namespace Caravela.TestFramework.Templating
                 return base.Visit( node );
             }
         }
-
     }
 }

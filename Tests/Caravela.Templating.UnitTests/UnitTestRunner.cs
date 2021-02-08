@@ -1,14 +1,14 @@
-﻿using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework.Templating;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
+using Caravela.TestFramework.Templating;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Xunit.Abstractions;
 
 namespace Caravela.Templating.UnitTests
@@ -30,14 +30,14 @@ namespace Caravela.Templating.UnitTests
 
             if ( !string.IsNullOrEmpty( callerName ) && this._usedSyntaxKindsCollector.CollectedSyntaxKinds.Any() )
             {
-                string syntaxKindsText = string.Join(
+                var syntaxKindsText = string.Join(
                     Environment.NewLine,
                     this._usedSyntaxKindsCollector.CollectedSyntaxKinds
                         .Select( s => this._unsupportedSyntaxKinds.Contains( s ) ? $"{s}*" : $"{s}" )
                         .OrderBy( s => s ) );
 
-                string dirPath = Path.GetFullPath(@"..\..\..\tests\SyntaxCover");
-                string filePath = Path.Combine( dirPath, callerName + ".txt" ); // TODO: file name should include test class name in addition to the test method name.
+                var dirPath = Path.GetFullPath( @"..\..\..\tests\SyntaxCover" );
+                var filePath = Path.Combine( dirPath, callerName + ".txt" ); // TODO: file name should include test class name in addition to the test method name.
                 Directory.CreateDirectory( dirPath );
                 File.WriteAllText( filePath, syntaxKindsText );
             }
@@ -72,13 +72,11 @@ namespace Caravela.Templating.UnitTests
 
         private void RecordUnsupportedSyntaxKind( Diagnostic diagnostic )
         {
-            string syntaxKindString;
-            if ( diagnostic.Properties.TryGetValue( TemplatingDiagnosticProperties.SyntaxKind, out syntaxKindString ) )
+            if ( diagnostic.Properties.TryGetValue( TemplatingDiagnosticProperties.SyntaxKind, out var syntaxKindString ) )
             {
-                object? syntaxKind;
-                if ( Enum.TryParse( typeof( SyntaxKind ), syntaxKindString, out syntaxKind ) )
+                if ( Enum.TryParse( typeof( SyntaxKind ), syntaxKindString, out var syntaxKind ) )
                 {
-                    this._unsupportedSyntaxKinds.Add( (SyntaxKind) syntaxKind );
+                    this._unsupportedSyntaxKinds.Add( (SyntaxKind) syntaxKind! );
                 }
             }
         }

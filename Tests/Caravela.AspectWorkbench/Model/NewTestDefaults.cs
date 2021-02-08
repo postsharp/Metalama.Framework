@@ -1,6 +1,6 @@
 ﻿namespace Caravela.AspectWorkbench.Model
 {
-    static class NewTestDefaults
+    internal static class NewTestDefaults
     {
         public const string TemplateSource = @"  
 using System;
@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         return proceed();

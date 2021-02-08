@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
@@ -8,7 +7,7 @@ using Caravela.Reactive.Sources;
 
 namespace Caravela.Framework.Impl
 {
-    class AttributeAspectSource : AspectSource
+    internal class AttributeAspectSource : AspectSource
     {
         private readonly ICompilation _compilation;
         private readonly CompileTimeAssemblyLoader _loader;
@@ -21,11 +20,9 @@ namespace Caravela.Framework.Impl
 
         public override IReactiveCollection<AspectInstance> GetAspects()
         {
-            var results = ImmutableArray.CreateBuilder<AspectInstance>();
+            var iAspect = this._compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            var iAspect = this._compilation.GetTypeByReflectionType(typeof(IAspect))!;
-
-            var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectManyRecursive( codeElement => codeElement switch
+            var codeElements = new ICodeElement[] { this._compilation }.ToImmutableReactive().SelectDescendants( codeElement => codeElement switch
             {
                 ICompilation compilation => compilation.DeclaredTypes,
                 INamedType namedType => namedType.NestedTypes.Union<ICodeElement>( namedType.Methods ).Union( namedType.Properties ).Union( namedType.Events ),

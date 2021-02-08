@@ -1,22 +1,25 @@
-﻿using Caravela.Framework.Aspects;
-using System;
+﻿using System;
+using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
+
+// ReSharper disable UnusedMember.Local
 
 namespace Caravela.Framework.TestApp
 {
-    class ThisAccess
+    internal class ThisAccess
     {
-        static string StaticProperty => "SP";
-        string InstanceProperty => "IP";
+        private static string StaticProperty => "SP";
+
+        private string InstanceProperty => "IP";
 
         [ThisAccessAspect]
-        static string StaticMethod()
+        private static string StaticMethod()
         {
             return "SM";
         }
 
         [ThisAccessAspect]
-        string InstanceMethod()
+        private string InstanceMethod()
         {
             return "IM";
         }
@@ -28,14 +31,14 @@ namespace Caravela.Framework.TestApp
 
         public static void Run()
         {
-            Console.WriteLine(StaticMethod());
-            Console.WriteLine(new ThisAccess().InstanceMethod());
+            Console.WriteLine( StaticMethod() );
+            Console.WriteLine( new ThisAccess().InstanceMethod() );
         }
     }
 
-    class ThisAccessAspect : OverrideMethodAspect
+    internal class ThisAccessAspect : OverrideMethodAspect
     {
-        public override dynamic Template()
+        public override dynamic OverrideMethod()
         {
             string result = proceed();
 

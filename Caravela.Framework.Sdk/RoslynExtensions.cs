@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 
 namespace Caravela.Framework.Sdk
 {

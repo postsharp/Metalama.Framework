@@ -1,5 +1,5 @@
-using Caravela.Framework.Impl.Templating.Serialization;
 using System;
+using Caravela.Framework.Impl.Templating.Serialization;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
@@ -9,18 +9,18 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestDateTime()
         {
-            AssertDateTimeSerialization( new DateTime(2000, 1, 1, 14, 42, 22, DateTimeKind.Local) );
-            AssertDateTimeSerialization( new DateTime(2000, 1, 1, 14, 42, 22, DateTimeKind.Utc) );
+            AssertDateTimeSerialization( new DateTime( 2000, 1, 1, 14, 42, 22, DateTimeKind.Local ) );
+            AssertDateTimeSerialization( new DateTime( 2000, 1, 1, 14, 42, 22, DateTimeKind.Utc ) );
             AssertDateTimeSerialization( DateTime.Now );
-            AssertDateTimeSerialization( DateTime.MinValue);
-            AssertDateTimeSerialization( DateTime.MaxValue);
+            AssertDateTimeSerialization( DateTime.MinValue );
+            AssertDateTimeSerialization( DateTime.MaxValue );
         }
 
         private static void AssertDateTimeSerialization( DateTime dateTime )
         {
             var serializer = new DateTimeSerializer();
             var dt = dateTime;
-            Assert.Equal("System.DateTime.FromBinary(" + dt.ToBinary().ToString() + "L)", serializer.Serialize(dt).ToString());
+            Assert.Equal( "System.DateTime.FromBinary(" + dt.ToBinary().ToString() + "L)", serializer.Serialize( dt ).ToString() );
         }
     }
 }

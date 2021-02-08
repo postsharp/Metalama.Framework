@@ -1,6 +1,5 @@
-using Caravela.Framework.Impl;
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -13,7 +12,7 @@ using System.Collections.Generic;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         A<Aspect, int, string> x = new C<object, int, string>();

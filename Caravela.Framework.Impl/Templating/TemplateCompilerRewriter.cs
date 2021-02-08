@@ -7,8 +7,8 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateHelper;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -23,52 +23,66 @@ namespace Caravela.Framework.Impl.Templating
         private List<StatementSyntax>? _currentMetaStatementList;
         private int _nextStatementListId;
 
-        public TemplateCompilerRewriter(SemanticAnnotationMap semanticAnnotationMap)
+        public TemplateCompilerRewriter( SemanticAnnotationMap semanticAnnotationMap )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
 
-        #region Pretty print
+        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
+           CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
 
-        protected override ExpressionSyntax TransformIdentifierName(IdentifierNameSyntax node)
+        private static string NormalizeSpace( string statementComment )
         {
-            if (node.Identifier.Text == "var")
+            // TODO: Replace this with something more GC-friendly.
+
+            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
+
+            while ( true )
             {
-                // The simplified form does not work.
-                return base.TransformIdentifierName(node);
+                var old = statementComment;
+                statementComment = statementComment.Replace( "  ", " " );
+                if ( old == statementComment )
+                {
+                    return statementComment;
+                }
             }
-            else if (node.Identifier.Text == "dynamic")
-            {
-                // We change all dynamic into var in the template.
-                return base.TransformIdentifierName(IdentifierName(Identifier("var")));
-            }
-
-
-            // The base implementation is very verbose, so we use this one:
-
-            return InvocationExpression(IdentifierName(nameof(IdentifierName)))
-                .AddArgumentListArguments(Argument(this.CreateLiteralExpression(node.Identifier.Text)))
-                .WithTemplateAnnotationsFrom(node);
         }
 
+        protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
+        {
+            if ( node.Identifier.Text == "var" )
+            {
+                // The simplified form does not work.
+                return base.TransformIdentifierName( node );
+            }
+            else if ( node.Identifier.Text == "dynamic" )
+            {
+                // We change all dynamic into var in the template.
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
+            }
 
-        protected override ExpressionSyntax TransformArgument(ArgumentSyntax node)
+            // The base implementation is very verbose, so we use this one:
+
+            return InvocationExpression( IdentifierName( nameof( IdentifierName ) ) )
+                .AddArgumentListArguments( Argument( this.CreateLiteralExpression( node.Identifier.Text ) ) )
+                .WithTemplateAnnotationsFrom( node );
+        }
+
+        protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
         {
             // The base implementation is very verbose, so we use this one:
 
-            if (node.RefKindKeyword.Kind() == SyntaxKind.None)
+            if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                return InvocationExpression(IdentifierName(nameof(Argument)))
-                    .AddArgumentListArguments(Argument(this.Transform(node.Expression)))
-                    .WithTemplateAnnotationsFrom(node);
+                return InvocationExpression( IdentifierName( nameof( Argument ) ) )
+                    .AddArgumentListArguments( Argument( this.Transform( node.Expression ) ) )
+                    .WithTemplateAnnotationsFrom( node );
             }
             else
             {
-                return base.TransformArgument(node);
+                return base.TransformArgument( node );
             }
         }
-
-        #endregion
 
         /// <summary>
         /// Determines how a <see cref="SyntaxNode"/> should be transformed:
@@ -77,20 +91,20 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected override TransformationKind GetTransformationKind(SyntaxNode node)
+        protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            if (node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly)
+            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
             {
                 return TransformationKind.None;
             }
 
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
-            for (var parent = node.Parent;
+            for ( var parent = node.Parent;
                 parent != null;
-                parent = parent.Parent)
+                parent = parent.Parent )
             {
-                if (parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly)
+                if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax
                         ? TransformationKind.Transform
@@ -101,25 +115,21 @@ namespace Caravela.Framework.Impl.Templating
             return TransformationKind.Transform;
         }
 
-
         /// <summary>
         /// Determines if a symbol represents a call to <c>proceed()</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private bool IsProceed(SyntaxNode node)
+        private bool IsProceed( SyntaxNode node )
         {
-            var symbol = this._semanticAnnotationMap.GetSymbol(node);
-            if (symbol == null)
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            if ( symbol == null )
             {
                 return false;
             }
 
-            return symbol.GetAttributes().Any(a => a.AttributeClass.Name == nameof(ProceedAttribute));
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
         }
-
-        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
-            CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/>, especially taking care of handling
@@ -128,10 +138,9 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        protected override ExpressionSyntax TransformExpression(ExpressionSyntax expression)
+        protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression )
         {
-            switch (expression.Kind())
+            switch ( expression.Kind() )
             {
                 // TODO: We need to transform null and default values though. How to do this right then?
                 case SyntaxKind.NullLiteralExpression:
@@ -154,7 +163,7 @@ namespace Caravela.Framework.Impl.Templating
             var type = this._semanticAnnotationMap.GetType( expression );
 
             // A local function that wraps the input `expression` into a LiteralExpression.
-            ExpressionSyntax CreateLiteralExpressionFactory(SyntaxKind syntaxKind)
+            ExpressionSyntax CreateLiteralExpressionFactory( SyntaxKind syntaxKind )
             {
                 // new RuntimeExpression(LiteralExpression(syntaxKind, Literal(expression)), type)
                 return ObjectCreationExpression( IdentifierName( nameof( RuntimeExpression ) ) )
@@ -167,18 +176,18 @@ namespace Caravela.Framework.Impl.Templating
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
             }
 
-            if ( type is IErrorTypeSymbol)
+            if ( type is IErrorTypeSymbol )
             {
                 // There is a compile-time error. Return default.
                 return LiteralExpression(
                     SyntaxKind.DefaultLiteralExpression,
-                    Token(SyntaxKind.DefaultKeyword));
+                    Token( SyntaxKind.DefaultKeyword ) );
             }
 
-            switch (type.Name)
+            switch ( type.Name )
             {
                 case "dynamic":
-                    if (this.IsProceed(expression))
+                    if ( this.IsProceed( expression ) )
                     {
                         // TODO: Emit a diagnostic. proceed() cannot be used as a general expression but only in 
                         // specifically supported statements, i.e. variable assignments and return.
@@ -190,11 +199,11 @@ namespace Caravela.Framework.Impl.Templating
                             SyntaxKind.SimpleMemberAccessExpression,
                             ParenthesizedExpression(
                                 CastFromDynamic(
-                                    IdentifierName(nameof(IDynamicMetaMember)), expression)),
-                            IdentifierName(nameof(IDynamicMetaMember.CreateExpression))));
+                                    IdentifierName( nameof( IDynamicMetaMember ) ), expression ) ),
+                            IdentifierName( nameof( IDynamicMetaMember.CreateExpression ) ) ) );
 
                 case "String":
-                    return CreateLiteralExpressionFactory(SyntaxKind.StringLiteralExpression);
+                    return CreateLiteralExpressionFactory( SyntaxKind.StringLiteralExpression );
 
                 case "Int32":
                 case "Int16":
@@ -204,12 +213,12 @@ namespace Caravela.Framework.Impl.Templating
                 case "UInt64":
                 case "Byte":
                 case "SByte":
-                case nameof(Single):
-                case nameof(Double):
-                    return CreateLiteralExpressionFactory(SyntaxKind.NumericLiteralExpression);
+                case nameof( Single ):
+                case nameof( Double ):
+                    return CreateLiteralExpressionFactory( SyntaxKind.NumericLiteralExpression );
 
-                case nameof(Char):
-                    return CreateLiteralExpressionFactory(SyntaxKind.CharacterLiteralExpression);
+                case nameof( Char ):
+                    return CreateLiteralExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
                 case nameof( Boolean ):
                     // new RuntimeExpression(LiteralExpression(BooleanKeyword(expression)), "System.Boolean")
@@ -730,18 +739,20 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateHelper.TemplateReturnStatement ) ) ).AddArgumentListArguments(
-                        Argument( this.Transform( node.Expression ) )
-                    );
+                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                        Argument( this.Transform( node.Expression ) ) );
             }
         }
 
         public override bool VisitIntoStructuredTrivia => false;
 
-        private StatementListCookie UseStatementList(string variableName, List<StatementSyntax> metaStatementList)
+        private StatementListCookie UseStatementList( string variableName, List<StatementSyntax> metaStatementList )
         {
-            var cookie = new StatementListCookie(this, this._currentStatementListVariableName!,
-                this._currentMetaStatementList!);
+            var cookie = new StatementListCookie(
+                this,
+                this._currentStatementListVariableName!,
+                this._currentMetaStatementList! );
+
             this._currentStatementListVariableName = variableName;
             this._currentMetaStatementList = metaStatementList;
             return cookie;

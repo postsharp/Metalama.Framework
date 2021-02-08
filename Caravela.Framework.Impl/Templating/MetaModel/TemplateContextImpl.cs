@@ -1,16 +1,16 @@
-﻿using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Reactive;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    class TemplateContextImpl : ITemplateContext
+    internal class TemplateContextImpl : ITemplateContext
     {
         public IMethod Method { get; }
 
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Compilation = compilation;
         }
 
-        class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
+        private class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
         {
             private readonly bool _allowExpression;
             private readonly IType _type;
@@ -45,17 +45,19 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             public RuntimeExpression CreateExpression()
             {
                 if ( this._allowExpression )
+                {
                     return new( ThisExpression(), this._type );
+                }
 
                 // TODO: diagnostic
-                throw new InvalidOperationException("Can't directly access 'this' on a static method.");
+                throw new InvalidOperationException( "Can't directly access 'this' on a static method." );
             }
 
             public RuntimeExpression CreateMemberAccessExpression( string member ) => new( IdentifierName( Identifier( member ) ) );
         }
     }
 
-    class AdviceParameterList : IAdviceParameterList
+    internal class AdviceParameterList : IAdviceParameterList
     {
         private readonly AdviceParameter[] _parameters;
 
@@ -70,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
-    class AdviceParameter : IAdviceParameter
+    internal class AdviceParameter : IAdviceParameter
     {
         private readonly IParameter _parameter;
 
@@ -96,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public IReactiveCollection<IAttribute> Attributes => this._parameter.Attributes;
 
-        public CodeElementKind Kind => this._parameter.Kind;
+        public CodeElementKind ElementKind => this._parameter.ElementKind;
 
         public bool HasDefaultValue => this._parameter.HasDefaultValue;
 
@@ -108,10 +110,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotImplementedException();
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._parameter.ToDisplayString( format, context );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
     }
 
-    class DynamicMetaMember : IDynamicMetaMember
+    internal class DynamicMetaMember : IDynamicMetaMember
     {
         private readonly ExpressionSyntax _expression;
         private readonly IType _type;

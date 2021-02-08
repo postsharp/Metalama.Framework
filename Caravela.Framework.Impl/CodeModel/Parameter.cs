@@ -12,11 +12,12 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly IParameterSymbol _symbol;
 
         public IParameterSymbol Symbol => this._symbol;
+
         private readonly CodeElement _containingMember;
 
         private SymbolMap SymbolMap => this._containingMember.SymbolMap;
 
-        public Parameter(IParameterSymbol symbol, CodeElement containingMember)
+        public Parameter( IParameterSymbol symbol, CodeElement containingMember )
         {
             this._symbol = symbol;
             this._containingMember = containingMember;
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
             Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
             Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
             Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
-            _ => throw new InvalidOperationException($"Roslyn RefKind {this._symbol.RefKind} not recognized.")
+            _ => throw new InvalidOperationException( $"Roslyn RefKind {this._symbol.RefKind} not recognized." )
         };
 
         public bool IsByRef => this.RefKind != RefKind.None;
@@ -40,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsParams => this._symbol.IsParams;
 
         [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type);
+        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
 
         public string Name => this._symbol.Name;
 
@@ -49,14 +50,14 @@ namespace Caravela.Framework.Impl.CodeModel
         public ICodeElement ContainingElement => this._containingMember;
 
         [Memo]
-        public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select(a => new Attribute(a, this.SymbolMap )).ToImmutableReactive();
+        public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
-        public CodeElementKind Kind => CodeElementKind.Parameter;
+        public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
         public bool HasDefaultValue => this._symbol.HasExplicitDefaultValue;
 
         public object? DefaultValue => this._symbol.ExplicitDefaultValue;
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._symbol.ToDisplayString( );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
     }
 }

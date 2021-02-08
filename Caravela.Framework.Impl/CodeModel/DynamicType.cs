@@ -1,10 +1,10 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class DynamicType : IDynamicType, ITypeInternal
+    internal class DynamicType : IDynamicType, ITypeInternal
     {
         private readonly IDynamicTypeSymbol _typeSymbol;
 
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.Dynamic;
+        public Code.TypeKind TypeKind => Code.TypeKind.Dynamic;
 
         public bool Is( IType other ) =>
             this._compilation.RoslynCompilation.HasImplicitConversion( this._typeSymbol, other.GetSymbol() );
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPointerType MakePointerType() =>
             (IPointerType) this._compilation.SymbolMap.GetIType( this._compilation.RoslynCompilation.CreatePointerTypeSymbol( this._typeSymbol ) );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._typeSymbol.ToDisplayString();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._typeSymbol.ToDisplayString();
 
         public override string ToString() => this._typeSymbol.ToString();
     }

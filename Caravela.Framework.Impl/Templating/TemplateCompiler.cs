@@ -1,9 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -11,12 +11,12 @@ namespace Caravela.Framework.Impl.Templating
     {
         public const string TemplateMethodSuffix = "_Template";
 
-        private bool TryAnnotate( SyntaxNode sourceSyntaxRoot,
+        private bool TryAnnotate(
+            SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SemanticAnnotationMap? symbolAnnotationMap,
-            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot
-            )
+            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
             SyntaxNode currentSyntaxRoot;
 
@@ -24,7 +24,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Put the annotated node back into the original tree, so that diagnostics have correct locations.
                 var markerAnnotation = new SyntaxAnnotation();
-                var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode( sourceSyntaxRoot,
+                var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode(
+                    sourceSyntaxRoot,
                     currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
                 currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             }
@@ -36,9 +37,9 @@ namespace Caravela.Framework.Impl.Templating
             FixupTreeForDiagnostics();
 
             // Find calls to Proceed.
-            var proceedAnnotator = new ProceedCallAnnotator(symbolAnnotationMap);
+            var proceedAnnotator = new ProceedCallAnnotator( symbolAnnotationMap );
             currentSyntaxRoot = proceedAnnotator.Visit( currentSyntaxRoot )!;
-            diagnostics.AddRange(proceedAnnotator.Diagnostics);
+            diagnostics.AddRange( proceedAnnotator.Diagnostics );
 
             FixupTreeForDiagnostics();
 
@@ -47,9 +48,11 @@ namespace Caravela.Framework.Impl.Templating
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
 
+            // TODO: the algorihm should now work with a single iteration. However, just removing the code breaks it.
+
             var changeIdBefore = -1;
 
-            int iterations = 0;
+            var iterations = 0;
 
             while ( true )
             {
@@ -75,22 +78,16 @@ namespace Caravela.Framework.Impl.Templating
 
                 changeIdBefore = annotatorRewriter.ChangeId;
             }
-
-            // Unreachable.
-            throw new AssertionFailedException();
-
         }
 
-
-        public bool TryAnnotate( SyntaxNode sourceSyntaxRoot,
+        public bool TryAnnotate(
+            SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
-            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot
-            )
+            [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
          => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
-
-        public bool TryCompile( 
+        public bool TryCompile(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
@@ -104,7 +101,6 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter( symbolAnnotationMap );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
@@ -112,8 +108,6 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: add diagnostics.
 
             return true;
-
         }
-
     }
 }

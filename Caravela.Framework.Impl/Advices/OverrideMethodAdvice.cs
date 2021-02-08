@@ -4,14 +4,15 @@ using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    class OverrideMethodAdvice : IOverrideMethodAdvice
+
+    internal class OverrideMethodAdvice : Advice, IOverrideMethodAdvice
     {
-        public IMethod TargetDeclaration { get; }
+        public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
+
         public OverriddenMethod Transformation { get; }
 
-        public OverrideMethodAdvice( IMethod targetDeclaration, OverriddenMethod transformation )
+        public OverrideMethodAdvice( IMethod targetDeclaration, OverriddenMethod transformation ) : base( targetDeclaration )
         {
-            this.TargetDeclaration = targetDeclaration;
             this.Transformation = transformation;
         }
     }

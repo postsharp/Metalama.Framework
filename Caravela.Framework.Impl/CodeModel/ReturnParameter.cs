@@ -5,7 +5,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    abstract class ReturnParameter : IParameter
+    internal abstract class ReturnParameter : IParameter
     {
         internal static RefKind MapRefKind( Microsoft.CodeAnalysis.RefKind roslynRefKind ) => roslynRefKind switch
         {
@@ -37,12 +37,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IReactiveCollection<IAttribute> Attributes { get; }
 
-        public CodeElementKind Kind => CodeElementKind.Parameter;
+        public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
         public bool HasDefaultValue => false;
 
-        public object? DefaultValue => throw new InvalidOperationException( "Return parameter can't have default value." );
+        public object? DefaultValue => throw new InvalidOperationException();
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => throw new NotImplementedException();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
     }
 }

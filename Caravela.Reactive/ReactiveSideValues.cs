@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 
 namespace Caravela.Reactive
 {
@@ -6,6 +7,12 @@ namespace Caravela.Reactive
     /// An immutable list of side values.
     /// Side values are guaranteed to be copied (combined), from source to result, for all operators.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// By design, there can be only one side value of each <see cref="Type"/> in each <see cref="ReactiveSideValues"/>
+    /// instance. This avoids the use of value names.
+    /// </para>
+    /// </remarks>
     public readonly struct ReactiveSideValues
     {
         private readonly ImmutableArray<IReactiveSideValue> _sideValues;
@@ -15,12 +22,23 @@ namespace Caravela.Reactive
             this._sideValues = sideValues;
         }
 
+        /// <summary>
+        /// Creates a <see cref="ReactiveSideValues"/> object from a single <see cref="IReactiveSideValue"/>.
+        /// </summary>
+        /// <param name="sideValue"></param>
+        /// <returns></returns>
         public static ReactiveSideValues Create( IReactiveSideValue? sideValue ) => sideValue == null ? default : new ReactiveSideValues( ImmutableArray.Create( sideValue ) );
 
-        
-        public bool TryGetValue<T>(out T? value) where T : class, IReactiveSideValue
+        /// <summary>
+        /// Gets the side value of a given type from the current instance.
+        /// </summary>
+        /// <param name="value">At output, the side value, or <c>null</c> if there is no side value of type <typeparamref name="T"/>.</param>
+        /// <typeparam name="T">The type of the side value to get.</typeparam>
+        /// <returns><c>true</c> if a side value was found, <c>false</c> otherwise.</returns>
+        public bool TryGetValue<T>( out T? value )
+            where T : class, IReactiveSideValue
         {
-            if (this._sideValues.IsDefaultOrEmpty )
+            if ( this._sideValues.IsDefaultOrEmpty )
             {
                 value = null;
                 return false;
@@ -39,7 +57,7 @@ namespace Caravela.Reactive
             return false;
         }
 
-        ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
+        private ImmutableArray<IReactiveSideValue>.Builder CreateBuilder()
         {
             // There's typically just one item so this is optimized for this situation.
             var builder = ImmutableArray.CreateBuilder<IReactiveSideValue>( this._sideValues.Length );
@@ -47,9 +65,9 @@ namespace Caravela.Reactive
             return builder;
         }
 
-        void Combine(ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
+        private void Combine( ref ImmutableArray<IReactiveSideValue>.Builder builder, IReactiveSideValue value )
         {
-            for ( int i = 0; i < builder.Count; i++ )
+            for ( var i = 0; i < builder.Count; i++ )
             {
                 if ( builder[i].TryCombine( value, out var combinedValue ) )
                 {
@@ -60,10 +78,15 @@ namespace Caravela.Reactive
 
             // We could not combine, so we append it.
             builder.Add( value );
-
         }
 
-
+        /// <summary>
+        /// Creates and returns a new <see cref="ReactiveSideValues"/> that combines the values of the current
+        /// object with one given other value.
+        /// </summary>
+        /// <param name="value">The additional value.</param>
+        /// <returns>A <see cref="ReactiveSideValues"/> instance that combines the values of the current object
+        /// with <paramref name="value"/>.</returns>
         public ReactiveSideValues Combine( IReactiveSideValue value )
         {
             if ( this._sideValues.IsDefaultOrEmpty )
@@ -79,8 +102,6 @@ namespace Caravela.Reactive
                 return new ReactiveSideValues( builder.MoveToImmutable() );
             }
         }
-
-
 
         /// <summary>
         /// Combines the current side values (typically stemming from the source) with other side values (typically coming from the valuation of the

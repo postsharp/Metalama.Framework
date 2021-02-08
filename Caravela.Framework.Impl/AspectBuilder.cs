@@ -8,15 +8,17 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    class AspectBuilder<T> : IAspectBuilder<T>
+    internal class AspectBuilder<T> : IAspectBuilder<T>
         where T : class, ICodeElement
     {
         private readonly IImmutableList<AdviceInstance> _declarativeAdvices;
 
         public T TargetDeclaration { get; }
+
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
 
         private readonly AdviceFactory _adviceFactory;
+
         public IAdviceFactory AdviceFactory => this._adviceFactory;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<AdviceInstance> declarativeAdvices, AdviceFactory adviceFactory )
@@ -27,6 +29,6 @@ namespace Caravela.Framework.Impl
         }
 
         internal AspectInstanceResult ToResult() =>
-            new( ImmutableList.Create<Diagnostic>(), this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), ImmutableList.Create<AspectInstance>() );
+            new ( ImmutableList.Create<Diagnostic>(), this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), ImmutableList.Create<AspectInstance>() );
     }
 }
