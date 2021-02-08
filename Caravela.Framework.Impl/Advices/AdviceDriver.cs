@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Advices
                 _ => throw new NotImplementedException()
             };
 
-            return new ( ImmutableArray.Create<Diagnostic>(), ImmutableArray.Create( transformation ) );
+            return new( ImmutableArray.Create<Diagnostic>(), ImmutableArray.Create( transformation ) );
         }
     }
 }

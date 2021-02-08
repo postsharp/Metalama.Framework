@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this.RoslynCompilation = roslynCompilation;
 
-            this.SymbolMap = new ( this );
+            this.SymbolMap = new( this );
 
             this.SyntaxGenerator = new CSharpSyntaxGenerator();
         }

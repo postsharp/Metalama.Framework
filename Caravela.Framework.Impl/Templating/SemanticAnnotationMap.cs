@@ -17,13 +17,13 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
-        private readonly Dictionary<ISymbol,SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
-        private readonly Dictionary<SyntaxAnnotation,ISymbol> _annotationToDeclaredSymbolMap = new();
-        private readonly Dictionary<ISymbol,SyntaxAnnotation> _symbolToAnnotationMap = new();
-        private readonly Dictionary<SyntaxAnnotation,ISymbol> _annotationToSymbolMap = new();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
-        private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new ();
-        private readonly Dictionary<ILocalSymbol,SyntaxAnnotation> _localToAssignmentMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
+        private readonly Dictionary<ILocalSymbol, SyntaxAnnotation> _localToAssignmentMap = new();
 
         private int _nextId;
 
@@ -165,7 +165,9 @@ namespace Caravela.Framework.Impl.Templating
         public IParameterSymbol? GetParameterSymbol( ArgumentSyntax argument )
         {
             if ( argument.Parent?.Parent == null )
+            {
                 return null;
+            }
 
             var invocationSymbol = this.GetSymbol( argument.Parent.Parent );
 
@@ -177,23 +179,31 @@ namespace Caravela.Framework.Impl.Templating
             };
 
             if ( parameters.Length == 0 )
+            {
                 return null;
+            }
 
             if ( argument.NameColon != null )
             {
                 return parameters.FirstOrDefault( p => p.Name == argument.NameColon.Name.Identifier.ValueText );
             }
 
-            int index = argument.Parent.ChildNodes().ToList().IndexOf( argument );
+            var index = argument.Parent.ChildNodes().ToList().IndexOf( argument );
             if ( index == -1 )
+            {
                 return null;
+            }
 
             if ( index < parameters.Length )
+            {
                 return parameters[index];
+            }
 
             var lastParameter = parameters.Last();
             if ( lastParameter.IsParams )
+            {
                 return lastParameter;
+            }
 
             return null;
         }

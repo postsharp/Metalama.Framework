@@ -4,35 +4,6 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
 {
-    public interface IPropertyInvocation
-    {
-        dynamic Value { get; set; }
-
-        /// <summary>
-        /// Get the value for a different instance;
-        /// </summary>
-        dynamic GetValue( dynamic? instance );
-
-        /// <summary>
-        /// Set the value for a different instance;
-        /// </summary>
-        dynamic SetValue( dynamic? instance, dynamic value );
-
-        /// <summary>
-        /// Get the value for an indexer.
-        /// </summary>
-        dynamic GetIndexerValue( dynamic? instance, params dynamic[] args );
-
-        /// <summary>
-        /// Set the value for an indexer.
-        /// </summary>
-        /// <remarks>
-        /// Note: the order of parameters is different than in C# code:
-        /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
-        /// </remarks>
-        dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args );
-    }
-
     /// <summary>
     /// Represents a property or a field.
     /// </summary>

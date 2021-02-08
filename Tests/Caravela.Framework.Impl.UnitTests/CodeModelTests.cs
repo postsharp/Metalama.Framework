@@ -458,7 +458,7 @@ class C<T>
         [Fact]
         public void WithGenericArguments()
         {
-            string code = @"
+            var code = @"
 class C<TC>
 {
     (TC, TM) M<TM>() => default;

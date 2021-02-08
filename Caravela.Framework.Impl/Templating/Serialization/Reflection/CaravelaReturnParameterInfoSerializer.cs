@@ -9,7 +9,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         private readonly CaravelaMethodInfoSerializer _methodInfoSerializer;
 
-        public CaravelaReturnParameterInfoSerializer( CaravelaMethodInfoSerializer methodInfoSerializer ) => this._methodInfoSerializer = methodInfoSerializer;
+        public CaravelaReturnParameterInfoSerializer( CaravelaMethodInfoSerializer methodInfoSerializer )
+        {
+            this._methodInfoSerializer = methodInfoSerializer;
+        }
 
         public override ExpressionSyntax Serialize( CaravelaReturnParameterInfo o )
         {

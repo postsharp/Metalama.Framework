@@ -7,7 +7,10 @@ namespace Caravela.Framework.Impl
     {
         private readonly IReactiveCollection<AspectInstance> _aspectInstances;
 
-        public ReactiveAspectSource( IReactiveCollection<AspectInstance> aspectInstances ) => this._aspectInstances = aspectInstances;
+        public ReactiveAspectSource( IReactiveCollection<AspectInstance> aspectInstances )
+        {
+            this._aspectInstances = aspectInstances;
+        }
 
         public override IReactiveCollection<AspectInstance> GetAspects() => this._aspectInstances;
     }

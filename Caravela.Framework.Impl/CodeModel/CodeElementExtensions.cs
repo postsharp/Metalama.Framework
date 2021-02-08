@@ -1,15 +1,15 @@
-﻿using Caravela.Framework.Code;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    static class CodeElementExtensions
+    internal static class CodeElementExtensions
     {
         internal static ExpressionSyntax CastIfNecessary( this CodeElement codeElement, RuntimeExpression expression, IType targetType, bool parenthesize = false )
         {
@@ -18,12 +18,16 @@ namespace Caravela.Framework.Impl.CodeModel
             var targetTypeSymbol = targetType.GetSymbol();
 
             if ( SymbolEqualityComparer.Default.Equals( expressionType, targetTypeSymbol ) )
+            {
                 return expression.Syntax;
+            }
 
             var result = (ExpressionSyntax) codeElement.Compilation.SyntaxGenerator.CastExpression( targetTypeSymbol, expression.Syntax );
 
             if ( parenthesize )
+            {
                 result = SyntaxFactory.ParenthesizedExpression( result );
+            }
 
             return result;
         }
@@ -34,14 +38,18 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( parameters.LastOrDefault()?.IsParams == true )
             {
                 // all non-params arguments have to be set + any number of params arguments
-                int requiredArguments = parameters.Count - 1;
+                var requiredArguments = parameters.Count - 1;
                 if ( arguments.Length < requiredArguments )
+                {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments, codeElement, requiredArguments );
+                }
             }
             else
             {
                 if ( arguments.Length != parameters.Count )
+                {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, codeElement, parameters.Count );
+                }
             }
         }
 
@@ -51,7 +59,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var arguments = new List<ArgumentSyntax>( args.Length );
 
-            for ( int i = 0; i < args.Length; i++ )
+            for ( var i = 0; i < args.Length; i++ )
             {
                 var arg = (RuntimeExpression) args[i];
 
@@ -70,21 +78,26 @@ namespace Caravela.Framework.Impl.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, object instance ) where T: CodeElement, IMember
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, object instance )
+            where T : CodeElement, IMember
         {
             var instanceExpression = (RuntimeExpression) instance;
 
             if ( codeElement.IsStatic )
             {
                 if ( !instanceExpression.IsNull )
+                {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.CantProvideInstanceForStaticMember, codeElement );
+                }
 
                 return (ExpressionSyntax) codeElement.Compilation.SyntaxGenerator.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
             }
             else
             {
                 if ( instanceExpression.IsNull )
+                {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.HasToProvideInstanceForInstanceMember, codeElement );
+                }
 
                 return codeElement.CastIfNecessary( instanceExpression, codeElement.DeclaringType!, parenthesize: true );
             }

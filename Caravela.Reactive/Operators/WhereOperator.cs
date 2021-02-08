@@ -20,7 +20,7 @@ namespace Caravela.Reactive.Operators
 
         protected override ReactiveOperatorResult<IEnumerable<T>> EvaluateFunction( IEnumerable<T> source )
         {
-            return new ( source.Where( arg => this._predicate( arg, this.ObserverToken ) ) );
+            return new( source.Where( arg => this._predicate( arg, this.ObserverToken ) ) );
         }
 
         protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, T item, in IncrementalUpdateToken updateToken )

@@ -61,7 +61,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly AdviceParameter[] _parameters;
 
-        public AdviceParameterList( IMethod method ) => this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();
+        public AdviceParameterList( IMethod method )
+        {
+            this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();
+        }
 
         public IAdviceParameter this[int index] => this._parameters[index];
 
@@ -76,7 +79,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly IParameter _parameter;
 
-        public AdviceParameter( IParameter p ) => this._parameter = p;
+        public AdviceParameter( IParameter p )
+        {
+            this._parameter = p;
+        }
 
         public RefKind RefKind => this._parameter.RefKind;
 

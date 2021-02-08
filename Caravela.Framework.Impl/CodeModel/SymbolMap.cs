@@ -10,21 +10,24 @@ namespace Caravela.Framework.Impl.CodeModel
     /// </remarks>
     internal class SymbolMap
     {
-        private readonly SourceCompilation compilation;
+        private readonly SourceCompilation _compilation;
 
-        public SymbolMap( SourceCompilation compilation ) => this.compilation = compilation;
+        public SymbolMap( SourceCompilation compilation )
+        {
+            this._compilation = compilation;
+        }
 
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> typeCache = new ();
-        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> methodCache = new ();
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
 
-        internal IType GetIType( ITypeSymbol typeSymbol ) => this.typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this.compilation ) );
+        internal IType GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this._compilation ) );
 
-        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this.typeCache.GetOrAdd( typeSymbol, ts => new NamedType( (INamedTypeSymbol) ts, this.compilation ) );
+        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new NamedType( (INamedTypeSymbol) ts, this._compilation ) );
 
         internal IGenericParameter GetGenericParameter( ITypeParameterSymbol typeSymbol ) =>
-            (GenericParameter) this.typeCache.GetOrAdd( typeSymbol, ts => new GenericParameter( (ITypeParameterSymbol) ts, this.compilation ) );
+            (GenericParameter) this._typeCache.GetOrAdd( typeSymbol, ts => new GenericParameter( (ITypeParameterSymbol) ts, this._compilation ) );
 
-        internal IMethod GetMethod( IMethodSymbol methodSymbol ) => this.methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this.compilation ) );
+        internal IMethod GetMethod( IMethodSymbol methodSymbol ) => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this._compilation ) );
 
         internal ICodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
             symbol switch

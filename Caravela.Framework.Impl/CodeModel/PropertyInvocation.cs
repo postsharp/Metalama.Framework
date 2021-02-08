@@ -1,18 +1,22 @@
 ﻿using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
-using Caravela.Framework.Aspects;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal readonly struct PropertyInvocation<TProperty> : IPropertyInvocation where TProperty : CodeElement, IProperty
+    internal readonly struct PropertyInvocation<TProperty> : IPropertyInvocation
+        where TProperty : CodeElement, IProperty
     {
         private readonly TProperty _property;
 
-        public PropertyInvocation( TProperty property ) => this._property = property;
+        public PropertyInvocation( TProperty property )
+        {
+            this._property = property;
+        }
 
         public object Value
         {
@@ -26,7 +30,9 @@ namespace Caravela.Framework.Impl.CodeModel
         private ExpressionSyntax CreatePropertyAccess( object instance )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
+            {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._property );
+            }
 
             this._property.CheckArguments( this._property.Parameters, Array.Empty<IParameter>() );
 
@@ -47,7 +53,9 @@ namespace Caravela.Framework.Impl.CodeModel
         private ExpressionSyntax CreateIndexerAccess( object instance, object[] args )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
+            {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._property );
+            }
 
             var receiver = this._property.GetReceiverSyntax( instance );
             var arguments = this._property.GetArguments( this._property.Parameters, args );

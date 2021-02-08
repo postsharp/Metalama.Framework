@@ -1,5 +1,5 @@
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -15,7 +15,7 @@ using Caravela.Reactive;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         foreach (var type in target.Compilation.DeclaredTypes.GetValue())

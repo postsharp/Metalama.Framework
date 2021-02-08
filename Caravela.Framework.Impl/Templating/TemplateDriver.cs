@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -6,9 +8,6 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Reflection;
-using System.Runtime.ExceptionServices;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -17,7 +16,10 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly MethodInfo _templateMethod;
 
-        public TemplateDriver( MethodInfo templateMethodInfo ) => this._templateMethod = templateMethodInfo;
+        public TemplateDriver( MethodInfo templateMethodInfo )
+        {
+            this._templateMethod = templateMethodInfo;
+        }
 
         public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
@@ -43,6 +45,7 @@ namespace Caravela.Framework.Impl.Templating
                 ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
                 throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
             }
+
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
             TemplateContext.ProceedImpl = null;

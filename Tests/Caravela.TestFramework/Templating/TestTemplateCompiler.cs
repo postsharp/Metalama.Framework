@@ -12,7 +12,7 @@ namespace Caravela.TestFramework.Templating
     {
         private readonly TemplateCompiler _compiler = new TemplateCompiler();
         private readonly SemanticModel _semanticModel;
-        private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new ();
+        private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
 
         public TestTemplateCompiler( SemanticModel semanticModel )
         {
@@ -21,7 +21,7 @@ namespace Caravela.TestFramework.Templating
 
         public bool HasError { get; private set; }
 
-        public List<Diagnostic> Diagnostics { get; } = new ();
+        public List<Diagnostic> Diagnostics { get; } = new();
 
         public bool TryCompile( SyntaxNode rootNode, out SyntaxNode annotatedNode, out SyntaxNode transformedNode )
         {

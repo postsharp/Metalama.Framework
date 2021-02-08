@@ -9,9 +9,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Parameter : IParameter
     {
-        private readonly IParameterSymbol _symbol;
-
-        public IParameterSymbol Symbol => this._symbol;
+        public IParameterSymbol Symbol { get; }
 
         private readonly CodeElement _containingMember;
 
@@ -19,17 +17,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Parameter( IParameterSymbol symbol, CodeElement containingMember )
         {
-            this._symbol = symbol;
+            this.Symbol = symbol;
             this._containingMember = containingMember;
         }
 
-        public RefKind RefKind => this._symbol.RefKind switch
+        public RefKind RefKind => this.Symbol.RefKind switch
         {
             Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
             Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
             Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
             Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
-            _ => throw new InvalidOperationException( $"Roslyn RefKind {this._symbol.RefKind} not recognized." )
+            _ => throw new InvalidOperationException( $"Roslyn RefKind {this.Symbol.RefKind} not recognized." )
         };
 
         public bool IsByRef => this.RefKind != RefKind.None;
@@ -38,26 +36,26 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOut => this.RefKind == RefKind.Out;
 
-        public bool IsParams => this._symbol.IsParams;
+        public bool IsParams => this.Symbol.IsParams;
 
         [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
+        public IType Type => this.SymbolMap.GetIType( this.Symbol.Type );
 
-        public string Name => this._symbol.Name;
+        public string Name => this.Symbol.Name;
 
-        public int Index => this._symbol.Ordinal;
+        public int Index => this.Symbol.Ordinal;
 
         public ICodeElement ContainingElement => this._containingMember;
 
         [Memo]
-        public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public IReactiveCollection<IAttribute> Attributes => this.Symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        public bool HasDefaultValue => this._symbol.HasExplicitDefaultValue;
+        public bool HasDefaultValue => this.Symbol.HasExplicitDefaultValue;
 
-        public object? DefaultValue => this._symbol.ExplicitDefaultValue;
+        public object? DefaultValue => this.Symbol.ExplicitDefaultValue;
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Symbol.ToDisplayString();
     }
 }

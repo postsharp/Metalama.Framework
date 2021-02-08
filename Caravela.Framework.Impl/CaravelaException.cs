@@ -23,9 +23,4 @@ namespace Caravela.Framework.Impl
             this.Diagnostic = diagnostic;
         }
     }
-
-    static class ExceptionExtensions
-    {
-        public static string ToDiagnosticString( this Exception ex ) => ex.ToString();
-    }
 }

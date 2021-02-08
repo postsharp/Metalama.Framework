@@ -436,6 +436,7 @@ namespace Caravela.Framework.Impl.Templating
                 foreach ( var argument in node.ArgumentList.Arguments )
                 {
                     var parameterType = this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type;
+
                     // dynamic or dynamic[]
                     if ( parameterType is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } )
                     {
@@ -450,7 +451,8 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                var updatedInvocation = node.Update( transformedExpression,
+                var updatedInvocation = node.Update(
+                    transformedExpression,
                     ArgumentList( SeparatedList( transformedArguments ) ) );
 
                 return updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
@@ -504,8 +506,7 @@ namespace Caravela.Framework.Impl.Templating
                         (StatementSyntax) this.Visit( node.Else.Statement )! ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly ).WithTriviaFrom( node.Else )
                     : null;
 
-                return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
-                    annotatedStatement, annotatedElse ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {
@@ -523,8 +524,7 @@ namespace Caravela.Framework.Impl.Templating
                     var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                     var annotatedElse = (ElseClauseSyntax) this.Visit( node.Else )!;
 
-                    var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
-                        annotatedStatement, annotatedElse );
+                    var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse );
 
                     return result;
                 }

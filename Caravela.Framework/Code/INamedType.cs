@@ -1,4 +1,3 @@
-using Caravela.Reactive;
 using System.Collections.Immutable;
 using Caravela.Reactive;
 
@@ -61,7 +60,7 @@ namespace Caravela.Framework.Code
         IImmutableList<IGenericParameter> GenericParameters { get; }
 
         /// <summary>
-        /// Indicates whether this type or any of its containers does not have generic arguments set.
+        /// Gets a value indicating whether this type or any of its containers does not have generic arguments set.
         /// </summary>
         bool IsOpenGeneric { get; }
 

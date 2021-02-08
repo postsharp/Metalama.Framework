@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -124,7 +124,10 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             public Method Method { get; }
 
-            public MethodReturnParameter( Method method ) => this.Method = method;
+            public MethodReturnParameter( Method method )
+            {
+                this.Method = method;
+            }
 
             protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method._symbol.RefKind;
 
@@ -141,7 +144,10 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             private readonly Method _method;
 
-            public MethodInvocation( Method method ) => this._method = method;
+            public MethodInvocation( Method method )
+            {
+                this._method = method;
+            }
 
             public bool HasBase => true;
 
@@ -150,23 +156,28 @@ namespace Caravela.Framework.Impl.CodeModel
             public object Invoke( object? instance, params object[] args )
             {
                 if ( this._method.IsOpenGeneric )
-                    throw new CaravelaException(GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._method);
+                {
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._method );
+                }
 
                 var name = this._method.GenericArguments.Any()
                     ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( this._method.Name, this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : IdentifierName( this._method.Name );
                 var arguments = this._method.GetArguments( this._method.Parameters, args );
 
-                if ( ((IMethod) this._method).Kind == MethodKind.LocalFunction )
+                if ( ((IMethod) this._method).MethodKind == MethodKind.LocalFunction )
                 {
                     if ( this._method.ContainingElement != TemplateContext.target.Method )
+                    {
                         throw new CaravelaException( GeneralDiagnosticDescriptors.CantInvokeLocalFunctionFromAnotherMethod, this._method, TemplateContext.target.Method, this._method.ContainingElement );
+                    }
 
                     var instanceExpression = (RuntimeExpression) instance!;
 
                     if ( !instanceExpression.IsNull )
+                    {
                         throw new CaravelaException( GeneralDiagnosticDescriptors.CantProvideInstanceForLocalFunction, this._method );
-
+                    }
 
                     return new DynamicMetaMember(
                         InvocationExpression( name ).AddArgumentListArguments( arguments ),
