@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -58,7 +60,7 @@ namespace Caravela.Framework.Impl
                 return new ( ImmutableList.Create( diagnostic ), ImmutableList.Create<IAdvice>(), ImmutableList.Create<AspectInstance>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.attribute, x.method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
@@ -70,9 +72,10 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private IAdvice CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod ) where T : ICodeElement
+        private IAdvice CreateDeclarativeAdvice<T>( IAspect aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+            where T : ICodeElement
         {
-            throw new NotImplementedException( $"No implementation for advice attribute {typeof( T ).Name}." );
+            return AdviceAttributeFactory.CreateAdvice( attribute, aspect, codeElement, templateMethod );
         }
     }
 }

@@ -2,6 +2,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -11,7 +12,12 @@ namespace Caravela.Framework.Impl.Linking
         {
             var compilationToBeLinked = new ModifiedCompilationModel( context.Compilation, context.Transformations );
 
+
             return new AdviceLinkerResult( compilationToBeLinked, Array.Empty<Diagnostic>().ToImmutableReactive() );
+        }
+
+        public class Rewriter : CSharpSyntaxRewriter
+        {
         }
     }
 }

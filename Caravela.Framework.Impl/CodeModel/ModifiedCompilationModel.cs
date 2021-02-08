@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    // TODO: Introduced members are not reflected in containing elements, at this point this only rewrites Roslyn compilation correctly.
+
     internal sealed class ModifiedCompilationModel : CompilationModel
     {
         private readonly CompilationModel _originalCompilation;
