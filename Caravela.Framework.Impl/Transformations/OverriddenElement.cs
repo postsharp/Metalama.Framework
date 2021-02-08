@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract IList<MemberDeclarationSyntax> GetOverrides( ICompilation compilation );
 
-        public OverriddenElement( IAdvice advice, ICodeElement overridenDeclaration ) : base( advice )
+        public OverriddenElement( IAdvice advice, ICodeElement overriddenDeclaration ) : base( advice )
         {
-            this.OverridenDeclaration = overridenDeclaration;
+            this.OverridenDeclaration = overriddenDeclaration;
         }
     }
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMethod TemplateMethod { get; }
 
-        public OverriddenMethod( IAdvice advice, IMethod overridenDeclaration, IMethod templateMethod ) : base( advice, overridenDeclaration )
+        public OverriddenMethod( IAdvice advice, IMethod overriddenDeclaration, IMethod templateMethod ) : base( advice, overriddenDeclaration )
         {
             this.TemplateMethod = templateMethod;
         }

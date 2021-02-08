@@ -7,6 +7,5 @@ namespace Caravela.Framework.Advices
     /// </summary>
     public interface IOverrideMethodAdvice : IAdvice<IMethod>
     {
-        IMethod TemplateMethod { get; }
     }
 }

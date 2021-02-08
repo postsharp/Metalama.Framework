@@ -94,9 +94,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
                     foreach ( var transformation in this._overriddenMethods )
                     {
-                        var overridenSyntax = transformation.OverridenDeclaration!.GetSyntaxNodes().FirstOrDefault();
+                        var overriddenSyntax = transformation.OverridenDeclaration!.GetSyntaxNodes().FirstOrDefault();
 
-                        if ( overridenSyntax == member )
+                        if ( overriddenSyntax == member )
                         {
                             foreach ( var overridingSyntax in transformation.GetOverrides( this._baseCompilation ) )
                             {

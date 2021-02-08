@@ -32,13 +32,13 @@ namespace Caravela.Framework.Impl.Advices
         public AdviceResult ToResult( ICompilation compilation )
         {
             var introducedMethod = new IntroducedMethod( this, this.TargetDeclaration, this.TemplateMethod, this.Scope, this.Name, this.IsStatic, this.IsVirtual, this.Visibility );
-            var overridenMethod = new OverriddenMethod( this, introducedMethod, this.TemplateMethod );
+            var overriddenMethod = new OverriddenMethod( this, introducedMethod, this.TemplateMethod );
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray.Create<Transformation>(
                     introducedMethod,
-                    overridenMethod ) );
+                    overriddenMethod ) );
         }
     }
 }
