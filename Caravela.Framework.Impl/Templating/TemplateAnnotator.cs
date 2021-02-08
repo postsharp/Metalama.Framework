@@ -17,17 +17,6 @@ namespace Caravela.Framework.Impl.Templating
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from
     /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SemanticAnnotationMap"/>.
     /// </summary>
-    /*
-     *  TODO
-     *    * Analyze other mutating operators like ++, +=, ...
-     *    * Analyze non-pure method access from non-meta conditional branches as mutating
-     *    * Analyze while/do, for, foreach, exception handlers as conditional constructs
-     *    * Implement foreach as a meta construct
-     *    * Analyze out, ref parameters as mutations (in SemanticAnnotationMap too)
-     *    * Solve the problem "i = i + 1" - this cannot be solved by naive recursion; a constraint solver may be needed.
-     *
-     *     IsMeta(symbol) should return three states: meta, nonmeta, or mixed. Only meta symbols cause expressions to be meta.
-     */
     internal partial class TemplateAnnotator : CSharpSyntaxRewriter
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
@@ -36,6 +25,8 @@ namespace Caravela.Framework.Impl.Templating
         /// Scope of local variables.
         /// </summary>
         private readonly Dictionary<ILocalSymbol, SymbolDeclarationScope> _localScopes = new Dictionary<ILocalSymbol, SymbolDeclarationScope>();
+
+        private readonly SymbolClassifier _symbolScopeClassifier;
 
         /// <summary>
         /// Specifies that the current node is guarded by a conditional statement where the condition is a runtime-only
@@ -49,10 +40,9 @@ namespace Caravela.Framework.Impl.Templating
         /// Specifies that the current expression is obliged to be compile-time-only.
         /// </summary>
         private bool _forceCompileTimeOnlyExpression;
-        private readonly SymbolClassifier _symbolScopeClassifier;
 
         /// <summary>
-        /// Diagnostics produced by the current <see cref="TemplateAnnotator"/>.
+        /// Gets the list of diagnostics produced by the current <see cref="TemplateAnnotator"/>.
         /// </summary>
         public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
@@ -136,10 +126,15 @@ namespace Caravela.Framework.Impl.Templating
                     if ( this._forceCompileTimeOnlyExpression )
                     {
                         // If the current expression must be compile-time by inference, emit a diagnostic.
-                        this.Diagnostics.Add( Diagnostic.Create( "CA01", "Annotation",
+                        this.Diagnostics.Add( Diagnostic.Create(
+                            "CA01",
+                            "Annotation",
                             "A compile-time expression is required.",
                             DiagnosticSeverity.Error,
-                            DiagnosticSeverity.Error, true, 0, location: nodeForDiagnostic.GetLocation() ) );
+                            DiagnosticSeverity.Error,
+                            true,
+                            0,
+                            location: nodeForDiagnostic.GetLocation() ) );
                         return SymbolDeclarationScope.CompileTimeOnly;
                     }
 
@@ -309,11 +304,15 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
-
-                    this.Diagnostics.Add( Diagnostic.Create( "CA02", "Annotation",
+                    this.Diagnostics.Add( Diagnostic.Create(
+                        "CA02",
+                        "Annotation",
                         $"The expression {node} cannot be used in a build-time expression.",
                         DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error, true, 0, location: Location.Create( node.SyntaxTree, node.Span ) ) );
+                        DiagnosticSeverity.Error,
+                        true,
+                        0,
+                        location: Location.Create( node.SyntaxTree, node.Span ) ) );
 
                     return transformedNode;
                 }
@@ -493,8 +492,8 @@ namespace Caravela.Framework.Impl.Templating
                         (StatementSyntax) this.Visit( node.Else.Statement )! ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly ).WithTriviaFrom( node.Else )
                     : null;
 
-                return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
-                    annotatedStatement, annotatedElse ).AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                return node.Update( node.AttributeLists, node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {
@@ -512,8 +511,7 @@ namespace Caravela.Framework.Impl.Templating
                     var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                     var annotatedElse = (ElseClauseSyntax) this.Visit( node.Else )!;
 
-                    var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken,
-                        annotatedStatement, annotatedElse );
+                    var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse );
 
                     return result;
                 }
@@ -737,10 +735,15 @@ namespace Caravela.Framework.Impl.Templating
                 else
                 {
                     // TODO: We may have to write this diagnostic in the last iteration only.
-                    this.Diagnostics.Add( Diagnostic.Create( "CA01", "Annotation",
+                    this.Diagnostics.Add( Diagnostic.Create(
+                        "CA01",
+                        "Annotation",
                         "Split build-time and run-time variables into several declarations.",
                         DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error, true, 0, location: node.GetLocation() ) );
+                        DiagnosticSeverity.Error,
+                        true,
+                        0,
+                        location: node.GetLocation() ) );
                     return transformedVariableDeclaration;
                 }
             }
@@ -863,11 +866,17 @@ namespace Caravela.Framework.Impl.Templating
                 transformedStatement = (StatementSyntax) this.Visit( node.Statement )!;
             }
 
-            return ForStatement( node.ForKeyword, node.OpenParenToken, transformedVariableDeclaration,
+            return ForStatement(
+                node.ForKeyword,
+                node.OpenParenToken,
+                transformedVariableDeclaration,
                 SeparatedList( transformedInitializers ),
-                node.FirstSemicolonToken, transformedCondition, node.SecondSemicolonToken,
+                node.FirstSemicolonToken,
+                transformedCondition,
+                node.SecondSemicolonToken,
                 SeparatedList( transformedIncrementors ),
-                node.CloseParenToken, transformedStatement );
+                node.CloseParenToken,
+                transformedStatement );
         }
 
         public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )

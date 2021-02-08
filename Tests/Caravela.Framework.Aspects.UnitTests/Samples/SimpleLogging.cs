@@ -1,6 +1,4 @@
-﻿#pragma warning disable SA1649 // File name should match first type name
-
-using System;
+﻿using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging

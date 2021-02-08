@@ -10,3 +10,9 @@ dotnet_diagnostic.SA1310.severity = none
 
 # SA1601: Partial elements should be documented
 dotnet_diagnostic.SA1601.severity = none
+
+# SA1649: File name should match first type name
+dotnet_diagnostic.SA1649.severity = none
+
+# SA1124: Do not use regions
+dotnet_diagnostic.SA1124.severity = none

@@ -1,7 +1,4 @@
 ﻿using System;
-using System;
-using System;
-using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -22,6 +19,7 @@ namespace Caravela.TestFramework
         {
             this.TemplateDocument = templateDocument;
         }
+
         public SyntaxNode? AnnotatedTemplateSyntax { get; set; }
 
         public SyntaxNode? TransformedTemplateSyntax { get; set; }

@@ -47,7 +47,7 @@ namespace Caravela.TestFramework
                 var aspectPipeline = new AspectPipeline();
                 var resultCompilation = aspectPipeline.Execute( new AspectTestPipelineContext( initialCompilation, result ) );
 
-                result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace ) ;
+                result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
                 result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
 
                 return result;
