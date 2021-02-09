@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class DynamicType : IDynamicType, ITypeInternal
+    internal class DynamicType : IDynamicType
     {
         private readonly IDynamicTypeSymbol _typeSymbol;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
+        public ITypeSymbol TypeSymbol => this._typeSymbol;
 
         private readonly SourceCompilationModel _compilation;
 

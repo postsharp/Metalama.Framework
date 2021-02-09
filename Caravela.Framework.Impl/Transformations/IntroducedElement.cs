@@ -4,20 +4,22 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal abstract class IntroducedElement : Transformation, ICodeElement, IToSyntax
+    internal abstract class IntroducedElement : Transformation, ICodeElement, IToSyntax, IMemberInternal
     {
-        public abstract ICodeElement? ContainingElement { get; }
+        public abstract CodeElement? ContainingElement { get; }
 
-        public abstract IReactiveCollection<IAttribute> Attributes { get; }
+        public abstract IImmutableList<Attribute> Attributes { get; }
 
         public abstract CodeElementKind ElementKind { get; }
 
@@ -60,7 +62,7 @@ namespace Caravela.Framework.Impl.Transformations
         private readonly bool? _isVirtual;
         private readonly Visibility? _visibility;
 
-        public override ICodeElement? ContainingElement { get; }
+        public override CodeElement? ContainingElement { get; }
 
         public IMethod TemplateMethod { get; }
 
@@ -88,7 +90,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override INamedType? DeclaringType => this.TemplateMethod!.DeclaringType;
 
-        public override IReactiveCollection<IAttribute> Attributes => this.TemplateMethod!.Attributes;
+        public override IImmutableList<Attribute> Attributes => this.TemplateMethod!.Attributes;
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -164,9 +166,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public object? DefaultValue => this._template.DefaultValue;
 
-        public override ICodeElement? ContainingElement { get; }
+        public override CodeElement? ContainingElement { get; }
 
-        public override IReactiveCollection<IAttribute> Attributes => this._template.Attributes;
+        public override IImmutableList<Attribute> Attributes => this._template.Attributes;
 
         public override CodeElementKind ElementKind => this._template.ElementKind;
 
@@ -213,9 +215,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         Code.TypeKind IType.TypeKind => Code.TypeKind.GenericParameter;
 
-        public override ICodeElement? ContainingElement { get; }
+        public override CodeElement? ContainingElement { get; }
 
-        public override IReactiveCollection<IAttribute> Attributes => this._template.Attributes;
+        public override IImmutableList<Attribute> Attributes => this._template.Attributes;
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 

@@ -10,19 +10,27 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Method : CodeElement, IMethod
+    internal class SourceMethod : Method, ISourceCodeElement
     {
         private readonly IMethodSymbol _symbol;
+        
+        public ISymbol Symbol => this._symbol;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public SourceCompilationModel Compilation { get; }
 
-        internal override SourceCompilationModel Compilation { get; }
-
-        public Method( IMethodSymbol symbol, SourceCompilationModel compilation )
+        public SourceMethod( IMethodSymbol symbol, SourceCompilationModel compilation )
         {
             this._symbol = symbol;
             this.Compilation = compilation;
         }
+        
+    }
+    
+    internal class Method : CodeElement, IMethod, IMemberInternal
+    {
+        
+
+      
 
         [Memo]
         public IParameter? ReturnParameter => ((IMethod) this).MethodKind is MethodKind.Constructor ? null : new MethodReturnParameter( this );
@@ -77,7 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsStatic => this._symbol.IsStatic;
 
         [Memo]
-        public override ICodeElement ContainingElement => this._symbol.ContainingSymbol switch
+        public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch
         {
             INamedTypeSymbol type => this.SymbolMap.GetNamedType( type ),
             IMethodSymbol method => this.SymbolMap.GetMethod( method ),
@@ -85,7 +93,7 @@ namespace Caravela.Framework.Impl.CodeModel
         };
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public override IImmutableList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -106,10 +114,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override IType Type => this.Method.ReturnType;
 
-            public override ICodeElement? ContainingElement => this.Method;
+            public override CodeElement? ContainingElement => this.Method;
 
             [Memo]
-            public override IReactiveCollection<IAttribute> Attributes =>
+            public override IImmutableList<IAttribute> Attributes =>
                 this.Method._symbol.GetReturnTypeAttributes().Select( a => new Attribute( a, this.Method.SymbolMap ) ).ToImmutableReactive();
         }
     }

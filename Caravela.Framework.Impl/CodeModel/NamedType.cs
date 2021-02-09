@@ -4,110 +4,104 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using System.Collections.Generic;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class NamedType : CodeElement, INamedType, ITypeInternal
+    internal interface ITypeInternal : IType
     {
-        internal INamedTypeSymbol TypeSymbol { get; }
+        
+    }
+    
+    
+    internal abstract class NamedType : CodeElement,  ITypeInternal, INamedType
+    {
+ 
+        
+        
+        INamedType? INamedType.BaseType => this.BaseType;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
+        IReadOnlyList<INamedType> INamedType.ImplementedInterfaces => this.ImplementedInterfaces;
 
-        protected internal override ISymbol Symbol => this.TypeSymbol;
+        IReadOnlyList<IGenericParameter> INamedType.GenericParameters => this.GenericParameters;
 
-        internal override SourceCompilationModel Compilation { get; }
+        IReadOnlyList<INamedType> INamedType.NestedTypes => this.NestedTypes;
 
-        internal NamedType( INamedTypeSymbol typeSymbol, SourceCompilationModel compilation )
-        {
-            this.TypeSymbol = typeSymbol;
-            this.Compilation = compilation;
-        }
+        IReadOnlyList<IProperty> INamedType.Properties => this.Properties;
 
-        TypeKind IType.TypeKind => this.TypeSymbol.TypeKind switch
-        {
-            RoslynTypeKind.Class => TypeKind.Class,
-            RoslynTypeKind.Delegate => TypeKind.Delegate,
-            RoslynTypeKind.Enum => TypeKind.Enum,
-            RoslynTypeKind.Interface => TypeKind.Interface,
-            RoslynTypeKind.Struct => TypeKind.Struct,
-            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
-        };
+        IReadOnlyList<IEvent> INamedType.Events => this.Events;
+
+        IReadOnlyList<IMethod> INamedType.Methods => this.Methods;
+
+        IReadOnlyList<IMethod> INamedType.InstanceConstructors => this.InstanceConstructors;
+
+        public abstract bool IsAbstract { get; }
+        public abstract bool IsSealed { get; }
 
         public bool HasDefaultConstructor =>
-            this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
-            (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract && this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
+            this.TypeKind== TypeKind.Struct ||
+            (this.TypeKind == TypeKind.Class && !this.IsAbstract && this.InstanceConstructors.Any( ctor => ctor.Parameters.Count == 0 ));
 
         [Memo]
-        public IReactiveCollection<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
+        public abstract IImmutableList<NamedType> NestedTypes { get; }
 
         [Memo]
-        public IReactiveCollection<IProperty> Properties =>
-            this.TypeSymbol.GetMembers().Select( m => m switch
-            {
-                IPropertySymbol p => new Property( p, this ),
-                IFieldSymbol { IsImplicitlyDeclared: false } f => new Field( f, this ),
-                _ => (IProperty) null!
-            } )
-            .Where( p => p != null )
-            .ToImmutableReactive();
+        public IImmutableList<Property> Properties => this.Members.OfType<Property>().ToImmutableList();
+            
+
+
+        public abstract IImmutableList<IMemberInternal> Members { get; }
+
+
+        [Memo] public IImmutableList<Event> Events => this.Members.OfType<Event>().ToImmutableList();
 
         [Memo]
-        public IReactiveCollection<IEvent> Events => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
+        public IImmutableList<Method> Methods
+            => this.Members.OfType<Method>()
+                .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
+                .ToImmutableList();
 
         [Memo]
-        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select( m => this.SymbolMap.GetMethod( m ) ).ToImmutableReactive();
+        public IImmutableList<Method> InstanceConstructors
+            => this.Members.OfType<Method>()
+                .Where( m => m.MethodKind == MethodKind.Constructor )
+                .ToImmutableList();
 
         [Memo]
-        public IImmutableList<IGenericParameter> GenericParameters =>
-            this.TypeSymbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
+        public IMethod StaticConstructor => this.Members.OfType<IMethod>()
+            .Where( m => m.MethodKind == MethodKind.StaticConstructor )
+            .SingleOrDefault();
 
-        public string Name => this.TypeSymbol.Name;
 
-        [Memo]
-        public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
+        public abstract IReadOnlyList<IType> GenericArguments { get; }
+        public abstract IImmutableList<GenericParameter> GenericParameters { get; }
 
-        [Memo]
-        public string FullName => this.TypeSymbol.ToDisplayString();
+        
 
-        [Memo]
-        public IImmutableList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
-
-        [Memo]
-        public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
-        {
-            INamespaceSymbol => null,
-            INamedTypeSymbol containingType => this.Compilation.SymbolMap.GetNamedType( containingType ),
-            _ => throw new NotImplementedException()
-        };
-
-        [Memo]
-        public override IReactiveCollection<IAttribute> Attributes =>
-            this.TypeSymbol.GetAttributes().Select( a => new Attribute( a, this.Compilation.SymbolMap ) ).ToImmutableReactive();
-
+     
         public override CodeElementKind ElementKind => CodeElementKind.Type;
 
-        [Memo]
-        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );
+        public abstract NamedType? BaseType { get; }
 
-        [Memo]
-        public IReactiveCollection<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableReactive();
+        public abstract IImmutableList<NamedType> ImplementedInterfaces { get; }
 
-        public bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, other.GetSymbol() );
+        public abstract string Name { get; }
+        public abstract string? Namespace { get; }
+        public abstract string FullName { get; }
 
-        public bool Is( Type other ) =>
-            this.Is( this.Compilation.GetTypeByReflectionType( other ) ?? throw new ArgumentException( $"Could not resolve type {other}.", nameof( other ) ) );
+        public abstract TypeKind TypeKind { get; }
 
-        public IArrayType MakeArrayType( int rank = 1 ) =>
-            (IArrayType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this.TypeSymbol, rank ) );
+        public abstract bool Is( IType other );
 
-        public IPointerType MakePointerType() =>
-            (IPointerType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this.TypeSymbol ) );
+        public abstract bool Is( Type other );
 
-        public INamedType MakeGenericType( params IType[] genericArguments ) =>
-            this.SymbolMap.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+        public abstract IArrayType MakeArrayType( int rank = 1 );
 
-        public override string ToString() => this.TypeSymbol.ToString();
+        public abstract  IPointerType MakePointerType();
+
+        public abstract  INamedType MakeGenericType( params IType[] genericArguments );
+
     }
 }

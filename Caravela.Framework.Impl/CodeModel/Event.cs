@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : CodeElement, IEvent
+    internal class Event : IMemberInternal, IEvent
     {
         private readonly IEventSymbol _symbol;
 
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly NamedType _containingElement;
 
-        public override ICodeElement ContainingElement => this._containingElement;
+        public override CodeElement? ContainingElement => this._containingElement;
 
         internal override SourceCompilationModel Compilation => this._containingElement.Compilation;
 
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType DeclaringType => this._containingElement;
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public override IImmutableList Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
     }

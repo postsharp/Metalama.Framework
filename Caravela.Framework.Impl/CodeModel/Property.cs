@@ -7,6 +7,10 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    internal interface IMemberInternal :  IMember
+    {
+        
+    }
     internal sealed class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol _symbol;
@@ -15,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly NamedType _containingElement;
 
-        public override ICodeElement ContainingElement => this._containingElement;
+        public override CodeElement? ContainingElement => this._containingElement;
 
         internal override SourceCompilationModel Compilation => this._containingElement.Compilation;
 
@@ -56,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType DeclaringType => this._containingElement;
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public override IImmutableList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Property;
     }

@@ -7,11 +7,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class GenericParameter : IGenericParameter, ITypeInternal
+    internal class GenericParameter : IGenericParameter
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
+        public ITypeSymbol TypeSymbol => this._typeSymbol;
 
         private readonly SourceCompilationModel _compilation;
 
@@ -41,10 +41,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public ICodeElement ContainingElement => this._compilation.SymbolMap.GetNamedTypeOrMethod( this._typeSymbol.ContainingSymbol );
+        public CodeElement? ContainingElement => this._compilation.SymbolMap.GetNamedTypeOrMethod( this._typeSymbol.ContainingSymbol );
 
         [Memo]
-        public IReactiveCollection<IAttribute> Attributes => this._typeSymbol.GetAttributes().Select( a => new Attribute( a, this._compilation.SymbolMap ) ).ToImmutableReactive();
+        public IImmutableList<Attribute> Attributes => this._typeSymbol.GetAttributes().Select( a => new Attribute( a, this._compilation.SymbolMap ) ).ToImmutableReactive();
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 

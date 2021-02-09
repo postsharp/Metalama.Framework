@@ -31,9 +31,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int Index => -1;
 
-        public abstract ICodeElement? ContainingElement { get; }
+        public abstract CodeElement? ContainingElement { get; }
 
-        public abstract IReactiveCollection<IAttribute> Attributes { get; }
+        public abstract IImmutableList Attributes { get; }
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 

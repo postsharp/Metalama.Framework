@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Caravela.Reactive;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
@@ -15,6 +16,10 @@ namespace Caravela.Framework.Code
     /// </remarks>
     public interface INamedType : IType, ICodeElement
     {
+        
+        bool IsAbstract { get; }
+        bool IsSealed { get; }
+        
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
 
@@ -29,7 +34,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
-        IReactiveCollection<INamedType> ImplementedInterfaces { get; }
+        IReadOnlyList<INamedType> ImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the name of the type, but not its namespace.
@@ -51,36 +56,40 @@ namespace Caravela.Framework.Code
         /// applied to the <see cref="GenericParameters"/> of the current type. Returns
         /// an empty collection if the type an open generic type definition or if the type is non-generic.
         /// </summary>
-        IImmutableList<IType> GenericArguments { get; }
+        IReadOnlyList<IType> GenericArguments { get; }
 
         /// <summary>
         /// Gets the generic parameters of the type, or an empty collection if the
         /// type is not generic.
         /// </summary>
-        IImmutableList<IGenericParameter> GenericParameters { get; }
+        IReadOnlyList<IGenericParameter> GenericParameters { get; }
 
         /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>
-        IReactiveCollection<INamedType> NestedTypes { get; }
+        IReadOnlyList<INamedType> NestedTypes { get; }
 
         /// <summary>
         /// Gets the list of properties and fields defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReactiveCollection<IProperty> Properties { get; }
+        IReadOnlyList<IProperty> Properties { get; }
 
         /// <summary>
         /// Gets the list of events defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReactiveCollection<IEvent> Events { get; }
+        IReadOnlyList<IEvent> Events { get; }
 
         /// <summary>
         /// Gets the list of methods defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReactiveCollection<IMethod> Methods { get; }
+        IReadOnlyList<IMethod> Methods { get; }
+        
+        IReadOnlyList<IMethod> InstanceConstructors { get; }
+        
+        IMethod StaticConstructor { get; }
 
         /// <summary>
         /// Makes a generic instance of the current generic type definition.

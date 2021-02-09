@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this.SymbolMap = new ( this );
         }
 
+        public override IImmutableList<Transformation> Transformations => ImmutableArray<Transformation>.Empty;
+
         [Memo]
         public override IReactiveCollection<INamedType> DeclaredTypes =>
             this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
@@ -29,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public override IReactiveCollection<IAttribute> Attributes =>
+        public override IImmutableList<IAttribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                 .Select( a => new Attribute( a, this.SymbolMap ) )
                 .ToImmutableReactive();
@@ -40,13 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return symbol == null ? null : this.SymbolMap.GetNamedType( symbol );
         }
-
-        internal override CSharpCompilation GetPrimeCompilation() => this.RoslynCompilation;
-
-        internal override IReactiveCollection<Transformation> CollectTransformations() => ImmutableArray.Create<Transformation>().ToReactive();
-
-        internal override CSharpCompilation GetRoslynCompilation() => this.RoslynCompilation;
-
+        
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
     }
 }

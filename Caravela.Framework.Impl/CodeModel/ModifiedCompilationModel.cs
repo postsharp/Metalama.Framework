@@ -7,6 +7,7 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
-        public override IReactiveCollection<IAttribute> Attributes => this._originalCompilation.Attributes;
+        public override IImmutableList<Attribute> Attributes => this._originalCompilation.Attributes;
 
         public override INamedType? GetTypeByReflectionName( string reflectionName ) => this._originalCompilation.GetTypeByReflectionName( reflectionName );
 

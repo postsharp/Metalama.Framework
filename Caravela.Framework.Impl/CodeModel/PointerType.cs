@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class PointerType : IPointerType, ITypeInternal
+    internal class PointerType : IPointerType
     {
         private readonly IPointerTypeSymbol _typeSymbol;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
+        public ITypeSymbol TypeSymbol => this._typeSymbol;
 
         private readonly SourceCompilationModel _compilation;
 

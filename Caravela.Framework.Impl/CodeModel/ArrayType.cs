@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class ArrayType : IArrayType, ITypeInternal
+    internal class ArrayType : IArrayType
     {
         private readonly IArrayTypeSymbol _typeSymbol;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
+        public ITypeSymbol TypeSymbol => this._typeSymbol;
 
         private readonly SourceCompilationModel _compilation;
 

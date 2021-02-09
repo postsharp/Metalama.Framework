@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection

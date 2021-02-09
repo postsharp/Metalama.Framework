@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
-        public override IReactiveCollection<IAttribute> Attributes => this._originalCompilation.Attributes;
+        public override IImmutableList Attributes => this._originalCompilation.Attributes;
 
         public override INamedType? GetTypeByReflectionName( string reflectionName ) => this._originalCompilation.GetTypeByReflectionName( reflectionName );
 

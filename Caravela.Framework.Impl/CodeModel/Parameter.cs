@@ -45,10 +45,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int Index => this._symbol.Ordinal;
 
-        public ICodeElement ContainingElement => this._containingMember;
+        public CodeElement? ContainingElement => this._containingMember;
 
         [Memo]
-        public IReactiveCollection<IAttribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public IImmutableList Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 

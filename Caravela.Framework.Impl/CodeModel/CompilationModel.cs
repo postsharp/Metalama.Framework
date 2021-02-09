@@ -4,6 +4,9 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -16,13 +19,23 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace );
 
-        public abstract IReactiveCollection<IAttribute> Attributes { get; }
+        public abstract IImmutableList<Attribute> Attributes { get; }
 
-        ICodeElement? ICodeElement.ContainingElement => null;
+        CodeElement? ICodeElement.ContainingElement => null;
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
+        
+        /// <summary>
+        /// Gets the list of transformations added by any previous layer of the compilation model.
+        /// </summary>
+        public abstract IImmutableList<Transformation> Transformations { get; }
+
+        [Memo]
+        public IReadOnlyDictionary<CodeElement, IImmutableList<IntroducedElement>> IntroductionsByContainingElement =>
+            this.Transformations.OfType<IntroducedElement>().GroupBy( i => i.ContainingElement )
+                .ToDictionary<CodeElement, IImmutableList<IntroducedElement>>( g => g.Key, g => g.ToImmutableList() );
 
         public IType? GetTypeByReflectionType( Type type )
         {
@@ -61,11 +74,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetTypeByReflectionName( type.FullName );
         }
 
-        internal abstract CSharpCompilation GetPrimeCompilation();
-
-        internal abstract IReactiveCollection<Transformation> CollectTransformations();
-
-        internal abstract CSharpCompilation GetRoslynCompilation();
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
     }

@@ -12,11 +12,11 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public interface ICompilation : ICodeElement
     {
-        IReactiveCollection<INamedType> DeclaredTypes { get; }
+        IReadOnlyList<INamedType> DeclaredTypes { get; }
 
-        IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
+        IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
-        IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
+        IReadOnlyDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
 
         /// <summary>
         /// Get type based on its full name, as used in reflection.
