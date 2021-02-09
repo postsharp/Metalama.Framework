@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl
 
             var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics.GetValue() ).Concat( addedAdviceDiagnostics.GetValue() ).ToImmutableList();
             var newTransformations = this.Transformations.Concat( addedAdviceTransformations.GetValue() ).ToImmutableList();
-            var newCompilation = new ModifiedCompilationModel( this.Compilation, addedAdviceTransformations.Where( x => x is IntroducedElement ) );
+            var newCompilation = new ModifiedCompilationModel( this.Compilation, addedAdviceTransformations );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
             return new ( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources, newTransformations );
