@@ -7,10 +7,6 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal interface IMemberInternal :  IMember
-    {
-        
-    }
     internal sealed class Property : CodeElement, IProperty
     {
         private readonly IPropertySymbol _symbol;

@@ -18,12 +18,35 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public SourceCompilationModel Compilation { get; }
 
+        public override MethodKind MethodKind => this._symbol.MethodKind switch
+        {
+            RoslynMethodKind.Ordinary => MethodKind.Default,
+            RoslynMethodKind.Constructor => MethodKind.Constructor,
+            RoslynMethodKind.StaticConstructor => MethodKind.StaticConstructor,
+            RoslynMethodKind.Destructor => MethodKind.Finalizer,
+            RoslynMethodKind.PropertyGet => MethodKind.PropertyGet,
+            RoslynMethodKind.PropertySet => MethodKind.PropertySet,
+            RoslynMethodKind.EventAdd => MethodKind.EventAdd,
+            RoslynMethodKind.EventRemove => MethodKind.EventRemove,
+            RoslynMethodKind.EventRaise => MethodKind.EventRaise,
+            RoslynMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
+            RoslynMethodKind.Conversion => MethodKind.ConversionOperator,
+            RoslynMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+            RoslynMethodKind.LocalFunction => MethodKind.LocalFunction,
+            RoslynMethodKind.AnonymousFunction or
+            RoslynMethodKind.BuiltinOperator or
+            RoslynMethodKind.DelegateInvoke or
+            RoslynMethodKind.ReducedExtension or
+            RoslynMethodKind.DeclareMethod or
+            RoslynMethodKind.FunctionPointerSignature => throw new NotSupportedException(),
+            _ => throw new InvalidOperationException()
+        };
+
         public SourceMethod( IMethodSymbol symbol, SourceCompilationModel compilation )
         {
             this._symbol = symbol;
             this.Compilation = compilation;
         }
-        
     }
     
     internal class Method : CodeElement, IMethod, IMemberInternal
@@ -56,29 +79,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IImmutableList<IGenericParameter> GenericParameters =>
             this._symbol.TypeParameters.Select( tp => this.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
 
-        MethodKind IMethod.MethodKind => this._symbol.MethodKind switch
-        {
-            RoslynMethodKind.Ordinary => MethodKind.Default,
-            RoslynMethodKind.Constructor => MethodKind.Constructor,
-            RoslynMethodKind.StaticConstructor => MethodKind.StaticConstructor,
-            RoslynMethodKind.Destructor => MethodKind.Finalizer,
-            RoslynMethodKind.PropertyGet => MethodKind.PropertyGet,
-            RoslynMethodKind.PropertySet => MethodKind.PropertySet,
-            RoslynMethodKind.EventAdd => MethodKind.EventAdd,
-            RoslynMethodKind.EventRemove => MethodKind.EventRemove,
-            RoslynMethodKind.EventRaise => MethodKind.EventRaise,
-            RoslynMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-            RoslynMethodKind.Conversion => MethodKind.ConversionOperator,
-            RoslynMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
-            RoslynMethodKind.LocalFunction => MethodKind.LocalFunction,
-            RoslynMethodKind.AnonymousFunction or
-            RoslynMethodKind.BuiltinOperator or
-            RoslynMethodKind.DelegateInvoke or
-            RoslynMethodKind.ReducedExtension or
-            RoslynMethodKind.DeclareMethod or
-            RoslynMethodKind.FunctionPointerSignature => throw new NotSupportedException(),
-            _ => throw new InvalidOperationException()
-        };
+        public abstract MethodKind MethodKind { get; }
 
         public string Name => this._symbol.Name;
 

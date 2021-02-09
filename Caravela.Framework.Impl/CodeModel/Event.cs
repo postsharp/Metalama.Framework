@@ -1,52 +1,30 @@
-﻿using System.Linq;
-using Caravela.Framework.Code;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis;
+﻿using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : IMemberInternal, IEvent
+
+    internal abstract class Event : Member, IEvent
     {
-        private readonly IEventSymbol _symbol;
+        INamedType IEvent.EventType => this.EventType;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public abstract NamedType EventType { get; }
 
-        private readonly NamedType _containingElement;
+        IMethod IEvent.Adder => this.Adder;
 
-        public override CodeElement? ContainingElement => this._containingElement;
+        public abstract Method Adder { get; }
 
-        internal override SourceCompilationModel Compilation => this._containingElement.Compilation;
+        IMethod IEvent.Remover => this.Remover;
 
-        public Event( IEventSymbol symbol, NamedType containingElement )
-        {
-            this._symbol = symbol;
-            this._containingElement = containingElement;
-        }
+        public abstract Method Remover { get; }
 
-        [Memo]
-        public INamedType EventType => this.SymbolMap.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
+        IMethod? IEvent.Raiser => this.Raiser;
 
-        [Memo]
-        public IMethod Adder => this.SymbolMap.GetMethod( this._symbol.AddMethod! );
-
-        [Memo]
-        public IMethod Remover => this.SymbolMap.GetMethod( this._symbol.RemoveMethod! );
-
-        // TODO: pseudo-accessor
-        [Memo]
-        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.RaiseMethod );
-
-        public string Name => this._symbol.Name;
-
-        public bool IsStatic => this._symbol.IsStatic;
-
-        public bool IsVirtual => this._symbol.IsVirtual;
-
-        public INamedType DeclaringType => this._containingElement;
-
-        [Memo]
-        public override IImmutableList Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public abstract Method? Raiser{ get; }
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
+
+        public Event( NamedType containingElement ) : base( containingElement )
+        {
+        }
     }
 }

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
 {
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parameters passed to the <see cref="Constructor"/>.
         /// </summary>
-        IImmutableList<object?> ConstructorArguments { get; }
+        IReadOnlyList<object?> ConstructorArguments { get; }
 
         /// <summary>
         /// Gets the named arguments (either fields or properties) of the attribute.

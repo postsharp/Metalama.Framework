@@ -22,12 +22,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IType GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this._compilation ) );
 
-        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new NamedType( (INamedTypeSymbol) ts, this._compilation ) );
+        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new SourceNamedType( (INamedTypeSymbol) ts, this._compilation ) );
 
         internal GenericParameter GetGenericParameter( ITypeParameterSymbol typeSymbol ) =>
             (GenericParameter) this._typeCache.GetOrAdd( typeSymbol, ts => new GenericParameter( (ITypeParameterSymbol) ts, this._compilation ) );
 
-        internal Method GetMethod( IMethodSymbol methodSymbol ) => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this._compilation ) );
+        internal Method GetMethod( IMethodSymbol methodSymbol ) => this._methodCache.GetOrAdd( methodSymbol, ms => new SourceMethod( ms, this._compilation ) );
 
         internal CodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
             symbol switch
