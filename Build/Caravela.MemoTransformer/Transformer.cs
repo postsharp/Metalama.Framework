@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Compiler;
@@ -10,36 +10,43 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Caravela.MemoTransformer
 {
     [Transformer]
-    class Transformer : ISourceTransformer
+    internal class Transformer : ISourceTransformer
     {
-        public Compilation Execute(TransformerContext context)
+        public Compilation Execute( TransformerContext context )
         {
             var rewriter = new Rewriter();
             var compilation = context.Compilation;
-            foreach (var tree in compilation.SyntaxTrees)
+            foreach ( var tree in compilation.SyntaxTrees )
             {
-                compilation = compilation.ReplaceSyntaxTree(tree, tree.WithRootAndOptions(rewriter.Visit(tree.GetRoot()), tree.Options));
+                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
             }
+
             return compilation;
         }
 
-        class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : CSharpSyntaxRewriter
         {
-            List<FieldDeclarationSyntax> fieldsToAdd;
+            private List<FieldDeclarationSyntax>? _fieldsToAdd;
 
-            public override SyntaxNode VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+            public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                if (!node.AttributeLists.SelectMany(al => al.Attributes)
-                    .Any(a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute"))
+                if ( !node.AttributeLists.SelectMany( al => al.Attributes )
+                    .Any( a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute" ) )
+                {
                     return node;
+                }
 
-                if (node.ExpressionBody == null)
-                    throw new NotSupportedException("Only expression-bodied properties are supported.");
+                if ( node.ExpressionBody == null )
+                {
+                    throw new NotSupportedException( "Only expression-bodied properties are supported." );
+                }
 
-                if (node.Modifiers.Any(SyntaxKind.StaticKeyword))
-                    throw new NotSupportedException("Static properties are not supported.");
+                if ( node.Modifiers.Any( SyntaxKind.StaticKeyword ) )
+                {
+                    throw new NotSupportedException( "Static properties are not supported." );
+                }
 
-                string fieldName = "@" + char.ToLowerInvariant(node.Identifier.ValueText[0]) + node.Identifier.ValueText.Substring(1);
+                var fieldName = "@" + char.ToLowerInvariant( node.Identifier.ValueText[0] ) + node.Identifier.ValueText.Substring( 1 );
 
                 var expression = node.ExpressionBody.Expression;
 
@@ -51,44 +58,46 @@ namespace Caravela.MemoTransformer
 
                 var block = Block(
                     IfStatement(
-                        BinaryExpression(SyntaxKind.EqualsExpression, IdentifierName(fieldName), LiteralExpression(SyntaxKind.NullLiteralExpression)),
-                        ExpressionStatement(InvocationExpression(ParseExpression("Interlocked.CompareExchange")).AddArgumentListArguments(
-                            Argument(IdentifierName(fieldName)).WithRefKindKeyword(Token(SyntaxKind.RefKeyword)),
-                            Argument(expression),
-                            Argument(LiteralExpression(SyntaxKind.NullLiteralExpression))))),
-                    ReturnStatement(IdentifierName(fieldName)));
+                        BinaryExpression( SyntaxKind.EqualsExpression, IdentifierName( fieldName ), LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                        ExpressionStatement( InvocationExpression( ParseExpression( "Interlocked.CompareExchange" ) ).AddArgumentListArguments(
+                            Argument( IdentifierName( fieldName ) ).WithRefKindKeyword( Token( SyntaxKind.RefKeyword ) ),
+                            Argument( expression ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
+                    ReturnStatement( IdentifierName( fieldName ) ) );
 
-
-                var newNode = node.WithExpressionBody(null).WithSemicolonToken(default)
-                    .AddAccessorListAccessors(AccessorDeclaration(SyntaxKind.GetAccessorDeclaration, block));
+                var newNode = node.WithExpressionBody( null ).WithSemicolonToken( default )
+                    .AddAccessorListAccessors( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, block ) );
 
                 // PropertyType? field;
-                this.fieldsToAdd.Add(FieldDeclaration(VariableDeclaration(NullableType(node.Type)).AddVariables(VariableDeclarator(fieldName))));
+                this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );
 
                 return newNode;
             }
 
-            public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
+            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                var parentFieldsToAdd = this.fieldsToAdd;
-                this.fieldsToAdd = new();
+                var parentFieldsToAdd = this._fieldsToAdd;
+                this._fieldsToAdd = new ();
 
-                var result = (ClassDeclarationSyntax)base.VisitClassDeclaration(node);
+                var result = (ClassDeclarationSyntax) base.VisitClassDeclaration( node )!;
 
-                result = result.AddMembers( this.fieldsToAdd.ToArray());
-                this.fieldsToAdd = parentFieldsToAdd;
+                result = result.AddMembers( this._fieldsToAdd.ToArray<MemberDeclarationSyntax>() );
+
+                this._fieldsToAdd = parentFieldsToAdd;
 
                 return result;
             }
 
-            public override SyntaxNode VisitCompilationUnit(CompilationUnitSyntax node)
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
-                string usingSystemThreading = "using System.Threading;";
+                const string usingSystemThreading = "using System.Threading;";
 
-                if (!node.Usings.Any(u => u.ToString() == usingSystemThreading))
-                    node = node.AddUsings(ParseCompilationUnit(usingSystemThreading).Usings.Single());
+                if ( node.Usings.All( u => u.ToString() != usingSystemThreading ) )
+                {
+                    node = node.AddUsings( ParseCompilationUnit( usingSystemThreading ).Usings.Single() );
+                }
 
-                return base.VisitCompilationUnit(node);
+                return base.VisitCompilationUnit( node );
             }
         }
     }

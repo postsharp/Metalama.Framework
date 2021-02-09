@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -10,11 +11,10 @@ using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.IO;
 
 namespace Caravela.Framework.Impl
 {
-    sealed class AspectPipeline
+    internal sealed class AspectPipeline
     {
         public Compilation Execute( IAspectPipelineContext context )
         {
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
+                var debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl
                         ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
                     .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
                     .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
-                    .GetValue( default );
+                    .GetValue();
 
                 foreach ( var stage in stages )
                 {
@@ -97,15 +97,15 @@ namespace Caravela.Framework.Impl
             }
             catch ( Exception exception )
             {
-                Guid guid = Guid.NewGuid();
-                string path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                var guid = Guid.NewGuid();
+                var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
                 try
                 {
                     File.WriteAllText( path, exception.ToString() );
                 }
                 catch
                 {
-
+                    // ignored
                 }
 
                 Console.WriteLine( exception.ToString() );
@@ -135,9 +135,6 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-
-        record AspectPartData( AspectType AspectType, AspectPart AspectPart );
-
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
         {
             switch ( groupKey )
@@ -155,16 +152,21 @@ namespace Caravela.Framework.Impl
                 default:
 
                     throw new NotSupportedException();
-            };
+            }
         }
 
-        class AspectPartDataComparer : IComparer<AspectPartData>
+        private class AspectPartDataComparer : IComparer<AspectPartData>
         {
             private readonly AspectPartComparer _partComparer;
 
-            public AspectPartDataComparer( AspectPartComparer partComparer ) => this._partComparer = partComparer;
+            public AspectPartDataComparer( AspectPartComparer partComparer )
+            {
+                this._partComparer = partComparer;
+            }
 
             public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
         }
+
+        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
     }
 }

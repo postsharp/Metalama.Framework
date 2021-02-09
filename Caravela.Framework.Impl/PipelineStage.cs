@@ -1,7 +1,7 @@
 ﻿namespace Caravela.Framework.Impl
 {
-    abstract class PipelineStage
+    internal abstract class PipelineStage
     {
-        public abstract AspectCompilation Transform(AspectCompilation input);
+        public abstract AspectCompilation Transform( AspectCompilation input );
     }
 }

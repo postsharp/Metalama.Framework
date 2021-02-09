@@ -1,16 +1,16 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System.Reflection;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    class TemplateDriver
+    internal class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
@@ -20,9 +20,8 @@ namespace Caravela.Framework.Impl.Templating
         {
             return this.ExpandDeclaration(
                 templateInstance,
-                new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode() ),
-                new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation )
-                );
+                new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode()! ),
+                new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation ) );
         }
 
         internal BlockSyntax ExpandDeclaration( object templateInstance, IProceedImpl proceedImpl, ITemplateContext templateContext )
@@ -42,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         // TODO temporary implementation of ITemplateExpansionContext before we support template nesting.
-        class TemplateDriverExpansionContext : ITemplateExpansionContext
+        private class TemplateDriverExpansionContext : ITemplateExpansionContext
         {
             private readonly TemplateDriver _templateDriver;
             private readonly ITemplateContext _templateContext;
@@ -61,14 +60,14 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 var returnExpressionKind = returnExpression.Kind();
-                if (returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression)
+                if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
                 {
                     return ReturnStatement( returnExpression );
                 }
 
                 // TODO: validate the returnExpression according to the method's return type.
                 // TODO: how to report diagnostics from the template invocation?
-                //throw new CaravelaException(
+                // throw new CaravelaException(
                 //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
                 //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
                 return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );

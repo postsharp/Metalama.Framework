@@ -7,92 +7,89 @@ using System.Xml;
 
 namespace Caravela.Obfuscator
 {
-    public class ObfuscationTable
+    internal class ObfuscationTable
     {
-        private readonly SHA1 sha1 = SHA1.Create();
-        private readonly Dictionary<string,string> hashToName = new Dictionary<string, string>(32*1024);
-        private readonly Dictionary<string, string> nameToHash = new Dictionary<string, string>(32 * 1024);
-        
-        public ObfuscationTable()
-        {
-            
-        }
+        private readonly SHA256 _sha1 = SHA256.Create();
+        private readonly Dictionary<string, string> _hashToName = new Dictionary<string, string>( 32 * 1024 );
+        private readonly Dictionary<string, string> _nameToHash = new Dictionary<string, string>( 32 * 1024 );
 
-        public int Count { get { return this.nameToHash.Count; } }
+        public int Count => this._nameToHash.Count;
+
         public int ConflictCount { get; private set; }
 
-        public string GetHash(string input)
+        public string GetHash( string input )
         {
-            string hashString;
             input = input.Normalize();
-            if (!this.nameToHash.TryGetValue(input, out hashString))
+            if ( !this._nameToHash.TryGetValue( input, out var hashString ) )
             {
-                throw new ArgumentException("No hash available for this value.");
+                throw new ArgumentException( "No hash available for this value." );
             }
 
             return hashString;
         }
 
-        public string CreateHash(string input)
+        public string CreateHash( string input )
         {
             input = input.Normalize();
 
             int hashLen;
-            if (input.Length < 8)
+            if ( input.Length < 8 )
+            {
                 hashLen = 3;
-            else if (input.Length < 32)
+            }
+            else if ( input.Length < 32 )
+            {
                 hashLen = 6;
+            }
             else
+            {
                 hashLen = 9;
-              
+            }
+
             // Check if we already hash this string so we always return the same hash for the same string.
-            string hashString;
-            if ( this.nameToHash.TryGetValue( input, out hashString ))
+            if ( this._nameToHash.TryGetValue( input, out var hashString ) )
             {
                 return hashString;
             }
-            
-            byte[] inputBytes = Encoding.UTF8.GetBytes( input );
-            bool hasConflict = false;
+
+            var inputBytes = Encoding.UTF8.GetBytes( input );
+            var hasConflict = false;
             do
             {
-                byte[] hash = sha1.ComputeHash(inputBytes);
-                hashString = "^" + Convert.ToBase64String(hash, 0, hashLen);
+                var hash = this._sha1.ComputeHash( inputBytes );
+                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen );
 
-                string existingName;
-                if ( this.hashToName.TryGetValue( hashString, out existingName ) && existingName != input)
+                if ( this._hashToName.TryGetValue( hashString, out var existingName ) && existingName != input )
                 {
                     // We have a hash conflict. There is no good way to solve it, so we simply add some
                     // random.
-                    
-                    byte[] randomBytes = new byte[1];
+
+                    var randomBytes = new byte[1];
                     RandomNumberGenerator.Create().GetBytes( randomBytes );
                     inputBytes[0] = randomBytes[0];
                     hasConflict = true;
                 }
                 else
                 {
-                    this.hashToName.Add( hashString, input );
-                    this.nameToHash.Add( input, hashString );
-                    if (hasConflict)
+                    this._hashToName.Add( hashString, input );
+                    this._nameToHash.Add( input, hashString );
+                    if ( hasConflict )
                     {
                         this.ConflictCount++;
                     }
+
                     return hashString;
                 }
-                
-            } while ( true );
-            
+            }
+            while ( true );
         }
 
-    
-        public void Write(TextWriter writer)
+        public void Write( TextWriter writer )
         {
-            foreach ( KeyValuePair<string, string> pair in this.nameToHash )
+            foreach ( var pair in this._nameToHash )
             {
-                writer.WriteLine("{0}: {1}", XmlConvert.EncodeName( pair.Key ), pair.Value);
+                writer.WriteLine( "{0}: {1}", XmlConvert.EncodeName( pair.Key ), pair.Value );
             }
         }
-
     }
 }

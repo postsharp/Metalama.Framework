@@ -1,10 +1,6 @@
-#region
-
 using System;
 using System.Collections.Generic;
 using Caravela.Reactive.Implementation;
-
-#endregion
 
 namespace Caravela.Reactive.Operators
 {
@@ -14,21 +10,22 @@ namespace Caravela.Reactive.Operators
         private readonly IReactiveSubscription? _subscription;
         private DependencyList _dependencies;
 
-        public WriteLineOperator(IReactiveCollection<T> source, string? name)
+        public WriteLineOperator( IReactiveCollection<T> source, string? name )
         {
             this._source = source;
-            this.Name = name ?? typeof(T).Name;
-            this._subscription = this._source.Observable.AddObserver(this);
-            this._dependencies = new DependencyList(this);
+            this.Name = name ?? typeof( T ).Name;
+            this._subscription = this._source.Observable.AddObserver( this );
+            this._dependencies = new DependencyList( this );
 
-            foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+            foreach ( var item in this._source.GetValue( new ReactiveCollectorToken( this ) ) )
             {
-                this.Add(item);
+                this.Add( item );
             }
         }
 
-        private void Add(T item) => Console.WriteLine($"{this.Name}: Added {item}");
-        private void Remove(T item) => Console.WriteLine($"{this.Name}: Removed {item}");
+        private void Add( T item ) => Console.WriteLine( $"{this.Name}: Added {item}" );
+
+        private void Remove( T item ) => Console.WriteLine( $"{this.Name}: Removed {item}" );
 
         public string Name { get; }
 
@@ -38,58 +35,58 @@ namespace Caravela.Reactive.Operators
             this._subscription?.Dispose();
         }
 
-
-        void IReactiveCollectionObserver<T>.OnItemAdded(IReactiveSubscription subscription, T item, int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemAdded( IReactiveSubscription subscription, T item, int newVersion )
         {
-            this.Add(item);
+            this.Add( item );
         }
 
-        void IReactiveCollectionObserver<T>.OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemRemoved( IReactiveSubscription subscription, T item, int newVersion )
         {
-            this.Remove(item);
+            this.Remove( item );
         }
 
-        void IReactiveCollectionObserver<T>.OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem,
-            int newVersion)
+        void IReactiveCollectionObserver<T>.OnItemReplaced( IReactiveSubscription subscription, T oldItem, T newItem, int newVersion )
         {
-            Console.WriteLine($"{this.Name}: Replaced {oldItem}  ->  {newItem}.");
+            Console.WriteLine( $"{this.Name}: Replaced {oldItem}  ->  {newItem}." );
         }
 
-        void IReactiveObserver.OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange)
+        void IReactiveObserver.OnValueInvalidated( IReactiveSubscription subscription, bool isBreakingChange )
         {
-            if (isBreakingChange)
+            if ( isBreakingChange )
             {
-                foreach (var item in this._source.GetValue(new ReactiveCollectorToken(this)))
+                foreach ( var item in this._source.GetValue( new ReactiveCollectorToken( this ) ) )
                 {
-                    this.Add(item);
+                    this.Add( item );
                 }
             }
         }
 
-
-        void IReactiveObserver<IEnumerable<T>>.OnValueChanged(IReactiveSubscription subscription,
-            IEnumerable<T> oldValue, IEnumerable<T> newValue, int newVersion,
-            bool isBreakingChange)
+        void IReactiveObserver<IEnumerable<T>>.OnValueChanged(
+            IReactiveSubscription subscription,
+            IEnumerable<T> oldValue,
+            IEnumerable<T> newValue,
+            int newVersion,
+            bool isBreakingChange )
         {
-            if (isBreakingChange)
+            if ( isBreakingChange )
             {
-                foreach (var item in oldValue)
+                foreach ( var item in oldValue )
                 {
-                    this.Remove(item);
+                    this.Remove( item );
                 }
 
-                foreach (var item in newValue)
+                foreach ( var item in newValue )
                 {
-                    this.Add(item);
+                    this.Add( item );
                 }
             }
         }
 
-        void IReactiveCollector.AddDependency(IReactiveObservable<IReactiveObserver> source, int version)
+        void IReactiveCollector.AddDependency( IReactiveObservable<IReactiveObserver> source, int version )
         {
-            if (source.Source != this._source )
+            if ( source.Source != this._source )
             {
-                this._dependencies.Add(source, version);
+                this._dependencies.Add( source, version );
             }
         }
 

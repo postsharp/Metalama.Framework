@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Caravela.Framework.Impl.Templating.Serialization;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
@@ -15,19 +15,21 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             this.AssertSerialization( "5F", (float?) 5F );
             this.AssertSerialization( "null", (float?) null );
         }
-        
+
         [Fact]
-        public void TestListOfNullables() 
+        public void TestListOfNullables()
         {
-            List<float?> list = new List<float?>();
-            list.Add( 5 );
-            list.Add( null );
+            var list = new List<float?>
+            {
+                5,
+                null
+            };
             this.AssertSerialization( "new System.Collections.Generic.List<System.Nullable<System.Single>>{5F, null}", list );
         }
-        
-        private void AssertSerialization( string expected, object o )
+
+        private void AssertSerialization<T>( string expected, T? o )
         {
-            string creationExpression = this._serializers.SerializeToRoslynCreationExpression(o).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

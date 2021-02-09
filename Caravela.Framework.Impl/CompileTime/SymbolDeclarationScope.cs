@@ -1,6 +1,6 @@
 namespace Caravela.Framework.Impl.CompileTime
 {
-    enum SymbolDeclarationScope
+    internal enum SymbolDeclarationScope
     {
         /// <summary>
         /// The symbol can be used both at compile time or at run time.

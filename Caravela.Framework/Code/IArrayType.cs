@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
         /// Gets the element type, e.g. the <c>T</c> in <c>T[]</c>.
         /// </summary>
         IType ElementType { get; }
-        
+
         /// <summary>
         /// Gets the array rank (1 for <c>T[]</c>, 2 for <c>T[,]</c>, ...).
         /// </summary>

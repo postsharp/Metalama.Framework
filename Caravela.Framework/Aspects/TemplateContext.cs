@@ -1,6 +1,8 @@
-﻿using Caravela.Framework.Project;
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Caravela.Framework.Project;
+
+#pragma warning disable SA1300 // Element should begin with upper-case letter
 
 namespace Caravela.Framework.Aspects
 {
@@ -24,7 +26,8 @@ namespace Caravela.Framework.Aspects
         /// Gets information about the element of code to which the template has been applied.
         /// </summary>
 #pragma warning disable IDE1006 // Naming Styles
-        [field: ThreadStatic] [AllowNull]
+        [field: ThreadStatic]
+        [AllowNull]
         [TemplateKeyword]
         public static ITemplateContext target { get; internal set; }
 
@@ -37,11 +40,10 @@ namespace Caravela.Framework.Aspects
         [Proceed]
         public static dynamic proceed() => ProceedImpl ?? throw NewInvalidOperationException();
 
-        
         /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted at compile time. This is typically used
         /// to coerce expressions that can be either run-time or compile-time. Since ambiguous expressions are
-        /// interpreted as run-time by default, this method allows to change that behavior. 
+        /// interpreted as run-time by default, this method allows to change that behavior.
         /// </summary>
         /// <param name="expression">An expression.</param>
         /// <typeparam name="T"></typeparam>

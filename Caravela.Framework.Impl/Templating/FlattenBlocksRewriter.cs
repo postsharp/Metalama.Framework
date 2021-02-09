@@ -57,7 +57,6 @@ namespace Caravela.Framework.Impl.Templating
 
             Flatten( node );
 
-
             return node.CopyAnnotationsTo( Block( statements.ToArray() ) );
         }
     }

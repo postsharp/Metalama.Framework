@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
@@ -22,13 +19,13 @@ namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
             catch ( Exception e )
             {
                 Console.WriteLine( target.Method.ToDisplayString() + " failed: " + e.Message );
-
                 throw;
             }
         }
     }
 
-    class TargetClass
+    #region Target
+    internal class TargetClass
     {
         [Log]
         public static int Add( int a, int b )
@@ -37,4 +34,5 @@ namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
             return a + b;
         }
     }
+    #endregion
 }

@@ -1,9 +1,9 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
@@ -24,9 +24,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         public override bool IsDefined( Type attributeType, bool inherit ) => throw new NotImplementedException();
 
-        public override Module Module  => throw new NotImplementedException();
-        public override string Namespace  => throw new NotImplementedException();
-        public override string Name  => throw new NotImplementedException();
+        public override Module Module => throw new NotImplementedException();
+
+        public override string Namespace => throw new NotImplementedException();
+
+        public override string Name => throw new NotImplementedException();
+
         protected override TypeAttributes GetAttributeFlagsImpl() => throw new NotImplementedException();
 
         protected override ConstructorInfo GetConstructorImpl( BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers ) => throw new NotImplementedException();
@@ -65,11 +68,15 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 
         protected override bool IsPrimitiveImpl() => throw new NotImplementedException();
 
-        public override Assembly Assembly  => throw new NotImplementedException();
-        public override string AssemblyQualifiedName  => throw new NotImplementedException();
-        public override Type BaseType  => throw new NotImplementedException();
-        public override string FullName  => throw new NotImplementedException();
-        public override Guid GUID  => throw new NotImplementedException();
+        public override Assembly Assembly => throw new NotImplementedException();
+
+        public override string AssemblyQualifiedName => throw new NotImplementedException();
+
+        public override Type BaseType => throw new NotImplementedException();
+
+        public override string FullName => throw new NotImplementedException();
+
+        public override Guid GUID => throw new NotImplementedException();
 
         protected override PropertyInfo GetPropertyImpl( string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers ) => throw new NotImplementedException();
 

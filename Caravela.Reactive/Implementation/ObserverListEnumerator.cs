@@ -9,29 +9,27 @@ namespace Caravela.Reactive.Implementation
     /// </summary>
     /// <typeparam name="TIn">Type of observers stored in the <see cref="ObserverList{T}"/>.</typeparam>
     /// <typeparam name="TOut">Type of observers requested by the consumer.</typeparam>
-    public struct ObserverListEnumerator<TIn, TOut> : 
+    public struct ObserverListEnumerator<TIn, TOut> :
         IEnumerable<ObserverListEnumeratedItem<TOut>>,
         IEnumerator<ObserverListEnumeratedItem<TOut>>
         where TOut : class, IReactiveObserver
         where TIn : class, IReactiveObserver
     {
-        private ObserverListItem<TIn>? _node;
         private readonly ObserverListItem<TIn>? _first;
+        private ObserverListItem<TIn>? _node;
 
-        internal ObserverListEnumerator(ObserverListItem<TIn>? first)
+        internal ObserverListEnumerator( ObserverListItem<TIn>? first )
         {
             this._first = first;
             this._node = null;
-            
         }
 
         public ObserverListEnumerator<TIn, T> OfType<T>()
             where T : class, IReactiveObserver
-            => new ObserverListEnumerator<TIn, T>(this._first);
+            => new ObserverListEnumerator<TIn, T>( this._first );
 
         public ObserverListEnumerator<TIn, IReactiveObserver<IEnumerable<T>>> OfEnumerableType<T>()
-            => new ObserverListEnumerator<TIn, IReactiveObserver<IEnumerable<T>>>(this._first);
-
+            => new ObserverListEnumerator<TIn, IReactiveObserver<IEnumerable<T>>>( this._first );
 
         public void Dispose()
         {
@@ -39,17 +37,17 @@ namespace Caravela.Reactive.Implementation
 
         public bool MoveNext()
         {
-         
-            while (true)
+
+            while ( true )
             {
                 this._node = this._node == null ? this._first : this._node.Next;
 
-                if (this._node == null)
+                if ( this._node == null )
                 {
                     return false;
                 }
 
-                if (this._node.WeaklyTypedObserver is TOut)
+                if ( this._node.WeaklyTypedObserver is TOut )
                 {
                     return true;
                 }
@@ -62,7 +60,7 @@ namespace Caravela.Reactive.Implementation
         }
 
         public ObserverListEnumeratedItem<TOut> Current =>
-            new ObserverListEnumeratedItem<TOut>((TOut) this._node!.WeaklyTypedObserver, (IReactiveSubscription<TOut>) (object) this._node);
+            new ObserverListEnumeratedItem<TOut>( (TOut) this._node!.WeaklyTypedObserver, (IReactiveSubscription<TOut>) (object) this._node );
 
         object IEnumerator.Current => this.Current;
 
@@ -75,7 +73,6 @@ namespace Caravela.Reactive.Implementation
         {
             return this.GetEnumerator();
         }
-
 
         IEnumerator IEnumerable.GetEnumerator()
         {

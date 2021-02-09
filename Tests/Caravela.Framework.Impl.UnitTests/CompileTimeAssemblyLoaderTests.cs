@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.CodeModel;
+﻿using System.Linq;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Xunit;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.UnitTests
         [Fact]
         public void Attributes()
         {
-            string code = @"
+            var code = @"
 using System;
 using Caravela.Framework.Project;
 
