@@ -51,8 +51,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
-    <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"  Condition="'$(EnforceCodeStyleInBuild)'=='True'"/>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All"/>
+    <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"  Condition="'$(EnforceCodeStyleInBuild)'=='True'" Pack="false"/>
   </ItemGroup>
 
   <ItemGroup>
