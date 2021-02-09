@@ -16,3 +16,9 @@ dotnet_diagnostic.SA1649.severity = none
 
 # SA1124: Do not use regions
 dotnet_diagnostic.SA1124.severity = none
+
+# SA1503: Braces should not be omitted
+dotnet_diagnostic.SA1503.severity = none
+
+# IDE0011: Add braces to 'if' statement
+dotnet_diagnostic.IDE0011.severity = none

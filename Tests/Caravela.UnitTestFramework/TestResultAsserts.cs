@@ -33,8 +33,8 @@ namespace Caravela.UnitTestFramework
             testResult.AssertNoErrors();
 
             var regionText = textSpan != null
-                ? testResult.TransformedTargetSource?.GetSubText( textSpan.Value ).ToString()?.Trim()
-                : testResult.TransformedTargetSource?.ToString()?.Trim();
+                ? testResult.TransformedTargetSource?.GetSubText( textSpan.Value ).ToString()
+                : testResult.TransformedTargetSource?.ToString();
             AssertSourceEqual( expectedTransformedSource.Trim(), regionText, actualOutputPath );
         }
 
@@ -42,7 +42,7 @@ namespace Caravela.UnitTestFramework
         {
             try
             {
-                Assert.Equal( expected, actual );
+                Assert.Equal( expected.Trim(), actual?.Trim() );
             }
             catch ( EqualException )
             {

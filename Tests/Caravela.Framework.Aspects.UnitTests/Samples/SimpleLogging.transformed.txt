@@ -1,4 +1,5 @@
-class TargetClass
+
+    internal class TargetClass
     {
         [Log]
         public static int Add(int a, int b)
@@ -19,3 +20,4 @@ class TargetClass
             }
         }
     }
+    
