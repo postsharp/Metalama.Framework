@@ -33,8 +33,15 @@ namespace Caravela.Framework.Impl.Transformations
             this.TemplateMethod = templateMethod;
         }
 
+        private IList<MemberDeclarationSyntax>? _overrides;
+
         public override IList<MemberDeclarationSyntax> GetOverrides( ICompilation compilation )
         {
+            if (this._overrides != null)
+            {
+                return this._overrides;
+            }
+
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             var newMethodBody = new TemplateDriver( this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) ).ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, compilation );
@@ -42,13 +49,13 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: other method kinds (constructors).
             var originalSyntax = (MethodDeclarationSyntax) ((IToSyntax) this.OverridenDeclaration).GetSyntaxNode();
 
-            return new[] {
+            this._overrides = new[] {
                 MethodDeclaration(
                     originalSyntax.AttributeLists,
                     originalSyntax.Modifiers,
                     originalSyntax.ReturnType,
                     originalSyntax.ExplicitInterfaceSpecifier,
-                    Identifier(originalSyntax.Identifier.ValueText + "_Override_" + Guid.NewGuid().ToString()), // TODO: This should be deterministic.
+                    Identifier(originalSyntax.Identifier.ValueText + "_Override_" + Guid.NewGuid().ToString( "N" ) ), // TODO: The name is temporary.
                     originalSyntax.TypeParameterList,
                     originalSyntax.ParameterList,
                     originalSyntax.ConstraintClauses,
@@ -56,29 +63,8 @@ namespace Caravela.Framework.Impl.Transformations
                     null,
                     originalSyntax.SemicolonToken)
             };
-        }
 
-        private class LinkerProceed : IProceedImpl
-        {
-            public LinkerProceed()
-            {
-            }
-
-            public StatementSyntax CreateAssignStatement( string returnValueLocalName )
-            {
-                // Assign result
-                throw new NotImplementedException();
-            }
-
-            public StatementSyntax CreateReturnStatement()
-            {
-                throw new NotImplementedException();
-            }
-
-            public TypeSyntax CreateTypeSyntax()
-            {
-                throw new NotImplementedException();
-            }
+            return this._overrides;
         }
     }
 }

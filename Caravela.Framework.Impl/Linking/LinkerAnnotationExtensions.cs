@@ -14,7 +14,8 @@ namespace Caravela.Framework.Impl.Linking
             return annotationValue != null ? LinkerAnnotation.FromString( annotationValue ) : null;
         }
 
-        public static SyntaxNode AddCodeVersionAnnotation( this SyntaxNode node, LinkerAnnotation annotation )
+        public static T AddCodeVersionAnnotation<T>( this T node, LinkerAnnotation annotation )
+            where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( annotationKind, annotation.ToString() ) );
         }

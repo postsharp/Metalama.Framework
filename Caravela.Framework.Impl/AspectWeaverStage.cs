@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext(
-                this.aspectType, aspectInstances, input.Compilation.GetRoslynCompilation(), diagnosticSink, resources.Add );
+                this.aspectType, aspectInstances, input.Compilation, diagnosticSink, resources.Add );
 
             CSharpCompilation newCompilation;
             try
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl
 
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
-                new SourceCompilationModel( newCompilation ),
+                newCompilation,
                 input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectInstances );

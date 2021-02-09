@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -22,16 +23,15 @@ namespace Caravela.Framework.Impl
 
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectPartResult = new AspectPartResult( input.Compilation, this._assemblyLoader );
+            var aspectPartResult = new AspectPartResult( new SourceCompilationModel( input.Compilation ), this._assemblyLoader );
 
             foreach ( var aspectPart in this._aspectParts )
             {
                 aspectPartResult = aspectPart.ToResult( aspectPartResult );
             }
 
-            // TODO: Aspect Linker goes here.
             var linker = new AspectLinker();
-            var linkerContext = new AdviceLinkerContext( aspectPartResult.Compilation, aspectPartResult.Transformations.Where( x => x is OverriddenElement ).ToImmutableReactive() );
+            var linkerContext = new AdviceLinkerContext( aspectPartResult.Compilation, aspectPartResult.Transformations.ToImmutableReactive() );
             var linkerResult = linker.ToResult( linkerContext );
 
             return new PipelineStageResult(

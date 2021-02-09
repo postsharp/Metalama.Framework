@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>().ToImmutableReactive() );
+                var pipelineStageResult = new PipelineStageResult( roslynCompilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>().ToImmutableReactive() );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl
                     }
                 }
 
-                var resultCompilation = pipelineStageResult.Compilation.GetRoslynCompilation();
+                var resultCompilation = pipelineStageResult.Compilation;
 
                 resultCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( resultCompilation );
 
