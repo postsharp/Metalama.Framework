@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
     internal static class SourceCodeElementExtensions
     {
-        public static IEnumerable<CSharpSyntaxNode> ToSyntaxNodes(this ISourceCodeElement element) 
+        public static IEnumerable<CSharpSyntaxNode> ToSyntaxNodes(this ISourceCodeElement element)
             => element.Symbol.DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() );
         
         // TODO: special case partial methods?
@@ -27,15 +27,20 @@ namespace Caravela.Framework.Impl.CodeModel
     
     internal abstract class CodeElement : ICodeElement
     {
-
-        internal SymbolMap SymbolMap => this.Compilation.SymbolMap;
+        ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
         public abstract CodeElement? ContainingElement { get; }
 
-        public abstract IImmutableList<Attribute> Attributes { get; }
+        IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
+
+        public abstract IReadOnlyList<Attribute> Attributes { get; }
+
+        CodeElementKind ICodeElement.ElementKind => this.ElementKind;
 
         public abstract CodeElementKind ElementKind { get; }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+
+        public abstract bool Equals( ICodeElement other );
     }
 }

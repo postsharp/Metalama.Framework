@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IImmutableList<IAttribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                .Select( a => new Attribute( a, this.SymbolMap ) )
+                .Select( a => new SourceAttribute( a, this.SymbolMap ) )
                 .ToImmutableReactive();
 
         public override INamedType? GetTypeByReflectionName( string reflectionName )
