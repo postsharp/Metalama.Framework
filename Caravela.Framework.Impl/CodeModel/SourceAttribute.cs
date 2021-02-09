@@ -9,19 +9,20 @@ namespace Caravela.Framework.Impl.CodeModel
     internal sealed class SourceAttribute : Attribute
     {
         private readonly AttributeData _data;
-        private readonly SymbolMap _symbolMap;
 
-        public SourceAttribute( AttributeData data, SymbolMap symbolMap )
+        private SourceCompilationModel Compilation { get; }
+
+        public SourceAttribute( SourceCompilationModel compilation, AttributeData data )
         {
             this._data = data;
-            this._symbolMap = symbolMap;
+            this.Compilation = compilation;
         }
 
         [Memo]
-        public override NamedType Type => this._symbolMap.GetNamedType( this._data.AttributeClass! );
+        public override NamedType Type => this.Compilation.SymbolMap.GetNamedType( this._data.AttributeClass! );
 
         [Memo]
-        public override Method Constructor => this._symbolMap.GetMethod( this._data.AttributeConstructor! );
+        public override Method Constructor => this.Compilation.SymbolMap.GetMethod( this._data.AttributeConstructor! );
 
         [Memo]
         public override IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableList();
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
             constant.Kind switch
             {
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
-                TypedConstantKind.Type => constant.Value == null ? null : this._symbolMap.GetIType( (ITypeSymbol) constant.Value ),
+                TypedConstantKind.Type => constant.Value == null ? null : this.Compilation.SymbolMap.GetIType( (ITypeSymbol) constant.Value ),
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
                 _ => throw new ArgumentException( nameof( constant ) )
             };

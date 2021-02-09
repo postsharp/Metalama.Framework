@@ -9,8 +9,9 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class SourceEvent : Event, ISourceCodeElement
     {
-        private readonly SourceCompilationModel _compilation;
         private readonly IEventSymbol _symbol;
+
+        private SourceCompilationModel Compilation { get; }
 
         public ISymbol Symbol => this._symbol;
 
@@ -21,25 +22,25 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsVirtual => this._symbol.IsVirtual;
 
         [Memo]
-        public override ITypeInternal EventType => this._compilation.SymbolMap.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
+        public override NamedType EventType => this.Compilation.SymbolMap.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
 
         [Memo]
-        public override Method Adder => this._compilation.SymbolMap.GetMethod( this._symbol.AddMethod! );
+        public override Method Adder => this.Compilation.SymbolMap.GetMethod( this._symbol.AddMethod! );
 
         [Memo]
-        public override Method Remover => this._compilation.SymbolMap.GetMethod( this._symbol.RemoveMethod! );
+        public override Method Remover => this.Compilation.SymbolMap.GetMethod( this._symbol.RemoveMethod! );
 
         // TODO: pseudo-accessor
         [Memo]
-        public override Method? Raiser => this._symbol.RaiseMethod == null ? null : this._compilation.SymbolMap.GetMethod( this._symbol.RaiseMethod );
+        public override Method? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.SymbolMap.GetMethod( this._symbol.RaiseMethod );
 
         [Memo]
-        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this._compilation.SymbolMap ) ).ToImmutableList();
+        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableList();
 
-        public SourceEvent( IEventSymbol symbol, SourceNamedType containingElement ) : base(containingElement)
+        public SourceEvent( IEventSymbol symbol, SourceNamedType declaringType ) : base(containingElement)
         {
             this._symbol = symbol;
-            this._compilation = containingElement.Compilation;
+            this.Compilation = containingElement.Compilation;
         }
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

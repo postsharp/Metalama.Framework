@@ -14,10 +14,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         INamedType? IMember.DeclaringType => this.DeclaringType;
 
-        public NamedType? DeclaringType => (NamedType?)this.ContainingElement;
+        public abstract NamedType? DeclaringType { get; };
 
-        public Member(NamedType declaringType) : base(declaringType)
-        {
-        }
+        public override CodeElement? ContainingElement => this.DeclaringType;
     }
 }

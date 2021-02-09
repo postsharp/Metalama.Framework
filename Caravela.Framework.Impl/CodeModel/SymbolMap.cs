@@ -20,14 +20,14 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
         private readonly ConcurrentDictionary<IMethodSymbol, Method> _methodCache = new ();
 
-        internal IType GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this._compilation ) );
+        internal ITypeInternal GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( this._compilation, ts ) );
 
-        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new SourceNamedType( (INamedTypeSymbol) ts, this._compilation ) );
+        internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new SourceNamedType( this._compilation, ( INamedTypeSymbol) ts ) );
 
         internal GenericParameter GetGenericParameter( ITypeParameterSymbol typeSymbol ) =>
-            (GenericParameter) this._typeCache.GetOrAdd( typeSymbol, ts => new GenericParameter( (ITypeParameterSymbol) ts, this._compilation ) );
+            (GenericParameter) this._typeCache.GetOrAdd( typeSymbol, ts => new SourceGenericParameter( this._compilation, ( ITypeParameterSymbol) ts ) );
 
-        internal Method GetMethod( IMethodSymbol methodSymbol ) => this._methodCache.GetOrAdd( methodSymbol, ms => new SourceMethod( ms, this._compilation ) );
+        internal Method GetMethod( IMethodSymbol methodSymbol ) => this._methodCache.GetOrAdd( methodSymbol, ms => new SourceMethod( this._compilation, ms ) );
 
         internal CodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
             symbol switch

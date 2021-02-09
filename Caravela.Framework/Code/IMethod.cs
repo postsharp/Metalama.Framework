@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
@@ -20,17 +20,17 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of local functions declared by the current method.
         /// </summary>
-        IImmutableList<IMethod> LocalFunctions { get; }
+        IReadOnlyList<IMethod> LocalFunctions { get; }
 
         /// <summary>
         /// Gets the list of parameters of the current method.
         /// </summary>
-        IImmutableList<IParameter> Parameters { get; }
+        IReadOnlyList<IParameter> Parameters { get; }
 
         /// <summary>
         /// Gets the generic parameters of the current method.
         /// </summary>
-        IImmutableList<IGenericParameter> GenericParameters { get; }
+        IReadOnlyList<IGenericParameter> GenericParameters { get; }
 
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.

@@ -13,12 +13,12 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract class CompilationModel : ICompilation
     {
-        public abstract IReadOnlyList<INamedType> DeclaredTypes { get; }
+        public abstract IReadOnlyList<NamedType> DeclaredTypes { get; }
 
-        public abstract IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
+        public abstract IReadOnlyList<NamedType> DeclaredAndReferencedTypes { get; }
 
         [Memo]
-        public IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace );
+        public IReadOnlyDictionary<string?, IReadOnlyList<NamedType>> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace ).ToDictionary( g => g.Key, g => (IReadOnlyList<NamedType>)g.ToImmutableList() );
 
         public abstract IReadOnlyList<Attribute> Attributes { get; }
 
@@ -34,9 +34,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract IReadOnlyList<Transformation> Transformations { get; }
 
         [Memo]
-        public IReadOnlyDictionary<CodeElement, IImmutableList<IntroducedElement>> IntroductionsByContainingElement =>
+        public IReadOnlyDictionary<CodeElement, IReadOnlyList<IntroducedElement>> IntroductionsByContainingElement =>
             this.Transformations.OfType<IntroducedElement>().GroupBy( i => i.ContainingElement )
-                .ToDictionary<CodeElement, IImmutableList<IntroducedElement>>( g => g.Key, g => g.ToImmutableList() );
+                .ToDictionary( g => g.Key, g => (IReadOnlyList<IntroducedElement>) g.ToImmutableList() );
 
 
 

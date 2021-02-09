@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override string FullName => this.TypeSymbol.ToDisplayString();
 
-        internal SourceNamedType(INamedTypeSymbol typeSymbol, SourceCompilationModel compilation) : base(null)
+        internal SourceNamedType( SourceCompilationModel compilation,INamedTypeSymbol typeSymbol) : base(null)
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;
@@ -40,12 +40,12 @@ namespace Caravela.Framework.Impl.CodeModel
             _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
-        public override IImmutableList<Member> Members => this.TypeSymbol.GetMembers()
+        public override IReadOnlyList<Member> Members => this.TypeSymbol.GetMembers()
             .Select( m => m.Kind switch {
-                    SymbolKind.Event => new SourceEvent( m ),
-                    SymbolKind.Property => new SourceProperty( m ),
-                    SymbolKind.Method => new SourceMethod(m),
-                    SymbolKind.Field => new SourceProperty( m ),
+                    SymbolKind.Event => new SourceEvent( this.Compilation, m ),
+                    SymbolKind.Property => new SourceProperty( this.Compilation, m ),
+                    SymbolKind.Method => new SourceMethod( this.Compilation, m ),
+                    SymbolKind.Field => new SourceProperty( this.Compilation, m ),
                     _ => throw new AssertionFailedException()
                     }
                 );

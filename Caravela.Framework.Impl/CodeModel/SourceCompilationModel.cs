@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
@@ -20,18 +21,18 @@ namespace Caravela.Framework.Impl.CodeModel
             this.SymbolMap = new ( this );
         }
 
-        public override IImmutableList<Transformation> Transformations => ImmutableArray<Transformation>.Empty;
+        public override IReadOnlyList<Transformation> Transformations => ImmutableArray<Transformation>.Empty;
 
         [Memo]
-        public override IReactiveCollection<INamedType> DeclaredTypes =>
+        public override IReadOnlyList<NamedType> DeclaredTypes =>
             this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes =>
+        public override IReadOnlyList<INamedType> DeclaredAndReferencedTypes =>
             this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
 
         [Memo]
-        public override IImmutableList<IAttribute> Attributes =>
+        public override IReadOnlyList<IAttribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                 .Select( a => new SourceAttribute( a, this.SymbolMap ) )
                 .ToImmutableReactive();

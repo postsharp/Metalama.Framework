@@ -7,14 +7,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
     internal static class CodeModelFactory
     {
-        internal static IType CreateIType( ITypeSymbol typeSymbol, SourceCompilationModel compilation ) =>
+        internal static ITypeInternal CreateIType( ITypeSymbol typeSymbol, SourceCompilationModel compilation ) =>
             typeSymbol switch
             {
-                INamedTypeSymbol namedType => new NamedType( namedType, compilation ),
-                IArrayTypeSymbol arrayType => new ArrayType( arrayType, compilation ),
-                IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
-                ITypeParameterSymbol typeParameter => new GenericParameter( typeParameter, compilation ),
-                IDynamicTypeSymbol dynamicType => new DynamicType( dynamicType, compilation ),
+                INamedTypeSymbol namedType => new SourceNamedType( compilation, namedType ),
+                IArrayTypeSymbol arrayType => new SourceArrayType( compilation, arrayType ),
+                IPointerTypeSymbol pointerType => new SourcePointerType( compilation, pointerType ),
+                ITypeParameterSymbol typeParameter => new SourceGenericParameter( compilation, typeParameter),
+                IDynamicTypeSymbol dynamicType => new SourceDynamicType( compilation, dynamicType ),
                 _ => throw new NotImplementedException()
             };
     }
