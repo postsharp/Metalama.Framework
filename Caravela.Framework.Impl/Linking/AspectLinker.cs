@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Code;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
@@ -9,14 +10,95 @@ using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
     internal class AspectLinker
     {
-        public AdviceLinkerResult ToResult( AdviceLinkerContext context )
+        private readonly AdviceLinkerInput _input;
+
+        public AspectLinker( AdviceLinkerInput input )
         {
-            return new AdviceLinkerResult( context.Compilation.GetRoslynCompilation(), Array.Empty<Diagnostic>().ToImmutableReactive() );
+            this._input = input;
+        }
+        public AdviceLinkerResult ToResult(  )
+        {
+            var resultingCompilation = this._input.Compilation;
+            
+            var transformationsByContainingType =
+                this._input.CompilationModel.Transformations.
+                    GroupBy( t => t.ContainingType, t => t, EqualityComparer<ICodeElement>.Default )
+                    .ToDictionary( g => (INamedType) g.Key, g => g );
+            
+            
+            var transformationsBySyntaxTree =
+                this._input.CompilationModel.Transformations.
+                    GroupBy( t => t.SyntaxTree, t => t )
+                    .ToDictionary( g =>  g.Key, g => g );
+
+          
+            // First pass. Add all transformations to the compilation, but we don't link them yet.
+            var newSyntaxTrees = new List<SyntaxTree>( transformationsBySyntaxTree.Count );
+            foreach ( var syntaxTreeGroup in transformationsBySyntaxTree )
+            {
+                var oldSyntaxTree = syntaxTreeGroup.Key;
+                
+                AddTransformationRewriter addTransformationRewriter = new (syntaxTreeGroup);
+                
+                var newRoot = addTransformationRewriter.Visit( oldSyntaxTree.GetRoot() );
+
+                var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newRoot, default );
+                newSyntaxTrees.Add(  newSyntaxTree );
+                
+                resultingCompilation = resultingCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
+            }
+            
+            // Second pass. Count references to modified methods.
+            Dictionary<ISymbol, int> referenceCounts = new Dictionary<ISymbol, int>();
+            foreach ( var syntaxTree in newSyntaxTrees )
+            {
+                foreach ( var referencingNode in syntaxTree.GetRoot(  ).GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
+                {
+                    var symbol = resultingCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode ).Symbol;
+                    if ( referenceCounts.TryGetValue( symbol, out var count ) )
+                    {
+                        referenceCounts[symbol] = count + 1;
+                    }
+                    else
+                    {
+                        referenceCounts[symbol] = 1;
+                    }
+                }
+            }
+            
+            // Third pass. Linker.
+            
+
+        }
+
+
+        public class AddTransformationRewriter : CSharpSyntaxRewriter
+        {
+            private IEnumerable<Transformation> _transformationsOnSyntaxTree;
+
+
+            public AddTransformationRewriter( IEnumerable<Transformation> transformationsOnSyntaxTree, bool visitIntoStructuredTrivia = false) : base(visitIntoStructuredTrivia)
+            {
+                this._transformationsOnSyntaxTree = transformationsOnSyntaxTree;
+            }
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                var members = new List<MemberDeclarationSyntax>(node.Members.Count);
+                foreach ( var member in members )
+                {
+                    members.Add( member );
+                    members.AddRange( this._transformationsOnSyntaxTree.Where( t => t.InsertPositionNode == node ).Select( t => t.GeneratePreLinkerCode() ) );
+                }
+
+                return node.WithMembers( List( members ) );
+            }
         }
 
         public class Walker : CSharpSyntaxWalker

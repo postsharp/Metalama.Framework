@@ -1,8 +1,11 @@
 ﻿using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal record AdviceLinkerContext( CompilationModel Compilation, IReactiveCollection<Transformation> Transformations );
+    internal record AdviceLinkerInput(
+        Compilation Compilation,
+        CompilationModel CompilationModel );
 }

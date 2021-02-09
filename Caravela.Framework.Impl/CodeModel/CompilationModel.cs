@@ -3,6 +3,7 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Reactive;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -12,14 +13,14 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract class CompilationModel : ICompilation
     {
-        public abstract IReactiveCollection<INamedType> DeclaredTypes { get; }
+        public abstract IReadOnlyList<INamedType> DeclaredTypes { get; }
 
-        public abstract IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
+        public abstract IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
         [Memo]
         public IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace => this.DeclaredTypes.GroupBy( t => t.Namespace );
 
-        public abstract IImmutableList<Attribute> Attributes { get; }
+        public abstract IReadOnlyList<Attribute> Attributes { get; }
 
         CodeElement? ICodeElement.ContainingElement => null;
 
@@ -30,12 +31,14 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Gets the list of transformations added by any previous layer of the compilation model.
         /// </summary>
-        public abstract IImmutableList<Transformation> Transformations { get; }
+        public abstract IReadOnlyList<Transformation> Transformations { get; }
 
         [Memo]
         public IReadOnlyDictionary<CodeElement, IImmutableList<IntroducedElement>> IntroductionsByContainingElement =>
             this.Transformations.OfType<IntroducedElement>().GroupBy( i => i.ContainingElement )
                 .ToDictionary<CodeElement, IImmutableList<IntroducedElement>>( g => g.Key, g => g.ToImmutableList() );
+
+
 
         public IType? GetTypeByReflectionType( Type type )
         {

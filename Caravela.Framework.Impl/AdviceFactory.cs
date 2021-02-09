@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate )
         {
-            var templateMethod = this._aspectType.Methods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
+            var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod );
             this._advices.Add( advice );
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl
         public IIntroductionAdvice IntroduceMethod( INamedType targetType, string defaultTemplate )
         {
             // TODO: signature matching.
-            var templateMethod = this._aspectType.Methods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
+            var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
             var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod );
             this._advices.Add( advice );
 

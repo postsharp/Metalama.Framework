@@ -23,7 +23,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the collection of custom attributes on the element of code.
         /// </summary>
-        IReadOnlyList<Attribute> Attributes { get; }
+        IReadOnlyList<IAttribute> Attributes { get; }
 
         /// <summary>
         /// Gets the kind of element of code.

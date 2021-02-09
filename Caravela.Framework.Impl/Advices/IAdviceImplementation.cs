@@ -2,8 +2,5 @@
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal interface IAdviceImplementation
-    {
-        AdviceResult ToResult( ICompilation compilation );
-    }
+    
 }

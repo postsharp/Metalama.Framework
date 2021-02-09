@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 
-    internal sealed class IntroduceMethodAdvice : Advice, IIntroductionAdvice, IAdviceImplementation
+    internal sealed class IntroduceMethodAdvice : Advice, IIntroductionAdvice
     {
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
             this.TemplateMethod = templateMethod;
         }
 
-        public AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             var introducedMethod = new IntroducedMethod( this, this.TargetDeclaration, this.TemplateMethod, this.Scope, this.Name, this.IsStatic, this.IsVirtual, this.Visibility );
             var overriddenMethod = new OverriddenMethod( this, introducedMethod, this.TemplateMethod );

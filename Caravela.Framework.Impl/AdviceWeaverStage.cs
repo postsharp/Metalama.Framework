@@ -31,14 +31,15 @@ namespace Caravela.Framework.Impl
             }
 
             var linker = new AspectLinker();
-            var linkerContext = new AdviceLinkerContext( aspectPartResult.Compilation, aspectPartResult.Transformations.ToImmutableReactive() );
+            var linkerContext = new AdviceLinkerInput( aspectPartResult.Compilation );
             var linkerResult = linker.ToResult( linkerContext );
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
                 aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics.GetValue() ).ToList(),
-                aspectPartResult.Resources,
+                aspectPartResult.Compilation.Transformations.OfType<IntroducedManagedResource>(  ).Select( r => r.ToResourceDescription() ).ToList(),
                 aspectPartResult.Aspects );
         }
+
     }
 }

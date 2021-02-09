@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<ResourceDescription> Resources { get; }
 
-        public IReactiveCollection<AspectInstance> AspectInstances { get; }
+        public IReadOnlyList<AspectInstance> AspectInstances { get; }
 
-        public PipelineStageResult( CSharpCompilation compilation, IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, IReactiveCollection<AspectInstance> aspectInstances )
+        public PipelineStageResult( CSharpCompilation compilation, IReadOnlyList<Diagnostic> diagnostics, IReadOnlyList<ResourceDescription> resources, IReadOnlyList<AspectInstance> aspectInstances )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics;

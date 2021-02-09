@@ -4,10 +4,11 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Caravela.Reactive.Sources;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AttributeAspectSource : AspectSource
+    internal class AttributeAspectSource 
     {
         private readonly ICompilation _compilation;
         private readonly CompileTimeAssemblyLoader _loader;
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl
             this._loader = loader;
         }
 
-        public override IReactiveCollection<AspectInstance> GetAspects()
+        public IReadOnlyList<AspectInstance> GetAspects()
         {
             var iAspect = this._compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 

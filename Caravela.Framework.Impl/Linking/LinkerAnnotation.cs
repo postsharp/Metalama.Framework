@@ -1,4 +1,6 @@
-﻿namespace Caravela.Framework.Impl.Linking
+﻿using Microsoft.CodeAnalysis;
+
+namespace Caravela.Framework.Impl.Linking
 {
 #pragma warning disable SA1313 // Parameter names should begin with lower-case letter
     public record LinkerAnnotation( string? AspectTypeName, string? PartName, string? Order, string? Verb )
@@ -19,5 +21,7 @@
                 parts[2] == "null" ? null : parts[2],
                 parts[3] == "null" ? null : parts[3] );
         }
+
+    
     }
 }

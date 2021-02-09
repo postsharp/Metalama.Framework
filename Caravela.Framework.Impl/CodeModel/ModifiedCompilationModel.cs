@@ -16,26 +16,25 @@ namespace Caravela.Framework.Impl.CodeModel
     internal sealed class ModifiedCompilationModel : CompilationModel
     {
         private readonly CompilationModel _originalCompilation;
-        private readonly IReactiveCollection<Transformation> _transformations;
+        private readonly IReadOnlyList<Transformation> _transformations;
 
-        public ModifiedCompilationModel( CompilationModel originalCompilation, IReactiveCollection<Transformation> transformations )
+        public ModifiedCompilationModel( CompilationModel originalCompilation, IReadOnlyList<Transformation> transformations )
         {
             this._originalCompilation = originalCompilation;
             this._transformations = transformations;
         }
 
-        public override IReactiveCollection<INamedType> DeclaredTypes => this._originalCompilation.DeclaredTypes;
+        public override IReadOnlyList<INamedType> DeclaredTypes => this._originalCompilation.DeclaredTypes;
 
-        public override IReactiveCollection<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
+        public override IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
-        public override IImmutableList<Attribute> Attributes => this._originalCompilation.Attributes;
+        public override IReadOnlyList<Attribute> Attributes => this._originalCompilation.Attributes;
 
         public override INamedType? GetTypeByReflectionName( string reflectionName ) => this._originalCompilation.GetTypeByReflectionName( reflectionName );
 
-        internal override CSharpCompilation GetPrimeCompilation() => this._originalCompilation.GetPrimeCompilation();
+        public override IReadOnlyList<Transformation> Transformations => this._transformations;
 
-        internal override IReactiveCollection<Transformation> CollectTransformations() => this._originalCompilation.CollectTransformations().Union( this._transformations );
-
+        /*
         internal override CSharpCompilation GetRoslynCompilation()
         {
             // Modified compilations can form a linked list. First, find the Roslyn compilation at the start of the list and collect all advices from the list.
@@ -49,6 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return result;
         }
+        */
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._originalCompilation.ToDisplayString( format, context );
 

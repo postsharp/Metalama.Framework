@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 #pragma warning disable SA1313 // Parameter names should begin with lower-case letter
-    internal record AdviceResult( ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<Transformation> Transformations );
+    internal record AdviceResult(
+        ImmutableArray<Diagnostic> Diagnostics, 
+        ImmutableArray<Transformation> Transformations );
 #pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 }

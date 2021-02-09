@@ -1,10 +1,8 @@
 ﻿using Caravela.Framework.Sdk;
 using Caravela.Reactive;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
-    internal abstract class AspectSource
-    {
-        public abstract IReactiveCollection<AspectInstance> GetAspects();
-    }
+    
 }
