@@ -19,7 +19,8 @@ namespace Foo
 {
     class C {}
 }
-", ignoreErrors: true );
+",
+                ignoreErrors: true );
 
             var expected = @"
 using System;

@@ -27,6 +27,8 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsOut { get; }
 
+        bool IsParams { get; }
+
         /// <summary>
         /// Gets the parameter type.
         /// </summary>

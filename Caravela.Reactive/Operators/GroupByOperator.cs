@@ -155,7 +155,7 @@ namespace Caravela.Reactive.Operators
 
             this._groups = builder.ToImmutable();
 
-            return new ( this._groups.Values );
+            return new( this._groups.Values );
         }
 
         protected override void OnSourceItemAdded( IReactiveSubscription sourceSubscription, TSource item, in IncrementalUpdateToken updateToken )

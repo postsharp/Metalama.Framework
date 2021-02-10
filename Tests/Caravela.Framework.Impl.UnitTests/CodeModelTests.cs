@@ -454,5 +454,31 @@ class C<T>
             Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
             Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
         }
+
+        [Fact]
+        public void WithGenericArguments()
+        {
+            var code = @"
+class C<TC>
+{
+    (TC, TM) M<TM>() => default;
+}
+";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+
+            var intType = compilation.GetTypeByReflectionType( typeof( int ) )!;
+            var stringType = compilation.GetTypeByReflectionType( typeof( string ) )!;
+
+            var openTypeMethod = type.Methods.GetValue().First();
+            var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.GetValue().First();
+
+            Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
+            Assert.Equal( "(TC, int)", openTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
+            Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
+            Assert.Equal( "(string, int)", closedTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
+        }
     }
 }

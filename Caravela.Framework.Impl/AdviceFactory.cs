@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl
         private readonly INamedType _aspectType;
         private readonly IAspect _aspect;
 
-        private readonly List<AdviceInstance> _advices = new ();
+        private readonly List<AdviceInstance> _advices = new();
 
         internal IReadOnlyList<AdviceInstance> Advices => this._advices;
 

@@ -5,24 +5,24 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     public interface IDynamicMetaMember
     {
-        ExpressionSyntax CreateExpression();
+        RuntimeExpression CreateExpression();
     }
 
     internal interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
     {
-        ExpressionSyntax CreateMemberAccessExpression( string member );
+        RuntimeExpression CreateMemberAccessExpression( string member );
     }
 
     public static class DynamicMetaMemberExtensions
     {
-        public static ExpressionSyntax CreateMemberAccessExpression( this IDynamicMetaMember metaMember, string member )
+        public static RuntimeExpression CreateMemberAccessExpression( this IDynamicMetaMember metaMember, string member )
         {
             if ( metaMember is IDynamicMetaMemberDifferentiated metaMemberDifferentiated )
             {
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
             }
 
-            return SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, metaMember.CreateExpression(), SyntaxFactory.IdentifierName( member ) );
+            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, metaMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
         }
     }
 

@@ -153,12 +153,8 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        private bool IsDynamic( SyntaxNode originalNode )
-        {
-            var type = this._semanticAnnotationMap.GetType( originalNode );
-
-            return type != null && type.Kind == SymbolKind.DynamicType;
-        }
+        private bool IsDynamic( SyntaxNode originalNode ) =>
+            this._semanticAnnotationMap.GetType( originalNode ) is IDynamicTypeSymbol;
 
         /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.
@@ -354,8 +350,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitLiteralExpression( LiteralExpressionSyntax node )
         {
-            // Literals are always compile-time (not really compile-time only but it does not matter).
-            return base.VisitLiteralExpression( node )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+            // Literals are always compile-time (not really compile-time only but it does not matter), unless they are converted to dynamic.
+            var scope = this.IsDynamic( node ) ? SymbolDeclarationScope.RunTimeOnly : SymbolDeclarationScope.CompileTimeOnly;
+            return base.VisitLiteralExpression( node )!.AddScopeAnnotation( scope );
         }
 
         public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
@@ -431,17 +428,33 @@ namespace Caravela.Framework.Impl.Templating
             if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.CompileTimeOnly )
             {
                 // If the expression on the left meta is compile-time (because of rules on the symbol),
-                // then all arguments MUST be compile-time.
+                // then arguments MUST be compile-time, unless they are dynamic.
 
-                using ( this.EnterForceCompileTimeExpression() )
+                var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
+
+                foreach ( var argument in node.ArgumentList.Arguments )
                 {
+                    var parameterType = this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type;
 
-                    var updatedInvocation = node.Update(
-                        transformedExpression,
-                        (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
-
-                    return updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                    // dynamic or dynamic[]
+                    if ( parameterType is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } )
+                    {
+                        transformedArguments.Add( (ArgumentSyntax) this.VisitArgument( argument )! );
+                    }
+                    else
+                    {
+                        using ( this.EnterForceCompileTimeExpression() )
+                        {
+                            transformedArguments.Add( (ArgumentSyntax) this.VisitArgument( argument )! );
+                        }
+                    }
                 }
+
+                var updatedInvocation = node.Update(
+                    transformedExpression,
+                    ArgumentList( SeparatedList( transformedArguments ) ) );
+
+                return updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {
@@ -796,14 +809,14 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedNode = (ExpressionStatementSyntax) base.VisitExpressionStatement( node )!;
 
-            return transformedNode.WithScopeAnnotationFrom( node.Expression ).WithScopeAnnotationFrom( node );
+            return transformedNode.WithScopeAnnotationFrom( transformedNode.Expression ).WithScopeAnnotationFrom( node );
         }
 
         public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
         {
             var annotatedType = (TypeSyntax?) this.Visit( node.Type );
             var annotatedExpression = (ExpressionSyntax?) this.Visit( node.Expression );
-            var transformedNode = CastExpression( annotatedType ?? node.Type, annotatedExpression ?? node.Expression );
+            var transformedNode = node.WithType( annotatedType ?? node.Type ).WithExpression( annotatedExpression ?? node.Expression );
 
             return this.AnnotateCastExpression( transformedNode, annotatedType, annotatedExpression );
         }
@@ -816,7 +829,7 @@ namespace Caravela.Framework.Impl.Templating
                 case SyntaxKind.AsExpression:
                     var annotatedType = (TypeSyntax?) this.Visit( node.Right );
                     var annotatedExpression = (ExpressionSyntax?) this.Visit( node.Left );
-                    var transformedNode = BinaryExpression( node.Kind(), annotatedExpression ?? node.Left, annotatedType ?? node.Right );
+                    var transformedNode = node.WithLeft( annotatedExpression ?? node.Left ).WithRight( annotatedType ?? node.Right );
 
                     return this.AnnotateCastExpression( transformedNode, annotatedType, annotatedExpression );
             }

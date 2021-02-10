@@ -8,10 +8,10 @@ namespace Caravela.Reactive.Operators
     {
         protected Func<TSource, ReactiveCollectorToken, IReactiveCollection<TCollection>> CollectionSelector { get; }
 
-        private readonly Dictionary<TSource, (IReactiveSubscription? subscription, int count)> _subscriptions
-            = new ( EqualityComparerFactory.GetEqualityComparer<TSource>() );
+        private readonly Dictionary<TSource, (IReactiveSubscription? Subscription, int Count)> _subscriptions
+            = new( EqualityComparerFactory.GetEqualityComparer<TSource>() );
 
-        private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new ();
+        private readonly Dictionary<IReactiveSubscription, TSource> _subscriptionsReverse = new();
 
         public SelectManyObservableOperatorBase(
             IReactiveCollection<TSource> source,
@@ -26,9 +26,9 @@ namespace Caravela.Reactive.Operators
 
         protected override void UnfollowAll()
         {
-            foreach ( var subscription in this._subscriptions.Values )
+            foreach ( var (subscription, _) in this._subscriptions.Values )
             {
-                subscription.subscription?.Dispose();
+                subscription?.Dispose();
             }
 
             this._subscriptionsReverse.Clear();
@@ -38,18 +38,18 @@ namespace Caravela.Reactive.Operators
         {
             if ( this._subscriptions.TryGetValue( source, out var tuple ) )
             {
-                if ( tuple.count == 1 )
+                if ( tuple.Count == 1 )
                 {
-                    tuple.subscription?.Dispose();
+                    tuple.Subscription?.Dispose();
                     this._subscriptions.Remove( source );
-                    if ( tuple.subscription != null )
+                    if ( tuple.Subscription != null )
                     {
-                        this._subscriptionsReverse.Remove( tuple.subscription );
+                        this._subscriptionsReverse.Remove( tuple.Subscription );
                     }
                 }
                 else
                 {
-                    this._subscriptions[source] = (tuple.subscription, tuple.count - 1);
+                    this._subscriptions[source] = (tuple.Subscription, tuple.Count - 1);
                 }
             }
         }
@@ -58,7 +58,7 @@ namespace Caravela.Reactive.Operators
         {
             if ( this._subscriptions.TryGetValue( source, out var tuple ) )
             {
-                this._subscriptions[source] = (tuple.subscription, tuple.count + 1);
+                this._subscriptions[source] = (tuple.Subscription, tuple.Count + 1);
             }
             else
             {

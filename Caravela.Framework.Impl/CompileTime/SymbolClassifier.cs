@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // TODO: be more strict with .NET Standard.
-            if ( assembly.Name.StartsWith( "System" ) || assembly.Name == "netstandard" )
+            if ( assembly.Name.StartsWith( "System" ) || assembly.Name == "netstandard" || assembly.Name == "Caravela.Reactive" )
             {
                 return SymbolDeclarationScope.Default;
             }
