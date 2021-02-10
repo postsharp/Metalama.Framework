@@ -18,23 +18,16 @@ namespace Caravela.Framework.Code
         IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
         IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
+        
+        ITypeFactory TypeFactory { get; }
+        
+        IReadOnlyList<IManagedResource> ManagedResources { get; }
 
-        /// <summary>
-        /// Get type based on its full name, as used in reflection.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// For nested types, this means using <c>+</c>, e.g. to get <see cref="System.Environment.SpecialFolder"/>, use <c>System.Environment+SpecialFolder</c>.
-        /// </para>
-        /// <para>
-        /// For generic type definitions, this requires using <c>`</c>, e.g. to get <see cref="List{T}"/>, use <c>System.Collections.Generic.List`1</c>.
-        /// </para>
-        /// <para>
-        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.MakeGenericType"/>.
-        /// </para>
-        /// </remarks>
-        INamedType? GetTypeByReflectionName( string reflectionName );
+      
+    }
 
-        IType? GetTypeByReflectionType( Type type );
+    public interface IManagedResource : ICodeElement
+    {
+        
     }
 }

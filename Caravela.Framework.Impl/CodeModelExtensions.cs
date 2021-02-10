@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl
         // TODO: should this be in the SDK?
         public static INamedTypeSymbol GetSymbol( this INamedType namedType )
         {
-            if ( namedType is SourceNamedType sourceNamedType )
+            if ( namedType is NamedType sourceNamedType )
             {
-                return sourceNamedType.Symbol;
+                return sourceNamedType.TypeSymbol;
             }
             else
             {
@@ -22,9 +22,9 @@ namespace Caravela.Framework.Impl
 
         public static ITypeSymbol GetSymbol( this IType type )
         {
-            if ( type is ISourceType sourceNamedType )
+            if ( type is ITypeInternal sourceNamedType )
             {
-                return sourceNamedType.Symbol;
+                return sourceNamedType.TypeSymbol;
             }
             else
             {
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
 
         public static IMethodSymbol GetSymbol( this IMethod method )
         {
-            if ( method is SourceMethod sourceMethod )
+            if ( method is Method sourceMethod )
             {
                 return (IMethodSymbol) sourceMethod.Symbol;
             }

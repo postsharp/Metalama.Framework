@@ -22,6 +22,6 @@ namespace Caravela.Framework.Aspects
         /// <param name="type">The type into which the method is to be introduced.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <returns></returns>
-        IIntroductionAdvice IntroduceMethod( INamedType type, string defaultTemplate );
+        IMethodIntroductionAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default );
     }
 }

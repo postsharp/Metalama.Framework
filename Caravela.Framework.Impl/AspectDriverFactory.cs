@@ -2,16 +2,17 @@
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectDriverFactory
     {
-        private readonly ICompilation _compilation;
+        private readonly CompilationModel _compilation;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;
 
-        public AspectDriverFactory( ICompilation compilation, ImmutableArray<object> plugins )
+        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins )
         {
             this._compilation = compilation;
 

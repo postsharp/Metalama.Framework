@@ -1,6 +1,5 @@
-﻿using System.Collections.Immutable;
-using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Advices;
+using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -9,37 +8,31 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 
-    internal sealed class IntroduceMethodAdvice : Advice, IIntroductionAdvice
+    internal sealed class IntroduceMethodAdvice : Advice, IMethodIntroductionAdvice
     {
+        private readonly MethodBuilder _methodBuilder;
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IMethod TemplateMethod { get; }
 
-        public IntroductionScope? Scope { get; set; }
-
-        public string? Name { get; set; }
-
-        public bool? IsStatic { get; set; }
-
-        public bool? IsVirtual { get; set; }
-
-        public Visibility? Visibility { get; set; }
-
         public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
+            
+            // TODO: Set name and all properties from the template.
+            this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod, templateMethod.Name );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            var introducedMethod = new IntroducedMethod( this, this.TargetDeclaration, this.TemplateMethod, this.Scope, this.Name, this.IsStatic, this.IsVirtual, this.Visibility );
-            var overriddenMethod = new OverriddenMethod( this, introducedMethod, this.TemplateMethod );
+            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod );
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray.Create<Transformation>(
-                    introducedMethod,
-                    overriddenMethod ) );
+                ImmutableArray.Create<ICodeElementBuilder>( this._methodBuilder ),
+                ImmutableArray.Create<Transformation>( overriddenMethod ) );
         }
+
+        public IMethodBuilder Builder => this._methodBuilder;
     }
 }

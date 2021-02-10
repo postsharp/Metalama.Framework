@@ -1,9 +1,6 @@
 ﻿using Caravela.Framework.Code;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 
@@ -27,13 +24,13 @@ namespace Caravela.Framework.Impl.Linking
             var resultingCompilation = this._input.Compilation;
             
             var transformationsByContainingType =
-                this._input.CompilationModel.Transformations.
+                this._input.CompilationModel.IntroducedElements.
                     GroupBy( t => t.ContainingType, t => t, EqualityComparer<ICodeElement>.Default )
                     .ToDictionary( g => (INamedType) g.Key, g => g );
             
             
             var transformationsBySyntaxTree =
-                this._input.CompilationModel.Transformations.
+                this._input.CompilationModel.IntroducedElements.
                     GroupBy( t => t.SyntaxTree, t => t )
                     .ToDictionary( g =>  g.Key, g => g );
 
@@ -107,7 +104,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public class Rewriter : CSharpSyntaxRewriter
         {
-            private readonly Dictionary<TypeDeclarationSyntax, List<IntroducedMethod>> _introducedMethods;
+            private readonly Dictionary<TypeDeclarationSyntax, List<MethodBuilder>> _introducedMethods;
             private readonly Dictionary<MethodDeclarationSyntax, List<OverriddenMethod>> _overriddenMethods;
 
             public Rewriter(IEnumerable<Transformation> transformations)
@@ -116,7 +113,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 this._introducedMethods =
                     transformations
-                    .OfType<IntroducedMethod>()
+                    .OfType<MethodBuilder>()
                     .SelectMany(x => x.GetSyntaxNodes().Select( y => (type: ((IToSyntax) x.TargetDeclaration).GetSyntaxNode(), transformation: x) ) )
                     .GroupBy( x => x.type )
                     .ToDictionary( x => (TypeDeclarationSyntax) x.Key, x => x.Select( y => y.transformation ).ToList() );

@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public IAdvice Advice { get; }
 
-        public INamedType ContainingType
+        public ICodeElement ContainingElement
         {
             get { throw new System.NotImplementedException(); }
         }
@@ -39,19 +39,5 @@ namespace Caravela.Framework.Impl.Transformations
         AfterSibling,
         End
         
-    }
-
-    internal class IntroducedManagedResource : Transformation
-    {
-        public IntroducedManagedResource(IAdvice advice) : base(advice)
-        {
-            // TODO
-        }
-        
-        
-        public ResourceDescription ToResourceDescription()
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

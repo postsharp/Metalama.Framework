@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
 
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectPartResult = new AspectPartResult( new SourceCompilationModel( input.Compilation ), this._assemblyLoader );
+            var aspectPartResult = new AspectPartResult( new RoslynBasedCompilationModel( input.Compilation ), this._assemblyLoader );
 
             foreach ( var aspectPart in this._aspectParts )
             {
@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
-                aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics.GetValue() ).ToList(),
-                aspectPartResult.Compilation.Transformations.OfType<IntroducedManagedResource>(  ).Select( r => r.ToResourceDescription() ).ToList(),
+                aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
+                aspectPartResult.Compilation.IntroducedElements[null].OfType<ManagedResourceBuilder>(  ).Select( r => r.ToResourceDescription() ).ToList(),
                 aspectPartResult.Aspects );
         }
 

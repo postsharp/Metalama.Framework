@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
@@ -22,14 +21,17 @@ namespace Caravela.Framework.Impl
         public IReadOnlyList<AspectInstance> Aspects { get; }
         
         public IReadOnlyList<Advice> Advices { get; }
+        
+        public IReadOnlyList<Transformation> Transformations { get; }
 
         
-        public AspectPartResult( SourceCompilationModel compilation, CompileTimeAssemblyLoader loader )
+        public AspectPartResult( RoslynBasedCompilationModel compilation, CompileTimeAssemblyLoader loader )
             : this
             (compilation,
                 Array.Empty<Diagnostic>(),
                   compilation.GetAspectsFromAttributes(loader).ToList(),
-                  Array.Empty<Advice>() )
+                  Array.Empty<Advice>(),
+                Array.Empty<Transformation>())
         {
         }
 
@@ -37,26 +39,28 @@ namespace Caravela.Framework.Impl
             CompilationModel compilation, 
             IReadOnlyList<Diagnostic> diagnostics, 
             IReadOnlyList<AspectInstance> aspects,
-            IReadOnlyList<Advice> advices)
+            IReadOnlyList<Advice> advices, 
+            IReadOnlyList<Transformation> transformations )
         {
             this.Diagnostics = diagnostics;
             this.Compilation = compilation;
             this.Aspects = aspects;
             this.Advices = advices;
-
+            this.Transformations = transformations;
         }
 
-        public AspectPartResult WithNewResults(
-            CompilationModel compilation, 
-            IReadOnlyList<Diagnostic> additionalDiagnostics, 
+        public AspectPartResult WithNewResults( CompilationModel compilation,
+            IReadOnlyList<Diagnostic> additionalDiagnostics,
             IReadOnlyList<AspectInstance> additionalAspects,
-            IReadOnlyList<Advice> additionalAdvices)
+            IReadOnlyList<Advice> additionalAdvices, 
+            IReadOnlyList<Transformation> additionalTransformations )
         {
             return new ( 
                 compilation,
                 this.Diagnostics.Concat( additionalDiagnostics ),
                 additionalAspects.Concat( additionalAspects ),
-                this.Advices.Concat( additionalAdvices )
+                this.Advices.Concat( additionalAdvices ),
+                this.Transformations.Concat( additionalTransformations )
                 );
         }
 

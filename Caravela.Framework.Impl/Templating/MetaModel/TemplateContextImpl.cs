@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -72,15 +70,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly IParameter _parameter;
 
-        public AdviceParameter( IParameter p ) => this._parameter = p;
+        public AdviceParameter( IParameter p )
+        {
+            this._parameter = p;
+        }
 
         public RefKind RefKind => this._parameter.RefKind;
-
-        public bool IsByRef => this._parameter.IsByRef;
-
-        public bool IsRef => this._parameter.IsRef;
-
-        public bool IsOut => this._parameter.IsOut;
 
         public IType Type => this._parameter.Type;
 
@@ -88,7 +83,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
-        public CodeElement? ContainingElement => this._parameter.ContainingElement;
+        public ICodeElement? ContainingElement => this._parameter.ContainingElement;
 
         public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
 
@@ -105,6 +100,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
+        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
     }
 
     internal class DynamicMetaMember : IDynamicMetaMember

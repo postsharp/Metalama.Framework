@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Impl.Advices;
+﻿using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 
@@ -7,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 
 namespace Caravela.Framework.Impl
 {
@@ -43,7 +41,6 @@ namespace Caravela.Framework.Impl
                 
                 var instanceResults = aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
 
-                
                 aspectInitializerDiagnostics = instanceResults.SelectMany( air => air.Diagnostics );
                 
                 addedAspects = instanceResults.SelectMany( air => air.Aspects );
@@ -62,11 +59,12 @@ namespace Caravela.Framework.Impl
 
             var adviceResults = advicesInCurrentAspectParts
                 .Select( ai => ai.ToResult( input.Compilation ) ).ToList();
+
+
+            var addedIntroductions = adviceResults.SelectMany( ar => ar.Introductions );
+            var addedTransformations = adviceResults.SelectMany( ar => ar.Transformations );
             
-            
-            
-            
-            var newCompilation = new ModifiedCompilationModel( input.Compilation, adviceResults.SelectMany( ar => ar.Transformations ).ToList() );
+            var newCompilation = new RoslynBasedCompilationModel( (RoslynBasedCompilationModel) input.Compilation, addedIntroductions );
 
 
 
@@ -74,7 +72,8 @@ namespace Caravela.Framework.Impl
             return input.WithNewResults( newCompilation,
                 aspectInitializerDiagnostics.Concat( adviceResults.SelectMany( ar => ar.Diagnostics ) ).ToList(),
                 addedAspects.ToList(),
-                addedAdvices.ToList());
+                addedAdvices.ToList(),
+                addedTransformations.ToList());
 
 
 

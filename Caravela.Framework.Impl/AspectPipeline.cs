@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
-                var compilation = new SourceCompilationModel( roslynCompilation );
+                var compilation = new RoslynBasedCompilationModel( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static IEnumerable<INamedType> GetAspectTypes( SourceCompilationModel compilation )
+        private static IEnumerable<INamedType> GetAspectTypes( RoslynBasedCompilationModel compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl
         private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
 #pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 
-        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch ( groupKey )
             {

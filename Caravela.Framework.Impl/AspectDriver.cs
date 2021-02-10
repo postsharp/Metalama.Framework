@@ -5,6 +5,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 
 using Microsoft.CodeAnalysis;
@@ -16,11 +17,11 @@ namespace Caravela.Framework.Impl
     {
         public INamedType AspectType { get; }
 
-        private readonly ICompilation _compilation;
+        private readonly CompilationModel _compilation;
 
         private readonly IReadOnlyList<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
 
-        public AspectDriver( INamedType aspectType, ICompilation compilation )
+        public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
             this.AspectType = aspectType;
 

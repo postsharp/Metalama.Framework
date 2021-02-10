@@ -13,21 +13,6 @@ namespace Caravela.Framework.Code
         RefKind RefKind { get; }
 
         /// <summary>
-        /// Returns <c>true</c> for <c>ref</c>, <c>out</c> and <c>in</c> parameters and <c>ref</c> and <c>ref readonly</c> return parameters.
-        /// </summary>
-        bool IsByRef { get; }
-
-        /// <summary>
-        /// Returns <c>true</c> for <c>ref</c> parameters.
-        /// </summary>
-        bool IsRef { get; }
-
-        /// <summary>
-        /// Returns <c>true</c> for <c>out</c> parameters.
-        /// </summary>
-        bool IsOut { get; }
-
-        /// <summary>
         /// Gets the parameter type.
         /// </summary>
         IType Type { get; }
@@ -42,16 +27,38 @@ namespace Caravela.Framework.Code
         /// </summary>
         int Index { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the parameter has a default value.
-        /// </summary>
-        bool HasDefaultValue { get; }
+      
 
         /// <remarks>
-        /// Gets the default value of the parameter, or  <c>null</c> if the parameter type is a struct and the default
+        /// Gets the default value of the parameter, or  <c>default</c> if the parameter type is a struct and the default
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        object? DefaultValue { get; }
+        OptionalValue DefaultValue { get; }
+    }
+
+    public interface IParameterBuilder : IParameter, ICodeElementBuilder
+    {
+       
+        /// <remarks>
+        /// Gets or sets the default value of the parameter, or  <c>default</c> if the parameter type is a struct and the default
+        /// value of the parameter is the default value of the struct type.
+        /// </remarks>
+        /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
+        new OptionalValue DefaultValue { get; set; }
+        
+        /// <summary>
+        /// Gets the parameter type.
+        /// </summary>
+        new IType Type { get; set; }
+    }
+
+    public static class ParameterExtensions
+    {
+        public static bool IsByRef(this IParameter parameter) => parameter.RefKind != RefKind.None;
+
+        public static bool IsRef(this IParameter parameter) => parameter.RefKind == RefKind.Ref;
+
+        public static bool IsOut(this IParameter parameter) => parameter.RefKind == RefKind.Out;
     }
 }

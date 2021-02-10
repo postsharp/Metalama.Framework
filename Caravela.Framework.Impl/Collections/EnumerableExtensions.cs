@@ -1,7 +1,6 @@
 // unset
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Collections
@@ -29,20 +28,12 @@ namespace Caravela.Framework.Impl.Collections
             return list;
         }
 
-        public static MultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>( this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
-            => new MultiValueDictionary<TKey, TValue>( enumerable );
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>( this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
+            => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static MultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this  IEnumerable<TItem> enumerable, Func<TItem, TKey> getKey,
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this  IEnumerable<TItem> enumerable, Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue )
-        {
-            MultiValueDictionary<TKey, TValue> dictionary = new();
-            foreach ( var item in enumerable )
-            {
-                dictionary.Add( getKey(item), getValue(item) );
-            }
-
-            return dictionary;
-        }
+         => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue );
 
 
     }

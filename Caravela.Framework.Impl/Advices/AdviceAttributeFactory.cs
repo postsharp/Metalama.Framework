@@ -1,8 +1,8 @@
 ﻿using System;
 using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -11,19 +11,67 @@ namespace Caravela.Framework.Impl.Advices
         public static IAdvice CreateAdvice<T>( this IAttribute attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
             where T : ICodeElement
         {
+            var namedArguments = attribute.NamedArguments.ToDictionary( p=>p.Key, p=>p.Value );
+
+            bool TryGetNamedArgument<TArg>( string name, out TArg value ) 
+            {
+                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue != null )
+                {
+                    value = (TArg?) objectValue;
+                    return true;
+                }
+                else
+                {
+                    value = default;
+                    return false;
+                }
+            }
+       
+            
             switch ( attribute.Type.Name )
             {
                 case nameof(OverrideMethodAttribute):
                     return new OverrideMethodAdvice( aspect, (IMethod) declaration, (IMethod) templateMethod );
-                case nameof( IntroduceMethodAttribute ):
-                    return new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod )
+                case nameof(IntroduceMethodAttribute):
+                {
+                    var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod );
+
+                    
+                    if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                     {
-                        Name = attribute.NamedArguments.ContainsKey( nameof( IntroduceMethodAdvice.Name ) ) ? (string?)attribute.NamedArguments[nameof(IntroduceMethodAdvice.Name)] : null,
-                        Scope = attribute.NamedArguments.ContainsKey( nameof( IntroduceMethodAdvice.Scope ) ) ? (IntroductionScope?) attribute.NamedArguments[nameof( IntroduceMethodAdvice.Scope )] : null,
-                        IsStatic = attribute.NamedArguments.ContainsKey( nameof( IntroduceMethodAdvice.IsStatic ) ) ? (bool?) attribute.NamedArguments[nameof( IntroduceMethodAdvice.IsStatic )] : null,
-                        IsVirtual = attribute.NamedArguments.ContainsKey( nameof( IntroduceMethodAdvice.IsVirtual ) ) ? (bool?) attribute.NamedArguments[nameof( IntroduceMethodAdvice.IsVirtual )] : null,
-                        Visibility = attribute.NamedArguments.ContainsKey( nameof( IntroduceMethodAdvice.Visibility ) ) ? (Visibility?) attribute.NamedArguments[nameof( IntroduceMethodAdvice.Visibility )] : null,
-                    };
+                        advice.Builder.Name = name;
+                    }
+                    
+                    if ( TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope ) )
+                    {
+                        // TODO: handle scope.
+                    }
+                    
+                    if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsStatic), out var isStatic ) )
+                    {
+                        advice.Builder.IsStatic = isStatic;
+                    }
+                    
+                    if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
+                    {
+                        advice.Builder.IsVirtual = isVirtual;
+                    }
+                    
+                    
+                    if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsSealed), out var isSealed ) )
+                    {
+                        advice.Builder.IsSealed = isSealed;
+                    }
+                    
+                    if ( TryGetNamedArgument<Visibility>( nameof(IntroduceMethodAttribute.Visibility), out var visibility ) )
+                    {
+                        advice.Builder.Visibility = visibility;
+                    }
+
+
+                    return advice;
+
+                }
             }
 
             throw new NotImplementedException( $"No implementation for advice attribute {attribute.Constructor.DeclaringType}." );

@@ -1,5 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices
 {
@@ -15,6 +16,8 @@ namespace Caravela.Framework.Advices
         public bool IsVirtual { get; set; }
 
         public Visibility? Visibility { get; set; }
+        
+        public bool IsSealed { get; set; }
     }
 
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]

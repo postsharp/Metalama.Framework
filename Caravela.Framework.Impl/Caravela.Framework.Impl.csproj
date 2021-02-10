@@ -12,6 +12,10 @@
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
 
     <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
+
+    <Compile Remove="CodeModel\Before\**" />
+
+    <None Remove="CodeModel\Before\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,6 +78,10 @@ namespace Caravela.Framework.Impl.CompileTime
   <ItemGroup>
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
     <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="CodeModel\Before\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

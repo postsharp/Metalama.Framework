@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttribute
+    public interface IAttribute : ICodeElement
     {
         // TODO: add TargetElement?
 
@@ -37,6 +37,14 @@ namespace Caravela.Framework.Code
         /// Gets the named arguments (either fields or properties) of the attribute.
         /// </summary>
         // TODO: it cannot ve a dictionary because the ordering of assignments must be preserved.
-        IReadOnlyDictionary<string, object?> NamedArguments { get; }
+        IReadOnlyList<KeyValuePair<string, object?>> NamedArguments { get; }
     }
+
+    public interface IAttributeBuilder : IAttribute
+    {
+        void AddNamedArgument( string name, object? value );
+
+    }
+    
+    
 }

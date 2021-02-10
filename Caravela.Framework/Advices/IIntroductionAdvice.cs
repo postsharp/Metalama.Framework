@@ -10,26 +10,10 @@ namespace Caravela.Framework.Advices
         Target
     }
 
-    public enum Visibility
+
+
+    public interface IMethodIntroductionAdvice : IAdvice<INamedType, IMethodBuilder>
     {
-        Private,
-        PrivateInternal,
-        Protected,
-        ProtectedInternal,
-        Internal,
-        Public
-    }
-
-    public interface IIntroductionAdvice : IAdvice<INamedType>
-    {
-        IntroductionScope? Scope { get; set; }
-
-        string? Name { get; set; }
-
-        bool? IsStatic { get; set; }
-
-        bool? IsVirtual { get; set; }
-
-        Visibility? Visibility { get; set; }
+        
     }
 }

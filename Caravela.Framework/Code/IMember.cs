@@ -5,6 +5,8 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IMember : ICodeElement
     {
+        Visibility Visibility { get; }
+        
         /// <summary>
         /// Gets the member name.
         /// </summary>
@@ -19,11 +21,38 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the member is <c>virtual</c>.
         /// </summary>
         bool IsVirtual { get; }
+        
+        
+        bool IsSealed { get; }
 
         /// <summary>
         /// Gets the type containing the current member, or <c>null</c> if the current member is not contained
         /// within a type (which should not happen in C#).
         /// </summary>
         INamedType? DeclaringType { get; }
+    }
+
+    public interface IMemberBuilder : IMember, ICodeElementBuilder
+    {
+         new Visibility Visibility { get; set; }
+        
+        /// <summary>
+        /// Gets the member name.
+        /// </summary>
+        new string Name { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>static</c>.
+        /// </summary>
+        new bool IsStatic { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>virtual</c>.
+        /// </summary>
+        new bool IsVirtual { get; set;}
+        
+        new bool IsSealed { get; set; }
+
+        
     }
 }

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
