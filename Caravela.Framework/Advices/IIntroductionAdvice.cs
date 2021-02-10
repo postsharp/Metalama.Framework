@@ -12,7 +12,7 @@ namespace Caravela.Framework.Advices
 
 
 
-    public interface IMethodIntroductionAdvice : IAdvice<INamedType, IMethodBuilder>
+    public interface IMethodIntroductionAdvice : IIntroduceAdvice<INamedType, IMethodBuilder>
     {
         
     }

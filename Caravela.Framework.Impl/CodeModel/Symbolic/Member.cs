@@ -8,6 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract class Member : CodeElement, IMember
     {
+        public bool IsSealed => this.Symbol.IsSealed;
 
         [Memo]
         public NamedType DeclaringType => this.Compilation.GetNamedType( this.Symbol.ContainingType );

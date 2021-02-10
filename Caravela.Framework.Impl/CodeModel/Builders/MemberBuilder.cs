@@ -7,6 +7,8 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder
     {
+        public bool IsSealed { get; set; }
+
         public INamedType DeclaringType { get; }
 
         public Visibility Visibility { get; set; }

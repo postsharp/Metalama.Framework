@@ -40,7 +40,7 @@ namespace Caravela.Framework.Advices
         new T TargetDeclaration { get; }
     }
 
-    public interface IAdvice<out TTarget, out TBuilder> : IAdvice<TTarget>
+    public interface IIntroduceAdvice<out TTarget, out TBuilder> : IAdvice<TTarget>
         where TTarget : ICodeElement
         where TBuilder : ICodeElementBuilder
     {
