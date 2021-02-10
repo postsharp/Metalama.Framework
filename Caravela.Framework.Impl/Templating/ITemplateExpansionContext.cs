@@ -7,12 +7,15 @@ namespace Caravela.Framework.Impl.Templating
     internal interface ITemplateExpansionContext
     {
         ICodeElement TargetDeclaration { get; }
+
         object TemplateInstance { get; }
+
         IProceedImpl ProceedImplementation { get; }
 
         ICompilation Compilation { get; }
 
         ITemplateExpansionLexicalScope CurrentLexicalScope { get; }
+
         StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression );
     }
 }

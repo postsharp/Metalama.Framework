@@ -1,12 +1,12 @@
-﻿using Caravela.Framework.Code;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -15,30 +15,37 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateDriverExpansionContext : ITemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
-        //private readonly TemplateDriver _templateDriver;
-        //private readonly ITemplateContext _templateContext;
 
         public TemplateDriverExpansionContext( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
             this.Compilation = compilation;
-            //this._templateContext = templateContext;
-            //this._templateDriver = templateDriver;
-            this.ProceedImplementation = new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode() );
+            this.ProceedImplementation = new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode()! );
             this.CurrentLexicalScope = new TemplateDriverLexicalScope( this, (IMethodInternal) targetMethod );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
+
         public object TemplateInstance { get; }
+
         public IProceedImpl ProceedImplementation { get; }
+
         public ICompilation Compilation { get; }
+
         public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
-            if ( returnExpression == null ) return ReturnStatement();
-            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) ) return ReturnStatement();
+            if ( returnExpression == null )
+            {
+                return ReturnStatement();
+            }
+
+            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
+            {
+                return ReturnStatement();
+            }
 
             var returnExpressionKind = returnExpression.Kind();
             if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
@@ -50,8 +57,7 @@ namespace Caravela.Framework.Impl.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-
-        class TemplateDriverLexicalScope : ITemplateExpansionLexicalScope
+        private class TemplateDriverLexicalScope : ITemplateExpansionLexicalScope
         {
             private readonly Dictionary<string, string> _templateToTargetIdentifiersMap = new Dictionary<string, string>();
             private readonly HashSet<string> _definedIdentifiers = new HashSet<string>();
@@ -86,8 +92,8 @@ namespace Caravela.Framework.Impl.Templating
 
             public SyntaxToken DefineIdentifier( string name )
             {
-                string targetName = name;
-                int i = 0;
+                var targetName = name;
+                var i = 0;
                 while ( this.IsDefined( targetName ) )
                 {
                     i++;

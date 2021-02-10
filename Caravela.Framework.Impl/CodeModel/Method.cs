@@ -98,12 +98,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IReadOnlyList<ISymbol> IMethodInternal.LookupSymbols()
         {
-            if ( this._symbol.DeclaringSyntaxReferences.Length == 0 ) throw new InvalidOperationException();
+            if ( this._symbol.DeclaringSyntaxReferences.Length == 0 )
+            {
+                throw new InvalidOperationException();
+            }
 
             var syntaxReference = this._symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
             var methodBodyNode = ((BaseMethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
-            int lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
+            var lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
 
             return semanticModel.LookupSymbols( lookupPosition );
         }
@@ -114,7 +117,10 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             public Method Method { get; }
 
-            public MethodReturnParameter( Method method ) => this.Method = method;
+            public MethodReturnParameter( Method method )
+            {
+                this.Method = method;
+            }
 
             protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method._symbol.RefKind;
 

@@ -90,6 +90,7 @@ namespace Caravela.Framework.Impl.Templating
                 .AddArgumentListArguments( Argument( this.CreateLiteralExpression( node.Identifier.Text ) ) )
                 .WithTemplateAnnotationsFrom( node );
         }
+
         protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
         {
             // The base implementation is very verbose, so we use this one:
@@ -355,6 +356,7 @@ namespace Caravela.Framework.Impl.Templating
                                             IdentifierName( this._currentStatementListVariableName! ),
                                             IdentifierName( "ToArray" ) ) ) )
                                 .WithLeadingTrivia( this.GetIndentation() ) );
+                        
                         // Wrap in using(OpenTemplateLexicalScope())
                         var usingStatement = UsingStatement(
                             Block( this._currentMetaStatementList ) )
@@ -419,6 +421,7 @@ namespace Caravela.Framework.Impl.Templating
                 return Block();
             }
         }
+
         private IEnumerable<StatementSyntax> ToMetaStatements( in SyntaxList<StatementSyntax> statements )
             => statements.Select( this.ToMetaStatement );
 
@@ -477,7 +480,6 @@ namespace Caravela.Framework.Impl.Templating
                 throw new AssertionFailedException();
             }
         }
-
 
         public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
         {
@@ -583,7 +585,10 @@ namespace Caravela.Framework.Impl.Templating
 
         private ExpressionSyntax TransformTemplateDeclaratorIdentifier( SyntaxToken token )
         {
-            if ( token.Kind() != SyntaxKind.IdentifierToken ) throw new AssertionFailedException();
+            if ( token.Kind() != SyntaxKind.IdentifierToken )
+            {
+                throw new AssertionFailedException();
+            }
 
             return InvocationExpression(
                 IdentifierName( nameof( TemplateDeclaratorIdentifier ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]

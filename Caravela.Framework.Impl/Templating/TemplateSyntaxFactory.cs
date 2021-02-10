@@ -11,17 +11,31 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     public static class TemplateSyntaxFactory
     {
-        private static readonly SyntaxAnnotation flattenBlockAnnotation = new SyntaxAnnotation( "flatten" );
+        private static readonly SyntaxAnnotation _flattenBlockAnnotation = new SyntaxAnnotation( "flatten" );
 
-        [field: ThreadStatic]
-        internal static ITemplateExpansionContext? ExpansionContext { get; set; }
+        [ThreadStatic]
+        private static ITemplateExpansionContext? _expansionContext;
 
+        internal static ITemplateExpansionContext GetExpansionContext()
+        {
+            if ( _expansionContext == null )
+            {
+                throw new AssertionFailedException( "ExpansionContext cannot be null." );
+            }
+
+            return _expansionContext;
+        }
+
+        internal static void SetExpansionContext( ITemplateExpansionContext? value )
+        {
+            _expansionContext = value;
+        }
 
         public static BlockSyntax WithFlattenBlockAnnotation( this BlockSyntax block ) =>
-        block.WithAdditionalAnnotations( flattenBlockAnnotation );
+        block.WithAdditionalAnnotations( _flattenBlockAnnotation );
 
         public static bool HasFlattenBlockAnnotation( this BlockSyntax block ) =>
-            block.HasAnnotation( flattenBlockAnnotation );
+            block.HasAnnotation( _flattenBlockAnnotation );
 
         // ReSharper disable once UnusedMember.Global
         public static SeparatedSyntaxList<T> SeparatedList<T>( params T[] items )
@@ -32,16 +46,15 @@ namespace Caravela.Framework.Impl.Templating
             value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) =>
-            ExpansionContext.CreateReturnStatement( returnExpression );
+            GetExpansionContext().CreateReturnStatement( returnExpression );
 
         public static IDisposable OpenTemplateLexicalScope() =>
-            ExpansionContext.CurrentLexicalScope.OpenNestedScope();
+            GetExpansionContext().CurrentLexicalScope.OpenNestedScope();
 
         public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
-            ExpansionContext.CurrentLexicalScope.DefineIdentifier( text );
+            GetExpansionContext().CurrentLexicalScope.DefineIdentifier( text );
 
         public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
-            ExpansionContext.CurrentLexicalScope.CreateIdentifierName( name );
+            GetExpansionContext().CurrentLexicalScope.CreateIdentifierName( name );
     }
 }
-
