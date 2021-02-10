@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Templating
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
 
-            // The base implementation is very verbose, so we use this one. Also we may need to invoke our own genertor of unique identifier names.
+            // The base implementation is very verbose, so we use this one. Also we may need to invoke our own generator of unique identifier names.
             var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
             var isTemplateIdentifier = SymbolEqualityComparer.Default.Equals( identifierSymbol?.ContainingSymbol, this._rootTemplateSymbol );
             var nameOfIdentifierNameMethod = isTemplateIdentifier ? nameof( TemplateIdentifierName ) : nameof( IdentifierName );
