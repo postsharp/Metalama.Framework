@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class GenericParameter : IGenericParameter
+    internal class GenericParameter : IGenericParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public int Index => this._typeSymbol.Ordinal;
 
         [Memo]
-        public IImmutableList<IType> TypeConstraints => this._typeSymbol.ConstraintTypes.Select( t => this._compilation.SymbolMap.GetIType( t ) ).ToImmutableList();
+        public IImmutableList<IType> TypeConstraints => this._typeSymbol.ConstraintTypes.Select( t => this._compilation.SymbolMap.GetIType( t ) ).ToImmutableArray();
 
         public bool IsCovariant => this._typeSymbol.Variance == VarianceKind.Out;
 

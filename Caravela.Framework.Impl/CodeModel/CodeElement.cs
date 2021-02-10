@@ -12,6 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel
     internal interface ISourceCodeElement 
     {
         ISymbol Symbol { get; }
+        SourceCompilationModel Compilation { get; }
     }
 
     internal static class SourceCodeElementExtensions

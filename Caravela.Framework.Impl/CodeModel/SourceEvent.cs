@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override Method? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.SymbolMap.GetMethod( this._symbol.RaiseMethod );
 
         [Memo]
-        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableList();
+        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableArray();
 
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

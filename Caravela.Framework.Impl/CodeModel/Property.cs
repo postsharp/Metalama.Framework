@@ -2,12 +2,13 @@
 using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Property : Member, IProperty
+    internal abstract class Property : Member, IProperty, IEquatable<Property>
     {
         public abstract RefKind RefKind { get; }
 
@@ -32,5 +33,6 @@ namespace Caravela.Framework.Impl.CodeModel
         IMethod? IProperty.Setter => this.Setter;
 
         public abstract Method? Setter { get; }
+        
     }
 }

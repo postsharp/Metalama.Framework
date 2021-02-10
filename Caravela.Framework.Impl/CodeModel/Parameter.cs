@@ -1,67 +1,41 @@
 ﻿using System;
-using System.Linq;
 using Caravela.Framework.Code;
-
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Parameter : IParameter
+    internal abstract class Parameter : IParameter, IEquatable<Parameter>
     {
-        private readonly IParameterSymbol _symbol;
 
-        public IParameterSymbol Symbol => this._symbol;
-
-        private readonly CodeElement _containingMember;
-
-        private SymbolMap SymbolMap => this._containingMember.SymbolMap;
-
-        public Parameter( IParameterSymbol symbol, CodeElement containingMember )
-        {
-            this._symbol = symbol;
-            this._containingMember = containingMember;
-        }
-
-        public RefKind RefKind => this._symbol.RefKind switch
-        {
-            Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
-            Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
-            Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
-            Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
-            _ => throw new InvalidOperationException( $"Roslyn RefKind {this._symbol.RefKind} not recognized." )
-        };
-
+        public abstract RefKind RefKind { get; }
         public bool IsByRef => this.RefKind != RefKind.None;
 
         public bool IsRef => this.RefKind == RefKind.Ref;
 
         public bool IsOut => this.RefKind == RefKind.Out;
+        public abstract IType Type { get; }
+        public abstract string? Name { get; }
+        public abstract int Index { get; }
+        public abstract bool HasDefaultValue { get; }
 
-        [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
+        public abstract object? DefaultValue { get; }
 
-        public string Name => this._symbol.Name;
 
-        public int Index => this._symbol.Ordinal;
-
-        public CodeElement? ContainingElement => this._containingMember;
+        public abstract CodeElement? ContainingElement { get; }
         
         IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
 
         ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
-        [Memo]
-        public IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToList();
+        public abstract IReadOnlyList<Attribute> Attributes { get; }
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        public bool HasDefaultValue => this._symbol.HasExplicitDefaultValue;
 
-        public object? DefaultValue => this._symbol.ExplicitDefaultValue;
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
-        bool IEquatable<ICodeElement>.Equals( ICodeElement other ) => throw new NotImplementedException();
+        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+        bool IEquatable<ICodeElement>.Equals( ICodeElement other ) => other is Parameter p && this.Equals( p );
+        public abstract bool Equals( Parameter other );
     }
 }

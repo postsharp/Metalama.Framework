@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override Method Constructor => this.Compilation.SymbolMap.GetMethod( this._data.AttributeConstructor! );
 
         [Memo]
-        public override IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableList();
+        public override IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
         public override IReadOnlyDictionary<string, object?> NamedArguments => this._data.NamedArguments.ToImmutableDictionary( kvp => kvp.Key, kvp => this.Translate( kvp.Value ) );

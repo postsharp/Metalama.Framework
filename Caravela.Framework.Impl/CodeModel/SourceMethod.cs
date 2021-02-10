@@ -36,10 +36,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public override IReadOnlyList<GenericParameter> GenericParameters =>
-            this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
+            this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableArray();
 
         [Memo]
-        public override IReadOnlyList<Parameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableList<Parameter>();
+        public override IReadOnlyList<Parameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableArray<Parameter>();
 
         [Memo]
         public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch
@@ -85,10 +85,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 .OfType<LocalFunctionStatementSyntax>()
                 .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
                 .Select( s => this.Compilation.SymbolMap.GetMethod( s ) )
-                .ToImmutableList();
+                .ToImmutableArray();
 
         [Memo]
-        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( a, this.Compilation.SymbolMap ) ).ToImmutableList();
+        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( a, this.Compilation.SymbolMap ) ).ToImmutableArray();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -120,7 +120,7 @@ namespace Caravela.Framework.Impl.CodeModel
             public override CodeElement? ContainingElement => this.Method;
 
             [Memo]
-            public override IImmutableList<IAttribute> Attributes =>
+            public override IReadOnlyList<Attribute> Attributes =>
                 this.Method._symbol.GetReturnTypeAttributes().Select( a => new Attribute( a, this.Method.SymbolMap ) ).ToImmutableReactive();
         }
     }

@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Transformations
                 .OfType<IntroducedElement>()
                 .GroupBy( i => i.ContainingElement )
-                .ToDictionary( g => g.Key, g => (IReadOnlyList<IntroducedElement>) g.ToImmutableList() );
+                .ToDictionary( g => g.Key, g => (IReadOnlyList<IntroducedElement>) g.ToImmutableArray() );
 
 
 

@@ -36,6 +36,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the named arguments (either fields or properties) of the attribute.
         /// </summary>
+        // TODO: it cannot ve a dictionary because the ordering of assignments must be preserved.
         IReadOnlyDictionary<string, object?> NamedArguments { get; }
     }
 }

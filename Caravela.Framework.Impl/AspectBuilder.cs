@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
         {
             this.TargetDeclaration = targetDeclaration;
-            this._declarativeAdvices = declarativeAdvices.ToImmutableList();
+            this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._adviceFactory = adviceFactory;
         }
 

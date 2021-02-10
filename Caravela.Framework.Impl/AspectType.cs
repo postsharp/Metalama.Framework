@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
         {
             this.Name = name;
             this.AspectDriver = aspectDriver;
-            this.Parts = partNames.Select( partName => new AspectPart( this, partName ) ).ToImmutableList();
+            this.Parts = partNames.Select( partName => new AspectPart( this, partName ) ).ToImmutableArray();
         }
     }
 }

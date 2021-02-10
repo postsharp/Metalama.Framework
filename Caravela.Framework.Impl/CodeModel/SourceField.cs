@@ -8,7 +8,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class SourceField : Field, ISourceCodeElement
+    internal sealed class SourceField : Property, ISourceCodeElement
     {
         private readonly IFieldSymbol _symbol;
 

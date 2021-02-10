@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl
         {
             if ( namedType is SourceNamedType sourceNamedType )
             {
-                return sourceNamedType.TypeSymbol;
+                return sourceNamedType.Symbol;
             }
             else
             {
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl
         {
             if ( type is ISourceType sourceNamedType )
             {
-                return sourceNamedType.TypeSymbol;
+                return sourceNamedType.Symbol;
             }
             else
             {

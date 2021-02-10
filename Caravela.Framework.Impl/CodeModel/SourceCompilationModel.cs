@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -38,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReadOnlyList<Attribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                .Select( a => new SourceAttribute( a, this.SymbolMap ) )
+                .Select( a => new SourceAttribute( this, a ) )
                 .ToList();
 
         public override INamedType? GetTypeByReflectionName( string reflectionName )

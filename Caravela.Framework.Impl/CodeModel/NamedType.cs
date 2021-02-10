@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IImmutableList<Method> Methods
             => this.Members.OfType<Method>()
                 .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
-                .ToImmutableList();
+                .ToImmutableArray();
 
         IReadOnlyList<IMethod> INamedType.InstanceConstructors => this.InstanceConstructors;
 
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IImmutableList<Method> InstanceConstructors
             => this.Members.OfType<Method>()
                 .Where( m => m.MethodKind == MethodKind.Constructor )
-                .ToImmutableList();
+                .ToImmutableArray();
 
         [Memo]
         public IMethod StaticConstructor => this.Members.OfType<IMethod>()

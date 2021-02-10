@@ -61,17 +61,17 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableArray();
 
         [Memo]
-        public override IReadOnlyList<ITypeInternal> GenericArguments => this._symbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
+        public override IReadOnlyList<ITypeInternal> GenericArguments => this._symbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableArray();
 
         [Memo]
         public override IReadOnlyList<Attribute> Attributes =>
-            this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableList();
+            this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableArray();
 
         [Memo]
         public override NamedType? BaseType => this._symbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this._symbol.BaseType );
 
         [Memo]
-        public override IReadOnlyList<NamedType> ImplementedInterfaces => this._symbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableList();
+        public override IReadOnlyList<NamedType> ImplementedInterfaces => this._symbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch

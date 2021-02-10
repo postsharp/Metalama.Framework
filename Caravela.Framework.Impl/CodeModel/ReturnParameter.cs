@@ -1,6 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Code;
-
+using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract CodeElement? ContainingElement { get; }
 
-        public abstract IImmutableList Attributes { get; }
+        public abstract IReadOnlyList<Attribute> Attributes { get; }
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 

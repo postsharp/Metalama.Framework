@@ -8,11 +8,12 @@ namespace Caravela.Framework.Impl.CodeModel
         
     }
 
+
     /// <summary>
-    /// Represents a type that is backed by source code, and therefore has a <see cref="TypeSymbol"/>.
+    /// Represents a type that is backed by source code, and therefore has a <see cref="Symbol"/>.
     /// </summary>
     internal interface ISourceType : ITypeInternal
     {
-        ITypeSymbol TypeSymbol { get; }
+        ITypeSymbol Symbol { get; }
     }
 }

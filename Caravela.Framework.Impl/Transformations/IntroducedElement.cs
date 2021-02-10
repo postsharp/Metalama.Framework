@@ -75,10 +75,10 @@ namespace Caravela.Framework.Impl.Transformations
         public IImmutableList<IMethod> LocalFunctions => this.TemplateMethod!.LocalFunctions;
 
         [Memo]
-        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select( x => (IParameter) new IntroducedParameter( this.Advice, this, x ) ).ToImmutableList();
+        public IImmutableList<IParameter> Parameters => this.TemplateMethod!.Parameters!.Select( x => (IParameter) new IntroducedParameter( this.Advice, this, x ) ).ToImmutableArray();
 
         [Memo]
-        public IImmutableList<IGenericParameter> GenericParameters => this.TemplateMethod!.GenericParameters!.Select( x => (IGenericParameter) new IntroducedGenericParameter( this.Advice, this, x ) ).ToImmutableList();
+        public IImmutableList<IGenericParameter> GenericParameters => this.TemplateMethod!.GenericParameters!.Select( x => (IGenericParameter) new IntroducedGenericParameter( this.Advice, this, x ) ).ToImmutableArray();
 
         public Code.MethodKind MethodKind => this.TemplateMethod!.MethodKind;
 

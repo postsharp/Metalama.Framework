@@ -17,10 +17,11 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ITypeSymbol, ITypeInternal> _typeCache = new ( SymbolEqualityComparer.Default );
+        
         private readonly ConcurrentDictionary<IMethodSymbol, Method> _methodCache = new ( SymbolEqualityComparer.Default );
 
-        internal ITypeInternal GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this._compilation ) );
+        internal ITypeInternal GetIType( ITypeSymbol typeSymbol ) => this._typeCache.GetOrAdd( typeSymbol, ts => this.CreateIType( ts, this._compilation ) );
 
         internal NamedType GetNamedType( INamedTypeSymbol typeSymbol ) => (NamedType) this._typeCache.GetOrAdd( typeSymbol, ts => new SourceNamedType( this._compilation, ( INamedTypeSymbol) ts ) );
 
@@ -35,6 +36,17 @@ namespace Caravela.Framework.Impl.CodeModel
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method => this.GetMethod( method ),
                 _ => throw new ArgumentException( nameof( symbol ) )
+            };
+        
+        private ITypeInternal CreateIType( ITypeSymbol typeSymbol, SourceCompilationModel compilation ) =>
+            typeSymbol switch
+            {
+                INamedTypeSymbol namedType => new SourceNamedType( compilation, namedType ),
+                IArrayTypeSymbol arrayType => new SourceArrayType( compilation, arrayType ),
+                IPointerTypeSymbol pointerType => new SourcePointerType( compilation, pointerType ),
+                ITypeParameterSymbol typeParameter => new SourceGenericParameter( compilation, typeParameter),
+                IDynamicTypeSymbol dynamicType => new SourceDynamicType( compilation, dynamicType ),
+                _ => throw new NotImplementedException()
             };
     }
 }
