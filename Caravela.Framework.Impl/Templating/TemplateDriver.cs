@@ -30,14 +30,14 @@ namespace Caravela.Framework.Impl.Templating
 
             TemplateContext.target = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, templateExpansionContext.Compilation );
             TemplateContext.ProceedImpl = templateExpansionContext.ProceedImplementation;
-            TemplateHelper.ExpansionContext = templateExpansionContext;
+            TemplateSyntaxFactory.ExpansionContext = templateExpansionContext;
 
             var output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
             TemplateContext.target = null;
             TemplateContext.ProceedImpl = null;
-            TemplateHelper.ExpansionContext = null;
+            TemplateSyntaxFactory.ExpansionContext = null;
 
             return result;
         }

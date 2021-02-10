@@ -22,12 +22,6 @@ class Aspect
             Console.WriteLine(x);
         }
         
-        if (target.Parameters.Count > 1)
-        {
-            var x = 1;
-            Console.WriteLine(x);
-        }
-        
         foreach(var p in target.Parameters)
         {
             var y = 0;
@@ -42,20 +36,26 @@ class Aspect
         private const string RunTimeDeclaratorInCompileTimeBlock_Target = @"
 class TargetCode
 {
-    int Method(int a, int b)
+    int Method(int a)
     {
-        return a + b;
+        return a;
     }
 }
 ";
 
-        private const string RunTimeDeclaratorInCompileTimeBlock_ExpectedOutput = @"";
+        private const string RunTimeDeclaratorInCompileTimeBlock_ExpectedOutput = @"{
+    var x = 0;
+    Console.WriteLine(x);
+    var y = 0;
+    Console.WriteLine(y);
+    return a;
+}";
 
         [Fact]
         public async Task RunTimeDeclaratorInCompileTimeBlock()
         {
             var testResult = await this._testRunner.Run( new TestInput( RunTimeDeclaratorInCompileTimeBlock_Template, RunTimeDeclaratorInCompileTimeBlock_Target ) );
-            testResult.AssertDiagnosticId( TemplatingDiagnosticDescriptors.LocalVariableAmbiguousCoercion.Id );
+            testResult.AssertOutput( RunTimeDeclaratorInCompileTimeBlock_ExpectedOutput );
         }
     }
 }

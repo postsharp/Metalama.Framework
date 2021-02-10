@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
+using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -724,7 +724,7 @@ namespace Caravela.Framework.Impl.Templating
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         createBlock,
-                        IdentifierName( nameof( TemplateHelper.WithFlattenBlockAnnotation ) ) ) );
+                        IdentifierName( nameof( TemplateSyntaxFactory.WithFlattenBlockAnnotation ) ) ) );
             }
         }
 
@@ -752,7 +752,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateHelper.TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                    IdentifierName( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) ).AddArgumentListArguments(
                         Argument( this.Transform( node.Expression ) )
                     );
             }
