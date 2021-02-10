@@ -32,17 +32,16 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var targetMethod = (IMethod) templateExpansionContext.TargetDeclaration;
+            var templateContext = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, templateExpansionContext.Compilation );
 
-            TemplateContext.target = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, templateExpansionContext.Compilation );
-            TemplateContext.ProceedImpl = templateExpansionContext.ProceedImplementation;
-            TemplateSyntaxFactory.SetExpansionContext( templateExpansionContext );
+            TemplateContext.Initialize( templateContext, templateExpansionContext.ProceedImplementation );
+            TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
             var output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
-            TemplateContext.target = null;
-            TemplateContext.ProceedImpl = null;
-            TemplateSyntaxFactory.SetExpansionContext( null );
+            TemplateContext.Close();
+            TemplateSyntaxFactory.Close();
 
             return result;
         }

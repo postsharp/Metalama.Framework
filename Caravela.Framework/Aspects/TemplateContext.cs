@@ -13,20 +13,22 @@ namespace Caravela.Framework.Aspects
     [CompileTime]
     public static class TemplateContext
     {
-        [field: ThreadStatic]
-        internal static object? ProceedImpl { get; set; }
+        [ThreadStatic]
+        private static ITemplateContext? _target;
 
+        [ThreadStatic]
+        private static object? _proceedImplementation;
+
+        // TODO: update the exception message.
         private static InvalidOperationException NewInvalidOperationException() =>
-            new InvalidOperationException( "Code calling this method has to be compiled using Caravela." );
+            new InvalidOperationException( "Code accessing this member has to be compiled using Caravela." );
 
         /// <summary>
         /// Gets information about the element of code to which the template has been applied.
         /// </summary>
 #pragma warning disable IDE1006 // Naming Styles
-        [field: ThreadStatic]
-        [AllowNull]
         [TemplateKeyword]
-        public static ITemplateContext target { get; internal set; }
+        public static ITemplateContext target => _target ?? throw NewInvalidOperationException();
 
         /// <summary>
         /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
@@ -35,7 +37,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [Proceed]
-        public static dynamic proceed() => ProceedImpl ?? throw NewInvalidOperationException();
+        public static dynamic proceed() => _proceedImplementation ?? throw NewInvalidOperationException();
 
         /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted at compile time. This is typically used
@@ -49,5 +51,17 @@ namespace Caravela.Framework.Aspects
         public static T compileTime<T>( T expression ) => expression;
 
 #pragma warning restore IDE1006 // Naming Styles
+
+        internal static void Initialize( ITemplateContext templateContext, object proceedImplementation )
+        {
+            _target = templateContext;
+            _proceedImplementation = proceedImplementation;
+        }
+
+        internal static void Close()
+        {
+            _target = null;
+            _proceedImplementation = null;
+        }
     }
 }

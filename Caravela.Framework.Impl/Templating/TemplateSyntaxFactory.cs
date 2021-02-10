@@ -16,19 +16,16 @@ namespace Caravela.Framework.Impl.Templating
         [ThreadStatic]
         private static ITemplateExpansionContext? _expansionContext;
 
-        internal static ITemplateExpansionContext GetExpansionContext()
-        {
-            if ( _expansionContext == null )
-            {
-                throw new AssertionFailedException( "ExpansionContext cannot be null." );
-            }
+        internal static ITemplateExpansionContext ExpansionContext => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
-            return _expansionContext;
+        internal static void Initialize( ITemplateExpansionContext expansionContext )
+        {
+            _expansionContext = expansionContext;
         }
 
-        internal static void SetExpansionContext( ITemplateExpansionContext? value )
+        internal static void Close()
         {
-            _expansionContext = value;
+            _expansionContext = null;
         }
 
         public static BlockSyntax WithFlattenBlockAnnotation( this BlockSyntax block ) =>
@@ -46,15 +43,15 @@ namespace Caravela.Framework.Impl.Templating
             value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) =>
-            GetExpansionContext().CreateReturnStatement( returnExpression );
+            ExpansionContext.CreateReturnStatement( returnExpression );
 
         public static IDisposable OpenTemplateLexicalScope() =>
-            GetExpansionContext().CurrentLexicalScope.OpenNestedScope();
+            ExpansionContext.CurrentLexicalScope.OpenNestedScope();
 
         public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
-            GetExpansionContext().CurrentLexicalScope.DefineIdentifier( text );
+            ExpansionContext.CurrentLexicalScope.DefineIdentifier( text );
 
         public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
-            GetExpansionContext().CurrentLexicalScope.CreateIdentifierName( name );
+            ExpansionContext.CurrentLexicalScope.CreateIdentifierName( name );
     }
 }
