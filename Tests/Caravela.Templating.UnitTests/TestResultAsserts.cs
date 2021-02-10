@@ -10,8 +10,8 @@ namespace Caravela.Templating.UnitTests
     {
         public static void AssertOutput( this TestResult testResult, string expectedOutput )
         {
-            Assert.Null( testResult.TestErrorMessage );
-            Assert.Null( testResult.TestException );
+            Assert.Null( testResult.ErrorMessage );
+            Assert.Null( testResult.Exception );
 
             // Don't test output if we have an error.
             if ( testResult.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
