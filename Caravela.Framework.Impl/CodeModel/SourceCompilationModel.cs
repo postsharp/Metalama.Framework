@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Caravela.Framework.Aspects;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -25,17 +29,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public override IReadOnlyList<NamedType> DeclaredTypes =>
-            this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
+            this.RoslynCompilation.Assembly.GetTypes().Select( this.SymbolMap.GetNamedType ).ToList();
 
         [Memo]
-        public override IReadOnlyList<INamedType> DeclaredAndReferencedTypes =>
-            this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToImmutableReactive();
+        public override IReadOnlyList<NamedType> DeclaredAndReferencedTypes =>
+            this.RoslynCompilation.GetTypes().Select( this.SymbolMap.GetNamedType ).ToList();
 
         [Memo]
-        public override IReadOnlyList<IAttribute> Attributes =>
+        public override IReadOnlyList<Attribute> Attributes =>
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                 .Select( a => new SourceAttribute( a, this.SymbolMap ) )
-                .ToImmutableReactive();
+                .ToList();
 
         public override INamedType? GetTypeByReflectionName( string reflectionName )
         {
@@ -45,5 +49,25 @@ namespace Caravela.Framework.Impl.CodeModel
         }
         
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
+        
+        public IEnumerable<AspectInstance> GetAspectsFromAttributes(CompileTimeAssemblyLoader loader)
+        {
+            var iAspect = this.GetTypeByReflectionType( typeof( IAspect ) )!;
+
+            var codeElements = new ICodeElement[] { this }
+                .SelectDescendants( codeElement => codeElement switch
+                {
+                    ICompilation compilation => compilation.DeclaredTypes,
+                    INamedType namedType => namedType.NestedTypes.Union<ICodeElement>( namedType.Methods ).Union( namedType.Properties ).Union( namedType.Events ),
+                    IMethod method => method.LocalFunctions,
+                    _ => null
+                } );
+
+            return from codeElement in codeElements
+                from attribute in codeElement.Attributes
+                where attribute.Type.Is( iAspect )
+                let aspect = (IAspect) loader.CreateAttributeInstance( attribute )
+                select new AspectInstance( aspect, codeElement, attribute.Type );
+        }
     }
 }

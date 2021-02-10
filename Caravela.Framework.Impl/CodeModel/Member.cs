@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         INamedType? IMember.DeclaringType => this.DeclaringType;
 
-        public abstract NamedType? DeclaringType { get; };
+        public abstract NamedType? DeclaringType { get; }
 
         public override CodeElement? ContainingElement => this.DeclaringType;
     }

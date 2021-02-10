@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;

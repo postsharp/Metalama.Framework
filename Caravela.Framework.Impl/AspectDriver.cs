@@ -6,8 +6,9 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl
 
         private readonly ICompilation _compilation;
 
-        private readonly IReactiveCollection<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
+        private readonly IReadOnlyList<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
 
         public AspectDriver( INamedType aspectType, ICompilation compilation )
         {
@@ -28,26 +29,25 @@ namespace Caravela.Framework.Impl
             var iAdviceAttribute = compilation.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
-                from method in aspectType.Methods
+            (from method in aspectType.Methods
                 from attribute in method.Attributes
                 where attribute.Type.Is( iAdviceAttribute )
-                select (attribute, method);
+                select (attribute, method)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
         {
-            var aspect = aspectInstance.Aspect;
 
             return aspectInstance.CodeElement switch
             {
-                ICompilation compilation => this.EvaluateAspect( compilation, aspect ),
-                INamedType type => this.EvaluateAspect( type, aspect ),
-                IMethod method => this.EvaluateAspect( method, aspect ),
+                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance ),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
+        private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect )
             where T : class, ICodeElement
         {
             if ( aspect is not IAspect<T> aspectOfT )
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl
                 return new ( ImmutableList.Create( diagnostic ), ImmutableList.Create<IAdvice>(), ImmutableList.Create<AspectInstance>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.attribute, x.method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.attribute, x.method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private IAdvice CreateDeclarativeAdvice<T>( IAspect aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+        private IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
             where T : ICodeElement
         {
             return AdviceAttributeFactory.CreateAdvice( attribute, aspect, codeElement, templateMethod );

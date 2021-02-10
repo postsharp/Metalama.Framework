@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Reactive;
-using Caravela.Reactive.Implementation;
 using Microsoft.CodeAnalysis;
 using static System.Math;
 

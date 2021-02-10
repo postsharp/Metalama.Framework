@@ -2,12 +2,13 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>( this IAttribute attribute, IAspect aspect, T declaration, ICodeElement templateMethod )
+        public static IAdvice CreateAdvice<T>( this IAttribute attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
             where T : ICodeElement
         {
             switch ( attribute.Type.Name )

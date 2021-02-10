@@ -4,7 +4,8 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Reactive;
+using Caravela.Framework.Sdk;
+
 
 namespace Caravela.Framework.Impl
 {
@@ -12,13 +13,13 @@ namespace Caravela.Framework.Impl
     {
         private readonly ICompilation _compilation;
         private readonly INamedType _aspectType;
-        private readonly IAspect _aspect;
+        private readonly AspectInstance _aspect;
 
         private readonly List<IAdvice> _advices = new ();
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
-        public AdviceFactory( ICompilation compilation, INamedType aspectType, IAspect aspect )
+        public AdviceFactory( ICompilation compilation, INamedType aspectType, AspectInstance aspect )
         {
             this._compilation = compilation;
             this._aspectType = aspectType;

@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using MethodKind = Caravela.Framework.Code.MethodKind;

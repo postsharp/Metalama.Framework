@@ -24,11 +24,11 @@ namespace Caravela.Framework.Impl
         public IReadOnlyList<Advice> Advices { get; }
 
         
-        public AspectPartResult( CompilationModel compilation, CompileTimeAssemblyLoader loader )
+        public AspectPartResult( SourceCompilationModel compilation, CompileTimeAssemblyLoader loader )
             : this
             (compilation,
                 Array.Empty<Diagnostic>(),
-                  new AttributeAspectSource( compilation, loader ).GetAspects(),
+                  compilation.GetAspectsFromAttributes(loader).ToList(),
                   Array.Empty<Advice>() )
         {
         }

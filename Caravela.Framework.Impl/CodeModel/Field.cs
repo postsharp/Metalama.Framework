@@ -1,13 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : CodeElement, IProperty
+    internal sealed class Field : Member, IProperty
     {
         private readonly IFieldSymbol _symbol;
 

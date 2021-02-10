@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -46,9 +47,13 @@ namespace Caravela.Framework.Impl.CodeModel
         public int Index => this._symbol.Ordinal;
 
         public CodeElement? ContainingElement => this._containingMember;
+        
+        IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
+
+        ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
         [Memo]
-        public IImmutableList Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToList();
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
@@ -57,5 +62,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public object? DefaultValue => this._symbol.ExplicitDefaultValue;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
+        bool IEquatable<ICodeElement>.Equals( ICodeElement other ) => throw new NotImplementedException();
     }
 }

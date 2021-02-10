@@ -5,7 +5,7 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CodeElement? ContainingElement => this._parameter.ContainingElement;
 
-        public IImmutableList Attributes => this._parameter.Attributes;
+        public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 

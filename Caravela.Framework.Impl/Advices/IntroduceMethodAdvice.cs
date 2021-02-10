@@ -3,6 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Advices
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public Visibility? Visibility { get; set; }
 
-        public IntroduceMethodAdvice( IAspect aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
+        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
         }

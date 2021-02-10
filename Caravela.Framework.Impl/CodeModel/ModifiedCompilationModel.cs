@@ -3,7 +3,7 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,9 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel
             this._transformations = transformations;
         }
 
-        public override IReadOnlyList<INamedType> DeclaredTypes => this._originalCompilation.DeclaredTypes;
+        public override IReadOnlyList<NamedType> DeclaredTypes => this._originalCompilation.DeclaredTypes;
 
-        public override IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
+        public override IReadOnlyList<NamedType> DeclaredAndReferencedTypes => this._originalCompilation.DeclaredAndReferencedTypes;
 
         public override IReadOnlyList<Attribute> Attributes => this._originalCompilation.Attributes;
 
@@ -58,9 +58,9 @@ namespace Caravela.Framework.Impl.CodeModel
             private readonly List<IntroducedMethod> _introducedMethods;
             private readonly List<OverriddenMethod> _overriddenMethods;
 
-            public CompilationRewriter( ICompilation baseCompilation, IReactiveCollection<Transformation> transformations )
+            public CompilationRewriter( ICompilation baseCompilation, IEnumerable<Transformation> transformations )
             {
-                var transformationList = (IList<Transformation>) transformations.Materialize().GetValue().ToList();
+                var transformationList = transformations.ToList();
 
                 this._baseCompilation = baseCompilation;
                 this._introducedMethods = transformationList.OfType<IntroducedMethod>().ToList();

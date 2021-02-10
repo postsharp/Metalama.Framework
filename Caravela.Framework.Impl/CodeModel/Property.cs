@@ -1,8 +1,9 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -56,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType DeclaringType => this._containingElement;
 
         [Memo]
-        public override IImmutableList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
+        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
 
         public override CodeElementKind ElementKind => CodeElementKind.Property;
     }

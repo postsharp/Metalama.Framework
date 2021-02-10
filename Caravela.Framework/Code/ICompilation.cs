@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Caravela.Framework.Collections;
+using System;
 using System.Collections.Generic;
 using Caravela.Framework.Project;
-using Caravela.Reactive;
+
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Code
 
         IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
-        IReadOnlyDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
+        IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
 
         /// <summary>
         /// Get type based on its full name, as used in reflection.

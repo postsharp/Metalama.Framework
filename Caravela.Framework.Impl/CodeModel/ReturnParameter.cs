@@ -1,6 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
+
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel

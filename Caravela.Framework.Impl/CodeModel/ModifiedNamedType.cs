@@ -1,25 +1,22 @@
-// unset
-
-using Caravela.Framework.Code;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    
-    
+
     internal sealed class ModifiedNamedType : NamedType
     {
         private NamedType _prototype;
         private CompilationModel _compilation;
         
         [Memo]
-        public override IImmutableList<Member> Members =>
+        public override IReadOnlyList<Member> Members =>
             this._prototype.Members.
                 Union( this._compilation.IntroductionsByContainingElement[this].OfType<Member>() )
-                .ToImmutableList();
+                .ToImmutableArray();
 
         public override bool IsAbstract => this._prototype.IsAbstract;
 
@@ -27,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override NamedType? BaseType => this._prototype.BaseType;
 
-        public override IImmutableList<NamedType> ImplementedInterfaces => this._prototype.ImplementedInterfaces;
+        public override IReadOnlyList<NamedType> ImplementedInterfaces => this._prototype.ImplementedInterfaces;
 
         public override string Name => this._prototype.Name;
 
@@ -37,15 +34,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override TypeKind TypeKind => this._prototype.TypeKind;
 
-        public override IReadOnlyList<IType> GenericArguments => this._prototype.GenericArguments;
+        public override IReadOnlyList<ITypeInternal> GenericArguments => this._prototype.GenericArguments;
 
-        public override IImmutableList<GenericParameter> GenericParameters => this._prototype.GenericParameters;
+        public override IReadOnlyList<GenericParameter> GenericParameters => this._prototype.GenericParameters;
 
-        public override IImmutableList<NamedType> NestedTypes => this._prototype.NestedTypes;
+        public override IReadOnlyList<NamedType> NestedTypes => this._prototype.NestedTypes;
 
         public override CodeElement? ContainingElement => this._prototype.ContainingElement;
 
-        public override IImmutableList<Attribute> Attributes => this._prototype.Attributes;
+        public override IReadOnlyList<Attribute> Attributes => this._prototype.Attributes;
 
         public override bool Is( IType other ) => this._prototype.Is(other);
 
@@ -58,5 +55,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public override INamedType MakeGenericType( params IType[] genericArguments ) => this._prototype.MakeGenericType( genericArguments );
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        public override bool Equals( ICodeElement other ) => this._prototype.Equals( other );
     }
 }

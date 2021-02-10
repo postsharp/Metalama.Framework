@@ -8,9 +8,9 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using MoreLinq;
 
 namespace Caravela.Framework.Impl
 {
@@ -40,16 +40,16 @@ namespace Caravela.Framework.Impl
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
 
-                var pipelineStageResult = new PipelineStageResult( roslynCompilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>().ToImmutableReactive() );
+                var pipelineStageResult = new PipelineStageResult( roslynCompilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>() );
 
                 var stages = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
                     .SelectMany(
                         at => at.Parts,
                         ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
-                    .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
-                    .Select( g => CreateStage( g.Key, g.GetValue(), compilation, compileTimeAssemblyLoader ) )
-                    .GetValue( default );
+                    .OrderBy( x => x, aspectPartDataComparer )
+                    .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
+                    .Select( g => CreateStage( g.Key, g, compilation, compileTimeAssemblyLoader ) );
 
                 foreach ( var stage in stages )
                 {
@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static IReactiveCollection<INamedType> GetAspectTypes( SourceCompilationModel compilation )
+        private static IEnumerable<INamedType> GetAspectTypes( SourceCompilationModel compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 

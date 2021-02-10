@@ -23,8 +23,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
 
-        public Event( NamedType containingElement ) : base( containingElement )
-        {
-        }
+    
     }
 }
