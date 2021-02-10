@@ -38,7 +38,7 @@ class Aspect
 }
 ";
 
-        private const string CompileTmeDeclaratorInCompileTimeBlock_Target = @"
+        private const string CompileTimeDeclaratorInCompileTimeBlock_Target = @"
 class TargetCode
 {
     int Method(int a, int b)
