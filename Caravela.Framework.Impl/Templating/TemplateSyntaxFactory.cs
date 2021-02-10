@@ -49,9 +49,9 @@ namespace Caravela.Framework.Impl.Templating
             ExpansionContext.CurrentLexicalScope.OpenNestedScope();
 
         public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
-            ExpansionContext.CurrentLexicalScope.DefineIdentifier( text );
+            SyntaxFactory.Identifier( ExpansionContext.CurrentLexicalScope.DefineIdentifier( text ) );
 
         public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
-            ExpansionContext.CurrentLexicalScope.CreateIdentifierName( name );
+            SyntaxFactory.IdentifierName( ExpansionContext.CurrentLexicalScope.TranslateIdentifierName( name ) );
     }
 }

@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                public SyntaxToken DefineIdentifier( string name )
+                public string DefineIdentifier( string name )
                 {
                     var targetName = name;
                     var i = 0;
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Templating
                     return Identifier( targetName );
                 }
 
-                public IdentifierNameSyntax CreateIdentifierName( string name )
+                public string TranslateIdentifierName( string name )
                 {
                     if ( this._templateToTargetIdentifiersMap.TryGetValue( name, out var targetName ) )
                     {
@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.Templating
 
                     if ( this._parentScope != null )
                     {
-                        return this._parentScope.CreateIdentifierName( name );
+                        return this._parentScope.TranslateIdentifierName( name );
                     }
 
                     return IdentifierName( name );
