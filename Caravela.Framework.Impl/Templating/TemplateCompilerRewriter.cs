@@ -356,7 +356,7 @@ namespace Caravela.Framework.Impl.Templating
                                             IdentifierName( this._currentStatementListVariableName! ),
                                             IdentifierName( "ToArray" ) ) ) )
                                 .WithLeadingTrivia( this.GetIndentation() ) );
-                        
+
                         // Wrap in using(OpenTemplateLexicalScope())
                         var usingStatement = UsingStatement(
                             Block( this._currentMetaStatementList ) )
@@ -718,7 +718,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( expressionType == null )
                 {
                     // We need the expression type.
-                    throw new Exception();
+                    throw new AssertionFailedException( "The type of the return expression was not found." );
                 }
 
                 return InvocationExpression(

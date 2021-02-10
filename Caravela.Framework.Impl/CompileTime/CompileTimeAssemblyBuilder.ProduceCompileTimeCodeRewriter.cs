@@ -15,17 +15,6 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
-            private readonly TemplateCompiler _templateCompiler;
-
-            public bool FoundCompileTimeCode { get; private set; }
-
-            public ProduceCompileTimeCodeRewriter( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, Compilation compilation )
-                : base( symbolClassifier, compilation )
-            {
-                this._templateCompiler = templateCompiler;
-            }
-
-            private bool _addTemplateUsings;
             private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = ParseCompilationUnit( @"
 using System;
 using System.Collections.Generic;
@@ -37,6 +26,18 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 " ).Usings;
+
+            private readonly TemplateCompiler _templateCompiler;
+
+            public bool FoundCompileTimeCode { get; private set; }
+
+            public ProduceCompileTimeCodeRewriter( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, Compilation compilation )
+                : base( symbolClassifier, compilation )
+            {
+                this._templateCompiler = templateCompiler;
+            }
+
+            private bool _addTemplateUsings;
 
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
