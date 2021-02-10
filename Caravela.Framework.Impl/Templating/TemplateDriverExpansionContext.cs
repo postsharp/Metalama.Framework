@@ -47,10 +47,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // TODO: validate the returnExpression according to the method's return type.
-            // TODO: how to report diagnostics from the template invocation?
-            //throw new CaravelaException(
-            //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
-            //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
@@ -58,24 +54,26 @@ namespace Caravela.Framework.Impl.Templating
         class TemplateDriverLexicalScope : ITemplateExpansionLexicalScope
         {
             private readonly Dictionary<string, string> _templateToTargetIdentifiersMap = new Dictionary<string, string>();
-            private readonly HashSet<string> _definedIdentifiers;
-            private readonly ITemplateExpansionLexicalScope? _parentScope;
+            private readonly HashSet<string> _definedIdentifiers = new HashSet<string>();
+            private readonly TemplateDriverLexicalScope? _parentScope;
+            private readonly List<TemplateDriverLexicalScope> _nestedScopes = new List<TemplateDriverLexicalScope>();
             private readonly TemplateDriverExpansionContext _expansionContext;
 
             public TemplateDriverLexicalScope( TemplateDriverExpansionContext expansionContext, IMethodInternal methodInternal )
-                : this( expansionContext )
             {
+                this._expansionContext = expansionContext;
+                this._parentScope = null;
+
                 foreach ( var symbolName in methodInternal.LookupSymbols().Select( s => s.Name ) )
                 {
                     this._definedIdentifiers.Add( symbolName );
                 }
             }
 
-            private TemplateDriverLexicalScope( TemplateDriverExpansionContext expansionContext )
+            private TemplateDriverLexicalScope( TemplateDriverLexicalScope parentScope )
             {
-                this._expansionContext = expansionContext;
-                this._definedIdentifiers = new HashSet<string>();
-                this._parentScope = expansionContext.CurrentLexicalScope;
+                this._expansionContext = parentScope._expansionContext;
+                this._parentScope = parentScope;
             }
 
             public void Dispose()
@@ -90,7 +88,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 string targetName = name;
                 int i = 0;
-                while ( this._definedIdentifiers.Contains( targetName ) )
+                while ( this.IsDefined( targetName ) )
                 {
                     i++;
                     targetName = $"{name}_{i}";
@@ -104,20 +102,53 @@ namespace Caravela.Framework.Impl.Templating
 
             public IdentifierNameSyntax CreateIdentifierName( string name )
             {
-                string targetName;
-                if ( !this._templateToTargetIdentifiersMap.TryGetValue( name, out targetName ) )
+                if ( this._templateToTargetIdentifiersMap.TryGetValue( name, out var targetName ) )
                 {
-                    targetName = name;
+                    return IdentifierName( targetName );
                 }
 
-                return IdentifierName( targetName );
+                if ( this._parentScope != null)
+                {
+                    return this._parentScope.CreateIdentifierName( name );
+                }
+
+                return IdentifierName( name );
             }
 
             public ITemplateExpansionLexicalScope OpenNestedScope()
             {
-                var nestedScope = new TemplateDriverLexicalScope( this._expansionContext );
+                var nestedScope = new TemplateDriverLexicalScope( this );
+                this._nestedScopes.Add( nestedScope );
                 this._expansionContext.CurrentLexicalScope = nestedScope;
                 return nestedScope;
+            }
+
+            private bool IsDefined( string name )
+            {
+                return this._definedIdentifiers.Contains( name ) || this.IsDefinedInParent( name ) || this.IsDefinedInNested( name );
+            }
+
+            private bool IsDefinedInParent( string name )
+            {
+                if ( this._parentScope == null )
+                {
+                    return false;
+                }
+
+                return this._parentScope._definedIdentifiers.Contains( name ) || this._parentScope.IsDefinedInParent( name );
+            }
+
+            private bool IsDefinedInNested( string name )
+            {
+                foreach ( var nestedScope in this._nestedScopes )
+                {
+                    if ( nestedScope._definedIdentifiers.Contains( name ) || nestedScope.IsDefinedInNested( name ) )
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
     }
