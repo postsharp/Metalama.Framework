@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns>
         /// An identifier name in the current lexical scope.
         /// </returns>
-        string TranslateIdentifierName( string name );
+        string LookupIdentifier( string name );
 
         /// <summary>
         /// Opens a new lexical scope which is nested within the current scope.

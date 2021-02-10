@@ -52,6 +52,6 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxFactory.Identifier( ExpansionContext.CurrentLexicalScope.DefineIdentifier( text ) );
 
         public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
-            SyntaxFactory.IdentifierName( ExpansionContext.CurrentLexicalScope.TranslateIdentifierName( name ) );
+            SyntaxFactory.IdentifierName( ExpansionContext.CurrentLexicalScope.LookupIdentifier( name ) );
     }
 }

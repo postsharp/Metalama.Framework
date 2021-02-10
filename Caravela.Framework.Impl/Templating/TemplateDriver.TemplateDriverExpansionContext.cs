@@ -105,22 +105,22 @@ namespace Caravela.Framework.Impl.Templating
                     this._definedIdentifiers.Add( targetName );
                     this._templateToTargetIdentifiersMap[name] = targetName;
 
-                    return Identifier( targetName );
+                    return targetName;
                 }
 
-                public string TranslateIdentifierName( string name )
+                public string LookupIdentifier( string name )
                 {
                     if ( this._templateToTargetIdentifiersMap.TryGetValue( name, out var targetName ) )
                     {
-                        return IdentifierName( targetName );
+                        return targetName;
                     }
 
                     if ( this._parentScope != null )
                     {
-                        return this._parentScope.TranslateIdentifierName( name );
+                        return this._parentScope.LookupIdentifier( name );
                     }
 
-                    return IdentifierName( name );
+                    return name;
                 }
 
                 public ITemplateExpansionLexicalScope OpenNestedScope()

@@ -29,7 +29,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(System.Runtime.CompilerServices.DynamicAttribute).Assembly,
                             typeof(SyntaxFactory).Assembly,
                             typeof(Framework.Aspects.TemplateContext).Assembly,
-                            typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly
+                            typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly,
                             typeof(Reactive.IReactiveCollection<>).Assembly
                         },
                         imports: new[]

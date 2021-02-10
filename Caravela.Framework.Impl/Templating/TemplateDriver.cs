@@ -17,9 +17,6 @@ namespace Caravela.Framework.Impl.Templating
         {
             this._templateMethod = templateMethodInfo;
         }
-        {
-            this._templateMethod = templateMethodInfo;
-        }
 
         [Obsolete( "Call a method with ITemplateExpansionContext parameter instead." )]
         public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
@@ -44,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode output;
             try
             {
-	            var output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
             }
             catch (TargetInvocationException ex) when (ex.InnerException != null)
             {
