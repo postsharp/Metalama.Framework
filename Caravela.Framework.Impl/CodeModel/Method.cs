@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var syntaxReference = this._symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-            var methodBodyNode = ((MethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
+            var methodBodyNode = ((BaseMethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
             int lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
 
             return semanticModel.LookupSymbols( lookupPosition );
