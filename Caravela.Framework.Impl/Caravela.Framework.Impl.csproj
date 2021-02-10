@@ -6,6 +6,8 @@
     <PackageDescription>
       PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
     </PackageDescription>
+    <!-- The Impl assembly shouldn't be publicly documented. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

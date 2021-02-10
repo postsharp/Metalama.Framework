@@ -38,7 +38,7 @@ namespace Caravela.TestFramework
 
             if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
-                result.TestErrorMessage = "Initial diagnostics failed.";
+                result.ErrorMessage = "Initial diagnostics failed.";
                 return result;
             }
 
@@ -47,14 +47,14 @@ namespace Caravela.TestFramework
                 var aspectPipeline = new AspectPipeline();
                 var resultCompilation = aspectPipeline.Execute( new AspectTestPipelineContext( initialCompilation, result ) );
 
-                var formattedOutput = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
-                result.TemplateOutputSource = formattedOutput.GetText();
+                result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
+                result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
 
                 return result;
             }
             catch ( Exception exception )
             {
-                result.TestErrorMessage = exception.ToString();
+                result.ErrorMessage = exception.ToString();
                 return result;
             }
         }

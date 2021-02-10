@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl
             var newCompilation = new ModifiedCompilation( this.Compilation, addedAdvices );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
-            return new( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources );
+            return new( newDiagnostics, this.Resources, newCompilation, newAspectSources );
         }
     }
 }
