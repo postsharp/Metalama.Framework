@@ -5,7 +5,7 @@
         None,
 
         /// <summary>
-        /// <c>ref</c>
+        /// <c>ref</c>.
         /// </summary>
         Ref,
 
@@ -20,7 +20,7 @@
         RefReadonly = In,
 
         /// <summary>
-        /// <c>out</c>
+        /// <c>out</c>.
         /// </summary>
         Out
     }

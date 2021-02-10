@@ -6,6 +6,9 @@ namespace Caravela.Framework.Impl.Advices
     {
         public IAdvice Advice { get; }
 
-        public AdviceInstance( IAdvice advice ) => this.Advice = advice;
+        public AdviceInstance( IAdvice advice )
+        {
+            this.Advice = advice;
+        }
     }
 }

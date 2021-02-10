@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
 
         private readonly ICompilation _compilation;
 
-        private readonly IReactiveCollection<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
+        private readonly IReactiveCollection<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
 
         public AspectDriver( INamedType aspectType, ICompilation compilation )
         {
@@ -56,10 +56,10 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new ( ImmutableList.Create( diagnostic ), ImmutableList.Create<AdviceInstance>(), ImmutableList.Create<AspectInstance>() );
+                return new( ImmutableList.Create( diagnostic ), ImmutableList.Create<AdviceInstance>(), ImmutableList.Create<AspectInstance>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.attribute, x.method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );

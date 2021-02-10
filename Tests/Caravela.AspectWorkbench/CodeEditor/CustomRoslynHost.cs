@@ -30,6 +30,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(SyntaxFactory).Assembly,
                             typeof(Framework.Aspects.TemplateContext).Assembly,
                             typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly
+                            typeof(Reactive.IReactiveCollection<>).Assembly
                         },
                         imports: new[]
                         {

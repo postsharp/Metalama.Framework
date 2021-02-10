@@ -27,7 +27,9 @@ namespace Caravela.Framework.Impl
 
         public AspectCompilation( BaseCompilation compilation, CompileTimeAssemblyLoader loader )
             : this(
-                  Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), compilation,
+                  Array.Empty<Diagnostic>(),
+                  Array.Empty<ResourceDescription>(),
+                  compilation,
                   ImmutableList.Create<AspectSource>( new AttributeAspectSource( compilation, loader ) ) )
         {
         }
@@ -49,7 +51,7 @@ namespace Caravela.Framework.Impl
             var newDiagnostics = this.Diagnostics.Concat( addedDiagnostics ).ToImmutableList();
             var newResources = this.Resources.Concat( addedResources ).ToImmutableList();
 
-            return new ( newDiagnostics, newResources, newCompilation, this._aspectSources );
+            return new( newDiagnostics, newResources, newCompilation, this._aspectSources );
         }
 
         internal AspectCompilation Update( IReactiveCollection<AspectInstanceResult> instanceResults )
@@ -64,7 +66,7 @@ namespace Caravela.Framework.Impl
             var newCompilation = new ModifiedCompilation( this.Compilation, addedAdvices );
             var newAspectSources = this._aspectSources.Add( new ReactiveAspectSource( addedAspects ) );
 
-            return new ( newDiagnostics, Array.Empty<ResourceDescription>(), newCompilation, newAspectSources );
+            return new( newDiagnostics, this.Resources, newCompilation, newAspectSources );
         }
     }
 }

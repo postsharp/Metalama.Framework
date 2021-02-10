@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -13,6 +14,9 @@ namespace Caravela.Framework.Impl.Templating
         private readonly MethodInfo _templateMethod;
 
         public TemplateDriver( MethodInfo templateMethodInfo )
+        {
+            this._templateMethod = templateMethodInfo;
+        }
         {
             this._templateMethod = templateMethodInfo;
         }
@@ -37,7 +41,17 @@ namespace Caravela.Framework.Impl.Templating
             TemplateContext.Initialize( templateContext, templateExpansionContext.ProceedImplementation );
             TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
-            var output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+            SyntaxNode output;
+            try
+            {
+	            var output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
+            }
+
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
             TemplateContext.Close();

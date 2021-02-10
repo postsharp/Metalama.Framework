@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Templating.Serialization
         private readonly ArraySerializer _arraySerializer;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ObjectSerializers"/>.
+        /// Initializes a new instance of the <see cref="ObjectSerializers"/> class.
         /// </summary>
         public ObjectSerializers()
         {

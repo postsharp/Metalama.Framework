@@ -1,6 +1,12 @@
 ﻿<Project>
   <ItemGroup>
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
+
+    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Analyzer Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" />
+    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Analyzer Include="$(PkgCaravela_CodeAnalysis_Workspaces_Lightweight_Common)\lib\netstandard2.0\Caravela.CodeAnalysis.Workspaces.Lightweight.dll" />
+    
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" GeneratePathProperty="true" ExcludeAssets="all" />
     <Analyzer Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" />
 

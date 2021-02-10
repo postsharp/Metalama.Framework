@@ -3,9 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Caravela.Framework.DesignTime.Contracts;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.DesignTime.Contracts
+namespace Caravela.Framework.DesignTime.Vsix
 {
 
     public static class DesignTimeEntryPointManagerExtensions

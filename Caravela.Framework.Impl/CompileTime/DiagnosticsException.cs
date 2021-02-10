@@ -8,7 +8,9 @@ namespace Caravela.Framework.Impl.CompileTime
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
         public DiagnosticsException( DiagnosticDescriptor diagnosticDescriptor, ImmutableArray<Diagnostic> diagnostics )
-            : base( diagnosticDescriptor ) =>
+            : base( diagnosticDescriptor )
+        {
             this.Diagnostics = diagnostics;
+        }
     }
 }

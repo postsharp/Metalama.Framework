@@ -11,7 +11,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         private readonly ObjectSerializers _serializers;
 
-        public ArraySerializer( ObjectSerializers serializers ) => this._serializers = serializers;
+        public ArraySerializer( ObjectSerializers serializers )
+        {
+            this._serializers = serializers;
+        }
 
         public ExpressionSyntax Serialize( Array array )
         {

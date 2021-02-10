@@ -4,6 +4,8 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -13,11 +15,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal SymbolMap SymbolMap { get; }
 
+        internal SyntaxGenerator SyntaxGenerator { get; }
+
         public SourceCompilation( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
 
-            this.SymbolMap = new ( this );
+            this.SymbolMap = new( this );
+
+            this.SyntaxGenerator = new CSharpSyntaxGenerator();
         }
 
         [Memo]

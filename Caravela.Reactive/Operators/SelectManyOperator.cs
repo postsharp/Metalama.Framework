@@ -94,7 +94,7 @@ namespace Caravela.Reactive.Operators
                 this.Follow( s );
             }
 
-            return new ( source.SelectMany( this.GetItems ) );
+            return new( source.SelectMany( this.GetItems ) );
         }
 
         private void AddItem( TResult addedItem, in IncrementalUpdateToken updateToken )
