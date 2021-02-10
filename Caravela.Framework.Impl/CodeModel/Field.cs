@@ -1,61 +1,25 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
-
-using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : Member, IProperty
+    internal abstract class Field : Member, IProperty
     {
-        private readonly IFieldSymbol _symbol;
+        public abstract RefKind RefKind { get; }
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public bool IsByRef => this.RefKind != RefKind.None;
 
-        private readonly NamedType _containingElement;
+        public bool IsRef => this.RefKind == RefKind.Ref;
 
-        public override CodeElement? ContainingElement => this._containingElement;
+        public bool IsRefReadonly => this.RefKind == RefKind.RefReadonly;
 
-        internal override SourceCompilationModel Compilation => this._containingElement.Compilation;
+        public abstract IType Type { get; }
 
-        public Field( IFieldSymbol symbol, NamedType containingElement )
-        {
-            this._symbol = symbol;
-            this._containingElement = containingElement;
-        }
+        public abstract IReadOnlyList<IParameter> Parameters { get; }
 
-        public RefKind RefKind => RefKind.None;
+        public abstract IMethod? Getter { get; }
 
-        public bool IsByRef => false;
-
-        public bool IsRef => false;
-
-        public bool IsRefReadonly => false;
-
-        [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
-
-        public IImmutableList<IParameter> Parameters => ImmutableList<IParameter>.Empty;
-
-        // TODO: pseudo-accessors
-        [Memo]
-        public IMethod? Getter => null;
-
-        [Memo]
-        public IMethod? Setter => null;
-
-        public string Name => this._symbol.Name;
-
-        public bool IsStatic => this._symbol.IsStatic;
-
-        public bool IsVirtual => false;
-
-        public INamedType DeclaringType => this._containingElement;
-
-        [Memo]
-        public override IImmutableList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
-
-        public override CodeElementKind ElementKind => CodeElementKind.Field;
+        public abstract IMethod? Setter { get; }
     }
 }

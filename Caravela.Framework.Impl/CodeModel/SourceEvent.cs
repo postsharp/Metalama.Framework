@@ -13,7 +13,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private SourceCompilationModel Compilation { get; }
 
+        public SourceEvent( SourceCompilationModel compilation, IEventSymbol symbol )
+        {
+            this._symbol = symbol;
+            this.Compilation = compilation;
+        }
         public ISymbol Symbol => this._symbol;
+
+        public override NamedType? DeclaringType => this.Compilation.SymbolMap.GetNamedType( this._symbol.ContainingType );
 
         public override string Name => this._symbol.Name;
 
@@ -37,11 +44,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableList();
 
-        public SourceEvent( IEventSymbol symbol, SourceNamedType declaringType ) : base(containingElement)
-        {
-            this._symbol = symbol;
-            this.Compilation = containingElement.Compilation;
-        }
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {

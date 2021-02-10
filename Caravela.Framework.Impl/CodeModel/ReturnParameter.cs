@@ -5,7 +5,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class ReturnParameter : IParameter
+    internal abstract class ReturnParameter : Parameter, IParameter
     {
         internal static RefKind MapRefKind( Microsoft.CodeAnalysis.RefKind roslynRefKind ) => roslynRefKind switch
         {

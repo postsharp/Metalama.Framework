@@ -1,100 +1,100 @@
-﻿using Caravela.Framework.Code;
-
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class SourceNamedType : NamedType
+    internal sealed class SourceNamedType : NamedType, ISourceCodeElement
     {
+        private readonly INamedTypeSymbol _symbol;
 
-        internal SourceCompilationModel Compilation { get; }
+        public SourceCompilationModel Compilation { get; }
 
-        public INamedTypeSymbol TypeSymbol { get; }
-
-        public override string Name => this.TypeSymbol.Name;
-
-        [Memo]
-        public override string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
-
-        [Memo]
-        public override string FullName => this.TypeSymbol.ToDisplayString();
-
-        internal SourceNamedType( SourceCompilationModel compilation,INamedTypeSymbol typeSymbol) : base(null)
+        internal SourceNamedType( SourceCompilationModel compilation, INamedTypeSymbol symbol )
         {
-            this.TypeSymbol = typeSymbol;
+            this._symbol = symbol;
             this.Compilation = compilation;
         }
 
-        public override Code.TypeKind TypeKind =>  this.TypeSymbol.TypeKind switch
+        ISymbol ISourceCodeElement.Symbol => this._symbol;
+
+        public INamedTypeSymbol Symbol => this._symbol;
+
+        public override string Name => this._symbol.Name;
+
+        [Memo]
+        public override string? Namespace => this._symbol.ContainingNamespace?.ToDisplayString();
+
+        [Memo]
+        public override string FullName => this._symbol.ToDisplayString();
+
+
+        public override Code.TypeKind TypeKind => this._symbol.TypeKind switch
         {
             RoslynTypeKind.Class => Code.TypeKind.Class,
             RoslynTypeKind.Delegate => Code.TypeKind.Delegate,
             RoslynTypeKind.Enum => Code.TypeKind.Enum,
             RoslynTypeKind.Interface => Code.TypeKind.Interface,
             RoslynTypeKind.Struct => Code.TypeKind.Struct,
-            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
+            _ => throw new InvalidOperationException( $"Unexpected type kind {this._symbol.TypeKind}." )
         };
 
-        public override IReadOnlyList<Member> Members => this.TypeSymbol.GetMembers()
+        public override IReadOnlyList<Member> Members => this._symbol.GetMembers()
             .Select( m => m.Kind switch {
-                    SymbolKind.Event => new SourceEvent( this.Compilation, m ),
-                    SymbolKind.Property => new SourceProperty( this.Compilation, m ),
-                    SymbolKind.Method => new SourceMethod( this.Compilation, m ),
-                    SymbolKind.Field => new SourceProperty( this.Compilation, m ),
+                    SymbolKind.Event => new SourceEvent( this.Compilation, (IEventSymbol)m ),
+                    SymbolKind.Property => new SourceProperty( this.Compilation, (IPropertySymbol)m ),
+                    SymbolKind.Method => new SourceMethod( this.Compilation, (IMethodSymbol)m ),
+                    SymbolKind.Field => new SourceField( this.Compilation, (IFieldSymbol)m ),
                     _ => throw new AssertionFailedException()
                     }
                 );
 
         [Memo]
-        public override IReadOnlyList<NamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableArray();
+        public override IReadOnlyList<NamedType> NestedTypes => this._symbol.GetTypeMembers().Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public override IReadOnlyList<GenericParameter> GenericParameters =>
-            this.TypeSymbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableArray();
+            this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableArray();
 
         [Memo]
-        public override IReadOnlyList<ITypeInternal> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
+        public override IReadOnlyList<ITypeInternal> GenericArguments => this._symbol.TypeArguments.Select( a => this.Compilation.SymbolMap.GetIType( a ) ).ToImmutableList();
 
         [Memo]
         public override IReadOnlyList<Attribute> Attributes =>
-            this.TypeSymbol.GetAttributes().Select( a => new Attribute( a, this.Compilation.SymbolMap ) ).ToImmutableList();
+            this._symbol.GetAttributes().Select( a => new SourceAttribute( this.Compilation, a ) ).ToImmutableList();
 
         [Memo]
-        public override NamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );
+        public override NamedType? BaseType => this._symbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this._symbol.BaseType );
 
         [Memo]
-        public override IReadOnlyList<NamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableList<INamedType>();
+        public override IReadOnlyList<NamedType> ImplementedInterfaces => this._symbol.AllInterfaces.Select( this.Compilation.SymbolMap.GetNamedType ).ToImmutableList();
 
         [Memo]
-        public override CodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
+        public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch
         {
             INamespaceSymbol => null,
             INamedTypeSymbol containingType => this.Compilation.SymbolMap.GetNamedType( containingType ),
             _ => throw new AssertionFailedException()
         };
 
-        public override bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this.TypeSymbol, other.GetSymbol() );
+        public override bool Is( IType other ) => this.Compilation.RoslynCompilation.HasImplicitConversion( this._symbol, other.GetSymbol() );
 
         public override bool Is( Type other ) =>
             this.Is( this.Compilation.GetTypeByReflectionType( other ) ?? throw new ArgumentException( $"Could not resolve type {other}.", nameof( other ) ) );
 
         public override IArrayType MakeArrayType( int rank = 1 ) =>
-            (IArrayType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this.TypeSymbol, rank ) );
+            (IArrayType) this.Compilation.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreateArrayTypeSymbol( this._symbol, rank ) );
 
         public override IPointerType MakePointerType() =>
-            (IPointerType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this.TypeSymbol ) );
+            (IPointerType) this.Compilation.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this._symbol ) );
 
         public override INamedType MakeGenericType( params IType[] genericArguments ) =>
-            this.SymbolMap.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+            this.Compilation.SymbolMap.GetNamedType( this._symbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        public override string ToString() => this.TypeSymbol.ToString();
-    }
-
-
+        public override string ToString() => this._symbol.ToString();    
     }
 }

@@ -22,7 +22,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract Method? Raiser{ get; }
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
-
-    
     }
 }

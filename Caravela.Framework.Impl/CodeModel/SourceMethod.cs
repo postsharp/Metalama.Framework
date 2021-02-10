@@ -13,18 +13,44 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IMethodSymbol _symbol;
 
-        public ISymbol Symbol => this._symbol;
-
         public SourceCompilationModel Compilation { get; }
 
-        public override string Name => this._symbol.Name;
+        public SourceMethod( SourceCompilationModel compilation, IMethodSymbol symbol )
+        {
+            this._symbol = symbol;
+            this.Compilation = compilation;
+        }
+        public ISymbol Symbol => this._symbol;
 
         public override bool IsStatic => this._symbol.IsStatic;
 
         public override bool IsVirtual => this._symbol.IsVirtual;
 
+        public override string Name => this._symbol.Name;
+
         [Memo]
-        public override INamedType? DeclaringType => this._symbol.ContainingType == null ? null : this.Compilation.SymbolMap.GetNamedType( this._symbol.ContainingType );
+        public override Parameter? ReturnParameter => this.MethodKind == Code.MethodKind.Constructor ? null : new SourceMethodReturnParameter( this );
+
+        [Memo]
+        public override ITypeInternal ReturnType => this.Compilation.SymbolMap.GetIType( this._symbol.ReturnType );
+
+        [Memo]
+        public override IReadOnlyList<GenericParameter> GenericParameters =>
+            this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
+
+        [Memo]
+        public override IReadOnlyList<Parameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableList<Parameter>();
+
+        [Memo]
+        public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch
+        {
+            INamedTypeSymbol type => this.Compilation.SymbolMap.GetNamedType( type ),
+            IMethodSymbol method => this.Compilation.SymbolMap.GetMethod( method ),
+            _ => throw new InvalidOperationException()
+        };
+
+        [Memo]
+        public override NamedType? DeclaringType => this._symbol.ContainingType == null ? null : this.Compilation.SymbolMap.GetNamedType( this._symbol.ContainingType );
 
         public override Code.MethodKind MethodKind => this._symbol.MethodKind switch
         {
@@ -50,18 +76,6 @@ namespace Caravela.Framework.Impl.CodeModel
             _ => throw new InvalidOperationException()
         };
 
-        public SourceMethod( SourceCompilationModel compilation, IMethodSymbol symbol)
-        {
-            this._symbol = symbol;
-            this.Compilation = compilation;
-        }
-
-        [Memo]
-        public override Parameter? ReturnParameter => this.MethodKind == Code.MethodKind.Constructor ? null : new MethodReturnParameter( this );
-
-        [Memo]
-        public override ITypeInternal ReturnType => this.Compilation.SymbolMap.GetIType( this._symbol.ReturnType );
-
         [Memo]
         public override IReadOnlyList<Method> LocalFunctions =>
             this._symbol.DeclaringSyntaxReferences
@@ -74,34 +88,30 @@ namespace Caravela.Framework.Impl.CodeModel
                 .ToImmutableList();
 
         [Memo]
-        public override IReadOnlyList<Parameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableList<Parameter>();
-
-        [Memo]
-        public override IReadOnlyList<GenericParameter> GenericParameters =>
-            this._symbol.TypeParameters.Select( tp => this.Compilation.SymbolMap.GetGenericParameter( tp ) ).ToImmutableList();
-
-        [Memo]
-        public override CodeElement? ContainingElement => this._symbol.ContainingSymbol switch
-        {
-            INamedTypeSymbol type => this.Compilation.SymbolMap.GetNamedType( type ),
-            IMethodSymbol method => this.Compilation.SymbolMap.GetMethod( method ),
-            _ => throw new InvalidOperationException()
-        };
-
-        [Memo]
         public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new SourceAttribute( a, this.Compilation.SymbolMap ) ).ToImmutableList();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-
-
         public override string ToString() => this._symbol.ToString();
 
-        internal sealed class SourceReturnParameter : ReturnParameter
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
-            public Method Method { get; }
+            throw new NotImplementedException();
+        }
 
-            public SourceReturnParameter( Method method ) => this.Method = method;
+        public override bool Equals( ICodeElement other )
+        {
+            throw new NotImplementedException();
+        }
+
+        internal sealed class SourceMethodReturnParameter : ReturnParameter
+        {
+            public SourceMethod Method { get; }
+
+            public SourceMethodReturnParameter( SourceMethod method )
+            {
+                this.Method = method;
+            }
 
             protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method._symbol.RefKind;
 

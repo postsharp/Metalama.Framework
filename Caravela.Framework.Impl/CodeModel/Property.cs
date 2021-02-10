@@ -1,32 +1,15 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Property : CodeElement, IProperty
+    internal abstract class Property : Member, IProperty
     {
-        private readonly IPropertySymbol _symbol;
-
-        protected internal override ISymbol Symbol => this._symbol;
-
-        private readonly NamedType _containingElement;
-
-        public override CodeElement? ContainingElement => this._containingElement;
-
-        internal override SourceCompilationModel Compilation => this._containingElement.Compilation;
-
-        public Property( IPropertySymbol symbol, NamedType containingElement )
-        {
-            this._symbol = symbol;
-            this._containingElement = containingElement;
-        }
-
-        public RefKind RefKind => ReturnParameter.MapRefKind( this._symbol.RefKind );
+        public abstract RefKind RefKind { get; }
 
         public bool IsByRef => this.RefKind != RefKind.None;
 
@@ -34,31 +17,20 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsRefReadonly => this.RefKind == RefKind.RefReadonly;
 
-        [Memo]
-        public IType Type => this.SymbolMap.GetIType( this._symbol.Type );
+        IType IProperty.Type => this.Type;
 
-        [Memo]
-        public IImmutableList<IParameter> Parameters => this._symbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableList<IParameter>();
+        public abstract ITypeInternal Type { get; }
 
-        [Memo]
-        public IMethod? Getter => this._symbol.GetMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.GetMethod );
+        IReadOnlyList<IParameter> IProperty.Parameters => this.Parameters;
 
-        [Memo]
+        public abstract IReadOnlyList<Parameter> Parameters { get; }
 
-        // TODO: get-only properties
-        public IMethod? Setter => this._symbol.SetMethod == null ? null : this.SymbolMap.GetMethod( this._symbol.SetMethod );
+        IMethod? IProperty.Getter => this.Getter;
 
-        public string Name => this._symbol.Name;
+        public abstract Method? Getter { get; }
 
-        public bool IsStatic => this._symbol.IsStatic;
+        IMethod? IProperty.Setter => this.Setter;
 
-        public bool IsVirtual => this._symbol.IsVirtual;
-
-        public INamedType DeclaringType => this._containingElement;
-
-        [Memo]
-        public override IReadOnlyList<Attribute> Attributes => this._symbol.GetAttributes().Select( a => new Attribute( a, this.SymbolMap ) ).ToImmutableReactive();
-
-        public override CodeElementKind ElementKind => CodeElementKind.Property;
+        public abstract Method? Setter { get; }
     }
 }
