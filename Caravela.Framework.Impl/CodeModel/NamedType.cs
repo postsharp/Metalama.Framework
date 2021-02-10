@@ -4,33 +4,35 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using TypeKind = Caravela.Framework.Code.TypeKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
     {
         internal INamedTypeSymbol TypeSymbol { get; }
+
         ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
+
         protected internal override ISymbol Symbol => this.TypeSymbol;
 
         internal override SourceCompilation Compilation { get; }
 
-        internal NamedType(INamedTypeSymbol typeSymbol, SourceCompilation compilation)
+        internal NamedType( INamedTypeSymbol typeSymbol, SourceCompilation compilation )
         {
             this.TypeSymbol = typeSymbol;
             this.Compilation = compilation;
         }
 
-        TypeKind IType.Kind => this.TypeSymbol.TypeKind switch
+        TypeKind IType.TypeKind => this.TypeSymbol.TypeKind switch
         {
             RoslynTypeKind.Class => TypeKind.Class,
             RoslynTypeKind.Delegate => TypeKind.Delegate,
             RoslynTypeKind.Enum => TypeKind.Enum,
             RoslynTypeKind.Interface => TypeKind.Interface,
             RoslynTypeKind.Struct => TypeKind.Struct,
-            _ => throw new InvalidOperationException($"Unexpected type kind {this.TypeSymbol.TypeKind}.")
+            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
         public bool HasDefaultConstructor =>
@@ -55,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReactiveCollection<IEvent> Events => this.TypeSymbol.GetMembers().OfType<IEventSymbol>().Select( e => new Event( e, this ) ).ToImmutableReactive();
 
         [Memo]
-        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select(m => this.SymbolMap.GetMethod(m)).ToImmutableReactive();
+        public IReactiveCollection<IMethod> Methods => this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().Select( m => this.SymbolMap.GetMethod( m ) ).ToImmutableReactive();
 
         [Memo]
         public IImmutableList<IGenericParameter> GenericParameters =>
@@ -67,7 +69,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
 
         [Memo]
-        // TODO: add tests verifying that simple call to ToDisplayString gives the desired result in all cases
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]
@@ -85,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override IReactiveCollection<IAttribute> Attributes =>
             this.TypeSymbol.GetAttributes().Select( a => new Attribute( a, this.Compilation.SymbolMap ) ).ToImmutableReactive();
 
-        public override CodeElementKind Kind => CodeElementKind.Type;
+        public override CodeElementKind ElementKind => CodeElementKind.Type;
 
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.SymbolMap.GetNamedType( this.TypeSymbol.BaseType );
@@ -103,6 +104,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IPointerType MakePointerType() =>
             (IPointerType) this.SymbolMap.GetIType( this.Compilation.RoslynCompilation.CreatePointerTypeSymbol( this.TypeSymbol ) );
+
+        public INamedType MakeGenericType( params IType[] genericArguments ) =>
+            this.SymbolMap.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

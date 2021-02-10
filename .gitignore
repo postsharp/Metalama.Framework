@@ -31,3 +31,6 @@
 _ReSharper*/
 .idea/
 /artifacts/
+*/packages/
+/shipping/
+*.actual_transformed.txt

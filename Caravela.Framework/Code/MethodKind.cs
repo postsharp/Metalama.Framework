@@ -5,7 +5,7 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public enum MethodKind
     {
-        Ordinary,
+        Default,
 
         Constructor,
         StaticConstructor,

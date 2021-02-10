@@ -7,8 +7,8 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -48,7 +48,25 @@ namespace Caravela.Framework.Impl.Templating
             return base.Visit( node );
         }
 
-        #region Pretty print
+        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
+           CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
+
+        private static string NormalizeSpace( string statementComment )
+        {
+            // TODO: Replace this with something more GC-friendly.
+
+            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
+
+            while ( true )
+            {
+                var old = statementComment;
+                statementComment = statementComment.Replace( "  ", " " );
+                if ( old == statementComment )
+                {
+                    return statementComment;
+                }
+            }
+        }
 
         protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
         {
@@ -72,7 +90,6 @@ namespace Caravela.Framework.Impl.Templating
                 .AddArgumentListArguments( Argument( this.CreateLiteralExpression( node.Identifier.Text ) ) )
                 .WithTemplateAnnotationsFrom( node );
         }
-
         protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
         {
             // The base implementation is very verbose, so we use this one:
@@ -87,8 +104,6 @@ namespace Caravela.Framework.Impl.Templating
                 return base.TransformArgument( node );
             }
         }
-
-        #endregion
 
         /// <summary>
         /// Determines how a <see cref="SyntaxNode"/> should be transformed:
@@ -134,11 +149,8 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-            return symbol.GetAttributes().Any( a => a.AttributeClass.Name == nameof( ProceedAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
         }
-
-        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
-            CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
 
         /// <summary>
         /// Transforms an <see cref="ExpressionSyntax"/>, especially taking care of handling
@@ -147,7 +159,6 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression )
         {
             switch ( expression.Kind() )
@@ -163,8 +174,8 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( this.Transform( SyntaxKind.DefaultLiteralExpression ) ) );
 
                 case SyntaxKind.DefaultExpression:
-                    //case SyntaxKind.NullLiteralExpression:
-                    //case SyntaxKind.DefaultLiteralExpression:
+                    // case SyntaxKind.NullLiteralExpression:
+                    // case SyntaxKind.DefaultLiteralExpression:
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
                     return expression;
@@ -176,11 +187,8 @@ namespace Caravela.Framework.Impl.Templating
                 return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
                         Argument( this.Transform( syntaxKind ) ),
                         Argument( InvocationExpression( IdentifierName( nameof( Literal ) ) ).AddArgumentListArguments(
-                            Argument( expression )
-                            ) )
-                        );
+                            Argument( expression ) ) ) );
             }
-
 
             var type = this._semanticAnnotationMap.GetType( expression )!;
 
@@ -197,7 +205,7 @@ namespace Caravela.Framework.Impl.Templating
                 case "dynamic":
                     if ( this.IsProceed( expression ) )
                     {
-                        // TODO: Emit a diagnostic. proceed() cannot be used as a general expression but only in 
+                        // TODO: Emit a diagnostic. proceed() cannot be used as a general expression but only in
                         // specifically supported statements, i.e. variable assignments and return.
                         throw new AssertionFailedException();
                     }
@@ -231,13 +239,11 @@ namespace Caravela.Framework.Impl.Templating
                 case nameof( Boolean ):
                     return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
                         Argument( InvocationExpression( IdentifierName( nameof( BooleanKeyword ) ) ).AddArgumentListArguments(
-                            Argument( expression )
-                            ) )
-                        );
+                            Argument( expression ) ) ) );
 
                 default:
-                    //TODO: emit an error. We don't know how to serialize this into syntax.
-                    //TODO: pluggable syntax serializers must be called here.
+                    // TODO: emit an error. We don't know how to serialize this into syntax.
+                    // TODO: pluggable syntax serializers must be called here.
                     return expression;
             }
         }
@@ -271,6 +277,11 @@ namespace Caravela.Framework.Impl.Templating
 
             // TODO: also compile templates for properties and so on.
 
+            if ( node.Body == null )
+            {
+                throw new NotImplementedException( "Expression-bodied templates are not supported." );
+            }
+
             var body = (BlockSyntax) this.VisitBlock( node.Body, TransformationKind.None, true );
 
             var result = MethodDeclaration(
@@ -294,21 +305,20 @@ namespace Caravela.Framework.Impl.Templating
 
         /// <summary>
         /// Transforms a block (according to a specified <see cref="MetaSyntaxRewriter.TransformationKind"/>)
-        /// and specifies if the block should have its own <c>List&lt;StatementSyntax&gt;</c>
+        /// and specifies if the block should have its own <c>List&lt;StatementSyntax&gt;</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <param name="transformationKind"></param>
         /// <param name="withOwnList"><c>true</c> if the block should declare its own List of statements,
         /// <c>false</c> if it should reuse the one of the parent block.</param>
         /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
         private SyntaxNode VisitBlock( BlockSyntax node, TransformationKind transformationKind, bool withOwnList )
         {
             if ( withOwnList )
             {
                 using ( this.UseStatementList( $"__s{++this._nextStatementListId}", new List<StatementSyntax>() ) )
                 {
-                    // List<StatementSyntax> statements = new List<StatementSyntax>(); 
+                    // List<StatementSyntax> statements = new List<StatementSyntax>();
                     this._currentMetaStatementList!.Add( LocalDeclarationStatement(
                         VariableDeclaration( GenericName( Identifier( "List" ) )
                                 .WithTypeArgumentList(
@@ -329,8 +339,7 @@ namespace Caravela.Framework.Impl.Templating
                                                                 SingletonSeparatedList<TypeSyntax>(
                                                                     IdentifierName( nameof( StatementSyntax ) ) ) ) ),
                                                     ArgumentList(),
-                                                    default
-                                                ) ) ) ) ) ).WithLeadingTrivia( this.GetIndentation() ) );
+                                                    default ) ) ) ) ) ).WithLeadingTrivia( this.GetIndentation() ) );
 
                     var metaStatements = this.ToMetaStatements( node.Statements );
                     this._currentMetaStatementList.AddRange( metaStatements );
@@ -345,9 +354,7 @@ namespace Caravela.Framework.Impl.Templating
                                             SyntaxKind.SimpleMemberAccessExpression,
                                             IdentifierName( this._currentStatementListVariableName! ),
                                             IdentifierName( "ToArray" ) ) ) )
-                                .WithLeadingTrivia( this.GetIndentation() )
-                        );
-
+                                .WithLeadingTrivia( this.GetIndentation() ) );
                         // Wrap in using(OpenTemplateLexicalScope())
                         var usingStatement = UsingStatement(
                             Block( this._currentMetaStatementList ) )
@@ -370,10 +377,8 @@ namespace Caravela.Framework.Impl.Templating
                                                                     .WithRankSpecifiers(
                                                                         SingletonList(
                                                                             ArrayRankSpecifier(
-                                                                                SingletonSeparatedList<ExpressionSyntax
-                                                                                >(
-                                                                                    OmittedArraySizeExpression()))))
-                                                            ))))
+                                                                                SingletonSeparatedList<ExpressionSyntax>(
+                                                                                    OmittedArraySizeExpression()))))))))
                                             .WithArgumentList(
                                                 ArgumentList(
                                                     SingletonSeparatedList(
@@ -392,7 +397,6 @@ namespace Caravela.Framework.Impl.Templating
                                     {
                                         Argument(IdentifierName(this._currentStatementListVariableName!))
                                     } ) ) ) ).WithLeadingTrivia( this.GetIndentation() ) );
-
 
                         return Block( this._currentMetaStatementList );
                     }
@@ -415,7 +419,6 @@ namespace Caravela.Framework.Impl.Templating
                 return Block();
             }
         }
-
         private IEnumerable<StatementSyntax> ToMetaStatements( in SyntaxList<StatementSyntax> statements )
             => statements.Select( this.ToMetaStatement );
 
@@ -431,7 +434,6 @@ namespace Caravela.Framework.Impl.Templating
                 return Block( this.ToMetaStatements( block.Statements ) );
             }
 
-
             var transformedStatement = this.Visit( statement );
 
             if ( transformedStatement is StatementSyntax statementSyntax )
@@ -446,7 +448,6 @@ namespace Caravela.Framework.Impl.Templating
 
                 var statementComment = NormalizeSpace( statement.ToString() );
 
-
                 if ( statementComment.Length > 120 )
                 {
                     // TODO: handle surrogate pairs correctly
@@ -456,7 +457,6 @@ namespace Caravela.Framework.Impl.Templating
                 var leadingTrivia = TriviaList( CarriageReturnLineFeed ).AddRange( this.GetIndentation() )
                     .Add( Comment( "// " + statementComment ) ).Add( CarriageReturnLineFeed ).AddRange( this.GetIndentation() );
                 var trailingTrivia = TriviaList( CarriageReturnLineFeed, CarriageReturnLineFeed );
-
 
                 // statements.Add( expression )
                 var add = ExpressionStatement(
@@ -478,23 +478,6 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private static string NormalizeSpace( string statementComment )
-        {
-            // TODO: Replace this with something more GC-friendly.
-
-            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
-
-            while ( true )
-            {
-                var old = statementComment;
-                statementComment = statementComment.Replace( "  ", " " );
-                if ( old == statementComment )
-                {
-                    return statementComment;
-                }
-            }
-        }
-
 
         public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
         {
@@ -513,7 +496,8 @@ namespace Caravela.Framework.Impl.Templating
                                             ArgumentList(
                                                 SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
                                                 {
-                                                    Argument(LiteralExpression(SyntaxKind.DefaultLiteralExpression,
+                                                    Argument(LiteralExpression(
+                                                        SyntaxKind.DefaultLiteralExpression,
                                                         Token(SyntaxKind.DefaultKeyword))),
                                                     Token(SyntaxKind.CommaToken),
                                                     Argument(this.Transform(SyntaxKind.InterpolatedStringTextToken)),
@@ -522,10 +506,10 @@ namespace Caravela.Framework.Impl.Templating
                                                     Token(SyntaxKind.CommaToken),
                                                     Argument(node.Expression),
                                                     Token(SyntaxKind.CommaToken),
-                                                    Argument(LiteralExpression(SyntaxKind.DefaultLiteralExpression,
+                                                    Argument(LiteralExpression(
+                                                        SyntaxKind.DefaultLiteralExpression,
                                                         Token(SyntaxKind.DefaultKeyword))),
-                                                })))
-                                )
+                                                }))))
                             } ) ) ) );
             }
             else
@@ -534,7 +518,6 @@ namespace Caravela.Framework.Impl.Templating
                 return transformedInterpolation;
             }
         }
-
 
         public override SyntaxNode VisitIfStatement( IfStatementSyntax node )
         {
@@ -547,11 +530,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedStatement = this.ToMetaStatement( node.Statement );
                 var transformedElseStatement = node.Else != null ? this.ToMetaStatement( node.Else.Statement ) : null;
-                return IfStatement( node.Condition, transformedStatement,
-                    (transformedElseStatement != null ? ElseClause( transformedElseStatement ) : null) );
+                return IfStatement(
+                    node.AttributeLists,
+                    node.Condition,
+                    transformedStatement,
+                    transformedElseStatement != null ? ElseClause( transformedElseStatement ) : null );
             }
         }
-
 
         public override SyntaxNode VisitForEachStatement( ForEachStatementSyntax node )
         {
@@ -655,16 +640,11 @@ namespace Caravela.Framework.Impl.Templating
                                                                                                 CastFromDynamic(
                                                                                                     IdentifierName(
                                                                                                         nameof(
-                                                                                                            IProceedImpl
-                                                                                                        )),
-                                                                                                    proceedAssignments[
-                                                                                                            0]
-                                                                                                        .Initializer
-                                                                                                        .Value)),
+                                                                                                            IProceedImpl)),
+                                                                                                    proceedAssignments[0].Initializer!.Value)),
                                                                                             IdentifierName(
                                                                                                 nameof(IProceedImpl
-                                                                                                    .CreateTypeSyntax
-                                                                                                ))),
+                                                                                                    .CreateTypeSyntax))),
                                                                                         ArgumentList()))))),
                                                                 IdentifierName("WithVariables")))
                                                         .WithArgumentList(
@@ -694,9 +674,9 @@ namespace Caravela.Framework.Impl.Templating
                                                                                                                                 Argument(
                                                                                                                                     this
                                                                                                                                         .CreateLiteralExpression(
-                                                                                                                                            returnVariableName)))))))))))))))))))))
-                            ),
+                                                                                                                                            returnVariableName)))))))))))))))))))))),
                             Token(SyntaxKind.CommaToken),
+
                             // Inject call to Proceed
                             Argument(
                                 InvocationExpression(
@@ -705,16 +685,13 @@ namespace Caravela.Framework.Impl.Templating
                                         ParenthesizedExpression(
                                             CastFromDynamic(
                                                 IdentifierName(nameof(IProceedImpl)),
-                                                proceedAssignments[0].Initializer.Value)),
+                                                proceedAssignments[0].Initializer!.Value)),
                                         IdentifierName(nameof(IProceedImpl.CreateAssignStatement))),
                                     ArgumentList(
                                         SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
                                             {
                                                 Argument(this.CreateLiteralExpression(returnVariableName)),
-                                            }
-                                        ))
-                                )
-                            )
+                                            }))))
                         } ) ) );
 
                 createBlock = this.DeepIndent( createBlock );
@@ -727,7 +704,6 @@ namespace Caravela.Framework.Impl.Templating
                         IdentifierName( nameof( TemplateSyntaxFactory.WithFlattenBlockAnnotation ) ) ) );
             }
         }
-
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
@@ -752,9 +728,8 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) ).AddArgumentListArguments(
-                        Argument( this.Transform( node.Expression ) )
-                    );
+                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                        Argument( this.Transform( node.Expression ) ) );
             }
         }
 
@@ -762,8 +737,11 @@ namespace Caravela.Framework.Impl.Templating
 
         private StatementListCookie UseStatementList( string variableName, List<StatementSyntax> metaStatementList )
         {
-            var cookie = new StatementListCookie( this, this._currentStatementListVariableName!,
+            var cookie = new StatementListCookie(
+                this,
+                this._currentStatementListVariableName!,
                 this._currentMetaStatementList! );
+
             this._currentStatementListVariableName = variableName;
             this._currentMetaStatementList = metaStatementList;
             return cookie;

@@ -1,0 +1,23 @@
+
+    internal class TargetClass
+    {
+        [Log]
+        public static int Add(int a, int b)
+        {
+            Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
+            try
+            {
+                int result;
+                if (a == 0) throw new ArgumentOutOfRangeException(nameof(a));
+                result = a + b;
+                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
+                return (int)result;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
+                throw;
+            }
+        }
+    }
+    

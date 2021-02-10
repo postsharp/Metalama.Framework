@@ -1,9 +1,4 @@
-#region
-
 using System;
-using System.Collections.Generic;
-
-#endregion
 
 namespace Caravela.Reactive
 {
@@ -20,7 +15,7 @@ namespace Caravela.Reactive
         ///     Specifies that the value cannot be reconstructed
         ///     by reacting to incremental events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
-        void OnValueInvalidated(IReactiveSubscription subscription, bool isBreakingChange);
+        void OnValueInvalidated( IReactiveSubscription subscription, bool isBreakingChange );
     }
 
     /// <summary>
@@ -41,19 +36,6 @@ namespace Caravela.Reactive
         ///     Specifies that <paramref name="newValue" /> cannot be incrementally evaluated
         ///     by reacting to incremental  events such as those of <see cref="IReactiveCollectionObserver{T}" />.
         /// </param>
-        void OnValueChanged(IReactiveSubscription subscription, T oldValue, T newValue, int newVersion,
-            bool isBreakingChange = false);
-    }
-
-    /// <summary>
-    /// An observer specialized for <see cref="IEnumerable{T}"/>. Supports notifications of changes
-    /// in a collection: <see cref="OnItemAdded"/>, <see cref="OnItemRemoved"/> and <see cref="OnItemReplaced"/>.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IReactiveCollectionObserver<in T> : IReactiveObserver<IEnumerable<T>>
-    {
-        void OnItemAdded(IReactiveSubscription subscription, T item, int newVersion);
-        void OnItemRemoved(IReactiveSubscription subscription, T item, int newVersion);
-        void OnItemReplaced(IReactiveSubscription subscription, T oldItem, T newItem, int newVersion);
+        void OnValueChanged( IReactiveSubscription subscription, T oldValue, T newValue, int newVersion, bool isBreakingChange = false );
     }
 }

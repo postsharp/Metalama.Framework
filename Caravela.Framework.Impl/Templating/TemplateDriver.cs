@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System.Reflection;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;

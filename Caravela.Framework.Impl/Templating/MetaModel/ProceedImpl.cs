@@ -1,16 +1,16 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    class ProceedImpl : IProceedImpl
+    internal class ProceedImpl : IProceedImpl
     {
         private readonly BaseMethodDeclarationSyntax _method;
 
-        public ProceedImpl(BaseMethodDeclarationSyntax method)
+        public ProceedImpl( BaseMethodDeclarationSyntax method )
         {
             this._method = method;
         }
@@ -35,74 +35,89 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public StatementSyntax CreateAssignStatement(string returnValue)
+        public StatementSyntax CreateAssignStatement( string returnValue )
         {
-            var returnCounter = new CountReturnStatements();
-            returnCounter.Visit(this._method.Body);
-            if (returnCounter.Count == 0)
+            if ( this._method.Body == null )
             {
-                return this._method.Body;
+                throw new NotImplementedException( "Expression-bodied methods not implemented." );
             }
-            else if (returnCounter.Count == 1 && this.IsLastStatement(this._method, returnCounter.LastReturnStatement))
+
+            var methodBody = this._method.Body!;
+
+            var returnCounter = new CountReturnStatements();
+            returnCounter.Visit( methodBody );
+            if ( returnCounter.Count == 0 )
+            {
+                return methodBody;
+            }
+            else if ( returnCounter.Count == 1 && this.IsLastStatement( returnCounter.LastReturnStatement! ) )
             {
                 // There is a single return statement at the end. We don't need to generate the label and the goto.
-                
-                var rewriter = new ReturnToAssignmentRewriter(returnValue,null);
-                
-                return (BlockSyntax) rewriter.Visit(this._method.Body);
-                
+
+                var rewriter = new ReturnToAssignmentRewriter( returnValue, null );
+
+                return (BlockSyntax) rewriter.Visit( methodBody );
             }
             else
             {
-                var rewriter = new ReturnToAssignmentRewriter(returnValue,"__continue");
-                
-                var body = (BlockSyntax) rewriter.Visit(this._method.Body);
-                
+                var rewriter = new ReturnToAssignmentRewriter( returnValue, "__continue" );
+
+                var body = (BlockSyntax) rewriter.Visit( methodBody );
+
                 return Block(
                     body,
-                    LabeledStatement("__continue", EmptyStatement())
-                );
-
+                    LabeledStatement( "__continue", EmptyStatement() ) );
             }
         }
 
-        private bool IsLastStatement(BaseMethodDeclarationSyntax method, SyntaxNode node)
+        private bool IsLastStatement( SyntaxNode node )
         {
-            if (node.Parent == method.Body)
+            if ( this._method.Body == null )
+            {
+                throw new NotImplementedException( "Expression-bodied methods not implemented." );
+            }
+
+            var methodBody = this._method.Body!;
+
+            if ( node.Parent == methodBody )
             {
                 // Termination of the loop.
                 return true;
             }
             else
             {
-                if (node.Parent is BlockSyntax parentBlock && parentBlock.Statements.Last() == node)
+                if ( node.Parent is BlockSyntax parentBlock && parentBlock.Statements.Last() == node )
                 {
-                    return this.IsLastStatement(method, parentBlock);
+                    return this.IsLastStatement( parentBlock );
                 }
                 else
                 {
                     return false;
                 }
-                
             }
-            
         }
 
         public StatementSyntax CreateReturnStatement()
         {
-            return this._method.Body;
+            if ( this._method.Body == null )
+            {
+                throw new NotImplementedException( "Expression-bodied methods not implemented." );
+            }
+
+            return this._method.Body!;
         }
 
         private class CountReturnStatements : CSharpSyntaxWalker
         {
             public int Count { get; private set; }
-            public ReturnStatementSyntax LastReturnStatement { get; private set; }
-            
-            public override void VisitReturnStatement(ReturnStatementSyntax node)
+
+            public ReturnStatementSyntax? LastReturnStatement { get; private set; }
+
+            public override void VisitReturnStatement( ReturnStatementSyntax node )
             {
                 this.Count++;
                 this.LastReturnStatement = node;
-                base.VisitReturnStatement(node);
+                base.VisitReturnStatement( node );
             }
         }
 
@@ -111,25 +126,24 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             private readonly string _returnValueName;
             private readonly string? _returnLabelName;
 
-            public ReturnToAssignmentRewriter(string returnValueName, string? returnLabelName)
+            public ReturnToAssignmentRewriter( string returnValueName, string? returnLabelName )
             {
                 this._returnValueName = returnValueName;
                 this._returnLabelName = returnLabelName;
             }
 
-            public override SyntaxNode? VisitReturnStatement(ReturnStatementSyntax node)
+            public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
             {
-                if (node.Expression != null)
+                if ( node.Expression != null )
                 {
-                    var assignment = ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, IdentifierName(this._returnValueName), node.Expression));
+                    var assignment = ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnValueName ), node.Expression ) );
 
-                    if (this._returnLabelName != null)
+                    if ( this._returnLabelName != null )
                     {
                         return Block(
 
                             assignment,
-                            GotoStatement(SyntaxKind.GotoStatement, IdentifierName(this._returnLabelName))
-                        );
+                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
                     {
@@ -138,12 +152,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 }
                 else
                 {
-                    if (this._returnLabelName != null)
+                    if ( this._returnLabelName != null )
                     {
                         return Block(
 
-                            GotoStatement(SyntaxKind.GotoStatement, IdentifierName(this._returnLabelName))
-                        );
+                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
                     {

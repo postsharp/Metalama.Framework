@@ -1,20 +1,19 @@
-﻿using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
 
@@ -51,9 +50,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
 
-        private readonly Random _random = new();
+        private readonly Random _random = new ();
 
-        public CompileTimeAssemblyBuilder( 
+        public CompileTimeAssemblyBuilder(
+            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
+            : this( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode )
+        {
+        }
+
+        public CompileTimeAssemblyBuilder(
             ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
         {
             this._symbolClassifier = symbolClassifier;
@@ -69,11 +74,14 @@ namespace Caravela.Framework.Impl.CompileTime
             compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
+            {
                 return null;
+            }
 
             compilation = compilation.AddSyntaxTrees(
-                SyntaxFactory.ParseSyntaxTree( $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
-                compilation.SyntaxTrees.First().Options ) );
+                SyntaxFactory.ParseSyntaxTree(
+                    $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
+                    compilation.SyntaxTrees.First().Options ) );
 
             compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
 
@@ -85,7 +93,9 @@ namespace Caravela.Framework.Impl.CompileTime
                         var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
 
                         if ( assemblyBytes != null )
+                        {
                             return MetadataReference.CreateFromImage( assemblyBytes );
+                        }
                     }
 
                     return null!;
@@ -106,10 +116,10 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             int GetVersionComponent() => this._random.Next( 0, ushort.MaxValue );
 
-            int major = GetVersionComponent();
-            int minor = GetVersionComponent();
-            int build = GetVersionComponent();
-            int revision = GetVersionComponent();
+            var major = GetVersionComponent();
+            var minor = GetVersionComponent();
+            var build = GetVersionComponent();
+            var revision = GetVersionComponent();
 
             return new Version( major, minor, build, revision ).ToString();
         }
@@ -119,20 +129,22 @@ namespace Caravela.Framework.Impl.CompileTime
             var stream = new MemoryStream();
 
 #if DEBUG
+            SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
+
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+            foreach ( var tree in compilation.SyntaxTrees )
+            {
+                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithChangedText( GetEmbeddableText( tree.GetText() ) ) );
+            }
 
             var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
             var compilationForDebugging = this._debugTransformedCode ? compilation : input;
             var embeddedTexts = compilationForDebugging.SyntaxTrees.Select(
                 tree =>
                 {
-                    string filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
+                    var filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
 
-                    var text = tree.GetText();
-                    if ( !text.CanBeEmbedded )
-                        text = SourceText.From( text.ToString(), Encoding.UTF8 );
-
-                    return EmbeddedText.FromSource( filePath, text );
+                    return EmbeddedText.FromSource( filePath, GetEmbeddableText( tree.GetText() ) );
                 } );
 
             var result = compilation.Emit( stream, manifestResources: this._resources, options: options, embeddedTexts: embeddedTexts );
@@ -162,7 +174,9 @@ namespace Caravela.Framework.Impl.CompileTime
             var compileTimeCompilation = this.CreateCompileTimeAssembly( compilation );
 
             if ( compileTimeCompilation == null )
+            {
                 return null;
+            }
 
             var stream = this.Emit( compileTimeCompilation, compilation );
 

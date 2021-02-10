@@ -3,7 +3,7 @@ using Caravela.Reactive;
 
 namespace Caravela.Framework.Impl
 {
-    class ReactiveAspectSource : AspectSource
+    internal class ReactiveAspectSource : AspectSource
     {
         private readonly IReactiveCollection<AspectInstance> _aspectInstances;
 

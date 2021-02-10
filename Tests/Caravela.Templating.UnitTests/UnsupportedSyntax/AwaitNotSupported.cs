@@ -1,6 +1,6 @@
-using Caravela.Framework.Impl;
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     async Task<T> Template<T>()
     {
         await Task.Yield();

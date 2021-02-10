@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using Caravela.Compiler;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -15,17 +14,11 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl
 {
-    [Transformer]
-    sealed class AspectPipeline : ISourceTransformer
+    internal sealed class AspectPipeline
     {
-        public Compilation Execute(TransformerContext context)
+        public Compilation Execute( IAspectPipelineContext context )
         {
-            bool getFlag( string flagName ) =>
-                context.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
-                bool.TryParse( flagString, out bool flagValue ) &&
-                flagValue;
-
-            if ( getFlag("DebugCaravela") )
+            if ( context.GetOptionsFlag( "DebugCaravela" ) )
             {
                 Debugger.Launch();
             }
@@ -34,10 +27,10 @@ namespace Caravela.Framework.Impl
             {
                 var roslynCompilation = (CSharpCompilation) context.Compilation;
 
-                bool debugTransformedCode = getFlag( "CaravelaDebugTransformedCode" );
+                var debugTransformedCode = context.GetOptionsFlag( "CaravelaDebugTransformedCode" );
 
                 // DI
-                var compileTimeAssemblyBuilder = CreateCompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
+                var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
                 var compilation = new SourceCompilation( roslynCompilation );
@@ -54,7 +47,7 @@ namespace Caravela.Framework.Impl
                         ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
                     .OrderedGroupBy( aspectPartDataComparer, x => GetGroupingKey( x.AspectType.AspectDriver ) )
                     .Select( g => CreateStage( g.Key, g.GetValue(), compilation ) )
-                    .GetValue( default );
+                    .GetValue();
 
                 foreach ( var stage in stages )
                 {
@@ -66,7 +59,7 @@ namespace Caravela.Framework.Impl
                     context.ReportDiagnostic( diagnostic );
                 }
 
-                foreach (var resource in aspectCompilation.Resources)
+                foreach ( var resource in aspectCompilation.Resources )
                 {
                     context.ManifestResources.Add( resource );
                 }
@@ -88,34 +81,45 @@ namespace Caravela.Framework.Impl
 
                 return resultCompilation;
             }
-            catch (CaravelaException exception)
+            catch ( CaravelaException exception )
             {
                 context.ReportDiagnostic( exception.Diagnostic );
 
-                if (exception is DiagnosticsException diagnosticsException)
+                if ( exception is DiagnosticsException diagnosticsException )
                 {
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
+                    {
                         context.ReportDiagnostic( diagnostic );
+                    }
                 }
 
                 return context.Compilation;
             }
-            catch (Exception exception)
+            catch ( Exception exception )
             {
-                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString() ) );
+                var guid = Guid.NewGuid();
+                var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                try
+                {
+                    File.WriteAllText( path, exception.ToString() );
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                Console.WriteLine( exception.ToString() );
+
+                context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString(), path ) );
                 return context.Compilation;
             }
         }
 
-        public static CompileTimeAssemblyBuilder CreateCompileTimeAssemblyBuilder(
-            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false ) =>
-            new CompileTimeAssemblyBuilder( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode );
-
-        private static IReactiveCollection<INamedType> GetAspectTypes(SourceCompilation compilation)
+        private static IReactiveCollection<INamedType> GetAspectTypes( SourceCompilation compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            return compilation.DeclaredAndReferencedTypes.Where( t => t.HasDefaultConstructor && t.Is( iAspect ) );
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) );
         }
 
         private static object GetGroupingKey( IAspectDriver driver ) =>
@@ -131,12 +135,9 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-
-        record AspectPartData( AspectType AspectType, AspectPart AspectPart );
-
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, ICompilation compilation )
         {
-            switch (groupKey)
+            switch ( groupKey )
             {
                 case IAspectWeaver weaver:
 
@@ -146,21 +147,26 @@ namespace Caravela.Framework.Impl
 
                 case nameof( AspectDriver ):
 
-                    return new AdviceWeaverStage(partsData.Select(pd => pd.AspectPart));
+                    return new AdviceWeaverStage( partsData.Select( pd => pd.AspectPart ) );
 
                 default:
 
                     throw new NotSupportedException();
-            };
+            }
         }
 
-        class AspectPartDataComparer : IComparer<AspectPartData>
+        private class AspectPartDataComparer : IComparer<AspectPartData>
         {
             private readonly AspectPartComparer _partComparer;
 
-            public AspectPartDataComparer( AspectPartComparer partComparer ) => this._partComparer = partComparer;
+            public AspectPartDataComparer( AspectPartComparer partComparer )
+            {
+                this._partComparer = partComparer;
+            }
 
             public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
         }
+
+        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
     }
 }

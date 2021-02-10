@@ -11,6 +11,7 @@
         Interface,
         Pointer,
         Struct,
-        //FunctionPointer
+
+        // FunctionPointer
     }
 }

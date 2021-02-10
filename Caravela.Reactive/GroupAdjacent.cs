@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable SA1008, SA1649, SA1600, SA1400, IDE0061, SA1506, SA1117, SA1012, SA1516, SA1124, SA1515
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,9 +23,10 @@ using System.Linq;
 // limitations under the License.
 #endregion
 
+// ReSharper disable once CheckNamespace
 namespace MoreLinq
 {
-    static partial class MoreEnumerable
+    internal static class MoreEnumerable
     {
         /// <summary>
         /// Groups the adjacent elements of a sequence according to a
@@ -84,8 +87,15 @@ namespace MoreLinq
             Func<TSource, TKey> keySelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
 
             return GroupAdjacent( source, keySelector, e => e, comparer );
         }
@@ -161,9 +171,20 @@ namespace MoreLinq
             Func<TSource, TElement> elementSelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( elementSelector == null ) throw new ArgumentNullException( nameof( elementSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( elementSelector == null )
+            {
+                throw new ArgumentNullException( nameof( elementSelector ) );
+            }
 
             return GroupAdjacentImpl( source, keySelector, elementSelector, CreateGroupAdjacentGrouping,
                                      comparer ?? EqualityComparer<TKey>.Default );
@@ -201,9 +222,20 @@ namespace MoreLinq
             Func<TSource, TKey> keySelector,
             Func<TKey, IEnumerable<TSource>, TResult> resultSelector )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( resultSelector == null ) throw new ArgumentNullException( nameof( resultSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( resultSelector == null )
+            {
+                throw new ArgumentNullException( nameof( resultSelector ) );
+            }
 
             // This should be removed once the target framework is bumped to something that supports covariance
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
@@ -247,9 +279,20 @@ namespace MoreLinq
             Func<TKey, IEnumerable<TSource>, TResult> resultSelector,
             IEqualityComparer<TKey>? comparer )
         {
-            if ( source == null ) throw new ArgumentNullException( nameof( source ) );
-            if ( keySelector == null ) throw new ArgumentNullException( nameof( keySelector ) );
-            if ( resultSelector == null ) throw new ArgumentNullException( nameof( resultSelector ) );
+            if ( source == null )
+            {
+                throw new ArgumentNullException( nameof( source ) );
+            }
+
+            if ( keySelector == null )
+            {
+                throw new ArgumentNullException( nameof( keySelector ) );
+            }
+
+            if ( resultSelector == null )
+            {
+                throw new ArgumentNullException( nameof( resultSelector ) );
+            }
 
             // This should be removed once the target framework is bumped to something that supports covariance
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
@@ -257,7 +300,7 @@ namespace MoreLinq
                                      comparer ?? EqualityComparer<TKey>.Default );
         }
 
-        static IEnumerable<TResult> GroupAdjacentImpl<TSource, TKey, TElement, TResult>(
+        private static IEnumerable<TResult> GroupAdjacentImpl<TSource, TKey, TElement, TResult>(
             this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector,
             Func<TSource, TElement> elementSelector,
@@ -291,14 +334,16 @@ namespace MoreLinq
 
             {
                 if ( group is ({ } k, { } members ) )
+                {
                     yield return resultSelector( k, members );
+                }
             }
         }
 
-        static IGrouping<TKey, TElement> CreateGroupAdjacentGrouping<TKey, TElement>( TKey key, IList<TElement> members ) =>
+        private static IGrouping<TKey, TElement> CreateGroupAdjacentGrouping<TKey, TElement>( TKey key, IList<TElement> members ) =>
             Grouping.Create( key, members.IsReadOnly ? members : new ReadOnlyCollection<TElement>( members ) );
 
-        static class Grouping
+        private static class Grouping
         {
             public static Grouping<TKey, TElement> Create<TKey, TElement>( TKey key, IEnumerable<TElement> members ) =>
                 new Grouping<TKey, TElement>( key, members );
@@ -306,10 +351,11 @@ namespace MoreLinq
 
 #if !NO_SERIALIZATION_ATTRIBUTES
         [Serializable]
+        private
 #endif
         sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
         {
-            readonly IEnumerable<TElement> _members;
+            private readonly IEnumerable<TElement> _members;
 
             public Grouping( TKey key, IEnumerable<TElement> members )
             {

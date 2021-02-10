@@ -1,5 +1,5 @@
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -13,7 +13,7 @@ using Caravela.Framework.Project;
 
 class Aspect
 {
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         string s = compileTime(typeof(string).FullName);

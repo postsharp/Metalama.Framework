@@ -1,7 +1,7 @@
+using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -24,7 +24,8 @@ namespace Caravela.Framework.Impl.Templating
             block.HasAnnotation( flattenBlockAnnotation );
 
         // ReSharper disable once UnusedMember.Global
-        public static SeparatedSyntaxList<T> SeparatedList<T>( params T[] items ) where T : SyntaxNode
+        public static SeparatedSyntaxList<T> SeparatedList<T>( params T[] items )
+            where T : SyntaxNode
             => SyntaxFactory.SeparatedList( items );
 
         public static SyntaxKind BooleanKeyword( bool value ) =>

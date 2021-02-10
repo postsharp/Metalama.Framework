@@ -1,13 +1,13 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Reactive;
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Reactive;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    class GenericParameter : IGenericParameter, ITypeInternal
+    internal class GenericParameter : IGenericParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public Code.TypeKind Kind => Code.TypeKind.GenericParameter;
+        public Code.TypeKind TypeKind => Code.TypeKind.GenericParameter;
 
         public string Name => this._typeSymbol.Name;
 
@@ -41,12 +41,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public ICodeElement? ContainingElement => this._compilation.SymbolMap.GetNamedTypeOrMethod( this._typeSymbol.ContainingSymbol );
+        public ICodeElement ContainingElement => this._compilation.SymbolMap.GetNamedTypeOrMethod( this._typeSymbol.ContainingSymbol );
 
         [Memo]
         public IReactiveCollection<IAttribute> Attributes => this._typeSymbol.GetAttributes().Select( a => new Attribute( a, this._compilation.SymbolMap ) ).ToImmutableReactive();
 
-        CodeElementKind ICodeElement.Kind => CodeElementKind.GenericParameter;
+        CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
         public bool Is( IType other ) =>
             this._compilation.RoslynCompilation.HasImplicitConversion( this._typeSymbol, other.GetSymbol() );
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPointerType MakePointerType() =>
             (IPointerType) this._compilation.SymbolMap.GetIType( this._compilation.RoslynCompilation.CreatePointerTypeSymbol( this._typeSymbol ) );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext context = null ) => this._typeSymbol.ToDisplayString();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._typeSymbol.ToDisplayString();
 
         public override string ToString() => this._typeSymbol.ToString();
     }

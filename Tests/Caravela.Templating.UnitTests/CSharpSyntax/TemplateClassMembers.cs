@@ -1,6 +1,5 @@
-using Caravela.Framework.Impl;
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -21,7 +20,7 @@ class Aspect : BaseAspect
     {
     }
     
-    [Template]
+    [TestTemplate]
     dynamic Template()
     {
         dynamic result = proceed();

@@ -1,6 +1,5 @@
-
-using Caravela.TestFramework.Templating;
 using System.Threading.Tasks;
+using Caravela.TestFramework;
 using Xunit;
 
 namespace Caravela.Templating.UnitTests
@@ -14,7 +13,7 @@ using System.Linq;
 
 class Aspect
 {
-  [Template]
+  [TestTemplate]
   dynamic Template()
   {
       IEnumerable<int> array = Enumerable.Range(1, 2);

@@ -1,4 +1,9 @@
 ﻿namespace Caravela.Framework.Code
 {
-    public interface IDynamicType : IType { }
+    /// <summary>
+    /// Represent the <c>dynamic</c> type.
+    /// </summary>
+    public interface IDynamicType : IType
+    {
+    }
 }

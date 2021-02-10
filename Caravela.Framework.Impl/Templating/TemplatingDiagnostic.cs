@@ -1,10 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    static class TemplatingDiagnostic
+    internal static class TemplatingDiagnostic
     {
         public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
         {

@@ -9,8 +9,8 @@ namespace Caravela.Templating.UnitTests
 
         public ForTests( ITestOutputHelper logger )
         {
-            _logger = logger;
-            _testRunner = new UnitTestRunner( _logger );
+            this._logger = logger;
+            this._testRunner = new UnitTestRunner( this._logger );
         }
     }
 }
