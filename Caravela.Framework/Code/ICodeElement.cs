@@ -30,12 +30,4 @@ namespace Caravela.Framework.Code
         /// </summary>
         public CodeElementKind ElementKind { get; }
     }
-
-    public interface ICodeElementBuilder : ICodeElement
-    {
-        bool IsReadOnly { get; }
-        
-        IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments );
-
-    }
 }

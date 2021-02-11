@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp

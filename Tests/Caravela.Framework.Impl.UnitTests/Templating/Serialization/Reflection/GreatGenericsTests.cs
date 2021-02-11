@@ -45,7 +45,7 @@ class User {
     public Descendant<float> FullyInstantiated;
 }";
             var compilation = CreateCompilation( this._code );
-            this._topLevelTypes = compilation.DeclaredTypes.GetValue();
+            this._topLevelTypes = compilation.DeclaredTypes;
         }
 
         [Fact]
@@ -53,7 +53,7 @@ class User {
         {
             // Pure types
             var origin = this._topLevelTypes.Single( t => t.Name == "Origin" );
-            var nested = origin.NestedTypes.GetValue().Single();
+            var nested = origin.NestedTypes.Single();
             var descendant = this._topLevelTypes.Single( t => t.Name == "Descendant" );
 
             this.TestSerializable(
@@ -79,7 +79,7 @@ class User {
         {
             // Generic instances
             var user = this._topLevelTypes.Single( t => t.Name == "User" )!;
-            var instantiatedDescendant = (INamedType) user.Properties.GetValue().Single().Type;
+            var instantiatedDescendant = (INamedType) user.Properties.Single().Type;
             var instantiatedNested = instantiatedDescendant.BaseType!;
             var instantiatedBaseOrigin = instantiatedNested.BaseType!;
 

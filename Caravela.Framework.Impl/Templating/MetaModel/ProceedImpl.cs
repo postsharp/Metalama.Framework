@@ -1,42 +1,56 @@
 using System;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class ProceedImpl : IProceedImpl
+    internal class ProceedInvokeMethod : IProceedImpl
     {
-        private readonly BaseMethodDeclarationSyntax _method;
+        private readonly IMethod _method;
 
-        public ProceedImpl( BaseMethodDeclarationSyntax method )
+        public ProceedInvokeMethod( IMethod method )
         {
             this._method = method;
         }
 
-        public TypeSyntax CreateTypeSyntax()
+        TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-            if ( this._method is MethodDeclarationSyntax method )
+        
+            if ( this._method.ReturnType.Is( typeof(void) ) )
             {
-                if ( method.ReturnType is PredefinedTypeSyntax predefinedType &&
-                    predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword )
-                {
-                    return IdentifierName( "__Void" );
-                }
-                else
-                {
-                    return method.ReturnType;
-                }
+                // TODO: Add the namespace.
+                return IdentifierName( nameof(__Void) );
             }
             else
             {
+                // TODO: Generate the syntax.
                 throw new NotImplementedException();
             }
+        
         }
 
-        public StatementSyntax CreateAssignStatement( string returnValue )
+        StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
         {
+            // TODO: Emit `xxx = TheMethod( a, b, c )`  where `a, b, c` is the canonical list of arguments.
+            throw new NotImplementedException();
+        }
+
+        StatementSyntax IProceedImpl.CreateReturnStatement()
+        {
+            // TODO: Emit `return TheMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
+            throw new NotImplementedException();
+        }
+
+        
+        // The following commented logic should move to the aspect linker.
+        
+        /*
+        StatementSyntax IProceedImpl.CreateAssignStatement( string returnLocalVariableName )
+        {
+            
+            
             if ( this._method.Body == null )
             {
                 throw new NotImplementedException( "Expression-bodied methods not implemented." );
@@ -54,13 +68,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 // There is a single return statement at the end. We don't need to generate the label and the goto.
 
-                var rewriter = new ReturnToAssignmentRewriter( returnValue, null );
+                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, null );
 
                 return (BlockSyntax) rewriter.Visit( methodBody );
             }
             else
             {
-                var rewriter = new ReturnToAssignmentRewriter( returnValue, "__continue" );
+                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, "__continue" );
 
                 var body = (BlockSyntax) rewriter.Visit( methodBody );
 
@@ -68,6 +82,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     body,
                     LabeledStatement( "__continue", EmptyStatement() ) );
             }
+            
         }
 
         private bool IsLastStatement( SyntaxNode node )
@@ -97,7 +112,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        public StatementSyntax CreateReturnStatement()
+        StatementSyntax IProceedImpl.CreateReturnStatement()
         {
             if ( this._method.Body == null )
             {
@@ -165,5 +180,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 }
             }
         }
+        */
     }
 }

@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeTargetDotMethod( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );
             var method = (Method) single;
             var actual = new CaravelaMethodInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaMethodInfo( method ) ).ToString();
             return actual;

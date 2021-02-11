@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeEvent( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Events.GetValue().Single( m => m.Name == "Activated" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
             var e = (single as Event)!;
             var actual = new CaravelaEventInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
             return actual;

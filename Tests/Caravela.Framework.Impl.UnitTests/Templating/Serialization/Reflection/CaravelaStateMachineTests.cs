@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         public void TestEnumerable()
         {
             var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().First() ) ).ToString();
+            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) ).ToString();
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}""))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Method", info.Name ) );
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         public void TestAsync()
         {
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().First() ) ).ToString();
+            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) ).ToString();
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method""))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Method", info.Name ) );

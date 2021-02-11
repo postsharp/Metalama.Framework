@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeType( string code )
         {
             var compilation = CreateCompilation( code );
-            IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
+            IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
             var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
             return actual;
         }
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeTypeOfProperty( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" ).Type;
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
             var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
             return actual;
         }

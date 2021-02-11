@@ -13,19 +13,15 @@ namespace Caravela.Framework.Impl.Transformations
         private bool _hasDefaultValue;
        private object? _defaultValue;
 
-        public Code.RefKind RefKind { get; }
+        public RefKind RefKind { get; }
 
         public IType Type { get; set; }
-       
 
         public string? Name { get; }
     
         public int Index { get; }
 
-
-
         public OptionalValue DefaultValue { get; set; }
-      
 
         public override ICodeElement? ContainingElement { get; }
 
@@ -39,15 +35,6 @@ namespace Caravela.Framework.Impl.Transformations
             this.Type = type;
             this.RefKind = refKind;
         }
-
-        public override MemberDeclarationSyntax GetDeclaration()
-        {
-            throw new NotSupportedException();
-        }
-
-        public override CSharpSyntaxNode GetSyntaxNode() => throw new NotSupportedException();
-
-        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => throw new NotSupportedException();
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {

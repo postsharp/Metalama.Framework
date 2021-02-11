@@ -1,6 +1,5 @@
 // unset
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
@@ -70,51 +69,19 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodBuilder( IAdvice advice, INamedType targetType, IMethod templateMethod, string name )
-            : base( advice, targetType )
+        public MethodBuilder( INamedType targetType, IMethod templateMethod, string name )
+            : base( targetType )
         {
             this.Name = name;
         }
 
-        // TODO: Memo for methods?
-        private MemberDeclarationSyntax? _declaration;
-
-        public override MemberDeclarationSyntax GetDeclaration()
-        {
-            /*
-            if ( this._declaration != null )
-            {
-                return this._declaration;
-            }
-
-            var templateSyntax = (MethodDeclarationSyntax) this.TemplateMethod!.GetSyntaxNode()!;
-
-            this._declaration = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.List<AttributeListSyntax>(), // TODO: Copy some attributes?
-                templateSyntax.Modifiers,
-                templateSyntax.ReturnType,
-                templateSyntax.ExplicitInterfaceSpecifier!,
-                templateSyntax.Identifier,
-                templateSyntax.TypeParameterList!,
-                templateSyntax.ParameterList,
-                templateSyntax.ConstraintClauses,
-                SyntaxFactory.Block( SyntaxFactory.ThrowStatement( SyntaxFactory.ObjectCreationExpression( SyntaxFactory.ParseTypeName( "System.NotImplementedException" ) ) ) ),
-                null,
-                templateSyntax.SemicolonToken );
-*/
-            return this._declaration;
-        }
-
-        public override CSharpSyntaxNode GetSyntaxNode() => this.GetDeclaration();
-
-        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => new[] { (CSharpSyntaxNode) this.GetDeclaration() };
-
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            throw new NotImplementedException();
-        }
-
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
         protected override void ForEachChild( Action<CodeElementBuilder> action ) => throw new NotImplementedException();
+        public override MemberDeclarationSyntax GenerateMember()
+        {
+            // TODO: Generate the method HERE with an implementation that just throws NotImplementedException.
+            throw new NotImplementedException();
+        }
     }
 }

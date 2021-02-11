@@ -88,9 +88,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var code = "class Target { public string this[int target] {get{return default;}} }";
             var compilation = CreateCompilation( code );
-            var referencedTypes = compilation.DeclaredAndReferencedTypes.GetValue();
+            var referencedTypes = compilation.DeclaredAndReferencedTypes;
             var stringType = referencedTypes.Single( t => t.Name == "String" );
-            var properties = stringType.Properties.GetValue();
+            var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
             var serialized = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( (Property) property ) ).ToString();
             this.AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))", serialized );
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeIndexerWithTarget( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
             var actual = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( property ) ).ToString();
             return actual;
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeProperty( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( p => p.Name == "Property" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
             var actual = this._caravelaLocationInfoSerializer.Serialize( new CaravelaLocationInfo( property ) ).ToString();
             return actual;

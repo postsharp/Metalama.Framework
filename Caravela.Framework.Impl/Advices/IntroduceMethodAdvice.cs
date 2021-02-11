@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Advices
             this.TemplateMethod = templateMethod;
             
             // TODO: Set name and all properties from the template.
-            this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod, templateMethod.Name );
+            this._methodBuilder = new MethodBuilder( targetDeclaration, templateMethod, templateMethod.Name );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Advices
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray.Create<ICodeElementBuilder>( this._methodBuilder ),
+                ImmutableArray.Create<IIntroducedElement>( this._methodBuilder ),
                 ImmutableArray.Create<Transformation>( overriddenMethod ) );
         }
 

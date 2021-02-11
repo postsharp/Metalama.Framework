@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class CodeElement : ICodeElement, IToSyntax
+    internal abstract class CodeElement : ICodeElement, IHasLocation
     {
         protected CodeElement( CompilationModel compilation )
         {
@@ -40,10 +40,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() );
 
-        // TODO: special case partial methods?
-        CSharpSyntaxNode IToSyntax.GetSyntaxNode() => this.ToSyntaxNodes().Single();
-
-        IEnumerable<CSharpSyntaxNode> IToSyntax.GetSyntaxNodes() => this.ToSyntaxNodes();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();
@@ -51,5 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Equals( ICodeElement other ) =>
             other is CodeElement codeElement &&
             SymbolEqualityComparer.Default.Equals( this.Symbol, codeElement.Symbol );
+
+        public Location? Location => this.Symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation();
     }
 }

@@ -8,7 +8,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal abstract class CodeElementBuilder : IToSyntax, IIntroducedElement
+    internal abstract class CodeElementBuilder : IIntroducedElement
     {
         
         public abstract ICodeElement? ContainingElement { get; }
@@ -19,11 +19,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract CodeElementKind ElementKind { get; }
 
-        public abstract CSharpSyntaxNode GetSyntaxNode();
-
-        public abstract IEnumerable<CSharpSyntaxNode> GetSyntaxNodes();
-
-        public abstract MemberDeclarationSyntax GetDeclaration();
         
         public SyntaxTree TargetSyntaxTree => throw new NotImplementedException();
 
@@ -44,10 +39,5 @@ namespace Caravela.Framework.Impl.Transformations
         protected abstract void ForEachChild( Action<CodeElementBuilder> action );
 
         
-    }
-
-    internal interface IIntroducedElement : ICodeElementBuilder
-    {
-        SyntaxTree TargetSyntaxTree { get;  }
     }
 }

@@ -22,7 +22,7 @@ namespace Caravela.Framework.TestApp
 
         public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
         {
-            var methods = aspectBuilder.TargetDeclaration.Methods.GetValue();
+            var methods = aspectBuilder.TargetDeclaration.Methods;
             this._methodCount = methods.Count();
             foreach ( var method in methods.Where( x => x.MethodKind != Caravela.Framework.Code.MethodKind.Constructor ) )
             {

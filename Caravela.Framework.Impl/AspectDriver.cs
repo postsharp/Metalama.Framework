@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Advices;
@@ -7,9 +8,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
-
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
@@ -55,7 +54,7 @@ namespace Caravela.Framework.Impl
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
                 return new ( ImmutableList.Create( diagnostic ), ImmutableList.Create<IAdvice>(), ImmutableList.Create<AspectInstance>() );
             }

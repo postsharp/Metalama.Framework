@@ -36,29 +36,4 @@ namespace Caravela.Framework.Code
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
         OptionalValue DefaultValue { get; }
     }
-
-    public interface IParameterBuilder : IParameter, ICodeElementBuilder
-    {
-       
-        /// <remarks>
-        /// Gets or sets the default value of the parameter, or  <c>default</c> if the parameter type is a struct and the default
-        /// value of the parameter is the default value of the struct type.
-        /// </remarks>
-        /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        new OptionalValue DefaultValue { get; set; }
-        
-        /// <summary>
-        /// Gets the parameter type.
-        /// </summary>
-        new IType Type { get; set; }
-    }
-
-    public static class ParameterExtensions
-    {
-        public static bool IsByRef(this IParameter parameter) => parameter.RefKind != RefKind.None;
-
-        public static bool IsRef(this IParameter parameter) => parameter.RefKind == RefKind.Ref;
-
-        public static bool IsOut(this IParameter parameter) => parameter.RefKind == RefKind.Out;
-    }
 }

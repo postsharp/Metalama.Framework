@@ -1,6 +1,5 @@
 // unset
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,20 +41,11 @@ namespace Caravela.Framework.Impl.Transformations
         
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        public GenericParameterBuilder( IAdvice advice, IMethod containingMethod, IGenericParameter template ) : base()
+        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template ) : base()
         {
             this.ContainingElement = containingMethod;
             this._template = template;
         }
-
-        public override MemberDeclarationSyntax GetDeclaration()
-        {
-            throw new NotSupportedException();
-        }
-
-        public override CSharpSyntaxNode GetSyntaxNode() => this._template.GetSyntaxNode()!;
-
-        public override IEnumerable<CSharpSyntaxNode> GetSyntaxNodes() => this._template.GetSyntaxNodes()!;
 
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

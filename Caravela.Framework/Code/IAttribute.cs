@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Code
 {
@@ -39,12 +40,4 @@ namespace Caravela.Framework.Code
         // TODO: it cannot ve a dictionary because the ordering of assignments must be preserved.
         IReadOnlyList<KeyValuePair<string, object?>> NamedArguments { get; }
     }
-
-    public interface IAttributeBuilder : IAttribute
-    {
-        void AddNamedArgument( string name, object? value );
-
-    }
-    
-    
 }

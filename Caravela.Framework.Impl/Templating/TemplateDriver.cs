@@ -2,7 +2,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,13 +13,16 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly MethodInfo _templateMethod;
 
-        public TemplateDriver( MethodInfo templateMethodInfo ) => this._templateMethod = templateMethodInfo;
+        public TemplateDriver( MethodInfo templateMethodInfo )
+        {
+            this._templateMethod = templateMethodInfo;
+        }
 
         public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
             return this.ExpandDeclaration(
                 templateInstance,
-                new ProceedImpl( (BaseMethodDeclarationSyntax) targetMethod.GetSyntaxNode()! ),
+                new ProceedInvokeMethod( targetMethod ),
                 new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation ) );
         }
 

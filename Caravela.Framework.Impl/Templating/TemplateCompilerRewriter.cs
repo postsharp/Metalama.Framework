@@ -216,7 +216,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case nameof( Boolean ):
                     return InvocationExpression( IdentifierName( nameof( LiteralExpression ) ) ).AddArgumentListArguments(
-                        Argument( InvocationExpression( IdentifierName( nameof( BooleanKeyword ) ) ).AddArgumentListArguments(
+                        Argument( InvocationExpression( IdentifierName( nameof( TemplateHelper.BooleanKeyword ) ) ).AddArgumentListArguments(
                             Argument( expression ) ) ) );
 
                 default:
@@ -677,7 +677,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                    IdentifierName( nameof( TemplateHelper.TemplateReturnStatement ) ) ).AddArgumentListArguments(
                         Argument( this.Transform( node.Expression ) ) );
             }
         }

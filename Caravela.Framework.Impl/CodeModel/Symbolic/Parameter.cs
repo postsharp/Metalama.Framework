@@ -7,42 +7,42 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Parameter : CodeElement, IParameter
     {
-        private readonly IParameterSymbol _symbol;
+        public IParameterSymbol ParameterSymbol { get; }
 
 
         private readonly CodeElement _containingMember;
 
         public Parameter( IParameterSymbol symbol, CodeElement containingMember ) : base( containingMember.Compilation )
         {
-            this._symbol = symbol;
+            this.ParameterSymbol = symbol;
             this._containingMember = containingMember;
         }
 
-        public RefKind RefKind => this._symbol.RefKind switch
+        public RefKind RefKind => this.ParameterSymbol.RefKind switch
         {
             Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
             Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
             Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
             Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
-            _ => throw new InvalidOperationException( $"Roslyn RefKind {this._symbol.RefKind} not recognized." )
+            _ => throw new InvalidOperationException( $"Roslyn RefKind {this.ParameterSymbol.RefKind} not recognized." )
         };
 
         [Memo]
-        public IType Type => this.Compilation.GetIType( this._symbol.Type );
+        public IType Type => this.Compilation.GetIType( this.ParameterSymbol.Type );
 
-        public string Name => this._symbol.Name;
+        public string Name => this.ParameterSymbol.Name;
 
-        public int Index => this._symbol.Ordinal;
+        public int Index => this.ParameterSymbol.Ordinal;
 
         public override ICodeElement ContainingElement => this._containingMember;
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        protected internal override ISymbol Symbol => this.ParameterSymbol;
 
     
-        public OptionalValue DefaultValue => this._symbol.HasExplicitDefaultValue ? new OptionalValue(this._symbol.ExplicitDefaultValue) : default;
+        public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue(this.ParameterSymbol.ExplicitDefaultValue) : default;
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.ParameterSymbol.ToDisplayString();
     }
 }

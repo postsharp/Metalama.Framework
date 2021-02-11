@@ -113,7 +113,7 @@ namespace Caravela.TestFramework.Templating
 
                 var caravelaCompilation = new RoslynBasedCompilationModel( compilationForInitialDiagnostics );
                 var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" )!;
-                var targetCaravelaMethod = targetCaravelaType.Methods.GetValue().SingleOrDefault( m => m.Name == "Method" );
+                var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
 
                 var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );

@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeType( string code )
         {
             var compilation = CreateCompilation( code );
-            IType single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).NestedTypes.GetValue().Single( nt => nt.Name == "Sub" );
+            IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
             return new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
         }
 

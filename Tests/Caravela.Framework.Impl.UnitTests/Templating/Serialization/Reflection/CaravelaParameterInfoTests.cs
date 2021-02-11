@@ -122,26 +122,26 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeIndexerParameter( string code )
         {
             var compilation = CreateCompilation( code );
-            var targetType = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" );
-            var single = targetType.Properties.GetValue().Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
+            var targetType = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
+            var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
             var parameter = (Parameter) single;
-            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
+            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) ).ToString();
             return actual;
         }
 
         private string SerializeParameter( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).Parameters.First( p => p.Name == "target" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).Parameters.First( p => p.Name == "target" );
             var parameter = (Parameter) single;
-            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.Symbol, parameter.ContainingElement ) ).ToString();
+            var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) ).ToString();
             return actual;
         }
 
         private string SerializeReturnParameter( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Methods.GetValue().Single( m => m.Name == "Method" ).ReturnParameter!;
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter!;
             var p = (Method.MethodReturnParameter) single;
             var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;
@@ -150,7 +150,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         private string SerializeReturnParameterOfProperty( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.GetValue().Single( t => t.Name == "Target" ).Properties.GetValue().Single( m => m.Name == "Property" ).Getter!.ReturnParameter!;
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).Getter!.ReturnParameter!;
             var p = (Method.MethodReturnParameter) single;
             var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CaravelaReturnParameterInfo( p ) ).ToString();
             return actual;

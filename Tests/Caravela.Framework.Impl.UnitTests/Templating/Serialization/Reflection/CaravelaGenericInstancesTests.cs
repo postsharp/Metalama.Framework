@@ -37,10 +37,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
         private void AssertFieldType( string code, Type expectedType, string expected )
         {
-            var allTypes = CreateCompilation( code ).DeclaredTypes.GetValue();
-            var nestedTypes = allTypes.Single().NestedTypes.GetValue();
+            var allTypes = CreateCompilation( code ).DeclaredTypes;
+            var nestedTypes = allTypes.Single().NestedTypes;
             var innerType = nestedTypes.Single();
-            var allProperties = innerType.Properties.GetValue();
+            var allProperties = innerType.Properties;
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
                     CaravelaType.Create(
                         allProperties.Single().Type ) )

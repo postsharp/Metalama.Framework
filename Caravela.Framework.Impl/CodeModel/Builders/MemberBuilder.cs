@@ -1,7 +1,7 @@
 // unset
 
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -20,9 +20,11 @@ namespace Caravela.Framework.Impl.Transformations
         
         public sealed override ICodeElement? ContainingElement => this.DeclaringType;
 
-        public MemberBuilder( IAdvice advice, INamedType declaringType ) : base()
+        public MemberBuilder( INamedType declaringType ) 
         {
             this.DeclaringType = declaringType;
         }
+
+        public abstract MemberDeclarationSyntax GenerateMember();
     }
 }
