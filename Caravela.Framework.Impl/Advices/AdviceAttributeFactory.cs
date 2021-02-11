@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Advices
                     return new OverrideMethodAdvice( aspect, (IMethod) declaration, (IMethod) templateMethod );
                 case nameof(IntroduceMethodAttribute):
                 {
-                    var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod );
+                    var advice = new IntroduceIntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod );
 
                     
                     if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )

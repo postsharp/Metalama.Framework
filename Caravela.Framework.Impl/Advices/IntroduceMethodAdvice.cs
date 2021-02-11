@@ -8,14 +8,14 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 
-    internal sealed class IntroduceMethodAdvice : Advice, IMethodIntroductionAdvice
+    internal sealed class IntroduceIntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
         private readonly MethodBuilder _methodBuilder;
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IMethod TemplateMethod { get; }
 
-        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
+        public IntroduceIntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
             

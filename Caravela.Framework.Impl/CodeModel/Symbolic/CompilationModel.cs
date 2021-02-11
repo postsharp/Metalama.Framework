@@ -42,6 +42,6 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation = roslynCompilation;
         }
         
-        public abstract IReadOnlyMultiValueDictionary<ICodeElement?, ICodeElementBuilder> IntroducedElements { get; }
+        public abstract IReadOnlyMultiValueDictionary<ICodeElement?, IIntroducedElement> IntroducedElements { get; }
     }
 }

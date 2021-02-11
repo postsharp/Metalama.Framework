@@ -23,15 +23,11 @@ namespace Caravela.Framework.Impl.Linking
         {
             var resultingCompilation = this._input.Compilation;
             
-            var transformationsByContainingType =
-                this._input.CompilationModel.IntroducedElements.
-                    GroupBy( t => t.ContainingType, t => t, EqualityComparer<ICodeElement>.Default )
-                    .ToDictionary( g => (INamedType) g.Key, g => g );
             
             
             var transformationsBySyntaxTree =
-                this._input.CompilationModel.IntroducedElements.
-                    GroupBy( t => t.SyntaxTree, t => t )
+                this._input.CompilationModel.IntroducedElements.Values
+                    .GroupBy( t => t.TargetSyntaxTree, t => t )
                     .ToDictionary( g =>  g.Key, g => g );
 
           

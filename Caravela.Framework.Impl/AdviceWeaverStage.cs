@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
             return new PipelineStageResult(
                 linkerResult.Compilation,
                 aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
-                aspectPartResult.Compilation.IntroducedElements[null].OfType<ManagedResourceBuilder>(  ).Select( r => r.ToResourceDescription() ).ToList(),
+                aspectPartResult.Compilation.IntroducedElements.GetByKey( null ).OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
                 aspectPartResult.Aspects );
         }
 

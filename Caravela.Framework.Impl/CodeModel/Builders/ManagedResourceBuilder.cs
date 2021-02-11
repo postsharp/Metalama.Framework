@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class ManagedResourceBuilder : ICodeElementBuilder
+    internal class ManagedResourceBuilder : ICodeElementBuilder, IIntroducedElement
     {
         public ManagedResourceBuilder(IAdvice advice) 
         {
@@ -34,5 +34,7 @@ namespace Caravela.Framework.Impl.Transformations
         public bool IsReadOnly => true;
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotSupportedException();
+
+        public SyntaxTree TargetSyntaxTree => null;
     }
 }

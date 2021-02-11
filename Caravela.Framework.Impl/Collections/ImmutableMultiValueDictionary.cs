@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Collections
             return AddRange( builder, source, getKey, getValue );
         }
 
-        IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.this[ TKey key ] => this[key];
+        IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.GetByKey(TKey key) => this[key];
 
         public ImmutableArray<TValue> this[ TKey key ]
         {
@@ -71,6 +71,20 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         public IEnumerable<TKey> Keys => this._dictionary.Keys;
+
+        public IEnumerable<TValue> Values
+        {
+            get
+            {
+                foreach ( var group in this._dictionary.Values )
+                {
+                    foreach ( var item in group )
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
 
         readonly struct Group : IGrouping<TKey, TValue>
         {

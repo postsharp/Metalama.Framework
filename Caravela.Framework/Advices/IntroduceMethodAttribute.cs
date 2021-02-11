@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Advices
 {
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
-    public class IntroduceMethodAttribute : IntroduceMethodTemplateAttribute, IAdviceAttribute<IIntroductionAdvice>
+    public class IntroduceMethodAttribute : IntroduceMethodTemplateAttribute, IAdviceAttribute<IIntroduceMethodAdvice>
     {
         public IntroductionScope? Scope { get; set; }
 

@@ -35,11 +35,11 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IMethodIntroductionAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope  )
+        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope  )
         {
             // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
-            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod );
+            var advice = new IntroduceIntroduceMethodAdvice( this._aspect, targetType, templateMethod );
             this._advices.Add( advice );
 
             return advice;

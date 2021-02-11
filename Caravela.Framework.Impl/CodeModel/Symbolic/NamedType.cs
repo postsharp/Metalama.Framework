@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Select( m => this.Compilation.GetMethod( m ) )
-                .Concat( this.Compilation.IntroducedElements[this].OfType<Transformations.MethodBuilder>() )
+                .Concat( this.Compilation.IntroducedElements.GetByKey( this ).OfType<Transformations.MethodBuilder>() )
                 .ToImmutableArray();
 
         public INamedType MakeGenericType( params IType[] genericArguments ) => throw new NotImplementedException();

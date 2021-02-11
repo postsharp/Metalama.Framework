@@ -15,11 +15,11 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class RoslynBasedCompilationModel : CompilationModel
     {
-        private ImmutableMultiValueDictionary<ICodeElement, ICodeElementBuilder> _introducedElements;
+        private ImmutableMultiValueDictionary<ICodeElement, IIntroducedElement> _introducedElements;
 
         public RoslynBasedCompilationModel( CSharpCompilation roslynCompilation ) : base( roslynCompilation )
         {
-            this._introducedElements = ImmutableMultiValueDictionary<ICodeElement, ICodeElementBuilder>.Empty;
+            this._introducedElements = ImmutableMultiValueDictionary<ICodeElement, IIntroducedElement>.Empty;
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="introducedElements"></param>
-        public RoslynBasedCompilationModel( RoslynBasedCompilationModel prototype, IEnumerable<ICodeElementBuilder> introducedElements )
+        public RoslynBasedCompilationModel( RoslynBasedCompilationModel prototype, IEnumerable<IIntroducedElement> introducedElements )
         : base( prototype.RoslynCompilation )
         {
             this._introducedElements = prototype._introducedElements.AddRange( introducedElements, t => t.ContainingElement, t => t );
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
-        public override IReadOnlyMultiValueDictionary<ICodeElement, ICodeElementBuilder> IntroducedElements => this._introducedElements;
+        public override IReadOnlyMultiValueDictionary<ICodeElement, IIntroducedElement> IntroducedElements => this._introducedElements;
         protected override NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
 
         

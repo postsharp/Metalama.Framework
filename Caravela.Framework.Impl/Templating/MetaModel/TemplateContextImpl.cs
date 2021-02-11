@@ -83,16 +83,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
+        public OptionalValue DefaultValue => throw new NotImplementedException();
+
         public ICodeElement? ContainingElement => this._parameter.ContainingElement;
 
         public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 
-        public bool HasDefaultValue => this._parameter.HasDefaultValue;
-
-        public object? DefaultValue => this._parameter.DefaultValue;
-
+        
         public dynamic Value
         {
             get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
