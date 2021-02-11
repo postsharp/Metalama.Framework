@@ -7,6 +7,7 @@ namespace Caravela.Framework.Code
         bool IsReadOnly { get; }
         
         IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments );
+        void RemoveAttributes( INamedType type );
 
     }
 }

@@ -22,8 +22,8 @@ namespace Caravela.Framework.Impl.Advices
         {
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray<ICodeElementBuilder>.Empty,
-                ImmutableArray.Create<Transformation>(
+                ImmutableArray<IObservableTransformation>.Empty,
+                ImmutableArray.Create<INonObservableTransformation>(
                     new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) ) );
         }
     }

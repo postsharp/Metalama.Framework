@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Advices
 #pragma warning disable SA1313 // Parameter names should begin with lower-case letter
     internal record AdviceResult(
         ImmutableArray<Diagnostic> Diagnostics,
-        ImmutableArray<IIntroducedElement> Introductions,
-        ImmutableArray<Transformation> Transformations );
+        ImmutableArray<IObservableTransformation> ObservableTransformations,
+        ImmutableArray<INonObservableTransformation> NonObservableTransformations );
 #pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 }

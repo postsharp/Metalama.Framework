@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -71,7 +72,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Select( m => this.Compilation.GetMethod( m ) )
-                .Concat( this.Compilation.IntroducedElements.GetByKey( this ).OfType<Transformations.MethodBuilder>() )
+                .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodTransformationBuilder>() )
                 .ToImmutableArray();
 
         public INamedType MakeGenericType( params IType[] genericArguments ) => throw new NotImplementedException();

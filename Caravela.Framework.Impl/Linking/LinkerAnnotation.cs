@@ -1,23 +1,42 @@
-﻿namespace Caravela.Framework.Impl.Linking
+﻿using System;
+using System.Diagnostics;
+
+namespace Caravela.Framework.Impl.Linking
 {
-#pragma warning disable SA1313 // Parameter names should begin with lower-case letter
-    public record LinkerAnnotation( string? AspectTypeName, string? PartName, string? Order, string? Verb )
-#pragma warning restore SA1313 // Parameter names should begin with lower-case letter
+    public enum LinkerAnnotationOrder
+    {
+        /// <summary>
+        /// Calls the semantic in the state it is after the current aspect has been applied.
+        /// </summary>
+        Default,
+        
+        /// <summary>
+        /// Calls the semantic in the original order, before any transformation.
+        /// </summary>
+        Original,
+    }
+    
+    
+    public record LinkerAnnotation(
+        // Name of the aspect that is adding the semantic invocation to the syntax tree.
+        string? AspectTypeName, 
+        // Part of the aspect that is adding the semantic invocation to the syntax tree.
+        string? PartName,
+        // Determines which version of the semantic must be invoked.
+        LinkerAnnotationOrder Order )
     {
         public override string ToString()
         {
-            return $"{this.AspectTypeName}${this.PartName}${this.Order}${this.Verb}";
+            return $"{this.AspectTypeName}${this.PartName}${this.Order}";
         }
 
         public static LinkerAnnotation FromString( string str )
         {
             var parts = str.Split( '$' );
 
-            return new LinkerAnnotation(
-                parts[0] == "null" ? null : parts[0],
-                parts[1] == "null" ? null : parts[1],
-                parts[2] == "null" ? null : parts[2],
-                parts[3] == "null" ? null : parts[3] );
+            Debug.Assert( Enum.TryParse<LinkerAnnotationOrder>( parts[2], out var order ), "Invalid order." );
+            
+            return new LinkerAnnotation( parts[0], parts[1] == "null" ? null : parts[1], order );
         }
 
     

@@ -15,11 +15,11 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class RoslynBasedCompilationModel : CompilationModel
     {
-        private ImmutableMultiValueDictionary<ICodeElement, IIntroducedElement> _introducedElements;
+        private ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation> _transformations;
 
         public RoslynBasedCompilationModel( CSharpCompilation roslynCompilation ) : base( roslynCompilation )
         {
-            this._introducedElements = ImmutableMultiValueDictionary<ICodeElement, IIntroducedElement>.Empty;
+            this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty;
         }
 
         /// <summary>
@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="introducedElements"></param>
-        public RoslynBasedCompilationModel( RoslynBasedCompilationModel prototype, IEnumerable<IIntroducedElement> introducedElements )
+        public RoslynBasedCompilationModel( RoslynBasedCompilationModel prototype, IEnumerable<IObservableTransformation> introducedElements )
         : base( prototype.RoslynCompilation )
         {
-            this._introducedElements = prototype._introducedElements.AddRange( introducedElements, t => t.ContainingElement, t => t );
+            this._transformations = prototype._transformations.AddRange( introducedElements, t => t.ContainingElement, t => t );
         }
 
         [Memo]
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
-        public override IReadOnlyMultiValueDictionary<ICodeElement, IIntroducedElement> IntroducedElements => this._introducedElements;
+        public override IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations => this._transformations;
         protected override NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
 
         

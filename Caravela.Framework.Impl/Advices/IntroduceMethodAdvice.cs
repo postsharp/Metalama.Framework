@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Advices
 
     internal sealed class IntroduceIntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
-        private readonly MethodBuilder _methodBuilder;
+        private readonly MethodTransformationBuilder _methodTransformationBuilder;
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IMethod TemplateMethod { get; }
@@ -20,19 +20,19 @@ namespace Caravela.Framework.Impl.Advices
             this.TemplateMethod = templateMethod;
             
             // TODO: Set name and all properties from the template.
-            this._methodBuilder = new MethodBuilder( targetDeclaration, templateMethod, templateMethod.Name );
+            this._methodTransformationBuilder = new MethodTransformationBuilder( targetDeclaration, templateMethod, templateMethod.Name );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod );
+            var overriddenMethod = new OverriddenMethod( this, this._methodTransformationBuilder, this.TemplateMethod );
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray.Create<IIntroducedElement>( this._methodBuilder ),
-                ImmutableArray.Create<Transformation>( overriddenMethod ) );
+                ImmutableArray.Create<IObservableTransformation>( this._methodTransformationBuilder ),
+                ImmutableArray.Create<INonObservableTransformation>( overriddenMethod ) );
         }
 
-        public IMethodBuilder Builder => this._methodBuilder;
+        public IMethodBuilder Builder => this._methodTransformationBuilder;
     }
 }

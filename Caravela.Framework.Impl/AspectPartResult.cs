@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
         
         public IReadOnlyList<Advice> Advices { get; }
         
-        public IReadOnlyList<Transformation> Transformations { get; }
+        public IReadOnlyList<INonObservableTransformation> Transformations { get; }
 
         
         public AspectPartResult( RoslynBasedCompilationModel compilation, CompileTimeAssemblyLoader loader )
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl
                 Array.Empty<Diagnostic>(),
                   compilation.GetAspectsFromAttributes(loader).ToList(),
                   Array.Empty<Advice>(),
-                Array.Empty<Transformation>())
+                Array.Empty<INonObservableTransformation>())
         {
         }
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl
             IReadOnlyList<Diagnostic> diagnostics, 
             IReadOnlyList<AspectInstance> aspects,
             IReadOnlyList<Advice> advices, 
-            IReadOnlyList<Transformation> transformations )
+            IReadOnlyList<INonObservableTransformation> transformations )
         {
             this.Diagnostics = diagnostics;
             this.Compilation = compilation;
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl
             IReadOnlyList<Diagnostic> additionalDiagnostics,
             IReadOnlyList<AspectInstance> additionalAspects,
             IReadOnlyList<Advice> additionalAdvices, 
-            IReadOnlyList<Transformation> additionalTransformations )
+            IReadOnlyList<INonObservableTransformation> additionalTransformations )
         {
             return new ( 
                 compilation,

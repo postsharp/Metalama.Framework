@@ -53,7 +53,8 @@ namespace Caravela.Framework.Impl
                 newCompilation,
                 input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
-                input.AspectInstances );
+                input.AspectInstances,
+                input.AspectParts);
         }
 
         private class DiagnosticSink : IDiagnosticSink

@@ -38,16 +38,24 @@ namespace Caravela.Framework.Impl
                 var compilation = new RoslynBasedCompilationModel( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
-                var aspectPartDataComparer = new AspectPartDataComparer( new AspectPartComparer() );
+                var aspectPartComparer = new AspectPartComparer();
 
-                var pipelineStageResult = new PipelineStageResult( roslynCompilation, Array.Empty<Diagnostic>(), Array.Empty<ResourceDescription>(), Array.Empty<AspectInstance>() );
-
-                var stages = GetAspectTypes( compilation )
+            
+                var aspectParts = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
-                    .SelectMany(
-                        at => at.Parts,
-                        ( aspectType, aspectPart ) => new AspectPartData( aspectType, aspectPart ) )
-                    .OrderBy( x => x, aspectPartDataComparer )
+                    .SelectMany( at => at.Parts )
+                    .OrderBy( x => x, aspectPartComparer )
+                    .ToList();
+                
+                var pipelineStageResult = new PipelineStageResult( 
+                    roslynCompilation, 
+                    Array.Empty<Diagnostic>(), 
+                    Array.Empty<ResourceDescription>(), 
+                    Array.Empty<AspectInstance>(),
+                    aspectParts );
+
+                    
+                var stages = aspectParts
                     .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
                     .Select( g => CreateStage( g.Key, g, compilation, compileTimeAssemblyLoader ) );
 
@@ -136,11 +144,8 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-#pragma warning disable SA1313 // Parameter names should begin with lower-case letter
-        private record AspectPartData( AspectType AspectType, AspectPart AspectPart );
-#pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 
-        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPartData> partsData, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPart> partsData, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch ( groupKey )
             {
@@ -152,7 +157,7 @@ namespace Caravela.Framework.Impl
 
                 case nameof( AspectDriver ):
 
-                    return new AdviceWeaverStage( partsData.Select( pd => pd.AspectPart ), compileTimeAssemblyLoader );
+                    return new AdviceWeaverStage( partsData, compileTimeAssemblyLoader );
 
                 default:
 
@@ -160,16 +165,5 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private class AspectPartDataComparer : IComparer<AspectPartData>
-        {
-            private readonly AspectPartComparer _partComparer;
-
-            public AspectPartDataComparer( AspectPartComparer partComparer )
-            {
-                this._partComparer = partComparer;
-            }
-
-            public int Compare( AspectPartData x, AspectPartData y ) => this._partComparer.Compare( x.AspectPart, y.AspectPart );
-        }
     }
 }

@@ -1,11 +1,10 @@
-﻿using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Sdk;
-
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -61,10 +60,10 @@ namespace Caravela.Framework.Impl
                 .Select( ai => ai.ToResult( input.Compilation ) ).ToList();
 
 
-            var addedIntroductions = adviceResults.SelectMany( ar => ar.Introductions );
-            var addedTransformations = adviceResults.SelectMany( ar => ar.Transformations );
+            var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
+            var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
             
-            var newCompilation = new RoslynBasedCompilationModel( (RoslynBasedCompilationModel) input.Compilation, addedIntroductions );
+            var newCompilation = new RoslynBasedCompilationModel( (RoslynBasedCompilationModel) input.Compilation, addedObservableIntroductions );
 
 
 
@@ -73,7 +72,7 @@ namespace Caravela.Framework.Impl
                 aspectInitializerDiagnostics.Concat( adviceResults.SelectMany( ar => ar.Diagnostics ) ).ToList(),
                 addedAspects.ToList(),
                 addedAdvices.ToList(),
-                addedTransformations.ToList());
+                addedNonObservableTransformations.ToList());
 
 
 

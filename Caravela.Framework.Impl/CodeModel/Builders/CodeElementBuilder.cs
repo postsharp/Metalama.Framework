@@ -8,7 +8,7 @@ using System;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal abstract class CodeElementBuilder : IIntroducedElement
+    internal abstract class CodeElementBuilder : ICodeElementBuilder
     {
         
         public abstract ICodeElement? ContainingElement { get; }
@@ -19,8 +19,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract CodeElementKind ElementKind { get; }
 
-        
-        public SyntaxTree TargetSyntaxTree => throw new NotImplementedException();
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
         
@@ -29,15 +27,11 @@ namespace Caravela.Framework.Impl.Transformations
         public bool IsReadOnly { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new System.NotImplementedException();
+        public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 
-        public void Freeze()
+        public virtual void Freeze()
         {
             this.IsReadOnly = true;
-            this.ForEachChild( c => c.Freeze() );
         }
-
-        protected abstract void ForEachChild( Action<CodeElementBuilder> action );
-
-        
     }
 }

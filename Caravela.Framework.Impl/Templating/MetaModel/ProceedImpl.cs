@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
         {
-            // TODO: Emit `xxx = TheMethod( a, b, c )`  where `a, b, c` is the canonical list of arguments.
+            // TODO: Emit `xxx = TheMethod( a, b, c )`  where `a, b, c` is the canonical list of arguments. add LinkerAnnotation
             throw new NotImplementedException();
         }
 

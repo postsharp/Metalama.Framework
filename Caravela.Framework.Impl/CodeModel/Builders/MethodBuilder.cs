@@ -1,15 +1,16 @@
 // unset
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using MethodKind = Caravela.Framework.Code.MethodKind;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
+    internal sealed class MethodTransformationBuilder : MemberTransformationBuilder, IMethodBuilder
     {
         
         private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
@@ -69,7 +70,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodBuilder( INamedType targetType, IMethod templateMethod, string name )
+        public MethodTransformationBuilder( INamedType targetType, IMethod templateMethod, string name )
             : base( targetType )
         {
             this.Name = name;
@@ -77,11 +78,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
-        protected override void ForEachChild( Action<CodeElementBuilder> action ) => throw new NotImplementedException();
-        public override MemberDeclarationSyntax GenerateMember()
-        {
-            // TODO: Generate the method HERE with an implementation that just throws NotImplementedException.
-            throw new NotImplementedException();
-        }
+
+        public override IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers() => throw new NotImplementedException();
+
+        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
     }
 }

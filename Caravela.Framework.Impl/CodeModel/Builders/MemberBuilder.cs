@@ -1,11 +1,13 @@
 // unset
 
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder
+    internal abstract class MemberTransformationBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
     {
         public bool IsSealed { get; set; }
 
@@ -20,11 +22,15 @@ namespace Caravela.Framework.Impl.Transformations
         
         public sealed override ICodeElement? ContainingElement => this.DeclaringType;
 
-        public MemberBuilder( INamedType declaringType ) 
+        public MemberTransformationBuilder( INamedType declaringType ) 
         {
             this.DeclaringType = declaringType;
         }
 
-        public abstract MemberDeclarationSyntax GenerateMember();
+        public abstract IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers();
+
+        public abstract MemberDeclarationSyntax InsertPositionNode { get; }
+
+        SyntaxTree ISyntaxTreeIntroduction.TargetSyntaxTree => throw new System.NotImplementedException();
     }
 }

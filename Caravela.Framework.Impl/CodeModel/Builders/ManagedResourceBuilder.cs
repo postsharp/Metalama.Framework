@@ -8,13 +8,8 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal class ManagedResourceBuilder : ICodeElementBuilder, IIntroducedElement
+    internal class ManagedResourceBuilder : INonObservableTransformation
     {
-        public ManagedResourceBuilder(IAdvice advice) 
-        {
-            // TODO
-        }
-        
         
         public ResourceDescription ToResourceDescription()
         {
