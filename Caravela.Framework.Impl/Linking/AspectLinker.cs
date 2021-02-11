@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             private IReadOnlyList<IMemberIntroduction> _memberIntroductors;
             private IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
-            private Dictionary<ISymbol, List<(IOverridenElement,MemberDeclarationSyntax)>> OverridenSymbols = new ();
+            private Dictionary<ISymbol, List<IntroducedMember>> OverridenSymbols = new ();
 
 
             public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions) : base()
@@ -125,15 +125,16 @@ namespace Caravela.Framework.Impl.Linking
                         .SelectMany( t => t.GetIntroducedMembers() )
                         .ToList();
                     
-                    members.AddRange( introducedMembers );
+                    members.AddRange( introducedMembers.Select( i => i.Syntax ) );
                     
                     
                     // TODO: add to OverridenSymbols if the introduction implements IOverridenElement
                 }
-                
+
                 members.AddRange( this._memberIntroductors
                     .Where( t => t.InsertPositionNode == node )
-                    .SelectMany( t => t.GetIntroducedMembers() ) );
+                    .SelectMany( t => t.GetIntroducedMembers() )
+                    .Select( i => i.Syntax ) );
 
                 return node.WithMembers( List( members ) );
             }

@@ -1,3 +1,4 @@
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// Gets the full syntax of introduced members including the body.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers();
+        IEnumerable<IntroducedMember> GetIntroducedMembers();
         
         /// <summary>
         /// Gets the node after which the new members should be inserted. If <see cref="InsertPositionNode"/> is set to a <see cref="TypeDeclarationSyntax "/>,
@@ -21,4 +22,18 @@ namespace Caravela.Framework.Impl.Transformations
         MemberDeclarationSyntax InsertPositionNode { get; }
         
     }
+
+    internal enum IntroducedMemberSemantic
+    {
+        Introduction,
+        MethodOverride,
+        GetterOverride,
+        SetterOverride,
+        AdderOverride,
+        RemoverOverride,
+        RaiserOverride,
+        BeforeUserCodeInitialization,
+    }
+    
+    
 }

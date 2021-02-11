@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Transformations
             this.DeclaringType = declaringType;
         }
 
-        public abstract IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers();
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers();
 
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 

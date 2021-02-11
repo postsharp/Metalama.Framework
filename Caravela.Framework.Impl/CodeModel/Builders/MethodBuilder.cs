@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Transformations
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers() => throw new NotImplementedException();
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers() => throw new NotImplementedException();
 
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
     }

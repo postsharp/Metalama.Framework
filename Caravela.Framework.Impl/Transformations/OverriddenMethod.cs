@@ -10,21 +10,7 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Impl.Transformations
 {
 
-    /// <summary>
-    /// Represents an override, not an introduction.
-    /// </summary>
-    internal interface IOverridenElement
-    {
-        
-        /// <summary>
-        /// Gets the <see cref="AspectPart"/> that produced the <see cref="IOverridenElement"/>. This is
-        /// used to order the different overrides of the same member.
-        /// </summary>
-        AspectPart AspectPart { get; }
-        
-    }
-    
-    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction, IOverridenElement
+    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction
     {
         public IMethod OverridenDeclaration { get; }
 
@@ -38,7 +24,7 @@ namespace Caravela.Framework.Impl.Transformations
        
         public SyntaxTree TargetSyntaxTree => throw new NotImplementedException();
 
-        public IEnumerable<MemberDeclarationSyntax> GetIntroducedMembers()
+        public IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
             // TODO: Emit a method named __OriginalName__AspectShortName_
        
@@ -50,6 +36,7 @@ namespace Caravela.Framework.Impl.Transformations
             var originalSyntax = (MethodDeclarationSyntax) ((IToSyntax) this.OverridenDeclaration).GetSyntaxNode();
 
             var overrides = new[] {
+                new IntroducedMember( 
                 SyntaxFactory.MethodDeclaration(
                     originalSyntax.AttributeLists,
                     originalSyntax.Modifiers,
@@ -62,9 +49,10 @@ namespace Caravela.Framework.Impl.Transformations
                     newMethodBody,
                     null,
                     originalSyntax.SemicolonToken),
+                this.AspectPart, IntroducedMemberSemantic.MethodOverride )
             };
 
-            return _overrides;
+            return overrides;
         }
 
         public MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
