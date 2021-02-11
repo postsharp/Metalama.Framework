@@ -141,7 +141,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     if ( this._returnLabelName != null )
                     {
                         return Block(
-
                             assignment,
                             GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
@@ -155,7 +154,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     if ( this._returnLabelName != null )
                     {
                         return Block(
-
                             GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
