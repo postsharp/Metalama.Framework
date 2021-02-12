@@ -12,12 +12,15 @@ namespace Caravela.Framework.Impl.Transformations
 
     internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction
     {
+        public IAdvice Advice { get; }
+
         public IMethod OverridenDeclaration { get; }
 
         public IMethod TemplateMethod { get; }
 
         public OverriddenMethod( IAdvice advice, IMethod overriddenDeclaration, IMethod templateMethod )
         {
+            this.Advice = advice;
             this.TemplateMethod = templateMethod;
         }
 
@@ -32,8 +35,8 @@ namespace Caravela.Framework.Impl.Transformations
             var newMethodBody = new TemplateDriver( this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) ).ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, compilation );
 
             // TODO: other method kinds (constructors).
-            var originalSyntax = (MethodDeclarationSyntax) ((IToSyntax) this.OverridenDeclaration).GetSyntaxNode();
-
+            var originalSyntax = (MethodDeclarationSyntax) ((ISyn) this.OverridenDeclaration).GetSyntaxNode();
+            
             var overrides = new[] {
                 new IntroducedMember(
                 SyntaxFactory.MethodDeclaration(
