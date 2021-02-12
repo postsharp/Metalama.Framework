@@ -48,7 +48,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         IType IMethod.ReturnType => this.ReturnParameter?.Type;
 
-        [Memo]
         public ParameterBuilder? ReturnParameter { get; }
 
         IParameter? IMethod.ReturnParameter => this.ReturnParameter;
