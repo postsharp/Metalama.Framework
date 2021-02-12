@@ -14,7 +14,6 @@
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
 
     <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
-    <None Include="build\Caravela.Framework.properties" Pack="true" PackagePath="build" />
     
   </ItemGroup>
 
