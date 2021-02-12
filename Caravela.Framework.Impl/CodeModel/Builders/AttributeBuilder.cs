@@ -28,6 +28,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.Attribute;
 
+        ICompilation ICodeElement.Compilation => this.Constructor.Compilation;
+
         INamedType IAttribute.Type => this.Constructor.DeclaringType;
 
         public IMethod Constructor { get; }

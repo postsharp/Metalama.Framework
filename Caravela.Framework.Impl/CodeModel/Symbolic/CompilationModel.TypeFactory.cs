@@ -85,5 +85,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation.HasImplicitConversion(
                 ((ITypeInternal) left).TypeSymbol,
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
+
+        ICompilation ICodeElement.Compilation => this;
     }
 }

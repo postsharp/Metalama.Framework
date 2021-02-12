@@ -27,5 +27,8 @@ namespace Caravela.Framework.Code
         /// Gets the kind of element of code.
         /// </summary>
         public CodeElementKind ElementKind { get; }
+        
+        
+        ICompilation Compilation { get; }
     }
 }

@@ -15,6 +15,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract CodeElementKind ElementKind { get; }
 
+        public ICompilation Compilation => this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
         public abstract bool Equals( ICodeElement other );

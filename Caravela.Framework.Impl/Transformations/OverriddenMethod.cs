@@ -32,10 +32,12 @@ namespace Caravela.Framework.Impl.Transformations
 
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            var newMethodBody = new TemplateDriver( this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) ).ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, compilation );
+            var newMethodBody = new TemplateDriver( 
+                this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) )
+                .ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
 
             // TODO: other method kinds (constructors).
-            var originalSyntax = (MethodDeclarationSyntax) ((ISyn) this.OverridenDeclaration).GetSyntaxNode();
+            MethodDeclarationSyntax originalSyntax = null; //(MethodDeclarationSyntax) ((ISyn) this.OverridenDeclaration).GetSyntaxNode();
             
             var overrides = new[] {
                 new IntroducedMember(

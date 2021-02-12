@@ -101,6 +101,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 
+        public ICompilation Compilation => this._parameter.Compilation;
+
         public dynamic Value
         {
             get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ), this._parameter.Type );

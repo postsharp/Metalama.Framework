@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CodeElementKind ElementKind => CodeElementKind.Attribute;
 
+        public ICompilation Compilation => this.Constructor.Compilation;
+
         [Memo]
         public INamedType Type => this._compilation.GetNamedType( this._data.AttributeClass! );
 

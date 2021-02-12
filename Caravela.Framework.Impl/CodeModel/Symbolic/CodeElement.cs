@@ -17,6 +17,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal CompilationModel Compilation { get; }
 
+        ICompilation ICodeElement.Compilation => this.Compilation;
+
         [Memo]
         public virtual ICodeElement? ContainingElement => this.Symbol.ContainingSymbol switch
         {

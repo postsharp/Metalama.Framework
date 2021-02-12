@@ -35,11 +35,10 @@ namespace Caravela.Framework.Impl.CodeModel
         IReadOnlyList<IParameter> IProperty.Parameters => ImmutableList<IParameter>.Empty;
 
         // TODO: pseudo-accessors
-        [Memo]
-        public IMethod? Getter => throw new NotImplementedException();
+        [Memo] public IMethod? Getter => null;
 
         [Memo]
-        public IMethod? Setter => throw new NotImplementedException();
+        public IMethod? Setter => null;
 
         public dynamic Value
         {

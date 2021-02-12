@@ -467,13 +467,13 @@ class C<TC>
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes.GetValue() );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
-            var intType = compilation.GetTypeByReflectionType( typeof( int ) )!;
-            var stringType = compilation.GetTypeByReflectionType( typeof( string ) )!;
+            var intType = compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) )!;
+            var stringType = compilation.TypeFactory.GetTypeByReflectionType( typeof( string ) )!;
 
-            var openTypeMethod = type.Methods.GetValue().First();
-            var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.GetValue().First();
+            var openTypeMethod = type.Methods.First();
+            var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();
 
             Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(TC, int)", openTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );

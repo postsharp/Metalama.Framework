@@ -35,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CodeElementKind ElementKind => CodeElementKind.Parameter;
 
+        public ICompilation Compilation => this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         public abstract bool Equals( ICodeElement other );
