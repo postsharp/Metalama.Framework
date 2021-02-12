@@ -19,12 +19,12 @@ namespace Caravela.Framework.Code
         Type,
 
         /// <summary>
-        /// <see cref="IMethod"/>
+        /// <see cref="IMethod"/>.
         /// </summary>
         Method,
 
         /// <summary>
-        /// <see cref="IProperty"/>
+        /// <see cref="IProperty"/>.
         /// </summary>
         Property,
 
@@ -34,17 +34,17 @@ namespace Caravela.Framework.Code
         Field,
 
         /// <summary>
-        /// <see cref="IEvent"/>
+        /// <see cref="IEvent"/>.
         /// </summary>
         Event,
 
         /// <summary>
-        /// <see cref="IParameter"/>
+        /// <see cref="IParameter"/>.
         /// </summary>
         Parameter,
 
         /// <summary>
-        /// <see cref="GenericParameter"/>
+        /// <see cref="GenericParameter"/>.
         /// </summary>
         GenericParameter,
 

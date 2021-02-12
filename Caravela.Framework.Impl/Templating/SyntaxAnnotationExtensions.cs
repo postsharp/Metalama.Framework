@@ -14,13 +14,13 @@ namespace Caravela.Framework.Impl.Templating
         private const string _noindentAnnotationKind = "noindent";
         private const string _colorAnnotationKind = "color";
 
-        private static readonly SyntaxAnnotation buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
-        private static readonly SyntaxAnnotation runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
-        private static readonly SyntaxAnnotation templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
-        private static readonly SyntaxAnnotation noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
-        private static readonly SyntaxAnnotation proceedAnnotation = new SyntaxAnnotation( _proceedAnnotationKind );
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
+        private static readonly SyntaxAnnotation _templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
+        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
+        private static readonly SyntaxAnnotation _proceedAnnotation = new SyntaxAnnotation( _proceedAnnotationKind );
 
-        private static readonly ImmutableList<string> templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
+        private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
         {
@@ -135,13 +135,13 @@ namespace Caravela.Framework.Impl.Templating
             switch ( scope )
             {
                 case SymbolDeclarationScope.CompileTimeOnly:
-                    return node.WithAdditionalAnnotations( buildTimeOnlyAnnotation );
+                    return node.WithAdditionalAnnotations( _buildTimeOnlyAnnotation );
 
                 case SymbolDeclarationScope.RunTimeOnly:
-                    return node.WithAdditionalAnnotations( runTimeOnlyAnnotation );
+                    return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
                 case SymbolDeclarationScope.Template:
-                    return node.WithAdditionalAnnotations( templateAnnotation );
+                    return node.WithAdditionalAnnotations( _templateAnnotation );
 
                 default:
                     return node;
@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.Templating
         public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
             =>
-            node.WithAdditionalAnnotations( source.GetAnnotations( templateAnnotationKinds ) );
+            node.WithAdditionalAnnotations( source.GetAnnotations( _templateAnnotationKinds ) );
 
         public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
@@ -169,12 +169,12 @@ namespace Caravela.Framework.Impl.Templating
         public static T AddNoDeepIndentAnnotation<T>( this T node )
             where T : SyntaxNode
             =>
-            node.WithAdditionalAnnotations( noDeepIndentAnnotation );
+            node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
-        public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( noDeepIndentAnnotation );
+        public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
 
         public static bool HasCallsProceedAnnotation( this SyntaxNode node )
-            => node.HasAnnotation( proceedAnnotation );
+            => node.HasAnnotation( _proceedAnnotation );
 
         public static T AddCallsProceedAnnotation<T>( this T node )
             where T : SyntaxNode
@@ -185,7 +185,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return node.WithAdditionalAnnotations( proceedAnnotation );
+                return node.WithAdditionalAnnotations( _proceedAnnotation );
             }
         }
     }

@@ -19,7 +19,7 @@ namespace Caravela.Reactive.Operators
         protected override ReactiveOperatorResult<IEnumerable<TResult>> EvaluateFunction( TSource source )
         {
             this._cachedResult = this._func( source, this.ObserverToken );
-            return new ( this._cachedResult );
+            return new( this._cachedResult );
         }
 
         protected override IReactiveSubscription? SubscribeToSource() => this.Source.Observable.AddObserver( this );

@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public string Name => this.ParameterSymbol.Name;
 
         public int Index => this.ParameterSymbol.Ordinal;
+        
+        public bool IsParams => this.ParameterSymbol.IsParams;
 
         public override ICodeElement ContainingElement => this._containingMember;
 

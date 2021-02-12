@@ -66,6 +66,11 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IGenericParameter> GenericParameters { get; }
 
         /// <summary>
+        /// Gets a value indicating whether this type or any of its containers does not have generic arguments set.
+        /// </summary>
+        bool IsOpenGeneric { get; }
+
+        /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>
         IReadOnlyList<INamedType> NestedTypes { get; }
@@ -93,6 +98,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <param name="genericArguments"></param>
         /// <returns></returns>
-        public INamedType MakeGenericType( params IType[] genericArguments );
+        public INamedType WithGenericArguments( params IType[] genericArguments );
     }
 }

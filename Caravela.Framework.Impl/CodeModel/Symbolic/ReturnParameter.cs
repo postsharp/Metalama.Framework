@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         OptionalValue IParameter.DefaultValue => default;
 
+        public bool IsParams => false;
+
         public abstract ICodeElement? ContainingElement { get; }
 
         public abstract IReadOnlyList<IAttribute> Attributes { get; }

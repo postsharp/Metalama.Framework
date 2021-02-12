@@ -11,7 +11,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         public ITypeSymbol Symbol { get; }
 
-        public CaravelaType( ITypeSymbol symbol ) => this.Symbol = symbol;
+        public CaravelaType( ITypeSymbol symbol )
+        {
+            this.Symbol = symbol;
+        }
 
         public static CaravelaType Create( IType type )
         {

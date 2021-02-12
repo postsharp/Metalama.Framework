@@ -7,7 +7,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a property or a field.
     /// </summary>
-    public interface IProperty : IMember
+    public interface IProperty : IMember, IPropertyInvocation
     {
 
         /// <summary>
@@ -53,5 +53,16 @@ namespace Caravela.Framework.Code
         /// an object that does not map to source code but allows to add aspects and advices as with a normal method.
         /// </summary>
         IMethod? Setter { get; }
+
+        /// <summary>
+        /// Determines if the method existed before the current aspect was advice
+        /// (<see langword="false" /> if it was introduced by the current aspect).
+        /// </summary>
+        bool HasBase { get; }
+
+        /// <summary>
+        /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// </summary>
+        IPropertyInvocation Base { get; }
     }
 }

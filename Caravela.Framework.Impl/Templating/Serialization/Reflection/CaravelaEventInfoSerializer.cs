@@ -9,7 +9,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
     {
         private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
 
-        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer ) => this._caravelaTypeSerializer = caravelaTypeSerializer;
+        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer )
+        {
+            this._caravelaTypeSerializer = caravelaTypeSerializer;
+        }
 
         public override ExpressionSyntax Serialize( CaravelaEventInfo o )
         {

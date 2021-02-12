@@ -36,27 +36,16 @@ namespace Caravela.Framework.Aspects.UnitTests
             var testRunner = new AspectUnitTestRunner( this._logger );
             var testResult = await testRunner.Run( testSource );
 
-            await SaveTransformedSourceAsync( projectDir, relativeSourcePath, testResult );
-
-            testResult.AssertTransformedSourceEquals( expectedTransformedSource, actualTransformedPath );
+            // Compare the "Target" region of the transformed code to the expected output.
+            // If the region is not found then compare the complete transformed code.
+            var targetTextSpan = TestSyntaxHelper.FindRegionSpan( testResult.TransformedTargetSyntax, "Target" );
+            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );
         }
 
         private static string GetProjectDirectory()
         {
             return Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
                 .Single( a => a.Key == "ProjectDirectory" ).Value!;
-        }
-
-        private static async Task SaveTransformedSourceAsync( string projectDir, string relativeSourcePath, TestResult testResult )
-        {
-            var outputDirPath = Path.Combine(
-                projectDir,
-                "obj\\transformed",
-                Path.GetDirectoryName( relativeSourcePath )! );
-            Directory.CreateDirectory( outputDirPath );
-
-            var outputPath = Path.Combine( outputDirPath, Path.GetFileNameWithoutExtension( relativeSourcePath ) + ".transformed.txt" );
-            await File.WriteAllTextAsync( outputPath, testResult.TemplateOutputSource?.ToString()?.Trim() );
         }
     }
 

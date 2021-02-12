@@ -7,9 +7,12 @@ namespace Caravela.Framework.Impl
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        private readonly Dictionary<INamedType, AspectType> _aspectTypes = new ();
+        private readonly Dictionary<INamedType, AspectType> _aspectTypes = new();
 
-        public AspectTypeFactory( AspectDriverFactory aspectDriverFactory ) => this._aspectDriverFactory = aspectDriverFactory;
+        public AspectTypeFactory( AspectDriverFactory aspectDriverFactory )
+        {
+            this._aspectDriverFactory = aspectDriverFactory;
+        }
 
         public AspectType GetAspectType( INamedType attributeType )
         {

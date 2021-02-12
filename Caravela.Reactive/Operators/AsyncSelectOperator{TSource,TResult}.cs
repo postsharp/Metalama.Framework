@@ -30,7 +30,7 @@ namespace Caravela.Reactive.Operators
                 builder.Add( await this._func( item, this.ObserverToken, cancellationToken ) );
             }
 
-            return new ( builder.ToImmutable() );
+            return new( builder.ToImmutable() );
         }
 
         protected override async ValueTask OnSourceItemAddedAsync( IReactiveSubscription sourceSubscription, TSource item, IncrementalUpdateToken updateToken, CancellationToken cancellationToken )

@@ -58,10 +58,19 @@ namespace Caravela.Framework.Impl.Transformations
 
         IReadOnlyList<IGenericParameter> IMethod.GenericParameters => this._genericParameters;
 
+        IReadOnlyList<IType> IMethod.GenericArguments => throw new NotImplementedException();
+
+        bool IMethod.IsOpenGeneric => throw new NotImplementedException();
+
         public IReadOnlyList<IMethod> LocalFunctions => Array.Empty<IMethod>();
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
+        IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+
+        bool IMethod.HasBase => throw new NotImplementedException();
+
+        IMethodInvocation IMethod.Base => throw new NotImplementedException();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -78,5 +87,6 @@ namespace Caravela.Framework.Impl.Transformations
         public override IEnumerable<IntroducedMember> GetIntroducedMembers() => throw new NotImplementedException();
 
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+        dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
     }
 }

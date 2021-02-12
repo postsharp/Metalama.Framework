@@ -2,7 +2,6 @@
 
 namespace Caravela.Framework.Impl
 {
-
     internal static class ExceptionExtensions
     {
         public static string ToDiagnosticString( this Exception ex ) =>

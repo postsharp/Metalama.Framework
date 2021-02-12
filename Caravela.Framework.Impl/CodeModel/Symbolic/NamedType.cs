@@ -44,6 +44,8 @@ namespace Caravela.Framework.Impl.CodeModel
             (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
              this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
+        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
+
         [Memo]
         public IReadOnlyList<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.GetNamedType ).ToImmutableArray();
 
@@ -75,8 +77,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 .Select( m => this.Compilation.GetMethod( m ) )
                 .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodTransformationBuilder>() )
                 .ToImmutableArray();
-
-        public INamedType MakeGenericType( params IType[] genericArguments ) => throw new NotImplementedException();
 
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>

@@ -5,11 +5,15 @@ using Caravela.Framework.Collections;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract partial class CompilationModel : ICompilation, ITypeFactory
     {
+        
+        internal SyntaxGenerator SyntaxGenerator { get; }
+        
         internal CSharpCompilation RoslynCompilation { get; }
 
         public abstract IReadOnlyList<INamedType> DeclaredTypes { get; }

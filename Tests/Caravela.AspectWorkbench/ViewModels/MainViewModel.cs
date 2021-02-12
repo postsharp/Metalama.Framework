@@ -67,10 +67,10 @@ namespace Caravela.AspectWorkbench.ViewModels
             var testResult = await this._testRunner.Run( new TestInput( this.TemplateText, this.TargetText ) );
             stopwatch.Stop();
 
-            if ( testResult.AnnotatedSyntaxRoot != null )
+            if ( testResult.AnnotatedTemplateSyntax != null )
             {
                 // Display the annotated syntax tree.
-                var document2 = testResult.TemplateDocument.WithSyntaxRoot( testResult.AnnotatedSyntaxRoot );
+                var document2 = testResult.TemplateDocument.WithSyntaxRoot( testResult.AnnotatedTemplateSyntax );
                 var text2 = await document2.GetTextAsync();
 
                 var marker = new TextSpanClassifier( text2, true );
@@ -80,24 +80,24 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this.ColoredTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text2, metaSpans );
             }
 
-            if ( testResult.TransformedSyntaxRoot != null )
+            if ( testResult.TransformedTemplateSyntax != null )
             {
                 // Render the transformed tree.
                 var project3 = this._testRunner.CreateProject();
-                var document3 = project3.AddDocument( "name.cs", testResult.TransformedSyntaxRoot );
+                var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
                 var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
-                var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedSyntaxRoot, project3.Solution.Workspace, optionSet );
+                var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
                 var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
                 var spanMarker = new TextSpanClassifier( text4, true );
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
                 this.CompiledTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }
 
-            if ( testResult.TemplateOutputSource != null )
+            if ( testResult.TransformedTargetSource != null )
             {
                 // Display the transformed code.
-                this.TransformedTargetDocument = await this._syntaxColorizer.WriteSyntaxColoring( testResult.TemplateOutputSource, null );
+                this.TransformedTargetDocument = await this._syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSource, null );
             }
 
             var errorsTextBuilder = new StringBuilder();
@@ -108,9 +108,9 @@ namespace Caravela.AspectWorkbench.ViewModels
                 errorsTextBuilder.AppendLine( e.Location + ":" + e.Id + " " + e.GetMessage() );
             }
 
-            if ( !string.IsNullOrEmpty( testResult.TestErrorMessage ) )
+            if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
             {
-                errorsTextBuilder.AppendLine( testResult.TestErrorMessage );
+                errorsTextBuilder.AppendLine( testResult.ErrorMessage );
             }
 
             errorsTextBuilder.AppendLine( $"It took {stopwatch.Elapsed.TotalSeconds:f1} s." );

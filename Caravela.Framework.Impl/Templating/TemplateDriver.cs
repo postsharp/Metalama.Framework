@@ -1,15 +1,15 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal class TemplateDriver
+    internal partial class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
@@ -18,62 +18,43 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMethod = templateMethodInfo;
         }
 
+        [Obsolete( "Call a method with ITemplateExpansionContext parameter instead." )]
         public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
         {
-            return this.ExpandDeclaration(
-                templateInstance,
-                new ProceedInvokeMethod( targetMethod ),
-                new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, compilation ) );
+            return this.ExpandDeclaration( new TemplateDriverExpansionContext( templateInstance, targetMethod, compilation ) );
         }
 
-        internal BlockSyntax ExpandDeclaration( object templateInstance, IProceedImpl proceedImpl, ITemplateContext templateContext )
+        public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
-            TemplateContext.ProceedImpl = proceedImpl;
-            TemplateContext.target = templateContext;
-            TemplateContext.ExpansionContext = new TemplateDriverExpansionContext( this, templateContext );
+            // TODO: support target declaration other than a method.
+            if ( templateExpansionContext.TargetDeclaration is not IMethod )
+            {
+                throw new NotImplementedException();
+            }
 
-            var output = (SyntaxNode) this._templateMethod.Invoke( templateInstance, null );
+            var targetMethod = (IMethod) templateExpansionContext.TargetDeclaration;
+            var templateContext = new TemplateContextImpl( targetMethod, targetMethod.DeclaringType!, templateExpansionContext.Compilation );
+
+            TemplateContext.Initialize( templateContext, templateExpansionContext.ProceedImplementation );
+            TemplateSyntaxFactory.Initialize( templateExpansionContext );
+
+            SyntaxNode output;
+            try
+            {
+                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+            }
+            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            {
+                ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
+            }
+
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
-            TemplateContext.ProceedImpl = null;
-            TemplateContext.target = null;
-            TemplateContext.ExpansionContext = null;
+            TemplateContext.Close();
+            TemplateSyntaxFactory.Close();
 
             return result;
-        }
-
-        // TODO temporary implementation of ITemplateExpansionContext before we support template nesting.
-        private class TemplateDriverExpansionContext : ITemplateExpansionContext
-        {
-            private readonly TemplateDriver _templateDriver;
-            private readonly ITemplateContext _templateContext;
-
-            public TemplateDriverExpansionContext( TemplateDriver templateDriver, ITemplateContext templateContext )
-            {
-                this._templateContext = templateContext;
-                this._templateDriver = templateDriver;
-            }
-
-            public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
-            {
-                if ( this._templateContext.Method.ReturnType.Is( typeof( void ) ) || returnExpression == null )
-                {
-                    return ReturnStatement();
-                }
-
-                var returnExpressionKind = returnExpression.Kind();
-                if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
-                {
-                    return ReturnStatement( returnExpression );
-                }
-
-                // TODO: validate the returnExpression according to the method's return type.
-                // TODO: how to report diagnostics from the template invocation?
-                // throw new CaravelaException(
-                //    TemplatingDiagnosticDescriptors.ReturnTypeDoesNotMatch,
-                //    this._templateDriver._templateMethod.Name, this._templateContext.Method.Name );
-                return ReturnStatement( CastExpression( ParseTypeName( this._templateContext.Method.ReturnType.ToDisplayString() ), returnExpression ) );
-            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -10,14 +11,14 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IFieldSymbol _symbol;
 
+        public override CodeElementKind ElementKind => CodeElementKind.Field;
+
         protected internal override ISymbol Symbol => this._symbol;
 
-        private readonly NamedType _containingElement;
 
         public Field( IFieldSymbol symbol, NamedType containingElement ) : base( containingElement.Compilation )
         {
             this._symbol = symbol;
-            this._containingElement = containingElement;
         }
 
         public RefKind RefKind => RefKind.None;
@@ -35,11 +36,27 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: pseudo-accessors
         [Memo]
-        public IMethod? Getter => null;
+        public IMethod? Getter => throw new NotImplementedException();
 
         [Memo]
-        public IMethod? Setter => null;
+        public IMethod? Setter => throw new NotImplementedException();
 
-        public override CodeElementKind ElementKind => CodeElementKind.Field;
+        public dynamic Value
+        {
+            get => new PropertyInvocation<Field>( this ).Value;
+            set => throw new InvalidOperationException();
+        }
+
+        public object GetValue( object? instance ) => new PropertyInvocation<Field>( this ).GetValue( instance );
+
+        public object SetValue( object? instance, object value ) => new PropertyInvocation<Field>( this ).SetValue( instance, value );
+
+        public object GetIndexerValue( object? instance, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+
+        public bool HasBase => true;
+
+        public IPropertyInvocation Base => new PropertyInvocation<Field>( this ).Base;
     }
 }

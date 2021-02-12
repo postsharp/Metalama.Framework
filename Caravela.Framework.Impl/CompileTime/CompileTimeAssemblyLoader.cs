@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
 
-        private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new ();
-        private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new ();
+        private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
+        private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
 
         public CompileTimeAssemblyLoader( CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {

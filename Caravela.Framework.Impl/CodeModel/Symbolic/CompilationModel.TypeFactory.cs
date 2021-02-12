@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     return null;
                 }
 
-                return genericDefinition?.MakeGenericType( genericArguments! );
+                return genericDefinition?.WithGenericArguments( genericArguments! );
             }
 
             return this.GetTypeByReflectionName( type.FullName );

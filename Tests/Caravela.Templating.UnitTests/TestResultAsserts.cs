@@ -10,13 +10,16 @@ namespace Caravela.Templating.UnitTests
     {
         public static void AssertOutput( this TestResult testResult, string expectedOutput )
         {
+            Assert.Null( testResult.ErrorMessage );
+            Assert.Null( testResult.Exception );
+
             // Don't test output if we have an error.
             if ( testResult.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
                 Assert.False( true, string.Join( Environment.NewLine, testResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage() ) ) );
             }
 
-            Assert.Equal( expectedOutput.Trim(), testResult.TemplateOutputSource?.ToString()?.Trim() );
+            Assert.Equal( expectedOutput.Trim(), testResult.TransformedTargetSource?.ToString()?.Trim() );
         }
 
         public static void AssertDiagnosticId( this TestResult testResult, string expectedId )
