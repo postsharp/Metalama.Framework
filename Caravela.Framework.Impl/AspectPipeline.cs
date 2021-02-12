@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl
                     roslynCompilation, 
                     Array.Empty<Diagnostic>(), 
                     Array.Empty<ResourceDescription>(), 
-                    Array.Empty<AspectInstance>(),
+                    Array.Empty<IAspectSource>(),
                     aspectParts );
 
                     

@@ -15,11 +15,19 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class RoslynBasedCompilationModel : CompilationModel
     {
-        private ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation> _transformations;
+        private readonly ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation> _transformations;
+        private readonly ImmutableMultiValueDictionary<INamedType, IAttribute> _allAttributesByType;
 
         public RoslynBasedCompilationModel( CSharpCompilation roslynCompilation ) : base( roslynCompilation )
         {
             this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty;
+
+            var allCodeElements = new ICodeElement[] { this }
+                .SelectDescendants( codeElement => codeElement.SelectContainedElements() );
+
+            var allAttributes = allCodeElements.SelectMany( c => c.Attributes );
+            this._allAttributesByType = ImmutableMultiValueDictionary<INamedType, IAttribute>.Create( allAttributes, a => a.Type );
+            
         }
 
         /// <summary>
@@ -31,6 +39,17 @@ namespace Caravela.Framework.Impl.CodeModel
         : base( prototype.RoslynCompilation )
         {
             this._transformations = prototype._transformations.AddRange( introducedElements, t => t.ContainingElement, t => t );
+
+            var allNewCodeElements = 
+                introducedElements
+                    .OfType<ICodeElement>()
+                    .SelectDescendants( codeElement => codeElement.SelectContainedElements() );
+
+            var allAttributes = 
+                allNewCodeElements.SelectMany( c => c.Attributes )
+                    .Concat( introducedElements.OfType<IAttribute>() );
+
+            this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.Type );
         }
 
         [Memo]
@@ -59,25 +78,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public override IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations => this._transformations;
         protected override NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
 
-        
-        public IEnumerable<AspectInstance> GetAspectsFromAttributes(CompileTimeAssemblyLoader loader)
-        {
-            var iAspect = this.GetTypeByReflectionType( typeof( IAspect ) )!;
+ 
 
-            var codeElements = new ICodeElement[] { this }
-                .SelectDescendants( codeElement => codeElement switch
-                {
-                    ICompilation compilation => compilation.DeclaredTypes,
-                    INamedType namedType => namedType.NestedTypes.Union<ICodeElement>( namedType.Methods ).Union( namedType.Properties ).Union( namedType.Events ),
-                    IMethod method => method.LocalFunctions,
-                    _ => null
-                } );
+        public override IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType => _allAttributesByType;
 
-            return from codeElement in codeElements
-                from attribute in codeElement.Attributes
-                where attribute.Type.Is( iAspect )
-                let aspect = (IAspect) loader.CreateAttributeInstance( attribute )
-                select new AspectInstance( aspect, codeElement, attribute.Type );
-        }
+      
     }
 }

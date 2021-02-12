@@ -27,22 +27,22 @@ namespace Caravela.Framework.Impl
         {
             var aspectDriver = (AspectDriver) this.AspectType.AspectDriver;
 
-            // Takes our aspects.
-            var aspectInstances = input.Aspects.Where( a => a.AspectType.Name == this.AspectType.Name );
 
             // Run the aspect initializers.
             IEnumerable<Advice> addedAdvices;
             IEnumerable<Diagnostic> aspectInitializerDiagnostics;
-            IEnumerable<AspectInstance> addedAspects;
+            IEnumerable<IAspectSource> addedAspectSources;
             if ( this.PartName == null )
             {
                 // If we are in the default aspect part, we have to execute the aspect initializer.
                 
+                var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this.AspectType.Type ) );
+
                 var instanceResults = aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
 
                 aspectInitializerDiagnostics = instanceResults.SelectMany( air => air.Diagnostics );
                 
-                addedAspects = instanceResults.SelectMany( air => air.Aspects );
+                addedAspectSources = instanceResults.SelectMany( air => air.AspectSources );
 
                 addedAdvices = instanceResults.SelectMany( air => air.Advices ).Cast<Advice>();
             }
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl
             {
                 addedAdvices = Enumerable.Empty<Advice>();
                 aspectInitializerDiagnostics = Enumerable.Empty<Diagnostic>();
-                addedAspects = Enumerable.Empty<AspectInstance>();
+                addedAspectSources = Enumerable.Empty<IAspectSource>();
             }
 
             var advicesInCurrentAspectParts = 
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl
 
             return input.WithNewResults( newCompilation,
                 aspectInitializerDiagnostics.Concat( adviceResults.SelectMany( ar => ar.Diagnostics ) ).ToList(),
-                addedAspects.ToList(),
+                addedAspectSources.ToList(),
                 addedAdvices.ToList(),
                 addedNonObservableTransformations.ToList());
 

@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Collections;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -23,6 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel
         ITypeFactory ICompilation.TypeFactory => this;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
+
+        public abstract IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
 
         public abstract IReadOnlyList<IAttribute> Attributes { get; }
 
@@ -43,5 +45,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
         
         public abstract IReadOnlyMultiValueDictionary<ICodeElement?, IObservableTransformation> ObservableTransformations { get; }
+        
+       
+
     }
 }

@@ -22,8 +22,7 @@ namespace Caravela.Framework.Impl
 
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            // TODO: actual reactivity.
-            var aspectInstances = ((IList<AspectInstance>) input.AspectInstances.Where( x => x.AspectType.FullName == this.aspectType.FullName )).ToImmutableArray();
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this.aspectType ) ).ToImmutableArray();
 
             if ( !aspectInstances.Any() )
             {
@@ -53,7 +52,7 @@ namespace Caravela.Framework.Impl
                 newCompilation,
                 input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
-                input.AspectInstances,
+                input.AspectSources,
                 input.AspectParts);
         }
 

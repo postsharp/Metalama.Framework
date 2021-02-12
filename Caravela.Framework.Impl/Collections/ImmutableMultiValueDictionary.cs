@@ -7,7 +7,8 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    public class ImmutableMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey,TValue>
+    public partial class ImmutableMultiValueDictionary<TKey, TValue> : IReadOnlyMultiValueDictionary<TKey,TValue>
+        where TKey : notnull
     {
         private readonly ImmutableDictionary<TKey, Group> _dictionary;
 
@@ -19,38 +20,27 @@ namespace Caravela.Framework.Impl.Collections
 
         public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
+
+        public static ImmutableMultiValueDictionary<TKey, TValue> Create( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
+            => Create( source, getKey, v => v );
+        
         public static ImmutableMultiValueDictionary<TKey, TValue> Create<TItem>( IEnumerable<TItem> source, Func<TItem,TKey> getKey, Func<TItem,TValue> getValue )
         {
-            var builder = ImmutableDictionary.CreateBuilder<TKey, Group>();
 
-            return AddRange(builder, source, getKey, getValue);
+            var builder = new Builder( ImmutableDictionary.CreateBuilder<TKey, Group>() );
+            builder.AddRange( source, getKey, getValue );
+            return builder.ToImmutable();
         }
 
-        private static ImmutableMultiValueDictionary<TKey, TValue> AddRange<TItem>(ImmutableDictionary<TKey, Group>.Builder builder, IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue)
-        {
-            foreach (var item in source)
-            {
-                var key = getKey(item);
-                var value = getValue(item);
 
-                if (!builder.TryGetValue(key, out var group))
-                {
-                    @group = new Group(key, ImmutableArray<TValue>.Empty);
-                }
-
-                @group = @group.Add(value);
-
-                builder[key] = @group;
-            }
-
-            return new ImmutableMultiValueDictionary<TKey, TValue>(builder.ToImmutable());
-        }
+        public ImmutableMultiValueDictionary<TKey, TValue> AddRange( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
+            => AddRange( source, getKey, v => v );
 
         public ImmutableMultiValueDictionary<TKey, TValue> AddRange<TItem>( IEnumerable<TItem> source, Func<TItem, TKey> getKey, Func<TItem, TValue> getValue )
         {
-            var builder = this._dictionary.ToBuilder();
-
-            return AddRange( builder, source, getKey, getValue );
+            var builder = this.ToBuilder();
+            builder.AddRange( source, getKey, getValue );
+            return builder.ToImmutable();
         }
 
         IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.GetByKey(TKey key) => this[key];
@@ -86,36 +76,12 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
-        readonly struct Group : IGrouping<TKey, TValue>
-        {
-            public ImmutableArray<TValue> Items { get; }
-
-            public Group( TKey key, ImmutableArray<TValue> items )
-            {
-                this.Key = key;
-                this.Items = items;
-            }
-
-            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ) );
-
-            public TKey Key { get; }
-
-            public IEnumerator<TValue> GetEnumerator()
-            {
-                foreach ( var value in this.Items )
-                {
-                    yield return value;
-                }
-            }
-
-            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-        }
-
         public IEnumerator<IGrouping<TKey, TValue>> GetEnumerator()
             => this._dictionary.Values.Cast<IGrouping<TKey, TValue>>().GetEnumerator();
         
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
+        public Builder ToBuilder() => new Builder( this._dictionary.ToBuilder() );
     }
 }

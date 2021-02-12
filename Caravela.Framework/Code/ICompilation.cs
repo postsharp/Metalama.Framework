@@ -22,6 +22,8 @@ namespace Caravela.Framework.Code
         ITypeFactory TypeFactory { get; }
         
         IReadOnlyList<IManagedResource> ManagedResources { get; }
+        
+        IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
 
       
     }

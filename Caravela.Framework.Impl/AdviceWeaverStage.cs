@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl
                 linkerResult.Compilation,
                 aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
                 aspectPartResult.Transformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
-                aspectPartResult.Aspects,
+                aspectPartResult.AspectSources,
                 input.AspectParts );
         }
 

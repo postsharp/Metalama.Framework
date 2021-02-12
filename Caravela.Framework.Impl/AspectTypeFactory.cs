@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl
                 var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
                 // TODO: create AspectParts properly
-                aspectType = new ( attributeType.FullName, aspectDriver, new string?[] { null } );
+                aspectType = new ( attributeType, aspectDriver, new string?[] { null } );
 
                 this._aspectTypes.Add( attributeType, aspectType );
             }
