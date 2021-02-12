@@ -16,13 +16,12 @@ namespace Caravela.Framework.Code
     /// </remarks>
     public interface INamedType : IType, ICodeElement
     {
-        
         bool IsAbstract { get; }
-        
+
         bool IsSealed { get; }
-        
+
         bool IsStatic { get; }
-        
+
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
 
@@ -89,7 +88,7 @@ namespace Caravela.Framework.Code
         /// type.
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
-        
+
         /// <summary>
         /// Makes a generic instance of the current generic type definition.
         /// </summary>
