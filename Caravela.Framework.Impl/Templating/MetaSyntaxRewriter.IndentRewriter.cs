@@ -9,8 +9,8 @@ namespace Caravela.Framework.Impl.Templating
     {
         private class IndentRewriter : CSharpSyntaxRewriter
         {
+            private const int _limit = 80;
             private readonly MetaSyntaxRewriter _parent;
-            private const int limit = 80;
 
             public IndentRewriter( MetaSyntaxRewriter parent )
             {
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Templating
 
             public override SyntaxNode? VisitArgumentList( ArgumentListSyntax node )
             {
-                if ( node.Arguments.Count > 1 || node.Arguments.Span.Length > limit )
+                if ( node.Arguments.Count > 1 || node.Arguments.Span.Length > _limit )
                 {
                     this._parent.Indent();
                     try
@@ -29,7 +29,8 @@ namespace Caravela.Framework.Impl.Templating
 
                         return SyntaxFactory.ArgumentList(
                             node.OpenParenToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
-                            SyntaxFactory.SeparatedList( indentedArguments ), node.CloseParenToken );
+                            SyntaxFactory.SeparatedList( indentedArguments ),
+                            node.CloseParenToken );
                     }
                     finally
                     {
@@ -44,7 +45,7 @@ namespace Caravela.Framework.Impl.Templating
 
             public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
             {
-                if ( node.Expressions.Count > 1 || node.Span.Length > limit )
+                if ( node.Expressions.Count > 1 || node.Span.Length > _limit )
                 {
                     this._parent.Indent();
                     try
@@ -55,7 +56,8 @@ namespace Caravela.Framework.Impl.Templating
                         return SyntaxFactory.InitializerExpression(
                             node.Kind(),
                             node.OpenBraceToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
-                            SyntaxFactory.SeparatedList( indentedExpressions ), node.CloseBraceToken );
+                            SyntaxFactory.SeparatedList( indentedExpressions ),
+                            node.CloseBraceToken );
                     }
                     finally
                     {
@@ -70,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating
 
             public override SyntaxNode? Visit( SyntaxNode? node )
             {
-                if ( node == null || node.Span.Length < limit || node.HasNoDeepIndentAnnotation() )
+                if ( node == null || node.Span.Length < _limit || node.HasNoDeepIndentAnnotation() )
                 {
                     return node;
                 }

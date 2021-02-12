@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public ICompilation Compilation { get; }
 
         // TODO: when possible, this vanishes (e.g. `target.This.Property` is compiled to just `Property`); fix it so that it produces `this` or the name of the type, depending on whether the member on the right is static
-        public dynamic This => new ThisDynamicMetaMember( !this.Method.IsStatic );
+        public dynamic This => new ThisDynamicMetaMember( !this.Method.IsStatic, this.Type );
 
         public TemplateContextImpl( IMethod method, IType type, ICompilation compilation )
         {
@@ -33,21 +33,26 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         private class ThisDynamicMetaMember : IDynamicMetaMemberDifferentiated
         {
             private readonly bool _allowExpression;
+            private readonly IType _type;
 
-            public ThisDynamicMetaMember( bool allowExpression ) => this._allowExpression = allowExpression;
+            public ThisDynamicMetaMember( bool allowExpression, IType type )
+            {
+                this._allowExpression = allowExpression;
+                this._type = type;
+            }
 
-            public ExpressionSyntax CreateExpression()
+            public RuntimeExpression CreateExpression()
             {
                 if ( this._allowExpression )
                 {
-                    return ThisExpression();
+                    return new( ThisExpression(), this._type );
                 }
 
                 // TODO: diagnostic
                 throw new InvalidOperationException( "Can't directly access 'this' on a static method." );
             }
 
-            public ExpressionSyntax CreateMemberAccessExpression( string member ) => IdentifierName( Identifier( member ) );
+            public RuntimeExpression CreateMemberAccessExpression( string member ) => new( IdentifierName( Identifier( member ) ) );
         }
     }
 
@@ -55,7 +60,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly AdviceParameter[] _parameters;
 
-        public AdviceParameterList( IMethod method ) => this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();
+        public AdviceParameterList( IMethod method )
+        {
+            this._parameters = method.Parameters.Select( p => new AdviceParameter( p ) ).ToArray();
+        }
 
         public IAdviceParameter this[int index] => this._parameters[index];
 
@@ -76,6 +84,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public RefKind RefKind => this._parameter.RefKind;
+        
+        public bool IsParams => this._parameter.IsParams;
 
         public IType Type => this._parameter.Type;
 
@@ -93,7 +103,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Value
         {
-            get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
+            get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ), this._parameter.Type );
             set => throw new NotImplementedException();
         }
 
@@ -105,9 +115,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     internal class DynamicMetaMember : IDynamicMetaMember
     {
         private readonly ExpressionSyntax _expression;
+        private readonly IType _type;
 
-        public DynamicMetaMember( ExpressionSyntax expression ) => this._expression = expression;
+        public DynamicMetaMember( ExpressionSyntax expression, IType type )
+        {
+            this._expression = expression;
+            this._type = type;
+        }
 
-        public ExpressionSyntax CreateExpression() => this._expression;
+        public RuntimeExpression CreateExpression() => new( this._expression, this._type );
     }
 }

@@ -4,9 +4,9 @@ using Xunit;
 
 namespace Caravela.Templating.UnitTests
 {
-    public partial class VariableAnalysisTests
+    public partial class LocalVariablesTests
     {
-        private const string CompileTmeDeclaratorInCompileTimeBlock_Template = @"  
+        private const string CompileTimeDeclaratorInCompileTimeBlock_Template = @"  
 using System;
 using System.Collections.Generic;
 
@@ -38,7 +38,7 @@ class Aspect
 }
 ";
 
-        private const string CompileTmeDeclaratorInCompileTimeBlock_Target = @"
+        private const string CompileTimeDeclaratorInCompileTimeBlock_Target = @"
 class TargetCode
 {
     int Method(int a, int b)
@@ -48,7 +48,7 @@ class TargetCode
 }
 ";
 
-        private const string CompileTmeDeclaratorInCompileTimeBlock_ExpectedOutput = @"{
+        private const string CompileTimeDeclaratorInCompileTimeBlock_ExpectedOutput = @"{
     Console.WriteLine(0);
     Console.WriteLine(1);
     Console.WriteLine(0);
@@ -59,8 +59,8 @@ class TargetCode
         [Fact]
         public async Task CompileTmeDeclaratorInCompileTimeBlock()
         {
-            var testResult = await this._testRunner.Run( new TestInput( CompileTmeDeclaratorInCompileTimeBlock_Template, CompileTmeDeclaratorInCompileTimeBlock_Target ) );
-            testResult.AssertOutput( CompileTmeDeclaratorInCompileTimeBlock_ExpectedOutput );
+            var testResult = await this._testRunner.Run( new TestInput( CompileTimeDeclaratorInCompileTimeBlock_Template, CompileTimeDeclaratorInCompileTimeBlock_Target ) );
+            testResult.AssertOutput( CompileTimeDeclaratorInCompileTimeBlock_ExpectedOutput );
         }
     }
 }

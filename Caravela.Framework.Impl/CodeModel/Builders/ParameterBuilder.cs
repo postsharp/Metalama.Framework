@@ -20,6 +20,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public OptionalValue DefaultValue { get; set; }
 
+        public bool IsParams { get; set; }
+
         public override ICodeElement? ContainingElement { get; }
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;

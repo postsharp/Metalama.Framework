@@ -14,6 +14,18 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
+            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = ParseCompilationUnit( @"
+using System;
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
+" ).Usings;
+
             private readonly TemplateCompiler _templateCompiler;
 
             public bool FoundCompileTimeCode { get; private set; }
@@ -25,17 +37,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             private bool _addTemplateUsings;
-            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = ParseCompilationUnit( @"
-using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateHelper;
-" ).Usings;
 
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {

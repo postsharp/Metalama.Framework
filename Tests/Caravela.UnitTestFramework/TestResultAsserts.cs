@@ -3,30 +3,55 @@ using System.IO;
 using System.Linq;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Caravela.UnitTestFramework
 {
     public static class TestResultAsserts
     {
-        public static void AssertTransformedSourceEquals( this TestResult testResult, string expectedOutput, string? saveActualOutputPath = null )
+        public static void AssertNoErrors( this TestResult testResult)
         {
-            // Don't test output if we have an error.
-            Assert.Null( testResult.TestErrorMessage );
+            Assert.Null( testResult.ErrorMessage );
+            Assert.Null( testResult.Exception );
+
             if ( testResult.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
                 Assert.False( true, string.Join( Environment.NewLine, testResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage() ) ) );
             }
+        }
 
-            var actualOutput = testResult.TemplateOutputSource?.ToString()?.Trim();
-            if ( expectedOutput.Trim() != actualOutput )
+        public static void AssertTransformedSourceEqual( this TestResult testResult, string expectedTransformedSource, string? actualOutputPath = null )
+        {
+            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, null, actualOutputPath );
+        }
+
+        public static void AssertTransformedSourceSpanEqual( this TestResult testResult, string expectedTransformedSource, TextSpan? textSpan, string? actualOutputPath = null )
+        {
+            // Don't test output if we have an error.
+            testResult.AssertNoErrors();
+
+            var regionText = textSpan != null
+                ? testResult.TransformedTargetSource?.GetSubText( textSpan.Value ).ToString()
+                : testResult.TransformedTargetSource?.ToString();
+            AssertSourceEqual( expectedTransformedSource.Trim(), regionText, actualOutputPath );
+        }
+
+        private static void AssertSourceEqual(string expected, string? actual, string? actualOutputPath = null )
+        {
+            try
             {
-                if ( saveActualOutputPath != null && actualOutput != null )
+                Assert.Equal( expected.Trim(), actual?.Trim() );
+            }
+            catch ( EqualException )
+            {
+                if ( actualOutputPath != null )
                 {
-                    File.WriteAllText( saveActualOutputPath, actualOutput );
+                    File.WriteAllText( actualOutputPath, actual );
                 }
 
-                Assert.Equal( expectedOutput.Trim(), actualOutput );
+                throw;
             }
         }
 

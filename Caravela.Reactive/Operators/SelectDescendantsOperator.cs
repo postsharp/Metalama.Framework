@@ -11,9 +11,9 @@ namespace Caravela.Reactive.Operators
         private readonly Func<T, ReactiveCollectorToken, IReactiveCollection<T>> _getChildrenFunc;
         private ImmutableDictionary<T, int>? _dictionary;
 
-        private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>
+        private ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? Subscription, int Count)>
             _subscriptions =
-                ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? subscription, int count)>.Empty;
+                ImmutableDictionary<IReactiveCollection<T>, (IReactiveSubscription? Subscription, int Count)>.Empty;
 
         public SelectDescendantsOperator(
             IReactiveCollection<T> source,
@@ -50,7 +50,7 @@ namespace Caravela.Reactive.Operators
             }
 
             this._dictionary = builder.ToImmutable();
-            return new ( this._dictionary.Keys );
+            return new( this._dictionary.Keys );
         }
 
         private bool Follow( IReactiveCollection<T> source )
@@ -62,7 +62,7 @@ namespace Caravela.Reactive.Operators
             }
             else
             {
-                this._subscriptions = this._subscriptions.SetItem( source, (existing.subscription, existing.count + 1) );
+                this._subscriptions = this._subscriptions.SetItem( source, (existing.Subscription, existing.Count + 1) );
                 return false;
             }
         }
@@ -74,14 +74,14 @@ namespace Caravela.Reactive.Operators
                 return false;
             }
 
-            if ( existing.count == 1 )
+            if ( existing.Count == 1 )
             {
                 this._subscriptions = this._subscriptions.Remove( source );
                 return true;
             }
             else
             {
-                this._subscriptions = this._subscriptions.SetItem( source, (existing.subscription, existing.count - 1) );
+                this._subscriptions = this._subscriptions.SetItem( source, (existing.Subscription, existing.Count - 1) );
                 return false;
             }
         }

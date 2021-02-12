@@ -46,6 +46,7 @@
     <Compile Include="Classifier\Classifier.cs" />
     <Compile Include="Classifier\ClassifierProvider.cs" />
     <Compile Include="Classifier\FormatDefinitions.cs" />
+    <Compile Include="DesignTimeEntryPointManagerExtensions.cs" />
     <Compile Include="MyPackage.cs" />
     <Compile Include="ShowDiffCommand.cs" />
     <Compile Include="VSCommandTable.cs">

@@ -279,7 +279,7 @@ namespace Caravela.Framework.Impl.Templating
                                             list.Select( this.Transform ) ) ) ) ) ) ) );
         }
 
-        protected ExpressionSyntax Transform( SyntaxToken token )
+        protected virtual ExpressionSyntax Transform( SyntaxToken token )
         {
             if ( token.Kind() == SyntaxKind.None )
             {

@@ -21,7 +21,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         private static readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks =
             new ConcurrentDictionary<Version, Task<ICompilerServiceProvider>>();
 
-        internal static Version MatchAllVersion { get; } = new Version( 9999, 99 );
+        public static Version MatchAllVersion { get; } = new Version( 9999, 99 );
 
         public static IDesignTimeEntryPointManager Instance { get; private set; }
 

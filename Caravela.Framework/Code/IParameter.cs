@@ -31,5 +31,7 @@ namespace Caravela.Framework.Code
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
         OptionalValue DefaultValue { get; }
+        
+        bool IsParams { get; }
     }
 }

@@ -5,7 +5,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
 {
     internal class CaravelaReturnParameterInfo : ParameterInfo
     {
-        public CaravelaReturnParameterInfo( Method.MethodReturnParameter returnParameter ) => this.Method = returnParameter.Method;
+        public CaravelaReturnParameterInfo( Method.MethodReturnParameter returnParameter )
+        {
+            this.Method = returnParameter.Method;
+        }
 
         public Method Method { get; }
     }

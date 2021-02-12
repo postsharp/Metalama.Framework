@@ -12,7 +12,10 @@ namespace Caravela.Framework.Impl.Templating.Serialization
     {
         private readonly ObjectSerializers _serializers;
 
-        public DictionarySerializer( ObjectSerializers serializers ) => this._serializers = serializers;
+        public DictionarySerializer( ObjectSerializers serializers )
+        {
+            this._serializers = serializers;
+        }
 
         // ReSharper disable once UnusedParameter.Local
         // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
@@ -121,10 +124,12 @@ namespace Caravela.Framework.Impl.Templating.Serialization
                 lt.Add( InitializerExpression(
                     SyntaxKind.ComplexElementInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
-                        new SyntaxNodeOrToken[] {
+                        new SyntaxNodeOrToken[]
+                        {
                             this._serializers.SerializeToRoslynCreationExpression( key ),
                             Token(SyntaxKind.CommaToken),
-                            this._serializers.SerializeToRoslynCreationExpression( value ) } ) ) );
+                            this._serializers.SerializeToRoslynCreationExpression( value )
+                        } ) ) );
             }
 
             creationExpression = creationExpression.WithInitializer(

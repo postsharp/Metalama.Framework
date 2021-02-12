@@ -12,6 +12,12 @@ namespace Caravela.Framework.TestApp
 
         private string InstanceProperty => "IP";
 
+        public static void Run()
+        {
+            Console.WriteLine( StaticMethod() );
+            Console.WriteLine( new ThisAccess().InstanceMethod() );
+        }
+
         [ThisAccessAspect]
         private static string StaticMethod()
         {
@@ -27,12 +33,6 @@ namespace Caravela.Framework.TestApp
         public override string ToString()
         {
             return "this";
-        }
-
-        public static void Run()
-        {
-            Console.WriteLine( StaticMethod() );
-            Console.WriteLine( new ThisAccess().InstanceMethod() );
         }
     }
 

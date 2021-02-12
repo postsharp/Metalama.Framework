@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOut => false;
 
+        public bool IsParams => false;
+
         public abstract IType Type { get; }
 
         public string? Name => null;

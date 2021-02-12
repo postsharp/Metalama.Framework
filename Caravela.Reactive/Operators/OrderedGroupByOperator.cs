@@ -102,7 +102,7 @@ namespace Caravela.Reactive.Operators
             // and a map from source item to group
             this._sourceMap = newGroups.SelectMany( x => x.sourceItems, ( x, sourceItem ) => (x.group, sourceItem) ).ToImmutableDictionary( x => x.sourceItem, x => x.group );
 
-            return new ( this._groups );
+            return new( this._groups );
         }
 
         private ImmutableArray<IGrouping<TKey, TSource>> ComputeKeyGroups( IEnumerable<TSource> newSource ) =>

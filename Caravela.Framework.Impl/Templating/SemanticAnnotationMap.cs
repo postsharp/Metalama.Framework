@@ -17,13 +17,13 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
-        private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new Dictionary<ISymbol, SyntaxAnnotation>();
-        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new Dictionary<SyntaxAnnotation, ISymbol>();
-        private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new Dictionary<ISymbol, SyntaxAnnotation>();
-        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new Dictionary<SyntaxAnnotation, ISymbol>();
-        private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new Dictionary<ITypeSymbol, SyntaxAnnotation>();
-        private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new Dictionary<SyntaxAnnotation, ITypeSymbol>();
-        private readonly Dictionary<ILocalSymbol, SyntaxAnnotation> _localToAssignmentMap = new Dictionary<ILocalSymbol, SyntaxAnnotation>();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
+        private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
+        private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
+        private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
+        private readonly Dictionary<ILocalSymbol, SyntaxAnnotation> _localToAssignmentMap = new();
 
         private int _nextId;
 
@@ -155,10 +155,62 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         /// <summary>
-        /// Returns the result of <c>SemanticModel.GetTypeInfo</c>.
+        /// Returns the corresponding parameter symbol of the invoked member for an argument.
+        /// This takes named arguments and <see langword="params" /> parameters into account.
         /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
+        /// <example>
+        /// For the method <c>Add(int a, int b)</c> and the invocation <c>Add(b: 0, a: 1)</c>,
+        /// calling this method on the first argument (<c>b: 0</c>) returns the second parameter (<c>b</c>).
+        /// </example>
+        public IParameterSymbol? GetParameterSymbol( ArgumentSyntax argument )
+        {
+            if ( argument.Parent?.Parent == null )
+            {
+                return null;
+            }
+
+            var invocationSymbol = this.GetSymbol( argument.Parent.Parent );
+
+            var parameters = invocationSymbol switch
+            {
+                IMethodSymbol methodSymbol => methodSymbol.Parameters,
+                IPropertySymbol propertySymbol => propertySymbol.Parameters,
+                _ => ImmutableArray<IParameterSymbol>.Empty
+            };
+
+            if ( parameters.Length == 0 )
+            {
+                return null;
+            }
+
+            if ( argument.NameColon != null )
+            {
+                return parameters.FirstOrDefault( p => p.Name == argument.NameColon.Name.Identifier.ValueText );
+            }
+
+            var index = argument.Parent.ChildNodes().ToList().IndexOf( argument );
+            if ( index == -1 )
+            {
+                return null;
+            }
+
+            if ( index < parameters.Length )
+            {
+                return parameters[index];
+            }
+
+            var lastParameter = parameters.Last();
+            if ( lastParameter.IsParams )
+            {
+                return lastParameter;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the result of <c>semanticModel.GetTypeInfo(node).Type</c>.
+        /// </summary>
         public ITypeSymbol? GetType( SyntaxNode node )
         {
             var annotation = node.GetAnnotations( "type" ).SingleOrDefault();

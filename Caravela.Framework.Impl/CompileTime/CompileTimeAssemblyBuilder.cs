@@ -48,9 +48,9 @@ namespace Caravela.Framework.Impl.CompileTime
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
 
-        private (Compilation compilation, MemoryStream compileTimeAssembly)? _previousCompilation;
+        private readonly Random _random = new();
 
-        private readonly Random _random = new ();
+        private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
 
         public CompileTimeAssemblyBuilder(
             Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var stream = new MemoryStream();
 
 #if DEBUG
-            SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
+            static SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
 
             compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
             foreach ( var tree in compilation.SyntaxTrees )
@@ -164,9 +164,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )
         {
-            if ( compilation == this._previousCompilation?.compilation )
+            if ( compilation == this._previousCompilation?.Compilation )
             {
-                var lastStream = this._previousCompilation.Value.compileTimeAssembly;
+                var lastStream = this._previousCompilation.Value.CompileTimeAssembly;
                 lastStream.Position = 0;
                 return lastStream;
             }
