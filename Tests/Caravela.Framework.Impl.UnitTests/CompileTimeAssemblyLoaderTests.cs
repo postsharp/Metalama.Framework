@@ -36,7 +36,7 @@ class A : Attribute
 }";
 
             var roslynCompilation = CreateRoslynCompilation( code );
-            var compilation = CompilationFactory.CreateCompilation( roslynCompilation );
+            var compilation = new CompilationModel( roslynCompilation );
 
             var builder = new CompileTimeAssemblyBuilder( roslynCompilation );
             var loader = new CompileTimeAssemblyLoader( roslynCompilation, builder );

@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.UnitTests
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 
-            return CompilationFactory.CreateCompilation( roslynCompilation );
+            return new CompilationModel( roslynCompilation );
         }
 
         public static object? ExecuteExpression( string context, string expression )

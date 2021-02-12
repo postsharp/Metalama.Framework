@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="compilation"></param>
         /// <param name="loader"></param>
-        public AspectPartResult( RoslynBasedCompilationModel compilation, CompileTimeAssemblyLoader loader )
+        public AspectPartResult( CompilationModel compilation, CompileTimeAssemblyLoader loader )
             : this
             ( compilation,
                 Array.Empty<Diagnostic>(),

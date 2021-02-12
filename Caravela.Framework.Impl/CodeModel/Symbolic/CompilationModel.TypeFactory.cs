@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract partial class CompilationModel
+    internal partial class CompilationModel
     {
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
         private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new ();
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IType GetIType( ITypeSymbol typeSymbol )
             => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this ) );
 
-        protected abstract NamedType CreateNamedType( INamedTypeSymbol symbol );
+        protected NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
 
         internal NamedType GetNamedType( INamedTypeSymbol typeSymbol )
             => (NamedType) this._typeCache.GetOrAdd( typeSymbol, s => this.CreateNamedType( (INamedTypeSymbol) s ) );

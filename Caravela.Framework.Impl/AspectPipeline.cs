@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
                 var compileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
                 using var compileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, compileTimeAssemblyBuilder );
                 compileTimeAssemblyBuilder.CompileTimeAssemblyLoader = compileTimeAssemblyLoader;
-                var compilation = new RoslynBasedCompilationModel( roslynCompilation );
+                var compilation = new CompilationModel( roslynCompilation );
                 var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartComparer = new AspectPartComparer();
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        private static IEnumerable<INamedType> GetAspectTypes( RoslynBasedCompilationModel compilation )
+        private static IEnumerable<INamedType> GetAspectTypes( CompilationModel compilation )
         {
             var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
 

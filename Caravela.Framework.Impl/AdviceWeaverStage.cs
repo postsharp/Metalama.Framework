@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl
 
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectPartResult = new AspectPartResult( new RoslynBasedCompilationModel( input.Compilation ), this._assemblyLoader );
+            var aspectPartResult = new AspectPartResult( new CompilationModel( input.Compilation ), this._assemblyLoader );
 
             foreach ( var aspectPart in this._aspectParts )
             {

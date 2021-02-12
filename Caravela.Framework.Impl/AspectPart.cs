@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl
             var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
             var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
 
-            var newCompilation = new RoslynBasedCompilationModel( (RoslynBasedCompilationModel) input.Compilation, addedObservableIntroductions );
+            var newCompilation = new CompilationModel( input.Compilation, addedObservableIntroductions );
 
             return input.WithNewResults( newCompilation,
                 aspectInitializerDiagnostics.Concat( adviceResults.SelectMany( ar => ar.Diagnostics ) ).ToList(),
