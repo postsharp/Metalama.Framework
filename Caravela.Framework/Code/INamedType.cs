@@ -89,9 +89,10 @@ namespace Caravela.Framework.Code
 
         /// <summary>
         /// Gets the list of methods defined by the current type, but not those inherited from the base
-        /// type.
+        /// type, and not constructors.
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
+        
 
         /// <summary>
         /// Makes a generic instance of the current generic type definition.

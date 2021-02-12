@@ -1,10 +1,8 @@
-<Project InitialTargets="CheckVersionsPrerequisites">
+<Project>
 
   <PropertyGroup>
     
-    <!-- We need the Configuration property to be defined at this point.-->
-    <_ConfigurationPropertyMissing Condition="'$(Configuration)'==''">True</_ConfigurationPropertyMissing>
-  
+    
     <!-- TeamCity defines the environment variable VersionSuffix -->
     <MainVersion>0.1.1</MainVersion>
     <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
@@ -23,11 +21,6 @@
 
   <Target Name="PrintVersion">
     <Message Text="Version=$(Version)"/>
-  </Target>
-
-  <Target Name="CheckVersionsPrerequisites">
-    <Error Text="The Configuration property was not set when Versions.props was imported." 
-           Condition="'$(_ConfigurationPropertyMissing)'=='True'"/>
   </Target>
 
 </Project>

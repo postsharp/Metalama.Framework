@@ -2,25 +2,42 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Collections
 {
     public static class EnumerableExtensions
     {
         public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T>? collection, Func<T, IEnumerable<T>?> getChildren )
+            where T : class
         {
-            List<T> list = new ();
+            var recursionCheck = 0;
+
+            HashSet<T> list = new (ReferenceEqualityComparer<T>.Instance);
 
             void PopulateDescendants( IEnumerable<T>? c )
             {
+                recursionCheck++;
+
+                if ( recursionCheck > 64 )
+                {
+                    throw new InvalidOperationException( "Too many levels of inheritance." );
+                }
+
                 if ( c != null )
                 {
                     foreach ( var child in c )
                     {
-                        list.Add( child );
+                        if ( !list.Add( child ) )
+                        {
+                            throw new AssertionFailedException( $"The item {child} of type {child.GetType().Name} has been visited twice." );
+                        }
+
                         PopulateDescendants( getChildren( child ) );
                     }
                 }
+
+                recursionCheck--;
             }
 
             PopulateDescendants( collection );
@@ -29,10 +46,16 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>( this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
+            where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable, Func<TItem, TKey> getKey,
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable,
+            Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue )
+            where TKey: notnull
          => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue );
+
+
+        
     }
 }

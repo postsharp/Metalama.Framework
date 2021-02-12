@@ -35,8 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsVirtual => this.Symbol.IsVirtual;
 
-        public sealed override ICodeElement? ContainingElement => this.DeclaringType;
+        public sealed override ICodeElement? ContainingElement => this.Compilation.GetNamedTypeOrMethod( this.Symbol.ContainingSymbol );
 
-        INamedType? IMember.DeclaringType => this.DeclaringType;
+        INamedType IMember.DeclaringType => this.DeclaringType;
     }
 }

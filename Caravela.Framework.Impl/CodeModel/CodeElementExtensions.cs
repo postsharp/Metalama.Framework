@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <returns></returns>
         public static IEnumerable<ICodeElement> SelectContainedElements( this ICodeElement codeElement ) =>
             new[] { codeElement }.SelectDescendants(
-                codeElement => codeElement switch
+                child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
                     INamedType namedType => namedType.NestedTypes

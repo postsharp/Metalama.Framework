@@ -77,9 +77,11 @@ class C
             var type = compilation.DeclaredTypes.Single();
             Assert.Equal( "C", type.Name );
 
-            var methods = type.Methods.ToList();
+            var methods = type.Methods.OrderBy( m=>m.Name ).ToList();
 
-            var method = methods[0];
+            Assert.Equal( 2, methods.Count );
+
+            var method = methods[1];
             Assert.Equal( "M", method.Name );
             Assert.Same( type, method.ContainingElement );
 
@@ -405,7 +407,7 @@ class C
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.HasValue );
-                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue );
+                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 );

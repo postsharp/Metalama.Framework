@@ -29,7 +29,6 @@ namespace Caravela.Framework.Impl.Transformations
         SetterOverride,
         AdderOverride,
         RemoverOverride,
-        RaiserOverride,
-        BeforeUserCodeInitialization,
+        RaiserOverride
     }
 }

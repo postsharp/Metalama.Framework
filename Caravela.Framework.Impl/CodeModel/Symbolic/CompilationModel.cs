@@ -22,8 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation = roslynCompilation;
             this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty;
 
-            var allCodeElements = new ICodeElement[] { this }
-                .SelectDescendants( codeElement => codeElement.SelectContainedElements() );
+            var allCodeElements = this.SelectContainedElements();
 
             var allAttributes = allCodeElements.SelectMany( c => c.Attributes );
             this._allAttributesByType = ImmutableMultiValueDictionary<INamedType, IAttribute>.Create( allAttributes, a => a.Type );
