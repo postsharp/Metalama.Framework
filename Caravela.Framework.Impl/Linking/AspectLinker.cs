@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -44,8 +45,8 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // Second pass. Count references to modified methods.
-            Dictionary<(ISymbol symbol, int version), int> referenceCounts = new ();
-            List<(AspectPart aspectPart, int version)> aspectParts = new ();
+            Dictionary<(ISymbol symbol, int version), int> referenceCounts = new();
+            List<(AspectPart aspectPart, int version)> aspectParts = new();
             aspectParts.Add( (null, 0) );
             aspectParts.AddRange( this._input.OrderedAspectParts.Select( ( ar, i ) => (ar, i + 1) ) );
 
@@ -92,13 +93,15 @@ namespace Caravela.Framework.Impl.Linking
             // Third pass. Linker.
             // Two things it should do:
             //   1. Replace calls to the vanilla method to the call to the right "override" method.
+
+            return new AdviceLinkerResult( this._input.Compilation, Array.Empty<Diagnostic>() );
         }
 
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
         {
             private IReadOnlyList<IMemberIntroduction> _memberIntroductors;
             private IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
-            private Dictionary<ISymbol, List<IntroducedMember>> OverridenSymbols = new ();
+            private Dictionary<ISymbol, List<IntroducedMember>> OverridenSymbols = new();
 
             public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
             {
@@ -122,6 +125,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     members.AddRange( introducedMembers.Select( i => i.Syntax ) );
 
+
                     // TODO: add to OverridenSymbols if the introduction implements IOverridenElement
                 }
 
@@ -131,48 +135,6 @@ namespace Caravela.Framework.Impl.Linking
                     .Select( i => i.Syntax ) );
 
                 return node.WithMembers( List( members ) );
-            }
-        }
-
-        public class Walker : CSharpSyntaxWalker
-        {
-        }
-
-        public class Rewriter : CSharpSyntaxRewriter
-        {
-            private readonly Dictionary<TypeDeclarationSyntax, List<MethodTransformationBuilder>> _introducedMethods;
-            private readonly Dictionary<MethodDeclarationSyntax, List<OverriddenMethod>> _overriddenMethods;
-
-            public Rewriter( IEnumerable<INonObservableTransformation> transformations )
-            {
-                // This is probably not the best way to match syntax nodes with transformations.
-
-                this._introducedMethods =
-                    transformations
-                    .OfType<MethodTransformationBuilder>()
-                    .SelectMany( x => x.GetSyntaxNodes().Select( y => (type: ((IToSyntax) x.TargetDeclaration).GetSyntaxNode(), transformation: x) ) )
-                    .GroupBy( x => x.type )
-                    .ToDictionary( x => (TypeDeclarationSyntax) x.Key, x => x.Select( y => y.transformation ).ToList() );
-
-                this._overriddenMethods =
-                    transformations
-                    .OfType<OverriddenMethod>()
-                    .Select( x => (method: ((IToSyntax) x.OverridenDeclaration).GetSyntaxNode(), transformation: x) )
-                    .GroupBy( x => x.method )
-                    .ToDictionary( x => (MethodDeclarationSyntax) x.Key, x => x.Select( y => y.transformation ).ToList() );
-            }
-
-            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
-
-            private TypeDeclarationSyntax VisitTypeDeclaration( TypeDeclarationSyntax node )
-            {
-                return node;
             }
         }
     }

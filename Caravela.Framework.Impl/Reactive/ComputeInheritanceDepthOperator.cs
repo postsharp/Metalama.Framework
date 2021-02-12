@@ -5,6 +5,7 @@ using static System.Math;
 
 namespace Caravela.Framework.Impl.Reactive
 {
+    /*
     internal class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>
     {
         private const int _computePendingMarker = -1;
@@ -109,4 +110,5 @@ namespace Caravela.Framework.Impl.Reactive
             updateToken.SetBreakingChange();
         }
     }
+    */
 }
