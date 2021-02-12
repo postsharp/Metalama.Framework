@@ -17,18 +17,17 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-        
-            if ( this._method.ReturnType.Is( typeof(void) ) )
+
+            if ( this._method.ReturnType.Is( typeof( void ) ) )
             {
                 // TODO: Add the namespace.
-                return IdentifierName( nameof(__Void) );
+                return IdentifierName( nameof( __Void ) );
             }
             else
             {
                 // TODO: Generate the syntax.
                 throw new NotImplementedException();
             }
-        
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
@@ -43,9 +42,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             throw new NotImplementedException();
         }
 
-        
         // The following commented logic should move to the aspect linker.
-        
+
         /*
         StatementSyntax IProceedImpl.CreateAssignStatement( string returnLocalVariableName )
         {

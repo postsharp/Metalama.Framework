@@ -4,7 +4,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType 
+    internal class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
     {
         internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
         {
@@ -16,6 +16,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType ElementType => this.Compilation.GetIType( this.Symbol.ElementType );
 
         public int Rank => this.Symbol.Rank;
-
     }
 }

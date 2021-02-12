@@ -47,7 +47,7 @@ namespace Caravela.Framework.Code
         /// <see cref="GenericParameter"/>
         /// </summary>
         GenericParameter,
-        
+
         Attribute,
         Resource
     }

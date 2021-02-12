@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
         [Memo]
-        public IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace 
+        public IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace
             => this.DeclaredTypes.ToMultiValueDictionary( t => t.Namespace, t => t );
 
         ITypeFactory ICompilation.TypeFactory => this;
@@ -34,19 +34,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract INamedType? GetTypeByReflectionName( string reflectionName );
 
-
-
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
-        
+
         protected CompilationModel( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
         }
-        
-        public abstract IReadOnlyMultiValueDictionary<ICodeElement?, IObservableTransformation> ObservableTransformations { get; }
-        
-       
 
+        public abstract IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations { get; }
     }
 }

@@ -1,13 +1,13 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Sdk;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
-    
+
     internal interface IAspectSource
     {
         /// <summary>
@@ -16,7 +16,6 @@ namespace Caravela.Framework.Impl
         /// </summary>
         IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType );
     }
-
 
     /// <summary>
     /// An implementation of <see cref="IAspectSource"/> backed by delegates.

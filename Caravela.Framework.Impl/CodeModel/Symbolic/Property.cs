@@ -13,9 +13,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         protected internal override ISymbol Symbol => this._symbol;
 
-        
-     
-
         public Property( IPropertySymbol symbol, NamedType declaringType ) : base( declaringType.Compilation )
         {
             this._symbol = symbol;
@@ -42,7 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: get-only properties
         public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.GetMethod( this._symbol.SetMethod );
-
 
         public override CodeElementKind ElementKind => CodeElementKind.Property;
     }

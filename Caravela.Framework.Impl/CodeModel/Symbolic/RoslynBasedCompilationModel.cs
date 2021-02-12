@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Collections;
 using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -27,7 +24,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var allAttributes = allCodeElements.SelectMany( c => c.Attributes );
             this._allAttributesByType = ImmutableMultiValueDictionary<INamedType, IAttribute>.Create( allAttributes, a => a.Type );
-            
         }
 
         /// <summary>
@@ -40,12 +36,12 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._transformations = prototype._transformations.AddRange( introducedElements, t => t.ContainingElement, t => t );
 
-            var allNewCodeElements = 
+            var allNewCodeElements =
                 introducedElements
                     .OfType<ICodeElement>()
                     .SelectDescendants( codeElement => codeElement.SelectContainedElements() );
 
-            var allAttributes = 
+            var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
                     .Concat( introducedElements.OfType<IAttribute>() );
 
@@ -76,12 +72,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
         public override IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations => this._transformations;
+
         protected override NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
 
- 
-
-        public override IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType => _allAttributesByType;
-
-      
+        public override IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType => this._allAttributesByType;
     }
 }

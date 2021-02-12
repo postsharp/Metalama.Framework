@@ -1,7 +1,6 @@
 // unset
 
 using Microsoft.CodeAnalysis;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {

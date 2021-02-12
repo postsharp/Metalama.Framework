@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
@@ -11,19 +10,18 @@ namespace Caravela.Framework.Impl
 {
     internal sealed class AspectPartResult
     {
-        
+
         // TODO: should this be reactive or handled as a side value?
         public CompilationModel Compilation { get; }
 
         public IReadOnlyList<Diagnostic> Diagnostics { get; }
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
-        
+
         public IReadOnlyList<Advice> Advices { get; }
-        
+
         public IReadOnlyList<INonObservableTransformation> Transformations { get; }
 
-        
         /// <summary>
         /// Builds the initial <see cref="AspectPartResult"/>.
         /// </summary>
@@ -31,11 +29,11 @@ namespace Caravela.Framework.Impl
         /// <param name="loader"></param>
         public AspectPartResult( RoslynBasedCompilationModel compilation, CompileTimeAssemblyLoader loader )
             : this
-            (compilation,
+            ( compilation,
                 Array.Empty<Diagnostic>(),
-                new[]{new CompilationAspectSource( compilation, loader )},
+                new[] { new CompilationAspectSource( compilation, loader ) },
                   Array.Empty<Advice>(),
-                Array.Empty<INonObservableTransformation>())
+                Array.Empty<INonObservableTransformation>() )
         {
         }
 
@@ -48,10 +46,10 @@ namespace Caravela.Framework.Impl
         /// <param name="advices"></param>
         /// <param name="transformations"></param>
         private AspectPartResult(
-            CompilationModel compilation, 
-            IReadOnlyList<Diagnostic> diagnostics, 
+            CompilationModel compilation,
+            IReadOnlyList<Diagnostic> diagnostics,
             IReadOnlyList<IAspectSource> aspectSources,
-            IReadOnlyList<Advice> advices, 
+            IReadOnlyList<Advice> advices,
             IReadOnlyList<INonObservableTransformation> transformations )
         {
             this.Diagnostics = diagnostics;
@@ -64,10 +62,10 @@ namespace Caravela.Framework.Impl
         public AspectPartResult WithNewResults( CompilationModel compilation,
             IReadOnlyList<Diagnostic> additionalDiagnostics,
             IReadOnlyList<IAspectSource> additionalAspectSources,
-            IReadOnlyList<Advice> additionalAdvices, 
+            IReadOnlyList<Advice> additionalAdvices,
             IReadOnlyList<INonObservableTransformation> additionalTransformations )
         {
-            return new ( 
+            return new (
                 compilation,
                 this.Diagnostics.Concat( additionalDiagnostics ),
                 additionalAspectSources.Concat( additionalAspectSources ),
@@ -75,7 +73,6 @@ namespace Caravela.Framework.Impl
                 this.Transformations.Concat( additionalTransformations )
                 );
         }
-
     }
 
     internal static class EnumerableExtensions
@@ -88,7 +85,7 @@ namespace Caravela.Framework.Impl
             }
             else if ( a == null || a.Count == 0 )
             {
-                return new[] {b};
+                return new[] { b };
             }
             else
             {
@@ -97,8 +94,8 @@ namespace Caravela.Framework.Impl
                 l.Add( b );
                 return l;
             }
-            
         }
+
         public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, IReadOnlyList<T>? b )
         {
             if ( b == null || b.Count == 0 )

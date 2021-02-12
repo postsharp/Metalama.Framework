@@ -6,7 +6,7 @@ namespace Caravela.Framework.Code
     public interface IMember : ICodeElement
     {
         Visibility Visibility { get; }
-        
+
         /// <summary>
         /// Gets the member name.
         /// </summary>
@@ -21,14 +21,13 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether the member is <c>virtual</c>.
         /// </summary>
         bool IsVirtual { get; }
-        
-        
+
         bool IsSealed { get; }
 
         /// <summary>
         /// Gets the type containing the current member, or <c>null</c> if the current member is not contained
         /// within a type (which should not happen in C#).
         /// </summary>
-        INamedType? DeclaringType { get; }
+        INamedType DeclaringType { get; }
     }
 }

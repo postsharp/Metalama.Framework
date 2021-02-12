@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Caravela.Framework.Sdk;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Impl
         public IReadOnlyList<ResourceDescription> Resources { get; }
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
-        
+
         /// <summary>
         /// Gets the list of ordered aspect parts.
         /// </summary>

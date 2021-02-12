@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel
         where T : ITypeSymbol
     {
         protected CompilationModel Compilation { get; }
-        
+
         public T Symbol { get; }
 
         protected RoslynType( T symbol, CompilationModel compilation )

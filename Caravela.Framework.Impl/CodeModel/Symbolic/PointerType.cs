@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class PointerType : RoslynType<IPointerTypeSymbol>, IPointerType
     {
 
-        internal PointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation)
+        internal PointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
         {
         }
 
@@ -14,7 +14,5 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IType PointedAtType => this.Compilation.GetIType( this.Symbol.PointedAtType );
-
-        
     }
 }

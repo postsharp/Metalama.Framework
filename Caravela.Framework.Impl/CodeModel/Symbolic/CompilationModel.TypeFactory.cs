@@ -1,17 +1,17 @@
 // unset
 
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract partial class CompilationModel
     {
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
-        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new ();
 
         public IType? GetTypeByReflectionType( Type type )
         {
@@ -49,6 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return this.GetTypeByReflectionName( type.FullName );
         }
+
         internal IType GetIType( ITypeSymbol typeSymbol )
             => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this ) );
 
@@ -68,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method => this.GetMethod( method ),
-                _ => throw new ArgumentException( nameof(symbol) )
+                _ => throw new ArgumentException( nameof( symbol ) )
             };
 
         IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank ) =>
@@ -77,12 +78,12 @@ namespace Caravela.Framework.Impl.CodeModel
         IPointerType ITypeFactory.MakePointerType( IType pointedType ) =>
             (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol ) );
 
-        bool ITypeFactory.Is( IType left, IType right ) => 
+        bool ITypeFactory.Is( IType left, IType right ) =>
             this.RoslynCompilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
+
         bool ITypeFactory.Is( IType left, Type right ) =>
             this.RoslynCompilation.HasImplicitConversion(
                 ((ITypeInternal) left).TypeSymbol,
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
-
     }
 }

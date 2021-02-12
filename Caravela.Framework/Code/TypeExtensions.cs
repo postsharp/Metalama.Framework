@@ -24,7 +24,6 @@ namespace Caravela.Framework.Code
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.
         /// </summary>
-        /// <param name="other">Another type.</param>
         /// <returns></returns>
         public static bool Is( this IType left, IType right ) =>
             left.TypeFactory.Is( left, right );

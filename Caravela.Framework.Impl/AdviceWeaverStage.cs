@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl
                 aspectPartResult = aspectPart.ToResult( aspectPartResult );
             }
 
-            var linker = new AspectLinker(new AdviceLinkerInput( input.Compilation, aspectPartResult.Compilation, aspectPartResult.Transformations, input.AspectParts ));
+            var linker = new AspectLinker( new AdviceLinkerInput( input.Compilation, aspectPartResult.Compilation, aspectPartResult.Transformations, input.AspectParts ) );
             var linkerResult = linker.ToResult();
 
             return new PipelineStageResult(
@@ -39,6 +39,5 @@ namespace Caravela.Framework.Impl
                 aspectPartResult.AspectSources,
                 input.AspectParts );
         }
-
     }
 }

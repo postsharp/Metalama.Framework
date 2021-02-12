@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
@@ -44,7 +44,8 @@ namespace Caravela.Framework.Impl.CodeModel
             (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
              this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-        [Memo] public IReadOnlyList<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.GetNamedType ).ToImmutableArray();
+        [Memo]
+        public IReadOnlyList<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public IReadOnlyList<IProperty> Properties =>
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     m => m switch
                     {
                         IPropertySymbol p => new Property( p, this ),
-                        IFieldSymbol {IsImplicitlyDeclared: false} f => new Field( f, this ),
+                        IFieldSymbol { IsImplicitlyDeclared: false } f => new Field( f, this ),
                         _ => (IProperty) null!
                     } )
                 .Where( p => p != null )
@@ -83,11 +84,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string Name => this.TypeSymbol.Name;
 
-        [Memo] public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
+        [Memo]
+        public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
 
-        [Memo] public string FullName => this.TypeSymbol.ToDisplayString();
+        [Memo]
+        public string FullName => this.TypeSymbol.ToDisplayString();
 
-        [Memo] public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.GetIType( a ) ).ToImmutableList();
+        [Memo]
+        public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.GetIType( a ) ).ToImmutableList();
 
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
@@ -97,17 +101,16 @@ namespace Caravela.Framework.Impl.CodeModel
             _ => throw new NotImplementedException()
         };
 
-
         public override CodeElementKind ElementKind => CodeElementKind.Type;
 
-        [Memo] public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.GetNamedType( this.TypeSymbol.BaseType );
+        [Memo]
+        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.GetNamedType( this.TypeSymbol.BaseType );
 
         [Memo]
         public IReadOnlyList<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.GetNamedType ).ToImmutableArray();
 
         ITypeFactory IType.TypeFactory => this.Compilation;
 
-    
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 

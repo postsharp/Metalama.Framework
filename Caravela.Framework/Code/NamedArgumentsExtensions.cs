@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-    public static class NamedArgumentsExtensions 
+    public static class NamedArgumentsExtensions
     {
         public static bool TryGetByName( this IReadOnlyList<KeyValuePair<string, object?>> arguments, string name, out object? value )
         {

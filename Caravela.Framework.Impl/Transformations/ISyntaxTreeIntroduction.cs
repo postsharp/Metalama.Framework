@@ -7,6 +7,6 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal interface ISyntaxTreeIntroduction
     {
-        SyntaxTree TargetSyntaxTree { get;  }
+        SyntaxTree TargetSyntaxTree { get; }
     }
 }

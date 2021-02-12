@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
 
-
 namespace Caravela.Framework.Impl
 {
     internal class AdviceFactory : IAdviceFactory
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope  )
+        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope )
         {
             // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );

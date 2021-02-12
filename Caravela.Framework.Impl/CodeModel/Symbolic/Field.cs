@@ -1,7 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -14,8 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly NamedType _containingElement;
 
-
-        
         public Field( IFieldSymbol symbol, NamedType containingElement ) : base( containingElement.Compilation )
         {
             this._symbol = symbol;
@@ -41,8 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IMethod? Setter => null;
-
-        public INamedType DeclaringType => this._containingElement;
 
         public override CodeElementKind ElementKind => CodeElementKind.Field;
     }

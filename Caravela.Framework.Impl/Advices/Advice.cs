@@ -8,13 +8,12 @@ namespace Caravela.Framework.Impl.Advices
     internal abstract class Advice : IAdvice
     {
         public AspectInstance Aspect { get; }
-        
+
         IAspect IAdvice.Aspect => this.Aspect.Aspect;
 
         public ICodeElement TargetDeclaration { get; }
 
         public string PartName { get; set; }
-        
 
         protected Advice( AspectInstance aspect, ICodeElement targetDeclaration )
         {

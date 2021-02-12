@@ -3,7 +3,7 @@ using Caravela.Framework.Impl.CompileTime;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AttributeAspectSource 
+    internal class AttributeAspectSource
     {
         private readonly ICompilation _compilation;
         private readonly CompileTimeAssemblyLoader _loader;
@@ -13,7 +13,5 @@ namespace Caravela.Framework.Impl
             this._compilation = compilation;
             this._loader = loader;
         }
-
-        
     }
 }

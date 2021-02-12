@@ -30,9 +30,9 @@ namespace Caravela.Framework.Impl
 
             this._declarativeAdviceAttributes =
             (from method in aspectType.Methods
-                from attribute in method.Attributes
-                where attribute.Type.Is( iAdviceAttribute )
-                select (attribute, method)).ToList();
+             from attribute in method.Attributes
+             where attribute.Type.Is( iAdviceAttribute )
+             select (attribute, method)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
@@ -56,8 +56,8 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new ( ImmutableList.Create( diagnostic ), 
-                    ImmutableList.Create<IAdvice>(), 
+                return new ( ImmutableList.Create( diagnostic ),
+                    ImmutableList.Create<IAdvice>(),
                     ImmutableList.Create<IAspectSource>() );
             }
 

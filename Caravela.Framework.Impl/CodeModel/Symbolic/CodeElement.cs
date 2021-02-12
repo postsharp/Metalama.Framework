@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -18,9 +17,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal CompilationModel Compilation { get; }
 
-          
         [Memo]
-        public virtual ICodeElement ContainingElement => this.Symbol.ContainingSymbol switch
+        public virtual ICodeElement? ContainingElement => this.Symbol.ContainingSymbol switch
         {
             INamedTypeSymbol type => this.Compilation.GetNamedType( type ),
             IMethodSymbol method => this.Compilation.GetMethod( method ),
@@ -33,13 +31,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 .Select( a => new Attribute( a, this.Compilation, this ) )
                 .ToImmutableArray();
 
-
         public abstract CodeElementKind ElementKind { get; }
 
         protected internal abstract ISymbol Symbol { get; }
 
         private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() );
-
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();

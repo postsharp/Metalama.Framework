@@ -19,7 +19,7 @@ namespace Caravela.Framework.Advices
         /// Gets the element of code to which the current advice has been applied.
         /// </summary>
         ICodeElement TargetDeclaration { get; }
-        
+
         /// <summary>
         /// Gets or sets the aspect part to which the advice belongs, or <c>null</c> if it belongs to the default part.
         /// </summary>

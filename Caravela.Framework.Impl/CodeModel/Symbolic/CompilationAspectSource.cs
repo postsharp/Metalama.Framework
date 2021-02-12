@@ -1,11 +1,11 @@
 // unset
 
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {

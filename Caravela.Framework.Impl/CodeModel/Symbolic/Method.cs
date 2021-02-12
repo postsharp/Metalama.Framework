@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
@@ -14,10 +14,9 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         protected internal override ISymbol Symbol => this.MethodSymbol;
 
-
         internal IMethodSymbol MethodSymbol { get; }
 
-        public Method( IMethodSymbol symbol, CompilationModel compilation ) : base(compilation)
+        public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this.MethodSymbol = symbol;
         }
@@ -70,13 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel
             _ => throw new InvalidOperationException()
         };
 
-
-      
-
         public override CodeElementKind ElementKind => CodeElementKind.Method;
-
-        [Memo]
-        public INamedType? DeclaringType => this.MethodSymbol.ContainingType == null ? null : this.Compilation.GetNamedType( this.MethodSymbol.ContainingType );
 
         public override string ToString() => this.MethodSymbol.ToString();
 
@@ -93,17 +86,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override IType Type => this.Method.ReturnType;
 
-            public bool Equals( ICodeElement other ) => other is MethodReturnParameter methodReturnParameter &&
+            public override bool Equals( ICodeElement other ) => other is MethodReturnParameter methodReturnParameter &&
                                                                  SymbolEqualityComparer.Default.Equals( this.Method.Symbol,
                                                                      methodReturnParameter.Method.Symbol );
 
             public override ICodeElement? ContainingElement => this.Method;
 
-            public override IReadOnlyList<IAttribute> Attributes 
+            public override IReadOnlyList<IAttribute> Attributes
                 => this.Method.MethodSymbol.GetReturnTypeAttributes()
                 .Select( a => new Attribute( a, this.Method.Compilation, this ) )
                 .ToImmutableArray();
-
         }
     }
 }

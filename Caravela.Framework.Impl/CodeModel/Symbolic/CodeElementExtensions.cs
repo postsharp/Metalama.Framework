@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Collections;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -13,20 +13,20 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="codeElement"></param>
         /// <returns></returns>
         public static IEnumerable<ICodeElement> SelectContainedElements( this ICodeElement codeElement ) =>
-            new[]{codeElement}.SelectDescendants(
+            new[] { codeElement }.SelectDescendants(
                 codeElement => codeElement switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
                     INamedType namedType => namedType.NestedTypes
-                        .Concat<ICodeElement>(namedType.Methods)
-                        .Concat(namedType.Properties)
-                        .Concat(namedType.Events),
+                        .Concat<ICodeElement>( namedType.Methods )
+                        .Concat( namedType.Properties )
+                        .Concat( namedType.Events ),
                     IMethod method => method.LocalFunctions
                         .Concat<ICodeElement>( method.Parameters )
                         .Concat( method.GenericParameters )
                         .ConcatNotNull( method.ReturnParameter ),
                     _ => null
-                });
+                } );
 
         public static Location? GetLocation( this ICodeElement codeElement )
             => codeElement switch

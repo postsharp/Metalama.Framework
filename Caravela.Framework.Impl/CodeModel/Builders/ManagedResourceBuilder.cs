@@ -1,16 +1,15 @@
 // unset
 
-using Caravela.Framework.Advices;
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     internal class ManagedResourceBuilder : INonObservableTransformation
     {
-        
+
         public ResourceDescription ToResourceDescription()
         {
             throw new System.NotImplementedException();

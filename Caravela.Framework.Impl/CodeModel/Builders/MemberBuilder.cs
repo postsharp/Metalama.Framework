@@ -1,9 +1,9 @@
 // unset
 
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -14,15 +14,16 @@ namespace Caravela.Framework.Impl.Transformations
         public INamedType DeclaringType { get; }
 
         public Visibility Visibility { get; set; }
+
         public string Name { get; set; }
 
         public bool IsStatic { get; set; }
 
         public bool IsVirtual { get; set; }
-        
+
         public sealed override ICodeElement? ContainingElement => this.DeclaringType;
 
-        public MemberTransformationBuilder( INamedType declaringType ) 
+        public MemberTransformationBuilder( INamedType declaringType )
         {
             this.DeclaringType = declaringType;
         }

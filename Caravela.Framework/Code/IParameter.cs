@@ -1,5 +1,3 @@
-#pragma warning disable SA1623 // Property summary documentation should match accessors
-
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -26,8 +24,6 @@ namespace Caravela.Framework.Code
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.
         /// </summary>
         int Index { get; }
-
-      
 
         /// <remarks>
         /// Gets the default value of the parameter, or  <c>default</c> if the parameter type is a struct and the default

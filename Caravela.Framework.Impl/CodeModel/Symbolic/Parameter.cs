@@ -9,7 +9,6 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public IParameterSymbol ParameterSymbol { get; }
 
-
         private readonly CodeElement _containingMember;
 
         public Parameter( IParameterSymbol symbol, CodeElement containingMember ) : base( containingMember.Compilation )
@@ -40,9 +39,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         protected internal override ISymbol Symbol => this.ParameterSymbol;
 
-    
-        public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue(this.ParameterSymbol.ExplicitDefaultValue) : default;
-
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.ParameterSymbol.ToDisplayString();
+        public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
     }
 }

@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.CodeModel;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
 {

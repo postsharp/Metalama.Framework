@@ -1,12 +1,11 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal interface IInterfaceImplementationIntroduction : ISyntaxTreeIntroduction, IObservableTransformation 
+    internal interface IInterfaceImplementationIntroduction : ISyntaxTreeIntroduction, IObservableTransformation
     {
-        
-        IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations();
 
+        IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations();
     }
 }

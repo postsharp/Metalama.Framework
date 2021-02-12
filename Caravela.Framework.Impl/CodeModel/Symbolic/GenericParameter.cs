@@ -1,8 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.CodeModel
         private readonly ITypeParameterSymbol _typeSymbol;
 
         ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
-
 
         internal GenericParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
@@ -47,8 +46,6 @@ namespace Caravela.Framework.Impl.CodeModel
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
         public ITypeFactory TypeFactory => this.Compilation;
-
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._typeSymbol.ToDisplayString();
 
         public override string ToString() => this._typeSymbol.ToString();
     }

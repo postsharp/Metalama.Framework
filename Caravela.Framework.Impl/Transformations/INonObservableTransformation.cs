@@ -1,10 +1,4 @@
-﻿using Caravela.Framework.Advices;
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-
-namespace Caravela.Framework.Impl.Transformations
+﻿namespace Caravela.Framework.Impl.Transformations
 {
     /// <summary>
     /// Represent a transformation that is not observable by the aspects running after the aspect
@@ -12,6 +6,5 @@ namespace Caravela.Framework.Impl.Transformations
     /// </summary>
     internal interface INonObservableTransformation
     {
-        
     }
 }

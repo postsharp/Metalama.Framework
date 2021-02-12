@@ -15,12 +15,12 @@ namespace Caravela.Framework.Impl.Transformations
         /// Gets the syntax of the introduced member.
         /// </summary>
         public MemberDeclarationSyntax Syntax { get; }
-        
+
         /// <summary>
         /// Gets the <see cref="AspectPart"/> that emitted the current <see cref="IntroducedMember"/>.
         /// </summary>
         public AspectPart AspectPart { get; }
-        
+
         /// <summary>
         /// Gets the semantic of the introduced member as supported by the linker.
         /// </summary>

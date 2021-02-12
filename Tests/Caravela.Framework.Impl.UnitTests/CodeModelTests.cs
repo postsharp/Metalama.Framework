@@ -118,8 +118,8 @@ class TestAttribute : Attribute
             Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments );
             var namedArguments = attribute.NamedArguments;
             Assert.Equal( 2, namedArguments.Count );
-            Assert.Equal( 1, namedArguments.GetByName("E"));
-            var types = Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName("Types") );
+            Assert.Equal( 1, namedArguments.GetByName( "E" ) );
+            var types = Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName( "Types" ) );
             Assert.Equal( 3, types.Count );
             var type0 = Assert.IsAssignableFrom<INamedType>( types[0] );
             Assert.Equal( "E", type0.FullName );

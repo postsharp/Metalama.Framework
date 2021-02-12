@@ -91,7 +91,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 
-        
         public dynamic Value
         {
             get => new DynamicMetaMember( IdentifierName( this._parameter.Name! ) );
@@ -99,6 +98,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
+
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
     }
 

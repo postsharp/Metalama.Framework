@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl
 {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl
             }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(namedType), "This is not a source symbol.");
+                throw new ArgumentOutOfRangeException( nameof( namedType ), "This is not a source symbol." );
             }
         }
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
             }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(type), "This is not a source symbol.");
+                throw new ArgumentOutOfRangeException( nameof( type ), "This is not a source symbol." );
             }
         }
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl
             }
             else
             {
-                throw new ArgumentOutOfRangeException(nameof(method), "This is not a source symbol.");
+                throw new ArgumentOutOfRangeException( nameof( method ), "This is not a source symbol." );
             }
         }
     }

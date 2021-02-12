@@ -1,8 +1,8 @@
 // unset
 
+using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -12,8 +12,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public NamedType DeclaringType => this.Compilation.GetNamedType( this.Symbol.ContainingType );
-        
-        protected Member(CompilationModel compilation) : base(compilation)
+
+        protected Member( CompilationModel compilation ) : base( compilation )
         {
         }
 

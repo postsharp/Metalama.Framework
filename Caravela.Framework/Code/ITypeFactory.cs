@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
         /// For nested types, this means using <c>+</c>, e.g. to get <see cref="System.Environment.SpecialFolder"/>, use <c>System.Environment+SpecialFolder</c>.
         /// </para>
         /// <para>
-        /// For generic type definitions, this requires using <c>`</c>, e.g. to get <see cref="List{T}"/>, use <c>System.Collections.Generic.List`1</c>.
+        /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
         /// </para>
         /// <para>
         /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.MakeGenericType"/>.
@@ -21,15 +21,15 @@ namespace Caravela.Framework.Code
         INamedType? GetTypeByReflectionName( string reflectionName );
 
         IType? GetTypeByReflectionType( Type type );
-        
+
         IArrayType MakeArrayType( IType elementType, int rank );
+
         IPointerType MakePointerType( IType pointedType );
-        
+
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.
         /// </summary>
-        /// <param name="other">Another type.</param>
         /// <returns></returns>
         bool Is( IType left, IType right );
 
@@ -37,7 +37,6 @@ namespace Caravela.Framework.Code
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
         /// given as a reflection <see cref="Type"/>.
         /// </summary>
-        /// <param name="other">Another type.</param>
         /// <returns></returns>
         bool Is( IType left, Type right );
     }

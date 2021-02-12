@@ -1,8 +1,6 @@
-using Caravela.Framework.Project;
-
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
 {

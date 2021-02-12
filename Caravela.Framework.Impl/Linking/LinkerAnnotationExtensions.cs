@@ -7,7 +7,6 @@ namespace Caravela.Framework.Impl.Linking
     {
         public const string AnnotationKind = "CaravelaAspectLinker";
 
-
         public static LinkerAnnotation? GetLinkerAnnotation( this SyntaxNode node )
         {
             var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;

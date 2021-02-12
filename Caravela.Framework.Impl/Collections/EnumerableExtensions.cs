@@ -31,10 +31,8 @@ namespace Caravela.Framework.Impl.Collections
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>( this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this  IEnumerable<TItem> enumerable, Func<TItem, TKey> getKey,
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable, Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue )
          => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue );
-
-
     }
 }

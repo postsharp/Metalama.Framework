@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.TestApp.Aspects;
-using System;
+﻿using System;
 using System.Threading;
+using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
@@ -54,9 +54,14 @@ namespace Caravela.Framework.TestApp
             Cancellable1( cts.Token );
         }
 
-        [CancelAspect] private static void Cancellable0() { }
-        [CancelAspect] private static void Cancellable1( CancellationToken ct ) { }
-        [CancelAspect] private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
+        [CancelAspect]
+        private static void Cancellable0() { }
+
+        [CancelAspect]
+        private static void Cancellable1( CancellationToken ct ) { }
+
+        [CancelAspect]
+        private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
 
     [CountMethodsAspect]

@@ -1,6 +1,4 @@
-﻿using Caravela.Framework.Code;
-
-namespace Caravela.Framework.Advices
+﻿namespace Caravela.Framework.Advices
 {
     public enum IntroductionScope
     {
@@ -8,12 +6,5 @@ namespace Caravela.Framework.Advices
         Instance,
         Static,
         Target
-    }
-
-
-
-    public interface IIntroduceMethodAdvice : IIntroduceAdvice<INamedType, IMethodBuilder>
-    {
-        
     }
 }

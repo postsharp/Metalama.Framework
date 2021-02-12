@@ -1,4 +1,3 @@
-using Caravela.Framework.Code;
 using System.Collections.Immutable;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;

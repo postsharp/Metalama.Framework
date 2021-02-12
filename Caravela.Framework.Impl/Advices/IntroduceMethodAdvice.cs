@@ -1,5 +1,5 @@
-﻿using Caravela.Framework.Advices;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -11,6 +11,7 @@ namespace Caravela.Framework.Impl.Advices
     internal sealed class IntroduceIntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
         private readonly MethodTransformationBuilder _methodTransformationBuilder;
+
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IMethod TemplateMethod { get; }
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.Advices
         public IntroduceIntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
-            
+
             // TODO: Set name and all properties from the template.
             this._methodTransformationBuilder = new MethodTransformationBuilder( targetDeclaration, templateMethod, templateMethod.Name );
         }

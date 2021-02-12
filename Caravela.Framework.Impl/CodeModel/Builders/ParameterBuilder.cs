@@ -1,24 +1,21 @@
 // unset
 
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
     {
         private bool _hasDefaultValue;
-       private object? _defaultValue;
+        private object? _defaultValue;
 
         public RefKind RefKind { get; }
 
         public IType Type { get; set; }
 
         public string? Name { get; }
-    
+
         public int Index { get; }
 
         public OptionalValue DefaultValue { get; set; }

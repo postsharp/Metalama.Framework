@@ -40,21 +40,19 @@ namespace Caravela.Framework.Impl
                 var aspectTypeFactory = new AspectTypeFactory( driverFactory );
                 var aspectPartComparer = new AspectPartComparer();
 
-            
                 var aspectParts = GetAspectTypes( compilation )
                     .Select( at => aspectTypeFactory.GetAspectType( at ) )
                     .SelectMany( at => at.Parts )
                     .OrderBy( x => x, aspectPartComparer )
                     .ToList();
-                
-                var pipelineStageResult = new PipelineStageResult( 
-                    roslynCompilation, 
-                    Array.Empty<Diagnostic>(), 
-                    Array.Empty<ResourceDescription>(), 
+
+                var pipelineStageResult = new PipelineStageResult(
+                    roslynCompilation,
+                    Array.Empty<Diagnostic>(),
+                    Array.Empty<ResourceDescription>(),
                     Array.Empty<IAspectSource>(),
                     aspectParts );
 
-                    
                 var stages = aspectParts
                     .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
                     .Select( g => CreateStage( g.Key, g, compilation, compileTimeAssemblyLoader ) );
@@ -144,7 +142,6 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-
         private static PipelineStage CreateStage( object groupKey, IEnumerable<AspectPart> partsData, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch ( groupKey )
@@ -164,6 +161,5 @@ namespace Caravela.Framework.Impl
                     throw new NotSupportedException();
             }
         }
-
     }
 }

@@ -1,11 +1,8 @@
 // unset
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -38,7 +35,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override ICodeElement? ContainingElement { get; }
 
-        
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
         public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template ) : base()
@@ -46,7 +42,6 @@ namespace Caravela.Framework.Impl.Transformations
             this.ContainingElement = containingMethod;
             this._template = template;
         }
-
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {

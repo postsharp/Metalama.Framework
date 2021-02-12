@@ -1,8 +1,6 @@
-﻿using Caravela.Framework.Collections;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Collections;
 using Caravela.Framework.Project;
-
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code
@@ -18,13 +16,11 @@ namespace Caravela.Framework.Code
         IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
         IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
-        
-        ITypeFactory TypeFactory { get; }
-        
-        IReadOnlyList<IManagedResource> ManagedResources { get; }
-        
-        IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
 
-      
+        ITypeFactory TypeFactory { get; }
+
+        IReadOnlyList<IManagedResource> ManagedResources { get; }
+
+        IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
     }
 }

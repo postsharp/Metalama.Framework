@@ -1,8 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using Caravela.Framework.Advices;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {

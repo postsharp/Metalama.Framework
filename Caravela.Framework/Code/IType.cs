@@ -19,6 +19,5 @@ namespace Caravela.Framework.Code
 
         // TODO: Define Is(string)
         // TODO: Define Equals
-
     }
 }
