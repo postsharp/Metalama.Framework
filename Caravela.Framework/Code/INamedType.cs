@@ -92,6 +92,10 @@ namespace Caravela.Framework.Code
         /// type, and not constructors.
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
+        
+        IReadOnlyList<IConstructor> InstanceConstructors { get; }
+        
+        IConstructor? StaticConstructor { get; }
 
         bool IsPartial { get; }
 
