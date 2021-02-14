@@ -1,7 +1,7 @@
 ﻿using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class DynamicType : RoslynType<IDynamicTypeSymbol>, IDynamicType
     {

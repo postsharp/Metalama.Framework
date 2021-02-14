@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -8,7 +9,7 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 
-    internal sealed class IntroduceIntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
+    internal sealed class IntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
         private readonly MethodBuilder _methodBuilder;
 
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public IMethod TemplateMethod { get; }
 
-        public IntroduceIntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
+        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
 

@@ -1,11 +1,11 @@
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization.Reflection
 {
     internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CaravelaParameterInfo>
     {

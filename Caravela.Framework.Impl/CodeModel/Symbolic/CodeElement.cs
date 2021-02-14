@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal abstract class CodeElement : ICodeElement, IHasLocation
     {

@@ -3,9 +3,10 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class ManagedResourceBuilder : INonObservableTransformation
     {
@@ -28,7 +29,5 @@ namespace Caravela.Framework.Impl.Transformations
         public bool IsReadOnly => true;
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotSupportedException();
-
-        public SyntaxTree TargetSyntaxTree => null;
     }
 }

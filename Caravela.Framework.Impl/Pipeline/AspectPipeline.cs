@@ -6,28 +6,47 @@ using System.IO;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Pipeline
 {
 
+    /// <summary>
+    /// The base class for the main process of Caravela.
+    /// </summary>
     internal abstract class AspectPipeline : IDisposable
     {
-        public IReadOnlyList<AspectPart> AspectParts { get;}
+        /// <summary>
+        /// Gets the list of <see cref="AspectPart"/> in the pipeline. This list is fixed for the whole pipeline.
+        /// It is based on the aspects found in the project and its dependencies.
+        /// </summary>
+        public IReadOnlyList<AspectPart> AspectParts { get; }
 
-        public IReadOnlyList<PipelineStage> Stages { get;}
+        /// <summary>
+        /// Gets the list of stages of the pipeline. A stage is a group of transformations that do not require (within the group)
+        /// to modify the Roslyn compilation.
+        /// </summary>
+        public IReadOnlyList<PipelineStage> Stages { get; }
 
-        public IAspectPipelineContext Context { get;  }
+        /// <summary>
+        /// Gets the context object passed by the caller when instantiating the pipeline.
+        /// </summary>
+        public IAspectPipelineContext Context { get; }
 
+        /// <summary>
+        /// Gets the pipeline options.
+        /// </summary>
         public IAspectPipelineOptions PipelineOptions { get; }
 
+        // TODO: move to service provider?
         protected CompileTimeAssemblyBuilder CompileTimeAssemblyBuilder { get; }
 
-        protected CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get;  }
+        // TODO: move to service provider?
+        protected CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; }
 
         protected AspectPipeline( IAspectPipelineContext context, IAspectPipelineOptions options )
         {
@@ -63,6 +82,11 @@ namespace Caravela.Framework.Impl
                 .ToImmutableArray();
         }
 
+        /// <summary>
+        /// Handles an exception thrown in the pipeline.
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="context"></param>
         protected static void HandleException( Exception exception, IAspectPipelineContext context )
         {
             switch ( exception )
@@ -75,12 +99,9 @@ namespace Caravela.Framework.Impl
 
                     break;
 
-
                 case CaravelaException caravelaException:
                     context.ReportDiagnostic( caravelaException.Diagnostic );
                     break;
-
-
 
                 default:
                     var guid = Guid.NewGuid();
@@ -100,8 +121,12 @@ namespace Caravela.Framework.Impl
             }
         }
 
-
-        protected bool TryExecute(  out PipelineStageResult pipelineStageResult )
+        /// <summary>
+        /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
+        /// </summary>
+        /// <param name="pipelineStageResult"></param>
+        /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
+        protected bool TryExecute( out PipelineStageResult pipelineStageResult )
         {
             pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this.AspectParts );
 
@@ -140,7 +165,13 @@ namespace Caravela.Framework.Impl
                 _ => throw new NotSupportedException()
             };
 
-        protected abstract AdviceWeaverStage CreateAdviceWeaverStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
+        /// <summary>
+        /// Creates an instance of <see cref="HighLevelAspectsPipelineStage"/>.
+        /// </summary>
+        /// <param name="parts"></param>
+        /// <param name="compileTimeAssemblyLoader"></param>
+        /// <returns></returns>
+        protected abstract HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
 
         private PipelineStage CreateStage( object groupKey, IReadOnlyList<AspectPart> parts, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
@@ -150,11 +181,11 @@ namespace Caravela.Framework.Impl
 
                     var partData = parts.Single();
 
-                    return new AspectWeaverStage( weaver, compilation.GetTypeByReflectionName( partData.AspectType.Name )! );
+                    return new LowLevelAspectsPipelineStage( weaver, compilation.GetTypeByReflectionName( partData.AspectType.Name )! );
 
                 case nameof( AspectDriver ):
 
-                    return this.CreateAdviceWeaverStage( parts, compileTimeAssemblyLoader );
+                    return this.CreateStage( parts, compileTimeAssemblyLoader );
 
                 default:
 
@@ -162,6 +193,7 @@ namespace Caravela.Framework.Impl
             }
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             this.CompileTimeAssemblyLoader.Dispose();

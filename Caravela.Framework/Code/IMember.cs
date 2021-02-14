@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
         /// Gets the member name.
         /// </summary>
         string Name { get; }
-        
+
         bool IsAbstract { get; }
 
         /// <summary>
@@ -25,13 +25,13 @@ namespace Caravela.Framework.Code
         bool IsVirtual { get; }
 
         bool IsSealed { get; }
-        
+
         bool IsReadOnly { get; }
-        
+
         bool IsOverride { get; }
-        
+
         bool IsNew { get; }
-        
+
         bool IsAsync { get; }
 
         /// <summary>
@@ -39,7 +39,5 @@ namespace Caravela.Framework.Code
         /// within a type (which should not happen in C#).
         /// </summary>
         INamedType DeclaringType { get; }
-
-        
     }
 }

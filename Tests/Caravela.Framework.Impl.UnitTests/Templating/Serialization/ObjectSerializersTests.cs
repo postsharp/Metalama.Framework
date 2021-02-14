@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Impl.Templating.Serialization;
+using Caravela.Framework.Impl.Serialization;
 using EnumSpace;
 using Microsoft.CodeAnalysis;
 using Xunit;

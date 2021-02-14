@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.Serialization
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class DictionarySerializer : ObjectSerializer
     {

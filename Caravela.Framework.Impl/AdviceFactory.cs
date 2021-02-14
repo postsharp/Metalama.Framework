@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
 
-        private readonly List<IAdvice> _advices = new ();
+        private readonly List<IAdvice> _advices = new();
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl
         {
             // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
-            var advice = new IntroduceIntroduceMethodAdvice( this._aspect, targetType, templateMethod );
+            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod );
             this._advices.Add( advice );
 
             return advice;

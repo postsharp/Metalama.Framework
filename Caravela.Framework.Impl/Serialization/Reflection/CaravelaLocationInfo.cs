@@ -1,8 +1,8 @@
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 
-namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization.Reflection
 {
     internal class CaravelaLocationInfo : LocationInfo
     {

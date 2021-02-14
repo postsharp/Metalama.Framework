@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using Caravela.Framework.Code;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal abstract class ReturnParameter : IParameter
     {
-    
+
         protected abstract Microsoft.CodeAnalysis.RefKind SymbolRefKind { get; }
 
         public RefKind RefKind => this.SymbolRefKind.ToOurRefKind();

@@ -4,7 +4,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal abstract class RoslynType<T> : ITypeInternal
         where T : ITypeSymbol

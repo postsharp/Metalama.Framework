@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the method return type.
         /// </summary>
-        IType ReturnType { get; }
+        IType? ReturnType { get; }
 
         /// <summary>
         /// Gets the list of local functions declared by the current method.

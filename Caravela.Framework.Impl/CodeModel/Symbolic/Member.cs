@@ -1,14 +1,13 @@
 // unset
 
 using System;
+using System.Linq;
 using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal abstract class Member : CodeElement, IMember
     {
@@ -33,8 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public abstract bool IsAsync { get; }
-        
-        
+
         public bool IsAbstract => this.Symbol.IsAbstract;
 
         public bool IsStatic => this.Symbol.IsStatic;
@@ -61,7 +59,6 @@ namespace Caravela.Framework.Impl.CodeModel
         };
 
         public string Name => this.Symbol.Name;
-
 
         // Note that in case of local methods, the ContainingElement is the member even if it is exposed as a member.
         // Whether we should expose local methods as methods is questionable anyway.

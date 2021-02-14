@@ -1,11 +1,14 @@
-﻿using Caravela.Framework.Impl.CompileTime;
-using System;
-using System.Diagnostics.CodeAnalysis;
-using Microsoft.CodeAnalysis;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using Caravela.Framework.Impl.CompileTime;
+using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// The implementation of <see cref="AspectPipeline"/> used at compile time.
+    /// </summary>
     internal class CompileTimeAspectPipeline : AspectPipeline
     {
         private CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context, new Options() )
@@ -19,12 +22,11 @@ namespace Caravela.Framework.Impl
 
                 var pipeline = new CompileTimeAspectPipeline( context );
 
-                if ( !pipeline.TryExecute( out var result ))
+                if ( !pipeline.TryExecute( out var result ) )
                 {
                     outputCompilation = null;
                     return false;
                 }
-
 
                 foreach ( var resource in result.Resources )
                 {
@@ -44,7 +46,6 @@ namespace Caravela.Framework.Impl
 
                 outputCompilation = pipeline.CompileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
                 return true;
-
             }
             catch ( Exception exception )
             {
@@ -57,11 +58,9 @@ namespace Caravela.Framework.Impl
         private class Options : IAspectPipelineOptions
         {
             public bool CanTransformCompilation => true;
-
-            public bool CanAddSyntaxTrees => false;
         }
 
-        protected override AdviceWeaverStage CreateAdviceWeaverStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader ) 
-            =>new CompileTimeAdviceWeaverStage( parts, compileTimeAssemblyLoader );
+        protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+            => new CompileTimeHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader );
     }
 }

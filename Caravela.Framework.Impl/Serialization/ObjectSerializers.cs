@@ -2,12 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
+using Caravela.Framework.Impl.Serialization.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.Serialization
+namespace Caravela.Framework.Impl.Serialization
 {
     /// <summary>
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class

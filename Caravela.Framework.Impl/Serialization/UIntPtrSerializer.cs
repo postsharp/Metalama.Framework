@@ -2,7 +2,7 @@ using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Templating.Serialization
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class UIntPtrSerializer : TypedObjectSerializer<UIntPtr>
     {

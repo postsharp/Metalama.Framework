@@ -4,10 +4,12 @@ using System.Threading;
 using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
+    /// </summary>
     [Transformer]
     internal sealed class AspectPipelineTransformer : ISourceTransformer
     {
@@ -36,8 +38,6 @@ namespace Caravela.Framework.Impl
             public CSharpCompilation Compilation => (CSharpCompilation) this._transformerContext.Compilation;
 
             public ImmutableArray<object> Plugins => this._transformerContext.Plugins;
-
-            public AnalyzerConfigOptions GlobalOptions => this._transformerContext.GlobalOptions;
 
             public IList<ResourceDescription> ManifestResources => this._transformerContext.ManifestResources;
 

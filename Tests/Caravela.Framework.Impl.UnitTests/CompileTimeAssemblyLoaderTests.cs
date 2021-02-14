@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Xunit;
 

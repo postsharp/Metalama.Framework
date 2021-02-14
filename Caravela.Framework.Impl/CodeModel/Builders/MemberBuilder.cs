@@ -3,16 +3,17 @@
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
     {
         protected Advice ParentAdvice { get; }
-        
+
         public bool IsSealed { get; set; }
 
         public bool IsOverride { get; set; }

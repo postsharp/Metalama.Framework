@@ -77,7 +77,7 @@ class C
             var type = compilation.DeclaredTypes.Single();
             Assert.Equal( "C", type.Name );
 
-            var methods = type.Methods.OrderBy( m=>m.Name ).ToList();
+            var methods = type.Methods.OrderBy( m => m.Name ).ToList();
 
             Assert.Equal( 2, methods.Count );
 

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -18,21 +18,17 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            if ( SourceGeneratorAspectPipeline.TryExecute( new AspectPipelineContext( context ) , out var additionalSyntaxTrees) )
+            if ( SourceGeneratorAspectPipeline.TryExecute( new AspectPipelineContext( context ), out var additionalSyntaxTrees ) )
             {
                 foreach ( var additionalSyntaxTree in additionalSyntaxTrees )
                 {
                     context.AddSource( additionalSyntaxTree.Key, additionalSyntaxTree.Value.GetText() );
                 }
             }
-            
-
-
         }
 
         void ISourceGenerator.Initialize( GeneratorInitializationContext context )
         {
-            
         }
 
         private class AspectPipelineContext : IAspectPipelineContext
@@ -56,7 +52,6 @@ namespace Caravela.Framework.Impl.DesignTime
             public CancellationToken CancellationToken => this._generatorContext.CancellationToken;
 
             public void ReportDiagnostic( Diagnostic diagnostic ) => this._generatorContext.ReportDiagnostic( diagnostic );
-            
         }
     }
 }

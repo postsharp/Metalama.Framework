@@ -95,7 +95,6 @@ namespace Caravela.Framework.Code
 
         bool IsPartial { get; }
 
-
         /// <summary>
         /// Makes a generic instance of the current generic type definition.
         /// </summary>

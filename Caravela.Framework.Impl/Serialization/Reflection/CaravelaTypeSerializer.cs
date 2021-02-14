@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization.Reflection
 {
     internal class CaravelaTypeSerializer : TypedObjectSerializer<CaravelaType>
     {

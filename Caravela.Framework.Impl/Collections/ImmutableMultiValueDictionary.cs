@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Collections
             this._dictionary = dictionary;
         }
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new ( ImmutableDictionary<TKey, Group>.Empty );
+        public static ImmutableMultiValueDictionary<TKey, TValue> Empty => new( ImmutableDictionary<TKey, Group>.Empty );
 
         public static ImmutableMultiValueDictionary<TKey, TValue> Create( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
             => Create( source, getKey, v => v );

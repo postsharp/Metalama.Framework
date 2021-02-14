@@ -7,19 +7,23 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Pipeline
 {
-    internal sealed class AspectWeaverStage : PipelineStage
+    /// <summary>
+    /// A <see cref="PipelineStage"/> that has a single aspect backed by a low-level <see cref="IAspectWeaver"/>.
+    /// </summary>
+    internal sealed class LowLevelAspectsPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
         private readonly INamedType _aspectType;
 
-        public AspectWeaverStage( IAspectWeaver aspectWeaver, INamedType aspectType )
+        public LowLevelAspectsPipelineStage( IAspectWeaver aspectWeaver, INamedType aspectType )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
         }
 
+        /// <inheritdoc/>
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
             var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();

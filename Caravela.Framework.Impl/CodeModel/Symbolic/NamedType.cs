@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
     {
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     return false;
                 }
-                
+
                 return ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Modifiers.Any( m => m.Kind() == SyntaxKind.PartialKeyword );
             }
         }

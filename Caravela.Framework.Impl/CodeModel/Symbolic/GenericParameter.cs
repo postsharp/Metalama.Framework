@@ -4,7 +4,7 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class GenericParameter : CodeElement, IGenericParameter, ITypeInternal
     {

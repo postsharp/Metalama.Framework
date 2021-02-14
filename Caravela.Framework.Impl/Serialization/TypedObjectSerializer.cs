@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Templating.Serialization
+namespace Caravela.Framework.Impl.Serialization
 {
     /// <summary>
     /// As <see cref="ObjectSerializer"/>, except strongly-typed.

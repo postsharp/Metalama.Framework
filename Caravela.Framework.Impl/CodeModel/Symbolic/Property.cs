@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal sealed class Property : Member, IProperty
     {
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.GetMethod( this._symbol.SetMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Property;
-        
+
         public object Value
         {
             get => new PropertyInvocation<Property>( this ).Value;

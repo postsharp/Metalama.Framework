@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -7,12 +8,11 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class Method : Member, IMethod
     {
@@ -106,7 +106,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType?.IsOpenGeneric == true;
 
-
         public object Invoke( object? instance, params object[] args ) => new MethodInvocation( this ).Invoke( instance, args );
 
         public bool HasBase => true;
@@ -119,9 +118,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
-
-
-
 
         private readonly struct MethodInvocation : IMethodInvocation
         {

@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 
@@ -107,8 +106,6 @@ namespace Caravela.TestFramework
             public CancellationToken CancellationToken => CancellationToken.None;
 
             public IConfigOptions Options => this;
-
-            
 
             public void ReportDiagnostic( Diagnostic diagnostic )
             {

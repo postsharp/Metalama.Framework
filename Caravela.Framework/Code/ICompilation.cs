@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code
 
         IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
-        IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace { get; }
+        IReadOnlyMultiValueDictionary<string, INamedType> DeclaredTypesByNamespace { get; }
 
         ITypeFactory TypeFactory { get; }
 

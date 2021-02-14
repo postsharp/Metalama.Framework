@@ -2,18 +2,12 @@
 
 using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
     {
-        private bool _hasDefaultValue;
-        private object? _defaultValue;
-
         public RefKind RefKind { get; }
 
         public IType Type { get; set; }
@@ -46,16 +40,14 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        internal ParameterSyntax ToDeclarationSyntax(  )
+        internal ParameterSyntax ToDeclarationSyntax()
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
             return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
                 this.Name,
                 syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                 this.DefaultValue.ToExpressionSyntax( this.Compilation ),
-                this.RefKind.ToRoslynRefKind());
+                this.RefKind.ToRoslynRefKind() );
         }
     }
-    
-    
 }

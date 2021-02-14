@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class CodeElementBuilder : ICodeElementBuilder
     {
-        
+
         public abstract ICodeElement? ContainingElement { get; }
 
         IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;

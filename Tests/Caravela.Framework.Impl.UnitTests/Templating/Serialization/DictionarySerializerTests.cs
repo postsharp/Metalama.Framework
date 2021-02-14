@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Caravela.Framework.Impl.Templating.Serialization;
+using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Xunit;
 

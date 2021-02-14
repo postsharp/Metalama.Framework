@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder
     {
@@ -49,7 +49,5 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
-
-        
     }
 }

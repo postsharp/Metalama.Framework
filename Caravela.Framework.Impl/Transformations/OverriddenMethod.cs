@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Templating;
@@ -33,13 +32,13 @@ namespace Caravela.Framework.Impl.Transformations
 
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            var newMethodBody = new TemplateDriver( 
+            var newMethodBody = new TemplateDriver(
                 this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) )
                 .ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
 
             // TODO: other method kinds (constructors).
             MethodDeclarationSyntax originalSyntax = null; //(MethodDeclarationSyntax) ((ISyn) this.OverridenDeclaration).GetSyntaxNode();
-            
+
             var overrides = new[] {
                 new IntroducedMember(
                 SyntaxFactory.MethodDeclaration(

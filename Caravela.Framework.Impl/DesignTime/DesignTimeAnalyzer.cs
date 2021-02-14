@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -26,9 +24,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override void Initialize( AnalysisContext analysisContext )
         {
-          
         }
-
-
     }
 }

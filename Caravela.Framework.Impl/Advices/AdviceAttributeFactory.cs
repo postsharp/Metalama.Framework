@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
 
-            bool TryGetNamedArgument<TArg>( string name, out TArg value )
+            bool TryGetNamedArgument<TArg>( string name, [NotNullWhen( true )] out TArg? value )
             {
                 if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue != null )
                 {
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.Advices
                     return new OverrideMethodAdvice( aspect, (IMethod) declaration, (IMethod) templateMethod );
                 case nameof( IntroduceMethodAttribute ):
                     {
-                        var advice = new IntroduceIntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod );
+                        var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod );
 
                         if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
                         {

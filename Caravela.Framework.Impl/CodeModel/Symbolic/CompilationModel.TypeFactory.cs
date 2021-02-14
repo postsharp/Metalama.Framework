@@ -4,20 +4,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating.Serialization;
+using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal partial class CompilationModel
     {
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
-        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new ();
-        
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
+
         public ObjectSerializers Serializers { get; } = new();
         public SyntaxGenerator SyntaxGenerator { get; }
-
 
         public IType? GetTypeByReflectionType( Type type )
         {

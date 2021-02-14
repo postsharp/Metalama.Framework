@@ -7,7 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class CompilationAspectSource : IAspectSource
     {

@@ -2,7 +2,7 @@ using System.Reflection;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization.Reflection
 {
     internal class CaravelaParameterInfo : ParameterInfo
     {

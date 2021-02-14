@@ -11,7 +11,7 @@ namespace Caravela.UnitTestFramework
 {
     public static class TestResultAsserts
     {
-        public static void AssertNoErrors( this TestResult testResult)
+        public static void AssertNoErrors( this TestResult testResult )
         {
             Assert.Null( testResult.ErrorMessage );
             Assert.Null( testResult.Exception );
@@ -38,7 +38,7 @@ namespace Caravela.UnitTestFramework
             AssertSourceEqual( expectedTransformedSource.Trim(), regionText, actualOutputPath );
         }
 
-        private static void AssertSourceEqual(string expected, string? actual, string? actualOutputPath = null )
+        private static void AssertSourceEqual( string expected, string? actual, string? actualOutputPath = null )
         {
             try
             {

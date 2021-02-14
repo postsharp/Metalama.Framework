@@ -2,18 +2,16 @@
 
 using System;
 using System.Collections.Generic;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
     {
@@ -51,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        IType IMethod.ReturnType => this.ReturnParameter?.Type;
+        IType? IMethod.ReturnType => this.ReturnParameter?.Type;
 
         public ParameterBuilder? ReturnParameter { get; }
 
@@ -71,7 +69,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
-        
+
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         bool IMethod.HasBase => throw new NotImplementedException();
@@ -93,13 +91,11 @@ namespace Caravela.Framework.Impl.Transformations
         public override IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
-            
-            
 
             var method = (MethodDeclarationSyntax)
-                syntaxGenerator.MethodDeclaration( 
+                syntaxGenerator.MethodDeclaration(
                     this.Name,
-                    this._parameters.Select( p => p.ToDeclarationSyntax() ), 
+                    this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
                     syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(), this.ToDeclarationModifiers() );
@@ -108,6 +104,7 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
     }
 }

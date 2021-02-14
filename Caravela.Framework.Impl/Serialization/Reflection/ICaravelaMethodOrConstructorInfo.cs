@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Templating.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization.Reflection
 {
     internal interface ICaravelaMethodOrConstructorInfo
     {
