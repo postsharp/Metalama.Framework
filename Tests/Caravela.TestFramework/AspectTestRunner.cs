@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
@@ -10,6 +11,7 @@ using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 
@@ -44,11 +46,11 @@ namespace Caravela.TestFramework
 
             try
             {
-                var aspectPipeline = new ImmutableAspectPipeline();
-                var resultCompilation = aspectPipeline.Execute( new AspectTestPipelineContext( initialCompilation, result ) );
-
-                result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
-                result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
+                if ( CompileTimeAspectPipeline.TryExecute( new AspectTestPipelineContext( initialCompilation, result ), out var resultCompilation ) )
+                {
+                    result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
+                    result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
+                }
 
                 return result;
             }
@@ -85,28 +87,38 @@ namespace Caravela.TestFramework
             result.Diagnostics.AddRange( diagnostics );
         }
 
-        private class AspectTestPipelineContext : IAspectPipelineContext
+        private class AspectTestPipelineContext : IAspectPipelineContext, IConfigOptions
         {
             private readonly TestResult _testResult;
 
-            public AspectTestPipelineContext( Compilation compilation, TestResult testResult )
+            public AspectTestPipelineContext( CSharpCompilation compilation, TestResult testResult )
             {
                 this.Compilation = compilation;
                 this._testResult = testResult;
                 this.ManifestResources = new List<ResourceDescription>();
             }
 
-            public Compilation Compilation { get; }
+            public CSharpCompilation Compilation { get; }
 
             public ImmutableArray<object> Plugins => ImmutableArray<object>.Empty;
 
             public IList<ResourceDescription> ManifestResources { get; }
 
-            public bool GetOptionsFlag( string flagName ) => false;
+            public CancellationToken CancellationToken => CancellationToken.None;
+
+            public IConfigOptions Options => this;
+
+            
 
             public void ReportDiagnostic( Diagnostic diagnostic )
             {
                 this._testResult.Diagnostics.Add( diagnostic );
+            }
+
+            public bool TryGetValue( string name, out string? value )
+            {
+                value = null;
+                return false;
             }
         }
     }

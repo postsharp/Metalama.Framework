@@ -57,5 +57,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasBase => true;
 
         public IPropertyInvocation Base => new PropertyInvocation<Field>( this ).Base;
+
+        public override bool IsReadOnly => this._symbol.IsReadOnly;
+
+        public override bool IsAsync => false;
     }
 }

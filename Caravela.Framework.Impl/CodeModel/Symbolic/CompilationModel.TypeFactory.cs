@@ -4,7 +4,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Templating.Serialization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -12,6 +14,10 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
         private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new ();
+        
+        public ObjectSerializers Serializers { get; } = new();
+        public SyntaxGenerator SyntaxGenerator { get; }
+
 
         public IType? GetTypeByReflectionType( Type type )
         {

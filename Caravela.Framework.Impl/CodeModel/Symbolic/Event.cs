@@ -28,5 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.GetMethod( this._symbol.RaiseMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
+
+        public override bool IsReadOnly => false;
+
+        public override bool IsAsync => false;
     }
 }

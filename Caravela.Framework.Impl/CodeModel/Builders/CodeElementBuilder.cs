@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     internal abstract class CodeElementBuilder : ICodeElementBuilder
     {
-
+        
         public abstract ICodeElement? ContainingElement { get; }
 
         IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
@@ -15,7 +16,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract CodeElementKind ElementKind { get; }
 
-        public ICompilation Compilation => this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        ICompilation ICodeElement.Compilation => this.Compilation;
+
+        public CompilationModel Compilation => (CompilationModel) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 

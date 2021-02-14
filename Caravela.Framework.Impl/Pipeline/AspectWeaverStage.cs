@@ -11,18 +11,18 @@ namespace Caravela.Framework.Impl
 {
     internal sealed class AspectWeaverStage : PipelineStage
     {
-        private readonly IAspectWeaver aspectWeaver;
-        private readonly INamedType aspectType;
+        private readonly IAspectWeaver _aspectWeaver;
+        private readonly INamedType _aspectType;
 
         public AspectWeaverStage( IAspectWeaver aspectWeaver, INamedType aspectType )
         {
-            this.aspectWeaver = aspectWeaver;
-            this.aspectType = aspectType;
+            this._aspectWeaver = aspectWeaver;
+            this._aspectType = aspectType;
         }
 
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this.aspectType ) ).ToImmutableArray();
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
 
             if ( !aspectInstances.Any() )
             {
@@ -34,26 +34,26 @@ namespace Caravela.Framework.Impl
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext(
-                this.aspectType, aspectInstances, input.Compilation, diagnosticSink, resources.Add );
+                this._aspectType, aspectInstances, input.Compilation, diagnosticSink, resources.Add );
 
             CSharpCompilation newCompilation;
             try
             {
-                newCompilation = this.aspectWeaver.Transform( context );
+                newCompilation = this._aspectWeaver.Transform( context );
             }
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this.aspectType, ex.ToDiagnosticString() ) );
+                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
                 newCompilation,
+                input.AspectParts,
                 input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
-                input.AspectSources,
-                input.AspectParts );
+                input.AspectSources );
         }
 
         private class DiagnosticSink : IDiagnosticSink

@@ -177,5 +177,9 @@ namespace Caravela.Framework.Impl.CodeModel
                     this._method.ReturnType );
             }
         }
+
+        public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
+
+        public override bool IsAsync => this.MethodSymbol.IsAsync;
     }
 }

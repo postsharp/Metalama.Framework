@@ -5,6 +5,8 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
@@ -75,8 +77,22 @@ namespace Caravela.Framework.Impl.CodeModel
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Select( m => this.Compilation.GetMethod( m ) )
-                .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodTransformationBuilder>() )
+                .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodBuilder>() )
                 .ToImmutableArray();
+
+        public bool IsPartial
+        {
+            get
+            {
+                var syntaxReference = this.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+                if ( syntaxReference == null )
+                {
+                    return false;
+                }
+                
+                return ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Modifiers.Any( m => m.Kind() == SyntaxKind.PartialKeyword );
+            }
+        }
 
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>

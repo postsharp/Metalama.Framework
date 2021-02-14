@@ -2,7 +2,7 @@
 
 namespace Caravela.Framework.Code
 {
-    public enum Visibility
+    public enum Accessibility
     {
         Private,
         ProtectedOrInternal,

@@ -2,7 +2,7 @@ namespace Caravela.Framework.Code
 {
     public interface IMemberBuilder : IMember, ICodeElementBuilder
     {
-        new Visibility Visibility { get; set; }
+        new Accessibility Accessibility { get; set; }
 
         /// <summary>
         /// Gets the member name.

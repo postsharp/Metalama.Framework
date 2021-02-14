@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,13 +13,13 @@ namespace Caravela.Framework.Impl.Transformations
 
     internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction
     {
-        public IAdvice Advice { get; }
+        public Advice Advice { get; }
 
         public IMethod OverridenDeclaration { get; }
 
         public IMethod TemplateMethod { get; }
 
-        public OverriddenMethod( IAdvice advice, IMethod overriddenDeclaration, IMethod templateMethod )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
         {
             this.Advice = advice;
             this.TemplateMethod = templateMethod;
@@ -53,7 +54,7 @@ namespace Caravela.Framework.Impl.Transformations
                     newMethodBody,
                     null,
                     originalSyntax.SemicolonToken),
-                this.AspectPart, IntroducedMemberSemantic.MethodOverride )
+                this.Advice.AspectPartId, IntroducedMemberSemantic.MethodOverride )
             };
 
             return overrides;

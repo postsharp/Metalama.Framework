@@ -3,15 +3,20 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
+using System.Collections.Immutable;
+using System.Linq;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal sealed class MethodTransformationBuilder : MemberTransformationBuilder, IMethodBuilder
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
     {
-
         private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
 
         private readonly List<GenericParameterBuilder> _genericParameters = new List<GenericParameterBuilder>();
@@ -58,14 +63,15 @@ namespace Caravela.Framework.Impl.Transformations
 
         IReadOnlyList<IGenericParameter> IMethod.GenericParameters => this._genericParameters;
 
-        IReadOnlyList<IType> IMethod.GenericArguments => throw new NotImplementedException();
+        IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
 
-        bool IMethod.IsOpenGeneric => throw new NotImplementedException();
+        bool IMethod.IsOpenGeneric => true;
 
         public IReadOnlyList<IMethod> LocalFunctions => Array.Empty<IMethod>();
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
+        
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         bool IMethod.HasBase => throw new NotImplementedException();
@@ -74,8 +80,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodTransformationBuilder( INamedType targetType, IMethod templateMethod, string name )
-            : base( targetType )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
+            : base( parentAdvice, targetType )
         {
             this.Name = name;
         }
@@ -84,7 +90,22 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers() => throw new NotImplementedException();
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers()
+        {
+            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            
+            
+
+            var method = (MethodDeclarationSyntax)
+                syntaxGenerator.MethodDeclaration( 
+                    this.Name,
+                    this._parameters.Select( p => p.ToDeclarationSyntax() ), 
+                    this._genericParameters.Select( p => p.Name ),
+                    syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ),
+                    this.Accessibility.ToRoslynAccessibility(), this.ToDeclarationModifiers() );
+
+            return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
+        }
 
         public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();

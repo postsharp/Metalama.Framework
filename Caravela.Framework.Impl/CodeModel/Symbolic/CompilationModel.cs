@@ -78,7 +78,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType => this._allAttributesByType;
 
-        internal SyntaxGenerator SyntaxGenerator { get; }
         
         internal CSharpCompilation RoslynCompilation { get; }
 

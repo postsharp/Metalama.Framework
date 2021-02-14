@@ -60,9 +60,9 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Visibility>( nameof( IntroduceMethodAttribute.Visibility ), out var visibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Visibility ), out var visibility ) )
                         {
-                            advice.Builder.Visibility = visibility;
+                            advice.Builder.Accessibility = visibility;
                         }
 
                         return advice;

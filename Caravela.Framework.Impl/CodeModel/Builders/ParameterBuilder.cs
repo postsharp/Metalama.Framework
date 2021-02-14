@@ -2,6 +2,10 @@
 
 using System;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -41,5 +45,17 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
+
+        internal ParameterSyntax ToDeclarationSyntax(  )
+        {
+            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
+                this.Name,
+                syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                this.DefaultValue.ToExpressionSyntax( this.Compilation ),
+                this.RefKind.ToRoslynRefKind());
+        }
     }
+    
+    
 }

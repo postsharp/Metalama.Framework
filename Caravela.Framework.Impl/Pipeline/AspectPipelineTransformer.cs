@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
 using Caravela.Compiler;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Caravela.Framework.Impl
@@ -11,7 +13,14 @@ namespace Caravela.Framework.Impl
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            return new ImmutableAspectPipeline().Execute( new AspectPipelineContext( transformerContext ) );
+            if ( CompileTimeAspectPipeline.TryExecute( new AspectPipelineContext( transformerContext ), out var compilation ) )
+            {
+                return compilation;
+            }
+            else
+            {
+                return transformerContext.Compilation;
+            }
         }
 
         private class AspectPipelineContext : IAspectPipelineContext
@@ -21,9 +30,10 @@ namespace Caravela.Framework.Impl
             public AspectPipelineContext( TransformerContext transformerContext )
             {
                 this._transformerContext = transformerContext;
+                this.Options = new AnalyzerConfigOptionsAdapter( this._transformerContext.GlobalOptions );
             }
 
-            public Compilation Compilation => this._transformerContext.Compilation;
+            public CSharpCompilation Compilation => (CSharpCompilation) this._transformerContext.Compilation;
 
             public ImmutableArray<object> Plugins => this._transformerContext.Plugins;
 
@@ -31,15 +41,11 @@ namespace Caravela.Framework.Impl
 
             public IList<ResourceDescription> ManifestResources => this._transformerContext.ManifestResources;
 
-            public bool GetOptionsFlag( string flagName ) =>
-                this._transformerContext.GlobalOptions.TryGetValue( $"build_property.{flagName}", out var flagString ) &&
-                bool.TryParse( flagString, out var flagValue ) &&
-                flagValue;
+            public IConfigOptions Options { get; }
 
-            public void ReportDiagnostic( Diagnostic diagnostic )
-            {
-                this._transformerContext.ReportDiagnostic( diagnostic );
-            }
+            public CancellationToken CancellationToken => CancellationToken.None;
+
+            public void ReportDiagnostic( Diagnostic diagnostic ) => this._transformerContext.ReportDiagnostic( diagnostic );
         }
     }
 }

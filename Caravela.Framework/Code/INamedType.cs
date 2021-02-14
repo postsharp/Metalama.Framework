@@ -92,7 +92,9 @@ namespace Caravela.Framework.Code
         /// type, and not constructors.
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
-        
+
+        bool IsPartial { get; }
+
 
         /// <summary>
         /// Makes a generic instance of the current generic type definition.

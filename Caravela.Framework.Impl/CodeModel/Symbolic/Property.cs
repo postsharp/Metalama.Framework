@@ -19,13 +19,13 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
-        public RefKind RefKind => ReturnParameter.MapRefKind( this._symbol.RefKind );
+        public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
         public bool IsByRef => this.RefKind != RefKind.None;
 
         public bool IsRef => this.RefKind == RefKind.Ref;
 
-        public bool IsRefReadonly => this.RefKind == RefKind.RefReadonly;
+        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
 
         [Memo]
         public IType Type => this.Compilation.GetIType( this._symbol.Type );
@@ -62,5 +62,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPropertyInvocation Base => new PropertyInvocation<Property>( this ).Base;
 
         public override string ToString() => this._symbol.ToString();
+
+        public override bool IsReadOnly => this._symbol.IsReadOnly;
+
+        public override bool IsAsync => false;
     }
 }

@@ -49,5 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
+
+        
     }
 }

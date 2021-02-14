@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Caravela.Framework.Code;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.Advices;
@@ -7,6 +8,15 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
+
+    internal record AspectPartId( string AspectType, string? PartName )
+    {
+        public AspectPartId( INamedType aspectType, string? partName ) : this( aspectType.FullName, partName )
+        {
+            
+        }
+    }
+    
     internal class AspectPart
     {
         public AspectType AspectType { get; }
