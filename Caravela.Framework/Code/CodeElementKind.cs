@@ -49,6 +49,7 @@ namespace Caravela.Framework.Code
         GenericParameter,
 
         Attribute,
-        Resource
+        Resource,
+        Constructor
     }
 }

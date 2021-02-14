@@ -3,29 +3,21 @@ using System.Collections.Generic;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represents a method.
+    /// Represents a method, but not a constructor.
     /// </summary>
-    public interface IMethod : IMember, IMethodInvocation
+    public interface IMethod : IMethodBase, IMethodInvocation
     {
         /// <summary>
         /// Gets an object representing the method return type and custom attributes, or  <c>null</c> for methods that don't have return types: constructors and finalizers.
         /// </summary>
-        IParameter? ReturnParameter { get; }
+        IParameter ReturnParameter { get; }
 
         /// <summary>
         /// Gets the method return type.
         /// </summary>
-        IType? ReturnType { get; }
+        IType ReturnType { get; }
 
-        /// <summary>
-        /// Gets the list of local functions declared by the current method.
-        /// </summary>
-        IReadOnlyList<IMethod> LocalFunctions { get; }
-
-        /// <summary>
-        /// Gets the list of parameters of the current method.
-        /// </summary>
-        IReadOnlyList<IParameter> Parameters { get; }
+  
 
         /// <summary>
         /// Gets the generic parameters of the current method.
@@ -42,11 +34,7 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsOpenGeneric { get; }
 
-        /// <summary>
-        /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
-        /// </summary>
-        MethodKind MethodKind { get; }
-
+    
         /// <summary>
         /// Used for generic invocations. It returns an IMethod, not an IMethodInvocation, because
         /// it may be useful to evaluate the bound return and parameter types.

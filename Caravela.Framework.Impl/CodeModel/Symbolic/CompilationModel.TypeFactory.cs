@@ -14,6 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
         private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
+        private readonly ConcurrentDictionary<IMethodSymbol, IConstructor> _constructorCache = new();
 
         public ObjectSerializers Serializers { get; } = new();
         public SyntaxGenerator SyntaxGenerator { get; }
@@ -68,6 +69,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         internal IMethod GetMethod( IMethodSymbol methodSymbol )
             => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this ) );
+
+        internal IConstructor GetConstructor( IMethodSymbol methodSymbol )
+            => this._constructorCache.GetOrAdd( methodSymbol, ms => new Constructor( ms, this ) );
 
         internal ICodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
             symbol switch

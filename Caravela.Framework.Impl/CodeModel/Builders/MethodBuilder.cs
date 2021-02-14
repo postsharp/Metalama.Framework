@@ -55,9 +55,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameter? IMethod.ReturnParameter => this.ReturnParameter;
 
-        IReadOnlyList<IMethod> IMethod.LocalFunctions => this.LocalFunctions;
+        IReadOnlyList<IMethod> IMethodBase.LocalFunctions => this.LocalFunctions;
 
-        IReadOnlyList<IParameter> IMethod.Parameters => this._parameters;
+        IReadOnlyList<IParameter> IMethodBase.Parameters => this._parameters;
 
         IReadOnlyList<IGenericParameter> IMethod.GenericParameters => this._genericParameters;
 

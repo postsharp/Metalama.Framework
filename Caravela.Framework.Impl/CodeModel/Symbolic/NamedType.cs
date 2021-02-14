@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
@@ -76,9 +77,28 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             => this.TypeSymbol
                 .GetMembers()
                 .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind != MethodKind.Constructor )
                 .Select( m => this.Compilation.GetMethod( m ) )
                 .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodBuilder>() )
                 .ToImmutableArray();
+
+        [Memo]
+        public IReadOnlyList<IConstructor> InstanceConstructors
+            => this.TypeSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind == MethodKind.Constructor && !m.IsStatic )
+                .Select( m => this.Compilation.GetConstructor( m ) )
+                .ToImmutableArray();
+
+        [Memo]
+        public IConstructor? StaticConstructor
+            => this.TypeSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind == MethodKind.Constructor && m.IsStatic )
+                .Select( m => this.Compilation.GetConstructor( m ) )
+                .SingleOrDefault();
 
         public bool IsPartial
         {
