@@ -20,10 +20,11 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         {
         }
 
-        [Memo] public IParameter? ReturnParameter => ((IMethod) this).MethodKind is MethodKind.Constructor ? null : new MethodReturnParameter( this );
+        [Memo]
+        public IParameter ReturnParameter => new MethodReturnParameter( this );
 
-        [Memo] public IType ReturnType => this.Compilation.GetIType( this.MethodSymbol.ReturnType );
-
+        [Memo]
+        public IType ReturnType => this.Compilation.GetIType( this.MethodSymbol.ReturnType );
      
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>
