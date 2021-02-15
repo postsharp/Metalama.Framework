@@ -19,9 +19,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         [Obsolete( "Call a method with ITemplateExpansionContext parameter instead." )]
-        public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation )
+        public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation, IProceedImpl proceedImpl )
         {
-            return this.ExpandDeclaration( new TemplateDriverExpansionContext( templateInstance, targetMethod, compilation ) );
+            return this.ExpandDeclaration( new TemplateDriverExpansionContext( templateInstance, targetMethod, compilation, proceedImpl ) );
         }
 
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )

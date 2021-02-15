@@ -20,52 +20,55 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public Advice Advice { get; }
 
-        public IMethod OverridenDeclaration { get; }
+        public IMethod OverriddenDeclaration { get; }
 
         public IMethod TemplateMethod { get; }
 
         public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
         {
             this.Advice = advice;
-            this.OverridenDeclaration = overriddenDeclaration;
+            this.OverriddenDeclaration = overriddenDeclaration;
             this.TemplateMethod = templateMethod;
         }
 
         // TODO: Temporary
         public SyntaxTree TargetSyntaxTree =>
-            this.OverridenDeclaration is ISyntaxTreeTransformation introduction
+            this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
             ? introduction.TargetSyntaxTree
             :
-            ((NamedType) this.OverridenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+            ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
             // TODO: Emit a method named __OriginalName__AspectShortName_
             string methodName =
                 this.Advice.PartName != null
-                ? $"__OriginalName__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
-                : $"__OriginalName__{this.Advice.Aspect.Aspect.GetType().Name}";
+                ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
+                : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
 
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             var newMethodBody = new TemplateDriver(
                 this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                .ExpandDeclaration( this.Advice.Aspect.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
+                .ExpandDeclaration(
+                    this.Advice.Aspect.Aspect,
+                    this.OverriddenDeclaration,
+                    this.OverriddenDeclaration.Compilation,
+                    new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ) );
 
             var overrides = new[] {
                 new IntroducedMember(
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    this.OverridenDeclaration.GetSyntaxModifiers(),
-                    this.OverridenDeclaration.GetSyntaxReturnType(),
+                    this.OverriddenDeclaration.GetSyntaxModifiers(),
+                    this.OverriddenDeclaration.GetSyntaxReturnType(),
                     null,
-                    Identifier( methodName ), // TODO: The name is temporary.
-                    this.OverridenDeclaration.GetSyntaxTypeParameterList(),
-                    this.OverridenDeclaration.GetSyntaxParameterList(),
-                    this.OverridenDeclaration.GetSyntaxConstraintClauses(),
+                    Identifier( methodName ),
+                    this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
+                    this.OverriddenDeclaration.GetSyntaxParameterList(),
+                    this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
                     newMethodBody,
-                    null,
-                    Token(SyntaxKind.SemicolonToken)),
+                    null),
                 this.Advice.AspectPartId,
                 IntroducedMemberSemantic.MethodOverride )
             };
@@ -73,7 +76,7 @@ namespace Caravela.Framework.Impl.Transformations
             return overrides;
         }
 
-        public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverridenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
+        public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
 
         
         private class ProceedToNext : IProceedImpl

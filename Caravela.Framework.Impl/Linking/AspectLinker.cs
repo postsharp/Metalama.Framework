@@ -47,7 +47,6 @@ namespace Caravela.Framework.Impl.Linking
             // Second pass. Count references to modified methods.
             Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
             List<(AspectPart AspectPart, int Version)> aspectParts = new();
-            aspectParts.Add( (null, 0) );
             aspectParts.AddRange( this._input.OrderedAspectParts.Select( ( ar, i ) => (ar, i + 1) ) );
 
             foreach ( var syntaxTree in newSyntaxTrees )
@@ -76,7 +75,12 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     // Increment the usage count.
-                    var symbol = resultingCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode ).Symbol.AssertNotNull();
+                    var symbolInfo = resultingCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
+
+                    if ( symbolInfo.Symbol == null )
+                        continue;
+
+                    var symbol = symbolInfo.Symbol.AssertNotNull();
                     var symbolVersion = (symbol, targetVersion);
 
                     if ( referenceCounts.TryGetValue( symbolVersion, out var count ) )
@@ -101,7 +105,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
             private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
-            private Dictionary<ISymbol, List<IntroducedMember>> _overridenSymbols = new();
+            private Dictionary<ISymbol, List<IntroducedMember>> _overriddenSymbols = new();
 
             public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions ) : base()
             {
