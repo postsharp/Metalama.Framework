@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public override ICodeElement ContainingElement => this.Compilation.GetNamedTypeOrMethod( this._typeSymbol.ContainingSymbol );
+        public override ICodeElement ContainingElement => this.Compilation.GetCodeElement( this._typeSymbol.ContainingSymbol );
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 

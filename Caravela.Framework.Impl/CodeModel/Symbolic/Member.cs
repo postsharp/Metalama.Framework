@@ -60,10 +60,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public string Name => this.Symbol.Name;
 
-        // Note that in case of local methods, the ContainingElement is the member even if it is exposed as a member.
-        // Whether we should expose local methods as methods is questionable anyway.
-        public sealed override ICodeElement? ContainingElement => this.Compilation.GetNamedTypeOrMethod( this.Symbol.ContainingSymbol );
-
         INamedType IMember.DeclaringType => this.DeclaringType;
     }
 }

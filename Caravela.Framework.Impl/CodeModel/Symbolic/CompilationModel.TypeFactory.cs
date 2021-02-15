@@ -73,9 +73,10 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         internal IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => this._constructorCache.GetOrAdd( methodSymbol, ms => new Constructor( ms, this ) );
 
-        internal ICodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
+        internal ICodeElement GetCodeElement( ISymbol symbol ) =>
             symbol switch
             {
+                INamespaceSymbol ns => this,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method => this.GetMethod( method ),
                 _ => throw new ArgumentException( nameof( symbol ) )

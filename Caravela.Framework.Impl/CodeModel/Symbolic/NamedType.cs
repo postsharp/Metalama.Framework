@@ -13,7 +13,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
+    internal sealed class NamedType : Member, INamedType, ITypeInternal
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
@@ -36,11 +36,11 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
-        public bool IsAbstract => this.TypeSymbol.IsAbstract;
 
-        public bool IsSealed => this.TypeSymbol.IsSealed;
+        public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
-        public bool IsStatic => this.TypeSymbol.IsStatic;
+        public override bool IsAsync => false;
+        
 
         public bool HasDefaultConstructor =>
             this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
