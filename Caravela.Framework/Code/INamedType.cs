@@ -93,7 +93,7 @@ namespace Caravela.Framework.Code
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
         
-        IReadOnlyList<IConstructor> InstanceConstructors { get; }
+        IReadOnlyList<IConstructor> Constructors { get; }
         
         IConstructor? StaticConstructor { get; }
 

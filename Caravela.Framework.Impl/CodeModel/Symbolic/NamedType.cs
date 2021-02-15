@@ -77,17 +77,17 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             => this.TypeSymbol
                 .GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where( m => m.MethodKind != MethodKind.Constructor )
+                .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
                 .Select( m => this.Compilation.GetMethod( m ) )
                 .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodBuilder>() )
                 .ToImmutableArray();
 
         [Memo]
-        public IReadOnlyList<IConstructor> InstanceConstructors
+        public IReadOnlyList<IConstructor> Constructors
             => this.TypeSymbol
                 .GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where( m => m.MethodKind == MethodKind.Constructor && !m.IsStatic )
+                .Where( m => m.MethodKind == MethodKind.Constructor )
                 .Select( m => this.Compilation.GetConstructor( m ) )
                 .ToImmutableArray();
 
@@ -96,7 +96,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             => this.TypeSymbol
                 .GetMembers()
                 .OfType<IMethodSymbol>()
-                .Where( m => m.MethodKind == MethodKind.Constructor && m.IsStatic )
+                .Where( m => m.MethodKind == MethodKind.StaticConstructor )
                 .Select( m => this.Compilation.GetConstructor( m ) )
                 .SingleOrDefault();
 

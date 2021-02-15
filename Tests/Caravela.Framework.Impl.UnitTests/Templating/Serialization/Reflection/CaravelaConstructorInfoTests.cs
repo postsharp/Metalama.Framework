@@ -59,9 +59,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var namedTypes = compilation.DeclaredTypes;
             var type = namedTypes.Single( t => t.Name == "Target" );
-            var methods = type.Methods;
-            var single = methods.Single( m => m.Name == ".ctor" );
-            var p = (single as Method)!;
+            var methods = type.Constructors;
+            var single = methods.Single();
+            var p = (single as Constructor)!;
             var actual = new CaravelaConstructorInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaConstructorInfo( p ) ).ToString();
             return actual;
         }
