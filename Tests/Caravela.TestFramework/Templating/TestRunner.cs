@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -116,7 +117,7 @@ namespace Caravela.TestFramework.Templating
                 var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" )!;
                 var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
 
-                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );
+                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation, new ProceedInvokeMethod(targetCaravelaMethod) );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
                 result.TransformedTargetSource = formattedOutput.GetText();

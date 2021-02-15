@@ -1,6 +1,7 @@
 ﻿using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -28,13 +29,16 @@ namespace Caravela.Framework.Impl.Transformations
 
         public static TypeSyntax GetSyntaxReturnType( this IMethod method )
         {
-            return ParseTypeName( method.ReturnType.ToDisplayString() );
+            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( method.ReturnType.GetSymbol() );
         }
 
-        public static TypeParameterListSyntax GetSyntaxTypeParameterList( this IMethod method )
+        public static TypeParameterListSyntax? GetSyntaxTypeParameterList( this IMethod method )
         {
             // TODO: generics
-            return TypeParameterList();
+            return
+                method.GenericParameters.Count > 0
+                ? throw new NotImplementedException()
+                : null;
         }
 
         public static ParameterListSyntax GetSyntaxParameterList( this IMethod method )

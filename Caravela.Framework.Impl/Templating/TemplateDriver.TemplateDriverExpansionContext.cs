@@ -16,12 +16,12 @@ namespace Caravela.Framework.Impl.Templating
         {
             private readonly IMethod _targetMethod;
 
-            public TemplateDriverExpansionContext( object templateInstance, IMethod targetMethod, ICompilation compilation )
+            public TemplateDriverExpansionContext( object templateInstance, IMethod targetMethod, ICompilation compilation, IProceedImpl proceedImpl )
             {
                 this.TemplateInstance = templateInstance;
                 this._targetMethod = targetMethod;
                 this.Compilation = compilation;
-                this.ProceedImplementation = new ProceedInvokeMethod( targetMethod );
+                this.ProceedImplementation = proceedImpl;
                 this.CurrentLexicalScope = new TemplateDriverLexicalScope( this, (IMethodInternal) targetMethod );
             }
 

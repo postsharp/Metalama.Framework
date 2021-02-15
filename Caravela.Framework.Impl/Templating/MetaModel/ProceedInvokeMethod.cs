@@ -2,8 +2,11 @@
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Linking;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -11,25 +14,26 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class ProceedInvokeMethod : IProceedImpl
     {
-        private readonly IMethod _method;
+        private readonly IMethod _originalDeclaration;
+        private readonly AspectPartId? _aspectPartId;
 
-        public ProceedInvokeMethod( IMethod method )
+        public ProceedInvokeMethod( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
         {
-            this._method = method;
+            this._originalDeclaration = originalDeclaration;
+            this._aspectPartId = aspectPartId;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-
-            if ( this._method.ReturnType.Is( typeof( void ) ) )
+            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
             {
                 // TODO: Add the namespace.
                 return IdentifierName( nameof( __Void ) );
             }
             else
             {
-                // TODO: Generate the syntax.
-                throw new NotImplementedException();
+                // TODO: Introduced types?
+                return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._originalDeclaration.ReturnType).Symbol );
             }
         }
 
@@ -47,31 +51,48 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            // Emit `return <original_method_call>`.
-            return
-                ReturnStatement(
-                    this.CreateOriginalMethodCall()
+            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
+            {
+                // Emit `<original_method_call>; return`.
+                return Block(
+                    ExpressionStatement( this.CreateOriginalMethodCall() ),
+                    ReturnStatement()
                     );
+            }
+            else
+            {
+                // Emit `return <original_method_call>`.
+                return
+                    ReturnStatement(
+                        this.CreateOriginalMethodCall()
+                        );
+            }
         }
 
         private InvocationExpressionSyntax CreateOriginalMethodCall()
         {
             // Emit `OriginalMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
             // TODO: generics, static methods, consider explicit interfaces and other special methods.
-            return 
+            var invocation =
                 InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName( this._method.Name )
-                                ),
-                            ArgumentList(
-                                SeparatedList(
-                                    this._method.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
-                                    )
-                                )
+                    !this._originalDeclaration.IsStatic
+                    ? MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this._originalDeclaration.Name )
                             )
-                .AddLinkerAnnotation( new LinkerAnnotation( "TODO", null, LinkerAnnotationOrder.Default ) );
+                    : IdentifierName( this._originalDeclaration.Name ),
+                    ArgumentList(
+                        SeparatedList(
+                            this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
+                            )
+                        )
+                    );
+
+            if (this._aspectPartId != null)
+                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
+
+            return invocation;
         }
 
         // The following commented logic should move to the aspect linker.
