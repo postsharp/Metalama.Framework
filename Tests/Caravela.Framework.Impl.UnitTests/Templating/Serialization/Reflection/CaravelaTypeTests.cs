@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
+using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 

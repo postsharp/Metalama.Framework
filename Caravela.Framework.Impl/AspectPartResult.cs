@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -28,12 +28,12 @@ namespace Caravela.Framework.Impl
         /// <param name="compilation"></param>
         /// <param name="loader"></param>
         public AspectPartResult( CompilationModel compilation, CompileTimeAssemblyLoader loader )
-            : this
-            ( compilation,
-                Array.Empty<Diagnostic>(),
-                new[] { new CompilationAspectSource( compilation, loader ) },
+            : this(
+                  compilation,
+                  Array.Empty<Diagnostic>(),
+                  new[] { new CompilationAspectSource( compilation, loader ) },
                   Array.Empty<Advice>(),
-                Array.Empty<INonObservableTransformation>() )
+                  Array.Empty<INonObservableTransformation>() )
         {
         }
 
@@ -65,54 +65,13 @@ namespace Caravela.Framework.Impl
             IReadOnlyList<Advice> additionalAdvices,
             IReadOnlyList<INonObservableTransformation> additionalTransformations )
         {
-            return new (
+            return new(
                 compilation,
                 this.Diagnostics.Concat( additionalDiagnostics ),
                 this.AspectSources.Concat( additionalAspectSources ),
                 this.Advices.Concat( additionalAdvices ),
                 this.Transformations.Concat( additionalTransformations )
                 );
-        }
-    }
-
-    internal static class EnumerableExtensions
-    {
-        public static IReadOnlyList<T> ConcatNotNull<T>( this IReadOnlyList<T> a, T? b )
-        {
-            if ( b == null )
-            {
-                return a;
-            }
-            else if ( a == null || a.Count == 0 )
-            {
-                return new[] { b };
-            }
-            else
-            {
-                var l = new List<T>( a.Count + 1 );
-                l.AddRange( a );
-                l.Add( b );
-                return l;
-            }
-        }
-
-        public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, IReadOnlyList<T>? b )
-        {
-            if ( b == null || b.Count == 0 )
-            {
-                return a;
-            }
-            else if ( a.Count == 0 )
-            {
-                return b;
-            }
-            else
-            {
-                var l = new List<T>( a.Count + b.Count );
-                l.AddRange( a );
-                l.AddRange( b );
-                return l;
-            }
         }
     }
 }

@@ -1,6 +1,6 @@
 namespace Caravela.Framework.Impl.Transformations
 {
-    enum InsertPosition
+    internal enum InsertPosition
     {
         AfterSibling,
         End

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -8,32 +9,32 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Advices
 {
 
-    internal sealed class IntroduceIntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
+    internal sealed class IntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
-        private readonly MethodTransformationBuilder _methodTransformationBuilder;
+        private readonly MethodBuilder _methodBuilder;
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public IMethod TemplateMethod { get; }
 
-        public IntroduceIntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
+        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
 
             // TODO: Set name and all properties from the template.
-            this._methodTransformationBuilder = new MethodTransformationBuilder( targetDeclaration, templateMethod, templateMethod.Name );
+            this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name );
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            var overriddenMethod = new OverriddenMethod( this, this._methodTransformationBuilder, this.TemplateMethod );
+            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod );
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray.Create<IObservableTransformation>( this._methodTransformationBuilder ),
+                ImmutableArray.Create<IObservableTransformation>( this._methodBuilder ),
                 ImmutableArray.Create<INonObservableTransformation>( overriddenMethod ) );
         }
 
-        public IMethodBuilder Builder => this._methodTransformationBuilder;
+        public IMethodBuilder Builder => this._methodBuilder;
     }
 }

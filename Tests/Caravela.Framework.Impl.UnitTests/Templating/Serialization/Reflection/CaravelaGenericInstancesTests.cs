@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Impl.Templating.Serialization;
-using Caravela.Framework.Impl.Templating.Serialization.Reflection;
+using Caravela.Framework.Impl.Serialization;
+using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 

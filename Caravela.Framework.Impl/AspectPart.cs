@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl

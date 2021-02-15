@@ -271,7 +271,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastFromDynamic(
-                                IdentifierName( nameof( IDynamicMetaMember ) ), (ExpressionSyntax) this.Visit( node.Expression ) ) ),
+                                IdentifierName( nameof( IDynamicMetaMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                         IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
                      .AddArgumentListArguments( Argument( LiteralExpression(
                          SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
@@ -289,9 +289,9 @@ namespace Caravela.Framework.Impl.Templating
                 node.ArgumentList.Arguments.Any( ArgumentIsDynamic ) )
             {
                 return node.Update(
-                    (ExpressionSyntax) this.Visit( node.Expression ),
+                    (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( node.ArgumentList.Arguments.Select(
-                        a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a ) ) ) ) );
+                        a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
             }
 
             return base.VisitInvocationExpression( node );
@@ -561,7 +561,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedStatement = this.ToMetaStatement( node.Statement );
                 var transformedElseStatement = node.Else != null ? this.ToMetaStatement( node.Else.Statement ) : null;
-                return IfStatement( 
+                return IfStatement(
                     node.AttributeLists,
                     node.Condition,
                     transformedStatement,

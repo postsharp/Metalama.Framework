@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal sealed class Field : Member, IProperty
     {
@@ -14,7 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public override CodeElementKind ElementKind => CodeElementKind.Field;
 
         protected internal override ISymbol Symbol => this._symbol;
-
 
         public Field( IFieldSymbol symbol, NamedType containingElement ) : base( containingElement.Compilation )
         {
@@ -57,5 +56,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasBase => true;
 
         public IPropertyInvocation Base => new PropertyInvocation<Field>( this ).Base;
+
+        public override bool IsReadOnly => this._symbol.IsReadOnly;
+
+        public override bool IsAsync => false;
     }
 }

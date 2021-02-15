@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
             }
-            catch (TargetInvocationException ex) when (ex.InnerException != null)
+            catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {
                 ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
                 throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );

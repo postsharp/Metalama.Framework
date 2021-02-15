@@ -77,7 +77,7 @@ class C
             var type = compilation.DeclaredTypes.Single();
             Assert.Equal( "C", type.Name );
 
-            var methods = type.Methods.OrderBy( m=>m.Name ).ToList();
+            var methods = type.Methods.OrderBy( m => m.Name ).ToList();
 
             Assert.Equal( 2, methods.Count );
 
@@ -294,7 +294,7 @@ class C
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
-            Assert.Equal( new[] { None, None, Ref, RefReadonly }, refKinds );
+            Assert.Equal( new[] { None, None, Ref, RefReadOnly }, refKinds );
         }
 
         [Fact]
@@ -382,7 +382,7 @@ class C
             var type = Assert.Single( compilation.DeclaredTypes );
 
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
-            Assert.Equal( new RefKind?[] { None, Ref, RefReadonly, null }, type.Methods.Select( m => m.ReturnParameter?.RefKind ) );
+            Assert.Equal( new RefKind?[] { None, Ref, RefReadOnly, null }, type.Methods.Select( m => m.ReturnParameter?.RefKind ) );
         }
 
         [Fact]

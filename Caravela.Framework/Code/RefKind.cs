@@ -10,14 +10,14 @@
         Ref,
 
         /// <summary>
-        /// <c>in</c> input parameter. Synonym of <see cref="RefReadonly"/>.
+        /// <c>in</c> input parameter. Synonym of <see cref="RefReadOnly"/>.
         /// </summary>
         In,
 
         /// <summary>
         /// <c>ref readonly</c> property or return parameter.
         /// </summary>
-        RefReadonly = In,
+        RefReadOnly = In,
 
         /// <summary>
         /// <c>out</c>.

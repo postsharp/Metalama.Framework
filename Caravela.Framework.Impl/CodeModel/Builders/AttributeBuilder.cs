@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : IAttributeBuilder
     {
@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Transformations
             this.Constructor = constructor;
         }
 
-        public List<KeyValuePair<string, object?>> NamedArguments { get; } = new ();
+        public List<KeyValuePair<string, object?>> NamedArguments { get; } = new();
 
         public void AddNamedArgument( string name, object? value ) => throw new NotImplementedException();
 

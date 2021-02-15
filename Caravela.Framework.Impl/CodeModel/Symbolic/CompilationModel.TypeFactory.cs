@@ -4,14 +4,20 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal partial class CompilationModel
     {
-        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new ();
-        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new ();
+        private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
+        private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
+        private readonly ConcurrentDictionary<IMethodSymbol, IConstructor> _constructorCache = new();
+
+        public ObjectSerializers Serializers { get; } = new();
+        public SyntaxGenerator SyntaxGenerator { get; }
 
         public IType? GetTypeByReflectionType( Type type )
         {
@@ -63,6 +69,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal IMethod GetMethod( IMethodSymbol methodSymbol )
             => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this ) );
+
+        internal IConstructor GetConstructor( IMethodSymbol methodSymbol )
+            => this._constructorCache.GetOrAdd( methodSymbol, ms => new Constructor( ms, this ) );
 
         internal ICodeElement GetNamedTypeOrMethod( ISymbol symbol ) =>
             symbol switch

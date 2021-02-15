@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var oldSyntaxTree = syntaxTreeGroup.Key;
 
-                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new ( syntaxTreeGroup.Value );
+                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new( syntaxTreeGroup.Value );
 
                 var newRoot = addIntroducedElementsRewriter.Visit( oldSyntaxTree.GetRoot() );
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
                 {
-                    var linkerAnnotation = referencingNode.GetLinkerAnnotation();
+                    var linkerAnnotation = referencingNode.GetLinkerAnnotation()!;
                     int targetVersion;
 
                     // Determine which version of the semantic is being invoked.
@@ -99,9 +99,9 @@ namespace Caravela.Framework.Impl.Linking
 
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
         {
-            private IReadOnlyList<IMemberIntroduction> _memberIntroductors;
-            private IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
-            private Dictionary<ISymbol, List<IntroducedMember>> OverridenSymbols = new();
+            private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
+            private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
+            private Dictionary<ISymbol, List<IntroducedMember>> _overridenSymbols = new();
 
             public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
             {
@@ -123,7 +123,6 @@ namespace Caravela.Framework.Impl.Linking
                         .ToList();
 
                     members.AddRange( introducedMembers.Select( i => i.Syntax ) );
-
 
                     // TODO: add to OverridenSymbols if the introduction implements IOverridenElement
                 }

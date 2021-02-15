@@ -93,6 +93,11 @@ namespace Caravela.Framework.Code
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
         
+        IReadOnlyList<IConstructor> InstanceConstructors { get; }
+        
+        IConstructor? StaticConstructor { get; }
+
+        bool IsPartial { get; }
 
         /// <summary>
         /// Makes a generic instance of the current generic type definition.

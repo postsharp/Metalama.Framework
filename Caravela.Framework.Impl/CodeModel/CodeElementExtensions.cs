@@ -1,12 +1,16 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Linq;
+using Microsoft.CodeAnalysis.Editing;
+using Accessibility = Caravela.Framework.Code.Accessibility;
+using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -39,8 +43,8 @@ namespace Caravela.Framework.Impl.CodeModel
                 IHasLocation hasLocation => hasLocation.Location,
                 _ => null
             };
-        
-          internal static ExpressionSyntax CastIfNecessary( this CodeElement codeElement, RuntimeExpression expression, IType targetType, bool parenthesize = false )
+
+        internal static ExpressionSyntax CastIfNecessary( this CodeElement codeElement, RuntimeExpression expression, IType targetType, bool parenthesize = false )
         {
             var expressionType = expression.GetTypeSymbol( codeElement.Compilation );
 
@@ -130,6 +134,104 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return codeElement.CastIfNecessary( instanceExpression, codeElement.DeclaringType!, parenthesize: true );
             }
+        }
+
+        internal static ExpressionSyntax? ToExpressionSyntax( this in OptionalValue value, CompilationModel compilation )
+        {
+            if ( value.HasValue )
+            {
+                return compilation.Serializers.SerializeToRoslynCreationExpression( value.Value );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind ) => roslynRefKind switch
+        {
+            Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
+            Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
+            Microsoft.CodeAnalysis.RefKind.RefReadOnly => RefKind.RefReadOnly,
+            _ => throw new InvalidOperationException( $"Roslyn RefKind {roslynRefKind} not recognized here." )
+        };
+
+        internal static Microsoft.CodeAnalysis.RefKind ToRoslynRefKind( this RefKind ourRefKind ) => ourRefKind switch
+        {
+            RefKind.None => Microsoft.CodeAnalysis.RefKind.None,
+            RefKind.Ref => Microsoft.CodeAnalysis.RefKind.Ref,
+            RefKind.RefReadOnly => Microsoft.CodeAnalysis.RefKind.RefReadOnly,
+            _ => throw new InvalidOperationException( $"RefKind {ourRefKind} not recognized." )
+        };
+
+        internal static Accessibility ToOurVisibility( this Microsoft.CodeAnalysis.Accessibility accessibility ) => accessibility switch
+        {
+            Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
+            Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
+            Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.ProtectedAndInternal,
+            Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
+            Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
+            Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedOrInternal,
+            Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        internal static Microsoft.CodeAnalysis.Accessibility ToRoslynAccessibility( this Accessibility accessibility ) => accessibility switch
+        {
+            Accessibility.Private => Microsoft.CodeAnalysis.Accessibility.Private,
+            Accessibility.ProtectedAndInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
+            Accessibility.Protected => Microsoft.CodeAnalysis.Accessibility.Protected,
+            Accessibility.Internal => Microsoft.CodeAnalysis.Accessibility.Internal,
+            Accessibility.ProtectedOrInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
+            Accessibility.Public => Microsoft.CodeAnalysis.Accessibility.Public,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        internal static DeclarationModifiers ToDeclarationModifiers( this IMember member )
+        {
+            var modifiers = DeclarationModifiers.None;
+
+            if ( member.IsAbstract )
+            {
+                modifiers |= DeclarationModifiers.Abstract;
+            }
+
+            if ( member.IsSealed )
+            {
+                modifiers |= DeclarationModifiers.Sealed;
+            }
+
+            if ( member.IsReadOnly )
+            {
+                modifiers |= DeclarationModifiers.ReadOnly;
+            }
+
+            if ( member.IsStatic )
+            {
+                modifiers |= DeclarationModifiers.Static;
+            }
+
+            if ( member.IsVirtual )
+            {
+                modifiers |= DeclarationModifiers.Virtual;
+            }
+
+            if ( member.IsOverride )
+            {
+                modifiers |= DeclarationModifiers.Override;
+            }
+
+            if ( member.IsNew )
+            {
+                modifiers |= DeclarationModifiers.New;
+            }
+
+            if ( member.IsAsync )
+            {
+                modifiers |= DeclarationModifiers.Async;
+            }
+
+            return modifiers;
         }
     }
 }

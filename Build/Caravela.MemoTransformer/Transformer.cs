@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Compiler;
@@ -46,13 +45,13 @@ namespace Caravela.MemoTransformer
 
                 if ( node.ExpressionBody == null )
                 {
-                    this.Diagnostics.Add( Diagnostic.Create( NonExpressionBodyError, node.GetLocation() ) );
+                    this.Diagnostics.Add( Diagnostic.Create( _nonExpressionBodyError, node.GetLocation() ) );
                     return node;
                 }
 
                 if ( node.Modifiers.Any( SyntaxKind.StaticKeyword ) )
                 {
-                    this.Diagnostics.Add( Diagnostic.Create( StaticPropertyError, node.GetLocation() ) );
+                    this.Diagnostics.Add( Diagnostic.Create( _staticPropertyError, node.GetLocation() ) );
                     return node;
                 }
 
@@ -87,7 +86,7 @@ namespace Caravela.MemoTransformer
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 var parentFieldsToAdd = this._fieldsToAdd;
-                this._fieldsToAdd = new ();
+                this._fieldsToAdd = new();
 
                 var result = (ClassDeclarationSyntax) base.VisitClassDeclaration( node )!;
 
@@ -113,7 +112,7 @@ namespace Caravela.MemoTransformer
             }
         }
 
-        private static readonly DiagnosticDescriptor NonExpressionBodyError =
+        private static readonly DiagnosticDescriptor _nonExpressionBodyError =
             new DiagnosticDescriptor(
                 "CMT001",
                 "Only expression-bodied properties are supported.",
@@ -122,7 +121,7 @@ namespace Caravela.MemoTransformer
                 DiagnosticSeverity.Error,
                 true );
 
-        private static readonly DiagnosticDescriptor StaticPropertyError =
+        private static readonly DiagnosticDescriptor _staticPropertyError =
             new DiagnosticDescriptor(
                 "CMT002",
                 "Static properties are not supported.",

@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using static System.Math;
-
-namespace Caravela.Framework.Impl.Reactive
+﻿namespace Caravela.Framework.Impl.Reactive
 {
     /*
     internal class ComputeInheritanceDepthOperator : ReactiveCollectionOperator<INamedType, (INamedType type, int depth)>

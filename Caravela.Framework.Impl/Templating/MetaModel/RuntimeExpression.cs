@@ -1,5 +1,5 @@
 ﻿using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -58,6 +58,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             return null;
         }
 
-        public static implicit operator ExpressionSyntax(RuntimeExpression runtimeExpression) => runtimeExpression.Syntax;
+        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
     }
 }

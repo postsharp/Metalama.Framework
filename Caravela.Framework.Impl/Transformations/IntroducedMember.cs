@@ -19,14 +19,14 @@ namespace Caravela.Framework.Impl.Transformations
         /// <summary>
         /// Gets the <see cref="AspectPart"/> that emitted the current <see cref="IntroducedMember"/>.
         /// </summary>
-        public AspectPart AspectPart { get; }
+        public AspectPartId AspectPart { get; }
 
         /// <summary>
         /// Gets the semantic of the introduced member as supported by the linker.
         /// </summary>
         public IntroducedMemberSemantic Semantic { get; }
 
-        public IntroducedMember( MemberDeclarationSyntax syntax, AspectPart aspectPart, IntroducedMemberSemantic semantic )
+        public IntroducedMember( MemberDeclarationSyntax syntax, AspectPartId aspectPart, IntroducedMemberSemantic semantic )
         {
             this.Syntax = syntax;
             this.AspectPart = aspectPart;

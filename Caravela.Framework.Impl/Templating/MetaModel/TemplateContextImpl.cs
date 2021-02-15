@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public RefKind RefKind => this._parameter.RefKind;
-        
+
         public bool IsParams => this._parameter.IsParams;
 
         public IType Type => this._parameter.Type;

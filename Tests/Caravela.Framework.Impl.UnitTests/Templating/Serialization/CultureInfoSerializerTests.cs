@@ -1,5 +1,5 @@
 using System.Globalization;
-using Caravela.Framework.Impl.Templating.Serialization;
+using Caravela.Framework.Impl.Serialization;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization

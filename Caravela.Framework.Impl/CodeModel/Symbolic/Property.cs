@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal sealed class Property : Member, IProperty
     {
@@ -19,13 +19,13 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
-        public RefKind RefKind => ReturnParameter.MapRefKind( this._symbol.RefKind );
+        public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
         public bool IsByRef => this.RefKind != RefKind.None;
 
         public bool IsRef => this.RefKind == RefKind.Ref;
 
-        public bool IsRefReadonly => this.RefKind == RefKind.RefReadonly;
+        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
 
         [Memo]
         public IType Type => this.Compilation.GetIType( this._symbol.Type );
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Setter => this._symbol.SetMethod == null ? null : this.Compilation.GetMethod( this._symbol.SetMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Property;
-        
+
         public object Value
         {
             get => new PropertyInvocation<Property>( this ).Value;
@@ -62,5 +62,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IPropertyInvocation Base => new PropertyInvocation<Property>( this ).Base;
 
         public override string ToString() => this._symbol.ToString();
+
+        public override bool IsReadOnly => this._symbol.IsReadOnly;
+
+        public override bool IsAsync => false;
     }
 }

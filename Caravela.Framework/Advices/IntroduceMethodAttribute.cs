@@ -15,7 +15,7 @@ namespace Caravela.Framework.Advices
 
         public bool IsVirtual { get; set; }
 
-        public Visibility? Visibility { get; set; }
+        public Accessibility? Visibility { get; set; }
 
         public bool IsSealed { get; set; }
     }

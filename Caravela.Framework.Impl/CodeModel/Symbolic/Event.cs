@@ -1,7 +1,7 @@
 ﻿using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class Event : Member, IEvent
     {
@@ -28,5 +28,9 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.GetMethod( this._symbol.RaiseMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
+
+        public override bool IsReadOnly => false;
+
+        public override bool IsAsync => false;
     }
 }

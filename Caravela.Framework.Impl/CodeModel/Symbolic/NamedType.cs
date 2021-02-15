@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal sealed class NamedType : CodeElement, INamedType, ITypeInternal
     {
@@ -74,9 +77,42 @@ namespace Caravela.Framework.Impl.CodeModel
             => this.TypeSymbol
                 .GetMembers()
                 .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind != MethodKind.Constructor )
                 .Select( m => this.Compilation.GetMethod( m ) )
-                .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodTransformationBuilder>() )
+                .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodBuilder>() )
                 .ToImmutableArray();
+
+        [Memo]
+        public IReadOnlyList<IConstructor> InstanceConstructors
+            => this.TypeSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind == MethodKind.Constructor && !m.IsStatic )
+                .Select( m => this.Compilation.GetConstructor( m ) )
+                .ToImmutableArray();
+
+        [Memo]
+        public IConstructor? StaticConstructor
+            => this.TypeSymbol
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind == MethodKind.Constructor && m.IsStatic )
+                .Select( m => this.Compilation.GetConstructor( m ) )
+                .SingleOrDefault();
+
+        public bool IsPartial
+        {
+            get
+            {
+                var syntaxReference = this.TypeSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+                if ( syntaxReference == null )
+                {
+                    return false;
+                }
+
+                return ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Modifiers.Any( m => m.Kind() == SyntaxKind.PartialKeyword );
+            }
+        }
 
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>

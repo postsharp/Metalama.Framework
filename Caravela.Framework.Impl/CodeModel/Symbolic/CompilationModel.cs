@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Collections;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Editing;
-using System.Collections.Immutable;
-using System.Linq;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal partial class CompilationModel : ICompilation, ITypeFactory
     {
@@ -75,29 +73,22 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations => this._transformations;
 
-
         public IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType => this._allAttributesByType;
 
-        internal SyntaxGenerator SyntaxGenerator { get; }
-        
         internal CSharpCompilation RoslynCompilation { get; }
 
         [Memo]
-        public IReadOnlyMultiValueDictionary<string?, INamedType> DeclaredTypesByNamespace
-            => this.DeclaredTypes.ToMultiValueDictionary( t => t.Namespace, t => t );
+        public IReadOnlyMultiValueDictionary<string, INamedType> DeclaredTypesByNamespace
+            => this.DeclaredTypes.ToMultiValueDictionary( t => t.Namespace ?? string.Empty, t => t );
 
         ITypeFactory ICompilation.TypeFactory => this;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-    
         ICodeElement? ICodeElement.ContainingElement => null;
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
-
-    
-    
     }
 }

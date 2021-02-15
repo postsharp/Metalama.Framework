@@ -2,19 +2,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.Transformations
+namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodTransformationBuilder : MemberTransformationBuilder, IMethodBuilder, IMethodInternal
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
     {
-
         private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
 
         private readonly List<GenericParameterBuilder> _genericParameters = new List<GenericParameterBuilder>();
@@ -49,26 +51,27 @@ namespace Caravela.Framework.Impl.Transformations
             }
         }
 
-        IType IMethod.ReturnType => this.ReturnParameter?.Type;
+        IType? IMethod.ReturnType => this.ReturnParameter?.Type;
 
         public ParameterBuilder? ReturnParameter { get; }
 
         IParameter? IMethod.ReturnParameter => this.ReturnParameter;
 
-        IReadOnlyList<IMethod> IMethod.LocalFunctions => this.LocalFunctions;
+        IReadOnlyList<IMethod> IMethodBase.LocalFunctions => this.LocalFunctions;
 
-        IReadOnlyList<IParameter> IMethod.Parameters => this._parameters;
+        IReadOnlyList<IParameter> IMethodBase.Parameters => this._parameters;
 
         IReadOnlyList<IGenericParameter> IMethod.GenericParameters => this._genericParameters;
 
-        IReadOnlyList<IType> IMethod.GenericArguments => throw new NotImplementedException();
+        IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
 
-        bool IMethod.IsOpenGeneric => throw new NotImplementedException();
+        bool IMethod.IsOpenGeneric => true;
 
         public IReadOnlyList<IMethod> LocalFunctions => Array.Empty<IMethod>();
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
+
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         bool IMethod.HasBase => throw new NotImplementedException();
@@ -77,8 +80,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodTransformationBuilder( INamedType targetType, IMethod templateMethod, string name )
-            : base( targetType )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
+            : base( parentAdvice, targetType )
         {
             this.Name = name;
         }
@@ -87,11 +90,26 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers() => Enumerable.Empty<IntroducedMember>();
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers()
+        {
+            var syntaxGenerator = this.Compilation.SyntaxGenerator;
 
         // TODO: Temporary
         public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
         
+            var method = (MethodDeclarationSyntax)
+                syntaxGenerator.MethodDeclaration(
+                    this.Name,
+                    this._parameters.Select( p => p.ToDeclarationSyntax() ),
+                    this._genericParameters.Select( p => p.Name ),
+                    syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ),
+                    this.Accessibility.ToRoslynAccessibility(), this.ToDeclarationModifiers() );
+
+            return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
+        }
+
+        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public IReadOnlyList<ISymbol> LookupSymbols()

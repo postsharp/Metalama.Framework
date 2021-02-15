@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Collections
                 this.Items = items;
             }
 
-            public Group Add( TValue value ) => new ( this.Key, this.Items.Add( value ) );
+            public Group Add( TValue value ) => new( this.Key, this.Items.Add( value ) );
 
             public TKey Key { get; }
 

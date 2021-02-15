@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Collections
 {
@@ -13,7 +12,7 @@ namespace Caravela.Framework.Impl.Collections
         {
             var recursionCheck = 0;
 
-            HashSet<T> list = new (ReferenceEqualityComparer<T>.Instance);
+            HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
 
             void PopulateDescendants( T c )
             {
@@ -60,10 +59,7 @@ namespace Caravela.Framework.Impl.Collections
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue )
-            where TKey: notnull
+            where TKey : notnull
          => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue );
-
-
-        
     }
 }

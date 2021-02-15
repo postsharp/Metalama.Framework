@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
 
-namespace Caravela.Framework.Impl.CodeModel
+namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class Parameter : CodeElement, IParameter
     {
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string Name => this.ParameterSymbol.Name;
 
         public int Index => this.ParameterSymbol.Ordinal;
-        
+
         public bool IsParams => this.ParameterSymbol.IsParams;
 
         public override ICodeElement ContainingElement => this._containingMember;

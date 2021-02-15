@@ -17,10 +17,13 @@ namespace Caravela.Framework.Impl.Linking
     }
 
     public record LinkerAnnotation(
+
         // Name of the aspect that is adding the semantic invocation to the syntax tree.
         string? AspectTypeName,
+
         // Part of the aspect that is adding the semantic invocation to the syntax tree.
         string? PartName,
+
         // Determines which version of the semantic must be invoked.
         LinkerAnnotationOrder Order )
     {
@@ -37,6 +40,5 @@ namespace Caravela.Framework.Impl.Linking
 
             return new LinkerAnnotation( parts[0], parts[1] == "null" ? null : parts[1], order );
         }
-
     }
 }

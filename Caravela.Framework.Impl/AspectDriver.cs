@@ -7,6 +7,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl
 
         private readonly CompilationModel _compilation;
 
-        private readonly IReadOnlyList<(IAttribute attribute, IMethod method)> _declarativeAdviceAttributes;
+        private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
 
         public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
@@ -56,12 +57,12 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new ( ImmutableList.Create( diagnostic ),
+                return new( ImmutableList.Create( diagnostic ),
                     ImmutableList.Create<IAdvice>(),
                     ImmutableList.Create<IAspectSource>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.attribute, x.method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
