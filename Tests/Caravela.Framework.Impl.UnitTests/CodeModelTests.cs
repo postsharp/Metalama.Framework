@@ -77,11 +77,11 @@ class C
             var type = compilation.DeclaredTypes.Single();
             Assert.Equal( "C", type.Name );
 
-            var methods = type.Methods.OrderBy( m => m.Name ).ToList();
+            var methods = type.Methods;
 
-            Assert.Equal( 2, methods.Count );
+            Assert.Single( methods);
 
-            var method = methods[1];
+            var method = methods[0];
             Assert.Equal( "M", method.Name );
             Assert.Same( type, method.ContainingElement );
 
@@ -325,14 +325,19 @@ class C : IDisposable
             var methodKinds = new[]
             {
                 Default,
-                Constructor, StaticConstructor, Finalizer,
-                PropertyGet, PropertySet,
-                EventAdd, EventRemove,
+                Finalizer,
+                PropertyGet, 
+                PropertySet,
+                EventAdd, 
+                EventRemove,
                 ExplicitInterfaceImplementation,
-                ConversionOperator, UserDefinedOperator
+                ConversionOperator, 
+                UserDefinedOperator
             };
 
             Assert.Equal( methodKinds, type.Methods.Select( m => m.MethodKind ) );
+            Assert.Single( type.Constructors );
+            Assert.NotNull( type.StaticConstructor );
 
             Assert.Equal( LocalFunction, type.Methods.First().LocalFunctions.Single().MethodKind );
         }
@@ -382,7 +387,7 @@ class C
             var type = Assert.Single( compilation.DeclaredTypes );
 
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
-            Assert.Equal( new RefKind?[] { None, Ref, RefReadOnly, null }, type.Methods.Select( m => m.ReturnParameter?.RefKind ) );
+            Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.Select( m => m.ReturnParameter.RefKind ) );
         }
 
         [Fact]

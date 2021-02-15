@@ -88,7 +88,7 @@ class User {
                 Assert.Equal( typeof( float ), m.ReturnType );
                 Assert.Equal( typeof( string ), m.GetParameters()[0].ParameterType );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)" );
-            this.TestSerializable( this._code, instantiatedNested.Method( ".ctor" ), ( ConstructorInfo c ) =>
+            this.TestSerializable( this._code, instantiatedNested.Constructors.Single(), ( ConstructorInfo c ) =>
             {
                 Assert.Equal( typeof( string ), c.DeclaringType!.GenericTypeArguments[0] );
                 Assert.Equal( typeof( float ), c.DeclaringType.GenericTypeArguments[1] );
@@ -123,7 +123,7 @@ class User {
             this.TestExpression<MethodInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }
 
-        private void TestSerializable( string context, IMethod method, Action<ConstructorInfo> withResult, string expectedCode )
+        private void TestSerializable( string context, IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
         {
             this.TestExpression<ConstructorInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaConstructorInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }

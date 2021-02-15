@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
             return new CaravelaMethodInfo( (method as Method)! );
         }
 
-        public static ITypeSymbol? FindDeclaringTypeSymbol( Method method )
+        public static ITypeSymbol? FindDeclaringTypeSymbol( Member method )
         {
             var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
             var typeSymbol = methodDeclaringType.TypeSymbol;
@@ -38,30 +38,30 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
             }
         }
 
-        public override object[] GetCustomAttributes( bool inherit ) => throw new NotImplementedException();
+        public override object[] GetCustomAttributes( bool inherit ) => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw new NotImplementedException();
+        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override bool IsDefined( Type attributeType, bool inherit ) => throw new NotImplementedException();
+        public override bool IsDefined( Type attributeType, bool inherit ) => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override Type DeclaringType => throw new NotImplementedException();
+        public override Type DeclaringType => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override string Name => throw new NotImplementedException();
+        public override string Name => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override Type ReflectedType => throw new NotImplementedException();
+        public override Type ReflectedType => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override MethodImplAttributes GetMethodImplementationFlags() => throw new NotImplementedException();
+        public override MethodImplAttributes GetMethodImplementationFlags() => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override ParameterInfo[] GetParameters() => throw new NotImplementedException();
+        public override ParameterInfo[] GetParameters() => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture ) => throw new NotImplementedException();
+        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture ) => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override MethodAttributes Attributes => throw new NotImplementedException();
+        public override MethodAttributes Attributes => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override RuntimeMethodHandle MethodHandle => throw new NotImplementedException();
+        public override RuntimeMethodHandle MethodHandle => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override MethodInfo GetBaseDefinition() => throw new NotImplementedException();
+        public override MethodInfo GetBaseDefinition() => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
 
-        public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw new NotImplementedException();
+        public override ICustomAttributeProvider ReturnTypeCustomAttributes => throw ReflectionSerializationExceptionHelper.CreateNotSupportedException();
     }
 }

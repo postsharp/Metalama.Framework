@@ -20,12 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         ICompilation ICodeElement.Compilation => this.Compilation;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement => this.Symbol.ContainingSymbol switch
-        {
-            INamedTypeSymbol type => this.Compilation.GetNamedType( type ),
-            IMethodSymbol method => this.Compilation.GetMethod( method ),
-            _ => throw new NotImplementedException()
-        };
+        public virtual ICodeElement? ContainingElement => this.Compilation.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
         public IReadOnlyList<IAttribute> Attributes =>
