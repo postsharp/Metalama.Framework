@@ -463,6 +463,31 @@ class C<T>
         }
 
         [Fact]
+        public void PartialType()
+        {
+            var code = @"
+using System.Collections.Generic;
+
+class A
+{
+}
+
+partial class B
+{
+}
+";
+
+            var compilation = CreateCompilation( code );
+
+            Assert.Equal( 2, compilation.DeclaredTypes.Count );
+            
+            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A").IsPartial );
+            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B").IsPartial );
+
+            
+        }
+
+        [Fact]
         public void WithGenericArguments()
         {
             var code = @"
