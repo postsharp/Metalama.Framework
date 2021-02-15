@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             var newMethodBody = new TemplateDriver(
-                this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ) )
+                this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
                 .ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
 
             var overrides = new[] {
