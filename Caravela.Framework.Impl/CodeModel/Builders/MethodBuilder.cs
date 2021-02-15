@@ -5,18 +5,17 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
     {
         private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
 
@@ -32,11 +31,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotImplementedException();
 
-        IParameterBuilder? IMethodBuilder.ReturnParameter => this.ReturnParameter;
+        IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
 
-        IType? IMethodBuilder.ReturnType
+        IType IMethodBuilder.ReturnType
         {
-            get => this.ReturnParameter?.Type;
+            get => this.ReturnParameter.Type;
             set
             {
                 if ( this.ReturnParameter == null )
@@ -52,11 +51,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             }
         }
 
-        IType? IMethod.ReturnType => this.ReturnParameter?.Type;
+        IType IMethod.ReturnType => this.ReturnParameter.Type;
 
-        public ParameterBuilder? ReturnParameter { get; }
+        public ParameterBuilder ReturnParameter { get; }
 
-        IParameter? IMethod.ReturnParameter => this.ReturnParameter;
+        IParameter IMethod.ReturnParameter => this.ReturnParameter;
 
         IReadOnlyList<IMethod> IMethodBase.LocalFunctions => this.LocalFunctions;
 
@@ -85,6 +84,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType )
         {
             this.Name = name;
+            this.ReturnParameter =
+                new ParameterBuilder(
+                    this,
+                    -1,
+                    null,
+                    this.Compilation.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
+                    RefKind.None );
         }
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
@@ -100,8 +106,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.Name,
                     this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
-                    syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ),
-                    this.Accessibility.ToRoslynAccessibility(), this.ToDeclarationModifiers() );
+                    this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) : null,
+                    this.Accessibility.ToRoslynAccessibility(), 
+                    this.ToDeclarationModifiers() );
             
             return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
@@ -113,7 +120,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
-            //TODO: implement.
+            // TODO: implement.
             return Array.Empty<ISymbol>();
         }
     }

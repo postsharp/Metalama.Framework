@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        public ParameterBuilder( IMethod containingMethod, int index, string name, IType type, RefKind refKind ) : base()
+        public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind ) : base()
         {
             this.ContainingElement = containingMethod;
             this.Index = index;

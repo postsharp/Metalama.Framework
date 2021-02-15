@@ -10,11 +10,11 @@ namespace Caravela.Framework.Code
         /// Gets an object allowing to read and modify the method return type and custom attributes,
         /// or  <c>null</c> for methods that don't have return types: constructors and finalizers.
         /// </remarks>
-        new IParameterBuilder? ReturnParameter { get; }
+        new IParameterBuilder ReturnParameter { get; }
 
         /// <summary>
         /// Gets or sets the method return type.
         /// </summary>
-        new IType? ReturnType { get; set; }
+        new IType ReturnType { get; set; }
     }
 }

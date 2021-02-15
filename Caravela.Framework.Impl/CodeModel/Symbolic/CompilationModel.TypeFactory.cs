@@ -6,6 +6,7 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
@@ -17,7 +18,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         private readonly ConcurrentDictionary<IMethodSymbol, IConstructor> _constructorCache = new();
 
         public ObjectSerializers Serializers { get; } = new();
-        public SyntaxGenerator SyntaxGenerator { get; }
+
+        public SyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
 
         public IType? GetTypeByReflectionType( Type type )
         {
