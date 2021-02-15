@@ -43,14 +43,14 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: Emit a method named __OriginalName__AspectShortName_
             string methodName =
                 this.Advice.PartName != null
-                ? $"__OriginalName__{this.Advice.Aspect.GetType().Name}__{this.Advice.PartName}"
-                : $"__OriginalName__{this.Advice.Aspect.GetType().Name}";
+                ? $"__OriginalName__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
+                : $"__OriginalName__{this.Advice.Aspect.Aspect.GetType().Name}";
 
             // TODO: This is temporary.
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             var newMethodBody = new TemplateDriver(
-                this.Advice.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                .ExpandDeclaration( this.Advice.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
+                this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
+                .ExpandDeclaration( this.Advice.Aspect.Aspect, this.OverridenDeclaration, this.OverridenDeclaration.Compilation );
 
             var overrides = new[] {
                 new IntroducedMember(
