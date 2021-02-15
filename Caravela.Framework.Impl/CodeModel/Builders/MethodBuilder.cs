@@ -12,6 +12,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -100,15 +102,26 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
-            
+
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
                     this.Name,
                     this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
                     this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) : null,
-                    this.Accessibility.ToRoslynAccessibility(), 
-                    this.ToDeclarationModifiers() );
+                    this.Accessibility.ToRoslynAccessibility(),
+                    this.ToDeclarationModifiers(),
+                    !this.ReturnParameter.Type.Is( typeof( void ) )
+                    ? new[] {
+                        ReturnStatement(
+                            LiteralExpression(
+                                SyntaxKind.DefaultLiteralExpression,
+                                Token (SyntaxKind.DefaultKeyword)
+                                )
+                            )
+                    }
+                    : null
+                    );
             
             return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
