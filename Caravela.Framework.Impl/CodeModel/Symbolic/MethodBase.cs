@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 .SelectMany( n => n.DescendantNodes( descendIntoChildren: c => c == n || c is not LocalFunctionStatementSyntax ) )
                 .OfType<LocalFunctionStatementSyntax>()
                 .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
-                .Select( s => this.Compilation.GetMethod( s ) )
+                .Select( s => this.Compilation.Factory.GetMethod( s ) )
                 .ToImmutableArray();
 
         [Memo]

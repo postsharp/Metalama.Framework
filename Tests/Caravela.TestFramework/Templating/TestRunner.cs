@@ -113,7 +113,7 @@ namespace Caravela.TestFramework.Templating
                 var driver = new TemplateDriver( templateMethod );
 
                 var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
-                var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" )!;
+                var targetCaravelaType = caravelaCompilation.Factory.GetTypeByReflectionName( "TargetCode" )!;
                 var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
 
                 var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );

@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private static IEnumerable<INamedType> GetAspectTypes( CompilationModel compilation )
         {
-            var iAspect = compilation.GetTypeByReflectionType( typeof( IAspect ) )!;
+            var iAspect = compilation.Factory.GetTypeByReflectionType( typeof( IAspect ) )!;
 
             return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) );
         }
@@ -181,7 +181,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelAspectsPipelineStage( weaver, compilation.GetTypeByReflectionName( partData.AspectType.Name )! );
+                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )! );
 
                 case nameof( AspectDriver ):
 

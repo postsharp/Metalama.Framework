@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool IsVirtual => this.Symbol.IsVirtual;
 
         [Memo]
-        public NamedType DeclaringType => this.Compilation.GetNamedType( this.Symbol.ContainingType );
+        public NamedType DeclaringType => this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType );
 
         protected Member( CompilationModel compilation ) : base( compilation )
         {

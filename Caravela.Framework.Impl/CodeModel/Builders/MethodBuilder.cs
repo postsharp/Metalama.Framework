@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IMethodBuilder.ReturnType
         {
-            get => this.ReturnParameter.Type;
+            get => this.ReturnParameter.ParameterType;
             set
             {
                 if ( this.ReturnParameter == null )
@@ -47,11 +47,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new ArgumentNullException( nameof( value ) );
                 }
 
-                this.ReturnParameter.Type = value;
+                this.ReturnParameter.ParameterType = value;
             }
         }
 
-        IType IMethod.ReturnType => this.ReturnParameter.Type;
+        IType IMethod.ReturnType => this.ReturnParameter.ParameterType;
 
         public ParameterBuilder ReturnParameter { get; }
 
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this,
                     -1,
                     null,
-                    this.Compilation.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
+                    this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
                     RefKind.None );
         }
 
@@ -106,9 +106,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.Name,
                     this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
-                    this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) : null,
+                    this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) : null,
                     this.Accessibility.ToRoslynAccessibility(), 
-                    this.ToDeclarationModifiers() );
+                    this.ToDeclarationModifiers(),
+                    Array.Empty<StatementSyntax>());
             
             return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }

@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         // TODO: Temporary
         public SyntaxTree TargetSyntaxTree =>
-            this.OverridenDeclaration is ISyntaxTreeIntroduction introduction
+            this.OverridenDeclaration is ISyntaxTreeTransformation introduction
             ? introduction.TargetSyntaxTree
             :
             ((NamedType) this.OverridenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;

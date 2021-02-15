@@ -20,18 +20,15 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public object Value
         {
-            get => this.GetValue(
-                this._property.IsStatic ?
-                    new RuntimeExpression( null!, isNull: true ) :
-                    ((IDynamicMetaMember) (object) TemplateContext.target.This).CreateExpression() );
-            set => throw new NotImplementedException();
+            get => this.GetValue( this._property.IsStatic ? null : new CurrentTypeOrInstanceDynamic( true, this._property.DeclaringType ).CreateExpression() );
+            set => throw new NotSupportedException();
         }
 
-        private ExpressionSyntax CreatePropertyAccess( object instance )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._property );
+                throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
             }
 
             this._property.CheckArguments( this._property.Parameters, Array.Empty<IParameter>() );
@@ -39,22 +36,23 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._property.GetReceiverSyntax( instance ), IdentifierName( this._property.Name ) );
         }
 
-        public object GetValue( object? instance ) => new DynamicMetaMember( this.CreatePropertyAccess( instance! ), this._property.Type );
+        public object GetValue( object? instance ) 
+            => new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) ), this._property.Type, this._property is Field );
 
         public object SetValue( object? instance, object value )
         {
-            var propertyAccess = this.CreatePropertyAccess( instance! );
+            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, ((RuntimeExpression) value).Syntax );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value).Syntax );
 
-            return new DynamicMetaMember( expression, this._property.Type );
+            return new DynamicMember( expression, this._property.Type, false );
         }
 
-        private ExpressionSyntax CreateIndexerAccess( object instance, object[] args )
+        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[] args )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._property );
+                throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
             }
 
             var receiver = this._property.GetReceiverSyntax( instance );
@@ -64,15 +62,16 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             return expression;
         }
 
-        public object GetIndexerValue( object? instance, params object[] args ) => new DynamicMetaMember( this.CreateIndexerAccess( instance!, args ), this._property.Type );
+        public object GetIndexerValue( object? instance, params object[] args ) 
+            => new DynamicMember( this.CreateIndexerAccess( RuntimeExpression.FromDynamic(  instance ), RuntimeExpression.FromDynamic( args )), this._property.Type, false );
 
         public object SetIndexerValue( object? instance, object value, params object[] args )
         {
-            var propertyAccess = this.CreateIndexerAccess( instance!, args );
+            var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, ((RuntimeExpression) value).Syntax );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value ).Syntax );
 
-            return new DynamicMetaMember( expression, this._property.Type );
+            return new DynamicMember( expression, this._property.Type, false );
         }
 
         public bool HasBase => true;

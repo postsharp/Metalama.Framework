@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Transformations
                         p => Parameter(
                             List<AttributeListSyntax>(),
                             TokenList(), // TODO: modifiers
-                            ParseTypeName( p.Type.ToDisplayString() ),
+                            ParseTypeName( p.ParameterType.ToDisplayString() ),
                             Identifier( p.Name! ),
                             null ) ) )
                 );

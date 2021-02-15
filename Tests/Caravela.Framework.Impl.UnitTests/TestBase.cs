@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.UnitTests
             return roslynCompilation;
         }
 
-        public static ICompilation CreateCompilation( string? code )
+        internal static CompilationModel CreateCompilation( string? code )
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 

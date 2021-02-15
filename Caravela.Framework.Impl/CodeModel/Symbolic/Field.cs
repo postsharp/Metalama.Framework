@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool IsRefReadonly => false;
 
         [Memo]
-        public IType Type => this.Compilation.GetIType( this._symbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         IReadOnlyList<IParameter> IProperty.Parameters => ImmutableList<IParameter>.Empty;
 

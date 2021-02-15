@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         };
 
         [Memo]
-        public IType Type => this.Compilation.GetIType( this.ParameterSymbol.Type );
+        public IType ParameterType => this.Compilation.Factory.GetIType( this.ParameterSymbol.Type );
 
         public string Name => this.ParameterSymbol.Name;
 

@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeIntroduction.TargetSyntaxTree => 
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => 
             ( (NamedType)this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
     }
 }

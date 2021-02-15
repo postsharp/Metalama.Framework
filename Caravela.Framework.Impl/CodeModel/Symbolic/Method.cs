@@ -24,11 +24,11 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public IParameter ReturnParameter => new MethodReturnParameter( this );
 
         [Memo]
-        public IType ReturnType => this.Compilation.GetIType( this.MethodSymbol.ReturnType );
+        public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
      
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>
-            this.MethodSymbol.TypeParameters.Select( tp => this.Compilation.GetGenericParameter( tp ) ).ToImmutableArray();
+            this.MethodSymbol.TypeParameters.Select( tp => this.Compilation.Factory.GetGenericParameter( tp ) ).ToImmutableArray();
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
             protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method.MethodSymbol.RefKind;
 
-            public override IType Type => this.Method.ReturnType;
+            public override IType ParameterType => this.Method.ReturnType;
 
             public override bool Equals( ICodeElement other ) => other is MethodReturnParameter methodReturnParameter &&
                                                                  SymbolEqualityComparer.Default.Equals( this.Method.Symbol,
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         [Memo]
         public IReadOnlyList<IType> GenericArguments =>
-            this.MethodSymbol.TypeArguments.Select( this.Compilation.GetIType ).ToImmutableList();
+            this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
 
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType?.IsOpenGeneric == true;
 
@@ -109,41 +109,37 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             {
                 if ( this._method.IsOpenGeneric )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CantAccessOpenGenericMember, this._method );
+                    throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._method );
                 }
 
                 var name = this._method.GenericArguments.Any()
                     ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( this._method.Name,
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : IdentifierName( this._method.Name );
-                var arguments = this._method.GetArguments( this._method.Parameters, args );
+                var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic(  args ) );
 
                 if ( ((IMethod) this._method).MethodKind == MethodKind.LocalFunction )
                 {
-                    if ( this._method.ContainingElement != TemplateContext.target.Method )
+                    var instanceExpression = RuntimeExpression.FromDynamic( instance );
+
+                    if ( instanceExpression != null )
                     {
-                        throw new CaravelaException( GeneralDiagnosticDescriptors.CantInvokeLocalFunctionFromAnotherMethod, this._method,
-                            TemplateContext.target.Method, this._method.ContainingElement );
+                        throw new CaravelaException( GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction, this._method );
                     }
 
-                    var instanceExpression = (RuntimeExpression) instance!;
-
-                    if ( !instanceExpression.IsNull )
-                    {
-                        throw new CaravelaException( GeneralDiagnosticDescriptors.CantProvideInstanceForLocalFunction, this._method );
-                    }
-
-                    return new DynamicMetaMember(
+                    return new DynamicMember(
                         InvocationExpression( name ).AddArgumentListArguments( arguments ),
-                        this._method.ReturnType );
+                        this._method.ReturnType,
+                        false);
                 }
 
-                var receiver = this._method.GetReceiverSyntax( instance! );
+                var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromDynamic( instance! ));
 
-                return new DynamicMetaMember(
+                return new DynamicMember(
                     InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
                         .AddArgumentListArguments( arguments ),
-                    this._method.ReturnType );
+                    this._method.ReturnType,
+                    false);
             }
         }
 

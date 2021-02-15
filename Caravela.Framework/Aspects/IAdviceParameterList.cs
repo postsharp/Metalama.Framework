@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -10,8 +11,15 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     public interface IAdviceParameterList : IReadOnlyList<IAdviceParameter>
     {
-        // IAdviceParameter this[string name] { get; }
+         IAdviceParameter this[string name] { get; }
 
-        // IEnumerable<IAdviceParameter> this[Type type] { get; }
+         IEnumerable<IAdviceParameter> OfType( IType type );
+         
+         IEnumerable<IAdviceParameter> OfType( Type type );
+         
+         dynamic ToArray();
+         
+         dynamic ToValueTuple();
+         
     }
 }

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
 
-        public abstract IType Type { get; }
+        public abstract IType ParameterType { get; }
 
         public string? Name => null;
 

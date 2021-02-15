@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public int Index => this._typeSymbol.Ordinal;
 
         [Memo]
-        public IReadOnlyList<IType> TypeConstraints => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.GetIType( t ) ).ToImmutableArray();
+        public IReadOnlyList<IType> TypeConstraints => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public bool IsCovariant => this._typeSymbol.Variance == VarianceKind.Out;
 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool HasNonNullableValueTypeConstraint => this._typeSymbol.HasValueTypeConstraint;
 
         [Memo]
-        public override ICodeElement ContainingElement => this.Compilation.GetCodeElement( this._typeSymbol.ContainingSymbol );
+        public override ICodeElement ContainingElement => this.Compilation.Factory.GetCodeElement( this._typeSymbol.ContainingSymbol );
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
-        public ITypeFactory TypeFactory => this.Compilation;
+        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
         public override string ToString() => this._typeSymbol.ToString();
     }

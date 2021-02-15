@@ -27,9 +27,9 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var transformations = aspectPartResult.Compilation.ObservableTransformations;
 
-            ImmutableDictionary<string, SyntaxTree>.Builder additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
+            var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 
-            foreach ( IGrouping<ICodeElement, IObservableTransformation> transformationGroup in transformations )
+            foreach ( var transformationGroup in transformations )
             {
                 if ( !(transformationGroup.Key is INamedType declaringType) )
                 {

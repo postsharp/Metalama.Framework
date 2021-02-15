@@ -15,17 +15,17 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         }
 
         [Memo]
-        public INamedType EventType => this.Compilation.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
+        public INamedType EventType => this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this._symbol.Type );
 
         [Memo]
-        public IMethod Adder => this.Compilation.GetMethod( this._symbol.AddMethod! );
+        public IMethod Adder => this.Compilation.Factory.GetMethod( this._symbol.AddMethod! );
 
         [Memo]
-        public IMethod Remover => this.Compilation.GetMethod( this._symbol.RemoveMethod! );
+        public IMethod Remover => this.Compilation.Factory.GetMethod( this._symbol.RemoveMethod! );
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.GetMethod( this._symbol.RaiseMethod );
+        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
 

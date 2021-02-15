@@ -23,8 +23,8 @@ namespace Caravela.Framework.Impl.Linking
             var resultingCompilation = this._input.Compilation;
 
             var transformationsBySyntaxTree =
-                this._input.CompilationModel.ObservableTransformations.Values.OfType<ISyntaxTreeIntroduction>()
-                    .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeIntroduction>() )
+                this._input.CompilationModel.ObservableTransformations.Values.OfType<ISyntaxTreeTransformation>()
+                    .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                     .GroupBy( t => t.TargetSyntaxTree, t => t )
                     .ToDictionary( g => g.Key, g => g );
 
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
             private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
             private Dictionary<ISymbol, List<IntroducedMember>> _overridenSymbols = new();
 
-            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
+            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions ) : base()
             {
                 this._memberIntroductors = introductions.OfType<IMemberIntroduction>().ToList();
                 this._interfaceImplementationIntroductors = introductions.OfType<IInterfaceImplementationIntroduction>().ToList();

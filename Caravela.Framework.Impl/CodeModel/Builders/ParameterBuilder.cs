@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         public RefKind RefKind { get; }
 
-        public IType Type { get; set; }
+        public IType ParameterType { get; set; }
 
         public string? Name { get; }
 
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.ContainingElement = containingMethod;
             this.Index = index;
             this.Name = name;
-            this.Type = type;
+            this.ParameterType = type;
             this.RefKind = refKind;
         }
 
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
             return (ParameterSyntax) syntaxGenerator.ParameterDeclaration(
                 this.Name,
-                syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                syntaxGenerator.TypeExpression( this.ParameterType.GetSymbol() ),
                 this.DefaultValue.ToExpressionSyntax( this.Compilation ),
                 this.RefKind.ToRoslynRefKind() );
         }
