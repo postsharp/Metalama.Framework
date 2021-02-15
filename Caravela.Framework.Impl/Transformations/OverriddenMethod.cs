@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
                     newMethodBody,
                     null,
                     Token(SyntaxKind.SemicolonToken)),
-                this.AspectPart.ToAspectPartId(),
+                this.Advice.AspectPartId,
                 IntroducedMemberSemantic.MethodOverride )
             };
 
@@ -75,8 +75,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverridenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
 
-        public AspectPart AspectPart => throw new NotImplementedException();
-
+        
         private class ProceedToNext : IProceedImpl
         {
             public StatementSyntax CreateAssignStatement( string returnValueLocalName )
