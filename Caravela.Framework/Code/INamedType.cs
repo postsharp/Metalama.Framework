@@ -12,14 +12,10 @@ namespace Caravela.Framework.Code
     /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
     /// </para>
     /// </remarks>
-    public interface INamedType : IType, ICodeElement
+    public interface INamedType : IType, IMember
     {
-
-        bool IsAbstract { get; }
-
-        bool IsSealed { get; }
-
-        bool IsStatic { get; }
+        
+        bool IsPartial { get; }
 
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
@@ -36,11 +32,6 @@ namespace Caravela.Framework.Code
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
         IReadOnlyList<INamedType> ImplementedInterfaces { get; }
-
-        /// <summary>
-        /// Gets the name of the type, but not its namespace.
-        /// </summary>
-        string Name { get; }
 
         /// <summary>
         /// Gets the namespace of the current type.
@@ -96,8 +87,6 @@ namespace Caravela.Framework.Code
         IReadOnlyList<IConstructor> Constructors { get; }
         
         IConstructor? StaticConstructor { get; }
-
-        bool IsPartial { get; }
 
         /// <summary>
         /// Makes a generic instance of the current generic type definition.
