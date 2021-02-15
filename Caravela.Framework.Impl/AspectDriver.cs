@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl
         private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect )
             where T : class, ICodeElement
         {
-            if ( aspect is not IAspect<T> aspectOfT )
+            if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(

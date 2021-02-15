@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl
             }
 
             var advicesInCurrentAspectParts =
-                input.Advices.Concat( addedAdvices ).Where( a => a.Aspect.AspectType.Name == this.AspectType.Name && a.PartName == this.PartName );
+                input.Advices.Concat( addedAdvices ).Where( a => a.Aspect.AspectType.FullName == this.AspectType.Name && a.PartName == this.PartName );
 
             var adviceResults = advicesInCurrentAspectParts
                 .Select( ai => ai.ToResult( input.Compilation ) ).ToList();

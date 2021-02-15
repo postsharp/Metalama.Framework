@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl
             return new (
                 compilation,
                 this.Diagnostics.Concat( additionalDiagnostics ),
-                additionalAspectSources.Concat( additionalAspectSources ),
+                this.AspectSources.Concat( additionalAspectSources ),
                 this.Advices.Concat( additionalAdvices ),
                 this.Transformations.Concat( additionalTransformations )
                 );

@@ -2,14 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal sealed class MethodTransformationBuilder : MemberTransformationBuilder, IMethodBuilder
+    internal sealed class MethodTransformationBuilder : MemberTransformationBuilder, IMethodBuilder, IMethodInternal
     {
 
         private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
@@ -84,9 +87,17 @@ namespace Caravela.Framework.Impl.Transformations
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers() => throw new NotImplementedException();
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers() => Enumerable.Empty<IntroducedMember>();
 
-        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+        // TODO: Temporary
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
+        
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
+
+        public IReadOnlyList<ISymbol> LookupSymbols()
+        {
+            //TODO: implement.
+            return Array.Empty<ISymbol>();
+        }
     }
 }

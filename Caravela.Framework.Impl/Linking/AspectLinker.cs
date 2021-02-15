@@ -38,15 +38,15 @@ namespace Caravela.Framework.Impl.Linking
 
                 var newRoot = addIntroducedElementsRewriter.Visit( oldSyntaxTree.GetRoot() );
 
-                var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newRoot, default );
+                var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newRoot, oldSyntaxTree.Options );
                 newSyntaxTrees.Add( newSyntaxTree );
 
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
             }
 
             // Second pass. Count references to modified methods.
-            Dictionary<(ISymbol symbol, int version), int> referenceCounts = new();
-            List<(AspectPart aspectPart, int version)> aspectParts = new();
+            Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
+            List<(AspectPart AspectPart, int Version)> aspectParts = new();
             aspectParts.Add( (null, 0) );
             aspectParts.AddRange( this._input.OrderedAspectParts.Select( ( ar, i ) => (ar, i + 1) ) );
 
@@ -66,8 +66,8 @@ namespace Caravela.Framework.Impl.Linking
 
                         case LinkerAnnotationOrder.Default: // Next one.
                             var originatingVersion = aspectParts.Where(
-                                    p => p.aspectPart.AspectType.Name == linkerAnnotation.AspectTypeName && p.aspectPart.PartName == linkerAnnotation.PartName )
-                                .Select( p => p.version ).First();
+                                    p => p.AspectPart.AspectType.Name == linkerAnnotation.AspectTypeName && p.AspectPart.PartName == linkerAnnotation.PartName )
+                                .Select( p => p.Version ).First();
                             targetVersion = originatingVersion + 1;
                             break;
 
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.Linking
             // Two things it should do:
             //   1. Replace calls to the vanilla method to the call to the right "override" method.
 
-            return new AdviceLinkerResult( this._input.Compilation, Array.Empty<Diagnostic>() );
+            return new AdviceLinkerResult( resultingCompilation, Array.Empty<Diagnostic>() );
         }
 
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
@@ -111,9 +111,8 @@ namespace Caravela.Framework.Impl.Linking
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-                foreach ( var member in members )
+                foreach ( var member in node.Members )
                 {
                     members.Add( member );
 

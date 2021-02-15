@@ -1,7 +1,9 @@
 // unset
 
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -32,6 +34,8 @@ namespace Caravela.Framework.Impl.Transformations
 
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 
-        SyntaxTree ISyntaxTreeIntroduction.TargetSyntaxTree => throw new System.NotImplementedException();
+        // TODO: This is temporary.
+        SyntaxTree ISyntaxTreeIntroduction.TargetSyntaxTree => 
+            ( (NamedType)this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
     }
 }

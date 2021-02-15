@@ -20,12 +20,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public CompilationModel( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
-            this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty;
+            this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty.WithKeyComparer(CodeElementEqualityComparer.Instance);
 
             var allCodeElements = this.SelectContainedElements();
 
             var allAttributes = allCodeElements.SelectMany( c => c.Attributes );
-            this._allAttributesByType = ImmutableMultiValueDictionary<INamedType, IAttribute>.Create( allAttributes, a => a.Type );
+            this._allAttributesByType = ImmutableMultiValueDictionary<INamedType, IAttribute>.Create( allAttributes, a => a.Type, CodeElementEqualityComparer.Instance );
         }
 
         /// <summary>

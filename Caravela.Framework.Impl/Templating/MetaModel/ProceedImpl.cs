@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Linking;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -32,14 +35,43 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
         {
-            // TODO: Emit `xxx = TheMethod( a, b, c )`  where `a, b, c` is the canonical list of arguments. add LinkerAnnotation
-            throw new NotImplementedException();
+            // Emit `xxx = <original_method_call>`.
+            return
+                ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        IdentifierName( returnValueLocalName ),
+                        this.CreateOriginalMethodCall()
+                    );
         }
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            // TODO: Emit `return TheMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
-            throw new NotImplementedException();
+            // Emit `return <original_method_call>`.
+            return
+                ReturnStatement(
+                    this.CreateOriginalMethodCall()
+                    );
+        }
+
+        private InvocationExpressionSyntax CreateOriginalMethodCall()
+        {
+            // Emit `OriginalMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
+            // TODO: generics, static methods, consider explicit interfaces and other special methods.
+            return 
+                InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                ThisExpression(),
+                                IdentifierName( this._method.Name )
+                                ),
+                            ArgumentList(
+                                SeparatedList(
+                                    this._method.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
+                                    )
+                                )
+                            )
+                .AddLinkerAnnotation( new LinkerAnnotation( "TODO", null, LinkerAnnotationOrder.Default ) );
         }
 
         // The following commented logic should move to the aspect linker.

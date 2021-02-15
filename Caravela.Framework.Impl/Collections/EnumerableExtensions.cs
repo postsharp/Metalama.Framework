@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Collections
 
             HashSet<T> list = new (ReferenceEqualityComparer<T>.Instance);
 
-            void PopulateDescendants( IEnumerable<T>? c )
+            void PopulateDescendants( T c )
             {
                 recursionCheck++;
 
@@ -26,21 +26,29 @@ namespace Caravela.Framework.Impl.Collections
 
                 if ( c != null )
                 {
-                    foreach ( var child in c )
-                    {
-                        if ( !list.Add( child ) )
-                        {
-                            throw new AssertionFailedException( $"The item {child} of type {child.GetType().Name} has been visited twice." );
-                        }
+                    var children = getChildren( c );
 
-                        PopulateDescendants( getChildren( child ) );
+                    if ( children != null )
+                    {
+                        foreach ( var child in children )
+                        {
+                            if ( !list.Add( child ) )
+                            {
+                                throw new AssertionFailedException( $"The item {child} of type {child.GetType().Name} has been visited twice." );
+                            }
+
+                            PopulateDescendants( child );
+                        }
                     }
                 }
 
                 recursionCheck--;
             }
 
-            PopulateDescendants( collection );
+            foreach ( var child in collection )
+            {
+                PopulateDescendants( child );
+            }
 
             return list;
         }
