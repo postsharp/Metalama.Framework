@@ -22,6 +22,8 @@ namespace Caravela.Framework.Impl
             this.PartName = partName;
         }
 
+        public AspectPartId ToAspectPartId() => new AspectPartId( this.AspectType.Type, this.PartName );
+
         internal AspectPartResult ToResult( AspectPartResult input )
         {
             var aspectDriver = (AspectDriver) this.AspectType.AspectDriver;

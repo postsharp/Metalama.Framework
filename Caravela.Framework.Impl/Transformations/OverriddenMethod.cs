@@ -5,6 +5,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
@@ -65,7 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
                     newMethodBody,
                     null,
                     Token(SyntaxKind.SemicolonToken)),
-                this.AspectPart,
+                this.AspectPart.ToAspectPartId(),
                 IntroducedMemberSemantic.MethodOverride )
             };
 

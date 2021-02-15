@@ -8,6 +8,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
@@ -93,10 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
-
-        // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
-        
+            
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
                     this.Name,
@@ -104,12 +102,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this._genericParameters.Select( p => p.Name ),
                     syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(), this.ToDeclarationModifiers() );
-
+            
             return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
 
-        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
-
+        // TODO: Temporary
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
+        
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public IReadOnlyList<ISymbol> LookupSymbols()

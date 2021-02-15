@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         SyntaxKind.SimpleAssignmentExpression,
                         IdentifierName( returnValueLocalName ),
                         this.CreateOriginalMethodCall()
-                    );
+                    ) );
         }
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
