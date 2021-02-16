@@ -1,5 +1,3 @@
-// unset
-
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -36,12 +34,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsVirtual { get; set; }
 
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public sealed override ICodeElement? ContainingElement => this.DeclaringType;
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
-        public MemberBuilder( Advice parentAdvice, INamedType declaringType )
+        public MemberBuilder( Advice parentAdvice, INamedType declaringType, string name )
         {
             this.ParentAdvice = parentAdvice;
             this.DeclaringType = declaringType;
+            this.Name = name;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers();

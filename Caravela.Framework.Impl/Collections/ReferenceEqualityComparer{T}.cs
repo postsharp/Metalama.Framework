@@ -1,6 +1,4 @@
-﻿// unset
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Collections

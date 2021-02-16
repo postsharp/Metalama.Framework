@@ -21,15 +21,15 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public int GetHashCode( ICodeElement x )
+        public int GetHashCode( ICodeElement obj )
         {
-            if ( x is CodeElement cx )
+            if ( obj is CodeElement cx )
             {
                 return SymbolEqualityComparer.Default.GetHashCode( cx.Symbol );
             }
             else
             {
-                return x.GetHashCode();
+                return obj.GetHashCode();
             }
         }
     }

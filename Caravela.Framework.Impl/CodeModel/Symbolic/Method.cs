@@ -31,29 +31,27 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-
         internal sealed class MethodReturnParameter : ReturnParameter
         {
-            public Method Method { get; }
+            public Method DeclaringMethod { get; }
 
-            public MethodReturnParameter( Method method )
+            public override IMember DeclaringMember => this.DeclaringMethod;
+
+            public MethodReturnParameter( Method declaringMethod )
             {
-                this.Method = method;
+                this.DeclaringMethod = declaringMethod;
             }
 
-            protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.Method.MethodSymbol.RefKind;
+            protected override Microsoft.CodeAnalysis.RefKind SymbolRefKind => this.DeclaringMethod.MethodSymbol.RefKind;
 
-            public override IType ParameterType => this.Method.ReturnType;
+            public override IType ParameterType => this.DeclaringMethod.ReturnType;
 
             public override bool Equals( ICodeElement other ) => other is MethodReturnParameter methodReturnParameter &&
-                                                                 SymbolEqualityComparer.Default.Equals( this.Method.Symbol,
-                                                                     methodReturnParameter.Method.Symbol );
-
-            public override ICodeElement? ContainingElement => this.Method;
+                                                                 SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
             public override IReadOnlyList<IAttribute> Attributes
-                => this.Method.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new Attribute( a, this.Method.Compilation, this ) )
+                => this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
+                    .Select( a => new Attribute( a, this.DeclaringMethod.Compilation, this ) )
                     .ToImmutableArray();
         }
 
@@ -112,7 +110,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 }
 
                 var name = this._method.GenericArguments.Any()
-                    ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( this._method.Name,
+                    ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( 
+                        this._method.Name,
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : IdentifierName( this._method.Name );
                 var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic( args ) );

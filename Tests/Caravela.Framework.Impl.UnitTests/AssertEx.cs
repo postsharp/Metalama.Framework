@@ -29,6 +29,5 @@ namespace Caravela.Framework.Impl.UnitTests
                 Assert.Equal( diagnosticDescriptor.Id, e.Diagnostic.Id );
             }
         }
-
     }
 }

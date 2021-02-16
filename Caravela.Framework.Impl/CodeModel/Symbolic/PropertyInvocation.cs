@@ -23,31 +23,33 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             set => throw new NotSupportedException();
         }
 
-        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression instance )
+        private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
                 throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
             }
 
-            this._property.CheckArguments( this._property.Parameters, Array.Empty<IParameter>() );
+            this._property.CheckArguments( this._property.Parameters, null );
 
             return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._property.GetReceiverSyntax( instance ), IdentifierName( this._property.Name ) );
         }
 
         public object GetValue( object? instance )
-            => new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) ), this._property.Type, this._property is Field );
+        {
+            return new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) ), this._property.Type, this._property is Field );
+        }
 
-        public object SetValue( object? instance, object value )
+        public object SetValue( object? instance, object? value )
         {
             var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value ).Syntax );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromDynamic( value ) );
 
             return new DynamicMember( expression, this._property.Type, false );
         }
 
-        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[] args )
+        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression? instance, RuntimeExpression[]? args )
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
@@ -62,13 +64,15 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         }
 
         public object GetIndexerValue( object? instance, params object[] args )
-            => new DynamicMember( this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) ), this._property.Type, false );
+        {
+            return new DynamicMember( this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) ), this._property.Type, false );
+        }
 
         public object SetIndexerValue( object? instance, object value, params object[] args )
         {
             var propertyAccess = this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value ).Syntax );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromDynamic( value ) );
 
             return new DynamicMember( expression, this._property.Type, false );
         }

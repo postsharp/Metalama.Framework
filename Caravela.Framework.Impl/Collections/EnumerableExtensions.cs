@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +5,7 @@ namespace Caravela.Framework.Impl.Collections
 {
     public static class EnumerableExtensions
     {
-        public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T>? collection, Func<T, IEnumerable<T>?> getChildren )
+        public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T> collection, Func<T, IEnumerable<T>?> getChildren )
             where T : class
         {
             var recursionCheck = 0;
@@ -56,7 +54,8 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable,
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( 
+            this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue )
             where TKey : notnull

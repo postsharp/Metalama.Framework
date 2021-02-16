@@ -44,30 +44,36 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, object[] arguments )
+        internal static void CheckArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
+            var argumentsLength = arguments?.Length ?? 0;
             if ( parameters.LastOrDefault()?.IsParams == true )
             {
                 // all non-params arguments have to be set + any number of params arguments
                 var requiredArguments = parameters.Count - 1;
-                if ( arguments.Length < requiredArguments )
+                if ( argumentsLength < requiredArguments )
                 {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments, codeElement, requiredArguments );
                 }
             }
             else
             {
-                if ( arguments.Length != parameters.Count )
+                if ( argumentsLength != parameters.Count )
                 {
                     throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, codeElement, parameters.Count );
                 }
             }
         }
 
-        internal static ArgumentSyntax[] GetArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[] args )
+        internal static ArgumentSyntax[] GetArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? args )
         {
             CheckArguments( codeElement, parameters, args );
+
+            if ( args == null || args.Length == 0 )
+            {
+                return Array.Empty<ArgumentSyntax>();
+            }
 
             var arguments = new List<ArgumentSyntax>( args.Length );
 
@@ -83,7 +89,6 @@ namespace Caravela.Framework.Impl.CodeModel
                     // so it's probably best to not do any typecheking for them
 
                     argument = SyntaxFactory.Argument( arg.Syntax );
-
                 }
                 else
                 {
@@ -95,8 +100,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( !arg.IsReferenceable )
                         {
-                            throw new CaravelaException( GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
-                                arg.Syntax, parameter.Name, parameter.ContainingElement );
+                            throw new CaravelaException( 
+                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
+                                arg.Syntax, 
+                                parameter.Name, 
+                                parameter.DeclaringMember );
                         }
 
                         var syntax = parameter.IsRef() ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
@@ -109,14 +117,13 @@ namespace Caravela.Framework.Impl.CodeModel
                     }
                 }
 
-
                 arguments.Add( argument );
             }
 
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, RuntimeExpression instance )
+        internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, RuntimeExpression? instance )
             where T : CodeElement, IMember
         {
 

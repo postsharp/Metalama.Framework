@@ -1,5 +1,3 @@
-// unset
-
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic

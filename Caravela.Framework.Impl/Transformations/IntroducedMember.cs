@@ -1,5 +1,3 @@
-// unset
-
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

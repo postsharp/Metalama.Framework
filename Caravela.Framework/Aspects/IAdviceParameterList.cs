@@ -18,7 +18,6 @@ namespace Caravela.Framework.Aspects
         IEnumerable<IAdviceParameter> OfType( Type type );
 
         IAdviceParameterValueList Values { get; }
-
     }
 
     public interface IAdviceParameterValueList

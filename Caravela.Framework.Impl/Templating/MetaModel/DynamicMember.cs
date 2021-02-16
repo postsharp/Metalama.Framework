@@ -1,4 +1,4 @@
-using Caravela.Framework.Code;
+﻿using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel

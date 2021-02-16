@@ -1,5 +1,3 @@
-// unset
-
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -7,6 +5,5 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IConstructor : IMethodBase
     {
-
     }
 }

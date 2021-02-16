@@ -37,6 +37,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <inheritdoc/>
         protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader );
+            => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this.PipelineOptions );
     }
 }

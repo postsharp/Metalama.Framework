@@ -9,12 +9,14 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         public IParameterSymbol ParameterSymbol { get; }
 
-        private readonly CodeElement _containingMember;
+        public Member DeclaringMember { get; }
 
-        public Parameter( IParameterSymbol symbol, CodeElement containingMember ) : base( containingMember.Compilation )
+        IMember IParameter.DeclaringMember => this.DeclaringMember;
+
+        public Parameter( IParameterSymbol symbol, Member containingMember ) : base( containingMember.Compilation )
         {
             this.ParameterSymbol = symbol;
-            this._containingMember = containingMember;
+            this.DeclaringMember = containingMember;
         }
 
         public RefKind RefKind => this.ParameterSymbol.RefKind switch
@@ -35,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public bool IsParams => this.ParameterSymbol.IsParams;
 
-        public override ICodeElement ContainingElement => this._containingMember;
+        public override ICodeElement ContainingElement => this.DeclaringMember;
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 

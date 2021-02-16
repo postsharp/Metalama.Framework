@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly CompileTimeAssemblyLoader _assemblyLoader;
         private readonly IReadOnlyList<AspectPart> _aspectParts;
 
-        protected HighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader )
+        protected HighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineOptions options ) : base( options )
         {
             this._aspectParts = aspectParts;
             this._assemblyLoader = assemblyLoader;

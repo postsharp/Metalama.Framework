@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Linq;
 using Caravela.Framework.Code;

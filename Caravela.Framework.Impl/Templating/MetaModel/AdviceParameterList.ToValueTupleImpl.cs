@@ -33,7 +33,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                                p.IsOut()
                                    ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
                                    : SyntaxFactory.IdentifierName( p.Name ) ));
-
                 }
 
                 return new RuntimeExpression( expression );

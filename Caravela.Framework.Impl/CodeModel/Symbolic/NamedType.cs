@@ -36,11 +36,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
-
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public override bool IsAsync => false;
-
 
         public bool HasDefaultConstructor =>
             this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
@@ -117,8 +115,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>
             this.TypeSymbol.TypeParameters.Select( tp => this.Compilation.Factory.GetGenericParameter( tp ) ).ToImmutableList();
-
-        public string Name => this.TypeSymbol.Name;
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();

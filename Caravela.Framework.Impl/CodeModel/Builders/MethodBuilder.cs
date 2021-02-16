@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -83,9 +81,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
@@ -108,11 +105,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.Name,
                     this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
-                    this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) : null,
+                    syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(),
                     this.ToDeclarationModifiers(),
                     !this.ReturnParameter.ParameterType.Is( typeof( void ) )
-                    ? new[] {
+                    ? new[]
+                    {
                         ReturnStatement(
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,

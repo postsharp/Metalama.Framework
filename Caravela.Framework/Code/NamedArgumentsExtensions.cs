@@ -1,5 +1,3 @@
-// unset
-
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Code

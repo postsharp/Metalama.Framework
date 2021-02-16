@@ -75,7 +75,6 @@ namespace Caravela.Framework.Impl.Transformations
 
         public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
 
-
         private class ProceedToNext : IProceedImpl
         {
             public StatementSyntax CreateAssignStatement( string returnValueLocalName )

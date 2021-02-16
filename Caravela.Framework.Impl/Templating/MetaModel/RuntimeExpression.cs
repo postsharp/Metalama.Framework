@@ -29,9 +29,51 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.IsReferenceable = isReferenceable;
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, IType? type = null, bool isReferenceable = false ) : this( syntax, type?.GetSymbol(),
-            isReferenceable )
+        public RuntimeExpression( ExpressionSyntax syntax, IType? type = null, bool isReferenceable = false ) : this( syntax, type?.GetSymbol(), isReferenceable )
         {
+        }
+
+        public static ExpressionSyntax GetSyntaxFromDynamic( object? value )
+            => FromDynamic( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
+
+        public static RuntimeExpression? FromDynamic( object? value )
+            => value switch
+            {
+                null => null,
+                RuntimeExpression runtimeExpression => runtimeExpression,
+
+                // This case is used to simplify tests.
+                IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
+
+                _ => throw new ArgumentOutOfRangeException( nameof( value ) )
+            };
+
+        public static RuntimeExpression[]? FromDynamic( object[]? array )
+        {
+            RuntimeExpression[] ConvertArray()
+            {
+                if ( array.Length == 0 )
+                {
+                    return Array.Empty<RuntimeExpression>();
+                }
+                else
+                {
+                    var newArray = new RuntimeExpression[array.Length];
+                    for ( var i = 0; i < newArray.Length; i++ )
+                    {
+                        newArray[i] = FromDynamic( array[i] ).AssertNotNull();
+                    }
+
+                    return newArray;
+                }
+            }
+
+            return array switch
+            {
+                null => null,
+                RuntimeExpression[] runtimeExpressions => runtimeExpressions,
+                _ => ConvertArray()
+            };
         }
 
         /// <summary>
@@ -56,50 +98,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast;
             }
-
-
-
-        }
-
-
-        public static RuntimeExpression? FromDynamic( object? value )
-            => value switch
-            {
-                null => null,
-                RuntimeExpression runtimeExpression => runtimeExpression,
-
-                // This case is used to simplify tests.
-                IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
-
-                _ => throw new ArgumentOutOfRangeException( nameof( value ) )
-            };
-
-        public static RuntimeExpression?[]? FromDynamic( object[]? array )
-        {
-            RuntimeExpression?[] ConvertArray()
-            {
-                if ( array.Length == 0 )
-                {
-                    return Array.Empty<RuntimeExpression>();
-                }
-                else
-                {
-                    var newArray = new RuntimeExpression?[array.Length];
-                    for ( int i = 0; i < newArray.Length; i++ )
-                    {
-                        newArray[i] = FromDynamic( array[i] );
-                    }
-
-                    return newArray;
-                }
-            }
-
-            return array switch
-            {
-                null => null,
-                RuntimeExpression[] runtimeExpressions => runtimeExpressions,
-                _ => ConvertArray()
-            };
         }
     }
 }

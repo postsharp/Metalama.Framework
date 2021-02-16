@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,11 +6,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
     {
+        private readonly string? _name;
+
         public RefKind RefKind { get; }
 
         public IType ParameterType { get; set; }
 
-        public string? Name { get; }
+        public string Name => this._name ?? throw new NotSupportedException("Cannot get the name of a return parameter.");
 
         public int Index { get; }
 
@@ -20,15 +20,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsParams { get; set; }
 
-        public override ICodeElement? ContainingElement { get; }
+        public override ICodeElement? ContainingElement => this.DeclaringMember;
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
+        public IMember DeclaringMember { get; }
+
         public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind ) : base()
         {
-            this.ContainingElement = containingMethod;
+            this.DeclaringMember = containingMethod;
             this.Index = index;
-            this.Name = name;
+            this._name = name;
             this.ParameterType = type;
             this.RefKind = refKind;
         }

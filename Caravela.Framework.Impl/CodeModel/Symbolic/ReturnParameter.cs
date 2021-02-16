@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract IType ParameterType { get; }
 
-        public string? Name => null;
+        public string Name => throw new NotSupportedException("Cannot get the name of a return parameter.");
 
         public int Index => -1;
 
@@ -22,7 +22,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public bool IsParams => false;
 
-        public abstract ICodeElement? ContainingElement { get; }
+        public abstract IMember DeclaringMember { get; }
+
+        public ICodeElement? ContainingElement => this.DeclaringMember;
 
         public abstract IReadOnlyList<IAttribute> Attributes { get; }
 

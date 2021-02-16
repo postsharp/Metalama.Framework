@@ -34,7 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         [Memo]
         public IReadOnlyList<IParameter> Parameters => this.MethodSymbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableArray<IParameter>();
 
-
         MethodKind IMethodBase.MethodKind => this.MethodSymbol.MethodKind switch
         {
             Microsoft.CodeAnalysis.MethodKind.Ordinary => MethodKind.Default,
@@ -60,7 +59,5 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         };
 
         public override string ToString() => this.MethodSymbol.ToString();
-
-
     }
 }

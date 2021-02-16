@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool IsParams => this._parameter.IsParams;
 
+        public IMember DeclaringMember => this._parameter.DeclaringMember;
+
         public IType ParameterType => this._parameter.ParameterType;
 
         public string Name => this._parameter.Name.AssertNotNull();
@@ -35,14 +37,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICompilation Compilation => throw new NotImplementedException();
 
-
         public dynamic Value
         {
             get => new DynamicMember( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
             set => throw new NotImplementedException();
         }
-
-
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
 

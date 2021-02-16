@@ -68,5 +68,8 @@ namespace Caravela.Framework.Impl
             new( "CR0019", "Cannot use an expression in an out or ref parameter.",
                 "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.", _caravelaCategory, Error,
                 true );
+
+        public static readonly DiagnosticDescriptor CannotFindType =
+            new("CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true);
     }
 }

@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,7 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorHighLevelAspectsPipelineStage : HighLevelAspectsPipelineStage
     {
-        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader ) : base( aspectParts, assemblyLoader )
+        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineOptions options ) : base( aspectParts, assemblyLoader, options )
         {
         }
 
@@ -66,13 +64,19 @@ namespace Caravela.Framework.Impl.Pipeline
                     }
                 }
 
-                var syntaxTree =
-                    SyntaxFactory.SyntaxTree(
-                        SyntaxFactory.NamespaceDeclaration(
-                            SyntaxFactory.ParseName( declaringType.Namespace, 0, true ),
-                            default,
-                            default,
-                            SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) ) );
+                SyntaxNode topDeclaration = classDeclaration;
+
+                if ( declaringType.Namespace != null )
+                {
+
+                    topDeclaration = SyntaxFactory.NamespaceDeclaration(
+                                                SyntaxFactory.ParseName( declaringType.Namespace, 0, true ),
+                                                default,
+                                                default,
+                                                SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
+                }
+
+                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );
 
                 var syntaxTreeName = declaringType.FullName + ".cs";
 

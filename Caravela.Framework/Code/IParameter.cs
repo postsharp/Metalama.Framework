@@ -33,5 +33,7 @@ namespace Caravela.Framework.Code
         OptionalValue DefaultValue { get; }
 
         bool IsParams { get; }
+
+        IMember DeclaringMember { get; }
     }
 }

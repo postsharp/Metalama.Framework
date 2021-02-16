@@ -58,19 +58,16 @@ class TargetCode
                 fooMethod.Invoke( null ),
                 @"global::TargetCode.Foo()");
 
-
             // Test exception related to the 'instance' parameter.
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember,
                 () => fooMethod.Invoke( new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ) ) );
-
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
                 () => toString.Invoke(
                     null,
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
-
 
             // Test in/out.
             AssertEx.DynamicEquals(
@@ -86,7 +83,6 @@ class TargetCode
                         null,
                         new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
                         new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ));
-
         }
 
         [Fact]
@@ -112,7 +108,6 @@ class TargetCode
             AssertEx.DynamicEquals(
                 method.Invoke( null ),
                 @"global::TargetCode.Nested<global::System.String>.Foo<global::System.Int32>()" );
-
         }
 
         [Fact]
@@ -161,8 +156,6 @@ class TargetCode
             Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );
 
             Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof( int ) ) ).Name );
-
-
         }
 
         [Fact]
@@ -181,7 +174,6 @@ class TargetCode
 
             AssertEx.DynamicEquals( property.Value, @"this.P" );
             AssertEx.DynamicEquals( property.GetValue( property.Value ), @"this.P.P" );
-
         }
 
         [Fact]
@@ -219,7 +211,6 @@ class TargetCode
                 new AdviceParameterList( noParameterMethod ).Values.ToArray(),
                 @"new object[]{}" );
 
-
             AssertEx.DynamicEquals(
                 new AdviceParameterList( method ).Values.ToValueTuple(),
                 @"(a, b, c, default(global::System.DateTime), e)" );
@@ -231,10 +222,6 @@ class TargetCode
             AssertEx.DynamicEquals(
                 new AdviceParameterList( noParameterMethod ).Values.ToValueTuple(),
                 @"default(global::System.ValueType)" );
-
-
-
-
         }
     }
 }

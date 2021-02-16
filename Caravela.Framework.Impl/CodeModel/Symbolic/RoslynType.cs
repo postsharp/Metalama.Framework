@@ -1,5 +1,3 @@
-// unset
-
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;

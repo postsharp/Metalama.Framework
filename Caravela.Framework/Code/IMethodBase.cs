@@ -1,5 +1,3 @@
-// unset
-
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
@@ -23,6 +21,5 @@ namespace Caravela.Framework.Code
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
         /// </summary>
         MethodKind MethodKind { get; }
-
     }
 }

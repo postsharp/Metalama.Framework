@@ -15,6 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         private readonly ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation> _transformations;
         private readonly ImmutableMultiValueDictionary<INamedType, IAttribute> _allAttributesByType;
+
         public CodeElementFactory Factory { get; }
 
         public CompilationModel( CSharpCompilation roslynCompilation )
@@ -52,9 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.Type );
         }
 
-
         public CSharpSyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
-
 
         [Memo]
         public IReadOnlyList<INamedType> DeclaredTypes =>
@@ -69,7 +68,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             this.RoslynCompilation.Assembly.GetAttributes().Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                 .Select( a => new Attribute( a, this, this ) )
                 .ToImmutableArray();
-
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 

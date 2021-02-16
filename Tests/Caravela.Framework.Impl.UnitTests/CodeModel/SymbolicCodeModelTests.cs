@@ -483,8 +483,6 @@ partial class B
 
             Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
             Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
-
-
         }
 
         [Fact]
