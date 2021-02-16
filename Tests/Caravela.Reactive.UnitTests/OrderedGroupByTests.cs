@@ -52,9 +52,9 @@ namespace Caravela.Reactive.UnitTests
         [Fact]
         public void OrderedReactive()
         {
-            var source = new ReactiveHashSet<(int order, int value)>();
+            var source = new ReactiveHashSet<(int Order, int Value)>();
 
-            var groups = source.OrderedGroupBy( KeyComparer<(int order, int value)>.OrderBy( x => x.order ), x => x.value % 10, x => x.value );
+            var groups = source.OrderedGroupBy( KeyComparer<(int Order, int Value)>.OrderBy( x => x.Order ), x => x.Value % 10, x => x.Value );
             var itemsInGroups = groups.SelectMany( x => x );
 
             Assert.Equal( new object[0], GetGroups() );

@@ -522,3 +522,9 @@ dotnet_diagnostic.SA1604.severity = none
 # SA1620: Generic type parameter documentation should match type parameters
 dotnet_diagnostic.SA1620.severity = silent
 
+
+# SA1028: Code should not contain trailing whitespace
+dotnet_diagnostic.SA1028.severity = silent
+
+# SA1024: Deference symbol '*' should not be followed by a space.
+dotnet_diagnostic.SA1023.severity = silent

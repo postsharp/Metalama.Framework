@@ -5,6 +5,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
@@ -54,7 +55,12 @@ namespace Caravela.Framework.Impl
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetSyntaxNode()?.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement,
+                    codeElement.GetSyntaxNode()?.GetLocation(),
+                    this.AspectType,
+                    codeElement.ElementKind.ToDisplayString(),
+                    codeElement,
+                    typeof(IAspect<T>));
 
                 return new( ImmutableList.Create( diagnostic ), ImmutableList.Create<AdviceInstance>(), ImmutableList.Create<AspectInstance>() );
             }
