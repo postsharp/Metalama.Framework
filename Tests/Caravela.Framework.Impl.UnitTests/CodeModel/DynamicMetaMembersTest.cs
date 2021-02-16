@@ -3,6 +3,7 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -181,6 +182,63 @@ class TargetCode
             
             AssertEx.DynamicEquals( property.Value, @"this.P" );
             AssertEx.DynamicEquals(  property.GetValue( property.Value ), @"this.P.P" );
+
+        }
+
+        [Fact]
+        public void ToArrayTest()
+        {
+            var code = @"
+class TargetCode
+{
+    void A( int a, string b, object c, out System.DateTime d, ref System.TimeSpan e)
+    {
+        d = default;
+    }
+
+    void B( int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k, int l)
+    {
+    }
+
+    void C()
+    {
+    }
+}"
+
+    ;
+            var generator = CSharpSyntaxGenerator.Instance;
+
+            var compilation = CreateCompilation( code );
+            var type = compilation.DeclaredTypes.Single();
+            var method = type.Methods.OfName( "A" ).Single();
+            var longMethod = type.Methods.OfName( "B" ).Single();
+            var noParameterMethod = type.Methods.OfName( "C" ).Single();
+            
+            AdviceParameterList adviceParameterList = new( method );
+            
+            AssertEx.DynamicEquals( 
+                new AdviceParameterList( method ).Values.ToArray(), 
+                @"new object[]{a, b, c, default(global::System.DateTime), e}" );
+            
+            AssertEx.DynamicEquals( 
+                new AdviceParameterList( noParameterMethod ).Values.ToArray(), 
+                @"new object[]{}" );
+
+            
+            AssertEx.DynamicEquals( 
+                new AdviceParameterList( method ).Values.ToValueTuple(), 
+                @"(a, b, c, default(global::System.DateTime), e)" );
+            
+            AssertEx.DynamicEquals( 
+                new AdviceParameterList( longMethod ).Values.ToValueTuple(), 
+                @"(a, b, c, d, e, f, g, h, i, j, k, l)" );
+            
+            AssertEx.DynamicEquals( 
+                new AdviceParameterList( noParameterMethod ).Values.ToValueTuple(), 
+                @"default(global::System.ValueType)" );
+
+            
+            
 
         }
     }

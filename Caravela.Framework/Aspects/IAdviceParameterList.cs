@@ -17,9 +17,14 @@ namespace Caravela.Framework.Aspects
          
          IEnumerable<IAdviceParameter> OfType( Type type );
          
-         dynamic ToArray();
+         IAdviceParameterValueList Values { get; }
          
-         dynamic ToValueTuple();
+    }
+
+    public interface IAdviceParameterValueList 
+    {
+        dynamic ToArray();
          
+        dynamic ToValueTuple();
     }
 }

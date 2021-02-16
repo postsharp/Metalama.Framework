@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     this._parent._parameters.Select(
                         p =>
                             p.IsOut()
-                                ? SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression )
+                                ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( CodeModelExtensions.GetSymbol( (IType) p.ParameterType ) )
                                 : (ExpressionSyntax) SyntaxFactory.IdentifierName( p.Name ) ) );
 
                 return new RuntimeExpression(

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal partial class AdviceParameterList : IAdviceParameterList
+    internal partial class AdviceParameterList : IAdviceParameterList, IAdviceParameterValueList
     {
         private readonly IMethod _method;
         private readonly AdviceParameter[] _parameters;
@@ -38,8 +38,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public IEnumerable<IAdviceParameter> OfType( Type type ) =>
             this.OfType( this.Compilation.Factory.GetTypeByReflectionType( type ).AssertNotNull() );
 
-        public dynamic ToArray() => new ToArrayImpl( this );
+        public IAdviceParameterValueList Values => this;
 
-        public dynamic ToValueTuple() => new ToValueTupleImpl( this );
+        dynamic IAdviceParameterValueList.ToArray() => new ToArrayImpl( this );
+
+        dynamic IAdviceParameterValueList.ToValueTuple() => new ToValueTupleImpl( this );
     }
 }
