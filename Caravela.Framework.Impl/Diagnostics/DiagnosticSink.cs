@@ -16,10 +16,10 @@ using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 namespace Caravela.Framework.Impl.Diagnostics
 {
     /// <summary>
-    /// Implements the user-level <see cref="Caravela.Framework.Diagnostics.IDiagnosticSink"/> interface
+    /// Implements the user-level <see cref="IUserDiagnosticSink"/> interface
     /// and bridges it into an SDK-level <see cref="IDiagnosticSink"/>.
     /// </summary>
-    public abstract class UserDiagnosticSink : Caravela.Framework.Diagnostics.IDiagnosticSink
+    public abstract class UserUserDiagnosticSink : Caravela.Framework.Diagnostics.IUserDiagnosticSink
     {
         private static ConcurrentDictionary<DiagnosticDescriptor, RoslynDiagnosticDescriptor> _descriptors =
             new ConcurrentDictionary<DiagnosticDescriptor, RoslynDiagnosticDescriptor>();
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             };
     }
 
-    public class DiagnosticList : UserDiagnosticSink, IReadOnlyList<Diagnostic>
+    public class UserDiagnosticList : UserUserDiagnosticSink, IReadOnlyList<Diagnostic>
     {
         
         private List<Diagnostic>? _diagnostics;
@@ -72,11 +72,11 @@ namespace Caravela.Framework.Impl.Diagnostics
         public Diagnostic this[ int index ] => this._diagnostics.AssertNotNull()[index];
     }
 
-    public class DiagnosticSinkBridge : UserDiagnosticSink
+    public class UserDiagnosticSinkBridge : UserUserDiagnosticSink
     { 
         private IDiagnosticSink _sink;
         
-        public DiagnosticSinkBridge( IDiagnosticSink sink )
+        public UserDiagnosticSinkBridge( IDiagnosticSink sink )
         {
             this._sink = sink;
         }

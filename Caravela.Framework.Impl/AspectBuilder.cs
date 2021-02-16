@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         
-        public DiagnosticList Diagnostics { get; } = new DiagnosticList();
+        public UserDiagnosticList UserDiagnostics { get; } = new UserDiagnosticList();
 
         public T TargetDeclaration { get; }
 
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
 
         internal AspectInstanceResult ToResult() =>
             new( 
-                 this.Diagnostics.ToImmutableArray(), 
+                 this.UserDiagnostics.ToImmutableArray(), 
                 this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), 
                 ImmutableList.Create<IAspectSource>() );
 

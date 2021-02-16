@@ -1,5 +1,8 @@
 namespace Caravela.Framework.Diagnostics
 {
+    /// <summary>
+    /// Severity of user-code diagnostics.
+    /// </summary>
     public enum DiagnosticSeverity
     {
         /// <summary>
