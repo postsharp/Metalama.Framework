@@ -16,9 +16,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Caravela.Framework.Impl.Transformations
 {
 
-    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction
+    internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction, IOverriddenElement
     {
         public Advice Advice { get; }
+
+        ICodeElement IOverriddenElement.OverriddenElement => this.OverriddenDeclaration;
 
         public IMethod OverriddenDeclaration { get; }
 
@@ -40,7 +42,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
-            // TODO: Emit a method named __OriginalName__AspectShortName_
+            // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
             string methodName =
                 this.Advice.PartName != null
                 ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"

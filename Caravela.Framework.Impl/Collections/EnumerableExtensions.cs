@@ -1,5 +1,6 @@
 // unset
 
+using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 
@@ -56,10 +57,12 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( this IEnumerable<TItem> enumerable,
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( 
+            this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
-            Func<TItem, TValue> getValue )
+            Func<TItem, TValue> getValue,
+            IEqualityComparer<TKey> keyComparer = null)
             where TKey : notnull
-         => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue );
+         => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
     }
 }

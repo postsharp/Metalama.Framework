@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class AspectLinker
+    internal partial class AspectLinker
     {
         private readonly AdviceLinkerInput _input;
 
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            var resultingCompilation = this._input.Compilation;
+            var intermediateCompilation = this._input.Compilation;
 
             var transformationsBySyntaxTree =
                 this._input.CompilationModel.ObservableTransformations.Values.OfType<ISyntaxTreeIntroduction>()
@@ -28,7 +29,14 @@ namespace Caravela.Framework.Impl.Linking
                     .GroupBy( t => t.TargetSyntaxTree, t => t )
                     .ToDictionary( g => g.Key, g => g );
 
+
+            // TODO: This is not optimal structure for this.
+            ImmutableMultiValueDictionary<ICodeElement, IntroducedMember> overrideLookup =
+                ImmutableMultiValueDictionary<ICodeElement, IntroducedMember>.Empty.WithKeyComparer( CodeElementEqualityComparer.Instance );
+
             // First pass. Add all transformations to the compilation, but we don't link them yet.
+
+
             var newSyntaxTrees = new List<SyntaxTree>( transformationsBySyntaxTree.Count );
             foreach ( var syntaxTreeGroup in transformationsBySyntaxTree )
             {
@@ -41,7 +49,10 @@ namespace Caravela.Framework.Impl.Linking
                 var newSyntaxTree = oldSyntaxTree.WithRootAndOptions( newRoot, oldSyntaxTree.Options );
                 newSyntaxTrees.Add( newSyntaxTree );
 
-                resultingCompilation = resultingCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
+                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
+
+                // TODO: This is slow.
+                overrideLookup = overrideLookup.Merge( addIntroducedElementsRewriter.ElementOverrides );
             }
 
             // Second pass. Count references to modified methods.
@@ -75,7 +86,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     // Increment the usage count.
-                    var symbolInfo = resultingCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
+                    var symbolInfo = intermediateCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
 
                     if ( symbolInfo.Symbol == null )
                         continue;
@@ -94,50 +105,24 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            // Third pass. Linker.
+            var resultingCompilation = intermediateCompilation;
+
+            // Third pass. Linking.
             // Two things it should do:
             //   1. Replace calls to the vanilla method to the call to the right "override" method.
 
-            return new AdviceLinkerResult( resultingCompilation, Array.Empty<Diagnostic>() );
-        }
+            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts);
 
-        public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
-        {
-            private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
-            private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
-            private Dictionary<ISymbol, List<IntroducedMember>> _overriddenSymbols = new();
-
-            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
+            foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {
-                this._memberIntroductors = introductions.OfType<IMemberIntroduction>().ToList();
-                this._interfaceImplementationIntroductors = introductions.OfType<IInterfaceImplementationIntroduction>().ToList();
+                var newRoot = rewriter.Visit( syntaxTree.GetRoot() );
+
+                var newSyntaxTree = syntaxTree.WithRootAndOptions( newRoot, syntaxTree.Options );
+
+                resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
-            {
-                var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-                foreach ( var member in node.Members )
-                {
-                    members.Add( member );
-
-                    // TODO: optimize linq
-                    var introducedMembers = this._memberIntroductors
-                        .Where( t => t.InsertPositionNode == member )
-                        .SelectMany( t => t.GetIntroducedMembers() )
-                        .ToList();
-
-                    members.AddRange( introducedMembers.Select( i => i.Syntax ) );
-
-                    // TODO: add to OverridenSymbols if the introduction implements IOverridenElement
-                }
-
-                members.AddRange( this._memberIntroductors
-                    .Where( t => t.InsertPositionNode == node )
-                    .SelectMany( t => t.GetIntroducedMembers() )
-                    .Select( i => i.Syntax ) );
-
-                return node.WithMembers( List( members ) );
-            }
+            return new AdviceLinkerResult( intermediateCompilation, Array.Empty<Diagnostic>() );
         }
     }
 }

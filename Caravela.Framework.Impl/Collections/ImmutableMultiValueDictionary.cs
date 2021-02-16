@@ -39,6 +39,13 @@ namespace Caravela.Framework.Impl.Collections
             return builder.ToImmutable();
         }
 
+        public ImmutableMultiValueDictionary<TKey, TValue> Merge( ImmutableMultiValueDictionary<TKey, TValue> other )
+        {
+            var builder = this.ToBuilder();
+            builder.AddRange( other.SelectMany( x => x.Select( y => (x.Key, Value: y) ) ), x => x.Key, x => x.Value );
+            return builder.ToImmutable();
+        }
+
         IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.GetByKey( TKey key ) => this[key];
 
         public ImmutableArray<TValue> this[TKey key]
