@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-
+using System;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;
@@ -169,7 +169,16 @@ interface I<T>
             {
                 Assert.Same( containingElement, parameter.ContainingElement );
                 Assert.Equal( typeName, parameter.ParameterType.ToString() );
-                Assert.Equal( name, parameter.Name );
+
+                if ( name != null )
+                {
+                    Assert.Equal( name, parameter.Name );
+                }
+                else
+                {
+                    _ = Assert.Throws<NotSupportedException>( () => _ = parameter.Name );
+                }
+
                 Assert.Equal( index, parameter.Index );
             }
         }
@@ -364,7 +373,7 @@ class C<T>
 
             var type = Assert.Single( compilation.DeclaredTypes );
 
-            var typeKinds = new[] { Array, Class, Delegate, Dynamic, Enum, GenericParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ) );
         }
