@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal class Attribute : IAttribute
+    internal class Attribute : IAttribute, IHasDiagnosticLocation
     {
         private readonly AttributeData _data;
         private readonly CompilationModel _compilation;
@@ -61,6 +61,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
-        public IDiagnosticLocation? DiagnosticLocation => RoslynDiagnosticLocation.ForAttribute( this._data );
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation.ToUserDiagnosticLocation();
+
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetLocation( this._data );
     }
 }

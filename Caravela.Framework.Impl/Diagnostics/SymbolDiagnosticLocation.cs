@@ -1,14 +1,12 @@
-// unset
-
-using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal class RoslynDiagnosticLocation : IDiagnosticLocation
+    internal static class DiagnosticLocationHelper
     {
-        public static RoslynDiagnosticLocation? ForSymbol( ISymbol? symbol )
+        public static Location? GetLocation( ISymbol? symbol )
         {
             if ( symbol == null )
             {
@@ -19,15 +17,50 @@ namespace Caravela.Framework.Impl.Diagnostics
                 .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
                 .FirstOrDefault();
 
-            if ( bestDeclaration == null )
+            var syntax = bestDeclaration?.GetSyntax();
+            switch ( syntax )
             {
-                return null;
+                   
+                case null:
+                    return null;
+                
+                case MethodDeclarationSyntax method:
+                    return method.Identifier.GetLocation();
+                
+                case EventDeclarationSyntax @event:
+                    return @event.Identifier.GetLocation();
+                
+                case PropertyDeclarationSyntax property:
+                    return property.Identifier.GetLocation();
+                
+                case OperatorDeclarationSyntax @operator:
+                    return @operator.OperatorKeyword.GetLocation();
+                
+                case BaseTypeDeclarationSyntax type:
+                    return type.Identifier.GetLocation();
+                
+                case ParameterSyntax parameter:
+                    return parameter.Identifier.GetLocation();
+                
+                case AccessorDeclarationSyntax accessor:
+                    return accessor.Keyword.GetLocation();
+                
+                case DestructorDeclarationSyntax destructor:
+                    return destructor.Identifier.GetLocation();
+                
+                case ConstructorDeclarationSyntax constructor:
+                    return constructor.Identifier.GetLocation();
+                
+                case TypeParameterSyntax typeParameter:
+                    return typeParameter.Identifier.GetLocation();
+              
+                default:
+                    return syntax.GetLocation(); 
             }
-
-            return new RoslynDiagnosticLocation( bestDeclaration.GetSyntax().GetLocation() );
+        
         }
         
-        public static RoslynDiagnosticLocation? ForAttribute( AttributeData? attribute )
+        public static Location? GetLocation( AttributeData? attribute )
         {
             if ( attribute == null )
             {
@@ -41,14 +74,11 @@ namespace Caravela.Framework.Impl.Diagnostics
                 return null;
             }
 
-            return new RoslynDiagnosticLocation( application.GetSyntax().GetLocation() );
+            return application.GetSyntax().GetLocation();
         }
 
-        public RoslynDiagnosticLocation( Location location )
-        {
-            this.Location = location;
-        }
+        public static UserDiagnosticLocation? ToUserDiagnosticLocation( this Location? location )
+            => location == null ? null : new UserDiagnosticLocation( location );
 
-        public Location Location { get; }
     }
 }

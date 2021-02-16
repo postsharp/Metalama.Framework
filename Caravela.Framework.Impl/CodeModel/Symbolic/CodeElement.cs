@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal abstract class CodeElement : ICodeElement, IHasLocation
+    internal abstract class CodeElement : ICodeElement, IHasDiagnosticLocation
     {
         protected CodeElement( CompilationModel compilation )
         {
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             other is CodeElement codeElement &&
             SymbolEqualityComparer.Default.Equals( this.Symbol, codeElement.Symbol );
 
-        public Location? Location => this.Symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation();
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetLocation( this.Symbol );
 
-        public IDiagnosticLocation? DiagnosticLocation => RoslynDiagnosticLocation.ForSymbol( this.Symbol );
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToUserDiagnosticLocation();
     }
 }

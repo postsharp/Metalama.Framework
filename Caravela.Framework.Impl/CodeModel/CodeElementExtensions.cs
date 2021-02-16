@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public static Location? GetLocation( this ICodeElement codeElement )
             => codeElement switch
             {
-                IHasLocation hasLocation => hasLocation.Location,
+                IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 

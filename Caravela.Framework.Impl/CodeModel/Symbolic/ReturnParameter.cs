@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal abstract class ReturnParameter : IParameter
+    internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation
     {
 
         protected abstract Microsoft.CodeAnalysis.RefKind SymbolRefKind { get; }
@@ -38,5 +39,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public abstract bool Equals( ICodeElement other );
 
         public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
+
+        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetLocation();
     }
 }

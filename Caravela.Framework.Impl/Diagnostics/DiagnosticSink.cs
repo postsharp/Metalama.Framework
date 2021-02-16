@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public void Report( IDiagnosticLocation? location, DiagnosticDescriptor descriptor, object[] args )
         {
-            var roslynLocation = ((RoslynDiagnosticLocation?) location)?.Location;
+            var roslynLocation = ((UserDiagnosticLocation?) location)?.Location;
             var roslynDescriptor = GetRoslynDescriptor( descriptor );
             var diagnostic = Diagnostic.Create( roslynDescriptor, roslynLocation, args );
 
