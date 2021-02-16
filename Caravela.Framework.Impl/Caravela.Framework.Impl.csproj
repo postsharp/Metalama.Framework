@@ -14,6 +14,7 @@
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
 
     <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
+    
   </ItemGroup>
 
   <ItemGroup>
@@ -39,7 +40,7 @@
     <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
   </ItemGroup>
   
-  <!-- based on https://stackoverflow.com/a/56018426/41071 --> 
+  <!-- Includes referenced DLLs in the package. Based on https://stackoverflow.com/a/56018426/41071 --> 
   <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
     <ItemGroup>
       <!-- remove everything from lib -->
@@ -47,6 +48,7 @@
     </ItemGroup>
   </Target>
   
+  <!-- Generate code that includes the version of package dependencies. This allows to generate build-time projects. -->
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
@@ -69,6 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
   </Target>
 
+  <!-- Obfuscation -->
   <PropertyGroup>
     <PostSharpProperties>
       ObfuscateMapFile=$(OutputPath)\$(TargetFramework)\$(AssemblyName).obmap;
