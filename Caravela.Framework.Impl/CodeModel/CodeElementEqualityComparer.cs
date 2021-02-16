@@ -1,9 +1,7 @@
-﻿using Caravela.Framework.Code;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.CodeModel
 {

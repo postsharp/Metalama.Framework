@@ -1,12 +1,10 @@
-// unset
-
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
@@ -21,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         {
             this.MethodSymbol = symbol;
         }
-        
+
         [Memo]
         public IReadOnlyList<IMethod> LocalFunctions =>
             this.MethodSymbol.DeclaringSyntaxReferences
@@ -36,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         [Memo]
         public IReadOnlyList<IParameter> Parameters => this.MethodSymbol.Parameters.Select( p => new Parameter( p, this ) ).ToImmutableArray<IParameter>();
 
-        
+
         MethodKind IMethodBase.MethodKind => this.MethodSymbol.MethodKind switch
         {
             Microsoft.CodeAnalysis.MethodKind.Ordinary => MethodKind.Default,
@@ -60,7 +58,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 Microsoft.CodeAnalysis.MethodKind.FunctionPointerSignature => throw new NotSupportedException(),
             _ => throw new InvalidOperationException()
         };
-        
+
         public override string ToString() => this.MethodSymbol.ToString();
 
 

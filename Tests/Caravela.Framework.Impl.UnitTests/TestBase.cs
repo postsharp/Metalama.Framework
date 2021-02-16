@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

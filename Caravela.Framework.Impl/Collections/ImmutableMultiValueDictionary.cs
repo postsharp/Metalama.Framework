@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Collections
 
         public Builder ToBuilder() => new Builder( this._dictionary.ToBuilder() );
 
-        public ImmutableMultiValueDictionary<TKey, TValue> WithKeyComparer(IEqualityComparer<TKey> keyComparer)
+        public ImmutableMultiValueDictionary<TKey, TValue> WithKeyComparer( IEqualityComparer<TKey> keyComparer )
         {
             var innerBuilder = this._dictionary.ToBuilder();
             innerBuilder.KeyComparer = keyComparer;

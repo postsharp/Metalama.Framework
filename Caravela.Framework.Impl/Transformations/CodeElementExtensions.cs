@@ -1,27 +1,25 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using System.Linq;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     public static class CodeElementExtensions
     {
-        public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement)
+        public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement )
         {
-            if (codeElement is IMethod method)
+            if ( codeElement is IMethod method )
             {
                 return TokenList(
                     new SyntaxToken?[]
                     {
                         method.IsStatic ? Token( SyntaxKind.StaticKeyword ) : null
-                    }.Where( x => x != null ).Select( x => x.Value )
-                    );
+                    }.Where( x => x != null ).Select( x => x.Value ));
             }
 
             throw new AssertionFailedException();
@@ -52,8 +50,7 @@ namespace Caravela.Framework.Impl.Transformations
                             TokenList(), // TODO: modifiers
                             ParseTypeName( p.ParameterType.ToDisplayString() ),
                             Identifier( p.Name! ),
-                            null ) ) )
-                );
+                            null ) ) ));
         }
 
         public static SyntaxList<TypeParameterConstraintClauseSyntax> GetSyntaxConstraintClauses( this IMethod method )

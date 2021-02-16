@@ -1,8 +1,6 @@
-// unset
-
+using System;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
-using System;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -11,10 +9,10 @@ namespace Caravela.Framework.Impl.UnitTests
     {
         public static void DynamicEquals( dynamic expression, string expected )
         {
-            var _ = expression;
-            IDynamicMember meta = (IDynamicMember) expression;
+            _ = expression;
+            var meta = (IDynamicMember) expression;
             var actual = meta.CreateExpression().Syntax.NormalizeWhitespace().ToString();
-            
+
             Assert.Equal( expected, actual );
         }
 
@@ -30,9 +28,7 @@ namespace Caravela.Framework.Impl.UnitTests
             {
                 Assert.Equal( diagnosticDescriptor.Id, e.Diagnostic.Id );
             }
-            
         }
-        
-        
+
     }
 }

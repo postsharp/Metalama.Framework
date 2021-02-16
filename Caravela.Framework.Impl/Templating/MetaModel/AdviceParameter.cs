@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -41,11 +41,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             get => new DynamicMember( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
             set => throw new NotImplementedException();
         }
-        
-        
+
+
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
-        
+
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
     }
 }

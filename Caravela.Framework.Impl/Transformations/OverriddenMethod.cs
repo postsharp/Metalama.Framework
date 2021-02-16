@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -78,7 +75,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
 
-        
+
         private class ProceedToNext : IProceedImpl
         {
             public StatementSyntax CreateAssignStatement( string returnValueLocalName )

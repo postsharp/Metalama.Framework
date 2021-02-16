@@ -3,10 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
@@ -17,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         private CompilationModel _compilation;
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
-        
+
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
         private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
         private readonly ConcurrentDictionary<IMethodSymbol, IConstructor> _constructorCache = new();
@@ -113,6 +110,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 ((ITypeInternal) left).TypeSymbol,
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
 
-      
+
     }
 }

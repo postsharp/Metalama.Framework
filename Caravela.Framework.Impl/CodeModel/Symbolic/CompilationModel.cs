@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
-using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
@@ -21,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public CompilationModel( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
-            this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty.WithKeyComparer(CodeElementEqualityComparer.Instance);
+            this._transformations = ImmutableMultiValueDictionary<ICodeElement, IObservableTransformation>.Empty.WithKeyComparer( CodeElementEqualityComparer.Instance );
             this.Factory = new CodeElementFactory( this );
 
             var allCodeElements = this.SelectContainedElements();
@@ -52,8 +51,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
             this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.Type );
         }
-        
-        
+
+
         public CSharpSyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
 
 
@@ -71,7 +70,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 .Select( a => new Attribute( a, this, this ) )
                 .ToImmutableArray();
 
- 
+
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
         public IReadOnlyMultiValueDictionary<ICodeElement, IObservableTransformation> ObservableTransformations => this._transformations;
@@ -85,7 +84,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             => this.DeclaredTypes.ToMultiValueDictionary( t => t.Namespace ?? string.Empty, t => t );
 
         ITypeFactory ICompilation.TypeFactory => this.Factory;
-        
+
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
         ICodeElement? ICodeElement.ContainingElement => null;
@@ -93,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
-        
+
         ICompilation ICodeElement.Compilation => this;
     }
 }

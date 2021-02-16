@@ -1,7 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -27,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Compilation = compilation;
         }
     }
-    
+
     internal class CurrentTypeOrInstanceDynamic : IDynamicMemberDifferentiated
     {
         private readonly bool _allowExpression;

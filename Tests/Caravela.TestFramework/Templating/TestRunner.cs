@@ -117,7 +117,7 @@ namespace Caravela.TestFramework.Templating
                 var targetCaravelaType = caravelaCompilation.Factory.GetTypeByReflectionName( "TargetCode" )!;
                 var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
 
-                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation, new ProceedInvokeMethod(targetCaravelaMethod) );
+                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation, new ProceedInvokeMethod( targetCaravelaMethod ) );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
                 result.TransformedTargetSource = formattedOutput.GetText();

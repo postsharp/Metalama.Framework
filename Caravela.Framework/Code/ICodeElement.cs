@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Project;
-using System.Linq;
 
 namespace Caravela.Framework.Code
 {
@@ -30,12 +29,5 @@ namespace Caravela.Framework.Code
         public CodeElementKind ElementKind { get; }
 
         ICompilation Compilation { get; }
-    }
-
-    public static class CodeElementExtensions
-    {
-        public static IEnumerable<T> OfName<T>( this IEnumerable<T> members, string name )
-            where T : IMember
-            => members.Where( m => m.Name == name );
     }
 }

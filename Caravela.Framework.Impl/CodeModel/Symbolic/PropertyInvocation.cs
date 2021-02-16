@@ -1,5 +1,4 @@
 ﻿using System;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,14 +35,14 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this._property.GetReceiverSyntax( instance ), IdentifierName( this._property.Name ) );
         }
 
-        public object GetValue( object? instance ) 
+        public object GetValue( object? instance )
             => new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) ), this._property.Type, this._property is Field );
 
         public object SetValue( object? instance, object value )
         {
             var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value).Syntax );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.FromDynamic( value ).Syntax );
 
             return new DynamicMember( expression, this._property.Type, false );
         }
@@ -62,8 +61,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             return expression;
         }
 
-        public object GetIndexerValue( object? instance, params object[] args ) 
-            => new DynamicMember( this.CreateIndexerAccess( RuntimeExpression.FromDynamic(  instance ), RuntimeExpression.FromDynamic( args )), this._property.Type, false );
+        public object GetIndexerValue( object? instance, params object[] args )
+            => new DynamicMember( this.CreateIndexerAccess( RuntimeExpression.FromDynamic( instance ), RuntimeExpression.FromDynamic( args ) ), this._property.Type, false );
 
         public object SetIndexerValue( object? instance, object value, params object[] args )
         {

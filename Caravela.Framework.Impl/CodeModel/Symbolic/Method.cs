@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class Method : MethodBase, IMethodInternal
     {
-      
+
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
         }
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         [Memo]
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
-     
+
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>
             this.MethodSymbol.TypeParameters.Select( tp => this.Compilation.Factory.GetGenericParameter( tp ) ).ToImmutableArray();
@@ -116,7 +115,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                     ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( this._method.Name,
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : IdentifierName( this._method.Name );
-                var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic(  args ) );
+                var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic( args ) );
 
                 if ( ((IMethod) this._method).MethodKind == MethodKind.LocalFunction )
                 {
@@ -130,16 +129,16 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                     return new DynamicMember(
                         InvocationExpression( name ).AddArgumentListArguments( arguments ),
                         this._method.ReturnType,
-                        false);
+                        false );
                 }
 
-                var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromDynamic( instance! ));
+                var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromDynamic( instance! ) );
 
                 return new DynamicMember(
                     InvocationExpression( MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
                         .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,
-                    false);
+                    false );
             }
         }
 

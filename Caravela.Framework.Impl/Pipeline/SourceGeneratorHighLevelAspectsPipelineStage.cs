@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Pipeline
                             default,
                             SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) ) );
 
-                string syntaxTreeName = declaringType.FullName + ".cs";
+                var syntaxTreeName = declaringType.FullName + ".cs";
 
                 additionalSyntaxTrees.Add( syntaxTreeName, syntaxTree );
             }

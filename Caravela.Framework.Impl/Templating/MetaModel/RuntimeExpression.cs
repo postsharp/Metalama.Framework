@@ -1,10 +1,9 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -68,11 +67,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 null => null,
                 RuntimeExpression runtimeExpression => runtimeExpression,
-                
+
                 // This case is used to simplify tests.
                 IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
-                
-                _ => throw new ArgumentOutOfRangeException( nameof(value) )
+
+                _ => throw new ArgumentOutOfRangeException( nameof( value ) )
             };
 
         public static RuntimeExpression?[]? FromDynamic( object[]? array )
@@ -94,7 +93,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     return newArray;
                 }
             }
-            
+
             return array switch
             {
                 null => null,

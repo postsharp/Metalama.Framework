@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateDriver( MethodInfo templateMethodInfo )
         {
-            this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException(nameof(templateMethodInfo));
+            this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
 
         [Obsolete( "Call a method with ITemplateExpansionContext parameter instead." )]

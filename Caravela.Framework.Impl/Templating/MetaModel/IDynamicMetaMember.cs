@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
- 
+
     public interface IDynamicMember
     {
         RuntimeExpression CreateExpression();

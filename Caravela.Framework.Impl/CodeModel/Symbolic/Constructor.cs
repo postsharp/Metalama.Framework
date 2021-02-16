@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal class Constructor : MethodBase, IConstructor
     {
-        public Constructor(IMethodSymbol symbol, CompilationModel compilation) : base(symbol, compilation)
+        public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
         }
 

@@ -9,11 +9,11 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -116,19 +116,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         ReturnStatement(
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,
-                                Token (SyntaxKind.DefaultKeyword)
-                                )
-                            )
+                                Token (SyntaxKind.DefaultKeyword)))
                     }
-                    : null
-                    );
-            
+                    : null);
+
             return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
-        
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
+
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public IReadOnlyList<ISymbol> LookupSymbols()

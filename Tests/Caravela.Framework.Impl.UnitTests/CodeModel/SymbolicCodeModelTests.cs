@@ -79,7 +79,7 @@ class C
 
             var methods = type.Methods;
 
-            Assert.Single( methods);
+            Assert.Single( methods );
 
             var method = methods[0];
             Assert.Equal( "M", method.Name );
@@ -326,12 +326,12 @@ class C : IDisposable
             {
                 Default,
                 Finalizer,
-                PropertyGet, 
+                PropertyGet,
                 PropertySet,
-                EventAdd, 
+                EventAdd,
                 EventRemove,
                 ExplicitInterfaceImplementation,
-                ConversionOperator, 
+                ConversionOperator,
                 UserDefinedOperator
             };
 
@@ -480,11 +480,11 @@ partial class B
             var compilation = CreateCompilation( code );
 
             Assert.Equal( 2, compilation.DeclaredTypes.Count );
-            
-            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A").IsPartial );
-            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B").IsPartial );
 
-            
+            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
+            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
+
+
         }
 
         [Fact]

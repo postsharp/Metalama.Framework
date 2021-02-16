@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Transformations;
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => 
-            ( (NamedType)this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree =>
+            ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
     }
 }

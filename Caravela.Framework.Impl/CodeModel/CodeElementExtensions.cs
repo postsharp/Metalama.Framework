@@ -81,15 +81,15 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     // params methods can be called as params or direcly with an array
                     // so it's probably best to not do any typecheking for them
-                    
+
                     argument = SyntaxFactory.Argument( arg.Syntax );
-                    
+
                 }
                 else
                 {
 
                     if ( parameter.IsOut() || parameter.IsRef() )
-                    {    
+                    {
                         // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
                         // We also intentionally omit to cast the value since it would be illegal.
 
@@ -98,9 +98,9 @@ namespace Caravela.Framework.Impl.CodeModel
                             throw new CaravelaException( GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                                 arg.Syntax, parameter.Name, parameter.ContainingElement );
                         }
-                        
+
                         var syntax = parameter.IsRef() ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
-                        
+
                         argument = SyntaxFactory.Argument( null, SyntaxFactory.Token( syntax ), arg.Syntax );
                     }
                     else
@@ -108,8 +108,8 @@ namespace Caravela.Framework.Impl.CodeModel
                         argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.ParameterType ) );
                     }
                 }
-                
-                
+
+
                 arguments.Add( argument );
             }
 

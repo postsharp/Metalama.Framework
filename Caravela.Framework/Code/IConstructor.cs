@@ -7,6 +7,6 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IConstructor : IMethodBase
     {
-        
+
     }
 }

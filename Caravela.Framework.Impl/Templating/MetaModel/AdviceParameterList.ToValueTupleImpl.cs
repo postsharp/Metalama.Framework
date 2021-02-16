@@ -1,10 +1,8 @@
-// unset
-
+using System;
+using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -24,22 +22,21 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 ExpressionSyntax expression;
                 if ( this._parent.Count == 0 )
                 {
-                    var valueType = this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(ValueType) ).GetSymbol();
+                    var valueType = this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( ValueType ) ).GetSymbol();
                     expression = SyntaxFactory.DefaultExpression( (TypeSyntax) this._parent.Compilation.SyntaxGenerator.TypeExpression( valueType ) );
                 }
                 else
                 {
-                     expression = (ExpressionSyntax) this._parent.Compilation.SyntaxGenerator.TupleExpression(
-                        this._parent._parameters.Select(
-                            p =>
-                                p.IsOut()
-                                    ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
-                                    : (ExpressionSyntax) SyntaxFactory.IdentifierName( p.Name ) )
-                    );
-                    
+                    expression = (ExpressionSyntax) this._parent.Compilation.SyntaxGenerator.TupleExpression(
+                       this._parent._parameters.Select(
+                           p =>
+                               p.IsOut()
+                                   ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
+                                   : SyntaxFactory.IdentifierName( p.Name ) ));
+
                 }
-                
-                return new RuntimeExpression( expression);
+
+                return new RuntimeExpression( expression );
             }
         }
     }

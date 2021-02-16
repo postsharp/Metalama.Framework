@@ -1,10 +1,8 @@
-// unset
-
+using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -27,12 +25,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     this._parent._parameters.Select(
                         p =>
                             p.IsOut()
-                                ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( CodeModelExtensions.GetSymbol( (IType) p.ParameterType ) )
-                                : (ExpressionSyntax) SyntaxFactory.IdentifierName( p.Name ) ) );
+                                ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
+                                : SyntaxFactory.IdentifierName( p.Name ) ) );
 
                 return new RuntimeExpression(
                     array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
+                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) ),
                     false );
 
             }

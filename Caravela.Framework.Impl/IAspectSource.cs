@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl
         }
 
         public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType )
-        { 
+        {
             return this._sources[aspectType.Name].SelectMany( s => s() );
         }
     }

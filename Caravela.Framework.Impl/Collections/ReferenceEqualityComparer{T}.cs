@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Collections
 {
-    internal class ReferenceEqualityComparer<T> : IEqualityComparer<T> 
+    internal class ReferenceEqualityComparer<T> : IEqualityComparer<T>
         where T : class
     {
         public static readonly ReferenceEqualityComparer<T> Instance = new ReferenceEqualityComparer<T>();
