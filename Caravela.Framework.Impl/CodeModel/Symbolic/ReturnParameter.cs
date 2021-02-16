@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
@@ -35,5 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         public abstract bool Equals( ICodeElement other );
+
+        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
     }
 }

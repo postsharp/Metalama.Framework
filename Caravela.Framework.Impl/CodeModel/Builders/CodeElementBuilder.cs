@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -34,5 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             this.IsReadOnly = true;
         }
+
+        public IDiagnosticLocation? DiagnosticLocation => null;
     }
 }

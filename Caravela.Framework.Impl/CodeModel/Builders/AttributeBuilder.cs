@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -35,5 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<object?> ConstructorArguments { get; }
 
         IReadOnlyList<KeyValuePair<string, object?>> IAttribute.NamedArguments => this.NamedArguments;
+
+        public IDiagnosticLocation? DiagnosticLocation => null;
     }
 }

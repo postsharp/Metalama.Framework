@@ -2,6 +2,8 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -41,5 +43,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             SymbolEqualityComparer.Default.Equals( this.Symbol, codeElement.Symbol );
 
         public Location? Location => this.Symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax()?.GetLocation();
+
+        public IDiagnosticLocation? DiagnosticLocation => RoslynDiagnosticLocation.ForSymbol( this.Symbol );
     }
 }

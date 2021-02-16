@@ -1,5 +1,6 @@
 ﻿using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <remarks>
     /// The template driver requires an instance of the expansion context before it can invoke the template method.
     /// </remarks>
-    internal interface ITemplateExpansionContext
+    internal interface ITemplateExpansionContext 
     {
         /// <summary>
         /// Gets the element of code to which a template was applied.
