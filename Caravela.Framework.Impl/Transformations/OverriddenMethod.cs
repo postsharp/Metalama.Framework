@@ -58,21 +58,23 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ) );
 
-            var overrides = new[] {
+            var overrides = new[] 
+            {
                 new IntroducedMember(
-                MethodDeclaration(
-                    List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifiers(),
-                    this.OverriddenDeclaration.GetSyntaxReturnType(),
-                    null,
-                    Identifier( methodName ),
-                    this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                    this.OverriddenDeclaration.GetSyntaxParameterList(),
-                    this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
-                    newMethodBody,
-                    null),
-                this.Advice.AspectPartId,
-                IntroducedMemberSemantic.MethodOverride )
+                    this,
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        this.OverriddenDeclaration.GetSyntaxModifiers(),
+                        this.OverriddenDeclaration.GetSyntaxReturnType(),
+                        null,
+                        Identifier( methodName ),
+                        this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
+                        this.OverriddenDeclaration.GetSyntaxParameterList(),
+                        this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                        newMethodBody,
+                        null),
+                    this.Advice.AspectPartId,
+                    IntroducedMemberSemantic.MethodOverride )
             };
 
             return overrides;

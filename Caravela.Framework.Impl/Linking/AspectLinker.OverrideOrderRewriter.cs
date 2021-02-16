@@ -16,12 +16,17 @@ namespace Caravela.Framework.Impl.Linking
             private readonly CSharpCompilation _compilation;
             private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
             private readonly ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember> _introducedMemberLookup;
-
-            public SimpleLinkerRewriter(CSharpCompilation compilation, IReadOnlyList<AspectPart> orderedAspectParts, ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember> introducedMemberLookup)
+            public OverrideOrderRewriter( CSharpCompilation compilation, IReadOnlyList<AspectPart> orderedAspectParts, IReadOnlyList<ISyntaxTreeIntroduction> allTransformations )
             {
                 this._compilation = compilation;
                 this._orderedAspectParts = orderedAspectParts;
-                this._introducedMemberLookup = introducedMemberLookup;
+                this._introducedMemberLookup =
+                    ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember>.Empty;
+                //allTransformations
+                //.OfType<IOverriddenElement>()
+                //.OfType<IMemberIntroduction>()
+                //.SelectMany( x => x.GetIntroducedMembers().Select( i => (OverriddenElement: ((IOverriddenElement) x).OverriddenElement, IntroducedMember: i) ) )
+                //.ToMultiValueDictionary( x => x.OverriddenElement, x => x.IntroducedMember );
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )

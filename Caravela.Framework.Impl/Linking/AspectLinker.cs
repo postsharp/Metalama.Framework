@@ -23,12 +23,16 @@ namespace Caravela.Framework.Impl.Linking
         {
             var intermediateCompilation = this._input.Compilation;
 
-            var transformationsBySyntaxTree =
-                this._input.CompilationModel.ObservableTransformations.Values.OfType<ISyntaxTreeIntroduction>()
-                    .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeIntroduction>() )
-                    .GroupBy( t => t.TargetSyntaxTree, t => t )
-                    .ToDictionary( g => g.Key, g => g );
+            var allTransformations =
+                this._input.CompilationModel.ObservableTransformations.Values
+                .OfType<ISyntaxTreeIntroduction>()
+                .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeIntroduction>() )
+                .ToList();
 
+            var transformationsBySyntaxTree =
+                allTransformations
+                .GroupBy( t => t.TargetSyntaxTree, t => t )
+                .ToDictionary( g => g.Key, g => g );
 
             // TODO: This is not optimal structure for this.
             ImmutableMultiValueDictionary<ICodeElement, IntroducedMember> overrideLookup =
@@ -111,7 +115,7 @@ namespace Caravela.Framework.Impl.Linking
             // Two things it should do:
             //   1. Replace calls to the vanilla method to the call to the right "override" method.
 
-            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts);
+            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts, allTransformations );
 
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {

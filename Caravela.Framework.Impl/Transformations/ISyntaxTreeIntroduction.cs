@@ -8,6 +8,5 @@ namespace Caravela.Framework.Impl.Transformations
     internal interface ISyntaxTreeIntroduction
     {
         SyntaxTree TargetSyntaxTree { get; }
-        object InsertPosition { get; }
     }
 }
