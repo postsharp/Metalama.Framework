@@ -9,8 +9,17 @@ namespace Caravela.Framework.Diagnostics
     internal readonly struct DiagnosticContext
     {
         private static readonly AsyncLocal<DiagnosticContext> _current = new();
+
         public static DiagnosticContext Current => _current.Value;
+        
+        /// <summary>
+        /// Gets the <see cref="IUserDiagnosticSink"/> for the current execution context.
+        /// </summary>
         public IUserDiagnosticSink? Sink { get; }
+        
+        /// <summary>
+        /// Gets the default target, used when the location or target is not specified by the user.
+        /// </summary>
         public IDiagnosticTarget? DefaultTarget { get; }
 
         private DiagnosticContext( IUserDiagnosticSink? sink, IDiagnosticTarget? defaultTarget )
@@ -19,7 +28,6 @@ namespace Caravela.Framework.Diagnostics
             this.DefaultTarget = defaultTarget;
         }
 
-        
         /// <summary>
         /// Changes the diagnostic data for the current execution context.
         /// </summary>
@@ -33,13 +41,25 @@ namespace Caravela.Framework.Diagnostics
             return cookie;
         }
 
+        /// <summary>
+        /// Sets the <see cref="IUserDiagnosticSink"/> for the current execution context,
+        /// and returns an opaque <see cref="IDisposable"/> that the caller must dispose to return to the previous execution context data.
+        /// </summary>
+        /// <param name="sink"></param>
+        /// <returns></returns>
         public static IDisposable WithSink( IUserDiagnosticSink? sink ) => WithContext( sink, Current.DefaultTarget );
+        
+        /// <summary>
+        /// Sets the default target, used when the location or target is not specified by the user, for the current execution context,
+        /// and returns an opaque <see cref="IDisposable"/> that the caller must dispose to return to the previous execution context data.
+        /// </summary>
+        /// <param name="defaultTarget"></param>
+        /// <returns></returns>
         public static IDisposable WithDefaultTarget( IDiagnosticTarget? defaultTarget) => WithContext( Current.Sink, defaultTarget );
 
-
-        class Cookie : IDisposable
+        private class Cookie : IDisposable
         {
-            private DiagnosticContext _previousValue;
+            private readonly DiagnosticContext _previousValue;
 
             public Cookie( DiagnosticContext previousValue )
             {

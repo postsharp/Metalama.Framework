@@ -1,8 +1,7 @@
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
-using System.Linq;
-using System.Reflection.Metadata;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -37,7 +36,7 @@ class C<T> : object
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetLocation() );
-            AssertLocation( "C", type.StaticConstructor.GetLocation() );
+            AssertLocation( "C", type.StaticConstructor!.GetLocation() );
 
             // Methods
             AssertLocation( "Method", method.GetLocation() );
@@ -48,13 +47,9 @@ class C<T> : object
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetLocation() );
             var property = type.Properties.OfName( "Property" ).Single();
-            AssertLocation( "get", property.Getter.GetLocation() );
-            AssertLocation( "set", property.Setter.GetLocation() );
-
-
-
+            AssertLocation( "get", property.Getter!.GetLocation() );
+            AssertLocation( "set", property.Setter!.GetLocation() );
         }
-
 
         private static void AssertLocation( string? expectedText, Location? location )
         {
@@ -66,13 +61,10 @@ class C<T> : object
             
             Assert.NotNull( location );
 
-            var actualText = location.SourceTree.GetText().GetSubText( location.SourceSpan ).ToString();
+            var actualText = location!.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
             
             Assert.Equal( expectedText, actualText );
         }
-        
-        
-        
-        
+
     }
 }

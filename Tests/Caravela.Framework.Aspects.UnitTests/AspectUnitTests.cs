@@ -16,5 +16,4 @@ namespace Caravela.Framework.Aspects.UnitTests
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
     }
 
-
 }

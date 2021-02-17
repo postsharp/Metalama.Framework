@@ -61,8 +61,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation.ToUserDiagnosticLocation();
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetLocation( this._data );
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this._data );
     }
 }

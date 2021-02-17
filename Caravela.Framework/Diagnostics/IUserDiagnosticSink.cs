@@ -1,4 +1,4 @@
-namespace Caravela.Framework.Diagnostics
+﻿namespace Caravela.Framework.Diagnostics
 {
     /// <summary>
     /// A sink that reports diagnostics reported from user code.

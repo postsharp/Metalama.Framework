@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             other is CodeElement codeElement &&
             SymbolEqualityComparer.Default.Equals( this.Symbol, codeElement.Symbol );
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetLocation( this.Symbol );
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToUserDiagnosticLocation();
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
     }
 }

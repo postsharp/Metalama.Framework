@@ -1,12 +1,22 @@
+﻿using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
+    /// <summary>
+    /// Helper methods to work with diagnostics.
+    /// </summary>
     internal static class DiagnosticLocationHelper
     {
-        public static Location? GetLocation( ISymbol? symbol )
+
+        /// <summary>
+        /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
+        /// a given <see cref="ISymbol"/> (typically the identifier).
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public static Location? GetDiagnosticLocation( ISymbol? symbol )
         {
             if ( symbol == null )
             {
@@ -57,10 +67,15 @@ namespace Caravela.Framework.Impl.Diagnostics
                 default:
                     return syntax.GetLocation(); 
             }
-        
         }
-        
-        public static Location? GetLocation( AttributeData? attribute )
+
+        /// <summary>
+        /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
+        /// a given <see cref="AttributeData"/>.
+        /// </summary>
+        /// <param name="attribute"></param>
+        /// <returns></returns>
+        public static Location? GetDiagnosticLocation( AttributeData? attribute )
         {
             if ( attribute == null )
             {
@@ -77,8 +92,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             return application.GetSyntax().GetLocation();
         }
 
-        public static UserDiagnosticLocation? ToUserDiagnosticLocation( this Location? location )
-            => location == null ? null : new UserDiagnosticLocation( location );
-
+        public static DiagnosticLocation? ToDiagnosticLocation( this Location? location )
+            => location == null ? null : new DiagnosticLocation( location );
     }
 }

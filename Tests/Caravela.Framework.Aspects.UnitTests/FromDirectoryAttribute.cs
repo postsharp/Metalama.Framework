@@ -32,7 +32,9 @@ namespace Caravela.Framework.Aspects.UnitTests
         
         public override IEnumerable<object[]> GetData( MethodInfo testMethod )
         {
-            //Debugger.Launch();
+            // To debug this method, comment out the next line:
+            // Debugger.Launch();
+
             List<object[]> tests = new();
 
             void AddTestsInDirectory( string dirPath )
