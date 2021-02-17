@@ -21,7 +21,7 @@ namespace Caravela.TestFramework
     {
         public bool HandlesException { get; set; } = true;
         
-        public virtual async Task<TestResult> Run( string testPath, string testSource )
+        public virtual async Task<TestResult> Run( string testName, string testSource )
         {
 
             testSource = CommonSnippets.CaravelaUsings + testSource;
@@ -50,7 +50,7 @@ namespace Caravela.TestFramework
 
             try
             {
-                var context = new AspectTestPipelineContext( Path.GetFileNameWithoutExtension( testPath ), initialCompilation, result );
+                var context = new AspectTestPipelineContext( testName, initialCompilation, result );
                 CompileTimeAspectPipeline pipeline = new CompileTimeAspectPipeline( context );
                 if ( pipeline.TryExecute( out var resultCompilation ) )
                 {

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Collections;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
@@ -92,5 +93,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
         ICompilation ICodeElement.Compilation => this;
+
+        public IDiagnosticLocation? DiagnosticLocation => null;
     }
 }

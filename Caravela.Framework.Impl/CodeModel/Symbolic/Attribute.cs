@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal class Attribute : IAttribute
+    internal class Attribute : IAttribute, IHasDiagnosticLocation
     {
         private readonly AttributeData _data;
         private readonly CompilationModel _compilation;
@@ -58,5 +60,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
+
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
+
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this._data );
     }
 }

@@ -5,8 +5,10 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -67,7 +69,10 @@ namespace Caravela.Framework.Impl
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
-            aspectOfT.Initialize( aspectBuilder );
+            using ( DiagnosticContext.WithContext(aspectBuilder.UserDiagnostics, codeElement) )
+            {
+                aspectOfT.Initialize( aspectBuilder );
+            }
 
             return aspectBuilder.ToResult();
         }

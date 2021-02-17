@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -35,7 +36,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 
-        public ICompilation Compilation => throw new NotImplementedException();
+        public ICompilation Compilation => this._parameter.Compilation;
 
         public dynamic Value
         {
@@ -46,5 +47,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
+
+        public IDiagnosticLocation? DiagnosticLocation => this._parameter.DiagnosticLocation;
     }
 }

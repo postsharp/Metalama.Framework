@@ -1,3 +1,4 @@
+using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Project;
@@ -9,7 +10,7 @@ namespace Caravela.Framework.Code
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTime]
-    public interface ICodeElement : IDisplayable, IEquatable<ICodeElement>
+    public interface ICodeElement : IDisplayable, IDiagnosticTarget, IEquatable<ICodeElement>
     {
         /// <summary>
         /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
