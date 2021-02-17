@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,7 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorHighLevelAspectsPipelineStage : HighLevelAspectsPipelineStage
     {
-        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader ) : base( aspectParts, assemblyLoader )
+        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) : base( aspectParts, assemblyLoader, properties )
         {
         }
 
@@ -27,9 +25,9 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var transformations = aspectPartResult.Compilation.ObservableTransformations;
 
-            ImmutableDictionary<string, SyntaxTree>.Builder additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
+            var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 
-            foreach ( IGrouping<ICodeElement, IObservableTransformation> transformationGroup in transformations )
+            foreach ( var transformationGroup in transformations )
             {
                 if ( !(transformationGroup.Key is INamedType declaringType) )
                 {
@@ -66,15 +64,21 @@ namespace Caravela.Framework.Impl.Pipeline
                     }
                 }
 
-                var syntaxTree =
-                    SyntaxFactory.SyntaxTree(
-                        SyntaxFactory.NamespaceDeclaration(
-                            SyntaxFactory.ParseName( declaringType.Namespace, 0, true ),
-                            default,
-                            default,
-                            SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) ) );
+                SyntaxNode topDeclaration = classDeclaration;
 
-                string syntaxTreeName = declaringType.FullName + ".cs";
+                if ( declaringType.Namespace != null )
+                {
+
+                    topDeclaration = SyntaxFactory.NamespaceDeclaration(
+                                                SyntaxFactory.ParseName( declaringType.Namespace, 0, true ),
+                                                default,
+                                                default,
+                                                SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
+                }
+
+                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );
+
+                var syntaxTreeName = declaringType.FullName + ".cs";
 
                 additionalSyntaxTrees.Add( syntaxTreeName, syntaxTree );
             }

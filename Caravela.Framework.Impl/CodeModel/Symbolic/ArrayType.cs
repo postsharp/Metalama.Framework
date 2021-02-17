@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public override TypeKind TypeKind => TypeKind.Array;
 
         [Memo]
-        public IType ElementType => this.Compilation.GetIType( this.Symbol.ElementType );
+        public IType ElementType => this.Compilation.Factory.GetIType( this.Symbol.ElementType );
 
         public int Rank => this.Symbol.Rank;
     }

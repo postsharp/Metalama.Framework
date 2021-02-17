@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public AspectPartId AspectPartId => new AspectPartId( this.Aspect.AspectType, this.PartName );
 
-        public string PartName { get; set; }
+        public string? PartName { get; set; }
 
         protected Advice( AspectInstance aspect, ICodeElement targetDeclaration )
         {

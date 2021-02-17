@@ -3,18 +3,18 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// An implementation of <see cref="IConfigOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
+    /// An implementation of <see cref="IBuildOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
     /// </summary>
-    internal class AnalyzerConfigOptionsAdapter : IConfigOptions
+    internal class AnalyzerBuildOptionsSource : IBuildOptionsSource
     {
         private readonly AnalyzerConfigOptions _options;
 
-        public AnalyzerConfigOptionsAdapter( AnalyzerConfigOptionsProvider options )
+        public AnalyzerBuildOptionsSource( AnalyzerConfigOptionsProvider options )
         {
             this._options = options.GlobalOptions;
         }
 
-        public AnalyzerConfigOptionsAdapter( AnalyzerConfigOptions options )
+        public AnalyzerBuildOptionsSource( AnalyzerConfigOptions options )
         {
             this._options = options;
         }

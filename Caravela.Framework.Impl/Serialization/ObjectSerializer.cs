@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Serialization
         public abstract ExpressionSyntax SerializeObject( object o );
 
         /// <summary>
-        /// Throws a <see cref="CaravelaException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
+        /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
         /// </summary>
         protected internal static void ThrowIfStackTooDeep( object obj )
         {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Serialization
             }
             catch
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
             }
         }
     }

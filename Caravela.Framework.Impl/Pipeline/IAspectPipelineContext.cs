@@ -17,8 +17,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IList<ResourceDescription> ManifestResources { get; }
 
-        IConfigOptions Options { get; }
-
+        IBuildOptions BuildOptions { get; }
+        
         void ReportDiagnostic( Diagnostic diagnostic );
+        
+        bool HandleExceptions { get; }
     }
+
+    
 }

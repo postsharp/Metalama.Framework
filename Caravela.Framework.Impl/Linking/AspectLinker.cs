@@ -29,8 +29,8 @@ namespace Caravela.Framework.Impl.Linking
 
             var allTransformations =
                 this._input.CompilationModel.ObservableTransformations.Values
-                .OfType<ISyntaxTreeIntroduction>()
-                .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeIntroduction>() )
+                .OfType<ISyntaxTreeTransformation>()
+                .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();
 
             var transformationsBySyntaxTree =

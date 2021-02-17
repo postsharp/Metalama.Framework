@@ -1,5 +1,3 @@
-// unset
-
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
@@ -24,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract TypeKind TypeKind { get; }
 
-        ITypeFactory IType.TypeFactory => this.Compilation;
+        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
         ITypeSymbol ITypeInternal.TypeSymbol => this.Symbol;
 

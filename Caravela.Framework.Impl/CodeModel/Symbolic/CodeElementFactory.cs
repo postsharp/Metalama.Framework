@@ -1,27 +1,44 @@
-// unset
-
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
-using Microsoft.CodeAnalysis.Editing;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal partial class CompilationModel
+    /// <summary>
+    /// Creates instances of <see cref="ICodeElement"/> for a given <see cref="CompilationModel"/>.
+    /// </summary>
+    internal class CodeElementFactory : ITypeFactory
     {
+        private readonly CompilationModel _compilation;
         private readonly ConcurrentDictionary<ITypeSymbol, IType> _typeCache = new();
         private readonly ConcurrentDictionary<IMethodSymbol, IMethod> _methodCache = new();
         private readonly ConcurrentDictionary<IMethodSymbol, IConstructor> _constructorCache = new();
 
+        public CodeElementFactory( CompilationModel compilation )
+        {
+            this._compilation = compilation;
+        }
+
+        private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
+
+        public INamedType GetTypeByReflectionName( string reflectionName )
+        {
+            var symbol = this.RoslynCompilation.GetTypeByMetadataName( reflectionName );
+
+            if ( symbol == null )
+            {
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotFindType, reflectionName );
+            }
+
+            return this.GetNamedType( symbol );
+        }
+
         public ObjectSerializers Serializers { get; } = new();
 
-        public SyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
-
-        public IType? GetTypeByReflectionType( Type type )
+        public IType GetTypeByReflectionType( Type type )
         {
             if ( type.IsByRef )
             {
@@ -32,14 +49,14 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             {
                 var elementType = this.GetTypeByReflectionType( type.GetElementType() );
 
-                return elementType?.MakeArrayType( type.GetArrayRank() );
+                return elementType.MakeArrayType( type.GetArrayRank() );
             }
 
             if ( type.IsPointer )
             {
                 var pointedToType = this.GetTypeByReflectionType( type.GetElementType() );
 
-                return pointedToType?.MakePointerType();
+                return pointedToType.MakePointerType();
             }
 
             if ( type.IsConstructedGenericType )
@@ -47,38 +64,33 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 var genericDefinition = this.GetTypeByReflectionName( type.GetGenericTypeDefinition().FullName );
                 var genericArguments = type.GenericTypeArguments.Select( this.GetTypeByReflectionType ).ToArray();
 
-                if ( genericArguments.Any( a => a == null ) )
-                {
-                    return null;
-                }
-
-                return genericDefinition?.WithGenericArguments( genericArguments! );
+                return genericDefinition.WithGenericArguments( genericArguments! );
             }
 
             return this.GetTypeByReflectionName( type.FullName );
         }
 
         internal IType GetIType( ITypeSymbol typeSymbol )
-            => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this ) );
+            => this._typeCache.GetOrAdd( typeSymbol, ts => CodeModelFactory.CreateIType( ts, this._compilation ) );
 
-        protected NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this );
+        protected NamedType CreateNamedType( INamedTypeSymbol symbol ) => new NamedType( symbol, this._compilation );
 
         internal NamedType GetNamedType( INamedTypeSymbol typeSymbol )
             => (NamedType) this._typeCache.GetOrAdd( typeSymbol, s => this.CreateNamedType( (INamedTypeSymbol) s ) );
 
         internal GenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (GenericParameter) this._typeCache.GetOrAdd( typeParameterSymbol, new GenericParameter( typeParameterSymbol, this ) );
+            => (GenericParameter) this._typeCache.GetOrAdd( typeParameterSymbol, new GenericParameter( typeParameterSymbol, this._compilation ) );
 
         internal IMethod GetMethod( IMethodSymbol methodSymbol )
-            => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this ) );
+            => this._methodCache.GetOrAdd( methodSymbol, ms => new Method( ms, this._compilation ) );
 
         internal IConstructor GetConstructor( IMethodSymbol methodSymbol )
-            => this._constructorCache.GetOrAdd( methodSymbol, ms => new Constructor( ms, this ) );
+            => this._constructorCache.GetOrAdd( methodSymbol, ms => new Constructor( ms, this._compilation ) );
 
         internal ICodeElement GetCodeElement( ISymbol symbol ) =>
             symbol switch
             {
-                INamespaceSymbol ns => this,
+                INamespaceSymbol => this._compilation,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method => this.GetMethod( method ),
                 _ => throw new ArgumentException( nameof( symbol ) )
@@ -97,7 +109,5 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             this.RoslynCompilation.HasImplicitConversion(
                 ((ITypeInternal) left).TypeSymbol,
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
-
-        ICompilation ICodeElement.Compilation => this;
     }
 }

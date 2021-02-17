@@ -1,19 +1,18 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
     public static class CodeElementExtensions
     {
-        public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement)
+        public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement )
         {
             if (codeElement is Method method)
             {
@@ -55,10 +54,9 @@ namespace Caravela.Framework.Impl.Transformations
                         p => Parameter(
                             List<AttributeListSyntax>(),
                             TokenList(), // TODO: modifiers
-                            ParseTypeName( p.Type.ToDisplayString() ),
+                            ParseTypeName( p.ParameterType.ToDisplayString() ),
                             Identifier( p.Name! ),
-                            null ) ) )
-                );
+                            null ) ) ));
         }
 
         public static SyntaxList<TypeParameterConstraintClauseSyntax> GetSyntaxConstraintClauses( this IMethod method )

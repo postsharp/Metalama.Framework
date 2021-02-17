@@ -15,7 +15,8 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            if ( CompileTimeAspectPipeline.TryExecute( new AspectPipelineContext( transformerContext ), out var compilation ) )
+            using CompileTimeAspectPipeline pipeline = new( new AspectPipelineContext( transformerContext ));
+            if ( pipeline.TryExecute( out var compilation ) )
             {
                 return compilation;
             }
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
             public AspectPipelineContext( TransformerContext transformerContext )
             {
                 this._transformerContext = transformerContext;
-                this.Options = new AnalyzerConfigOptionsAdapter( this._transformerContext.GlobalOptions );
+                this.BuildOptions = new BuildOptions( new AnalyzerBuildOptionsSource( this._transformerContext.GlobalOptions ) );
             }
 
             public CSharpCompilation Compilation => (CSharpCompilation) this._transformerContext.Compilation;
@@ -41,11 +42,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
             public IList<ResourceDescription> ManifestResources => this._transformerContext.ManifestResources;
 
-            public IConfigOptions Options { get; }
+            public IBuildOptions BuildOptions { get; }
 
             public CancellationToken CancellationToken => CancellationToken.None;
 
             public void ReportDiagnostic( Diagnostic diagnostic ) => this._transformerContext.ReportDiagnostic( diagnostic );
+
+            public bool HandleExceptions => true;
         }
     }
 }

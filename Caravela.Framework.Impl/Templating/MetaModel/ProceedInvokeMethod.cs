@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
@@ -28,7 +27,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
             {
                 // TODO: Add the namespace.
+#pragma warning disable CS0618 // Type or member is obsolete
                 return IdentifierName( nameof( __Void ) );
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             else
             {
@@ -45,8 +46,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
                         IdentifierName( returnValueLocalName ),
-                        this.CreateOriginalMethodCall()
-                    ) );
+                        this.CreateOriginalMethodCall()) );
         }
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
@@ -56,16 +56,14 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 // Emit `<original_method_call>; return`.
                 return Block(
                     ExpressionStatement( this.CreateOriginalMethodCall() ),
-                    ReturnStatement()
-                    );
+                    ReturnStatement());
             }
             else
             {
                 // Emit `return <original_method_call>`.
                 return
                     ReturnStatement(
-                        this.CreateOriginalMethodCall()
-                        );
+                        this.CreateOriginalMethodCall());
             }
         }
 
@@ -79,18 +77,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
-                            IdentifierName( this._originalDeclaration.Name )
-                            )
+                            IdentifierName( this._originalDeclaration.Name ))
                     : IdentifierName( this._originalDeclaration.Name ),
                     ArgumentList(
                         SeparatedList(
-                            this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
-                            )
-                        )
-                    );
+                            this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
 
-            if (this._aspectPartId != null)
+            if ( this._aspectPartId != null )
+            {
                 invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
+            }
 
             return invocation;
         }

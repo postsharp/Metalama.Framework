@@ -12,15 +12,14 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorAspectPipeline : AspectPipeline
     {
-        private SourceGeneratorAspectPipeline( IAspectPipelineContext context ) : base( context, new Options() )
+        public SourceGeneratorAspectPipeline( IAspectPipelineContext context ) : base( context )
         {
         }
 
-        public static bool TryExecute( IAspectPipelineContext context, [NotNullWhen( true )] out IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees )
+        public bool TryExecute( [NotNullWhen( true )] out IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees )
         {
-            var pipeline = new SourceGeneratorAspectPipeline( context );
-
-            if ( !pipeline.TryExecute( out var result ) )
+            
+            if ( !this.TryExecuteCore( out var result ) )
             {
                 additionalSyntaxTrees = null;
                 return false;
@@ -30,13 +29,11 @@ namespace Caravela.Framework.Impl.Pipeline
             return true;
         }
 
-        private class Options : IAspectPipelineOptions
-        {
-            public bool CanTransformCompilation => false;
-        }
+        public override bool CanTransformCompilation => false;
 
+        
         /// <inheritdoc/>
         protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader );
+            => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this );
     }
 }

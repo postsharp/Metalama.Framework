@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl.Transformations
     /// <summary>
     /// Represents an introduced member (but not a type), observable or not.
     /// </summary>
-    internal interface IMemberIntroduction : ISyntaxTreeIntroduction
+    internal interface IMemberIntroduction : ISyntaxTreeTransformation
     {
         /// <summary>
         /// Gets the full syntax of introduced members including the body.

@@ -13,6 +13,6 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parameter type.
         /// </summary>
-        new IType Type { get; set; }
+        new IType ParameterType { get; set; }
     }
 }

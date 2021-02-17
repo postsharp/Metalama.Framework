@@ -11,18 +11,18 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class CompileTimeAspectPipeline : AspectPipeline
     {
-        private CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context, new Options() )
+        public CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context )
         {
         }
 
-        public static bool TryExecute( IAspectPipelineContext context, [NotNullWhen( true )] out Compilation? outputCompilation )
+        public bool TryExecute( [NotNullWhen( true )] out Compilation? outputCompilation )
         {
             try
             {
 
-                var pipeline = new CompileTimeAspectPipeline( context );
+                var pipeline = new CompileTimeAspectPipeline( this.Context );
 
-                if ( !pipeline.TryExecute( out var result ) )
+                if ( !pipeline.TryExecuteCore( out var result ) )
                 {
                     outputCompilation = null;
                     return false;
@@ -47,20 +47,19 @@ namespace Caravela.Framework.Impl.Pipeline
                 outputCompilation = pipeline.CompileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
                 return true;
             }
-            catch ( Exception exception )
+            catch ( Exception exception ) when ( this.Context.HandleExceptions )
             {
-                HandleException( exception, context );
+                this.HandleException( exception );
                 outputCompilation = null;
                 return false;
             }
         }
 
-        private class Options : IAspectPipelineOptions
-        {
-            public bool CanTransformCompilation => true;
-        }
+  
 
         protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new CompileTimeHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader );
+            => new CompileTimeHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this );
+
+        public override bool CanTransformCompilation => true;
     }
 }
