@@ -4,12 +4,23 @@
         [Log]
         public static int Add(int a, int b)
         {
+            return __Add__LogAttribute(a, b);
+        }
+
+        [Log]
+        public static int __Add__OriginalBody(int a, int b)
+        {
+            if (a == 0)
+                throw new ArgumentOutOfRangeException(nameof(a));
+            return a + b;
+        }
+        public static global::System.Int32 __Add__LogAttribute(int a, int b)
+        {
             Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
             try
             {
-                int result;
-                if (a == 0) throw new ArgumentOutOfRangeException(nameof(a));
-                result = a + b;
+                global::System.Int32 result;
+                result = __Add__OriginalBody(a, b);
                 Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
                 return (int)result;
             }

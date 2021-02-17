@@ -1,4 +1,5 @@
 ﻿using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -14,12 +15,16 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement)
         {
-            if (codeElement is IMethod method)
+            if (codeElement is Method method)
+            {
+                return ((BaseMethodDeclarationSyntax) method.Symbol.DeclaringSyntaxReferences.Single().GetSyntax()).Modifiers;
+            }
+            else if (codeElement is IMethod imethod)
             {
                 return TokenList(
                     new SyntaxToken?[]
                     {
-                        method.IsStatic ? Token( SyntaxKind.StaticKeyword ) : null
+                        imethod.IsStatic ? Token( SyntaxKind.StaticKeyword ) : null
                     }.Where( x => x != null ).Select( x => x.Value )
                     );
             }
