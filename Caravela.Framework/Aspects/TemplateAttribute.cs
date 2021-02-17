@@ -13,13 +13,4 @@ namespace Caravela.Framework.Aspects
         {
         }
     }
-
-    // TODO: Needs to be moved out of the public API.
-
-    /// <summary>
-    /// Can be used by the tests when they want to bypassing the aspect framework.
-    /// </summary>
-    public sealed class TestTemplateAttribute : TemplateAttribute
-    {
-    }
 }

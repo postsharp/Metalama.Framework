@@ -1,0 +1,7 @@
+{
+    Console.WriteLine(0);
+    Console.WriteLine(1);
+    Console.WriteLine(0);
+    Console.WriteLine(0);
+    return a + b;
+}

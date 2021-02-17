@@ -1,0 +1,20 @@
+{
+    object y = a;
+    var x = 0;
+    Console.WriteLine(x);
+    if (y == null)
+    {
+        var x_1 = 1;
+        Console.WriteLine(x_1);
+    }
+
+    var x_2 = 2;
+    Console.WriteLine(x_2);
+    if (y == null)
+    {
+        var x_1 = 3;
+        Console.WriteLine(x_1);
+    }
+
+    return a;
+}

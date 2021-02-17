@@ -1,0 +1,7 @@
+{
+    var x = 0;
+    Console.WriteLine(x);
+    var y = 0;
+    Console.WriteLine(y);
+    return a;
+}

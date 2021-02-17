@@ -1,0 +1,8 @@
+{
+    if (string.IsNullOrEmpty(a))
+    {
+        throw new ArgumentException("IsNullOrEmpty", "a");
+    }
+
+    return a;
+}

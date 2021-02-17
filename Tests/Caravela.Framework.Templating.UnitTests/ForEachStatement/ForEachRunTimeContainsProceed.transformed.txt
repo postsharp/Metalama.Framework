@@ -1,0 +1,9 @@
+{
+    IEnumerable<int> array = Enumerable.Range(1, 2);
+    foreach (var i in array)
+    {
+        Console.WriteLine(a + bb);
+    }
+
+    return;
+}
