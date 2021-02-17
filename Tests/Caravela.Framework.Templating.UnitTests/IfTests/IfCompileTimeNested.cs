@@ -10,7 +10,7 @@ namespace Caravela.Framework.Templating.UnitTests.IfTests.IfCompileTimeNested
         [TestTemplate]
         dynamic Template()
         {
-            int t = 0;
+            int t = compileTime(0);
             string name = target.Parameters[0].Name;
             if (name.Contains("a"))
             {

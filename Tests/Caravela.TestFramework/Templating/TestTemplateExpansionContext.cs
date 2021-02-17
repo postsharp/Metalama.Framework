@@ -36,7 +36,7 @@ namespace Caravela.TestFramework.Templating
                 .Single();
 
             this.ProceedImplementation = new TestProceedImpl( roslynMethod );
-            this.CurrentLexicalScope = new TemplateTestLexicalScope( this, (IMethodInternal) this._targetMethod );
+            this.CurrentLexicalScope = new TestLexicalScope( this, (IMethodInternal) this._targetMethod );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -70,15 +70,15 @@ namespace Caravela.TestFramework.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        private class TemplateTestLexicalScope : ITemplateExpansionLexicalScope
+        private class TestLexicalScope : ITemplateExpansionLexicalScope
         {
             private readonly Dictionary<string, string> _templateToTargetIdentifiersMap = new Dictionary<string, string>();
             private readonly HashSet<string> _definedIdentifiers = new HashSet<string>();
-            private readonly TemplateTestLexicalScope? _parentScope;
-            private readonly List<TemplateTestLexicalScope> _nestedScopes = new List<TemplateTestLexicalScope>();
+            private readonly TestLexicalScope? _parentScope;
+            private readonly List<TestLexicalScope> _nestedScopes = new List<TestLexicalScope>();
             private readonly TestTemplateExpansionContext _expansionContext;
 
-            public TemplateTestLexicalScope( TestTemplateExpansionContext expansionContext, IMethodInternal methodInternal )
+            public TestLexicalScope( TestTemplateExpansionContext expansionContext, IMethodInternal methodInternal )
             {
                 this._expansionContext = expansionContext;
                 this._parentScope = null;
@@ -89,7 +89,7 @@ namespace Caravela.TestFramework.Templating
                 }
             }
 
-            private TemplateTestLexicalScope( TemplateTestLexicalScope parentScope )
+            private TestLexicalScope( TestLexicalScope parentScope )
             {
                 this._expansionContext = parentScope._expansionContext;
                 this._parentScope = parentScope;
@@ -136,7 +136,7 @@ namespace Caravela.TestFramework.Templating
 
             public ITemplateExpansionLexicalScope OpenNestedScope()
             {
-                var nestedScope = new TemplateTestLexicalScope( this );
+                var nestedScope = new TestLexicalScope( this );
                 this._nestedScopes.Add( nestedScope );
                 this._expansionContext.CurrentLexicalScope = nestedScope;
                 return nestedScope;

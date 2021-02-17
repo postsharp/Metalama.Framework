@@ -1,7 +1,5 @@
-
 {
     Console.WriteLine(42);
-
     __Void result;
-    return result;
+    return;
 }

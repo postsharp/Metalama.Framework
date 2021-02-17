@@ -78,6 +78,11 @@ namespace Caravela.Framework.Templating.UnitTests
 
             foreach ( var testPath in Directory.EnumerateFiles( dirPath, "*.cs" ) )
             {
+                if ( Path.GetFileName( testPath ).StartsWith( "_" ) )
+                {
+                    continue;
+                }
+
                 this.Add( Path.GetRelativePath( this._projectDir, testPath ) );
             }
         }

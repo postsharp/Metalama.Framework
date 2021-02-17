@@ -10,7 +10,7 @@ namespace Caravela.Framework.Templating.UnitTests.TryCatchFinally.TryCatchFinall
         [TestTemplate]
         dynamic Template()
         {
-            int n = 1;
+            int n = compileTime(1);
             try
             {
                 n = 2;
