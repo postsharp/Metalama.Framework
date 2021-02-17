@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public ImmutableMultiValueDictionary<IMemberIntroduction, int> IntroducedSyntax { get; private set; }
 
-            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
+            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions ) : base()
             {
                 this._memberIntroductors = introductions.OfType<IMemberIntroduction>().ToList();
                 this._interfaceImplementationIntroductors = introductions.OfType<IInterfaceImplementationIntroduction>().ToList();

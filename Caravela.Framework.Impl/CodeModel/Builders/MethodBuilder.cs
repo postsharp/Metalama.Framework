@@ -1,5 +1,3 @@
-// unset
-
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,11 +7,11 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -37,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IType IMethodBuilder.ReturnType
         {
-            get => this.ReturnParameter.Type;
+            get => this.ReturnParameter.ParameterType;
             set
             {
                 if ( this.ReturnParameter == null )
@@ -49,11 +47,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     throw new ArgumentNullException( nameof( value ) );
                 }
 
-                this.ReturnParameter.Type = value;
+                this.ReturnParameter.ParameterType = value;
             }
         }
 
-        IType IMethod.ReturnType => this.ReturnParameter.Type;
+        IType IMethod.ReturnType => this.ReturnParameter.ParameterType;
 
         public ParameterBuilder ReturnParameter { get; }
 
@@ -83,15 +81,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
         public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
                     -1,
                     null,
-                    this.Compilation.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
+                    this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
                     RefKind.None );
         }
 
@@ -108,17 +105,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.Name,
                     this._parameters.Select( p => p.ToDeclarationSyntax() ),
                     this._genericParameters.Select( p => p.Name ),
-                    this.ReturnParameter != null ? syntaxGenerator.TypeExpression( this.ReturnParameter.Type.GetSymbol() ) : null,
+                    syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(),
                     this.ToDeclarationModifiers(),
-                    !this.ReturnParameter.Type.Is( typeof( void ) )
-                    ? new[] {
+                    !this.ReturnParameter.ParameterType.Is( typeof( void ) )
+                    ? new[]
+                    {
                         ReturnStatement(
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,
-                                Token (SyntaxKind.DefaultKeyword)
-                                )
-                            )
+                                Token (SyntaxKind.DefaultKeyword)))
                     }
                     : null
                     );
@@ -127,7 +123,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select(x => (TypeDeclarationSyntax)x.GetSyntax()).FirstOrDefault();
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax)x.GetSyntax() ).FirstOrDefault();
         
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 

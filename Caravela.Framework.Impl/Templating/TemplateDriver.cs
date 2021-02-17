@@ -3,7 +3,9 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -15,17 +17,13 @@ namespace Caravela.Framework.Impl.Templating
 
         public TemplateDriver( MethodInfo templateMethodInfo )
         {
-            this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException(nameof(templateMethodInfo));
+            this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
 
-        [Obsolete( "Call a method with ITemplateExpansionContext parameter instead." )]
-        public BlockSyntax ExpandDeclaration( object templateInstance, IMethod targetMethod, ICompilation compilation, IProceedImpl proceedImpl )
-        {
-            return this.ExpandDeclaration( new TemplateDriverExpansionContext( templateInstance, targetMethod, compilation, proceedImpl ) );
-        }
-
+   
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
+            
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
             {
@@ -41,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode output;
             try
             {
-                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
             }
             catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {

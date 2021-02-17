@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             var l = new List<IList>();
             l.Add( l );
 
-            Assert.Throws<CaravelaException>( () => this._serializer.SerializeObject( l ) );
+            Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( l ) );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )

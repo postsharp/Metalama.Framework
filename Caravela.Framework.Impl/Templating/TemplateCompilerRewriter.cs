@@ -224,8 +224,8 @@ namespace Caravela.Framework.Impl.Templating
                             SyntaxKind.SimpleMemberAccessExpression,
                             ParenthesizedExpression(
                                 CastFromDynamic(
-                                    IdentifierName( nameof( IDynamicMetaMember ) ), expression ) ),
-                            IdentifierName( nameof( IDynamicMetaMember.CreateExpression ) ) ) );
+                                    IdentifierName( nameof( IDynamicMember ) ), expression ) ),
+                            IdentifierName( nameof( IDynamicMember.CreateExpression ) ) ) );
 
                 case "String":
                     return CreateLiteralExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -271,7 +271,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastFromDynamic(
-                                IdentifierName( nameof( IDynamicMetaMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                                IdentifierName( nameof( IDynamicMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                         IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
                      .AddArgumentListArguments( Argument( LiteralExpression(
                          SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );

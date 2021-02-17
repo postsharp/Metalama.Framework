@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
@@ -17,6 +19,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
+using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -114,13 +117,22 @@ namespace Caravela.TestFramework.Templating
                 var driver = new TemplateDriver( templateMethod );
 
                 var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
-                var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( "TargetCode" )!;
+                var targetCaravelaType = caravelaCompilation.Factory.GetTypeByReflectionName( "TargetCode" )!;
                 var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
 
-                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation, new TemporaryProceedImplBeforeAlexChangesTemplatingTests( targetCaravelaMethod) );
-                var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
+                using ( DiagnosticContext.WithSink( new UserDiagnosticSinkBridge( result ) ) )
+                {
+                    var expansionContext = new TemplateExpansionContext( 
+                        aspectInstance,
+                        targetCaravelaMethod,
+                        caravelaCompilation,
+                        new TemporaryProceedImplBeforeAlexChangesTemplatingTests( targetCaravelaMethod ));
+                    
+                    var output = driver.ExpandDeclaration( expansionContext );
+                    var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
-                result.TransformedTargetSource = formattedOutput.GetText();
+                    result.TransformedTargetSource = formattedOutput.GetText();
+                }
             }
             catch ( Exception exception )
             {

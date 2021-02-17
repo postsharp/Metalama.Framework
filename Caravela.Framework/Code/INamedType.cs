@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code
     /// </remarks>
     public interface INamedType : IType, IMember
     {
-        
+
         bool IsPartial { get; }
 
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
@@ -83,9 +83,9 @@ namespace Caravela.Framework.Code
         /// type, and not constructors.
         /// </summary>
         IReadOnlyList<IMethod> Methods { get; }
-        
+
         IReadOnlyList<IConstructor> Constructors { get; }
-        
+
         IConstructor? StaticConstructor { get; }
 
         /// <summary>

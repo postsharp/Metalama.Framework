@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-
+using System;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;
@@ -11,7 +11,7 @@ using static Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.UnitTests
 {
-    public class CodeModelTests : TestBase
+    public class SymbolicCodeModelTests : TestBase
     {
         [Fact]
         public void ObjectIdentity()
@@ -79,7 +79,7 @@ class C
 
             var methods = type.Methods;
 
-            Assert.Single( methods);
+            Assert.Single( methods );
 
             var method = methods[0];
             Assert.Equal( "M", method.Name );
@@ -168,8 +168,17 @@ interface I<T>
                 IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
             {
                 Assert.Same( containingElement, parameter.ContainingElement );
-                Assert.Equal( typeName, parameter.Type.ToString() );
-                Assert.Equal( name, parameter.Name );
+                Assert.Equal( typeName, parameter.ParameterType.ToString() );
+
+                if ( name != null )
+                {
+                    Assert.Equal( name, parameter.Name );
+                }
+                else
+                {
+                    _ = Assert.Throws<NotSupportedException>( () => _ = parameter.Name );
+                }
+
                 Assert.Equal( index, parameter.Index );
             }
         }
@@ -238,7 +247,7 @@ class C
             var parameterTypes = from type in compilation.DeclaredTypes
                                  from method in type.Methods
                                  from parameter in method.Parameters
-                                 select parameter.Type;
+                                 select parameter.ParameterType;
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
@@ -326,12 +335,12 @@ class C : IDisposable
             {
                 Default,
                 Finalizer,
-                PropertyGet, 
+                PropertyGet,
                 PropertySet,
-                EventAdd, 
+                EventAdd,
                 EventRemove,
                 ExplicitInterfaceImplementation,
-                ConversionOperator, 
+                ConversionOperator,
                 UserDefinedOperator
             };
 
@@ -364,7 +373,7 @@ class C<T>
 
             var type = Assert.Single( compilation.DeclaredTypes );
 
-            var typeKinds = new[] { Array, Class, Delegate, Dynamic, Enum, GenericParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ) );
         }
@@ -430,12 +439,12 @@ class C
         {
             var compilation = CreateCompilation( null );
 
-            Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.TypeFactory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
-            Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.TypeFactory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
-            Assert.Equal( "int[][*,*]", compilation.TypeFactory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
-            Assert.Equal( "void*", compilation.TypeFactory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
+            Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
+            Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
 
-            Assert.Throws<System.ArgumentException>( () => compilation.TypeFactory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Throws<System.ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
 
         [Fact]
@@ -480,11 +489,9 @@ partial class B
             var compilation = CreateCompilation( code );
 
             Assert.Equal( 2, compilation.DeclaredTypes.Count );
-            
-            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A").IsPartial );
-            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B").IsPartial );
 
-            
+            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
+            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
         }
 
         [Fact]
@@ -501,8 +508,8 @@ class C<TC>
 
             var type = Assert.Single( compilation.DeclaredTypes );
 
-            var intType = compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) )!;
-            var stringType = compilation.TypeFactory.GetTypeByReflectionType( typeof( string ) )!;
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) )!;
+            var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) )!;
 
             var openTypeMethod = type.Methods.First();
             var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();

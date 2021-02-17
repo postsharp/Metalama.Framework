@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool IsRefReadonly => false;
 
         [Memo]
-        public IType Type => this.Compilation.GetIType( this._symbol.Type );
+        public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         IReadOnlyList<IParameter> IProperty.Parameters => ImmutableList<IParameter>.Empty;
 
@@ -49,9 +49,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public object SetValue( object? instance, object value ) => new PropertyInvocation<Field>( this ).SetValue( instance, value );
 
-        public object GetIndexerValue( object? instance, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+        public object GetIndexerValue( object? instance, params object[] args ) => throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
 
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
 
         public bool HasBase => true;
 

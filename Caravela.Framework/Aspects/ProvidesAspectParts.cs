@@ -1,10 +1,10 @@
-using Caravela.Framework.Advices;
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Advices;
 
 namespace Caravela.Framework.Aspects
 {
-    
+
     /// <summary>
     /// Custom attribute that, when added on a class implementing <see cref="IAspect{T}"/>, allows the aspect
     /// to provide advices into different aspect parts by setting the <see cref="IAdvice.PartName"/> property.
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
     /// aspect types can execute between two parts of the same aspect type. Note that the default part
     /// (specified by a null or empty string) is always included by default.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public sealed class ProvidesAspectPartsAttribute : Attribute
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Aspects
         {
             this.Parts = parts;
         }
-        
+
         /// <summary>
         /// Gets the list of aspect parts specified in the constructor.
         /// </summary>

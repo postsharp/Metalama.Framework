@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl
 
             if ( weavers.Count > 1 )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver, type, string.Join( ", ", weavers ) );
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver, type, string.Join( ", ", weavers ) );
             }
 
             if ( weavers.Count == 1 )

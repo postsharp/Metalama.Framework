@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Impl.Pipeline;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -16,6 +17,14 @@ namespace Caravela.Framework.Impl.CompileTime
     internal partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
+
+
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ISymbolClassifier _symbolClassifier;
+        private readonly TemplateCompiler _templateCompiler;
+        private readonly IEnumerable<ResourceDescription>? _resources;
+        private readonly Random _random = new();
+        private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
 
         static CompileTimeAssemblyBuilder()
         {
@@ -40,31 +49,32 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
-        private readonly ISymbolClassifier _symbolClassifier;
-        private readonly TemplateCompiler _templateCompiler;
-        private readonly IEnumerable<ResourceDescription>? _resources;
-        private readonly bool _debugTransformedCode;
 
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
-
-        private readonly Random _random = new();
-
-        private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
-
+      
         public CompileTimeAssemblyBuilder(
-            Compilation roslynCompilation, IEnumerable<ResourceDescription>? resources = null, bool debugTransformedCode = false )
-            : this( new SymbolClassifier( roslynCompilation ), new TemplateCompiler(), resources, debugTransformedCode )
+            IServiceProvider serviceProvider,
+            Compilation roslynCompilation, 
+            IEnumerable<ResourceDescription>? resources = null )
+            : this( 
+                serviceProvider,
+                new SymbolClassifier( roslynCompilation ), 
+                new TemplateCompiler(), 
+                resources )
         {
         }
 
         public CompileTimeAssemblyBuilder(
-            ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, IEnumerable<ResourceDescription>? resources, bool debugTransformedCode )
+            IServiceProvider serviceProvider,
+            ISymbolClassifier symbolClassifier,
+            TemplateCompiler templateCompiler,
+            IEnumerable<ResourceDescription>? resources )
         {
+            this._serviceProvider = serviceProvider;
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
             this._resources = resources;
-            this._debugTransformedCode = debugTransformedCode;
         }
 
         // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it?
@@ -72,6 +82,12 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
             compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
+
+            if ( !produceCompileTimeCodeRewriter.Success )
+            {
+                // We don't want to continue with the control flow if we have a user error here, so we throw an exception.
+                throw new InvalidUserCodeException( "Cannot create the compile-time assembly.", produceCompileTimeCodeRewriter.Diagnostics.ToImmutableArray() );
+            }
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
             {
@@ -128,33 +144,62 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var stream = new MemoryStream();
 
-#if DEBUG
-            static SourceText GetEmbeddableText( SourceText text ) => text.CanBeEmbedded ? text : SourceText.From( text.ToString(), Encoding.UTF8 );
+            var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
+            var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
-            compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
-            foreach ( var tree in compilation.SyntaxTrees )
+            EmitResult? result;
+            
+            // Write the generated files to disk if we should.
+            if ( !string.IsNullOrWhiteSpace( compileTimeProjectDirectory ) )
             {
-                compilation = compilation.ReplaceSyntaxTree( tree, tree.WithChangedText( GetEmbeddableText( tree.GetText() ) ) );
-            }
-
-            var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-            var compilationForDebugging = this._debugTransformedCode ? compilation : input;
-            var embeddedTexts = compilationForDebugging.SyntaxTrees.Select(
-                tree =>
+                if ( !Directory.Exists( compileTimeProjectDirectory ) )
                 {
-                    var filePath = string.IsNullOrEmpty( tree.FilePath ) ? $"{Guid.NewGuid()}.cs" : tree.FilePath;
+                    Directory.CreateDirectory( compileTimeProjectDirectory );
+                }
+                
+                compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+                HashSet<string> names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                foreach ( var tree in compilation.SyntaxTrees )
+                {
+                    // Find a decent and unique name.
+                    var treeName = !string.IsNullOrWhiteSpace( tree.FilePath ) ? Path.GetFileNameWithoutExtension( tree.FilePath ) : "Anonymous";
 
-                    return EmbeddedText.FromSource( filePath, GetEmbeddableText( tree.GetText() ) );
-                } );
+                    if ( names.Contains( treeName ) )
+                    {
+                        var treeNameSuffix = treeName;
+                        for ( int i = 1; names.Contains(  treeName = treeNameSuffix + "_" + i  ); i++ )
+                        {
+                            // Intentionally empty.
+                        }
 
-            var result = compilation.Emit( stream, manifestResources: this._resources, options: options, embeddedTexts: embeddedTexts );
-#else
-            var result = compilation.Emit( stream, manifestResources: this._resources );
-#endif
+                        _ = names.Add( treeName );
+                    }
+
+                    var path = Path.Combine( compileTimeProjectDirectory, treeName + ".cs" );
+                    var text = tree.GetText();
+
+                    using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
+                    {
+                        text.Write( textWriter );
+                    }
+
+                    // Update the link to the file path.
+                    var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8 );
+                    compilation = compilation.ReplaceSyntaxTree( tree, newTree );
+                }
+                
+                var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
+                
+                result = compilation.Emit( stream, manifestResources: this._resources, options: options);
+            }
+            else
+            {
+                 result = compilation.Emit( stream, manifestResources: this._resources );
+            }
 
             if ( !result.Success )
             {
-                throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorBuildingCompileTimeAssembly, result.Diagnostics );
+                throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
             }
 
             stream.Position = 0;

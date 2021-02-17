@@ -9,7 +9,12 @@
         /// <summary>
         /// Gets the pipeline options.
         /// </summary>
-        public IAspectPipelineOptions PipelineOptions { get; }
+        public IAspectPipelineProperties PipelineProperties { get; }
+
+        protected PipelineStage( IAspectPipelineProperties pipelineProperties )
+        {
+            this.PipelineProperties = pipelineProperties;
+        }
 
         /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.

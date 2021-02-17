@@ -1,5 +1,3 @@
-// unset
-
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;

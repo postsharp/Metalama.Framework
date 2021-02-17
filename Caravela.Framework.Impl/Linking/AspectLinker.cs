@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,12 +27,15 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
+            UserDiagnosticList diagnostics = new();
+            using var diagnosticContext = DiagnosticContext.WithSink( diagnostics );
+            
             var intermediateCompilation = this._input.Compilation;
 
             var allTransformations =
                 this._input.CompilationModel.ObservableTransformations.Values
-                .OfType<ISyntaxTreeIntroduction>()
-                .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeIntroduction>() )
+                .OfType<ISyntaxTreeTransformation>()
+                .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();
 
             var transformationsBySyntaxTree =
@@ -151,7 +156,7 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( resultingCompilation, Array.Empty<Diagnostic>() );
+            return new AdviceLinkerResult( resultingCompilation, diagnostics );
 
             ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
             {

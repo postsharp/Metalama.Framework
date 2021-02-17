@@ -12,14 +12,16 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal sealed class CompileTimeAssemblyLoader : IDisposable
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly CSharpCompilation _compilation;
         private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
 
         private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
         private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
 
-        public CompileTimeAssemblyLoader( CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
+        public CompileTimeAssemblyLoader( IServiceProvider serviceProvider, CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {
+            this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
 
@@ -325,7 +327,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     // note: this should only happen in Try Caravela
                     var compilation = compilationReference.Compilation;
-                    assemblyStream = new CompileTimeAssemblyBuilder( compilation ).EmitCompileTimeAssembly( compilation );
+                    assemblyStream = new CompileTimeAssemblyBuilder( this._serviceProvider, compilation ).EmitCompileTimeAssembly( compilation );
                 }
                 else
                 {

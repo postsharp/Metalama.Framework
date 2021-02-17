@@ -31,7 +31,7 @@ namespace Caravela.Framework.Code
         /// Gets a value indicating whether this method or any of its containers does not have generic arguments set.
         /// </summary>
         bool IsOpenGeneric { get; }
-    
+
         /// <summary>
         /// Used for generic invocations. It returns an IMethod, not an IMethodInvocation, because
         /// it may be useful to evaluate the bound return and parameter types.
