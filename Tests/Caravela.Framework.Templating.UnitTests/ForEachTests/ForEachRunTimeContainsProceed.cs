@@ -5,7 +5,7 @@ using System;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachRunTimeContainsProceed
+namespace Caravela.Framework.Templating.UnitTests.ForEachTests.ForEachRunTimeContainsProceed
 {
     class Aspect
     {

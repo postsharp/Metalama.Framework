@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachParameter
+namespace Caravela.Framework.Templating.UnitTests.ForEachTests.ForEachContinueCompileTime
 {
     class Aspect
     {
@@ -13,6 +13,7 @@ namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachParame
             int i = compileTime(0);
             foreach (var p in target.Parameters)
             {
+                if (p.Name.Length <= 1) continue;
                 i++;
             }
 
@@ -25,9 +26,9 @@ namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachParame
 
     class TargetCode
     {
-        int Method(int a, int b)
+        int Method(int a, int bb)
         {
-            return a + b;
+            return a + bb;
         }
     }
 }

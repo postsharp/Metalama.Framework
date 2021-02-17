@@ -1,23 +1,21 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachBreakCompileTime
+namespace Caravela.Framework.Templating.UnitTests.ForTests.UseForVariableInCompileTimeExpresson
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            int i = compileTime(0);
-            foreach (var p in target.Parameters)
+            for (int i = 0; i < target.Parameters.Count; i++)
             {
-                if (p.Name.Length > 1) break;
-                i++;
+                Console.WriteLine(target.Parameters[i].Name);
             }
-
-            Console.WriteLine(i);
 
             dynamic result = proceed();
             return result;
@@ -26,9 +24,9 @@ namespace Caravela.Framework.Templating.UnitTests.ForEachStatement.ForEachBreakC
 
     class TargetCode
     {
-        int Method(int a, int bb)
+        int Method(int a, int b)
         {
-            return a + bb;
+            return a + b;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.IfStatement.IfCompileTimeIfRunTime
+namespace Caravela.Framework.Templating.UnitTests.IfTests.IfCompileTimeIfRunTime
 {
     class Aspect
     {

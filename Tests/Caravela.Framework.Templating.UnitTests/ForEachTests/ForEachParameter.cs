@@ -1,21 +1,22 @@
 using System;
-using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.For.UseForVariableInCompileTimeExpresson
+namespace Caravela.Framework.Templating.UnitTests.ForEachTests.ForEachParameter
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            for (int i = 0; i < target.Parameters.Count; i++)
+            int i = compileTime(0);
+            foreach (var p in target.Parameters)
             {
-                Console.WriteLine(target.Parameters[i].Name);
+                i++;
             }
+
+            Console.WriteLine(i);
 
             dynamic result = proceed();
             return result;
