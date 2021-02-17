@@ -11,6 +11,8 @@ namespace Caravela.Framework.TestApp
         {
             typeof( Program ).GetMethod( "SomeIntroducedMethod" )?.Invoke( null, null );
 
+            MethodWithTwoAspects();
+
             PrintDebugInfo();
 
             PrintArray();
@@ -20,6 +22,13 @@ namespace Caravela.Framework.TestApp
             new ClassWithMethods();
 
             Cancel();
+        }
+
+        [SwallowExceptionsAspect]
+        [PrintDebugInfoAspect]
+        public static void MethodWithTwoAspects()
+        {
+            Console.WriteLine( "This is method with two aspects" );
         }
 
         [PrintDebugInfoAspect]

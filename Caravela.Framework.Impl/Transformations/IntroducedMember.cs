@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <summary>
         /// Gets the <see cref="IMemberIntroduction" /> that created this object.
         /// </summary>
-        IMemberIntroduction Introductor { get; }
+        public IMemberIntroduction Introductor { get; }
 
         /// <summary>
         /// Gets the syntax of the introduced member.

@@ -15,11 +15,13 @@ namespace Caravela.Framework.Impl.Linking
     {
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
         {
+            private static int _id;
+
             private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
             private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
             private readonly ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember> _introducedMemberLookup;
 
-            public ImmutableMultiValueDictionary<ICodeElement, IntroducedMember> ElementOverrides { get; }
+            public ImmutableMultiValueDictionary<IMemberIntroduction, int> IntroducedSyntax { get; private set; }
 
             public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeIntroduction> introductions ) : base()
             {
@@ -27,10 +29,11 @@ namespace Caravela.Framework.Impl.Linking
                 this._interfaceImplementationIntroductors = introductions.OfType<IInterfaceImplementationIntroduction>().ToList();
 
                 var introducedMembers = this._memberIntroductors
-                    .SelectMany( t => t.GetIntroducedMembers().Select( x => (Introductor: t, Introduced: x, InsertPosition: t.InsertPositionNode) ) )
+                    .SelectMany( t => t.GetIntroducedMembers().Select( x => (Introductor: t, Introduced: x) ) )
                     .ToList();
 
                 this._introducedMemberLookup = introducedMembers.ToMultiValueDictionary( x => x.Introductor.InsertPositionNode, x => x.Introduced );
+                this.IntroducedSyntax = ImmutableMultiValueDictionary<IMemberIntroduction, int>.Empty;
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -40,12 +43,21 @@ namespace Caravela.Framework.Impl.Linking
                 foreach ( var member in node.Members )
                 {
                     members.Add( member );
-                    members.AddRange( this._introducedMemberLookup[member].Select( i => i.Syntax ) );
+
+                    AddIntroductionsOnPosition( members, member );
                 }
 
-                members.AddRange( this._introducedMemberLookup[node].Select( i => i.Syntax ) );
+                AddIntroductionsOnPosition( members, node );
 
                 return node.WithMembers( List( members ) );
+
+                void AddIntroductionsOnPosition( List<MemberDeclarationSyntax> members, MemberDeclarationSyntax position )
+                {
+                    var introductorSyntaxPairs = this._introducedMemberLookup[position].Select( i => (i.Introductor, i.Syntax, Id: _id++) ).ToList();
+                    this.IntroducedSyntax = this.IntroducedSyntax.AddRange( introductorSyntaxPairs, x => x.Introductor, x => x.Id );
+
+                    members.AddRange( introductorSyntaxPairs.Select( x => x.Syntax.WithAdditionalAnnotations( new SyntaxAnnotation( IntroducedSyntaxAnnotationId, x.Id.ToString() ) ) ) );
+                }
             }
         }
     }

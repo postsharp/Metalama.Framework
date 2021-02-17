@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         private InvocationExpressionSyntax CreateOriginalMethodCall()
         {
             // Emit `OriginalMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
-            // TODO: generics, static methods, consider explicit interfaces and other special methods.
+            // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
             var invocation =
                 InvocationExpression(
                     !this._originalDeclaration.IsStatic

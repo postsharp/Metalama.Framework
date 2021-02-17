@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
@@ -15,18 +16,78 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CSharpCompilation _compilation;
             private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
-            private readonly ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember> _introducedMemberLookup;
-            public OverrideOrderRewriter( CSharpCompilation compilation, IReadOnlyList<AspectPart> orderedAspectParts, IReadOnlyList<ISyntaxTreeIntroduction> allTransformations )
+            private readonly ImmutableMultiValueDictionary<ISymbol, IntroducedMember> _overrideLookup;
+
+            public OverrideOrderRewriter( 
+                CSharpCompilation compilation, 
+                IReadOnlyList<AspectPart> orderedAspectParts, 
+                ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
                 this._compilation = compilation;
                 this._orderedAspectParts = orderedAspectParts;
-                this._introducedMemberLookup =
-                    ImmutableMultiValueDictionary<MemberDeclarationSyntax, IntroducedMember>.Empty;
-                //allTransformations
-                //.OfType<IOverriddenElement>()
-                //.OfType<IMemberIntroduction>()
-                //.SelectMany( x => x.GetIntroducedMembers().Select( i => (OverriddenElement: ((IOverriddenElement) x).OverriddenElement, IntroducedMember: i) ) )
-                //.ToMultiValueDictionary( x => x.OverriddenElement, x => x.IntroducedMember );
+                this._overrideLookup = overrideLookup;
+            }
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                var newMembers = new List<MemberDeclarationSyntax>();
+
+                foreach (var member in node.Members)
+                {
+                    if (member is not MethodDeclarationSyntax methodDeclaration)
+                    {
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                        continue;
+                    }    
+
+                    var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member );
+
+                    var overrides = this._overrideLookup[originalSymbol];
+
+                    if (!overrides.IsEmpty)
+                    {
+                        var lastOverride =
+                            this._orderedAspectParts
+                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
+                            .Where(x => x.Value != null)
+                            .Last().Value;
+
+                        // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
+                        var originalMethodDeclaration = (MethodDeclarationSyntax) member;
+                        var originalBodyMethodName = GetOriginalBodyMethodName( originalMethodDeclaration.Identifier.ValueText );
+                        var lastOverrideName = ((MethodDeclarationSyntax) lastOverride.Syntax).Identifier;
+
+                        var invocation = InvocationExpression(
+                            !originalSymbol.IsStatic
+                            ? MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                ThisExpression(),
+                                IdentifierName( lastOverrideName )
+                                )
+                            : IdentifierName( lastOverrideName ),
+                            ArgumentList(
+                                SeparatedList(
+                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
+                                    )
+                                )
+                            );
+
+                        newMembers.Add( originalMethodDeclaration.WithBody(
+                            Block(
+                                originalSymbol.ReturnsVoid
+                                ? ExpressionStatement( invocation )
+                                : ReturnStatement( invocation)
+                            ) ) );
+
+                        newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
+                    }
+                    else
+                    {
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                    }
+                }
+
+                return node.WithMembers( List( newMembers ) );
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -42,43 +103,83 @@ namespace Caravela.Framework.Impl.Linking
                 var currentMethodPosition =
                     this._orderedAspectParts
                     .Select( ( x, i ) => (Index: i, Value: x) )
-                    .Single( x => x.Value.AspectType.Name == annotation.AspectTypeName && x.Value.PartName == annotation.PartName )
+                    .Single( x => x.Value.ToAspectPartId().AspectType== annotation.AspectTypeName && x.Value.ToAspectPartId().PartName == annotation.PartName )
                     .Index;
 
                 // The callee is the original/introduced method.
                 var callee = (IMethodSymbol?) this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
-                var declarationSyntax = (MethodDeclarationSyntax)callee.DeclaringSyntaxReferences.Single().GetSyntax();
+                var declarationSyntax = (MethodDeclarationSyntax) callee.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                var declarationSymbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( declarationSyntax );
 
                 // Now look for IntroducedMembers targeting this syntax.
-                var overrides = this._introducedMemberLookup[declarationSyntax];
+                var overrides = this._overrideLookup[declarationSymbol];
 
                 var precedingOverrides =
                     this._orderedAspectParts
                     .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
                     .Where( x => x.Value != null && x.Index < currentMethodPosition );
 
-                if ( !precedingOverrides.Any() )
+                // TODO: simplify
+                if ( node.Expression is MemberAccessExpressionSyntax memberAccess )
                 {
-                    // There is not preceding override, so we leave the existing method call to the original/introduced declaration.
-                    return base.VisitInvocationExpression( node );
+                    if ( !precedingOverrides.Any() )
+                    {
+                        // There is no preceding override, so we call the moved method body.
+                        return
+                            InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    (ExpressionSyntax) this.Visit( memberAccess.Expression ),
+                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )
+                                    ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
+                            );
+                    }
+                    else
+                    {
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
+
+                        return
+                            InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    (ExpressionSyntax) this.Visit( memberAccess.Expression ),
+                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )
+                                    ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
+                            );
+                    }
                 }
+                else if ( node.Expression is IdentifierNameSyntax identifier )
+                {
+                    if ( !precedingOverrides.Any() )
+                    {
+                        // There is no preceding override, so we call the moved method body.
+                        return
+                            InvocationExpression(
+                                IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
+                            );
+                    }
+                    else
+                    {
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
 
-                var overrideImmediatelyBefore = precedingOverrides.Last().Value;
-
-                // TODO: not correct assumption?
-                var memberAccess = (MemberAccessExpressionSyntax) node.Expression;
-
-                return
-                    InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            (ExpressionSyntax)this.Visit( memberAccess.Expression ),
-                            IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )
-                            ),
-                        (ArgumentListSyntax)this.VisitArgumentList(node.ArgumentList)
-                    );
+                        return
+                            InvocationExpression(
+                                IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
+                            );
+                    }
+                }
+                else
+                    throw new NotImplementedException();
             }
+
+            private static string GetOriginalBodyMethodName( string methodName )
+                => $"__{methodName}__OriginalBody";
         }
     }
 }

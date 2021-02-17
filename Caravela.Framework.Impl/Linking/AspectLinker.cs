@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -12,6 +14,8 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class AspectLinker
     {
+        private const string IntroducedSyntaxAnnotationId = "AspectLinker_IntroducedSyntax";
+
         private readonly AdviceLinkerInput _input;
 
         public AspectLinker( AdviceLinkerInput input )
@@ -34,14 +38,9 @@ namespace Caravela.Framework.Impl.Linking
                 .GroupBy( t => t.TargetSyntaxTree, t => t )
                 .ToDictionary( g => g.Key, g => g );
 
-            // TODO: This is not optimal structure for this.
-            ImmutableMultiValueDictionary<ICodeElement, IntroducedMember> overrideLookup =
-                ImmutableMultiValueDictionary<ICodeElement, IntroducedMember>.Empty.WithKeyComparer( CodeElementEqualityComparer.Instance );
-
             // First pass. Add all transformations to the compilation, but we don't link them yet.
-
-
             var newSyntaxTrees = new List<SyntaxTree>( transformationsBySyntaxTree.Count );
+            var intermediateIntroducedSyntax = ImmutableMultiValueDictionary<IMemberIntroduction, (SyntaxTree Tree, int NodeAnnotationId)>.Empty;
             foreach ( var syntaxTreeGroup in transformationsBySyntaxTree )
             {
                 var oldSyntaxTree = syntaxTreeGroup.Key;
@@ -54,9 +53,10 @@ namespace Caravela.Framework.Impl.Linking
                 newSyntaxTrees.Add( newSyntaxTree );
 
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
-
-                // TODO: This is slow.
-                overrideLookup = overrideLookup.Merge( addIntroducedElementsRewriter.ElementOverrides );
+                intermediateIntroducedSyntax = intermediateIntroducedSyntax.Merge(
+                    addIntroducedElementsRewriter.IntroducedSyntax.SelectMany( x => x.Select( id => (x.Key, Tree: newSyntaxTree, NodeAnnotationId: id) ) )
+                    .ToMultiValueDictionary( x => x.Key, x => (x.Tree, x.NodeAnnotationId) )
+                    );
             }
 
             // Second pass. Count references to modified methods.
@@ -115,7 +115,32 @@ namespace Caravela.Framework.Impl.Linking
             // Two things it should do:
             //   1. Replace calls to the vanilla method to the call to the right "override" method.
 
-            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts, allTransformations );
+            var nodeAnnotationIds =
+                intermediateCompilation.SyntaxTrees
+                .SelectMany( st =>
+                     st.GetRoot()
+                     .GetAnnotatedNodes( IntroducedSyntaxAnnotationId )
+                     .Select( sn => (Node: sn, Id: sn.GetAnnotations( IntroducedSyntaxAnnotationId ).Select( a => int.Parse( a.Data ) ).Single()) )
+                    )
+                .ToDictionary( x => x.Id, x => x.Node );
+
+            var symbolOverrides =
+                transformationsBySyntaxTree.SelectMany(g =>
+                   g.Value
+                   .OfType<IOverriddenElement>()
+                   .OfType<IMemberIntroduction>()
+                   .SelectMany(mi => mi.GetIntroducedMembers())
+                   .Select(x => ((IOverriddenElement)x.Introductor).OverriddenElement switch
+                   {
+                       Method method => ( Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
+                       MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder), IntroducedMember: x)
+                   })
+                );
+
+            var symbolOverridesLookup =
+                symbolOverrides.ToMultiValueDictionary( x => x.Symbol, x => x.IntroducedMember, StructuralSymbolComparer.Instance );
+
+            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts, symbolOverridesLookup );
 
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {
@@ -126,7 +151,19 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( intermediateCompilation, Array.Empty<Diagnostic>() );
+            return new AdviceLinkerResult( resultingCompilation, Array.Empty<Diagnostic>() );
+
+            ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
+            {
+                if (codeElement is MethodBuilder method)
+                {
+                    var pair = intermediateIntroducedSyntax[method].Single();
+                    var symbol = intermediateCompilation.GetSemanticModel( pair.Tree ).GetDeclaredSymbol( nodeAnnotationIds[pair.NodeAnnotationId] );
+                    return symbol;
+                }
+
+                throw new NotSupportedException();
+            }
         }
     }
 }
