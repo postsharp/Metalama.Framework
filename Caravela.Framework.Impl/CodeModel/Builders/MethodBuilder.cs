@@ -127,7 +127,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany(x => ((TypeDeclarationSyntax)x.GetSyntax()).Members).First();
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select(x => (TypeDeclarationSyntax)x.GetSyntax()).FirstOrDefault();
         
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 

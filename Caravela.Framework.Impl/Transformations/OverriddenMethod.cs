@@ -42,6 +42,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers()
         {
+
             // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
             string methodName =
                 this.Advice.PartName != null
@@ -64,7 +65,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this,
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifiers(),
+                        this.OverriddenDeclaration.GetSyntaxModifierList(),
                         this.OverriddenDeclaration.GetSyntaxReturnType(),
                         null,
                         Identifier( methodName ),
@@ -80,7 +81,7 @@ namespace Caravela.Framework.Impl.Transformations
             return overrides;
         }
 
-        public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
+        public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax()).First();
 
         
         private class ProceedToNext : IProceedImpl

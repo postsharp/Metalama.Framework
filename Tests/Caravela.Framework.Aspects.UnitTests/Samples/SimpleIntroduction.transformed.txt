@@ -1,0 +1,20 @@
+
+    [Introduction]
+    internal class TargetClass
+    {
+        public void IntroducedMethod()
+        {
+            this.__IntroducedMethod__IntroductionAttribute();
+        }
+
+        public void __IntroducedMethod__OriginalBody()
+        {
+        }
+
+        public void __IntroducedMethod__IntroductionAttribute()
+        {
+            Console.WriteLine("This is introduced method.");
+            this.__IntroducedMethod__OriginalBody();
+        }
+    }
+    

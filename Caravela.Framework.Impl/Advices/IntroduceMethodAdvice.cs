@@ -23,6 +23,9 @@ namespace Caravela.Framework.Impl.Advices
 
             // TODO: Set name and all properties from the template.
             this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name );
+
+            this._methodBuilder.Accessibility = templateMethod.Accessibility;
+            this._methodBuilder.IsStatic = templateMethod.IsStatic;
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
