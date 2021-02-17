@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Caravela.Framework.Sdk;
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.TestFramework
 {
-    public class TestResult
+    public class TestResult : IDiagnosticSink
     {
         public List<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
 
@@ -30,9 +31,6 @@ namespace Caravela.TestFramework
         
         public bool Success { get; set; }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
-        {
-            throw new NotImplementedException();
-        }
+        void IDiagnosticSink.AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
     }
 }

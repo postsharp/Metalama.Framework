@@ -1,4 +1,5 @@
 ﻿using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -47,5 +48,7 @@ namespace Caravela.Framework.Impl.Templating
         /// A <see cref="StatementSyntax"/> instance that will be used in place of the return statement by the template method.
         /// </returns>
         StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression );
+        
+        IUserDiagnosticSink? DiagnosticSink { get; }
     }
 }

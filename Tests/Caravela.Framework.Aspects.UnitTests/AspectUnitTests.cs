@@ -13,7 +13,7 @@ namespace Caravela.Framework.Aspects.UnitTests
 
         [Theory]
         [FromDirectory( "Samples" )]
-        public Task Samples( string testName ) => this.RunTestAsync( testName );
+        public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
     }
 
 

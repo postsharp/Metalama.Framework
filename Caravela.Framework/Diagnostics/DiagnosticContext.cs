@@ -26,12 +26,15 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="sink">The current sink.</param>
         /// <param name="defaultTarget">The default target, used when the location or target is not specified by the user.</param>
         /// <returns>An opaque <see cref="IDisposable"/> that the caller must dispose to return to the previous execution context data.</returns>
-        public static IDisposable With( IUserDiagnosticSink? sink, IDiagnosticTarget? defaultTarget )
+        public static IDisposable WithContext( IUserDiagnosticSink? sink, IDiagnosticTarget? defaultTarget )
         {
             var cookie = new Cookie( _current.Value );
             _current.Value = new(sink, defaultTarget);
             return cookie;
         }
+
+        public static IDisposable WithSink( IUserDiagnosticSink? sink ) => WithContext( sink, Current.DefaultTarget );
+        public static IDisposable WithDefaultTarget( IDiagnosticTarget? defaultTarget) => WithContext( Current.Sink, defaultTarget );
 
 
         class Cookie : IDisposable

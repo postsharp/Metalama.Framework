@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Caravela.UnitTestFramework;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -24,23 +26,23 @@ namespace Caravela.Framework.Aspects.UnitTests
             this._logger = logger;
         }
 
-       
-        protected async Task RunTestAsync( string testPath )
+        protected async Task<TestResult> RunPipelineAsync( string testPath )
         {
             var sourceAbsolutePath = Path.Combine( ProjectDirectory, testPath );
 
-
-            var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
-            var actualTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".actual_transformed.txt" );
-
             var testSource = await File.ReadAllTextAsync( sourceAbsolutePath );
-            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
-
             var testRunner = new AspectTestRunner() { HandlesException = false };
-            var testResult = await testRunner.Run( testPath, testSource );
+            return await testRunner.Run( testPath, testSource );
 
-            // We assume that the file must run without error. We would need another run method and more abstraction to
-            // test for diagnostics.
+        }
+
+       
+        protected async Task AssertTransformedSourceEqualAsync( string testPath )
+        {
+            var sourceAbsolutePath = Path.Combine( ProjectDirectory, testPath );
+            
+            var testResult = await this.RunPipelineAsync( testPath );
+
             foreach ( var diagnostic in testResult.Diagnostics )
             {
                 if ( diagnostic.Severity == DiagnosticSeverity.Error )
@@ -53,6 +55,11 @@ namespace Caravela.Framework.Aspects.UnitTests
 
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
+            var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
+            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
+            var actualTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".actual_transformed.txt" );
+
+
             var targetTextSpan = TestSyntaxHelper.FindRegionSpan( testResult.TransformedTargetSyntax, "Target" );
             testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );
         }
