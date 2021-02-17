@@ -99,18 +99,15 @@ namespace Caravela.TestFramework.Templating
             try
             {
                 var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                var aspectInstance = Activator.CreateInstance( aspectType )!;
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
-                
+
                 Debug.Assert( templateMethod != null, "Cannot find the template method." );
                 var driver = new TemplateDriver( templateMethod );
 
-                var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
                 var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
-                var targetCaravelaType = caravelaCompilation.GetTypeByReflectionName( targetType.FullName! )!;
-                var targetCaravelaMethod = targetCaravelaType.Methods.GetValue().SingleOrDefault( m => m.Name == "Method" );
+                var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
-                var output = driver.ExpandDeclaration( aspectInstance, targetCaravelaMethod, caravelaCompilation );
+                var output = driver.ExpandDeclaration( expansionContext );
                 var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
                 result.TransformedTargetSource = formattedOutput.GetText();
