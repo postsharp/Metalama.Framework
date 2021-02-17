@@ -13,12 +13,12 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parameter type.
         /// </summary>
-        IType Type { get; }
+        IType ParameterType { get; }
 
         /// <summary>
         /// Gets the parameter type, or <c>null</c> for <see cref="IMethod.ReturnParameter"/>.
         /// </summary>
-        string? Name { get; }
+        string Name { get; }
 
         /// <summary>
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.
@@ -33,5 +33,7 @@ namespace Caravela.Framework.Code
         OptionalValue DefaultValue { get; }
 
         bool IsParams { get; }
+
+        IMember DeclaringMember { get; }
     }
 }

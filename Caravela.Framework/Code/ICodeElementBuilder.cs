@@ -1,5 +1,3 @@
-// unset
-
 namespace Caravela.Framework.Code
 {
     public interface ICodeElementBuilder : ICodeElement

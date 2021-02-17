@@ -28,10 +28,10 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
-        public INamedType Type => this._compilation.GetNamedType( this._data.AttributeClass! );
+        public INamedType Type => this._compilation.Factory.GetNamedType( this._data.AttributeClass! );
 
         [Memo]
-        public IMethod Constructor => this._compilation.GetMethod( this._data.AttributeConstructor! );
+        public IMethod Constructor => this._compilation.Factory.GetMethod( this._data.AttributeConstructor! );
 
         [Memo]
         public IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             constant.Kind switch
             {
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
-                TypedConstantKind.Type => constant.Value == null ? null : this._compilation.GetIType( (ITypeSymbol) constant.Value ),
+                TypedConstantKind.Type => constant.Value == null ? null : this._compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
                 _ => throw new ArgumentException( nameof( constant ) )
             };

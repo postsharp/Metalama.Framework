@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         ICompilation ICodeElement.Compilation => this.Compilation;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement => this.Compilation.GetCodeElement( this.Symbol.ContainingSymbol );
+        public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
         public IReadOnlyList<IAttribute> Attributes =>

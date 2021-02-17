@@ -36,11 +36,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
         };
 
-
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public override bool IsAsync => false;
-        
 
         public bool HasDefaultConstructor =>
             this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
@@ -50,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
 
         [Memo]
-        public IReadOnlyList<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.GetNamedType ).ToImmutableArray();
+        public IReadOnlyList<INamedType> NestedTypes => this.TypeSymbol.GetTypeMembers().Select( this.Compilation.Factory.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public IReadOnlyList<IProperty> Properties =>
@@ -78,7 +76,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
-                .Select( m => this.Compilation.GetMethod( m ) )
+                .Select( m => this.Compilation.Factory.GetMethod( m ) )
                 .Concat( this.Compilation.ObservableTransformations.GetByKey( this ).OfType<MethodBuilder>() )
                 .ToImmutableArray();
 
@@ -88,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where( m => m.MethodKind == MethodKind.Constructor )
-                .Select( m => this.Compilation.GetConstructor( m ) )
+                .Select( m => this.Compilation.Factory.GetConstructor( m ) )
                 .ToImmutableArray();
 
         [Memo]
@@ -97,7 +95,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
                 .GetMembers()
                 .OfType<IMethodSymbol>()
                 .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                .Select( m => this.Compilation.GetConstructor( m ) )
+                .Select( m => this.Compilation.Factory.GetConstructor( m ) )
                 .SingleOrDefault();
 
         public bool IsPartial
@@ -116,9 +114,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         [Memo]
         public IReadOnlyList<IGenericParameter> GenericParameters =>
-            this.TypeSymbol.TypeParameters.Select( tp => this.Compilation.GetGenericParameter( tp ) ).ToImmutableList();
-
-        public string Name => this.TypeSymbol.Name;
+            this.TypeSymbol.TypeParameters.Select( tp => this.Compilation.Factory.GetGenericParameter( tp ) ).ToImmutableList();
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
@@ -127,28 +123,28 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public string FullName => this.TypeSymbol.ToDisplayString();
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.GetIType( a ) ).ToImmutableList();
+        public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => null,
-            INamedTypeSymbol containingType => this.Compilation.GetNamedType( containingType ),
+            INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
             _ => throw new NotImplementedException()
         };
 
         public override CodeElementKind ElementKind => CodeElementKind.Type;
 
         [Memo]
-        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.GetNamedType( this.TypeSymbol.BaseType );
+        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
         [Memo]
-        public IReadOnlyList<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.GetNamedType ).ToImmutableArray();
+        public IReadOnlyList<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.Factory.GetNamedType ).ToImmutableArray();
 
-        ITypeFactory IType.TypeFactory => this.Compilation;
+        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
-            this.Compilation.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
+            this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

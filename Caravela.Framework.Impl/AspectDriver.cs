@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl
 
             this._compilation = compilation;
 
-            var iAdviceAttribute = compilation.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
+            var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
             (from method in aspectType.Methods

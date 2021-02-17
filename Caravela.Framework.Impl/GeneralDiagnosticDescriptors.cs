@@ -52,19 +52,24 @@ namespace Caravela.Framework.Impl
         public static readonly DiagnosticDescriptor MemberRequiresAtLeastNArguments =
             new( "CR0013", "Member requires more arguments.", "Member {0} requires at least {1} arguments.", _caravelaCategory, Error, true );
 
-        public static readonly DiagnosticDescriptor CantProvideInstanceForStaticMember =
-            new( "CR0014", "Can't provide instance for a static member.", "Member {0} is static, but has been used with a non-null instance.", _caravelaCategory, Error, true );
+        public static readonly DiagnosticDescriptor CannotProvideInstanceForStaticMember =
+            new( "CR0014", "Cannot provide instance for a static member.", "Member {0} is static, but has been used with a non-null instance.", _caravelaCategory, Error, true );
 
-        public static readonly DiagnosticDescriptor HasToProvideInstanceForInstanceMember =
+        public static readonly DiagnosticDescriptor MustProvideInstanceForInstanceMember =
             new( "CR0015", "Has to provide instance for an instance member.", "Member {0} is not static, but has been used with a null instance.", _caravelaCategory, Error, true );
 
-        public static readonly DiagnosticDescriptor CantAccessOpenGenericMember =
-            new( "CR0016", "Can't access an open generic member.", "Member {0} can't be accessed without specifying generic arguments.", _caravelaCategory, Error, true );
+        public static readonly DiagnosticDescriptor CannotAccessOpenGenericMember =
+            new( "CR0016", "Cannot access an open generic member.", "Member {0} Cannot be accessed without specifying generic arguments.", _caravelaCategory, Error, true );
 
-        public static readonly DiagnosticDescriptor CantInvokeLocalFunctionFromAnotherMethod =
-            new( "CR0017", "Can't invoke local function from another method.", "Local function {0} can't be invoked from method {1}, only from {2}.", _caravelaCategory, Error, true );
+        public static readonly DiagnosticDescriptor CannotProvideInstanceForLocalFunction =
+            new( "CR0018", "Cannot provide instance for a local function.", "{0} is a local function, so it Cannot be invoked with a non-null instance.", _caravelaCategory, Error, true );
 
-        public static readonly DiagnosticDescriptor CantProvideInstanceForLocalFunction =
-            new( "CR0018", "Can't provide instance for a local function.", "{0} is a local function, so it can't be invoked with a non-null instance.", _caravelaCategory, Error, true );
+        public static readonly DiagnosticDescriptor CannotPassExpressionToByRefParameter =
+            new( "CR0019", "Cannot use an expression in an out or ref parameter.",
+                "Cannot pass the expression '{0}' to the '{1}' parameter of method '{2}' because the parameter is 'out' or 'ref'.", _caravelaCategory, Error,
+                true );
+
+        public static readonly DiagnosticDescriptor CannotFindType =
+            new("CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true);
     }
 }

@@ -1,9 +1,7 @@
-﻿using Caravela.Framework.Code;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -23,15 +21,15 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public int GetHashCode( ICodeElement x )
+        public int GetHashCode( ICodeElement obj )
         {
-            if ( x is CodeElement cx )
+            if ( obj is CodeElement cx )
             {
                 return SymbolEqualityComparer.Default.GetHashCode( cx.Symbol );
             }
             else
             {
-                return x.GetHashCode();
+                return obj.GetHashCode();
             }
         }
     }

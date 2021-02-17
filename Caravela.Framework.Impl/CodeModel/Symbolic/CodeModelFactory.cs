@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         internal static IType CreateIType( ITypeSymbol typeSymbol, CompilationModel compilation ) =>
             typeSymbol switch
             {
-                INamedTypeSymbol namedType => compilation.GetNamedType( namedType ),
+                INamedTypeSymbol namedType => compilation.Factory.GetNamedType( namedType ),
                 IArrayTypeSymbol arrayType => new ArrayType( arrayType, compilation ),
                 IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
                 ITypeParameterSymbol typeParameter => new GenericParameter( typeParameter, compilation ),

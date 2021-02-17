@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
     {
         public CaravelaReturnParameterInfo( Method.MethodReturnParameter returnParameter )
         {
-            this.Method = returnParameter.Method;
+            this.Method = returnParameter.DeclaringMethod;
         }
 
         public Method Method { get; }

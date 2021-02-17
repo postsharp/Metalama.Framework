@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                     var parameterTypes = new List<ExpressionSyntax>();
                     foreach ( var parameter in o.Property.Parameters )
                     {
-                        parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( parameter.Type ) ) );
+                        parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( parameter.ParameterType ) ) );
                     }
 
                     var propertyName = o.Property.Symbol.MetadataName;

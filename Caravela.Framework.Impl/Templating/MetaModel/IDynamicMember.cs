@@ -1,28 +1,30 @@
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    public interface IDynamicMetaMember
+
+    public interface IDynamicMember
     {
         RuntimeExpression CreateExpression();
     }
 
-    internal interface IDynamicMetaMemberDifferentiated : IDynamicMetaMember
+    // TODO: Smell
+    internal interface IDynamicMemberDifferentiated : IDynamicMember
     {
         RuntimeExpression CreateMemberAccessExpression( string member );
     }
 
     public static class DynamicMetaMemberExtensions
     {
-        public static RuntimeExpression CreateMemberAccessExpression( this IDynamicMetaMember metaMember, string member )
+        public static RuntimeExpression CreateMemberAccessExpression( this IDynamicMember dynamicMember, string member )
         {
-            if ( metaMember is IDynamicMetaMemberDifferentiated metaMemberDifferentiated )
+            if ( dynamicMember is IDynamicMemberDifferentiated metaMemberDifferentiated )
             {
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
             }
 
-            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, metaMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
+            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ), null, false );
         }
     }
 

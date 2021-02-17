@@ -13,6 +13,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         public override Code.TypeKind TypeKind => Code.TypeKind.Pointer;
 
         [Memo]
-        public IType PointedAtType => this.Compilation.GetIType( this.Symbol.PointedAtType );
+        public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-    internal interface IInterfaceImplementationIntroduction : ISyntaxTreeIntroduction, IObservableTransformation
+    internal interface IInterfaceImplementationIntroduction : ISyntaxTreeTransformation, IObservableTransformation
     {
 
         IEnumerable<BaseTypeSyntax> GetIntroducedInterfaceImplementations();

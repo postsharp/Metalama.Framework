@@ -11,6 +11,11 @@
         /// </summary>
         public IAspectPipelineOptions PipelineOptions { get; }
 
+        protected PipelineStage( IAspectPipelineOptions pipelineOptions )
+        {
+            this.PipelineOptions = pipelineOptions;
+        }
+
         /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>

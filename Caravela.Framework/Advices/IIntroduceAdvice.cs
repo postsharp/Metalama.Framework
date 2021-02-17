@@ -1,5 +1,3 @@
-// unset
-
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices

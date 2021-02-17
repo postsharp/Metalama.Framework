@@ -1,6 +1,5 @@
 ﻿using Caravela.Framework.Code;
 using Caravela.Framework.Project;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Aspects
 {

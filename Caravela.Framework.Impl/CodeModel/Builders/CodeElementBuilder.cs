@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICompilation ICodeElement.Compilation => this.Compilation;
 
-        public CompilationModel Compilation => (CompilationModel) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
+        public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
