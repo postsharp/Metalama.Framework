@@ -18,9 +18,9 @@ namespace Caravela.Framework.Code
         /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.MakeGenericType"/>.
         /// </para>
         /// </remarks>
-        INamedType? GetTypeByReflectionName( string reflectionName );
+        INamedType GetTypeByReflectionName( string reflectionName );
 
-        IType? GetTypeByReflectionType( Type type );
+        IType GetTypeByReflectionType( Type type );
 
         IArrayType MakeArrayType( IType elementType, int rank );
 

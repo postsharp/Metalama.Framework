@@ -23,7 +23,6 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly ISymbolClassifier _symbolClassifier;
         private readonly TemplateCompiler _templateCompiler;
         private readonly IEnumerable<ResourceDescription>? _resources;
-        private readonly bool _debugTransformedCode;
         private readonly Random _random = new();
         private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
 
@@ -57,13 +56,12 @@ namespace Caravela.Framework.Impl.CompileTime
         public CompileTimeAssemblyBuilder(
             IServiceProvider serviceProvider,
             Compilation roslynCompilation, 
-            IEnumerable<ResourceDescription>? resources = null,
-            bool debugTransformedCode = false )
-            : this( serviceProvider,
+            IEnumerable<ResourceDescription>? resources = null )
+            : this( 
+                serviceProvider,
                 new SymbolClassifier( roslynCompilation ), 
                 new TemplateCompiler(), 
-                resources,
-                debugTransformedCode )
+                resources )
         {
         }
 
@@ -71,14 +69,12 @@ namespace Caravela.Framework.Impl.CompileTime
             IServiceProvider serviceProvider,
             ISymbolClassifier symbolClassifier,
             TemplateCompiler templateCompiler,
-            IEnumerable<ResourceDescription>? resources,
-            bool debugTransformedCode )
+            IEnumerable<ResourceDescription>? resources )
         {
             this._serviceProvider = serviceProvider;
             this._symbolClassifier = symbolClassifier;
             this._templateCompiler = templateCompiler;
             this._resources = resources;
-            this._debugTransformedCode = debugTransformedCode;
         }
 
         // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it?
@@ -148,7 +144,8 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var stream = new MemoryStream();
 
-            var compileTimeProjectDirectory = this._serviceProvider.GetService<IBuildOptions>().CompileTimeProjectDirectory;
+            var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
+            var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
             EmitResult? result;
             
@@ -190,9 +187,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8 );
                     compilation = compilation.ReplaceSyntaxTree( tree, newTree );
                 }
-
+                
                 var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-                var compilationForDebugging = this._debugTransformedCode ? compilation : input;
                 
                 result = compilation.Emit( stream, manifestResources: this._resources, options: options);
             }

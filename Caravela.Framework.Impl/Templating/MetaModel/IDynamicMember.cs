@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
             }
 
-            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ), null, false );
+            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
         }
     }
 

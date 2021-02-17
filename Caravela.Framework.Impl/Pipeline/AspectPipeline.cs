@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var debugTransformedCode = context.BuildOptions.MapPdbToTransformedCode;
 
             // DI
-            this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( this.ServiceProvider, roslynCompilation, context.ManifestResources, debugTransformedCode );
+            this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( this.ServiceProvider, roslynCompilation, context.ManifestResources );
             this.CompileTimeAssemblyLoader = new CompileTimeAssemblyLoader( this.ServiceProvider, roslynCompilation, this.CompileTimeAssemblyBuilder );
             this.CompileTimeAssemblyBuilder.CompileTimeAssemblyLoader = this.CompileTimeAssemblyLoader;
             var compilation = new CompilationModel( roslynCompilation );
