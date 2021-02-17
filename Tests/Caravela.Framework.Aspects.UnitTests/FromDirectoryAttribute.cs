@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,18 +23,16 @@ namespace Caravela.Framework.Aspects.UnitTests
         /// <summary>
         /// Initializes a new instance of the <see cref="FromDirectoryAttribute"/> class.
         /// </summary>
-        /// <param name="directory">The directory containing the tests to execute, relatively to the project directory.</param>
-        public FromDirectoryAttribute( string directory )
+        /// <param name="subdirectory">The directory containing the tests to execute, relatively to the project directory.</param>
+        public FromDirectoryAttribute( string subdirectory )
         {
-            var projectDir = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
-                    .Single( a => a.Key == "ProjectDirectory" ).Value!;
-
-            this._directory = Path.Combine( directory, projectDir );
+            this._directory = Path.Combine( AspectUnitTestBase.ProjectDirectory, subdirectory);
         }
 
         
         public override IEnumerable<object[]> GetData( MethodInfo testMethod )
         {
+            //Debugger.Launch();
             List<object[]> tests = new();
 
             void AddTestsInDirectory( string dirPath )
@@ -50,15 +49,12 @@ namespace Caravela.Framework.Aspects.UnitTests
 
                 foreach ( var testPath in Directory.EnumerateFiles( dirPath, "*.cs" ) )
                 {
-                    tests.Add( new[] { Path.GetRelativePath( this._directory, testPath ), testPath } );
+                    tests.Add( new[] { Path.GetRelativePath( AspectUnitTestBase.ProjectDirectory, testPath ) } );
                 }
             }
 
-            foreach ( var dir in Directory.EnumerateDirectories( this._directory ) )
-            {
-                AddTestsInDirectory( dir );
-            }
-
+            AddTestsInDirectory( this._directory );
+            
             return tests;
         }
 

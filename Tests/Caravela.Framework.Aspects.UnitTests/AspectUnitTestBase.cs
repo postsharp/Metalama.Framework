@@ -14,14 +14,22 @@ namespace Caravela.Framework.Aspects.UnitTests
     {
         private readonly ITestOutputHelper _logger;
 
+        public static string ProjectDirectory =
+            Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
+                    .Single( a => a.Key == "ProjectDirectory" ).Value!;
+
+
         public AspectUnitTestBase( ITestOutputHelper logger )
         {
             this._logger = logger;
         }
 
        
-        protected async Task RunTestAsync( string testName, string sourceAbsolutePath )
+        protected async Task RunTestAsync( string testPath )
         {
+            var sourceAbsolutePath = Path.Combine( ProjectDirectory, testPath );
+
+
             var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
             var actualTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".actual_transformed.txt" );
 
@@ -29,7 +37,7 @@ namespace Caravela.Framework.Aspects.UnitTests
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
             var testRunner = new AspectTestRunner() { HandlesException = false };
-            var testResult = await testRunner.Run( testName, testSource );
+            var testResult = await testRunner.Run( testPath, testSource );
 
             // We assume that the file must run without error. We would need another run method and more abstraction to
             // test for diagnostics.
