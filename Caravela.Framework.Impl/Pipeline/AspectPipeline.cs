@@ -18,8 +18,10 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    internal abstract class AspectPipeline : IDisposable
+    internal abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
+        protected ServiceProvider ServiceProvider { get; } = new ServiceProvider();
+        
         /// <summary>
         /// Gets the list of <see cref="AspectPart"/> in the pipeline. This list is fixed for the whole pipeline.
         /// It is based on the aspects found in the project and its dependencies.
@@ -37,10 +39,6 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         public IAspectPipelineContext Context { get; }
 
-        /// <summary>
-        /// Gets the pipeline options.
-        /// </summary>
-        public IAspectPipelineOptions PipelineOptions { get; }
 
         // TODO: move to service provider?
         protected CompileTimeAssemblyBuilder CompileTimeAssemblyBuilder { get; }
@@ -48,22 +46,23 @@ namespace Caravela.Framework.Impl.Pipeline
         // TODO: move to service provider?
         protected CompileTimeAssemblyLoader CompileTimeAssemblyLoader { get; }
 
-        protected AspectPipeline( IAspectPipelineContext context, IAspectPipelineOptions options )
+        protected AspectPipeline( IAspectPipelineContext context )
         {
-            if ( context.Options.GetBooleanOption( "DebugCaravela" ) )
+            if ( context.BuildOptions.AttachDebugger )
             {
                 Debugger.Launch();
             }
+            
+            this.ServiceProvider.AddService( context.BuildOptions );
 
             this.Context = context;
-            this.PipelineOptions = options;
             var roslynCompilation = context.Compilation;
 
-            var debugTransformedCode = context.Options.GetBooleanOption( "CaravelaDebugTransformedCode" );
+            var debugTransformedCode = context.BuildOptions.MapPdbToTransformedCode;
 
             // DI
-            this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( roslynCompilation, context.ManifestResources, debugTransformedCode );
-            this.CompileTimeAssemblyLoader = new CompileTimeAssemblyLoader( roslynCompilation, this.CompileTimeAssemblyBuilder );
+            this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( this.ServiceProvider, roslynCompilation, context.ManifestResources );
+            this.CompileTimeAssemblyLoader = new CompileTimeAssemblyLoader( this.ServiceProvider, roslynCompilation, this.CompileTimeAssemblyBuilder );
             this.CompileTimeAssemblyBuilder.CompileTimeAssemblyLoader = this.CompileTimeAssemblyLoader;
             var compilation = new CompilationModel( roslynCompilation );
             var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
@@ -87,46 +86,58 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="exception"></param>
         /// <param name="context"></param>
-        protected static void HandleException( Exception exception, IAspectPipelineContext context )
+        protected void HandleException( Exception exception )
         {
             switch ( exception )
             {
-                case DiagnosticsException diagnosticsException:
+                case InvalidUserCodeException diagnosticsException:
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
                     {
-                        context.ReportDiagnostic( diagnostic );
+                        this.Context.ReportDiagnostic( diagnostic );
                     }
 
-                    break;
-
-                case CaravelaException caravelaException:
-                    context.ReportDiagnostic( caravelaException.Diagnostic );
                     break;
 
                 default:
-                    var guid = Guid.NewGuid();
-                    var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
-                    try
+                    if ( this.WriteUnhandledExceptionsToFile )
                     {
-                        File.WriteAllText( path, exception.ToString() );
+                        var guid = Guid.NewGuid();
+                        var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                        try
+                        {
+                            File.WriteAllText( path, exception.ToString() );
+                        }
+                        catch
+                        {
+                        }
+
+
+                        Console.WriteLine( exception.ToString() );
+
+                        this.Context.ReportDiagnostic( Diagnostic.Create( 
+                            GeneralDiagnosticDescriptors.UncaughtException, 
+                            null, 
+                            exception.ToDiagnosticString(),
+                            path ) );
                     }
-                    catch
+                    else
                     {
+                        
                     }
 
-                    Console.WriteLine( exception.ToString() );
-
-                    context.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.UncaughtException, null, exception.ToDiagnosticString(), path ) );
                     break;
             }
         }
+
+        public virtual bool WriteUnhandledExceptionsToFile => true;
+        
 
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <param name="pipelineStageResult"></param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        protected bool TryExecute( out PipelineStageResult pipelineStageResult )
+        protected bool TryExecuteCore( out PipelineStageResult pipelineStageResult )
         {
             pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this.AspectParts );
 
@@ -181,7 +192,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this.PipelineOptions );
+                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
 
                 case nameof( AspectDriver ):
 
@@ -198,5 +209,8 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             this.CompileTimeAssemblyLoader.Dispose();
         }
+
+        public abstract bool CanTransformCompilation { get; }
+
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests
@@ -22,11 +23,11 @@ namespace Caravela.Framework.Impl.UnitTests
             {
                 testCode();
 
-                Assert.False( true, "Exception CaravelaException was not received." );
+                Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }
-            catch ( CaravelaException e )
+            catch ( InvalidUserCodeException e )
             {
-                Assert.Equal( diagnosticDescriptor.Id, e.Diagnostic.Id );
+                Assert.Contains(  e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
             }
         }
     }

@@ -9,11 +9,11 @@
         /// <summary>
         /// Gets the pipeline options.
         /// </summary>
-        public IAspectPipelineOptions PipelineOptions { get; }
+        public IAspectPipelineProperties PipelineProperties { get; }
 
-        protected PipelineStage( IAspectPipelineOptions pipelineOptions )
+        protected PipelineStage( IAspectPipelineProperties pipelineProperties )
         {
-            this.PipelineOptions = pipelineOptions;
+            this.PipelineProperties = pipelineProperties;
         }
 
         /// <summary>

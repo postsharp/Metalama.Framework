@@ -70,11 +70,12 @@ class TargetCode
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
 
             // Test in/out.
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
             AssertEx.DynamicEquals(
                 byRefMethod.Invoke(
                     null,
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ), null, true ),
-                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ), null, true ) ),
+                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ), intType, true ),
+                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ), intType, true ) ),
                 @"global::TargetCode.ByRef(out x, ref y)" );
 
             AssertEx.ThrowsWithDiagnostic(

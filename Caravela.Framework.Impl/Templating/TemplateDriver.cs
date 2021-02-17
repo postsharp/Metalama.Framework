@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode output;
             try
             {
-                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, null );
+                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
             }
             catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {

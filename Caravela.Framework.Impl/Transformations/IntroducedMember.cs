@@ -10,6 +10,11 @@ namespace Caravela.Framework.Impl.Transformations
     internal class IntroducedMember
     {
         /// <summary>
+        /// Gets the <see cref="IMemberIntroduction" /> that created this object.
+        /// </summary>
+        public IMemberIntroduction Introductor { get; }
+
+        /// <summary>
         /// Gets the syntax of the introduced member.
         /// </summary>
         public MemberDeclarationSyntax Syntax { get; }
@@ -24,8 +29,9 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public IntroducedMemberSemantic Semantic { get; }
 
-        public IntroducedMember( MemberDeclarationSyntax syntax, AspectPartId aspectPart, IntroducedMemberSemantic semantic )
+        public IntroducedMember( IMemberIntroduction introductor, MemberDeclarationSyntax syntax, AspectPartId aspectPart, IntroducedMemberSemantic semantic )
         {
+            this.Introductor = introductor;
             this.Syntax = syntax;
             this.AspectPart = aspectPart;
             this.Semantic = semantic;

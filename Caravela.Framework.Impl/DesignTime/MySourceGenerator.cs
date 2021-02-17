@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Caravela.Framework.Impl.DesignTime
 {
 
-    [Generator]
+    //[Generator]
     public class MySourceGenerator : ISourceGenerator
     {
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
@@ -18,7 +18,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            if ( SourceGeneratorAspectPipeline.TryExecute( new AspectPipelineContext( context ), out var additionalSyntaxTrees ) )
+            using SourceGeneratorAspectPipeline pipeline = new( new AspectPipelineContext( context ) );
+            if ( pipeline.TryExecute( out var additionalSyntaxTrees ) )
             {
                 foreach ( var additionalSyntaxTree in additionalSyntaxTrees )
                 {
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Impl.DesignTime
             public AspectPipelineContext( GeneratorExecutionContext generatorContext )
             {
                 this._generatorContext = generatorContext;
-                this.Options = new AnalyzerConfigOptionsAdapter( generatorContext.AnalyzerConfigOptions );
+                this.BuildOptions = new BuildOptions( new AnalyzerBuildOptionsSource( generatorContext.AnalyzerConfigOptions ) );
             }
 
             public CSharpCompilation Compilation => (CSharpCompilation) this._generatorContext.Compilation;
@@ -47,11 +48,13 @@ namespace Caravela.Framework.Impl.DesignTime
 
             public IList<ResourceDescription> ManifestResources => ImmutableArray<ResourceDescription>.Empty;
 
-            public IConfigOptions Options { get; }
+            public IBuildOptions BuildOptions { get; }
 
             public CancellationToken CancellationToken => this._generatorContext.CancellationToken;
 
             public void ReportDiagnostic( Diagnostic diagnostic ) => this._generatorContext.ReportDiagnostic( diagnostic );
+
+            public bool HandleExceptions => true;
         }
     }
 }

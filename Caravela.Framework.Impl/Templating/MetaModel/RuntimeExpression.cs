@@ -1,5 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -12,6 +13,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     public sealed class RuntimeExpression
     {
+        private ITypeSymbol? _expressionType;
+        private readonly string? _expressionTypeName;
 
         /// <summary>
         /// Determines whether it is legal to use the 'out' or 'ref' argument modifier with this expression.
@@ -20,16 +23,45 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ExpressionSyntax Syntax { get; }
 
-        public ITypeSymbol? ExpressionType { get; }
+        /// <summary>
+        /// Returns the <see cref="ExpressionSyntax"/> encapsulated by the current <see cref="RuntimeExpression"/>. Called from generated
+        /// code. Do not remove.
+        /// </summary>
+        /// <param name="runtimeExpression"></param>
+        /// <returns></returns>
+        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
+        
 
+        internal ITypeSymbol GetExpressionType(ITypeFactory typeFactory)
+         => this._expressionType ??= typeFactory.GetTypeByReflectionName( this._expressionTypeName.AssertNotNull() ).GetSymbol();
+        
         private RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, bool isReferenceable )
         {
             this.Syntax = syntax;
-            this.ExpressionType = expressionType;
+            this._expressionType = expressionType;
             this.IsReferenceable = isReferenceable;
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, IType? type = null, bool isReferenceable = false ) : this( syntax, type?.GetSymbol(), isReferenceable )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class by passing a type name. This constructor
+        /// is called from generated code and must not be changed or removed.
+        /// </summary>
+        /// <param name="syntax"></param>
+        /// <param name="typeName"></param>
+        /// <param name="isReferenceable"></param>
+        public RuntimeExpression( ExpressionSyntax syntax, string typeName, bool isReferenceable = false )
+        {
+            this.Syntax = syntax;
+            this._expressionTypeName = typeName;
+        }
+
+        public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false ) 
+            : this( syntax, type?.GetSymbol(), isReferenceable )
+        {
+        }
+        
+        public RuntimeExpression( ExpressionSyntax syntax )  
+            : this( syntax, (ITypeSymbol?) null, false )
         {
         }
 
@@ -84,7 +116,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <returns></returns>
         public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
         {
-            var expressionType = this.ExpressionType;
+            var expressionType = this.GetExpressionType(  targetType.TypeFactory);
 
             var targetTypeSymbol = targetType.GetSymbol();
 

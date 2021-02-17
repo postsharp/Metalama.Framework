@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestInfiniteRecursion()
         {
-            Assert.Throws<CaravelaException>( () =>
+            Assert.Throws<InvalidUserCodeException>( () =>
             {
                 var o = new List<object>();
                 o.Add( o );
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestUnsupportedAnonymousType()
         {
-            Assert.Throws<CaravelaException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
+            Assert.Throws<InvalidUserCodeException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
         }
 
         [Fact]

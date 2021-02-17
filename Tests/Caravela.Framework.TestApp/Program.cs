@@ -11,6 +11,8 @@ namespace Caravela.Framework.TestApp
         {
             typeof( Program ).GetMethod( "SomeIntroducedMethod" )?.Invoke( null, null );
 
+            MethodWithTwoAspects();
+
             PrintDebugInfo();
 
             PrintArray();
@@ -20,6 +22,13 @@ namespace Caravela.Framework.TestApp
             new ClassWithMethods();
 
             Cancel();
+        }
+
+        [SwallowExceptionsAspect]
+        [PrintDebugInfoAspect]
+        public static void MethodWithTwoAspects()
+        {
+            Console.WriteLine( "This is method with two aspects" );
         }
 
         [PrintDebugInfoAspect]
@@ -36,13 +45,10 @@ namespace Caravela.Framework.TestApp
         }
 
         [SwallowExceptionsAspect]
-        private static object PrintArrayAtIndex( int[] a, int i )
+        private static void PrintArrayAtIndex( int[] a, int i )
         {
             Console.WriteLine( a[i] );
             Thread.Sleep( 100 );
-
-            // void methods don't work if template contains "return default;"
-            return null;
         }
 
         private static void Cancel()

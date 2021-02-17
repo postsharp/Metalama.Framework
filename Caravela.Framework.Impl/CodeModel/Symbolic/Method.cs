@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             {
                 if ( this._method.IsOpenGeneric )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._method );
+                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._method );
                 }
 
                 var name = this._method.GenericArguments.Any()
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
                     if ( instanceExpression != null )
                     {
-                        throw new CaravelaException( GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction, this._method );
+                        throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction, this._method );
                     }
 
                     return new DynamicMember(

@@ -116,9 +116,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 SyntaxKind.DefaultLiteralExpression,
                                 Token (SyntaxKind.DefaultKeyword)))
                     }
-                    : null);
-
-            return new[] { new IntroducedMember( method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
+                    : null
+                    );
+            
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
 
         // TODO: Temporary

@@ -1,103 +1,48 @@
-﻿using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
-using Caravela.Framework.Impl.Linking;
+﻿using Caravela.Framework.Code;
+using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.MetaModel
+namespace Caravela.TestFramework.Templating
 {
-    internal class ProceedInvokeMethod : IProceedImpl
+    class TemporaryProceedImplBeforeAlexChangesTemplatingTests : IProceedImpl
     {
-        private readonly IMethod _originalDeclaration;
-        private readonly AspectPartId? _aspectPartId;
+        private readonly BaseMethodDeclarationSyntax _method;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
+        public TemporaryProceedImplBeforeAlexChangesTemplatingTests( IMethod method )
         {
-            this._originalDeclaration = originalDeclaration;
-            this._aspectPartId = aspectPartId;
+            this._method = (BaseMethodDeclarationSyntax) method.GetSymbol().DeclaringSyntaxReferences.Single().GetSyntax();
         }
 
-        TypeSyntax IProceedImpl.CreateTypeSyntax()
+        public TypeSyntax CreateTypeSyntax()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
+            if ( this._method is MethodDeclarationSyntax method )
             {
-                // TODO: Add the namespace.
-#pragma warning disable CS0618 // Type or member is obsolete
-                return IdentifierName( nameof( __Void ) );
-#pragma warning restore CS0618 // Type or member is obsolete
+                if ( method.ReturnType is PredefinedTypeSyntax predefinedType &&
+                    predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword )
+                {
+                    return IdentifierName( "__Void" );
+                }
+                else
+                {
+                    return method.ReturnType;
+                }
             }
             else
             {
-                // TODO: Introduced types?
-                return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._originalDeclaration.ReturnType).Symbol );
+                throw new NotImplementedException();
             }
         }
 
-        StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
+        public StatementSyntax CreateAssignStatement( string returnValue )
         {
-            // Emit `xxx = <original_method_call>`.
-            return
-                ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
-                        IdentifierName( returnValueLocalName ),
-                        this.CreateOriginalMethodCall()) );
-        }
-
-        StatementSyntax IProceedImpl.CreateReturnStatement()
-        {
-            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
-            {
-                // Emit `<original_method_call>; return`.
-                return Block(
-                    ExpressionStatement( this.CreateOriginalMethodCall() ),
-                    ReturnStatement());
-            }
-            else
-            {
-                // Emit `return <original_method_call>`.
-                return
-                    ReturnStatement(
-                        this.CreateOriginalMethodCall());
-            }
-        }
-
-        private InvocationExpressionSyntax CreateOriginalMethodCall()
-        {
-            // Emit `OriginalMethod( a, b, c )` where `a, b, c` is the canonical list of arguments.
-            // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
-            var invocation =
-                InvocationExpression(
-                    !this._originalDeclaration.IsStatic
-                    ? MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            ThisExpression(),
-                            IdentifierName( this._originalDeclaration.Name ))
-                    : IdentifierName( this._originalDeclaration.Name ),
-                    ArgumentList(
-                        SeparatedList(
-                            this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
-
-            if ( this._aspectPartId != null )
-            {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
-            }
-
-            return invocation;
-        }
-
-        // The following commented logic should move to the aspect linker.
-
-        /*
-        StatementSyntax IProceedImpl.CreateAssignStatement( string returnLocalVariableName )
-        {
-            
-            
             if ( this._method.Body == null )
             {
                 throw new NotImplementedException( "Expression-bodied methods not implemented." );
@@ -115,13 +60,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 // There is a single return statement at the end. We don't need to generate the label and the goto.
 
-                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, null );
+                var rewriter = new ReturnToAssignmentRewriter( returnValue, null );
 
                 return (BlockSyntax) rewriter.Visit( methodBody );
             }
             else
             {
-                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, "__continue" );
+                var rewriter = new ReturnToAssignmentRewriter( returnValue, "__continue" );
 
                 var body = (BlockSyntax) rewriter.Visit( methodBody );
 
@@ -129,7 +74,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     body,
                     LabeledStatement( "__continue", EmptyStatement() ) );
             }
-            
         }
 
         private bool IsLastStatement( SyntaxNode node )
@@ -159,7 +103,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
         }
 
-        StatementSyntax IProceedImpl.CreateReturnStatement()
+        public StatementSyntax CreateReturnStatement()
         {
             if ( this._method.Body == null )
             {
@@ -203,6 +147,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     if ( this._returnLabelName != null )
                     {
                         return Block(
+
                             assignment,
                             GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
@@ -216,6 +161,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                     if ( this._returnLabelName != null )
                     {
                         return Block(
+
                             GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
                     }
                     else
@@ -225,6 +171,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 }
             }
         }
-        */
     }
 }
