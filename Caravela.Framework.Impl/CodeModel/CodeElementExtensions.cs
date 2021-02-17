@@ -54,14 +54,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 var requiredArguments = parameters.Count - 1;
                 if ( argumentsLength < requiredArguments )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments, codeElement, requiredArguments );
+                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments, codeElement, requiredArguments );
                 }
             }
             else
             {
                 if ( argumentsLength != parameters.Count )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, codeElement, parameters.Count );
+                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, codeElement, parameters.Count );
                 }
             }
         }
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( !arg.IsReferenceable )
                         {
-                            throw new CaravelaException( 
+                            throw new InvalidUserCodeException( 
                                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                                 arg.Syntax, 
                                 parameter.Name, 
@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( instance != null )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember, codeElement );
+                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember, codeElement );
                 }
 
                 return (ExpressionSyntax) codeElement.Compilation.SyntaxGenerator.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( instance == null )
                 {
-                    throw new CaravelaException( GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember, codeElement );
+                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember, codeElement );
                 }
 
                 return instance.ToTypedExpression( codeElement.DeclaringType, true );

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
             }
 
             this._property.CheckArguments( this._property.Parameters, null );
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         {
             if ( this._property.DeclaringType!.IsOpenGeneric )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._property );
             }
 
             var receiver = this._property.GetReceiverSyntax( instance );

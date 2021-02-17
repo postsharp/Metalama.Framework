@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Caravela.UnitTestFramework;
+using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,8 +34,20 @@ namespace Caravela.Framework.Aspects.UnitTests
             var testSource = await File.ReadAllTextAsync( sourcePath );
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
-            var testRunner = new AspectUnitTestRunner( this._logger );
-            var testResult = await testRunner.Run( testSource );
+            var testRunner = new AspectTestRunner() { HandlesException = false };
+            var testResult = await testRunner.Run( relativeSourcePath, testSource );
+
+            // We assume that the file must run without error. We would need another run method and more abstraction to
+            // test for diagnostics.
+            foreach ( var diagnostic in testResult.Diagnostics )
+            {
+                if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                {
+                    this._logger.WriteLine( diagnostic.ToString() );
+                }
+            }
+            
+            Assert.True( testResult.Success, testResult.ErrorMessage );
 
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.

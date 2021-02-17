@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
             if ( symbol == null )
             {
-                throw new CaravelaException( GeneralDiagnosticDescriptors.CannotFindType, reflectionName );
+                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotFindType, reflectionName );
             }
 
             return this.GetNamedType( symbol );

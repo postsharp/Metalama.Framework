@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class CompileTimeHighLevelAspectsPipelineStage : HighLevelAspectsPipelineStage
     {
-        public CompileTimeHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineOptions options ) : base( aspectParts, assemblyLoader, options )
+        public CompileTimeHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) : base( aspectParts, assemblyLoader, properties )
         {
         }
 

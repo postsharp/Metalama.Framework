@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly IAspectWeaver _aspectWeaver;
         private readonly INamedType _aspectType;
 
-        public LowLevelAspectsPipelineStage( IAspectWeaver aspectWeaver, INamedType aspectType, IAspectPipelineOptions options ) : base( options )
+        public LowLevelAspectsPipelineStage( IAspectWeaver aspectWeaver, INamedType aspectType, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
