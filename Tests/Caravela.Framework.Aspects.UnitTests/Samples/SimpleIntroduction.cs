@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleIntroduction
+namespace Caravela.Framework.Aspects.UnitTests.AspectLinker.SimpleIntroduction
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {

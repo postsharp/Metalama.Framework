@@ -1,12 +1,11 @@
-﻿using Caravela.Framework.Impl.CodeModel.Symbolic;
+﻿using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Linking;
-using Caravela.Framework.Impl.Transformations;
-using FakeItEasy;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Linker
 {
-    public class OverrideTests : TestBase
+    public class OverrideTests : LinkerTestBase
     {
         [Fact]
         public void Test()
@@ -19,13 +18,39 @@ class T
     }
 }
 ";
+            var expectedCode = @"
+class T
+{
+    void Foo()
+    {
+        this.__Foo__TestAspect();
+    }
+
+    void __Foo__OriginalBody()
+    {
+    }
+
+    void __Foo__TestAspect()
+    {
+        this.__Foo__OriginalBody();
+    }
+}
+";
 
             var compilationModel = CreateCompilation( code );
-            var overrideTransformation = A.Fake<INonObservableTransformation>( builder => builder.Implements<IMemberIntroduction>() );
 
-            var input = new AdviceLinkerInput( ((CompilationModel) compilationModel).RoslynCompilation, compilationModel, new[] { overrideTransformation }, Array.Empty<IObservableTransformation>() );
+            var aspectType = CreateFakeAspectType();
+            var aspectPart = new AspectPart( aspectType, null );
 
-            AspectLinker linker = new AspectLinker( input );
+            var targetMethod = compilationModel.DeclaredTypes.OfName( "T" ).Single().Methods.OfName( "Foo" ).Single();
+            var overrideTransformation = CreateFakeOverride( aspectPart.ToAspectPartId(), targetMethod, CreateOverrideSyntax( aspectPart.ToAspectPartId(), targetMethod ) );
+
+            var input = new AdviceLinkerInput( compilationModel.RoslynCompilation, compilationModel, new[] { overrideTransformation }, new[] { aspectPart } );
+            var linker = new AspectLinker( input );
+            var result = linker.ToResult();
+
+            string transformedText = result.Compilation.SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
         }
     }
 }

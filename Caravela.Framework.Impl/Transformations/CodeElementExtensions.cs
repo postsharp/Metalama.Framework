@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             if (codeElement is IMethod imethod)
             {
-                List<SyntaxToken> tokens = new List<SyntaxToken>();
+                var tokens = new List<SyntaxToken>();
 
                 switch ( imethod.Accessibility )
                 {
