@@ -27,8 +27,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
             {
-                Xunit.Assert.Equal( "Field", info.Name );
-                Xunit.Assert.Equal( "Dictionary`2", info.FieldType.Name );
+                Assert.Equal( "Field", info.Name );
+                Assert.Equal( "Dictionary`2", info.FieldType.Name );
             } );
         }
 
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "ReturnSelf", info.Name );
-                Xunit.Assert.Equal( "TKey", info.ReturnParameter.ParameterType.Name );
+                Assert.Equal( "ReturnSelf", info.Name );
+                Assert.Equal( "TKey", info.ReturnParameter.ParameterType.Name );
             } );
         }
 
@@ -53,10 +53,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
-            TestExpression( code, serialized, ( Type info ) => Xunit.Assert.Equal( "Target`1[T2]", info.ToString() ) );
+            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Target`1[T2]", info.ToString() ) );
             var serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ) ) )
                 .ToString();
-            TestExpression( code, serialized2, ( Type info ) => Xunit.Assert.Equal( "Target`1[T1]", info.ToString() ) );
+            TestExpression<Type>( code, serialized2, ( info ) => Assert.Equal( "Target`1[T1]", info.ToString() ) );
         }
 
         [Fact]
@@ -65,11 +65,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
-            TestExpression( code, serialized, ( MethodInfo info ) => Xunit.Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
+            TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
             var serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
-            TestExpression( code2, serialized2, ( MethodInfo info ) => Xunit.Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );
+            TestExpression<MethodInfo>( code2, serialized2, ( info ) => Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );
         }
     }
 }

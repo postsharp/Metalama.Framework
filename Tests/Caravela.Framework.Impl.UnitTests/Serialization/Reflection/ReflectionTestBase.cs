@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         }
 
         /// <summary>
-        /// As <see cref="Xunit.Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,
+        /// As <see cref="Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,
         /// so that you can easily copy-paste it as the correct expected value into the test.
         /// </summary>
         /// <param name="expected">Expected value.</param>
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                 this._helper.WriteLine( "----" );
                 this._helper.WriteLine( "@\"" + actual.Replace( "\"", "\"\"" ) + '\"' );
                 this._helper.WriteLine( "----" );
-                Xunit.Assert.Equal( expected, actual );
+                Assert.Equal( expected, actual );
             }
         }
     }

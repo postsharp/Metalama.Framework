@@ -10,10 +10,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         public void TestString()
         {
             var serializer = new StringSerializer();
-            Xunit.Assert.Equal( "\"Hel\\0lo\\\"\"", serializer.Serialize( "Hel\0lo\"" ).NormalizeWhitespace().ToString() );
-            Xunit.Assert.Equal( "\"Hello,\\n world!\"", serializer.Serialize( @"Hello,
+            Assert.Equal( "\"Hel\\0lo\\\"\"", serializer.Serialize( "Hel\0lo\"" ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "\"Hello,\\n world!\"", serializer.Serialize( @"Hello,
  world!" ).NormalizeWhitespace().ToString().Replace( "\\r", "" ) );
-            Xunit.Assert.Equal( "\"Hello, world!\"", serializer.Serialize( $@"Hello, {"world"}!" ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "\"Hello, world!\"", serializer.Serialize( $@"Hello, {"world"}!" ).NormalizeWhitespace().ToString() );
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
                 ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
                 : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
             
-            Debug.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
+            Invariant.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
 
             // TODO: This is temporary.
             var expansionContext = new TemplateExpansionContext( 

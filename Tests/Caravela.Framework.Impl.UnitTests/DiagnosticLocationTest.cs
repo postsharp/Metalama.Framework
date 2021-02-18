@@ -55,15 +55,15 @@ class C<T> : object
         {
             if ( expectedText == null )
             {
-                Xunit.Assert.Null( location );
+                Assert.Null( location );
                 return;
             }
-
-            Xunit.Assert.NotNull( location );
+            
+            Assert.NotNull( location );
 
             var actualText = location!.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
-
-            Xunit.Assert.Equal( expectedText, actualText );
+            
+            Assert.Equal( expectedText, actualText );
         }
 
     }

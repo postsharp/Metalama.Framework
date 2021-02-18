@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 iterations++;
 
-                Debug.Assert( iterations < 32 );
+                Invariant.Assert( iterations < 32, "too many iterations" );
 
                 annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
