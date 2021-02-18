@@ -35,6 +35,14 @@
     <NoWarn Condition="'$(Configuration)'=='Debug'">1591,1572,1573</NoWarn>
   </PropertyGroup>
   
+  <!-- Assembly metadata -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>PackageVersion</_Parameter1>
+      <_Parameter2>$(Version)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  
   <!-- Source Link  -->
   <PropertyGroup>
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->

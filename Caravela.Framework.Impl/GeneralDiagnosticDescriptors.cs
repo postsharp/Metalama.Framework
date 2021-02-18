@@ -11,22 +11,22 @@ namespace Caravela.Framework.Impl
         private const string _caravelaCategory = "Caravela";
 
         public static readonly DiagnosticDescriptor UncaughtException =
-            new( "CR0001", "Unexpected exception in Caravela.", "Unexpected exception occurred in Caravela: {0}. Exception details are in {1}.", _caravelaCategory, Error, true );
+            new( "CR0001", "Unexpected exception in Caravela.", "Unexpected exception occurred in Caravela: {0} Exception details are in {1}.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor ErrorBuildingCompileTimeAssembly =
             new( "CR0002", "Error while building compile-time assembly.", "Error occurred while building compile-time assembly.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor AspectAppliedToIncorrectElement =
-            new( "CR0003", "Aspect applied to incorrect kind of element.", "Aspect {0} cannot be applied to element {1}, because it is a {2} or because the associated aspect weaver was not found.", _caravelaCategory, Error, true );
+            new( "CR0003", "Aspect applied to incorrect kind of element.", "Aspect '{0}' cannot be applied to {1} '{2}', because it does not implement the '{3}' interface.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor AspectHasMoreThanOneWeaver =
-            new( "CR0004", "Aspect has more than one weaver.", "Aspect {0} can have at most one weaver, but it has the following: {1}.", _caravelaCategory, Error, true );
+            new( "CR0004", "Aspect has more than one weaver.", "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor ErrorProcessingTemplates =
             new( "CR0005", "Error while processing templates.", "Error occurred while processing templates.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor ExceptionInWeaver =
-            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the aspect weaver {0}: {1}", _caravelaCategory, Error, true );
+            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the aspect weaver '{0}': {1}", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor UnsupportedSerialization =
             new( "CR0007", "Build-time code not serializable.", "Build-time code attempted to create {0} but no serializer is registered for that type.", _caravelaCategory, Error, true );
@@ -38,19 +38,19 @@ namespace Caravela.Framework.Impl
             new( "CR0009", "Multidimensional arrays not supported.", "Build-time array {0} has more than one dimension.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor UnsupportedDictionaryComparer =
-            new( "CR0010", "Custom equality comparers not supported.", "Build-time dictionary has an equality comparer {0} which is not supported. Only the default comparer and predefined string comparers are supported.", _caravelaCategory, Error, true );
+            new( "CR0010", "Custom equality comparers not supported.", "Build-time dictionary has an equality comparer '{0}' that is not supported. Only the default comparer and predefined string comparers are supported.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor TypeNotSerializable =
-            new( "CR0011", "Type not serializable.", "Build-time Type value {0} is of a form that is not supported for serialization.", _caravelaCategory, Error, true );
+            new( "CR0011", "Type not serializable.", "Build-time type value '{0}' is of a form that is not supported for serialization.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor MoreThanOneAdvicePerElement =
             new( "CR0012", "More than one advice per code element.", "'{0}' has more than one advice, which is currently not supported.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor MemberRequiresNArguments =
-            new( "CR0012", "Member requires number of arguments.", "Member {0} requires {1} arguments.", _caravelaCategory, Error, true );
+            new( "CR0012", "Member requires number of arguments.", "Member '{0}' requires {1} arguments.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor MemberRequiresAtLeastNArguments =
-            new( "CR0013", "Member requires more arguments.", "Member {0} requires at least {1} arguments.", _caravelaCategory, Error, true );
+            new( "CR0013", "Member requires more arguments.", "Member '{0}' requires at least {1} arguments.", _caravelaCategory, Error, true );
 
         public static readonly DiagnosticDescriptor CannotProvideInstanceForStaticMember =
             new( "CR0014", "Cannot provide instance for a static member.", "Member {0} is static, but has been used with a non-null instance.", _caravelaCategory, Error, true );

@@ -244,5 +244,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return modifiers;
         }
+
+        internal static string ToDisplayString( this CodeElementKind kind )
+         => kind switch
+         {
+             CodeElementKind.GenericParameter => "generic parameter",
+             _ => kind.ToString().ToLowerInvariant()
+         };
     }
 }

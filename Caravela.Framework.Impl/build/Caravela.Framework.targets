@@ -4,5 +4,10 @@
     <PackageReference Update="Caravela.Framework" PrivateAssets="none" />
     <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
   </ItemGroup>
-  
+
+  <ItemGroup>
+    <!-- Exports the properties to the compiler -->
+    <CompilerVisibleProperty Include="DebugCaravela" />
+  </ItemGroup>
+
 </Project>
