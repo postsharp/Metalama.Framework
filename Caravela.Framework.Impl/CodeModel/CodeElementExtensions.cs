@@ -102,5 +102,12 @@ namespace Caravela.Framework.Impl.CodeModel
                 return codeElement.CastIfNecessary( instanceExpression, codeElement.DeclaringType!, parenthesize: true );
             }
         }
+
+        internal static string ToDisplayString( this CodeElementKind kind )
+         => kind switch
+         {
+             CodeElementKind.GenericParameter => "generic parameter",
+             _ => kind.ToString().ToLowerInvariant()
+         };
     }
 }

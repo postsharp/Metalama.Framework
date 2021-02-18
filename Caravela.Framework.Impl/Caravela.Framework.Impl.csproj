@@ -69,6 +69,10 @@ namespace Caravela.Framework.Impl.CompileTime
     </PropertyGroup>
     
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
+
+    <ItemGroup>
+      <Compile Include="CompileTime/PackageVersions.g.cs"/>
+    </ItemGroup>
   </Target>
 
   <!-- Obfuscation -->

@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
-		
+
         IReadOnlyList<ISymbol> IMethodInternal.LookupSymbols()
         {
             if ( this._symbol.DeclaringSyntaxReferences.Length == 0 )
