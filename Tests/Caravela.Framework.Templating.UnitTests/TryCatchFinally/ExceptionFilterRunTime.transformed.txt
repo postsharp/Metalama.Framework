@@ -1,0 +1,10 @@
+{
+    try
+    {
+        return 42 / a;
+    }
+    catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))
+    {
+        return (int)-1;
+    }
+}

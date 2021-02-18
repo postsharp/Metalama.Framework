@@ -1,0 +1,19 @@
+{
+    try
+    {
+        Console.WriteLine("try");
+        int result;
+        result = a;
+        Console.WriteLine("success");
+        return (int)result;
+    }
+    catch
+    {
+        Console.WriteLine("exception");
+        throw;
+    }
+    finally
+    {
+        Console.WriteLine("finally");
+    }
+}
