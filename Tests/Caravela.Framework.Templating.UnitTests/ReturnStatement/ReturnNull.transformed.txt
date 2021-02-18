@@ -1,0 +1,10 @@
+{
+    if (a == null || b == null)
+    {
+        return null;
+    }
+
+    string result;
+    result = a + b;
+    return (string)result;
+}

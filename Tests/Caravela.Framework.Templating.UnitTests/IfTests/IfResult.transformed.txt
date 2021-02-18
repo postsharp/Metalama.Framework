@@ -1,0 +1,10 @@
+{
+    string result;
+    result = a?.ToString();
+    if (result == null)
+    {
+        return (string)"";
+    }
+
+    return (string)result;
+}

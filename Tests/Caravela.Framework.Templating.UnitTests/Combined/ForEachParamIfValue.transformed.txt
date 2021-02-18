@@ -1,0 +1,15 @@
+{
+    if (a == null)
+    {
+        throw new ArgumentNullException("a");
+    }
+
+    if (b == null)
+    {
+        throw new ArgumentNullException("b");
+    }
+
+    string result;
+    result = a.ToString() + b.ToString();
+    return (string)result;
+}

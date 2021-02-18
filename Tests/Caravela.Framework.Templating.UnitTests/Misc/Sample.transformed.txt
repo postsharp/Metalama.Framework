@@ -1,0 +1,19 @@
+{
+    var parameters = new object[3];
+    parameters[0] = a;
+    parameters[1] = b;
+    Console.WriteLine("Method(a = {0}, b = {1}, c = <out> )", parameters);
+    try
+    {
+        int result;
+        c = a - b;
+        result = a + b;
+        Console.WriteLine("Method(a = {0}, b = {1}, c = <out> ) returned " + result, parameters);
+        return (int)result;
+    }
+    catch (Exception _e)
+    {
+        Console.WriteLine("Method(a = {0}, b = {1}, c = <out> ) failed: " + _e, parameters);
+        throw;
+    }
+}

@@ -1,0 +1,7 @@
+{
+    var WriteLine = 0;
+    Console.WriteLine(WriteLine);
+    var WriteLine_1 = 1;
+    Console.WriteLine(WriteLine_1);
+    return a;
+}

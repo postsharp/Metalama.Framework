@@ -1,0 +1,8 @@
+
+{
+    A<Aspect, int, string> x = new C<object, int, string>();
+    a = x;
+    object result;
+    result = a;
+    return (object)result;
+}
