@@ -37,13 +37,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestMultiArray()
         {
-            Assert.Throws<InvalidUserCodeException>( () => this.AssertSerialization( "new System.Int32[,]{{2}}", new[,] { { 2 } } ) );
+            Xunit.Assert.Throws<InvalidUserCodeException>( () => this.AssertSerialization( "new System.Int32[,]{{2}}", new[,] { { 2 } } ) );
         }
 
         private void AssertSerialization( string expected, object o )
         {
             var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
-            Assert.Equal( expected, creationExpression );
+            Xunit.Assert.Equal( expected, creationExpression );
         }
     }
 }

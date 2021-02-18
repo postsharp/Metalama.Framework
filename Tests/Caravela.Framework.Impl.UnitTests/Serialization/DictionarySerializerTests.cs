@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             var d = new Dictionary<object, object>();
             d.Add( d, "20" );
-            Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( d ) );
+            Xunit.Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( d ) );
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             var d = new Dictionary<object, object>();
             d.Add( "20", d );
-            Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( d ) );
+            Xunit.Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( d ) );
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         public void TestStringDictionaryWithUnknownComparer()
         {
             // fallback to default comparer
-            Assert.Throws<InvalidUserCodeException>( () => this.AssertSerialization(
+            Xunit.Assert.Throws<InvalidUserCodeException>( () => this.AssertSerialization(
                 "new System.Collections.Generic.Dictionary<System.String, System.Object>{}",
                 new Dictionary<string, object>( StringComparer.Create( new CultureInfo( "sk-SK" ), false ) ) ) );
         }
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestStringDictionaryWithUnknownComparer2()
         {
-            Assert.Throws<InvalidUserCodeException>( () =>
+            Xunit.Assert.Throws<InvalidUserCodeException>( () =>
 
                 // fallback to default comparer
                 this.AssertSerialization(
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestIntDictionaryWithUnknownComparer()
         {
-            Assert.Throws<InvalidUserCodeException>( () =>
+            Xunit.Assert.Throws<InvalidUserCodeException>( () =>
 
                 // fallback to default comparer
                 this.AssertSerialization(
@@ -119,7 +119,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         private void AssertSerialization( string expected, object o )
         {
             var creationExpression = this._serializer.SerializeObject( o ).NormalizeWhitespace().ToString();
-            Assert.Equal( expected, creationExpression );
+            Xunit.Assert.Equal( expected, creationExpression );
         }
     }
 }

@@ -12,14 +12,14 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             var serializer = new TimeSpanSerializer();
             var ts = TimeSpan.FromMinutes( 38 );
             var ticks = 38 * TimeSpan.TicksPerMinute;
-            Assert.Equal( "new System.TimeSpan(" + ticks.ToString() + "L)", serializer.Serialize( ts ).ToString() );
+            Xunit.Assert.Equal( "new System.TimeSpan(" + ticks.ToString() + "L)", serializer.Serialize( ts ).ToString() );
         }
 
         [Fact]
         public void TestZero()
         {
             var serializer = new TimeSpanSerializer();
-            Assert.Equal( "new System.TimeSpan(0L)", serializer.Serialize( TimeSpan.Zero ).ToString() );
+            Xunit.Assert.Equal( "new System.TimeSpan(0L)", serializer.Serialize( TimeSpan.Zero ).ToString() );
         }
     }
 }

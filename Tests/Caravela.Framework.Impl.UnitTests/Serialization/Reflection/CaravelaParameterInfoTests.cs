@@ -25,9 +25,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( "target", parameterInfo.Name );
-                Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                Xunit.Assert.Equal( "target", parameterInfo.Name );
+                Xunit.Assert.Equal( 0, parameterInfo.Position );
+                Xunit.Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
 
@@ -40,9 +40,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( "target", parameterInfo.Name );
-                Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( "T", parameterInfo.ParameterType.Name );
+                Xunit.Assert.Equal( "target", parameterInfo.Name );
+                Xunit.Assert.Equal( 0, parameterInfo.Position );
+                Xunit.Assert.Equal( "T", parameterInfo.ParameterType.Name );
             } );
         }
 
@@ -55,9 +55,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( "target", parameterInfo.Name );
-                Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( "Tuple`2", parameterInfo.ParameterType.Name );
+                Xunit.Assert.Equal( "target", parameterInfo.Name );
+                Xunit.Assert.Equal( 0, parameterInfo.Position );
+                Xunit.Assert.Equal( "Tuple`2", parameterInfo.ParameterType.Name );
             } );
         }
 
@@ -70,9 +70,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( "target", parameterInfo.Name );
-                Assert.Equal( 1, parameterInfo.Position );
-                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                Xunit.Assert.Equal( "target", parameterInfo.Name );
+                Xunit.Assert.Equal( 1, parameterInfo.Position );
+                Xunit.Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
 
@@ -85,8 +85,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( -1, parameterInfo.Position );
-                Assert.Equal( typeof( string ), parameterInfo.ParameterType );
+                Xunit.Assert.Equal( -1, parameterInfo.Position );
+                Xunit.Assert.Equal( typeof( string ), parameterInfo.ParameterType );
             } );
         }
 
@@ -99,8 +99,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( -1, parameterInfo.Position );
-                Assert.Equal( typeof( string ), parameterInfo.ParameterType );
+                Xunit.Assert.Equal( -1, parameterInfo.Position );
+                Xunit.Assert.Equal( typeof( string ), parameterInfo.ParameterType );
             } );
         }
 
@@ -113,9 +113,9 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ParameterInfo>( code, serialized, ( parameterInfo ) =>
             {
-                Assert.Equal( "target", parameterInfo.Name );
-                Assert.Equal( 0, parameterInfo.Position );
-                Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                Xunit.Assert.Equal( "target", parameterInfo.Name );
+                Xunit.Assert.Equal( 0, parameterInfo.Position );
+                Xunit.Assert.Equal( typeof( int ), parameterInfo.ParameterType );
             } );
         }
 

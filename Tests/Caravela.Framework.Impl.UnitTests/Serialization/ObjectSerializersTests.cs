@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestInfiniteRecursion()
         {
-            Assert.Throws<InvalidUserCodeException>( () =>
+            Xunit.Assert.Throws<InvalidUserCodeException>( () =>
             {
                 var o = new List<object>();
                 o.Add( o );
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         [Fact]
         public void TestUnsupportedAnonymousType()
         {
-            Assert.Throws<InvalidUserCodeException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
+            Xunit.Assert.Throws<InvalidUserCodeException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         private void AssertSerialization<T>( string expected, T? o )
         {
             var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
-            Assert.Equal( expected, creationExpression );
+            Xunit.Assert.Equal( expected, creationExpression );
         }
 
         [Fact]

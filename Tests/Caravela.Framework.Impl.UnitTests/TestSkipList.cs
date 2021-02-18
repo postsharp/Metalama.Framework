@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.UnitTests
             var old = int.MinValue;
             foreach ( var pair in skipList )
             {
-                Assert.True( old < pair.Key );
+                Xunit.Assert.True( old < pair.Key );
                 old = pair.Key;
             }
         }
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.UnitTests
                 skipList.Add( i, i );
             }
 
-            Assert.Throws<ArgumentException>( () => skipList.Add( 20, 20 ) );
+            Xunit.Assert.Throws<ArgumentException>( () => skipList.Add( 20, 20 ) );
         }
 
         [Theory]
@@ -50,13 +50,13 @@ namespace Caravela.Framework.Impl.UnitTests
         public void TestCount()
         {
             var skipList = new SkipListIndexedDictionary<int, uint>();
-            Assert.Empty( skipList );
+            Xunit.Assert.Empty( skipList );
             skipList.Set( 1, 1 );
-            Assert.Single( skipList );
+            Xunit.Assert.Single( skipList );
             skipList.Set( 1, 1 );
-            Assert.Single( skipList );
+            Xunit.Assert.Single( skipList );
             skipList.Set( 2, 2 );
-            Assert.Equal( 2, skipList.Count );
+            Xunit.Assert.Equal( 2, skipList.Count );
         }
 
         [Theory( Skip = "Buggy, so we try not to remove." )]
@@ -64,16 +64,16 @@ namespace Caravela.Framework.Impl.UnitTests
         public void TestRemove()
         {
             var skipList = new SkipListIndexedDictionary<int, int>();
-            Assert.Empty( skipList );
+            Xunit.Assert.Empty( skipList );
             skipList.Add( 1, 1 );
-            Assert.Equal( new[] { 1 }, skipList.Values );
+            Xunit.Assert.Equal( new[] { 1 }, skipList.Values );
             skipList.Add( 2, 2 );
-            Assert.Equal( new[] { 1, 2 }, skipList.Values );
+            Xunit.Assert.Equal( new[] { 1, 2 }, skipList.Values );
             skipList.Add( 3, 3 );
-            Assert.True( skipList.Remove( 1 ) );
-            Assert.True( skipList.Remove( 2 ) );
-            Assert.True( skipList.Remove( 3 ) );
-            Assert.Empty( skipList );
+            Xunit.Assert.True( skipList.Remove( 1 ) );
+            Xunit.Assert.True( skipList.Remove( 2 ) );
+            Xunit.Assert.True( skipList.Remove( 3 ) );
+            Xunit.Assert.Empty( skipList );
 
             // Test if we can add an element at the same position.
             skipList.Add( 1, 1 );
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             for ( var j = 0; j < n; j++ )
             {
-                Assert.Equal( j, skipList.IndexOf( j ) );
+                Xunit.Assert.Equal( j, skipList.IndexOf( j ) );
             }
         }
 
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.UnitTests
 
             for ( var j = 0; j < n; j++ )
             {
-                Assert.Equal( j, skipList.GetAt( j ).Key );
+                Xunit.Assert.Equal( j, skipList.GetAt( j ).Key );
             }
         }
     }

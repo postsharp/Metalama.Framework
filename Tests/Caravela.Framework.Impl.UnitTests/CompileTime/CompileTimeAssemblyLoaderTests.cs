@@ -44,8 +44,8 @@ class A : Attribute
             var builder = new CompileTimeAssemblyBuilder(serviceProvider, roslynCompilation );
             var loader = new CompileTimeAssemblyLoader(serviceProvider, roslynCompilation, builder );
 
-            var attribute = Assert.IsAssignableFrom<System.Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
-            Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
+            var attribute = Xunit.Assert.IsAssignableFrom<System.Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
+            Xunit.Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
         }
     }
 
