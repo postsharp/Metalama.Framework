@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.UnitTests
             var code = "";
             var compilation = CreateCompilation( code );
 
-            Xunit.Assert.Same( compilation.DeclaredTypes, compilation.DeclaredTypes );
+            Assert.Same( compilation.DeclaredTypes, compilation.DeclaredTypes );
         }
 
         [Fact]
@@ -39,22 +39,22 @@ namespace NS
             var compilation = CreateCompilation( code );
 
             var types = compilation.DeclaredTypes.ToList();
-            Xunit.Assert.Equal( 2, types.Count );
+            Assert.Equal( 2, types.Count );
 
             var c1 = types[0];
-            Xunit.Assert.Equal( "C", c1.Name );
-            Xunit.Assert.Equal( "C", c1.FullName );
-            Xunit.Assert.Null( c1.ContainingElement );
+            Assert.Equal( "C", c1.Name );
+            Assert.Equal( "C", c1.FullName );
+            Assert.Null( c1.ContainingElement );
 
             var d = c1.NestedTypes.Single();
-            Xunit.Assert.Equal( "D", d.Name );
-            Xunit.Assert.Equal( "C.D", d.FullName );
-            Xunit.Assert.Same( c1, d.ContainingElement );
+            Assert.Equal( "D", d.Name );
+            Assert.Equal( "C.D", d.FullName );
+            Assert.Same( c1, d.ContainingElement );
 
             var c2 = types[1];
-            Xunit.Assert.Equal( "C", c2.Name );
-            Xunit.Assert.Equal( "NS.C", c2.FullName );
-            Xunit.Assert.Null( c2.ContainingElement );
+            Assert.Equal( "C", c2.Name );
+            Assert.Equal( "NS.C", c2.FullName );
+            Assert.Null( c2.ContainingElement );
         }
 
         [Fact]
@@ -75,23 +75,23 @@ class C
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.Single();
-            Xunit.Assert.Equal( "C", type.Name );
+            Assert.Equal( "C", type.Name );
 
             var methods = type.Methods;
 
-            Xunit.Assert.Single( methods );
+            Assert.Single( methods );
 
             var method = methods[0];
-            Xunit.Assert.Equal( "M", method.Name );
-            Xunit.Assert.Same( type, method.ContainingElement );
+            Assert.Equal( "M", method.Name );
+            Assert.Same( type, method.ContainingElement );
 
             var outerLocalFunction = method.LocalFunctions.Single();
-            Xunit.Assert.Equal( "Outer", outerLocalFunction.Name );
-            Xunit.Assert.Same( method, outerLocalFunction.ContainingElement );
+            Assert.Equal( "Outer", outerLocalFunction.Name );
+            Assert.Same( method, outerLocalFunction.ContainingElement );
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
-            Xunit.Assert.Equal( "Inner", innerLocalFunction.Name );
-            Xunit.Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
+            Assert.Equal( "Inner", innerLocalFunction.Name );
+            Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
         }
 
         [Fact]
@@ -116,18 +116,18 @@ class TestAttribute : Attribute
             var compilation = CreateCompilation( code );
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
-            Xunit.Assert.Equal( "TestAttribute", attribute.Type.FullName );
-            Xunit.Assert.Equal<IReadOnlyList<object>>( new object?[] { 42, "foo", null }, attribute.ConstructorArguments );
+            Assert.Equal( "TestAttribute", attribute.Type.FullName );
+            Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments );
             var namedArguments = attribute.NamedArguments;
-            Xunit.Assert.Equal( 2, namedArguments.Count );
-            Xunit.Assert.Equal<object>( 1, namedArguments.GetByName( "E" ) );
-            var types = Xunit.Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName( "Types" ) );
-            Xunit.Assert.Equal( 3, types.Count );
-            var type0 = Xunit.Assert.IsAssignableFrom<INamedType>( types[0] );
-            Xunit.Assert.Equal( "E", type0.FullName );
-            var type1 = Xunit.Assert.IsAssignableFrom<INamedType>( types[1] );
-            Xunit.Assert.Equal( "System.Action<,>", type1.FullName );
-            Xunit.Assert.Null( types[2] );
+            Assert.Equal( 2, namedArguments.Count );
+            Assert.Equal( 1, namedArguments.GetByName( "E" ) );
+            var types = Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName( "Types" ) );
+            Assert.Equal( 3, types.Count );
+            var type0 = Assert.IsAssignableFrom<INamedType>( types[0] );
+            Assert.Equal( "E", type0.FullName );
+            var type1 = Assert.IsAssignableFrom<INamedType>( types[1] );
+            Assert.Equal( "System.Action<,>", type1.FullName );
+            Assert.Null( types[2] );
         }
 
         [Fact]
@@ -145,13 +145,13 @@ interface I<T>
             var compilation = CreateCompilation( code );
 
             var methods = compilation.DeclaredTypes.Single().Methods.ToList();
-            Xunit.Assert.Equal( 2, methods.Count );
+            Assert.Equal( 2, methods.Count );
 
             var m1 = methods[0];
-            Xunit.Assert.Equal( "M1", m1.Name );
+            Assert.Equal( "M1", m1.Name );
 
             CheckParameterData( m1.ReturnParameter!, m1, "void", null, -1 );
-            Xunit.Assert.Equal( 5, m1.Parameters.Count );
+            Assert.Equal( 5, m1.Parameters.Count );
             CheckParameterData( m1.Parameters[0], m1, "int", "i", 0 );
             CheckParameterData( m1.Parameters[1], m1, "T", "t", 1 );
             CheckParameterData( m1.Parameters[2], m1, "dynamic", "d", 2 );
@@ -159,27 +159,27 @@ interface I<T>
             CheckParameterData( m1.Parameters[4], m1, "string", "s", 4 );
 
             var m2 = methods[1];
-            Xunit.Assert.Equal( "M2", m2.Name );
+            Assert.Equal( "M2", m2.Name );
 
             CheckParameterData( m2.ReturnParameter!, m2, "int", null, -1 );
-            Xunit.Assert.Equal( 0, m2.Parameters.Count );
+            Assert.Equal( 0, m2.Parameters.Count );
 
             static void CheckParameterData(
                 IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
             {
-                Xunit.Assert.Same( containingElement, parameter.ContainingElement );
-                Xunit.Assert.Equal( typeName, parameter.ParameterType.ToString() );
+                Assert.Same( containingElement, parameter.ContainingElement );
+                Assert.Equal( typeName, parameter.ParameterType.ToString() );
 
                 if ( name != null )
                 {
-                    Xunit.Assert.Equal( name, parameter.Name );
+                    Assert.Equal( name, parameter.Name );
                 }
                 else
                 {
-                    _ = Xunit.Assert.Throws<NotSupportedException>( () => _ = parameter.Name );
+                    _ = Assert.Throws<NotSupportedException>( () => _ = parameter.Name );
                 }
 
-                Xunit.Assert.Equal( index, parameter.Index );
+                Assert.Equal( index, parameter.Index );
             }
         }
 
@@ -196,12 +196,12 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select( t => t.ToString() ) );
 
             var method = type.Methods.First();
 
-            Xunit.Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
-            Xunit.Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
+            Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).GenericArguments.Select( t => t.ToString() ) );
         }
 
         [Fact]
@@ -223,13 +223,13 @@ class MyAttribute : Attribute
 
             var attributes = compilation.Attributes.ToArray();
 
-            Xunit.Assert.Equal( 2, attributes.Length );
+            Assert.Equal( 2, attributes.Length );
 
-            Xunit.Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
-            Xunit.Assert.Equal( "a", Xunit.Assert.Single<object>( attributes[0].ConstructorArguments ) );
+            Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
+            Assert.Equal( "a", Assert.Single( attributes[0].ConstructorArguments ) );
 
-            Xunit.Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
-            Xunit.Assert.Equal( "m", Xunit.Assert.Single<object>( attributes[1].ConstructorArguments ) );
+            Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
+            Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments ) );
         }
 
         [Fact]
@@ -248,17 +248,17 @@ class C
                                  from method in type.Methods
                                  from parameter in method.Parameters
                                  select parameter.ParameterType;
-            var parameterType = Xunit.Assert.Single<IType>( parameterTypes )!;
+            var parameterType = Assert.Single( parameterTypes )!;
 
-            Xunit.Assert.Equal( "int[]", parameterType.ToString() );
-            Xunit.Assert.True( parameterType.Is( typeof( int[] ) ) );
-            Xunit.Assert.False( parameterType.Is( typeof( int[,] ) ) );
+            Assert.Equal( "int[]", parameterType.ToString() );
+            Assert.True( parameterType.Is( typeof( int[] ) ) );
+            Assert.False( parameterType.Is( typeof( int[,] ) ) );
 
-            var arrayType = Xunit.Assert.IsAssignableFrom<IArrayType>( parameterType );
+            var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
 
-            Xunit.Assert.Equal( "int", arrayType.ElementType.ToString() );
-            Xunit.Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
-            Xunit.Assert.Equal( 1, arrayType.Rank );
+            Assert.Equal( "int", arrayType.ElementType.ToString() );
+            Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
+            Assert.Equal( 1, arrayType.Rank );
         }
 
         [Fact]
@@ -277,11 +277,11 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var propertyNames = type.Properties.Select( p => p.Name );
 
-            Xunit.Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly", "field" }, propertyNames );
+            Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly", "field" }, propertyNames );
         }
 
         [Fact]
@@ -299,11 +299,11 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
-            Xunit.Assert.Equal( new[] { None, None, Ref, RefReadOnly }, refKinds );
+            Assert.Equal( new[] { None, None, Ref, RefReadOnly }, refKinds );
         }
 
         [Fact]
@@ -329,7 +329,7 @@ class C : IDisposable
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var methodKinds = new[]
             {
@@ -344,11 +344,11 @@ class C : IDisposable
                 UserDefinedOperator
             };
 
-            Xunit.Assert.Equal( methodKinds, type.Methods.Select( m => m.MethodKind ) );
-            Xunit.Assert.Single( type.Constructors );
-            Xunit.Assert.NotNull( type.StaticConstructor );
+            Assert.Equal( methodKinds, type.Methods.Select( m => m.MethodKind ) );
+            Assert.Single( type.Constructors );
+            Assert.NotNull( type.StaticConstructor );
 
-            Xunit.Assert.Equal( LocalFunction, type.Methods.First().LocalFunctions.Single().MethodKind );
+            Assert.Equal( LocalFunction, type.Methods.First().LocalFunctions.Single().MethodKind );
         }
 
         [Fact]
@@ -371,11 +371,11 @@ class C<T>
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
-            Xunit.Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ) );
+            Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ) );
         }
 
         [Fact]
@@ -393,10 +393,10 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
-            Xunit.Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
-            Xunit.Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.Select( m => m.ReturnParameter.RefKind ) );
+            Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
+            Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.Select( m => m.ReturnParameter.RefKind ) );
         }
 
         [Fact]
@@ -412,7 +412,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var method = type.Methods.First();
 
@@ -420,18 +420,18 @@ class C
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
-                Xunit.Assert.False( parameter.DefaultValue.HasValue );
-                Xunit.Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue.Value );
+                Assert.False( parameter.DefaultValue.HasValue );
+                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 );
 
             foreach ( var parameter in parametersWithDefaults )
             {
-                Xunit.Assert.True( parameter.DefaultValue.HasValue );
+                Assert.True( parameter.DefaultValue.HasValue );
             }
 
-            Xunit.Assert.Equal<object>( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( (Func<IParameter, object>) (p => p.DefaultValue.Value) ) );
+            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue.Value ) );
         }
 
         [Fact]
@@ -439,12 +439,12 @@ class C
         {
             var compilation = CreateCompilation( null );
 
-            Xunit.Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
-            Xunit.Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
-            Xunit.Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
-            Xunit.Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
+            Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
+            Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
 
-            Xunit.Assert.Throws<System.ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Throws<System.ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
 
         [Fact]
@@ -463,12 +463,12 @@ class C<T>
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var fieldTypes = type.Properties.Select( p => (INamedType) p.Type );
 
-            Xunit.Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
-            Xunit.Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
+            Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
+            Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
         }
 
         [Fact]
@@ -488,10 +488,10 @@ partial class B
 
             var compilation = CreateCompilation( code );
 
-            Xunit.Assert.Equal( 2, compilation.DeclaredTypes.Count );
+            Assert.Equal( 2, compilation.DeclaredTypes.Count );
 
-            Xunit.Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
-            Xunit.Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
+            Assert.False( compilation.DeclaredTypes.Single( t => t.Name == "A" ).IsPartial );
+            Assert.True( compilation.DeclaredTypes.Single( t => t.Name == "B" ).IsPartial );
         }
 
         [Fact]
@@ -506,7 +506,7 @@ class C<TC>
 
             var compilation = CreateCompilation( code );
 
-            var type = Xunit.Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes );
 
             var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) )!;
             var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) )!;
@@ -514,10 +514,10 @@ class C<TC>
             var openTypeMethod = type.Methods.First();
             var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();
 
-            Xunit.Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
-            Xunit.Assert.Equal( "(TC, int)", openTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
-            Xunit.Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
-            Xunit.Assert.Equal( "(string, int)", closedTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
+            Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
+            Assert.Equal( "(TC, int)", openTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
+            Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
+            Assert.Equal( "(string, int)", closedTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
         }
     }
 }

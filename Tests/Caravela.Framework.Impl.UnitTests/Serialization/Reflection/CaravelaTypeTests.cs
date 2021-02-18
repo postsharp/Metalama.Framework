@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
 
-            TestExpression( code, serialized, ( Type info ) => Xunit.Assert.Equal( "Target", info.Name ) );
+            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Target", info.Name ) );
         }
 
         [Fact]
@@ -28,8 +28,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "Target`2", info.Name );
-                Xunit.Assert.Equal( 2, info.GetGenericArguments().Length );
+                Assert.Equal( "Target`2", info.Name );
+                Assert.Equal( 2, info.GetGenericArguments().Length );
             } );
         }
 
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "System.Int32[]", info.FullName );
-                Xunit.Assert.Equal( typeof( int[] ), info );
+                Assert.Equal( "System.Int32[]", info.FullName );
+                Assert.Equal( typeof( int[] ), info );
             } );
         }
 
@@ -56,8 +56,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<Type>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "System.Int32[,]", info.FullName );
-                Xunit.Assert.Equal( typeof( int[,] ), info );
+                Assert.Equal( "System.Int32[,]", info.FullName );
+                Assert.Equal( typeof( int[,] ), info );
             } );
         }
 

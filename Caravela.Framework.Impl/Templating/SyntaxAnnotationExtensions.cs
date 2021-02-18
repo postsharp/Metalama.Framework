@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( existingScope != SymbolDeclarationScope.Default )
             {
-                Assert.True( existingScope == scope );
+                DebugEx.Assert( existingScope == scope );
                 return node;
             }
 

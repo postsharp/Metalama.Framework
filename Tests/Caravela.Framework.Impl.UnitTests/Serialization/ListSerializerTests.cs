@@ -40,13 +40,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
             var l = new List<IList>();
             l.Add( l );
 
-            Xunit.Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( l ) );
+            Assert.Throws<InvalidUserCodeException>( () => this._serializer.SerializeObject( l ) );
         }
 
         private void AssertSerialization<T>( string expected, List<T> o )
         {
             var creationExpression = this._serializer.SerializeObject( o ).NormalizeWhitespace().ToString();
-            Xunit.Assert.Equal( expected, creationExpression );
+            Assert.Equal( expected, creationExpression );
         }
     }
 }

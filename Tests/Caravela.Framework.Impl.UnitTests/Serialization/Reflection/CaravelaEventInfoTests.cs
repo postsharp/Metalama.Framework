@@ -20,10 +20,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.NotNull( info.AddMethod );
-                Xunit.Assert.NotNull( info.RemoveMethod );
-                Xunit.Assert.Equal<Type>( typeof( Action ), info.EventHandlerType );
-                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.NotNull( info.AddMethod );
+                Assert.NotNull( info.RemoveMethod );
+                Assert.Equal( typeof( Action ), info.EventHandlerType );
+                Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }
 
@@ -36,10 +36,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.NotNull( info.AddMethod );
-                Xunit.Assert.NotNull( info.RemoveMethod );
-                Xunit.Assert.Equal<Type>( typeof( Action ), info.EventHandlerType );
-                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.NotNull( info.AddMethod );
+                Assert.NotNull( info.RemoveMethod );
+                Assert.Equal( typeof( Action ), info.EventHandlerType );
+                Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }
 
@@ -52,10 +52,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.NotNull( info.AddMethod );
-                Xunit.Assert.NotNull( info.RemoveMethod );
-                Xunit.Assert.Equal( "Func`1", info.EventHandlerType!.Name );
-                Xunit.Assert.Equal( "Target`1", info.DeclaringType!.Name );
+                Assert.NotNull( info.AddMethod );
+                Assert.NotNull( info.RemoveMethod );
+                Assert.Equal( "Func`1", info.EventHandlerType!.Name );
+                Assert.Equal( "Target`1", info.DeclaringType!.Name );
             } );
         }
 
