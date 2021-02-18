@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
@@ -14,7 +15,7 @@ namespace Caravela.Framework.Templating.UnitTests.CSharpSyntax.TypeOf
             string s = compileTime(typeof(string).FullName);
             Console.WriteLine(s);
 
-            if (target.Parameters[0].Type.Is(typeof(string)))
+            if (target.Parameters[0].ParameterType.Is(typeof(string)))
             {
                 Console.WriteLine(typeof(string).FullName);
             }

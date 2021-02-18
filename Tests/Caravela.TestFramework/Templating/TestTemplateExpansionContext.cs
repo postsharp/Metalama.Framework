@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,8 +18,9 @@ namespace Caravela.TestFramework.Templating
     internal class TestTemplateExpansionContext : ITemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
+        private readonly UserDiagnosticList _diagnostics = new UserDiagnosticList();
 
-        public TestTemplateExpansionContext( Assembly assembly, SourceCompilation compilation )
+        public TestTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             this.Compilation = compilation;
 
@@ -24,8 +28,8 @@ namespace Caravela.TestFramework.Templating
             this.TemplateInstance = Activator.CreateInstance( aspectType )!;
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
-            var targetCaravelaType = compilation.GetTypeByReflectionName( targetType.FullName! )!;
-            this._targetMethod = targetCaravelaType.Methods.GetValue().Single( m => m.Name == "Method" );
+            var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
+            this._targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
 
             var roslynCompilation = compilation.RoslynCompilation;
             var roslynType = roslynCompilation.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
@@ -48,6 +52,8 @@ namespace Caravela.TestFramework.Templating
         public ICompilation Compilation { get; }
 
         public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
+
+        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => _diagnostics;
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

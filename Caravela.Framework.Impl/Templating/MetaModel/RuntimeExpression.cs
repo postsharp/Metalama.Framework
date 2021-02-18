@@ -49,10 +49,22 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <param name="syntax"></param>
         /// <param name="typeName"></param>
         /// <param name="isReferenceable"></param>
-        public RuntimeExpression( ExpressionSyntax syntax, string typeName, bool isReferenceable = false )
+        public RuntimeExpression( ExpressionSyntax syntax, string typeName )
         {
             this.Syntax = syntax;
             this._expressionTypeName = typeName;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class and passes a flag telling that the
+        /// instance represents the <c>null</c> expression. This constructor is called from generated code and must not be changed or removed.
+        /// </summary>
+        /// <param name="syntax"></param>
+        /// <param name="typeName"></param>
+        /// <param name="isReferenceable"></param>
+        public RuntimeExpression( ExpressionSyntax syntax, bool isNull )
+        {
+            this.Syntax = syntax;
         }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false ) 

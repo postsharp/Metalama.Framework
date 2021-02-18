@@ -34,7 +34,7 @@ namespace Caravela.Framework.Templating.UnitTests
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
             var testRunner = new UnitTestRunner( this._logger );
-            var testResult = await testRunner.Run( new TestInput( testSource, null ) );
+            var testResult = await testRunner.Run( new TestInput( relativeSourcePath, testSource, null ) );
 
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
