@@ -46,8 +46,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
                         allProperties.Single().Type ) )
                 .ToString();
 
-            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( expectedType, info ) );
-            Assert.Equal( expected, serialized );
+            TestExpression( code, serialized, ( Type info ) => Xunit.Assert.Equal( expectedType, info ) );
+            Xunit.Assert.Equal( expected, serialized );
         }
     }
 }

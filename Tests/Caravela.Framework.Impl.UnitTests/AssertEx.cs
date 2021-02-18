@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.UnitTests
             var meta = (IDynamicMember) expression;
             var actual = meta.CreateExpression().Syntax.NormalizeWhitespace().ToString();
 
-            Assert.Equal( expected, actual );
+            Xunit.Assert.Equal( expected, actual );
         }
 
         public static void ThrowsWithDiagnostic( DiagnosticDescriptor diagnosticDescriptor, Action testCode )
@@ -23,11 +23,11 @@ namespace Caravela.Framework.Impl.UnitTests
             {
                 testCode();
 
-                Assert.False( true, "Exception InvalidUserCodeException was not received." );
+                Xunit.Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }
             catch ( InvalidUserCodeException e )
             {
-                Assert.Contains(  e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
+                Xunit.Assert.Contains(  e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
             }
         }
     }

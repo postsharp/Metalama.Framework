@@ -1,0 +1,12 @@
+{
+    try
+    {
+        __Void result;
+        Console.WriteLine(a / b);
+        return;
+    }
+    catch
+    {
+        return;
+    }
+}

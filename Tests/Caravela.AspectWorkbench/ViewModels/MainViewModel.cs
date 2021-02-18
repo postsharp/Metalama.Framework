@@ -64,7 +64,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.TransformedTargetDocument = null;
 
             var stopwatch = Stopwatch.StartNew();
-            var testResult = await this._testRunner.Run( new TestInput( this.TemplateText, this.TargetText ) );
+            var testResult = await this._testRunner.Run( new TestInput( "interactive", this.TemplateText, this.TargetText ) );
             stopwatch.Stop();
 
             if ( testResult.AnnotatedTemplateSyntax != null )
@@ -168,7 +168,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = new TestInput( this.TemplateText, this.TargetText );
+            this._currentTest.Input = new TestInput( "interactive", this.TemplateText, this.TargetText );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
             if ( !string.Equals( filePath, this.CurrentPath, StringComparison.Ordinal ) )

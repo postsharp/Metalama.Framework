@@ -1,0 +1,4 @@
+{
+    Console.WriteLine("a = " + a);
+    return a;
+}

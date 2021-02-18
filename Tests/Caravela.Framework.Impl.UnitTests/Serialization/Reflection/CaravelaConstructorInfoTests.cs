@@ -20,8 +20,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
-                Assert.Equal( "Target", info.DeclaringType!.Name );
-                Assert.Single( info.GetParameters() );
+                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
+                Xunit.Assert.Single( info.GetParameters() );
             } );
         }
 
@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
-                Assert.Equal( "Target`1", info.DeclaringType!.Name );
-                Assert.Single( info.GetParameters() );
+                Xunit.Assert.Equal( "Target`1", info.DeclaringType!.Name );
+                Xunit.Assert.Single( info.GetParameters() );
             } );
         }
 
@@ -48,8 +48,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
             {
-                Assert.Equal( "Target", info.DeclaringType!.Name );
-                Assert.Empty( info.GetParameters() );
+                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
+                Xunit.Assert.Empty( info.GetParameters() );
             } );
         }
 

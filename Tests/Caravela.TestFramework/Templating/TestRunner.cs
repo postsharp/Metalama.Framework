@@ -20,6 +20,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
+using Microsoft.CodeAnalysis.Text;
+using Caravela.Framework.Impl;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -27,21 +29,17 @@ namespace Caravela.TestFramework.Templating
     {
         public virtual async Task<TestResult> Run( TestInput testInput )
         {
-
-            var templateSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
-            var targetSource = CommonSnippets.CaravelaUsings + testInput.TargetSource;
+            var testSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
 
             // Source.
             var project = this.CreateProject();
-            var templateDocument = project.AddDocument( "Template.cs", templateSource );
-            _ = project.AddDocument( "Target.cs", targetSource );
-            var targetSyntaxTree = CSharpSyntaxTree.ParseText( targetSource, encoding: Encoding.UTF8 );
+            var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
 
-            var result = new TestResult( templateDocument );
+            var result = new TestResult( testDocument );
 
             var compilationForInitialDiagnostics = CSharpCompilation.Create(
                 "assemblyName",
-                new SyntaxTree[] { (await templateDocument.GetSyntaxTreeAsync())!, targetSyntaxTree },
+                new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions! );
             var diagnostics = compilationForInitialDiagnostics.GetDiagnostics();
@@ -53,8 +51,8 @@ namespace Caravela.TestFramework.Templating
                 return result;
             }
 
-            var templateSyntaxRoot = (await templateDocument.GetSyntaxRootAsync())!;
-            var templateSemanticModel = (await templateDocument.GetSemanticModelAsync())!;
+            var templateSyntaxRoot = (await testDocument.GetSyntaxRootAsync())!;
+            var templateSemanticModel = (await testDocument.GetSemanticModelAsync())!;
 
             foreach ( var templateAnalyzer in this.GetTestAnalyzers() )
             {
@@ -62,22 +60,44 @@ namespace Caravela.TestFramework.Templating
             }
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var success = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+            var templaceCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
-            if ( !success )
+            if ( !templaceCompilerSuccess )
             {
                 result.ErrorMessage = "Template compiler failed.";
                 return result;
             }
 
+            // Write the transformed code to disk.
+            var transformedTemplateText = transformedTemplateSyntax.SyntaxTree.GetText();
+            var transformedTemplatePath = Path.Combine( Environment.CurrentDirectory, "generated", Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            var transformedTemplateDirectory = Path.GetDirectoryName( transformedTemplatePath );
+            if ( !Directory.Exists(transformedTemplateDirectory))
+            {
+                Directory.CreateDirectory( transformedTemplateDirectory );
+            }
+
+            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            {
+                transformedTemplateText.Write( textWriter );
+            }
+
+            // Create a SyntaxTree that maps to the file we have just written.
+            var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
+            var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create( 
+                (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(), 
+                (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options, 
+                transformedTemplatePath, 
+                Encoding.UTF8 );
+
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { transformedTemplateSyntax.SyntaxTree.WithFilePath( string.Empty ), targetSyntaxTree },
+                new[] { newTransformedTemplateSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions! );
 
@@ -94,6 +114,7 @@ namespace Caravela.TestFramework.Templating
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
+                
                 result.ErrorMessage = "Final compilation failed.";
                 return result;
             }
@@ -105,34 +126,19 @@ namespace Caravela.TestFramework.Templating
 
             try
             {
-                var aspectType = assembly.GetType( "Aspect" )!;
-                var aspectInstance = Activator.CreateInstance( aspectType )!;
+                var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
                 Debug.Assert( templateMethod != null, "Cannot find the template method." );
-
-                var targetType = compilationForInitialDiagnostics.Assembly.GetTypeByMetadataName( "TargetCode" )!;
-                var targetMethod = (IMethodSymbol) targetType.GetMembers().SingleOrDefault( m => m.Name == "Method" )!;
-
                 var driver = new TemplateDriver( templateMethod );
 
                 var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
-                var targetCaravelaType = caravelaCompilation.Factory.GetTypeByReflectionName( "TargetCode" )!;
-                var targetCaravelaMethod = targetCaravelaType.Methods.SingleOrDefault( m => m.Name == "Method" );
+                var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
-                using ( DiagnosticContext.WithSink( new UserDiagnosticSinkBridge( result ) ) )
-                {
-                    var expansionContext = new TemplateExpansionContext( 
-                        aspectInstance,
-                        targetCaravelaMethod,
-                        caravelaCompilation,
-                        new TemporaryProceedImplBeforeAlexChangesTemplatingTests( targetCaravelaMethod ));
-                    
-                    var output = driver.ExpandDeclaration( expansionContext );
-                    var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
+                var output = driver.ExpandDeclaration( expansionContext );
+                var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
 
-                    result.TransformedTargetSource = formattedOutput.GetText();
-                }
+                result.TransformedTargetSource = formattedOutput.GetText();
             }
             catch ( Exception exception )
             {
@@ -143,6 +149,8 @@ namespace Caravela.TestFramework.Templating
             {
                 assemblyLoadContext.Unload();
             }
+
+            result.Success = true;
 
             return result;
         }
@@ -159,6 +167,7 @@ namespace Caravela.TestFramework.Templating
                 .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
                 ;
             return project;

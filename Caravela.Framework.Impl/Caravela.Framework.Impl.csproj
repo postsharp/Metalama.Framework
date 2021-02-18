@@ -6,8 +6,6 @@
     <PackageDescription>
       PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
     </PackageDescription>
-    <!-- The Impl assembly shouldn't be publicly documented. -->
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,7 +40,7 @@
     <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
-  <!-- based on https://stackoverflow.com/a/56018426/41071 --> 
+  <!-- Includes referenced DLLs in the package. Based on https://stackoverflow.com/a/56018426/41071 --> 
   <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
     <ItemGroup>
       <!-- remove everything from lib -->
@@ -50,6 +48,7 @@
     </ItemGroup>
   </Target>
   
+  <!-- Generate code that includes the version of package dependencies. This allows to generate build-time projects. -->
   <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
     <ItemGroup>
       <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
@@ -70,8 +69,13 @@ namespace Caravela.Framework.Impl.CompileTime
     </PropertyGroup>
     
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
+
+    <ItemGroup>
+      <Compile Include="CompileTime/PackageVersions.g.cs"/>
+    </ItemGroup>
   </Target>
 
+  <!-- Obfuscation -->
   <PropertyGroup>
     <PostSharpProperties>
       ObfuscateMapFile=$(OutputPath)\$(TargetFramework)\$(AssemblyName).obmap;

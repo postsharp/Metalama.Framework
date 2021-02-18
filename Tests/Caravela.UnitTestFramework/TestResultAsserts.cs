@@ -13,6 +13,7 @@ namespace Caravela.UnitTestFramework
     {
         public static void AssertNoErrors( this TestResult testResult )
         {
+            Assert.True( testResult.Success );
             Assert.Null( testResult.ErrorMessage );
             Assert.Null( testResult.Exception );
 

@@ -35,7 +35,7 @@ namespace Caravela.AspectWorkbench.Model
             return new TemplateTest
             {
                 OriginalSyntaxRoot = syntaxRoot,
-                Input = new TestInput( templateSource, targetSource ),
+                Input = new TestInput( "interactive", templateSource, targetSource ),
                 ExpectedOutput = expectedOutput
             };
         }

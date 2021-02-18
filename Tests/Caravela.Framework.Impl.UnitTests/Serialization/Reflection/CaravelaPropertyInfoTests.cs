@@ -26,10 +26,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
-                Assert.Equal( "Property", info.Name );
-                Assert.Equal( typeof( int ), info.PropertyType );
-                Assert.Null( info.SetMethod );
-                Assert.NotNull( info.GetMethod );
+                Xunit.Assert.Equal( "Property", info.Name );
+                Xunit.Assert.Equal( typeof( int ), info.PropertyType );
+                Xunit.Assert.Null( info.SetMethod );
+                Xunit.Assert.NotNull( info.GetMethod );
             } );
         }
 
@@ -42,10 +42,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
-                Assert.Equal( "Property", info.Name );
-                Assert.Equal( "T", info.PropertyType.Name );
-                Assert.Null( info.SetMethod );
-                Assert.NotNull( info.GetMethod );
+                Xunit.Assert.Equal( "Property", info.Name );
+                Xunit.Assert.Equal( "T", info.PropertyType.Name );
+                Xunit.Assert.Null( info.SetMethod );
+                Xunit.Assert.NotNull( info.GetMethod );
             } );
         }
 
@@ -58,10 +58,10 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
-                Assert.Equal( "Property", info.Name );
-                Assert.Equal( typeof( string ), info.PropertyType );
-                Assert.NotNull( info.SetMethod );
-                Assert.NotNull( info.GetMethod );
+                Xunit.Assert.Equal( "Property", info.Name );
+                Xunit.Assert.Equal( typeof( string ), info.PropertyType );
+                Xunit.Assert.NotNull( info.SetMethod );
+                Xunit.Assert.NotNull( info.GetMethod );
             } );
         }
 
@@ -75,11 +75,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
-                Assert.Equal( "Item", info.Name );
-                Assert.Equal( typeof( string ), info.PropertyType );
-                Assert.Null( info.SetMethod );
-                Assert.NotNull( info.GetMethod );
-                Assert.Single( info.GetIndexParameters() );
+                Xunit.Assert.Equal( "Item", info.Name );
+                Xunit.Assert.Equal( typeof( string ), info.PropertyType );
+                Xunit.Assert.Null( info.SetMethod );
+                Xunit.Assert.NotNull( info.GetMethod );
+                Xunit.Assert.Single( info.GetIndexParameters() );
             } );
         }
 
@@ -97,11 +97,11 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<PropertyInfo>( code, StripLocationInfo( serialized ), ( info ) =>
             {
-                Assert.Equal( "Chars", info.Name );
-                Assert.Equal( typeof( char ), info.PropertyType );
-                Assert.Null( info.SetMethod );
-                Assert.NotNull( info.GetMethod );
-                Assert.Single( info.GetIndexParameters() );
+                Xunit.Assert.Equal( "Chars", info.Name );
+                Xunit.Assert.Equal( typeof( char ), info.PropertyType );
+                Xunit.Assert.Null( info.SetMethod );
+                Xunit.Assert.NotNull( info.GetMethod );
+                Xunit.Assert.Single( info.GetIndexParameters() );
             } );
         }
 

@@ -1,0 +1,12 @@
+{
+    try
+    {
+        int result;
+        result = 42 / a;
+        return (int)result;
+    }
+    catch
+    {
+        return default;
+    }
+}

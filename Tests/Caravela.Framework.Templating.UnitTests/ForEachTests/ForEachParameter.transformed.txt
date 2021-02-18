@@ -1,0 +1,7 @@
+
+{
+    Console.WriteLine(2);
+    int result;
+    result = a + b;
+    return (int)result;
+}

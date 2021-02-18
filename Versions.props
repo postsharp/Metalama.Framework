@@ -4,14 +4,14 @@
     
     
     <!-- TeamCity defines the environment variable VersionSuffix -->
-    <MainVersion>0.1.1</MainVersion>
+    <MainVersion>0.1.2</MainVersion>
     <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
     <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
     <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
 
     <!-- Version of dependencies -->
     <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>3.8.5-preview</CaravelaCompilerVersion>
+    <CaravelaCompilerVersion>3.8.6-preview</CaravelaCompilerVersion>
     
     <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
     <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>

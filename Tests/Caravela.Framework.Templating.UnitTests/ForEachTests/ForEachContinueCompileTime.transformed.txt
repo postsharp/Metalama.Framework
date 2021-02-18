@@ -1,0 +1,6 @@
+{
+    Console.WriteLine(1);
+    int result;
+    result = a + bb;
+    return (int)result;
+}

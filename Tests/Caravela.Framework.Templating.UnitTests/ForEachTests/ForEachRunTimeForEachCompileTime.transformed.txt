@@ -1,0 +1,19 @@
+{
+    IEnumerable<int> array = Enumerable.Range(1, 2);
+    foreach (int n in array)
+    {
+        if (a <= n)
+        {
+            Console.WriteLine("Oops a <= " + n);
+        }
+
+        if (b <= n)
+        {
+            Console.WriteLine("Oops b <= " + n);
+        }
+    }
+
+    int result;
+    result = a + b;
+    return (int)result;
+}

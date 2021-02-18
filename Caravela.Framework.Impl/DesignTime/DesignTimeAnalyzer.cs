@@ -24,6 +24,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override void Initialize( AnalysisContext analysisContext )
         {
+
         }
     }
 }
