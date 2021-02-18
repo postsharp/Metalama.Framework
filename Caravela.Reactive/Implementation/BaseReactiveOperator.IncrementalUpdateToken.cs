@@ -96,6 +96,7 @@ namespace Caravela.Reactive.Implementation
 
             public int NextVersion => this._parent._result.Value.Version + 1;
 
+         
             public void Dispose()
             {
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse

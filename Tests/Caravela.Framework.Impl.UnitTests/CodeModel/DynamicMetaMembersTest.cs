@@ -153,10 +153,10 @@ class TargetCode
             AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
             AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
 
-            Xunit.Assert.Equal( adviceParameterList[0], adviceParameterList["i"] );
-            Xunit.Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );
+            Assert.Equal( adviceParameterList[0], adviceParameterList["i"] );
+            Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );
 
-            Xunit.Assert.Equal( "i", Xunit.Assert.Single( adviceParameterList.OfType( typeof( int ) ) ).Name );
+            Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof( int ) ) ).Name );
         }
 
         [Fact]

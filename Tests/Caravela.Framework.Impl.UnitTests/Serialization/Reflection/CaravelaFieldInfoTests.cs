@@ -19,8 +19,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
             {
-                Xunit.Assert.Equal( "Field", info.Name );
-                Xunit.Assert.Equal( typeof( int ), info.FieldType );
+                Assert.Equal( "Field", info.Name );
+                Assert.Equal( typeof( int ), info.FieldType );
             } );
         }
 
@@ -33,8 +33,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
 
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
             {
-                Xunit.Assert.Equal( "Field", info.Name );
-                Xunit.Assert.Equal( "TKey[]", info.FieldType.Name );
+                Assert.Equal( "Field", info.Name );
+                Assert.Equal( "TKey[]", info.FieldType.Name );
             } );
         }
 

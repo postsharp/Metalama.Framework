@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) ).ToString();
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}""))", serialized );
 
-            TestExpression( code, serialized, ( MethodInfo info ) => Xunit.Assert.Equal( "Method", info.Name ) );
+            TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Method", info.Name ) );
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) ).ToString();
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method""))", serialized );
 
-            TestExpression( code, serialized, ( MethodInfo info ) => Xunit.Assert.Equal( "Method", info.Name ) );
+            TestExpression<MethodInfo>( code, serialized, ( info ) => Assert.Equal( "Method", info.Name ) );
         }
     }
 }

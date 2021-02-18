@@ -19,8 +19,8 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization
         {
             var serializer = new DateTimeOffsetSerializer();
             var dt = dateTime;
-            Xunit.Assert.Equal( dateTime, DateTimeOffset.Parse( dateTime.ToString( "o" ) ) );
-            Xunit.Assert.Equal( "System.DateTimeOffset.Parse(\"" + dateTime.ToString( "o" ) + "\")", serializer.Serialize( dt ).ToString() );
+            Assert.Equal( dateTime, DateTimeOffset.Parse( dateTime.ToString( "o" ) ) );
+            Assert.Equal( "System.DateTimeOffset.Parse(\"" + dateTime.ToString( "o" ) + "\")", serializer.Serialize( dt ).ToString() );
         }
     }
 }

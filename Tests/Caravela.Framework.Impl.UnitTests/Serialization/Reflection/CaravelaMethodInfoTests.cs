@@ -13,13 +13,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var code = "class Target { public static int Method() => 42; }";
             var serialized = this.SerializeTargetDotMethod( code );
-            Xunit.Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\"))", serialized );
+            Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\"))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
-                Xunit.Assert.Equal( "Method", info.Name );
-                Xunit.Assert.Equal<object>( 42, info.Invoke( null, new object[0] ) );
+                Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.Equal( "Method", info.Name );
+                Assert.Equal( 42, info.Invoke( null, new object[0] ) );
             } );
         }
 
@@ -28,13 +28,13 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
             var serialized = this.SerializeTargetDotMethod( code );
-            Xunit.Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))", serialized );
+            Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
             {
-                Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
-                Xunit.Assert.Equal( "Method", info.Name );
-                Xunit.Assert.Equal<object>( 42, info.MakeGenericMethod( new[] { typeof( int ) } ).Invoke( null, new object[] { 21 } ) );
+                Assert.Equal( "Target", info.DeclaringType!.Name );
+                Assert.Equal( "Method", info.Name );
+                Assert.Equal( 42, info.MakeGenericMethod( new[] { typeof( int ) } ).Invoke( null, new object[] { 21 } ) );
             } );
         }
 
