@@ -13,9 +13,9 @@ namespace Caravela.UnitTestFramework
     {
         public static void AssertNoErrors( this TestResult testResult )
         {
-            Assert.True( testResult.Success );
             Assert.Null( testResult.ErrorMessage );
             Assert.Null( testResult.Exception );
+            Assert.True( testResult.Success );
 
             if ( testResult.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {

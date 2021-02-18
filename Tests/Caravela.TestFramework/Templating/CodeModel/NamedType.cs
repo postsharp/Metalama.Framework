@@ -1,25 +1,25 @@
 ﻿using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
-using ITypeInternal = Caravela.Framework.Impl.CodeModel.ITypeInternal;
-using SourceCompilation = Caravela.Framework.Impl.CodeModel.SourceCompilation;
+using Accessibility = Caravela.Framework.Code.Accessibility;
+using CompilationModel = Caravela.Framework.Impl.CodeModel.Symbolic.CompilationModel;
+using ITypeInternal = Caravela.Framework.Impl.CodeModel.Symbolic.ITypeInternal;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.TestFramework.Templating.CodeModel
 {
-    internal class NamedType : INamedType, ITypeInternal
+    internal class NamedType : CodeElement, INamedType, ITypeInternal
     {
         private readonly INamedTypeSymbol _symbol;
-        private readonly SourceCompilation _compilation;
 
-        public NamedType( INamedTypeSymbol symbol, SourceCompilation compilation )
+        public NamedType( INamedTypeSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
-            this._compilation = compilation;
         }
+
+        protected internal override ISymbol Symbol => this._symbol;
 
         public TypeKind TypeKind => throw new NotImplementedException();
 
@@ -27,7 +27,7 @@ namespace Caravela.TestFramework.Templating.CodeModel
 
         public INamedType? BaseType => throw new NotImplementedException();
 
-        public IReactiveCollection<INamedType> ImplementedInterfaces => throw new NotImplementedException();
+        public IReadOnlyList<INamedType> ImplementedInterfaces => throw new NotImplementedException();
 
         public string Name => this._symbol.Name;
 
@@ -35,48 +35,79 @@ namespace Caravela.TestFramework.Templating.CodeModel
 
         public string FullName => throw new NotImplementedException();
 
-        public IImmutableList<IType> GenericArguments => throw new NotImplementedException();
+        public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
 
-        public IImmutableList<IGenericParameter> GenericParameters => throw new NotImplementedException();
+        public IReadOnlyList<IGenericParameter> GenericParameters => throw new NotImplementedException();
 
         public bool IsOpenGeneric => throw new NotImplementedException();
 
-        public IReactiveCollection<INamedType> NestedTypes => throw new NotImplementedException();
+        public IReadOnlyList<INamedType> NestedTypes => throw new NotImplementedException();
 
-        public IReactiveCollection<IProperty> Properties => throw new NotImplementedException();
+        public IReadOnlyList<IProperty> Properties => throw new NotImplementedException();
 
-        public IReactiveCollection<IEvent> Events => throw new NotImplementedException();
+        public IReadOnlyList<IEvent> Events => throw new NotImplementedException();
 
-        public IReactiveCollection<IMethod> Methods => throw new NotImplementedException();
+        public IReadOnlyList<IMethod> Methods => throw new NotImplementedException();
 
-        public ICodeElement? ContainingElement => throw new NotImplementedException();
-
-        public IReactiveCollection<IAttribute> Attributes => throw new NotImplementedException();
-
-        public CodeElementKind ElementKind => CodeElementKind.Type;
+        public override CodeElementKind ElementKind => CodeElementKind.Type;
 
         public ITypeSymbol TypeSymbol => this._symbol;
 
-        public bool Is( IType other ) => this._compilation.RoslynCompilation.HasImplicitConversion( this._symbol, other.GetSymbol() );
+        public bool IsPartial => throw new NotImplementedException();
 
-        public bool Is( Type other ) =>
-            this.Is( this._compilation.GetTypeByReflectionType( other ) ?? throw new ArgumentException( $"Could not resolve type {other}.", nameof( other ) ) );
+        public IReadOnlyList<IConstructor> Constructors => throw new NotImplementedException();
 
-        public IArrayType MakeArrayType( int rank = 1 )
+        public IConstructor? StaticConstructor => throw new NotImplementedException();
+
+        public ITypeFactory TypeFactory => new TypeFactoryImpl( this.Compilation );
+
+        public Accessibility Accessibility => throw new NotImplementedException();
+
+        public bool IsAbstract => throw new NotImplementedException();
+
+        public bool IsStatic => throw new NotImplementedException();
+
+        public bool IsVirtual => throw new NotImplementedException();
+
+        public bool IsSealed => throw new NotImplementedException();
+
+        public bool IsReadOnly => throw new NotImplementedException();
+
+        public bool IsOverride => throw new NotImplementedException();
+
+        public bool IsNew => throw new NotImplementedException();
+
+        public bool IsAsync => throw new NotImplementedException();
+
+        public INamedType DeclaringType => throw new NotImplementedException();
+
+        public IArrayType MakeArrayType( int rank = 1 ) => throw new NotImplementedException();
+
+        public IPointerType MakePointerType() => throw new NotImplementedException();
+
+        public INamedType WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
+
+        private class TypeFactoryImpl : ITypeFactory
         {
-            throw new NotImplementedException();
-        }
+            private readonly CompilationModel _compilation;
 
-        public IPointerType MakePointerType()
-        {
-            throw new NotImplementedException();
-        }
+            public TypeFactoryImpl( CompilationModel compilation )
+            {
+                this._compilation = compilation;
+            }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
+            public INamedType GetTypeByReflectionName( string reflectionName ) => throw new NotImplementedException();
 
-        public INamedType WithGenericArguments( params IType[] genericArguments )
-        {
-            throw new NotImplementedException();
+            public IType GetTypeByReflectionType( Type type ) => throw new NotImplementedException();
+
+            public bool Is( IType left, IType right ) => this._compilation.RoslynCompilation.HasImplicitConversion( left.GetSymbol(), right.GetSymbol() );
+
+            public bool Is( IType left, Type right ) =>
+                this.Is( left, this._compilation.Factory.GetTypeByReflectionType( right ) ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
+
+            public IArrayType MakeArrayType( IType elementType, int rank ) => throw new NotImplementedException();
+
+            public IPointerType MakePointerType( IType pointedType ) => throw new NotImplementedException();
         }
     }
 }

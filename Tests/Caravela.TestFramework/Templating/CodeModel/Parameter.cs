@@ -1,22 +1,21 @@
 ﻿using System;
 using Caravela.Framework.Code;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
+using CompilationModel = Caravela.Framework.Impl.CodeModel.Symbolic.CompilationModel;
 using RefKind = Caravela.Framework.Code.RefKind;
-using SourceCompilation = Caravela.Framework.Impl.CodeModel.SourceCompilation;
 
 namespace Caravela.TestFramework.Templating.CodeModel
 {
-    internal class Parameter : IParameter
+    internal class Parameter : CodeElement, IParameter
     {
         private readonly IParameterSymbol _symbol;
-        private readonly SourceCompilation _compilation;
 
-        public Parameter( IParameterSymbol symbol, SourceCompilation compilation )
+        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
-            this._compilation = compilation;
         }
+
+        protected internal override ISymbol Symbol => this._symbol;
 
         public RefKind RefKind => this._symbol.RefKind switch
         {
@@ -35,22 +34,18 @@ namespace Caravela.TestFramework.Templating.CodeModel
 
         public bool IsParams => this._symbol.IsParams;
 
-        public IType Type => new NamedType( (INamedTypeSymbol) this._symbol.Type, this._compilation );
+        public IType ParameterType => new NamedType( (INamedTypeSymbol) this._symbol.Type, this.Compilation );
 
-        public string? Name => this._symbol.Name;
+        public string Name => this._symbol.Name;
 
         public int Index => this._symbol.Ordinal;
 
         public bool HasDefaultValue => this._symbol.HasExplicitDefaultValue;
 
-        public object? DefaultValue => this._symbol.ExplicitDefaultValue;
+        public OptionalValue DefaultValue => this._symbol.HasExplicitDefaultValue ? new OptionalValue( this._symbol.ExplicitDefaultValue ) : default;
 
-        public ICodeElement? ContainingElement => throw new NotImplementedException();
+        public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        public IReactiveCollection<IAttribute> Attributes => throw new NotImplementedException();
-
-        public CodeElementKind ElementKind => CodeElementKind.Parameter;
-
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._symbol.ToDisplayString();
+        public IMember DeclaringMember => throw new NotImplementedException();
     }
 }

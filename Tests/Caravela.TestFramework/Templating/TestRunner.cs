@@ -54,9 +54,10 @@ namespace Caravela.TestFramework.Templating
             var templateSyntaxRoot = (await testDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await testDocument.GetSemanticModelAsync())!;
 
-            foreach ( var templateAnalyzer in this.GetTestAnalyzers() )
+            foreach ( var testAnalyzer in this.GetTestAnalyzers() )
             {
-                templateAnalyzer.Visit( templateSyntaxRoot );
+                // TODO: should visit only template method.
+                testAnalyzer.Visit( templateSyntaxRoot );
             }
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
