@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Diagnostics;
+using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Diagnostics.ReportFromTemplate
@@ -6,10 +7,10 @@ namespace Caravela.Framework.Aspects.UnitTests.Diagnostics.ReportFromTemplate
     public class LogAttribute : OverrideMethodAspect
     {
         
-        public static Caravela.Framework.Diagnostics.DiagnosticDescriptor Error1 = new( "MY001", Caravela.Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}." );
         public override dynamic OverrideMethod()
         {
-            Error1.Report( target.Method );
+            target.ReportDiagnostic( Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Invalid method." );
+
             return proceed();
         }
     }

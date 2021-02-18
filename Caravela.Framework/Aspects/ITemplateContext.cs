@@ -1,4 +1,5 @@
 ﻿using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
@@ -8,7 +9,7 @@ namespace Caravela.Framework.Aspects
     /// This interface is exposed by the <see cref="TemplateContext.target"/> member.
     /// </summary>
     [CompileTime]
-    public interface ITemplateContext
+    public interface ITemplateContext : IDiagnosticSink
     {
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.

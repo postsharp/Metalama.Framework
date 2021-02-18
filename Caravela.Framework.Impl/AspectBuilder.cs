@@ -1,22 +1,19 @@
-﻿using Caravela.Framework.Advices;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>
+    internal class AspectBuilder<T> : DiagnosticList, IAspectBuilder<T>
         where T : class, ICodeElement
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
+        private bool _skipped;
         
-        public UserDiagnosticList UserDiagnostics { get; } = new UserDiagnosticList();
-
         public T TargetDeclaration { get; }
 
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -24,8 +21,10 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
+        public void SkipAspect() => this._skipped = true;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
+         : base( targetDeclaration.DiagnosticLocation )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
@@ -33,11 +32,14 @@ namespace Caravela.Framework.Impl
         }
 
         internal AspectInstanceResult ToResult() =>
-            new( 
-                 this.UserDiagnostics.ToImmutableArray(), 
-                this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), 
-                ImmutableList.Create<IAspectSource>() );
-
-
+            this.ErrorCount == 0 && !this._skipped
+                ? new(
+                    this.Diagnostics.ToImmutableArray(),
+                    this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
+                    Array.Empty<IAspectSource>() )
+                : new(
+                    this.Diagnostics.ToImmutableArray(),
+                    Array.Empty<IAdvice>(),
+                    Array.Empty<IAspectSource>() );
     }
 }

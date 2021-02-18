@@ -22,6 +22,14 @@ namespace Caravela.Framework.Aspects.UnitTests
         }
         
         [Fact]
+        public async Task SkipWithoutError()
+        {
+            var testResult = await this.RunPipelineAsync( "Diagnostics\\SkipWithoutError.cs" );
+            Assert.True( testResult.Success );
+            Assert.DoesNotContain( "This code should not be emitted.", testResult.TransformedTargetSource.ToString() );
+        }
+        
+        [Fact]
         public async Task ReportFromTemplate()
         {
             var testResult = await this.RunPipelineAsync( "Diagnostics\\ReportFromTemplate.cs" );

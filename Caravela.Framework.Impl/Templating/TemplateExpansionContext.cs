@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -21,13 +19,19 @@ namespace Caravela.Framework.Impl.Templating
             object templateInstance,
             IMethod targetMethod, 
             ICompilation compilation,
-            IProceedImpl proceedImpl )
+            IProceedImpl proceedImpl,
+            DiagnosticSink diagnosticSink )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
             this.Compilation = compilation;
             this.ProceedImplementation = proceedImpl;
             this.CurrentLexicalScope = new TemplateDriverLexicalScope( this, (IMethodInternal) targetMethod );
+            this.DiagnosticSink = diagnosticSink;
+            Invariant.Assert( diagnosticSink.DefaultLocation != null, "diagnosticSink.DefaultLocation cannot be null" );
+            Invariant.Assert( 
+                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ), 
+                "the default location of the DiagnosticSink must be equal to targetMethod");
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -62,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        public IUserDiagnosticSink? DiagnosticSink { get; }
+        public DiagnosticSink DiagnosticSink { get; }
 
         private class TemplateDriverLexicalScope : ITemplateExpansionLexicalScope
         {

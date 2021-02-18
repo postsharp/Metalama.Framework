@@ -1,9 +1,12 @@
+using Caravela.Framework.Project;
+
 namespace Caravela.Framework.Diagnostics
 {
     /// <summary>
-    /// Severity of user-code diagnostics.
+    /// Severity of diagnostics.
     /// </summary>
-    public enum DiagnosticSeverity
+    [CompileTime]
+    public enum Severity
     {
         /// <summary>
         /// Something that is an issue, but is not surfaced through normal means.

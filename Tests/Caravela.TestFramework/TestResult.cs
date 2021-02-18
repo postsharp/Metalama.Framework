@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.TestFramework
 {
-    public class TestResult : IDiagnosticSink
+    public class TestResult 
     {
         public List<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
 
@@ -31,6 +31,6 @@ namespace Caravela.TestFramework
         
         public bool Success { get; set; }
 
-        void IDiagnosticSink.AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
+     
     }
 }
