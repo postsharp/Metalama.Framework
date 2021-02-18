@@ -50,7 +50,7 @@ class T
             var result = linker.ToResult();
 
             var transformedText = result.Compilation.SyntaxTrees.Single().GetNormalizedText();
-            Xunit.Assert.Equal( expectedCode.Trim(), transformedText );
+            Assert.Equal( expectedCode.Trim(), transformedText );
         }
     }
 }
