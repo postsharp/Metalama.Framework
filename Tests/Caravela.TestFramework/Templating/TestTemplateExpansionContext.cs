@@ -6,9 +6,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Method = Caravela.TestFramework.Templating.CodeModel.Method;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -18,25 +20,35 @@ namespace Caravela.TestFramework.Templating
 
         public TestTemplateExpansionContext( Assembly assembly, SourceCompilation compilation )
         {
+            var roslynCompilation = compilation.RoslynCompilation;
+
             this.Compilation = compilation;
 
-            var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-            this.TemplateInstance = Activator.CreateInstance( aspectType )!;
+            var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+            this.TemplateInstance = Activator.CreateInstance( templateType )!;
 
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetCaravelaType = compilation.GetTypeByReflectionName( targetType.FullName! )!;
             this._targetMethod = targetCaravelaType.Methods.GetValue().Single( m => m.Name == "Method" );
 
-            var roslynCompilation = compilation.RoslynCompilation;
-            var roslynType = roslynCompilation.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
-            var roslynMethod = (BaseMethodDeclarationSyntax) roslynType.GetMembers()
+            var roslynTargetType = roslynCompilation.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
+            var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
                 .Single( m => m.Name == "Method" )
                 .DeclaringSyntaxReferences
                 .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
                 .Single();
 
-            this.ProceedImplementation = new TestProceedImpl( roslynMethod );
-            this.CurrentLexicalScope = new TestLexicalScope( this, (IMethodInternal) this._targetMethod );
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
+            var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );
+            if ( roslynTargetMethodSymbol == null)
+            {
+                throw new InvalidOperationException( "The symbol of the target method was not found." );
+            }
+
+            this._targetMethod = new Method( roslynTargetMethodSymbol, compilation );
+
+            this.ProceedImplementation = new TestProceedImpl( roslynTargetMethod );
+            this.CurrentLexicalScope = new TestLexicalScope( this, semanticModel, roslynTargetMethod );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -78,12 +90,15 @@ namespace Caravela.TestFramework.Templating
             private readonly List<TestLexicalScope> _nestedScopes = new List<TestLexicalScope>();
             private readonly TestTemplateExpansionContext _expansionContext;
 
-            public TestLexicalScope( TestTemplateExpansionContext expansionContext, IMethodInternal methodInternal )
+            public TestLexicalScope( TestTemplateExpansionContext expansionContext, SemanticModel semanticModel, BaseMethodDeclarationSyntax targetMethodSyntax )
             {
                 this._expansionContext = expansionContext;
                 this._parentScope = null;
 
-                foreach ( var symbolName in methodInternal.LookupSymbols().Select( s => s.Name ) )
+                var lookupPosition = targetMethodSyntax.Body != null ? targetMethodSyntax.Body.SpanStart : targetMethodSyntax.SpanStart;
+                var visibleSymbols = semanticModel.LookupSymbols( lookupPosition );
+
+                foreach ( var symbolName in visibleSymbols.Select( s => s.Name ) )
                 {
                     this._definedIdentifiers.Add( symbolName );
                 }
