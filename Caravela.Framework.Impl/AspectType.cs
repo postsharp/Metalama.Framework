@@ -1,23 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectType
     {
-        public string Name { get; }
+        public string Name => this.Type.FullName;
 
         public IAspectDriver AspectDriver { get; }
 
         public IImmutableList<AspectPart> Parts { get; }
 
-        public AspectType( string name, IAspectDriver aspectDriver, IEnumerable<string?> partNames )
+        public INamedType Type { get; }
+
+        public AspectType( INamedType aspectType, IAspectDriver aspectDriver, IEnumerable<string?> partNames )
         {
-            this.Name = name;
+            this.Type = aspectType;
             this.AspectDriver = aspectDriver;
-            this.Parts = partNames.Select( partName => new AspectPart( this, partName ) ).ToImmutableList();
+            this.Parts = partNames.Select( partName => new AspectPart( this, partName ) ).ToImmutableArray();
         }
     }
 }

@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of parameters of the property, if it is an indexer.
         /// </summary>
-        IImmutableList<IParameter> Parameters { get; }
+        IReadOnlyList<IParameter> Parameters { get; }
 
         /// <summary>
         /// Gets the property getter, or <c>null</c> if the property is write-only. In case of automatic properties, this property returns

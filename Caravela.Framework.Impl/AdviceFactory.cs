@@ -4,9 +4,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Transformations;
-using Caravela.Reactive;
+using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
@@ -14,13 +12,13 @@ namespace Caravela.Framework.Impl
     {
         private readonly ICompilation _compilation;
         private readonly INamedType _aspectType;
-        private readonly IAspect _aspect;
+        private readonly AspectInstance _aspect;
 
-        private readonly List<AdviceInstance> _advices = new();
+        private readonly List<IAdvice> _advices = new();
 
-        internal IReadOnlyList<AdviceInstance> Advices => this._advices;
+        internal IReadOnlyList<IAdvice> Advices => this._advices;
 
-        public AdviceFactory( ICompilation compilation, INamedType aspectType, IAspect aspect )
+        public AdviceFactory( ICompilation compilation, INamedType aspectType, AspectInstance aspect )
         {
             this._compilation = compilation;
             this._aspectType = aspectType;
@@ -29,17 +27,21 @@ namespace Caravela.Framework.Impl
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate )
         {
-            var templateMethod = this._aspectType.Methods.Where( m => m.Name == defaultTemplate ).GetValue().Single();
+            var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod );
+            this._advices.Add( advice );
 
-            var templateMethodName = templateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
+            return advice;
+        }
 
-            var methodBody = new TemplateDriver( this._aspect.GetType().GetMethod( templateMethodName ) ).ExpandDeclaration( this._aspect, targetMethod, this._compilation );
+        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope )
+        {
+            // TODO: signature matching.
+            var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
+            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod );
+            this._advices.Add( advice );
 
-            var result = new OverrideMethodAdvice( targetMethod, new OverriddenMethod( targetMethod, methodBody ) );
-
-            this._advices.Add( new AdviceInstance( result ) );
-
-            return result;
+            return advice;
         }
     }
 }

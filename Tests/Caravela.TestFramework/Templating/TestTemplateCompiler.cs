@@ -29,7 +29,7 @@ namespace Caravela.TestFramework.Templating
             visitor.Visit( rootNode );
 
             annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
-            transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!;
+            transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!.NormalizeWhitespace();
 
             return !this.HasError;
         }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;

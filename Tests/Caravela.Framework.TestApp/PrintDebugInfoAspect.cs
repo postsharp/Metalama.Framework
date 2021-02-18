@@ -1,6 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.TestApp.Aspects;
+using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp
 {
@@ -9,7 +10,7 @@ namespace Caravela.Framework.TestApp
         public override dynamic OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
-            return TemplateContext.proceed();
+            return proceed();
         }
     }
 }

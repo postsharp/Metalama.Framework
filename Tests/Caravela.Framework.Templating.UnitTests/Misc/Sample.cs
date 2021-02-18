@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Templating.UnitTests.Misc.Sample
 {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Templating.UnitTests.Misc.Sample
             {
                 string comma = i > 0 ? ", " : "";
 
-                if (p.IsOut)
+                if (p.IsOut())
                 {
                     stringBuilder.Append($"{comma}{p.Name} = <out> ");
                 }

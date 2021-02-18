@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Project;
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter

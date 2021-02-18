@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Provides additional properties and methods for <see cref="IMethod"/> code element which are not exposed in the public API.
     /// </summary>
-    internal interface IMethodInternal
+    internal interface IMethodInternal : IMethod
     {
         /// <summary>
         /// Finds all the symbols that are accessible and visible at the beginning of the method body.

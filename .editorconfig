@@ -360,7 +360,7 @@ dotnet_diagnostic.CA5379.severity = warning
 # CA5384: Do Not Use Digital Signature Algorithm (DSA)
 dotnet_diagnostic.CA5384.severity = warning
 
-# CA5385: Use Rivest–Shamir–Adleman (RSA) Algorithm With Sufficient Key Size
+# CA5385: Use Rivestï¿½Shamirï¿½Adleman (RSA) Algorithm With Sufficient Key Size
 dotnet_diagnostic.CA5385.severity = warning
 
 # CA5397: Do not use deprecated SslProtocols values
@@ -504,6 +504,9 @@ dotnet_diagnostic.IDE1005.severity = warning
 # IDE1006: Naming Styles
 dotnet_diagnostic.IDE1006.severity = warning
 
+# Expression value is not used
+dotnet_diagnostic.IDE0058.severity = suggestion
+
 # SA1602: Enumeration items should be documented
 dotnet_diagnostic.SA1602.severity = suggestion
 
@@ -522,3 +525,9 @@ dotnet_diagnostic.SA1604.severity = none
 # SA1620: Generic type parameter documentation should match type parameters
 dotnet_diagnostic.SA1620.severity = silent
 
+
+# SA1028: Code should not contain trailing whitespace
+dotnet_diagnostic.SA1028.severity = silent
+
+# SA1024: Deference symbol '*' should not be followed by a space.
+dotnet_diagnostic.SA1023.severity = silent

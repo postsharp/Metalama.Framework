@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,16 +8,20 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
+using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Microsoft.CodeAnalysis.Text;
+using Caravela.Framework.Impl;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -55,22 +60,44 @@ namespace Caravela.TestFramework.Templating
             }
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var success = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+            var templaceCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
-            if ( !success )
+            if ( !templaceCompilerSuccess )
             {
                 result.ErrorMessage = "Template compiler failed.";
                 return result;
             }
 
+            // Write the transformed code to disk.
+            var transformedTemplateText = transformedTemplateSyntax.SyntaxTree.GetText();
+            var transformedTemplatePath = Path.Combine( Environment.CurrentDirectory, "generated", Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            var transformedTemplateDirectory = Path.GetDirectoryName( transformedTemplatePath );
+            if ( !Directory.Exists(transformedTemplateDirectory))
+            {
+                Directory.CreateDirectory( transformedTemplateDirectory );
+            }
+
+            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            {
+                transformedTemplateText.Write( textWriter );
+            }
+
+            // Create a SyntaxTree that maps to the file we have just written.
+            var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
+            var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create( 
+                (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(), 
+                (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options, 
+                transformedTemplatePath, 
+                Encoding.UTF8 );
+
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
-                new[] { transformedTemplateSyntax.SyntaxTree.WithFilePath( string.Empty ) },
+                new[] { newTransformedTemplateSyntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions) project.CompilationOptions! );
 
@@ -87,6 +114,7 @@ namespace Caravela.TestFramework.Templating
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
+                
                 result.ErrorMessage = "Final compilation failed.";
                 return result;
             }
@@ -104,7 +132,7 @@ namespace Caravela.TestFramework.Templating
                 Debug.Assert( templateMethod != null, "Cannot find the template method." );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = new SourceCompilation( compilationForInitialDiagnostics );
+                var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );
@@ -121,6 +149,8 @@ namespace Caravela.TestFramework.Templating
             {
                 assemblyLoadContext.Unload();
             }
+
+            result.Success = true;
 
             return result;
         }

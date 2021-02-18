@@ -35,3 +35,5 @@ _ReSharper*/
 .packages/
 /shipping/
 *.actual_transformed.txt
+*.g.cs
+.packages

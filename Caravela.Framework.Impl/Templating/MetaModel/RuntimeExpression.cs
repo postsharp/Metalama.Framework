@@ -1,6 +1,8 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
@@ -8,52 +10,150 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// <summary>
     /// Contains information about an expression that is passed to dynamic methods.
     /// </summary>
-    public readonly struct RuntimeExpression
+    public sealed class RuntimeExpression
     {
+        private ITypeSymbol? _expressionType;
+        private readonly string? _expressionTypeName;
+
+        /// <summary>
+        /// Determines whether it is legal to use the 'out' or 'ref' argument modifier with this expression.
+        /// </summary>
+        public bool IsReferenceable { get; }
+
         public ExpressionSyntax Syntax { get; }
+        
+        /// <summary>
+        /// Returns the <see cref="ExpressionSyntax"/> encapsulated by the current <see cref="RuntimeExpression"/>. Called from generated
+        /// code. Do not remove.
+        /// </summary>
+        /// <param name="runtimeExpression"></param>
+        /// <returns></returns>
+        public static implicit operator ExpressionSyntax( RuntimeExpression runtimeExpression ) => runtimeExpression.Syntax;
 
-        public bool IsNull { get; }
-
-        private readonly string? _typeDocumentationCommentId;
-        private readonly ITypeSymbol? _typeSymbol;
-
-        public RuntimeExpression( ExpressionSyntax syntax, string typeDocumentationCommentId )
+        private ITypeSymbol? GetExpressionType( ITypeFactory typeFactory )
         {
-            this.Syntax = syntax;
-            this.IsNull = false;
-            this._typeDocumentationCommentId = typeDocumentationCommentId;
-            this._typeSymbol = null;
+            if ( this._expressionType == null )
+            {
+                if ( this._expressionTypeName == null )
+                {
+                    // We don't know the expression type, for instance because it is a `null` expression.
+                    return null;
+                }
+
+                this._expressionType = typeFactory.GetTypeByReflectionName( this._expressionTypeName.AssertNotNull() ).GetSymbol();
+            }
+
+            return this._expressionType;
+            
         }
 
-        private RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? typeSymbol )
+        private RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, bool isReferenceable )
         {
             this.Syntax = syntax;
-            this.IsNull = false;
-            this._typeDocumentationCommentId = null;
-            this._typeSymbol = typeSymbol;
+            this._expressionType = expressionType;
+            this.IsReferenceable = isReferenceable;
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, IType? type = null ) : this( syntax, type?.GetSymbol() ) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class by passing a type name. This constructor
+        /// is called from generated code and must not be changed or removed.
+        /// </summary>
+        /// <param name="syntax"></param>
+        /// <param name="typeName"></param>
+        /// <param name="isReferenceable"></param>
+        public RuntimeExpression( ExpressionSyntax syntax, string typeName )
+        {
+            this.Syntax = syntax;
+            this._expressionTypeName = typeName;
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuntimeExpression"/> class and passes a flag telling that the
+        /// instance represents the <c>null</c> expression. This constructor is called from generated code and must not be changed or removed.
+        /// </summary>
+        /// <param name="syntax"></param>
+        /// <param name="typeName"></param>
+        /// <param name="isReferenceable"></param>
         public RuntimeExpression( ExpressionSyntax syntax, bool isNull )
         {
             this.Syntax = syntax;
-            this.IsNull = isNull;
-            this._typeDocumentationCommentId = null;
-            this._typeSymbol = null;
         }
 
-        internal ITypeSymbol? GetTypeSymbol( SourceCompilation compilation )
+        public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false ) 
+            : this( syntax, type?.GetSymbol(), isReferenceable )
         {
-            if ( this._typeSymbol != null )
-                return this._typeSymbol;
-
-            if ( this._typeDocumentationCommentId != null )
-                return DocumentationCommentId.GetFirstSymbolForReferenceId( this._typeDocumentationCommentId, compilation.RoslynCompilation ) as ITypeSymbol;
-
-            return null;
+        }
+        
+        public RuntimeExpression( ExpressionSyntax syntax )  
+            : this( syntax, (ITypeSymbol?) null, false )
+        {
         }
 
-        public static implicit operator ExpressionSyntax(RuntimeExpression runtimeExpression) => runtimeExpression.Syntax;
+        public static ExpressionSyntax GetSyntaxFromDynamic( object? value )
+            => FromDynamic( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
+
+        public static RuntimeExpression? FromDynamic( object? value )
+            => value switch
+            {
+                null => null,
+                RuntimeExpression runtimeExpression => runtimeExpression,
+
+                // This case is used to simplify tests.
+                IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
+
+                _ => throw new ArgumentOutOfRangeException( nameof( value ) )
+            };
+
+        public static RuntimeExpression[]? FromDynamic( object[]? array )
+        {
+            RuntimeExpression[] ConvertArray()
+            {
+                if ( array.Length == 0 )
+                {
+                    return Array.Empty<RuntimeExpression>();
+                }
+                else
+                {
+                    var newArray = new RuntimeExpression[array.Length];
+                    for ( var i = 0; i < newArray.Length; i++ )
+                    {
+                        newArray[i] = FromDynamic( array[i] ).AssertNotNull();
+                    }
+
+                    return newArray;
+                }
+            }
+
+            return array switch
+            {
+                null => null,
+                RuntimeExpression[] runtimeExpressions => runtimeExpressions,
+                _ => ConvertArray()
+            };
+        }
+
+        /// <summary>
+        /// Converts the current <see cref="RuntimeExpression"/> into an <see cref="ExpressionSyntax"/> and emits a cast
+        /// if necessary.
+        /// </summary>
+        /// <param name="targetType">The target type, or <c>null</c> if no cast must be emitted in any case.</param>
+        /// <returns></returns>
+        public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
+        {
+            var expressionType = this.GetExpressionType( targetType.TypeFactory );
+
+            var targetTypeSymbol = targetType.GetSymbol();
+
+            if ( SymbolEqualityComparer.Default.Equals( expressionType, targetTypeSymbol ) )
+            {
+                return this.Syntax;
+            }
+            else
+            {
+                var cast = (ExpressionSyntax) CSharpSyntaxGenerator.Instance.CastExpression( targetTypeSymbol, this.Syntax );
+
+                return addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast;
+            }
+        }
     }
 }

@@ -1,16 +1,28 @@
 ﻿using Caravela.Framework.Advices;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal abstract class Advice : IAdvice
     {
-        protected Advice( ICodeElement targetDeclaration )
+        public AspectInstance Aspect { get; }
+
+        IAspect IAdvice.Aspect => this.Aspect.Aspect;
+
+        public ICodeElement TargetDeclaration { get; }
+
+        public AspectPartId AspectPartId => new AspectPartId( this.Aspect.AspectType, this.PartName );
+
+        public string? PartName { get; set; }
+
+        protected Advice( AspectInstance aspect, ICodeElement targetDeclaration )
         {
+            this.Aspect = aspect;
             this.TargetDeclaration = targetDeclaration;
         }
 
-        public ICodeElement TargetDeclaration { get; }
+        public abstract AdviceResult ToResult( ICompilation compilation );
     }
 }
