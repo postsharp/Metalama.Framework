@@ -3,7 +3,7 @@ using Caravela.Framework.Code;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Aspects.UnitTests.AspectLinker.SimpleIntroduction
+namespace Caravela.Framework.Aspects.UnitTests.Introductions.Methods.IgnoreExisting
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
@@ -12,10 +12,10 @@ namespace Caravela.Framework.Aspects.UnitTests.AspectLinker.SimpleIntroduction
         }
 
         [IntroduceMethod]
-        public void IntroducedMethod()
+        public int ExistingMethod()
         {
             Console.WriteLine( "This is introduced method." );
-            proceed();
+            return 42;
         }
     }
 
@@ -23,6 +23,10 @@ namespace Caravela.Framework.Aspects.UnitTests.AspectLinker.SimpleIntroduction
     [Introduction]
     internal class TargetClass
     {
+        public int ExistingMethod()
+        {
+            return 13;
+        }
     }
     #endregion
 }

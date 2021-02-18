@@ -66,6 +66,8 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.Accessibility = visibility;
                         }
 
+                        advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;
+
                         return advice;
                     }
             }

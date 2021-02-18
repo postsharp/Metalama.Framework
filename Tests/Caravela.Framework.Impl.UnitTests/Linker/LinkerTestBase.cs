@@ -4,15 +4,19 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using FakeItEasy;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.UnitTests.Linker
 {
     public class LinkerTestBase : TestBase
     {
-        internal static INonObservableTransformation CreateFakeOverride( AspectPartId aspectPart, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
+        internal static INonObservableTransformation CreateFakeMethodOverride( AspectPartId aspectPart, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
         {
             var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>() );
 
@@ -24,6 +28,58 @@ namespace Caravela.Framework.Impl.UnitTests.Linker
             A.CallTo( () => ((IOverriddenElement) transformation).OverriddenElement ).Returns( targetMethod );
 
             return (INonObservableTransformation) transformation;
+        }
+
+        internal static IObservableTransformation CreateFakeMethodIntroduction( AspectPartId aspectPart, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
+        {
+            var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<IObservableTransformation>().Implements<IMemberIntroduction>() );
+
+            A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
+            A.CallTo( () => transformation.InsertPositionNode ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>() );
+            A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
+            A.CallTo( () => transformation.GetIntroducedMembers() ).Returns(
+                new[] { new IntroducedMember( transformation, overrideSyntax, aspectPart, IntroducedMemberSemantic.MethodOverride ) } );
+            A.CallTo( () => ((IObservableTransformation) transformation).ContainingElement ).Returns( targetType );
+
+            return (IObservableTransformation) transformation;
+        }
+
+        internal static MemberDeclarationSyntax CreateIntroducedMethodSyntax( bool isStatic, Accessibility accesibility, string returnType, string name, params (string Name, string Type)[] parameters )
+        {
+            return MethodDeclaration(
+                List<AttributeListSyntax>(),
+                TokenList( GetModifiers() ),
+                ParseTypeName(returnType),
+                null,
+                Identifier( name ),
+                null,
+                ParameterList( SeparatedList (parameters.Select( p => Parameter( List<AttributeListSyntax>(), TokenList(), ParseTypeName(p.Type), Identifier(p.Name), null)))),
+                List<TypeParameterConstraintClauseSyntax>(),
+                returnType == "void"
+                ? Block()
+                : Block(
+                    ReturnStatement(
+                        LiteralExpression(
+                            SyntaxKind.DefaultLiteralExpression,
+                            Token( SyntaxKind.DefaultKeyword )
+                            )
+                        )
+                    ),
+                null
+                );
+
+            IEnumerable<SyntaxToken> GetModifiers()
+            {
+                List<SyntaxToken?> tokens = new List<SyntaxToken?>();
+                tokens.Add( isStatic ? Token( SyntaxKind.StaticKeyword ) : null );
+                tokens.Add( accesibility == Accessibility.Public ? Token( SyntaxKind.PublicKeyword) : null );
+                tokens.Add( accesibility == Accessibility.Private ? Token( SyntaxKind.PrivateKeyword ) : null );
+                tokens.Add( accesibility == Accessibility.Internal ? Token( SyntaxKind.InternalKeyword ) : null );
+                tokens.Add( accesibility == Accessibility.Protected ? Token( SyntaxKind.ProtectedKeyword ) : null );
+                tokens.AddRange( accesibility == Accessibility.ProtectedOrInternal ? new SyntaxToken?[] { Token( SyntaxKind.ProtectedKeyword ), Token( SyntaxKind.InternalKeyword ) } : Enumerable.Empty<SyntaxToken?>() );
+                tokens.AddRange( accesibility == Accessibility.ProtectedAndInternal ? new SyntaxToken?[] { Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.ProtectedKeyword ) } : Enumerable.Empty<SyntaxToken?>() );
+                return tokens.Where( token => token != null ).Cast<SyntaxToken>();
+            }
         }
 
         internal static MemberDeclarationSyntax CreateOverrideSyntax( AspectPartId aspectPart, IMethod targetMethod )

@@ -43,14 +43,14 @@ class T
             var aspectPart = new AspectPart( aspectType, null );
 
             var targetMethod = compilationModel.DeclaredTypes.OfName( "T" ).Single().Methods.OfName( "Foo" ).Single();
-            var overrideTransformation = CreateFakeOverride( aspectPart.ToAspectPartId(), targetMethod, CreateOverrideSyntax( aspectPart.ToAspectPartId(), targetMethod ) );
+            var overrideTransformation = CreateFakeMethodOverride( aspectPart.ToAspectPartId(), targetMethod, CreateOverrideSyntax( aspectPart.ToAspectPartId(), targetMethod ) );
 
             var input = new AdviceLinkerInput( compilationModel.RoslynCompilation, compilationModel, new[] { overrideTransformation }, new[] { aspectPart } );
             var linker = new AspectLinker( input );
             var result = linker.ToResult();
 
-            string transformedText = result.Compilation.SyntaxTrees.Single().GetNormalizedText();
-            Assert.Equal( expectedCode.Trim(), transformedText );
+            var transformedText = result.Compilation.SyntaxTrees.Single().GetNormalizedText();
+            Xunit.Assert.Equal( expectedCode.Trim(), transformedText );
         }
     }
 }

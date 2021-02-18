@@ -21,10 +21,11 @@ class T
 {
 }
 ";
+
             var expectedCode = @"
 class T
 {
-    void Foo()
+    public void Foo()
     {
     }
 }
@@ -36,7 +37,8 @@ class T
             var aspectPart = new AspectPart( aspectType, null );
 
             var targetType= compilationModel.DeclaredTypes.OfName( "T" ).Single();
-            var introduceMethodTransformation = new MethodBuilder( A.Fake<Advice>(), targetType, "Foo" );
+            var introducedMethodSyntax = CreateIntroducedMethodSyntax( false, Accessibility.Public, "void", "Foo" );
+            var introduceMethodTransformation = CreateFakeMethodIntroduction(aspectPart.ToAspectPartId(), targetType, introducedMethodSyntax);
             compilationModel = new CompilationModel( compilationModel, new[] { introduceMethodTransformation } );
 
             var input = new AdviceLinkerInput( compilationModel.RoslynCompilation, compilationModel, Array.Empty<INonObservableTransformation>(), new[] { aspectPart } );
@@ -44,7 +46,7 @@ class T
             var result = linker.ToResult();
 
             var transformedText = result.Compilation.SyntaxTrees.Single().GetNormalizedText();
-            Assert.Equal( expectedCode.Trim(), transformedText );
+            Xunit.Assert.Equal( expectedCode.Trim(), transformedText );
         }
     }
 }
