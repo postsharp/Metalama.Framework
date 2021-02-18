@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using FakeItEasy;
 using Xunit;
 
 namespace Caravela.Framework.Impl.UnitTests.Linker

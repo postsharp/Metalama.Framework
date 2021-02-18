@@ -51,6 +51,10 @@ namespace Caravela.Framework.Aspects.UnitTests
 
                 foreach ( var testPath in Directory.EnumerateFiles( dirPath, "*.cs" ) )
                 {
+                    // Skip tests with underscore in file name.
+                    if ( Path.GetFileName( testPath ).StartsWith( "_" ) )
+                        continue;
+
                     tests.Add( new[] { Path.GetRelativePath( AspectUnitTestBase.ProjectDirectory, testPath ) } );
                 }
             }

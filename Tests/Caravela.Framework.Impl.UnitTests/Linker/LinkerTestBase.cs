@@ -1,5 +1,6 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Builders;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -7,8 +8,6 @@ using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 

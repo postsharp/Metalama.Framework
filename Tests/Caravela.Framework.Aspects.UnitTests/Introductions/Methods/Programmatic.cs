@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Advices;
+﻿using System;
+using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
-using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Aspects.UnitTests.Introductions.Methods.Programmatic
