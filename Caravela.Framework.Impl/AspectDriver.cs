@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Sdk;
-using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -16,72 +19,70 @@ namespace Caravela.Framework.Impl
     {
         public INamedType AspectType { get; }
 
-        private readonly ICompilation _compilation;
+        private readonly CompilationModel _compilation;
 
-        private readonly IReactiveCollection<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
+        private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
 
-        public AspectDriver( INamedType aspectType, ICompilation compilation )
+        public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
             this.AspectType = aspectType;
 
             this._compilation = compilation;
 
-            var iAdviceAttribute = compilation.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
+            var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
-                from method in aspectType.Methods
-                from attribute in method.Attributes
-                where attribute.Type.Is( iAdviceAttribute )
-                select (attribute, method);
+            (from method in aspectType.Methods
+             from attribute in method.Attributes
+             where attribute.Type.Is( iAdviceAttribute )
+             select (attribute, method)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
         {
-            var aspect = aspectInstance.Aspect;
 
             return aspectInstance.CodeElement switch
             {
-                ICompilation compilation => this.EvaluateAspect( compilation, aspect ),
-                INamedType type => this.EvaluateAspect( type, aspect ),
-                IMethod method => this.EvaluateAspect( method, aspect ),
+                ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance ),
                 _ => throw new NotImplementedException()
             };
         }
 
-        private AspectInstanceResult EvaluateAspect<T>( T codeElement, IAspect aspect )
+        private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect )
             where T : class, ICodeElement
         {
-            if ( aspect is not IAspect<T> aspectOfT )
+            if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement,
-                    codeElement.GetSyntaxNode()?.GetLocation(),
-                    this.AspectType,
-                    codeElement.ElementKind.ToDisplayString(),
-                    codeElement,
-                    typeof(IAspect<T>));
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new( ImmutableList.Create( diagnostic ), ImmutableList.Create<AdviceInstance>(), ImmutableList.Create<AspectInstance>() );
+                return new( ImmutableList.Create( diagnostic ),
+                    ImmutableList.Create<IAdvice>(),
+                    ImmutableList.Create<IAspectSource>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.GetValue().Select( x => this.CreateDeclarativeAdvice( codeElement, x.Attribute, x.Method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
-            aspectOfT.Initialize( aspectBuilder );
+            using ( DiagnosticContext.WithContext(aspectBuilder.UserDiagnostics, codeElement) )
+            {
+                aspectOfT.Initialize( aspectBuilder );
+            }
 
             return aspectBuilder.ToResult();
         }
 
         public const string OriginalMemberSuffix = "_Original";
 
-        // ReSharper disable UnusedParameter.Local
-        private AdviceInstance CreateDeclarativeAdvice<T>( T codeElement, IAttribute attribute, IMethod templateMethod )
+        private IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
             where T : ICodeElement
         {
-            throw new NotImplementedException( $"No implementation for advice attribute {typeof( T ).Name}." );
+            return AdviceAttributeFactory.CreateAdvice( attribute, aspect, codeElement, templateMethod );
         }
     }
 }

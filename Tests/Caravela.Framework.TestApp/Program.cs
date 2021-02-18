@@ -2,19 +2,17 @@
 using System.Threading;
 using Caravela.Framework.TestApp.Aspects;
 
-// ReSharper disable ObjectCreationAsStatement
-// ReSharper disable ClassNeverInstantiated.Global
-// ReSharper disable MemberCanBeMadeStatic.Local
-// ReSharper disable UnusedMethodReturnValue.Local
-// ReSharper disable UnusedParameter.Local
-// ReSharper disable UnusedMember.Local
-
 namespace Caravela.Framework.TestApp
 {
+    [IntroduceSomeMethodAspect]
     internal class Program
     {
         private static void Main()
         {
+            typeof( Program ).GetMethod( "SomeIntroducedMethod" )?.Invoke( null, null );
+
+            MethodWithTwoAspects();
+
             PrintDebugInfo();
 
             PrintArray();
@@ -26,10 +24,15 @@ namespace Caravela.Framework.TestApp
             Cancel();
         }
 
+        [SwallowExceptionsAspect]
         [PrintDebugInfoAspect]
-        private static void PrintDebugInfo()
+        public static void MethodWithTwoAspects()
         {
+            Console.WriteLine( "This is method with two aspects" );
         }
+
+        [PrintDebugInfoAspect]
+        private static void PrintDebugInfo() { }
 
         private static void PrintArray()
         {
@@ -42,13 +45,10 @@ namespace Caravela.Framework.TestApp
         }
 
         [SwallowExceptionsAspect]
-        private static object PrintArrayAtIndex( int[] a, int i )
+        private static void PrintArrayAtIndex( int[] a, int i )
         {
             Console.WriteLine( a[i] );
             Thread.Sleep( 100 );
-
-            // void methods don't work if template contains "return default;"
-            return null;
         }
 
         private static void Cancel()
@@ -61,19 +61,13 @@ namespace Caravela.Framework.TestApp
         }
 
         [CancelAspect]
-        private static void Cancellable0()
-        {
-        }
+        private static void Cancellable0() { }
 
         [CancelAspect]
-        private static void Cancellable1( CancellationToken ct )
-        {
-        }
+        private static void Cancellable1( CancellationToken ct ) { }
 
         [CancelAspect]
-        private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 )
-        {
-        }
+        private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
 
     [CountMethodsAspect]
@@ -85,12 +79,8 @@ namespace Caravela.Framework.TestApp
             M2();
         }
 
-        private void M1()
-        {
-        }
+        private void M1() { }
 
-        private static void M2()
-        {
-        }
+        private static void M2() { }
     }
 }

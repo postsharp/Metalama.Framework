@@ -1,9 +1,10 @@
-﻿using System.Collections.Immutable;
-using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Sdk;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Advices;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    internal record AspectInstanceResult( IImmutableList<Diagnostic> Diagnostics, IImmutableList<AdviceInstance> Advices, IImmutableList<AspectInstance> Aspects );
+#pragma warning disable SA1313 // Parameter names should begin with lower-case letter
+    internal record AspectInstanceResult( IReadOnlyList<Diagnostic> Diagnostics, IReadOnlyList<IAdvice> Advices, IReadOnlyList<IAspectSource> AspectSources );
+#pragma warning restore SA1313 // Parameter names should begin with lower-case letter
 }

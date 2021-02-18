@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray<DiagnosticDescriptor>.Empty;
 
-        public override void Initialize( AnalysisContext context )
+        public override void Initialize( AnalysisContext analysisContext )
         {
 
         }

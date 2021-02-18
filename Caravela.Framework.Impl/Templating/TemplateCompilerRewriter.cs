@@ -224,8 +224,8 @@ namespace Caravela.Framework.Impl.Templating
                             SyntaxKind.SimpleMemberAccessExpression,
                             ParenthesizedExpression(
                                 CastFromDynamic(
-                                    IdentifierName( nameof( IDynamicMetaMember ) ), expression ) ),
-                            IdentifierName( nameof( IDynamicMetaMember.CreateExpression ) ) ) );
+                                    IdentifierName( nameof( IDynamicMember ) ), expression ) ),
+                            IdentifierName( nameof( IDynamicMember.CreateExpression ) ) ) );
 
                 case "String":
                     return CreateLiteralExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -271,7 +271,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             CastFromDynamic(
-                                IdentifierName( nameof( IDynamicMetaMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                                IdentifierName( nameof( IDynamicMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                         IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
                      .AddArgumentListArguments( Argument( LiteralExpression(
                          SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
@@ -291,7 +291,7 @@ namespace Caravela.Framework.Impl.Templating
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( node.ArgumentList.Arguments.Select(
-                        a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) ) ) );
+                        a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
             }
 
             return base.VisitInvocationExpression( node );
@@ -561,7 +561,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedStatement = this.ToMetaStatement( node.Statement );
                 var transformedElseStatement = node.Else != null ? this.ToMetaStatement( node.Else.Statement ) : null;
-                return IfStatement( 
+                return IfStatement(
                     node.AttributeLists,
                     node.Condition,
                     transformedStatement,
@@ -762,7 +762,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                    IdentifierName( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) ).AddArgumentListArguments(
                         Argument( this.Transform( node.Expression ) ) );
             }
         }

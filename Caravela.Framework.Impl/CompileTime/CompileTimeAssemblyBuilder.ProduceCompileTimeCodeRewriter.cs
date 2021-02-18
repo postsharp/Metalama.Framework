@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -28,6 +27,12 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 " ).Usings;
 
             private readonly TemplateCompiler _templateCompiler;
+            private bool _addTemplateUsings;
+
+            readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
+            public bool Success { get; private set; } = true;
+
+            public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
 
             public bool FoundCompileTimeCode { get; private set; }
 
@@ -37,8 +42,7 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                 this._templateCompiler = templateCompiler;
             }
 
-            private bool _addTemplateUsings;
-
+           
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 node = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
@@ -110,22 +114,17 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
             {
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
-                    var diagnostics = new List<Diagnostic>();
                     var success =
-                        this._templateCompiler.TryCompile( node, this.Compilation.GetSemanticModel( node.SyntaxTree ), diagnostics, out _, out var transformedNode );
+                        this._templateCompiler.TryCompile( node, this.Compilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
 
-                    Debug.Assert( success || diagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error ) );
-
+                    
                     if ( success )
                     {
-                        // reporting warnings is currently not supported here
-                        Debug.Assert( diagnostics.Count == 0 );
-
                         this._addTemplateUsings = true;
                     }
                     else
                     {
-                        throw new DiagnosticsException( GeneralDiagnosticDescriptors.ErrorProcessingTemplates, diagnostics.ToImmutableArray() );
+                        this.Success = false;
                     }
 
                     yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );

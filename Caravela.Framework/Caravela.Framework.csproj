@@ -15,9 +15,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Impl" />
-
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
-    
+    <InternalsVisibleTo Include="Caravela.TestFramework" />
     <PackageReference Include="System.Collections.Immutable" Version="1.7.1" />
   </ItemGroup>
 

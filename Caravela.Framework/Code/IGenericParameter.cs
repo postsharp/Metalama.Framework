@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the type constraints of the generic parameter.
         /// </summary>
-        IImmutableList<IType> TypeConstraints { get; }
+        IReadOnlyList<IType> TypeConstraints { get; }
 
         /// <summary>
         /// Gets a value indicating whether the generic parameter is covariant (i.e., <c>out</c>).

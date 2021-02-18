@@ -6,15 +6,16 @@
     <PackageDescription>
       PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
     </PackageDescription>
-    <!-- The Impl assembly shouldn't be publicly documented. -->
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
 
     <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
-    
+
+    <Compile Remove="CodeModel\Before\**" />
+
+    <None Remove="CodeModel\Before\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +38,6 @@
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />
     <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" PrivateAssets="all" />
   </ItemGroup>
   
   <!-- Includes referenced DLLs in the package. Based on https://stackoverflow.com/a/56018426/41071 --> 
@@ -87,6 +87,10 @@ namespace Caravela.Framework.Impl.CompileTime
   <ItemGroup>
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
     <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="CodeModel\Before\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using System.IO;
 
 namespace Caravela.TestFramework
 {
     public class AspectTestRunner
     {
-        public virtual async Task<TestResult> Run( string testSource )
+        public bool HandlesException { get; set; } = true;
+        
+        public virtual async Task<TestResult> Run( string testName, string testSource )
         {
 
             testSource = CommonSnippets.CaravelaUsings + testSource;
@@ -33,30 +37,38 @@ namespace Caravela.TestFramework
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
+            
             var diagnostics = initialCompilation.GetDiagnostics();
-            this.ReportDiagnostics( result, diagnostics );
+            
+            result.Diagnostics.AddRange( diagnostics );
 
             if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
-                result.ErrorMessage = "Initial diagnostics failed.";
+                result.ErrorMessage = "The initial compilation failed.";
                 return result;
             }
 
             try
             {
-                var aspectPipeline = new AspectPipeline();
-                var resultCompilation = aspectPipeline.Execute( new AspectTestPipelineContext( initialCompilation, result ) );
-
-                result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
-                result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
-
-                return result;
+                var context = new AspectTestPipelineContext( testName, initialCompilation, result );
+                CompileTimeAspectPipeline pipeline = new CompileTimeAspectPipeline( context );
+                if ( pipeline.TryExecute( out var resultCompilation ) )
+                {
+                    result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
+                    result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
+                    result.Success = true;
+                }
+                else
+                {
+                    result.ErrorMessage = "The pipeline failed.";
+                }
             }
-            catch ( Exception exception )
+            catch ( Exception exception ) when ( this.HandlesException )
             {
-                result.ErrorMessage = exception.ToString();
-                return result;
+                result.ErrorMessage = "Unhandled exception: " + exception.ToString();
             }
+            
+            return result;
         }
 
         protected virtual Project CreateProject()
@@ -80,34 +92,43 @@ namespace Caravela.TestFramework
             yield break;
         }
 
-        protected virtual void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
+        private class AspectTestPipelineContext : IAspectPipelineContext, IBuildOptions
         {
-            result.Diagnostics.AddRange( diagnostics );
-        }
-
-        private class AspectTestPipelineContext : IAspectPipelineContext
-        {
+            private readonly string _testName;
             private readonly TestResult _testResult;
 
-            public AspectTestPipelineContext( Compilation compilation, TestResult testResult )
+            public AspectTestPipelineContext( string testName, CSharpCompilation compilation, TestResult testResult )
             {
                 this.Compilation = compilation;
+                this._testName = testName;
                 this._testResult = testResult;
                 this.ManifestResources = new List<ResourceDescription>();
             }
 
-            public Compilation Compilation { get; }
+            public CSharpCompilation Compilation { get; }
 
-            public ImmutableArray<object> Plugins => ImmutableArray<object>.Empty;
+            ImmutableArray<object> IAspectPipelineContext.Plugins => ImmutableArray<object>.Empty;
 
             public IList<ResourceDescription> ManifestResources { get; }
 
-            public bool GetOptionsFlag( string flagName ) => false;
+            CancellationToken IAspectPipelineContext.CancellationToken => CancellationToken.None;
 
-            public void ReportDiagnostic( Diagnostic diagnostic )
+            IBuildOptions IAspectPipelineContext.BuildOptions => this;
+
+            void IAspectPipelineContext.ReportDiagnostic( Diagnostic diagnostic )
             {
                 this._testResult.Diagnostics.Add( diagnostic );
             }
+
+            public bool HandleExceptions => false;
+
+            bool IBuildOptions.AttachDebugger => false;
+
+            bool IBuildOptions.MapPdbToTransformedCode => true;
+
+            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testName );
+
+            public bool WriteUnhandledExceptionsToFile => true;
         }
     }
 }

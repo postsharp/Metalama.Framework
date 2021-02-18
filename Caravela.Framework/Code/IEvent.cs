@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the type of the event, i.e. the type of the delegate.
         /// </summary>
-        INamedType EventType { get; }
+        INamedType EventType { get; } // TODO: This should be IType
 
         /// <summary>
         /// Gets the method implementing the <c>add</c> semantic. In case of field-like events, this property returns

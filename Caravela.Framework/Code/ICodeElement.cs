@@ -1,5 +1,7 @@
+using Caravela.Framework.Diagnostics;
+using System;
+using System.Collections.Generic;
 using Caravela.Framework.Project;
-using Caravela.Reactive;
 
 namespace Caravela.Framework.Code
 {
@@ -8,7 +10,7 @@ namespace Caravela.Framework.Code
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTime]
-    public interface ICodeElement : IDisplayable
+    public interface ICodeElement : IDisplayable, IDiagnosticTarget, IEquatable<ICodeElement>
     {
         /// <summary>
         /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
@@ -20,11 +22,13 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the collection of custom attributes on the element of code.
         /// </summary>
-        IReactiveCollection<IAttribute> Attributes { get; }
+        IReadOnlyList<IAttribute> Attributes { get; }
 
         /// <summary>
         /// Gets the kind of element of code.
         /// </summary>
         public CodeElementKind ElementKind { get; }
+
+        ICompilation Compilation { get; }
     }
 }

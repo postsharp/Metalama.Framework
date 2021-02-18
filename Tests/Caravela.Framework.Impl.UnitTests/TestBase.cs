@@ -3,8 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -51,11 +50,11 @@ namespace Caravela.Framework.Impl.UnitTests
             return roslynCompilation;
         }
 
-        public static ICompilation CreateCompilation( string? code )
+        internal static CompilationModel CreateCompilation( string? code )
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 
-            return CompilationFactory.CreateCompilation( roslynCompilation );
+            return new CompilationModel( roslynCompilation );
         }
 
         public static object? ExecuteExpression( string context, string expression )

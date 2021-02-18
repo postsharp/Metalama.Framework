@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Collections;
 using Caravela.Framework.Project;
-using Caravela.Reactive;
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code
@@ -12,28 +11,16 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public interface ICompilation : ICodeElement
     {
-        IReactiveCollection<INamedType> DeclaredTypes { get; }
+        IReadOnlyList<INamedType> DeclaredTypes { get; }
 
-        IReactiveCollection<INamedType> DeclaredAndReferencedTypes { get; }
+        IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
 
-        IReactiveGroupBy<string?, INamedType> DeclaredTypesByNamespace { get; }
+        IReadOnlyMultiValueDictionary<string, INamedType> DeclaredTypesByNamespace { get; }
 
-        /// <summary>
-        /// Get type based on its full name, as used in reflection.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// For nested types, this means using <c>+</c>, e.g. to get <see cref="System.Environment.SpecialFolder"/>, use <c>System.Environment+SpecialFolder</c>.
-        /// </para>
-        /// <para>
-        /// For generic type definitions, this requires using <c>`</c>, e.g. to get <see cref="List{T}"/>, use <c>System.Collections.Generic.List`1</c>.
-        /// </para>
-        /// <para>
-        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.WithGenericArguments"/>.
-        /// </para>
-        /// </remarks>
-        INamedType? GetTypeByReflectionName( string reflectionName );
+        ITypeFactory TypeFactory { get; }
 
-        IType? GetTypeByReflectionType( Type type );
+        IReadOnlyList<IManagedResource> ManagedResources { get; }
+
+        IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
     }
 }

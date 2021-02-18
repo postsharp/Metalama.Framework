@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Code
 {
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttribute
+    public interface IAttribute : ICodeElement
     {
         // TODO: add TargetElement?
 
@@ -32,11 +31,12 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parameters passed to the <see cref="Constructor"/>.
         /// </summary>
-        IImmutableList<object?> ConstructorArguments { get; }
+        IReadOnlyList<object?> ConstructorArguments { get; }
 
         /// <summary>
         /// Gets the named arguments (either fields or properties) of the attribute.
         /// </summary>
-        IReadOnlyDictionary<string, object?> NamedArguments { get; }
+        // TODO: it cannot ve a dictionary because the ordering of assignments must be preserved.
+        IReadOnlyList<KeyValuePair<string, object?>> NamedArguments { get; }
     }
 }

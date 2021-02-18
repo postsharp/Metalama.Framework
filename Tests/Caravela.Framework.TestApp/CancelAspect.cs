@@ -1,13 +1,14 @@
 ﻿using System.Linq;
 using System.Threading;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.TestApp
 {
     internal class CancelAspect : OverrideMethodAspect
     {
-        private static bool TypeIsCancellationToken( IAdviceParameter p ) => p.Type.Is( typeof( CancellationToken ) );
+        private static bool TypeIsCancellationToken( IAdviceParameter p ) => p.ParameterType.Is( typeof( CancellationToken ) );
 
         public override dynamic OverrideMethod()
         {

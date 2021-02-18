@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Compiler;
@@ -12,6 +11,7 @@ namespace Caravela.MemoTransformer
     [Transformer]
     internal class Transformer : ISourceTransformer
     {
+
         public Compilation Execute( TransformerContext context )
         {
             var rewriter = new Rewriter();
@@ -21,12 +21,19 @@ namespace Caravela.MemoTransformer
                 compilation = compilation.ReplaceSyntaxTree( tree, tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
             }
 
+            foreach ( var diagnostic in rewriter.Diagnostics )
+            {
+                context.ReportDiagnostic( diagnostic );
+            }
+
             return compilation;
         }
 
         private class Rewriter : CSharpSyntaxRewriter
         {
             private List<FieldDeclarationSyntax>? _fieldsToAdd;
+
+            public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
             public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
@@ -38,12 +45,14 @@ namespace Caravela.MemoTransformer
 
                 if ( node.ExpressionBody == null )
                 {
-                    throw new NotSupportedException( "Only expression-bodied properties are supported." );
+                    this.Diagnostics.Add( Diagnostic.Create( _nonExpressionBodyError, node.GetLocation() ) );
+                    return node;
                 }
 
                 if ( node.Modifiers.Any( SyntaxKind.StaticKeyword ) )
                 {
-                    throw new NotSupportedException( "Static properties are not supported." );
+                    this.Diagnostics.Add( Diagnostic.Create( _staticPropertyError, node.GetLocation() ) );
+                    return node;
                 }
 
                 var fieldName = "@" + char.ToLowerInvariant( node.Identifier.ValueText[0] ) + node.Identifier.ValueText.Substring( 1 );
@@ -92,13 +101,33 @@ namespace Caravela.MemoTransformer
             {
                 const string usingSystemThreading = "using System.Threading;";
 
+                node = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
+
                 if ( node.Usings.All( u => u.ToString() != usingSystemThreading ) )
                 {
                     node = node.AddUsings( ParseCompilationUnit( usingSystemThreading ).Usings.Single() );
                 }
 
-                return base.VisitCompilationUnit( node );
+                return node;
             }
         }
+
+        private static readonly DiagnosticDescriptor _nonExpressionBodyError =
+            new DiagnosticDescriptor(
+                "CMT001",
+                "Only expression-bodied properties are supported.",
+                "Only expression-bodied properties are supported.",
+                "Caravela.MemoTransformer",
+                DiagnosticSeverity.Error,
+                true );
+
+        private static readonly DiagnosticDescriptor _staticPropertyError =
+            new DiagnosticDescriptor(
+                "CMT002",
+                "Static properties are not supported.",
+                "Static properties are not supported.",
+                "Caravela.MemoTransformer",
+                DiagnosticSeverity.Error,
+                true );
     }
 }

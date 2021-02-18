@@ -59,7 +59,7 @@ namespace Caravela.Framework.Templating.UnitTests
             {
                 foreach ( var d in diagnosticsToLog )
                 {
-                    this._logger.WriteLine( d.Location + ":" + d.Id + " " + d.GetMessage() );
+                    this._logger.WriteLine( d.ToString() );
 
                     //if ( d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) )
                     //{
