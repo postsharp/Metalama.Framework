@@ -34,8 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract CodeElementKind ElementKind { get; }
 
-        bool ISdkCodeElement.IsIntroduced => false;
-
         public abstract ISymbol Symbol { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
