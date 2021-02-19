@@ -69,10 +69,7 @@ namespace Caravela.Framework.Impl
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
-            using ( DiagnosticContext.WithContext(aspectBuilder.UserDiagnostics, codeElement) )
-            {
-                aspectOfT.Initialize( aspectBuilder );
-            }
+            aspectOfT.Initialize( aspectBuilder );
 
             return aspectBuilder.ToResult();
         }

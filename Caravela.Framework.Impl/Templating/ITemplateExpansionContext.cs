@@ -1,5 +1,6 @@
 ﻿using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -49,6 +50,6 @@ namespace Caravela.Framework.Impl.Templating
         /// </returns>
         StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression );
         
-        IUserDiagnosticSink? DiagnosticSink { get; }
+        DiagnosticSink DiagnosticSink { get; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -34,10 +35,33 @@ namespace Caravela.Framework.Impl
         {
             if ( obj == null )
             {
-                Assert( false, $"the reference to {typeof( T ).Name} must no be not null" );
+                throw new AssertionFailedException( $"Assertion failed: the reference to {typeof( T ).Name} must no be not null." );
             }
             
             return obj;
+        }
+
+        public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
+            where T : class
+        {
+            if ( items == null )
+            {
+                throw new AssertionFailedException( $"Assertion failed: the enumeration must no be not null." );
+            }
+
+            var i = 0;
+            foreach ( var item in items )
+            {
+                if ( item == null )
+                {
+                    throw new AssertionFailedException( $"Assertion failed: the {i}-th {typeof(T).Name} must no be not null." );
+                }
+
+                i++;
+            }
+            
+            return items!;
+            
         }
     }
 }

@@ -27,18 +27,17 @@ namespace Caravela.Framework.Impl.Pipeline
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
             var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
+            var diagnostics = new List<Diagnostic>();
 
             if ( !aspectInstances.Any() )
             {
                 return input;
             }
 
-            var diagnosticSink = new DiagnosticSink();
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext(
-                this._aspectType, aspectInstances, input.Compilation, diagnosticSink, resources.Add );
+            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.Add, resources.Add );
 
             CSharpCompilation newCompilation;
             try
@@ -48,23 +47,17 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnosticSink.AddDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
+                diagnostics.Add( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
                 newCompilation,
                 input.AspectParts,
-                input.Diagnostics.Concat( diagnosticSink.Diagnostics ).ToList(),
+                input.Diagnostics.Concat( diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
         }
-
-        private class DiagnosticSink : IDiagnosticSink
-        {
-            public List<Diagnostic> Diagnostics { get; } = new();
-
-            public void AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );
-        }
     }
+  
 }

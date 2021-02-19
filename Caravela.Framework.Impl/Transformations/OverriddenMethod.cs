@@ -44,15 +44,16 @@ namespace Caravela.Framework.Impl.Transformations
             :
             ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public IEnumerable<IntroducedMember> GetIntroducedMembers( IntroductionContext context )
+        public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
+            using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
+            {
+                // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
+                string methodName =
+                    this.Advice.PartName != null
+                        ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
+                        : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
 
-            // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
-            string methodName =
-                this.Advice.PartName != null
-                ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
-                : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
-            
             Invariant.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
 
             // TODO: This is temporary.
@@ -67,26 +68,31 @@ namespace Caravela.Framework.Impl.Transformations
                 this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
                 .ExpandDeclaration( expansionContext );
 
-            var overrides = new[] 
-            {
-                new IntroducedMember(
-                    this,
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
-                        null,
-                        Identifier( methodName ),
-                        this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
-                        newMethodBody,
-                        null),
-                    this.Advice.AspectPartId,
-                    IntroducedMemberSemantic.MethodOverride )
-            };
+                var newMethodBody = new TemplateDriver(
+                        this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
+                    .ExpandDeclaration( expansionContext );
 
-            return overrides;
+                var overrides = new[]
+                {
+                    new IntroducedMember(
+                        this,
+                        MethodDeclaration(
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.GetSyntaxModifiers(),
+                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            null,
+                            Identifier( methodName ),
+                            this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
+                            this.OverriddenDeclaration.GetSyntaxParameterList(),
+                            this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                            newMethodBody,
+                            null ),
+                        this.Advice.AspectPartId,
+                        IntroducedMemberSemantic.MethodOverride )
+                };
+
+                return overrides;
+            }
         }
 
         public MemberDeclarationSyntax InsertPositionNode

@@ -36,6 +36,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsReadOnly = true;
         }
 
-        public IDiagnosticLocation? DiagnosticLocation => null;
+        public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
     }
 }
