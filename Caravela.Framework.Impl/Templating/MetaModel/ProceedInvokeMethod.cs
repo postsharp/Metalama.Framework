@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
             if ( this._aspectPartId != null )
             {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
+                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectName, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
             }
 
             return invocation;

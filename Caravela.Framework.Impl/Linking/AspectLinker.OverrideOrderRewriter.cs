@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         var lastOverride =
                             this._orderedAspectParts
-                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
+                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart.Equals( x ) )) )
                             .Where(x => x.Value != null)
                             .Last().Value;
 
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
                 var currentMethodPosition =
                     this._orderedAspectParts
                     .Select( ( x, i ) => (Index: i, Value: x) )
-                    .Single( x => x.Value.ToAspectPartId().AspectType== annotation.AspectTypeName && x.Value.ToAspectPartId().PartName == annotation.PartName )
+                    .Single( x => x.Value.AspectName== annotation.AspectTypeName && x.Value.PartName == annotation.PartName )
                     .Index;
 
                 // The callee is the original/introduced method.
@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 var precedingOverrides =
                     this._orderedAspectParts
-                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
+                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart.Equals( x ) )) )
                     .Where( x => x.Value != null && x.Index < currentMethodPosition );
 
                 // TODO: simplify

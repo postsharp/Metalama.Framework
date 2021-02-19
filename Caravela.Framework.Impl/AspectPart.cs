@@ -7,24 +7,29 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AspectPart
+    internal class AspectPart : AspectPartId
     {
-        public AspectType AspectType { get; }
+        
 
-        /// <summary>
-        /// Gets the name of the part, or <c>null</c> for the default part.
-        /// </summary>
-        public string? PartName { get; }
 
-        public AspectPart( AspectType aspectType, string? partName = null )
+        public AspectPart( AspectType aspectType, string? partName = null ) : base( aspectType.Type, partName )
         {
             this.AspectType = aspectType;
-            this.PartName = partName;
         }
 
-        public AspectPartId ToAspectPartId() => new AspectPartId( this.AspectType.Type, this.PartName );
+        public AspectType AspectType { get; }
+        
 
-        internal AspectPartResult ToResult( AspectPartResult input )
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        /// <param name="prototype"></param>
+        protected AspectPart( AspectPart prototype ) : this( prototype.AspectType, prototype.PartName )
+        {
+            
+        }
+
+        internal AspectPartResult Execute( AspectPartResult input )
         {
             var aspectDriver = (AspectDriver) this.AspectType.AspectDriver;
 
@@ -32,9 +37,11 @@ namespace Caravela.Framework.Impl
             IEnumerable<Advice> addedAdvices;
             IEnumerable<Diagnostic> aspectInitializerDiagnostics;
             IEnumerable<IAspectSource> addedAspectSources;
-            if ( this.PartName == null )
+            if ( this.IsDefault )
             {
                 // If we are in the default aspect part, we have to execute the aspect initializer.
+                
+                // TODO: order declarations by depth of inheritance. 
 
                 var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this.AspectType.Type ) );
 
@@ -54,7 +61,7 @@ namespace Caravela.Framework.Impl
             }
 
             var advicesInCurrentAspectParts =
-                input.Advices.Concat( addedAdvices ).Where( a => a.Aspect.AspectType.FullName == this.AspectType.Name && a.PartName == this.PartName );
+                input.Advices.Concat( addedAdvices ).Where( a => a.AspectPartId.Equals( this ) );
 
             var adviceResults = advicesInCurrentAspectParts
                 .Select( ai => ai.ToResult( input.Compilation ) ).ToList();

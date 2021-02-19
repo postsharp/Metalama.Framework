@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    
     internal abstract class CodeElement : ICodeElement, IHasDiagnosticLocation, ICodeElementLink<ICodeElement>
     {
         protected CodeElement( CompilationModel compilation )
@@ -49,5 +50,5 @@ namespace Caravela.Framework.Impl.CodeModel
             
 
         object? ICodeElementLink.Target => this.Symbol;
-    }
+   }
 }

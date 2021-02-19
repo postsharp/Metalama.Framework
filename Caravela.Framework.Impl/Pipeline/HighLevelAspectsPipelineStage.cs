@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var aspectPart in this._aspectParts )
             {
-                aspectPartResult = aspectPart.ToResult( aspectPartResult );
+                aspectPartResult = aspectPart.Execute( aspectPartResult );
             }
 
             return this.GenerateCode( input, aspectPartResult );

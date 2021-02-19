@@ -29,6 +29,10 @@ namespace Caravela.Framework.Impl.Collections
             return builder.ToImmutable();
         }
 
+        public static Builder CreateBuilder( IEqualityComparer<TKey>? comparer = null )
+            => new Builder( ImmutableDictionary.CreateBuilder<TKey, Group>( comparer ) );
+
+
         public ImmutableMultiValueDictionary<TKey, TValue> AddRange( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
             => AddRange( source, getKey, v => v );
 

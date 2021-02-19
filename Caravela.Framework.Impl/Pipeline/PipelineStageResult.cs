@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Impl.AspectOrdering;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
@@ -40,11 +41,11 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the list of ordered aspect parts.
         /// </summary>
-        public IReadOnlyList<AspectPart> AspectParts { get; }
+        public IReadOnlyList<OrderedAspectPart> AspectParts { get; }
 
         public PipelineStageResult(
             CSharpCompilation compilation,
-            IReadOnlyList<AspectPart> aspectParts,
+            IReadOnlyList<OrderedAspectPart> aspectParts,
             IReadOnlyList<Diagnostic>? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
