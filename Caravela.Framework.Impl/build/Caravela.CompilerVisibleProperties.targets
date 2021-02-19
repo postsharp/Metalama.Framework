@@ -1,0 +1,10 @@
+<Project>
+    <!-- Exports the properties to the compiler -->
+    <ItemGroup>
+        <CompilerVisibleProperty Include="DebugCaravela" />
+        <CompilerVisibleProperty Include="CaravelaDebugTransformedCode" />
+        <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
+        <CompilerVisibleProperty Include="CaravelaCrashReportDirectory" />
+    </ItemGroup>
+
+</Project>
