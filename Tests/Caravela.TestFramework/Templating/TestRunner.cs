@@ -1,5 +1,4 @@
-﻿using Caravela.Framework.Diagnostics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,18 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Caravela.Reactive;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
-using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Microsoft.CodeAnalysis.Text;
-using Caravela.Framework.Impl;
+using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -56,7 +52,6 @@ namespace Caravela.TestFramework.Templating
 
             foreach ( var testAnalyzer in this.GetTestAnalyzers() )
             {
-                // TODO: should visit only template method.
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 

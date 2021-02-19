@@ -13,11 +13,11 @@ namespace SyntaxCover
 
         static void Main(string[] args)
         {
-            string workDir = Path.GetFullPath(@"..\..\..\..\..\..\..\artifacts\tests\");
+            string workDir = Path.GetFullPath(@"..\..\..\..\artifacts\tests\");
 
             Dictionary<string, int> syntaxKindCounts = GetAllSyntaxKinds().ToDictionary( s => s.ToString(), s => 0 );
 
-            var testOutputFiles = Directory.GetFiles( Path.Combine( workDir, "SyntaxCover" ) );
+            var testOutputFiles = Directory.GetFiles( Path.Combine( workDir, "SyntaxCover" ), "*.txt", SearchOption.AllDirectories );
             foreach ( var testOutputFile in testOutputFiles )
             {
                 foreach (var line in File.ReadAllLines( testOutputFile ))

@@ -8,6 +8,8 @@
     <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Caravela.Framework.Impl -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.3" />
+    <PackageReference Include="xunit.assert" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
