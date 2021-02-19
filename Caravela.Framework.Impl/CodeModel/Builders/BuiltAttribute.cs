@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<object?> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
 
-        public IReadOnlyList<KeyValuePair<string, object?>> NamedArguments => this.AttributeBuilder.NamedArguments;
+        public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
 
         public IAttribute GetForCompilation( CompilationModel compilation ) =>
             compilation == this.Compilation ? this : throw new AssertionFailedException();

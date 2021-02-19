@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -22,11 +20,4 @@ namespace Caravela.Framework.Code
         /// </summary>
         MethodKind MethodKind { get; }
     }
-
-    public interface IParameterList : IReadOnlyList<IParameter>
-    {
-        
-    }
-    
-     
 }

@@ -4,7 +4,6 @@ namespace Caravela.Framework.Code
 {
     public static class TypeExtensions
     {
-
         /// <summary>
         /// Creates an array type from the current type.
         /// </summary>

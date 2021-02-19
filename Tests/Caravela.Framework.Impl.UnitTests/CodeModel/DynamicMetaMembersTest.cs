@@ -36,9 +36,9 @@ class TargetCode
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes[0];
-            var toString = type.Methods.OfName( "ToString" ).Single();
-            var fooMethod = type.Methods.OfName( "Foo" ).Single();
-            var byRefMethod = type.Methods.OfName( "ByRef" ).Single();
+            var toString = type.Methods.Named( "ToString" ).Single();
+            var fooMethod = type.Methods.Named( "Foo" ).Single();
+            var byRefMethod = type.Methods.Named( "ByRef" ).Single();
 
             // Test normal case.
             AssertEx.DynamicEquals(
@@ -102,7 +102,7 @@ class TargetCode
 }";
             var compilation = CreateCompilation( code );
 
-            var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
+            var type = compilation.DeclaredTypes.Named( "TargetCode" ).Single();
             var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( string ) )! );
             var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( int ) )! );
 
@@ -123,7 +123,7 @@ class TargetCode
     }
 }";
             var compilation = CreateCompilation( code );
-            var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
+            var localFunction = compilation.DeclaredTypes.Named( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
             AssertEx.DynamicEquals(
                 localFunction.Invoke( null ),
@@ -171,7 +171,7 @@ class TargetCode
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.Single();
-            var property = type.Properties.OfName( "P" ).Single();
+            var property = type.Properties.Named( "P" ).Single();
 
             AssertEx.DynamicEquals( property.Value, @"this.P" );
             AssertEx.DynamicEquals( property.GetValue( property.Value ), @"this.P.P" );
@@ -200,9 +200,9 @@ class TargetCode
     ;
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes.Single();
-            var method = type.Methods.OfName( "A" ).Single();
-            var longMethod = type.Methods.OfName( "B" ).Single();
-            var noParameterMethod = type.Methods.OfName( "C" ).Single();
+            var method = type.Methods.Named( "A" ).Single();
+            var longMethod = type.Methods.Named( "B" ).Single();
+            var noParameterMethod = type.Methods.Named( "C" ).Single();
 
             AssertEx.DynamicEquals(
                 new AdviceParameterList( method ).Values.ToArray(),

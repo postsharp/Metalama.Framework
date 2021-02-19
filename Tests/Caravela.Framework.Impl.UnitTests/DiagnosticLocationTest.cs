@@ -28,7 +28,7 @@ class C<T> : object
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.Single();
-            var method = type.Methods.OfName( "Method" ).Single();
+            var method = type.Methods.Named( "Method" ).Single();
             
             // Type
             AssertLocation( "C", type.GetLocation() );
@@ -45,8 +45,8 @@ class C<T> : object
             AssertLocation( "Method", method.ReturnParameter.GetLocation() );
             
             // Properties
-            AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetLocation() );
-            var property = type.Properties.OfName( "Property" ).Single();
+            AssertLocation( "AutomaticProperty", type.Properties.Named( "AutomaticProperty" ).Single().GetLocation() );
+            var property = type.Properties.Named( "Property" ).Single();
             AssertLocation( "get", property.Getter!.GetLocation() );
             AssertLocation( "set", property.Setter!.GetLocation() );
         }

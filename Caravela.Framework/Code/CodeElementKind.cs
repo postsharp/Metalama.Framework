@@ -44,12 +44,23 @@ namespace Caravela.Framework.Code
         Parameter,
 
         /// <summary>
-        /// <see cref="GenericParameter"/>.
+        /// <see cref="IGenericParameter"/>.
         /// </summary>
         GenericParameter,
 
+        /// <summary>
+        /// <see cref="IAttribute"/>
+        /// </summary>
         Attribute,
-        Resource,
+        
+        /// <summary>
+        /// <see cref="IManagedResource"/>
+        /// </summary>
+        ManagedResource,
+        
+        /// <summary>
+        /// <see cref="IConstructor"/>
+        /// </summary>
         Constructor
     }
 }

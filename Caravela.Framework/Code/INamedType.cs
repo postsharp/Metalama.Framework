@@ -14,7 +14,9 @@ namespace Caravela.Framework.Code
     /// </remarks>
     public interface INamedType : IType, IMember
     {
-
+        /// <summary>
+        /// Determines whether the type is marked as partial in source code. 
+        /// </summary>
         bool IsPartial { get; }
 
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
@@ -84,8 +86,14 @@ namespace Caravela.Framework.Code
         /// </summary>
         IMethodList Methods { get; }
 
+        /// <summary>
+        /// Gets the list of constructors, including the implicit default constructor if any, but not the static constructor. 
+        /// </summary>
         IConstructorList Constructors { get; }
 
+        /// <summary>
+        /// Gets the static constructor.
+        /// </summary>
         IConstructor? StaticConstructor { get; }
 
         /// <summary>
@@ -94,40 +102,5 @@ namespace Caravela.Framework.Code
         /// <param name="genericArguments"></param>
         /// <returns></returns>
         public INamedType WithGenericArguments( params IType[] genericArguments );
-    }
-
-    public interface IMemberList<out T> : IReadOnlyList<T>
-        where T : IMember
-    {
-        IEnumerable<T> OfName( string name );
-    }
-
-    public interface IMethodList : IMemberList<IMethod>
-    {
-        
-    }
-
-    public interface IConstructorList : IMemberList<IConstructor>
-    {
-        
-    }
-
-    public interface IPropertyList : IMemberList<IProperty>
-    {
-    }
-
-    public interface IEventList : IMemberList<IEvent>
-    {
-        
-    }
-
-    public interface INamedTypeList : IMemberList<INamedType>
-    {
-        
-    }
-
-    public interface IGenericParameterList : IReadOnlyList<IGenericParameter>
-    {
-        
     }
 }

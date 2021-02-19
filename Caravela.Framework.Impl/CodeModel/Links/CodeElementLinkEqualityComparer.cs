@@ -4,6 +4,11 @@ using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
+    /// <summary>
+    /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="ICodeElementLink"/>.
+    /// The comparison is compilation-independent.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal class CodeElementLinkEqualityComparer<T> : IEqualityComparer<T>
         where T : ICodeElementLink
     
@@ -11,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         public static readonly CodeElementLinkEqualityComparer<T> Instance = new CodeElementLinkEqualityComparer<T>();
 
         private static ISymbol? GetSymbol( T link )
-            => link.LinkedObject switch
+            => link.Target switch
             {
                 ISymbol symbol => symbol,
                 CodeElement codeElement => codeElement.Symbol,
@@ -27,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             }
             else
             {
-                return ReferenceEquals( x.LinkedObject, y.LinkedObject );
+                return ReferenceEquals( x.Target, y.Target );
             }
         }
 
@@ -47,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
                 }
                 else
                 {
-                    return RuntimeHelpers.GetHashCode( obj.LinkedObject );
+                    return RuntimeHelpers.GetHashCode( obj.Target );
                 }
             }
 

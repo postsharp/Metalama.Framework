@@ -15,9 +15,11 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
 
+        /// <summary>
+        /// Gets the service used to compare this type or construct other types.
+        /// This member is used by <see cref="TypeExtensions"/> and is not meant to be used directly in user code.
+        /// </summary>
         ITypeFactory TypeFactory { get; }
 
-        // TODO: Define Is(string)
-        // TODO: Define Equals
     }
 }

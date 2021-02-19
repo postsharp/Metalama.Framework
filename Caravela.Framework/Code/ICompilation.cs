@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Caravela.Framework.Collections;
-using Caravela.Framework.Project;
+﻿using Caravela.Framework.Project;
+using System.Collections.Generic;
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code
@@ -11,14 +10,19 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public interface ICompilation : ICodeElement
     {
-        int Revision { get; }
-        
+        /// <summary>
+        /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
+        /// </summary>
         INamedTypeList DeclaredTypes { get; }
 
+        /// <summary>
+        /// Gets a service that allows to create type instances and compare them.
+        /// </summary>
         ITypeFactory TypeFactory { get; }
 
+        /// <summary>
+        /// Gets the list of managed resources in the current compilation.
+        /// </summary>
         IReadOnlyList<IManagedResource> ManagedResources { get; }
-
-        
     }
 }

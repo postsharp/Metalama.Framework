@@ -2,6 +2,9 @@ using System;
 
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
+    /// </summary>
     public interface ITypeFactory
     {
         /// <summary>
@@ -20,10 +23,26 @@ namespace Caravela.Framework.Code
         /// </remarks>
         INamedType GetTypeByReflectionName( string reflectionName );
 
+        /// <summary>
+        /// Gets an <see cref="IType"/> given a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         IType GetTypeByReflectionType( Type type );
 
+        /// <summary>
+        /// Creates an array type.
+        /// </summary>
+        /// <param name="elementType"></param>
+        /// <param name="rank"></param>
+        /// <returns></returns>
         IArrayType MakeArrayType( IType elementType, int rank );
 
+        /// <summary>
+        /// Creates a pointer type.
+        /// </summary>
+        /// <param name="pointedType"></param>
+        /// <returns></returns>
         IPointerType MakePointerType( IType pointedType );
 
         /// <summary>

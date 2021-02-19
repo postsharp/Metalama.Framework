@@ -21,6 +21,6 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public ICodeElementBuilder? Builder => null;
 
-        public object? LinkedObject => this;
+        public object? Target => this;
     }
 }

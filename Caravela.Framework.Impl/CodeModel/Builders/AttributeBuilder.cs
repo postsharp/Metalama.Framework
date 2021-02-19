@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.Constructor = constructor;
         }
 
-        public List<KeyValuePair<string, object?>> NamedArguments { get; } = new();
+        public NamedArgumentsList NamedArguments { get; } = new();
 
         public void AddNamedArgument( string name, object? value ) => throw new NotImplementedException();
 
@@ -37,13 +37,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<object?> ConstructorArguments { get; }
 
-        IReadOnlyList<KeyValuePair<string, object?>> IAttribute.NamedArguments => this.NamedArguments;
+        INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
 
         public IDiagnosticLocation? DiagnosticLocation => null;
         IAttribute ICodeElementLink<IAttribute>.GetForCompilation( CompilationModel compilation ) => compilation.Factory.GetAttribute( this );
         protected override ICodeElement GetForCompilation( CompilationModel compilation ) => throw new NotImplementedException();
 
-        object? ICodeElementLink.LinkedObject => this;
+        object? ICodeElementLink.Target => this;
 
         CodeElementLink<INamedType> IAttributeLink.AttributeType => new CodeElementLink<INamedType>(this.Constructor.DeclaringType);
 

@@ -7,6 +7,10 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
+    /// <summary>
+    /// The base class for the read-only facade of introduced code elements, represented by <see cref="CodeElementBuilder"/>. Facades
+    /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
+    /// </summary>
     internal abstract class BuiltCodeElement : ICodeElement, ICodeElementLink<ICodeElement>
     {
         protected BuiltCodeElement( CompilationModel compilation )
@@ -38,6 +42,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation( compilation );
 
-        object? ICodeElementLink.LinkedObject => throw new NotImplementedException();
+        object? ICodeElementLink.Target => throw new NotSupportedException();
     }
 }

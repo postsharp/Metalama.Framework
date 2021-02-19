@@ -32,8 +32,14 @@ namespace Caravela.Framework.Code
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
         OptionalValue DefaultValue { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         bool IsParams { get; }
 
+        /// <summary>
+        /// Gets the parent <see cref="IMethod"/>, <see cref="IConstructor"/> or <see cref="IProperty"/>.
+        /// </summary>
         IMember DeclaringMember { get; }
     }
 }

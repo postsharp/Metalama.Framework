@@ -48,6 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel
             this.GetForCompilation<ICodeElement>( compilation );
             
 
-        object? ICodeElementLink.LinkedObject => this.Symbol;
+        object? ICodeElementLink.Target => this.Symbol;
     }
 }

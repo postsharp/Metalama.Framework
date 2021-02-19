@@ -40,10 +40,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public IReadOnlyList<KeyValuePair<string, object?>> NamedArguments =>
-            this._data.NamedArguments
-                .Select( kvp => new KeyValuePair<string, object?>( kvp.Key, this.Translate( kvp.Value ) ) )
-                .ToImmutableArray();
+        public INamedArgumentList NamedArguments =>
+            new NamedArgumentsList(
+                this._data.NamedArguments
+                    .Select( kvp => new KeyValuePair<string, object?>( kvp.Key, this.Translate( kvp.Value ) ) ) );
 
         private object? Translate( TypedConstant constant ) =>
             constant.Kind switch

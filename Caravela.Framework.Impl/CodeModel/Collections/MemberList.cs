@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             
         }
 
-        public IEnumerable<TCodeElement> OfName( string name )
+        public IEnumerable<TCodeElement> Named( string name )
         {
             for ( var i = 0; i < this.Count; i++ )
             {

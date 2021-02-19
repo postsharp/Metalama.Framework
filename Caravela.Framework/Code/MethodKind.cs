@@ -26,6 +26,6 @@ namespace Caravela.Framework.Code
         ConversionOperator,
         UserDefinedOperator,
 
-        LocalFunction,
+        LocalFunction
     }
 }

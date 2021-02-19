@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
             foreach ( var item in sourceItems )
             {
-                if ( item.LinkedObject != null )
+                if ( item.Target != null )
                 {
                     builder.Add( item );
                     canMoveToImmutable = false;

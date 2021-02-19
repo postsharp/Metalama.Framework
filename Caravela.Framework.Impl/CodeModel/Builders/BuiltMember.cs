@@ -37,6 +37,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
 
-        public object? LinkedObject => throw new System.NotImplementedException();
+        public object? Target => throw new System.NotImplementedException();
     }
 }

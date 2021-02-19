@@ -1,4 +1,5 @@
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 using System;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -7,20 +8,29 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 {
 
 
+    /// <summary>
+    /// Contains factory methods for the generic <see cref="CodeElementLink{T}"/>.
+    /// </summary>
     internal static class CodeElementLink
     {
 
+        /// <summary>
+        /// Asserts that a given symbol is compatible with a given <see cref="ICodeElement"/> interface.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static ISymbol AssertValidType<T>( this ISymbol symbol)
             where T : ICodeElement
         {
             Invariant.Implies( 
                 typeof(T) == typeof(IConstructor), 
-                symbol is IMethodSymbol constructor && (constructor.MethodKind == MethodKind.Constructor || constructor.MethodKind == MethodKind.StaticConstructor ),
+                symbol.GetCodeElementKind() == CodeElementKind.Constructor,
                 "Expected a constructor symbol.");
                     
             Invariant.Implies( 
                 typeof(T) == typeof(IMethod), 
-                symbol is IMethodSymbol method && !(method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor ),
+                symbol.GetCodeElementKind() == CodeElementKind.Method,
                 "Expected a constructor symbol.");
 
             return symbol;
@@ -29,32 +39,57 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
 #pragma warning disable 618
 
+        /// <summary>
+        /// Creates a <see cref="CodeElementLink{T}"/> from a <see cref="ICodeElementLink{T}"/> (typically a <see cref="CodeElementBuilder"/>).
+        /// </summary>
+        /// <param name="link"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static CodeElementLink<T> FromLink<T>( ICodeElementLink<T> link ) where T : class, ICodeElement
         {
             return new CodeElementLink<T>( link );
         }
 
+        /// <summary>
+        /// Creates a <see cref="CodeElementLink{T}"/> from a <see cref="ICodeElementLink{T}"/> (typically a <see cref="CodeElementBuilder"/>).
+        /// </summary>
+        /// <param name="link"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static CodeElementLink<ICodeElement> FromLink( ICodeElementLink<ICodeElement> link )
         {
             return new CodeElementLink<ICodeElement>( link );
         }
 
+        /// <summary>
+        /// Creates a <see cref="CodeElementLink{T}"/> from a Roslyn symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static CodeElementLink<ICodeElement> FromSymbol( ISymbol symbol )
         {
             return new CodeElementLink<ICodeElement>( symbol );
         }
 
+        /// <summary>
+        /// Creates a <see cref="CodeElementLink{T}"/> from a Roslyn symbol.
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static CodeElementLink<T> FromSymbol<T>( ISymbol symbol ) where T : class, ICodeElement
         {
             return new CodeElementLink<T>( symbol );
         }
 
-        public static CodeElementLink<T> FromCodeElement<T>( T codeElement ) where T : class, ICodeElement
-        {
-            return new CodeElementLink<T>( codeElement );
-        }
 #pragma warning restore 618
     }
+    
+    /// <summary>
+    /// The base implementation of <see cref="ICodeElementLink{T}"/>.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     internal readonly struct CodeElementLink<T> : ICodeElementLink<T>
         where T : class, ICodeElement
     {
@@ -65,27 +100,26 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         {
             CodeElementLink.AssertValidType<T>( symbol );      
             
-            this.LinkedObject = symbol;
+            this.Target = symbol;
         }
 
         [Obsolete("Use the factory method.")]
         internal  CodeElementLink( ICodeElementLink<T> link )
         {
-            this.LinkedObject = link;
+            this.Target = link;
         }
         
         [Obsolete("Use the factory method.")]
         internal  CodeElementLink( T link )
         {
             Invariant.Assert( link is ICodeElementLink<T>, "The type must implement ICodeElementLink" );
-            this.LinkedObject = link;
+            this.Target = link;
         }
 
-        
-        public object? LinkedObject { get; }
+        public object? Target { get; }
 
         public T GetForCompilation( CompilationModel compilation ) =>
-            GetForCompilation( this.LinkedObject, compilation ); 
+            GetForCompilation( this.Target, compilation ); 
         
         internal static T GetForCompilation( object? link, CompilationModel compilation )
             => link switch
@@ -94,16 +128,15 @@ namespace Caravela.Framework.Impl.CodeModel.Links
                 
                 ReturnParameterLink returnParameterLink => (T) compilation.Factory.GetMethod( returnParameterLink.Method ).ReturnParameter,
 
-                // TODO: Get a compilation-consistent IMember from the IMemberBuilder.
                 ICodeElementLink<T> codeElement => codeElement.GetForCompilation( compilation ),
                 
                 _ => throw new AssertionFailedException()
             };
 
 
-        public ISymbol? Symbol => this.LinkedObject as ISymbol;
+        public ISymbol? Symbol => this.Target as ISymbol;
 
-        public override string ToString() => this.LinkedObject?.ToString() ?? "null";
+        public override string ToString() => this.Target?.ToString() ?? "null";
     }
 
 }

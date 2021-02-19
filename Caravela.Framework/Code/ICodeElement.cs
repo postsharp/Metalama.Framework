@@ -1,6 +1,4 @@
 using Caravela.Framework.Diagnostics;
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
@@ -30,11 +28,5 @@ namespace Caravela.Framework.Code
         public CodeElementKind ElementKind { get; }
 
         ICompilation Compilation { get; }
-    }
-
-    public interface IAttributeList : IReadOnlyList<IAttribute>
-    {
-        // TODO: OfType
-        
     }
 }

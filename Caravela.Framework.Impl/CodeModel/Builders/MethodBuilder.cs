@@ -22,10 +22,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue optionalValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue defaultValue = default )
         {
             var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
-            parameter.DefaultValue = optionalValue;
+            parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
             return parameter;
         }

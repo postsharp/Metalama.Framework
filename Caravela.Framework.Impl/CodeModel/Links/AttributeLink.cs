@@ -7,20 +7,20 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     {
         public AttributeLink( AttributeData attributeData, CodeElementLink<ICodeElement> declaringElement )
         {
-            this.LinkedObject = attributeData;
+            this.Target = attributeData;
             this.DeclaringElement = declaringElement;
         }
 
         public AttributeLink( IAttributeLink link )
         {
-            this.LinkedObject = link;
+            this.Target = link;
             this.DeclaringElement = link.DeclaringElement;
         }
 
-        public object? LinkedObject { get; }
+        public object? Target { get; }
 
         public CodeElementLink<INamedType> AttributeType
-            => this.LinkedObject switch
+            => this.Target switch
             {
                 AttributeData attributeData => CodeElementLink.FromSymbol<INamedType>(attributeData.AttributeClass.AssertNotNull()),
                 IAttributeLink link => link.AttributeType,
@@ -30,13 +30,13 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         public CodeElementLink<ICodeElement> DeclaringElement { get; }
 
         public IAttribute GetForCompilation( CompilationModel compilation )
-            => this.LinkedObject switch
+            => this.Target switch
             {
                 AttributeData attributeData => new Attribute( attributeData, compilation, this.DeclaringElement.GetForCompilation( compilation ) ),
                 IAttributeLink link  => link.GetForCompilation( compilation ),
                 _ => throw new AssertionFailedException()
             };
         
-        public override string ToString() => this.LinkedObject?.ToString() ?? "null";
+        public override string ToString() => this.Target?.ToString() ?? "null";
     }
 }

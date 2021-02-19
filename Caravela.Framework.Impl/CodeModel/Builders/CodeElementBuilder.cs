@@ -7,6 +7,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
+    /// <summary>
+    /// Base class implementing <see cref="ICodeElementBuilder"/>. These classes are returned by introduction advices so the user can continue
+    /// specifying the introduced code element. They are bound to the <see cref="CompilationModel"/> that created them, but implement
+    /// <see cref="ICodeElementLink{T}"/> so they can resolve, using <see cref="CodeElementFactory"/>, to the consuming <see cref="CompilationModel"/>.
+    /// 
+    /// </summary>
     internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementLink<ICodeElement>
     {
 
@@ -42,6 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         protected abstract ICodeElement GetForCompilation( CompilationModel compilation );
 
         // We are a link to ourselves.
-        object? ICodeElementLink.LinkedObject => this;
+        object? ICodeElementLink.Target => this;
     }
 }

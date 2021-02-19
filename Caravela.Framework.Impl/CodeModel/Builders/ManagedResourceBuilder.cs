@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IReadOnlyList<IAttribute> Attributes => Array.Empty<IAttribute>();
 
-        public CodeElementKind ElementKind => CodeElementKind.Resource;
+        public CodeElementKind ElementKind => CodeElementKind.ManagedResource;
 
         public bool IsReadOnly => true;
 

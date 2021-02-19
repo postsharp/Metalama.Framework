@@ -138,17 +138,17 @@ namespace Caravela.Framework.Impl.CodeModel
         public IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd( 
                 CodeElementLink.FromLink( attributeBuilder ),
-                l => new BuiltAttribute( (AttributeBuilder) l.LinkedObject!, this._compilation ) );
+                l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilation ) );
 
         public IParameter GetParameter( ParameterBuilder parameterBuilder )
             => (IParameter) this._cache.GetOrAdd( 
                 CodeElementLink.FromLink( parameterBuilder ),
-                l => new BuiltParameter( (ParameterBuilder) l.LinkedObject!, this._compilation ) );
+                l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilation ) );
         
         public IGenericParameter? GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
             => (IGenericParameter) this._cache.GetOrAdd( 
                 CodeElementLink.FromLink( genericParameterBuilder ),
-                l => new BuiltGenericParameter( (GenericParameterBuilder) l.LinkedObject!, this._compilation ) );
+                l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilation ) );
 
 
         public ICodeElement? GetCodeElement( CodeElementBuilder builder )
