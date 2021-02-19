@@ -38,8 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract ISymbol Symbol { get; }
 
-        private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() );
-
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();
 
