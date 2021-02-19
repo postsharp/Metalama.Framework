@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        protected internal override ISymbol Symbol => this.ParameterSymbol;
+        public override ISymbol Symbol => this.ParameterSymbol;
 
         public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
     }

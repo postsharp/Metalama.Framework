@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
     internal abstract class MethodBase : Member, IMethodBase
     {
-        protected internal override ISymbol Symbol => this.MethodSymbol;
+        public override ISymbol Symbol => this.MethodSymbol;
 
         internal IMethodSymbol MethodSymbol { get; }
 

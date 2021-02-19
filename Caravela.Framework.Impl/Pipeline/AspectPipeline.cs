@@ -203,7 +203,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
+                    return new LowLevelAspectsPipelineStage( weaver, (ISdkNamedType) compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
 
                 case nameof( AspectDriver ):
 
