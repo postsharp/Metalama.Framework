@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateCompilation = this._input.Compilation;
 
             var allTransformations =
-                this._input.CompilationModel.ObservableTransformations.Values
+                this._input.CompilationModel.GetAllObservableTransformations()
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( this._input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();

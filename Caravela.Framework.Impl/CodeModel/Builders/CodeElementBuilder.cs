@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Links;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class CodeElementBuilder : ICodeElementBuilder
+    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementLink<ICodeElement>
     {
 
         public abstract ICodeElement? ContainingElement { get; }
 
-        IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
+        IAttributeList ICodeElement.Attributes => this.Attributes;
 
-        public List<AttributeBuilder> Attributes { get; } = new List<AttributeBuilder>();
+        public AttributeBuilderList Attributes { get; } = new AttributeBuilderList();
 
         public abstract CodeElementKind ElementKind { get; }
 
@@ -23,8 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public abstract bool Equals( ICodeElement other );
-
+        
         public bool IsReadOnly { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new System.NotImplementedException();
@@ -37,5 +37,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
+
+        ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation( compilation );
+        protected abstract ICodeElement GetForCompilation( CompilationModel compilation );
+
+        // We are a link to ourselves.
+        object? ICodeElementLink.LinkedObject => this;
     }
 }

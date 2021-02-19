@@ -1,6 +1,6 @@
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Serialization.Reflection
 {

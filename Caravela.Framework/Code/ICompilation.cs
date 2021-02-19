@@ -11,16 +11,14 @@ namespace Caravela.Framework.Code
     [CompileTime]
     public interface ICompilation : ICodeElement
     {
-        IReadOnlyList<INamedType> DeclaredTypes { get; }
-
-        IReadOnlyList<INamedType> DeclaredAndReferencedTypes { get; }
-
-        IReadOnlyMultiValueDictionary<string, INamedType> DeclaredTypesByNamespace { get; }
+        int Revision { get; }
+        
+        INamedTypeList DeclaredTypes { get; }
 
         ITypeFactory TypeFactory { get; }
 
         IReadOnlyList<IManagedResource> ManagedResources { get; }
 
-        IReadOnlyMultiValueDictionary<INamedType, IAttribute> AllAttributesByType { get; }
+        
     }
 }

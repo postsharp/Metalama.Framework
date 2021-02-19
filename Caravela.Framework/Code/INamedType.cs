@@ -54,7 +54,7 @@ namespace Caravela.Framework.Code
         /// Gets the generic parameters of the type, or an empty collection if the
         /// type is not generic.
         /// </summary>
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        IGenericParameterList GenericParameters { get; }
 
         /// <summary>
         /// Gets a value indicating whether this type or any of its containers does not have generic arguments set.
@@ -64,27 +64,27 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>
-        IReadOnlyList<INamedType> NestedTypes { get; }
+        INamedTypeList NestedTypes { get; }
 
         /// <summary>
         /// Gets the list of properties and fields defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReadOnlyList<IProperty> Properties { get; }
+        IPropertyList Properties { get; }
 
         /// <summary>
         /// Gets the list of events defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReadOnlyList<IEvent> Events { get; }
+        IEventList Events { get; }
 
         /// <summary>
         /// Gets the list of methods defined by the current type, but not those inherited from the base
         /// type, and not constructors.
         /// </summary>
-        IReadOnlyList<IMethod> Methods { get; }
+        IMethodList Methods { get; }
 
-        IReadOnlyList<IConstructor> Constructors { get; }
+        IConstructorList Constructors { get; }
 
         IConstructor? StaticConstructor { get; }
 
@@ -94,5 +94,40 @@ namespace Caravela.Framework.Code
         /// <param name="genericArguments"></param>
         /// <returns></returns>
         public INamedType WithGenericArguments( params IType[] genericArguments );
+    }
+
+    public interface IMemberList<out T> : IReadOnlyList<T>
+        where T : IMember
+    {
+        IEnumerable<T> OfName( string name );
+    }
+
+    public interface IMethodList : IMemberList<IMethod>
+    {
+        
+    }
+
+    public interface IConstructorList : IMemberList<IConstructor>
+    {
+        
+    }
+
+    public interface IPropertyList : IMemberList<IProperty>
+    {
+    }
+
+    public interface IEventList : IMemberList<IEvent>
+    {
+        
+    }
+
+    public interface INamedTypeList : IMemberList<INamedType>
+    {
+        
+    }
+
+    public interface IGenericParameterList : IReadOnlyList<IGenericParameter>
+    {
+        
     }
 }

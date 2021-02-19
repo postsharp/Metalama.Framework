@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Collections
 {
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Impl.Collections
 
             HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
 
-            void PopulateDescendants( T c )
+            void PopulateDescendants( T? c )
             {
                 recursionCheck++;
 
@@ -27,6 +28,7 @@ namespace Caravela.Framework.Impl.Collections
 
                     if ( children != null )
                     {
+                        var i = 0;
                         foreach ( var child in children )
                         {
                             if ( !list.Add( child ) )
@@ -35,6 +37,8 @@ namespace Caravela.Framework.Impl.Collections
                             }
 
                             PopulateDescendants( child );
+
+                            i++;
                         }
                     }
                 }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+﻿using Caravela.Framework.Impl.CodeModel;
+using System.Collections.Generic;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 

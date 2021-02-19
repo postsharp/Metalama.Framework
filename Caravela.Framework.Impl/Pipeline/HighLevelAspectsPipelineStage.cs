@@ -1,5 +1,5 @@
+using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult ToResult( PipelineStageResult input )
         {
-            var aspectPartResult = new AspectPartResult( new CompilationModel( input.Compilation ), this._assemblyLoader );
+            var aspectPartResult = new AspectPartResult( CompilationModel.CreateInitialInstance(input.Compilation), this._assemblyLoader );
 
             foreach ( var aspectPart in this._aspectParts )
             {

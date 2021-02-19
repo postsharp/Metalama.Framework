@@ -24,14 +24,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, AspectPartResult aspectPartResult )
         {
-            var transformations = aspectPartResult.Compilation.ObservableTransformations;
+            var transformations = aspectPartResult.Compilation.GetAllObservableTransformations();
             DiagnosticList diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 
             foreach ( var transformationGroup in transformations )
             {
-                if ( !(transformationGroup.Key is INamedType declaringType) )
+                if ( !(transformationGroup.DeclaringElement is INamedType declaringType) )
                 {
                     // We only support introductions to types.
                     continue;
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     default,
                     default );
 
-                foreach ( var transformation in transformationGroup )
+                foreach ( var transformation in transformationGroup.Transformations )
                 {
                     switch ( transformation )
                     {

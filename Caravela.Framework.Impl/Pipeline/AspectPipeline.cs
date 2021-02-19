@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( this.ServiceProvider, roslynCompilation, context.ManifestResources );
             this.CompileTimeAssemblyLoader = new CompileTimeAssemblyLoader( this.ServiceProvider, roslynCompilation, this.CompileTimeAssemblyBuilder );
             this.CompileTimeAssemblyBuilder.CompileTimeAssemblyLoader = this.CompileTimeAssemblyLoader;
-            var compilation = new CompilationModel( roslynCompilation );
+            var compilation = CompilationModel.CreateInitialInstance(roslynCompilation);
             var driverFactory = new AspectDriverFactory( compilation, context.Plugins );
             var aspectTypeFactory = new AspectTypeFactory( driverFactory );
             var aspectPartComparer = new AspectPartComparer();

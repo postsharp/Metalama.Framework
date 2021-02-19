@@ -10,16 +10,23 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of local functions declared by the current method.
         /// </summary>
-        IReadOnlyList<IMethod> LocalFunctions { get; }
+        IMethodList LocalFunctions { get; }
 
         /// <summary>
         /// Gets the list of parameters of the current method.
         /// </summary>
-        IReadOnlyList<IParameter> Parameters { get; }
+        IParameterList Parameters { get; }
 
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
         /// </summary>
         MethodKind MethodKind { get; }
     }
+
+    public interface IParameterList : IReadOnlyList<IParameter>
+    {
+        
+    }
+    
+     
 }

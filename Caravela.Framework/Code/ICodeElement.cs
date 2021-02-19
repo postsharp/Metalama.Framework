@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTime]
-    public interface ICodeElement : IDisplayable, IDiagnosticTarget, IEquatable<ICodeElement>
+    public interface ICodeElement : IDisplayable, IDiagnosticTarget
     {
         /// <summary>
         /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the collection of custom attributes on the element of code.
         /// </summary>
-        IReadOnlyList<IAttribute> Attributes { get; }
+        IAttributeList Attributes { get; }
 
         /// <summary>
         /// Gets the kind of element of code.
@@ -30,5 +30,11 @@ namespace Caravela.Framework.Code
         public CodeElementKind ElementKind { get; }
 
         ICompilation Compilation { get; }
+    }
+
+    public interface IAttributeList : IReadOnlyList<IAttribute>
+    {
+        // TODO: OfType
+        
     }
 }

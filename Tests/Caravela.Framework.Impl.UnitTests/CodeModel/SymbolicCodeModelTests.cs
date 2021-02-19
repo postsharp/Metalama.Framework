@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
@@ -91,6 +92,7 @@ class C
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
             Assert.Equal( "Inner", innerLocalFunction.Name );
+            
             Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
         }
 

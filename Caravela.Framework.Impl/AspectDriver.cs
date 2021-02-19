@@ -9,7 +9,6 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 

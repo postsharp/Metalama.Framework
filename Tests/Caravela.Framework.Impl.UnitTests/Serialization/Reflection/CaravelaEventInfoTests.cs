@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;

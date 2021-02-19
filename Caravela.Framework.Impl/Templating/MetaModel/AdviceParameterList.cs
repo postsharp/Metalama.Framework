@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {

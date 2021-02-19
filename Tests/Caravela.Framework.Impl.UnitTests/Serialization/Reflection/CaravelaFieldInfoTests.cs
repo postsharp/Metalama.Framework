@@ -1,6 +1,6 @@
+using Caravela.Framework.Impl.CodeModel;
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;

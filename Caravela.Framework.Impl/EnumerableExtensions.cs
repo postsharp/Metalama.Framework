@@ -11,7 +11,22 @@ namespace Caravela.Framework.Impl
             {
                 return a;
             }
-            else if ( a == null || a.Count == 0 )
+            else if ( a.Count == 0 )
+            {
+                return new[] { b };
+            }
+            else
+            {
+                var l = new List<T>( a.Count + 1 );
+                l.AddRange( a );
+                l.Add( b );
+                return l;
+            }
+        }
+        
+        public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, T b )
+        {
+            if ( a.Count == 0 )
             {
                 return new[] { b };
             }

@@ -19,8 +19,28 @@ namespace Caravela.Framework.Impl
         {
             if ( !condition )
             {
-                throw new AssertionFailedException( "Assertion failed: " + description + "." );
+                throw new AssertionFailedException( description );
             }
+        }
+
+        public static void Implies( bool premise, bool conclusion, string description )
+        {
+            if ( premise && !conclusion )
+            {
+                throw new AssertionFailedException( description );
+            }
+        }
+
+
+        public static T Assert<T>( this T obj, Predicate<T> predicate, string message )
+            where T : class
+        {
+            if ( !predicate(obj) )
+            {
+                throw new AssertionFailedException( message );
+            }
+
+            return obj;
         }
 
 
@@ -35,7 +55,7 @@ namespace Caravela.Framework.Impl
         {
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"Assertion failed: the reference to {typeof( T ).Name} must no be not null." );
+                throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
             }
             
             return obj;
@@ -46,7 +66,7 @@ namespace Caravela.Framework.Impl
         {
             if ( items == null )
             {
-                throw new AssertionFailedException( $"Assertion failed: the enumeration must no be not null." );
+                throw new AssertionFailedException( $"The enumeration must no be not null." );
             }
 
             var i = 0;
@@ -54,7 +74,7 @@ namespace Caravela.Framework.Impl
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"Assertion failed: the {i}-th {typeof(T).Name} must no be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must no be not null." );
                 }
 
                 i++;

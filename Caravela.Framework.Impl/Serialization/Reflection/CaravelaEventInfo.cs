@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Serialization.Reflection

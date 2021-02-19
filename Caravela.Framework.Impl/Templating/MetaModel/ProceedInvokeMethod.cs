@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

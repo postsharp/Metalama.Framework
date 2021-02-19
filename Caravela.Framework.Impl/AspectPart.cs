@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl
             var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
             var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
 
-            var newCompilation = new CompilationModel( input.Compilation, addedObservableIntroductions );
+            var newCompilation = CompilationModel.CreateRevisedInstance(input.Compilation, addedObservableIntroductions);
 
             return input.WithNewResults( 
                 newCompilation,

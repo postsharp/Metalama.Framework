@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Caravela.Framework.Impl.CodeModel;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.UnitTests
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 
-            return new CompilationModel( roslynCompilation );
+            return CompilationModel.CreateInitialInstance(roslynCompilation);
         }
 
         public static object? ExecuteExpression( string context, string expression )

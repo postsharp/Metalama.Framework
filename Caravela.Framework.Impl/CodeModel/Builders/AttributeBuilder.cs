@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : IAttributeBuilder
+    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IAttributeLink
     {
-        public AttributeBuilder( IMethod constructor, IReadOnlyList<object?> constructorArguments )
+        public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<object?> constructorArguments )
         {
+            this.ContainingElement = containingElement;
             this.ConstructorArguments = constructorArguments;
             this.Constructor = constructor;
         }
@@ -19,15 +22,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
-        bool IEquatable<ICodeElement>.Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
+        public override ICodeElement ContainingElement { get; }
 
-        IReadOnlyList<IAttribute> ICodeElement.Attributes => Array.Empty<IAttribute>();
+        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
 
-        CodeElementKind ICodeElement.ElementKind => CodeElementKind.Attribute;
+        public override CodeElementKind ElementKind => CodeElementKind.Attribute;
 
-        ICompilation ICodeElement.Compilation => this.Constructor.Compilation;
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
         INamedType IAttribute.Type => this.Constructor.DeclaringType;
 
@@ -38,5 +40,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IReadOnlyList<KeyValuePair<string, object?>> IAttribute.NamedArguments => this.NamedArguments;
 
         public IDiagnosticLocation? DiagnosticLocation => null;
+        IAttribute ICodeElementLink<IAttribute>.GetForCompilation( CompilationModel compilation ) => compilation.Factory.GetAttribute( this );
+        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => throw new NotImplementedException();
+
+        object? ICodeElementLink.LinkedObject => this;
+
+        CodeElementLink<INamedType> IAttributeLink.AttributeType => new CodeElementLink<INamedType>(this.Constructor.DeclaringType);
+
+        CodeElementLink<ICodeElement> IAttributeLink.DeclaringElement => new CodeElementLink<ICodeElement>( this.ContainingElement );
     }
 }

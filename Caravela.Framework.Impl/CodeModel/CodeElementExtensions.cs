@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
@@ -10,18 +10,40 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Accessibility = Caravela.Framework.Code.Accessibility;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class CodeElementExtensions
     {
+
+        public static CodeElementKind GetCodeElementKind( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol constructor =>
+                    constructor.MethodKind == MethodKind.Constructor || constructor.MethodKind == MethodKind.StaticConstructor
+                        ? CodeElementKind.Constructor
+                        : CodeElementKind.Method,
+                _ => throw new NotImplementedException()
+
+            };
+
+    
+        
+        /// <summary>
+        /// Determines whether a symbol is exposed to the user code model.
+        /// </summary>
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public static bool IsVisible( this ISymbol m ) => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && m.MetadataName == ".ctor");
+        
         /// <summary>
         /// Select all code elements recursively contained in a given code element (i.e. all children of the tree).
         /// </summary>
         /// <param name="codeElement"></param>
         /// <returns></returns>
-        public static IEnumerable<ICodeElement> SelectContainedElements( this ICodeElement codeElement ) =>
+        public static IEnumerable<ICodeElement> GetContainedElements( this ICodeElement codeElement ) =>
             new[] { codeElement }.SelectDescendants(
                 child => child switch
                 {
@@ -36,6 +58,38 @@ namespace Caravela.Framework.Impl.CodeModel
                         .ConcatNotNull( method.ReturnParameter ),
                     _ => null
                 } );
+
+        /// <summary>
+        /// Select all code elements recursively contained in a given code element (i.e. all children of the tree).
+        /// </summary>
+        /// <param name="symbol"></param>
+        /// <returns></returns>
+        public static IEnumerable<ISymbol> GetContainedSymbols( this ISymbol symbol ) =>
+            symbol switch
+                    {
+                        IAssemblySymbol compilation => compilation.GetTypes(),
+                        INamedTypeSymbol namedType => namedType.GetMembers().Where( IsVisible ).Concat( namedType.TypeParameters ),
+                        IMethodSymbol method => method.Parameters.Concat<ISymbol>( method.TypeParameters ),
+                        IPropertySymbol property => property.Parameters,
+                        _ => null
+                    };
+
+        public static IEnumerable<AttributeLink> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol ) =>
+            attributes.Select( a => new AttributeLink( a, CodeElementLink.FromSymbol(declaringSymbol) ) );
+
+        public static IEnumerable<AttributeLink> GetAllAttributes( this ISymbol symbol ) =>
+            symbol switch
+            {
+                IMethodSymbol method => method
+                    .GetAttributes()
+                    .ToAttributeLinks( method )
+                    .Concat( method.GetReturnTypeAttributes()
+                        .Select( a => new AttributeLink( a, new ReturnParameterLink( method ).ToSymbolicLink() ) ) ),
+                _ => symbol.GetAttributes().ToAttributeLinks( symbol )
+            };
+
+        public static CodeElementLink<ICodeElement> ToLink( this ISymbol symbol ) => CodeElementLink.FromSymbol(symbol);
+        
 
         public static Location? GetLocation( this ICodeElement codeElement )
             => codeElement switch

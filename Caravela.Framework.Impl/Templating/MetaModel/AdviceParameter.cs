@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICodeElement? ContainingElement => this._parameter.ContainingElement;
 
-        public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
+        public IAttributeList Attributes => this._parameter.Attributes;
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 

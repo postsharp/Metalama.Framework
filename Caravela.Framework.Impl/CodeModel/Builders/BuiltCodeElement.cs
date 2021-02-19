@@ -1,0 +1,43 @@
+using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Links;
+using System;
+using System.Linq;
+
+namespace Caravela.Framework.Impl.CodeModel.Builders
+{
+    internal abstract class BuiltCodeElement : ICodeElement, ICodeElementLink<ICodeElement>
+    {
+        protected BuiltCodeElement( CompilationModel compilation )
+        {
+            this.Compilation = compilation;
+        }
+
+        public CompilationModel Compilation { get; }
+        
+        public abstract CodeElementBuilder Builder { get; }
+
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
+            this.Builder.ToDisplayString( format, context );
+
+        public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
+
+        public ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Builder );
+
+        [Memo]
+        public IAttributeList Attributes =>
+            new AttributeList( this.Builder.Attributes.Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ), this.Compilation );
+
+        public CodeElementKind ElementKind => this.Builder.ElementKind;
+
+        ICompilation ICodeElement.Compilation => this.Compilation;
+
+        protected ICodeElement GetForCompilation( CompilationModel compilation )
+            => this.Compilation == compilation ? this : compilation.Factory.GetCodeElement( this.Builder );
+
+        ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation( compilation );
+
+        object? ICodeElementLink.LinkedObject => throw new NotImplementedException();
+    }
+}

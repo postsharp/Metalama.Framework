@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +10,7 @@ using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
+    internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation, IMemberLink<IMember>
     {
         protected Advice ParentAdvice { get; }
 
@@ -52,5 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // TODO: This is temporary.
         SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree =>
             ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+
+        IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
     }
 }

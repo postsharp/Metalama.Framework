@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
@@ -22,6 +21,7 @@ using Microsoft.CodeAnalysis.Formatting;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 using Microsoft.CodeAnalysis.Text;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -132,7 +132,7 @@ namespace Caravela.TestFramework.Templating
                 Invariant.Assert( templateMethod != null, "Cannot find the template method." );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
+                var caravelaCompilation = CompilationModel.CreateInitialInstance(compilationForInitialDiagnostics);
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );

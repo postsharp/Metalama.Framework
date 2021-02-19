@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder
+    internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder, ICodeElementLink<IGenericParameter>
     {
         private readonly IGenericParameter _template;
 
@@ -26,10 +27,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool HasNonNullableValueTypeConstraint { get; set; }
 
-        Code.TypeKind IType.TypeKind => Code.TypeKind.GenericParameter;
+        TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
-        // TODO: Here we have a design problem.
-        public ITypeFactory TypeFactory => throw new NotSupportedException();
+        ITypeFactory IType.TypeFactory => throw new NotSupportedException();
 
         public override ICodeElement? ContainingElement { get; }
 
@@ -46,6 +46,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        
+        // TODO: Implement compilation-consistent model.
+        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => compilation == this.Compilation ? this : throw new AssertionFailedException();
+
+        IGenericParameter ICodeElementLink<IGenericParameter>.GetForCompilation( CompilationModel compilation ) => (IGenericParameter) this.GetForCompilation( compilation );
     }
 }

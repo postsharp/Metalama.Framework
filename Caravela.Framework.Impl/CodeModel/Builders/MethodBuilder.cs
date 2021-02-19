@@ -4,7 +4,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,17 +16,17 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal, IMemberLink<IMethod>
     {
-        private readonly List<ParameterBuilder> _parameters = new List<ParameterBuilder>();
+        public ParameterBuilderList Parameters { get; } = new();
 
-        private readonly List<GenericParameterBuilder> _genericParameters = new List<GenericParameterBuilder>();
+        public GenericParameterBuilderList GenericParameters { get; } = new();
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue optionalValue = default )
         {
-            var parameter = new ParameterBuilder( this, this._parameters.Count, name, type, refKind );
+            var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
             parameter.DefaultValue = optionalValue;
-            this._parameters.Add( parameter );
+            this.Parameters.Add( parameter );
             return parameter;
         }
 
@@ -57,18 +58,17 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameter IMethod.ReturnParameter => this.ReturnParameter;
 
-        IReadOnlyList<IMethod> IMethodBase.LocalFunctions => this.LocalFunctions;
+        IMethodList IMethodBase.LocalFunctions => MethodList.Empty;
 
-        IReadOnlyList<IParameter> IMethodBase.Parameters => this._parameters;
+        IParameterList IMethodBase.Parameters => this.Parameters;
 
-        IReadOnlyList<IGenericParameter> IMethod.GenericParameters => this._genericParameters;
+        IGenericParameterList IMethod.GenericParameters => this.GenericParameters;
 
         IReadOnlyList<IType> IMethod.GenericArguments => ImmutableArray<IType>.Empty;
 
         bool IMethod.IsOpenGeneric => true;
 
-        public IReadOnlyList<IMethod> LocalFunctions => Array.Empty<IMethod>();
-
+        
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
 
@@ -94,7 +94,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
+        // TODO: Implement compilation-consistent model.
+        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => this;
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
@@ -103,8 +104,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
                     this.Name,
-                    this._parameters.Select( p => p.ToDeclarationSyntax() ),
-                    this._genericParameters.Select( p => p.Name ),
+                    this.Parameters.AsBuilderList.Select( p => p.ToDeclarationSyntax() ),
+                    this.GenericParameters.AsBuilderList.Select( p => p.Name ),
                     syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(),
                     this.ToDeclarationModifiers(),
@@ -132,5 +133,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             // TODO: implement.
             return Array.Empty<ISymbol>();
         }
+
+        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => throw new NotImplementedException();
     }
 }

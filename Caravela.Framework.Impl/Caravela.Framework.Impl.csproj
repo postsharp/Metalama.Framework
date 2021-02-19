@@ -93,6 +93,10 @@ namespace Caravela.Framework.Impl.CompileTime
     <EmbeddedResource Remove="CodeModel\Before\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="CodeModel\Source" />
+  </ItemGroup>
+
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
