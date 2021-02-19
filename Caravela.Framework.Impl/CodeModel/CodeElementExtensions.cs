@@ -21,11 +21,17 @@ namespace Caravela.Framework.Impl.CodeModel
         public static CodeElementKind GetCodeElementKind( this ISymbol symbol )
             => symbol switch
             {
-                IMethodSymbol constructor =>
-                    constructor.MethodKind == MethodKind.Constructor || constructor.MethodKind == MethodKind.StaticConstructor
-                        ? CodeElementKind.Constructor
-                        : CodeElementKind.Method,
-                _ => throw new NotImplementedException()
+                INamespaceSymbol => CodeElementKind.Compilation,
+                INamedTypeSymbol => CodeElementKind.Type,
+                IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor ? CodeElementKind.Constructor : CodeElementKind.Method,
+                IPropertySymbol => CodeElementKind.Property,
+                IFieldSymbol => CodeElementKind.Field,
+                ITypeParameterSymbol => CodeElementKind.GenericParameter,
+                IAssemblySymbol => CodeElementKind.Compilation,
+                IParameterSymbol => CodeElementKind.Parameter,
+                IEventSymbol => CodeElementKind.Event,
+                ITypeSymbol => CodeElementKind.None,
+                _ => throw new ArgumentException( nameof( symbol ), $"Unexpected symbol: {symbol.GetType().Name}." )
 
             };
 

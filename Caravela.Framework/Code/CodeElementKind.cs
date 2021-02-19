@@ -9,6 +9,11 @@ namespace Caravela.Framework.Code
     public enum CodeElementKind
     {
         /// <summary>
+        /// Not a valid code element represented by <see cref="ICodeElement"/>.
+        /// </summary>
+        None,
+        
+        /// <summary>
         /// <see cref="ICompilation"/>.
         /// </summary>
         Compilation,
@@ -61,6 +66,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// <see cref="IConstructor"/>
         /// </summary>
-        Constructor
+        Constructor,
+ 
     }
 }
