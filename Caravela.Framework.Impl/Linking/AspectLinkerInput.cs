@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal record AdviceLinkerInput(
+    internal record AspectLinkerInput(
         CSharpCompilation Compilation,
         CompilationModel CompilationModel,
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations,

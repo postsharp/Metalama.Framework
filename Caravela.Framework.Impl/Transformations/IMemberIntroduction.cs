@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// Gets the full syntax of introduced members including the body.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<IntroducedMember> GetIntroducedMembers();
+        IEnumerable<IntroducedMember> GetIntroducedMembers( IntroductionContext introductionContext );
 
         /// <summary>
         /// Gets the node after which the new members should be inserted. If <see cref="InsertPositionNode"/> is set to a <see cref="TypeDeclarationSyntax "/>,

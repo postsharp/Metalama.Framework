@@ -2,21 +2,21 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.MetaModel
+namespace Caravela.Framework.Impl.Linking
 {
-    internal class ProceedInvokeMethod : IProceedImpl
+    internal class LinkerCallProceedImpl : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
         private readonly AspectPartId? _aspectPartId;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
+        public LinkerCallProceedImpl( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
         {
             this._originalDeclaration = originalDeclaration;
             this._aspectPartId = aspectPartId;

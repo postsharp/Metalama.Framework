@@ -38,7 +38,7 @@ class T
             var introduceMethodTransformation = CreateFakeMethodIntroduction(aspectPart.ToAspectPartId(), targetType, introducedMethodSyntax);
             compilationModel = new CompilationModel( compilationModel, new[] { introduceMethodTransformation } );
 
-            var input = new AdviceLinkerInput( compilationModel.RoslynCompilation, compilationModel, Array.Empty<INonObservableTransformation>(), new[] { aspectPart } );
+            var input = new AspectLinkerInput( compilationModel.RoslynCompilation, compilationModel, Array.Empty<INonObservableTransformation>(), new[] { aspectPart } );
             var linker = new AspectLinker( input );
             var result = linker.ToResult();
 

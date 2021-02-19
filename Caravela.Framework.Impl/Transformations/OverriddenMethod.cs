@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Transformations
             :
             ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public IEnumerable<IntroducedMember> GetIntroducedMembers()
+        public IEnumerable<IntroducedMember> GetIntroducedMembers( IntroductionContext context )
         {
 
             // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Transformations
                 this.Advice.Aspect.Aspect,
                 this.OverriddenDeclaration,
                 this.OverriddenDeclaration.Compilation,
-                new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ));
+                new LinkerCallProceedImpl( this.OverriddenDeclaration, this.Advice.AspectPartId ));
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             
             var newMethodBody = new TemplateDriver(

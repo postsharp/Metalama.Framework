@@ -18,14 +18,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         private const string IntroducedSyntaxAnnotationId = "AspectLinker_IntroducedSyntax";
 
-        private readonly AdviceLinkerInput _input;
+        private readonly AspectLinkerInput _input;
 
-        public AspectLinker( AdviceLinkerInput input )
+        public AspectLinker( AspectLinkerInput input )
         {
             this._input = input;
         }
 
-        public AdviceLinkerResult ToResult()
+        public AspectLinkerResult ToResult()
         {
             UserDiagnosticList diagnostics = new();
             using var diagnosticContext = DiagnosticContext.WithSink( diagnostics );
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( resultingCompilation, diagnostics );
+            return new AspectLinkerResult( resultingCompilation, diagnostics );
 
             ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
             {

@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, AspectPartResult aspectPartResult )
         {
-            var linker = new AspectLinker( new AdviceLinkerInput( input.Compilation, aspectPartResult.Compilation, aspectPartResult.Transformations, input.AspectParts ) );
+            var linker = new AspectLinker( new AspectLinkerInput( input.Compilation, aspectPartResult.Compilation, aspectPartResult.Transformations, input.AspectParts ) );
             var linkerResult = linker.ToResult();
 
             return new PipelineStageResult(
