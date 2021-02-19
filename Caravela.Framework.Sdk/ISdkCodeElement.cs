@@ -1,5 +1,6 @@
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Sdk
 {
@@ -9,13 +10,16 @@ namespace Caravela.Framework.Sdk
     public interface ISdkCodeElement : ICodeElement
     {
         /// <summary>
-        /// Determines if the current code element stems from source code. Returns <c>false</c> if it was introduced by an aspect.
+        /// Determines if the current code element has been introduced by an aspect, in which case the <see cref="Symbol"/>
+        /// property throws <see cref="NotSupportedException"/>
         /// </summary>
-        bool IsSourceArtefact { get; }
+        bool IsIntroduced { get; }
         
         /// <summary>
-        /// Gets the Roslyn <see cref="ISymbol"/> for the current code element, or <c>null</c> if the code element was introduced by an aspect.
+        /// Gets the Roslyn <see cref="ISymbol"/> for the current code element, or throws <see cref="NotSupportedException"/>
+        /// if <see cref="IsIntroduced"/> is <c>true</c>. Note that the symbol returned can be linked to a different
+        /// Roslyn compilation than the one provided to the aspect weaver.
         /// </summary>
-        ISymbol? Symbol { get; } 
+        ISymbol Symbol { get; } 
     }
 }

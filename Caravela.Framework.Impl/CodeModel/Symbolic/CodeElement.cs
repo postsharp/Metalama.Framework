@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         ICompilation ICodeElement.Compilation => this.Compilation;
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         [Memo]
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
@@ -32,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract CodeElementKind ElementKind { get; }
 
-        bool ISdkCodeElement.IsSourceArtefact => true;
+        bool ISdkCodeElement.IsIntroduced => false;
 
         public abstract ISymbol Symbol { get; }
 

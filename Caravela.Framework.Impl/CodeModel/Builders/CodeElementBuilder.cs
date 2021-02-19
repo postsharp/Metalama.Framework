@@ -8,6 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class CodeElementBuilder : ICodeElementBuilder
     {
+        public CodeOrigin Origin => CodeOrigin.Aspect;
 
         public abstract ICodeElement? ContainingElement { get; }
 
