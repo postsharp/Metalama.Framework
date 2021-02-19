@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Transformations
         {
             if (codeElement is IMethod imethod)
             {
+                // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
                 var tokens = new List<SyntaxToken>();
 
                 switch ( imethod.Accessibility )
@@ -45,6 +46,16 @@ namespace Caravela.Framework.Impl.Transformations
                 if ( imethod.IsStatic )
                 {
                     tokens.Add( Token( SyntaxKind.StaticKeyword ) );
+                }
+
+                if ( imethod.IsAbstract )
+                {
+                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                }
+
+                if (imethod.IsVirtual)
+                {
+                    tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
                 }
 
                 return TokenList( tokens );

@@ -28,6 +28,10 @@ namespace Caravela.Framework.Impl.Transformations
 
         public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
         {
+            Invariant.Assert( advice != null, $"{nameof( advice )} should not be null." );
+            Invariant.Assert( overriddenDeclaration != null, $"{nameof( overriddenDeclaration )} should not be null." );
+            Invariant.Assert( templateMethod != null, $"{nameof( templateMethod )} should not be null." );
+
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
             this.TemplateMethod = templateMethod;
@@ -85,23 +89,21 @@ namespace Caravela.Framework.Impl.Transformations
             return overrides;
         }
 
-        public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax()).First();
-
-        private class ProceedToNext : IProceedImpl
+        public MemberDeclarationSyntax InsertPositionNode
         {
-            public StatementSyntax CreateAssignStatement( string returnValueLocalName )
+            get
             {
-                throw new NotImplementedException();
-            }
+                // TODO: Select a good syntax reference if there are multiple (partial class, partial method).
+                var methodSymbol = (this.OverriddenDeclaration as Method)?.Symbol;
 
-            public StatementSyntax CreateReturnStatement()
-            {
-                throw new NotImplementedException();
-            }
+                if (methodSymbol != null)
+                {
+                    return methodSymbol.DeclaringSyntaxReferences.Select( x => (MethodDeclarationSyntax) x.GetSyntax() ).First();
+                }
 
-            public TypeSyntax CreateTypeSyntax()
-            {
-                throw new NotImplementedException();
+                var typeSymbol = ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol;
+
+                return typeSymbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).First();
             }
         }
     }
