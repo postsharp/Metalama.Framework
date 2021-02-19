@@ -27,8 +27,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            UserDiagnosticList diagnostics = new();
-            using var diagnosticContext = DiagnosticContext.WithSink( diagnostics );
+            DiagnosticList diagnostics = new(null);
             
             var intermediateCompilation = this._input.Compilation;
 
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var oldSyntaxTree = syntaxTreeGroup.Key;
 
-                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new( syntaxTreeGroup.Value );
+                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new( syntaxTreeGroup.Value, diagnostics );
 
                 var newRoot = addIntroducedElementsRewriter.Visit( oldSyntaxTree.GetRoot() );
 
@@ -134,7 +133,7 @@ namespace Caravela.Framework.Impl.Linking
                    g.Value
                    .OfType<IOverriddenElement>()
                    .OfType<IMemberIntroduction>()
-                   .SelectMany(mi => mi.GetIntroducedMembers())
+                   .SelectMany(mi => mi.GetIntroducedMembers( new MemberIntroductionContext(diagnostics) ))
                    .Select(x => ((IOverriddenElement)x.Introductor).OverriddenElement switch
                    {
                        Method method => ( Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
@@ -156,7 +155,7 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( resultingCompilation, diagnostics );
+            return new AdviceLinkerResult( resultingCompilation, diagnostics.Diagnostics );
 
             ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
             {

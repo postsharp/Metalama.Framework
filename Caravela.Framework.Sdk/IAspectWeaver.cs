@@ -21,7 +21,8 @@ namespace Caravela.Framework.Sdk
 
         public CSharpCompilation Compilation { get; }
 
-        public IDiagnosticSink Diagnostics { get; }
+
+        private readonly Action<Diagnostic> _addDiagnostic;
 
         // TODO: suport reading existing resources
         private readonly Action<ResourceDescription> _addManifestResource;
@@ -32,19 +33,18 @@ namespace Caravela.Framework.Sdk
             INamedType aspectType,
             IReadOnlyList<AspectInstance> aspectInstances,
             CSharpCompilation compilation,
-            IDiagnosticSink diagnostics,
+            Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )
         {
             this.AspectType = aspectType;
             this.AspectInstances = aspectInstances;
             this.Compilation = compilation;
-            this.Diagnostics = diagnostics;
+            this._addDiagnostic = addDiagnostic;
             this._addManifestResource = addManifestResource;
         }
+
+        public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );
+
     }
 
-    public interface IDiagnosticSink
-    {
-        void AddDiagnostic( Diagnostic diagnostic );
-    }
 }

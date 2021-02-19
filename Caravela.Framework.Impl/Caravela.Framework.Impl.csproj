@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
 
     <ItemGroup>
-      <Compile Include="CompileTime/PackageVersions.g.cs"/>
+      <Compile Include="CompileTime/PackageVersions.g.cs" />
     </ItemGroup>
   </Target>
 

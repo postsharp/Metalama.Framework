@@ -96,7 +96,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers()
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
 

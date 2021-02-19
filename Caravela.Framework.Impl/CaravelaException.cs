@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -23,7 +25,7 @@ namespace Caravela.Framework.Impl
         {
         }
 
-        public InvalidUserCodeException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( message )
+        public InvalidUserCodeException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;
         }
@@ -33,5 +35,9 @@ namespace Caravela.Framework.Impl
         {
             this.Diagnostics = ImmutableArray.Create( diagnostic );
         }
+        
+        private static string GetMessage( string message, IReadOnlyList<Diagnostic> diagnostics )
+            => message + Environment.NewLine + string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
+
     }
 }

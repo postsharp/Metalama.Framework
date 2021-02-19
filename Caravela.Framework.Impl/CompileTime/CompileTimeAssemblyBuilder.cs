@@ -86,7 +86,9 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !produceCompileTimeCodeRewriter.Success )
             {
                 // We don't want to continue with the control flow if we have a user error here, so we throw an exception.
-                throw new InvalidUserCodeException( "Cannot create the compile-time assembly.", produceCompileTimeCodeRewriter.Diagnostics.ToImmutableArray() );
+                throw new InvalidUserCodeException( 
+                    "Cannot create the compile-time assembly.", 
+                    produceCompileTimeCodeRewriter.Diagnostics.ToImmutableArray() );
             }
 
             if ( !produceCompileTimeCodeRewriter.FoundCompileTimeCode )
