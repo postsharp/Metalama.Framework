@@ -2,9 +2,10 @@
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
         <CompilerVisibleProperty Include="DebugCaravela" />
-        <CompilerVisibleProperty Include="CaravelaDebugTransformedCode" />
-        <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
         <CompilerVisibleProperty Include="CaravelaCrashReportDirectory" />
+        <CompilerVisibleProperty Include="CaravelaCompileTimeProjectDirectory" />
     </ItemGroup>
+    
+    <!-- More properties are already exported by Caravela.Compiler and don't need to be exported a second time. -->
 
 </Project>
