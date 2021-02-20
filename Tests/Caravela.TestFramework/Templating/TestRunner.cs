@@ -129,7 +129,7 @@ namespace Caravela.TestFramework.Templating
                 var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                Invariant.Assert( templateMethod != null, "Cannot find the template method." );
+                Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
                 var caravelaCompilation = CompilationModel.CreateInitialInstance(compilationForInitialDiagnostics);

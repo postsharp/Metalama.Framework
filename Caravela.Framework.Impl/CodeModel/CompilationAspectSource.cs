@@ -18,6 +18,15 @@ namespace Caravela.Framework.Impl.CodeModel
             this._loader = loader;
         }
 
+        public IEnumerable<INamedType> AspectTypes
+        {
+            get
+            {
+                var aspectType = this._compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
+                return this._compilation.GetAllAttributeTypes().Where( t => t.Is(aspectType) && t.TypeKind == TypeKind.Class );
+            }
+        }
+
         public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType ) =>
             this._compilation.GetAllAttributesOfType( aspectType ).Select( attribute =>
             {

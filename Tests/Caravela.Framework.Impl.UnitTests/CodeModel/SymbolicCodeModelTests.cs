@@ -45,7 +45,7 @@ namespace NS
             var c1 = types[0];
             Assert.Equal( "C", c1.Name );
             Assert.Equal( "C", c1.FullName );
-            Assert.Null( c1.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c1.ContainingElement );
 
             var d = c1.NestedTypes.Single();
             Assert.Equal( "D", d.Name );
@@ -55,7 +55,7 @@ namespace NS
             var c2 = types[1];
             Assert.Equal( "C", c2.Name );
             Assert.Equal( "NS.C", c2.FullName );
-            Assert.Null( c2.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c2.ContainingElement );
         }
 
         [Fact]

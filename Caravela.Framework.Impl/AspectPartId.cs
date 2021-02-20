@@ -1,71 +1,65 @@
 ﻿using Caravela.Framework.Code;
+using Caravela.Framework.Impl.AspectOrdering;
 using System;
 
 namespace Caravela.Framework.Impl
 {
-    internal readonly struct  AspectSliceId : IEquatable<AspectSliceId>
+    internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {
-        public AspectPartId AspectPart { get; }
+        private static readonly char[] separators = { ':'};
 
-        public int Depth { get; }
+        public static bool operator ==(AspectLayerId left, AspectLayerId right) => left.Equals(right);
 
-        public AspectSliceId( AspectPartId aspectPart, int depth )
+        public static bool operator !=(AspectLayerId left, AspectLayerId right) => !left.Equals(right);
+
+        public AspectLayerId( INamedType aspectType, string? layerName = null) : this( aspectType.FullName, layerName )
         {
-            this.AspectPart = aspectPart;
-            this.Depth = depth;
-        }
-
-        public bool Equals(AspectSliceId other) => this.AspectPart.Equals(other.AspectPart) && this.Depth == other.Depth;
-
-        public override bool Equals(object? obj) => obj is AspectSliceId other && Equals(other);
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (this.AspectPart.GetHashCode() * 397) ^ this.Depth;
-            }
-        }
-
-        public static bool operator ==(AspectSliceId left, AspectSliceId right) => left.Equals(right);
-
-        public static bool operator !=(AspectSliceId left, AspectSliceId right) => !left.Equals(right);
-    }
-    
-    internal class AspectPartId : IEquatable<AspectPartId>
-    {
-        public AspectPartId( INamedType aspectType, string? partName ) : this( aspectType.FullName, partName )
-        {
-            
         }
         
-        public AspectPartId( string aspectName, string? partName )
+        public AspectLayerId( AspectType aspectType, string? layerName = null) : this( aspectType.Name, layerName )
+        {
+        }
+        
+        public AspectLayerId( string aspectName, string? layerName = null)
         {
             this.AspectName = aspectName;
-            this.PartName = partName;
+            this.LayerName = layerName;
         }
         
-        public bool IsDefault => this.PartName == null;
-        
+        public bool IsDefault => this.LayerName == null;
         public string AspectName { get; }
-        public  string? PartName { get; }
+        public  string? LayerName { get; }
         
-        public string FullName => this.PartName == null ? this.AspectName : this.AspectName + ":" + this.PartName;
+        public string FullName => this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
+        public override string ToString() => this.FullName;
 
-
-        public bool Equals(AspectPartId? other)
+        public static AspectLayerId FromString( string s )
         {
-            if ( ReferenceEquals(other, null) )
+            var parts = s.Split( separators );
+            if ( parts.Length == 1 )
             {
-                return false;
+                return new AspectLayerId( parts[0] );
             }
-
-            return StringComparer.Ordinal.Equals( this.AspectName, other.AspectName ) && StringComparer.Ordinal.Equals( this.PartName, other.PartName );
+            else
+            {
+                return new AspectLayerId( parts[0],  parts.Length == 2 ? parts[1] : null );
+            }
         }
 
-        public override int GetHashCode()
-        {
-            return StringComparer.Ordinal.GetHashCode( this.AspectName ) ^ StringComparer.Ordinal.GetHashCode( this.PartName );
-        }
+        public bool Equals(AspectLayerId other) => 
+            StringComparer.Ordinal.Equals( this.AspectName, other.AspectName ) && StringComparer.Ordinal.Equals( this.LayerName, other.LayerName );
+
+        public override int GetHashCode() => 
+            StringComparer.Ordinal.GetHashCode( this.AspectName ) ^ ( this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ) );
+
+        public bool Equals( AspectLayer other ) => this.Equals( other.Id );
+
+        public override bool Equals(object obj) => 
+            obj switch
+            {
+                AspectLayerId id => this.Equals(id),
+                AspectLayer layer => this.Equals( layer ),
+                _ => false
+            };
     }
 }

@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( existingScope != SymbolDeclarationScope.Default )
             {
-                Invariant.Assert( existingScope == scope, "the scopes must be equal" );
+                Invariant.Assert( existingScope == scope );
                 return node;
             }
 

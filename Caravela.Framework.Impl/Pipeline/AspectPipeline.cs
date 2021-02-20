@@ -12,6 +12,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -24,10 +25,10 @@ namespace Caravela.Framework.Impl.Pipeline
         protected ServiceProvider ServiceProvider { get; } = new ServiceProvider();
         
         /// <summary>
-        /// Gets the list of <see cref="AspectPart"/> in the pipeline. This list is fixed for the whole pipeline.
+        /// Gets the list of <see cref="AspectLayerId"/> in the pipeline. This list is fixed for the whole pipeline.
         /// It is based on the aspects found in the project and its dependencies.
         /// </summary>
-        private IReadOnlyList<OrderedAspectPart> AspectParts { get; set; }
+        private IReadOnlyList<OrderedAspectLayer> AspectLayers { get; set; }
 
         /// <summary>
         /// Gets the list of stages of the pipeline. A stage is a group of transformations that do not require (within the group)
@@ -137,38 +138,38 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( at => aspectTypeFactory.GetAspectType( at ) );
             
             // Get aspect parts and sort them.
-            var unsortedAspectParts = aspectTypes
-                .SelectMany( at => at.UnorderedParts )
+            var unsortedAspectLayers = aspectTypes
+                .SelectMany( at => at.UnorderedLayers )
                 .ToImmutableArray();
 
             var aspectOrderSources = new[] {new AttributeAspectOrderingSource( compilation, this.CompileTimeAssemblyLoader )};
 
-            if ( !AspectPartSorter.TrySort( unsortedAspectParts, aspectOrderSources, this.Context.ReportDiagnostic, out var sortedAspectParts ) )
+            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, this.Context.ReportDiagnostic, out var sortedAspectLayers ) )
             {
                 pipelineStageResult = null;
                 return false;
             }
             
-            this.AspectParts = sortedAspectParts
+            this.AspectLayers = sortedAspectLayers
                 .ToImmutableArray();
 
             // Update the aspects back with an ordered list of parts (not sure why we would need that).
             foreach ( var aspectType in aspectTypes )
             {
-                aspectType.UpdateFromOrderedParts( sortedAspectParts );
+                aspectType.UpdateFromOrderedParts( sortedAspectLayers );
             }
 
-            this.Stages = this.AspectParts
+            this.Stages = this.AspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compilation, this.CompileTimeAssemblyLoader ) )
                 .ToImmutableArray();
             
             
-            pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this.AspectParts );
+            pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this.AspectLayers );
 
             foreach ( var stage in this.Stages )
             {
-                pipelineStageResult = stage.ToResult( pipelineStageResult );
+                pipelineStageResult = stage.Execute( pipelineStageResult );
             }
 
             var hasError = false;
@@ -185,7 +186,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var iAspect = compilation.Factory.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) );
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) && !t.IsAbstract);
         }
 
         private static object GetGroupingKey( IAspectDriver driver ) =>
@@ -207,9 +208,9 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="parts"></param>
         /// <param name="compileTimeAssemblyLoader"></param>
         /// <returns></returns>
-        protected abstract HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
+        protected abstract HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
 
-        private PipelineStage CreateStage( object groupKey, IReadOnlyList<AspectPart> parts, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        private PipelineStage CreateStage( object groupKey, IReadOnlyList<OrderedAspectLayer> parts, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch ( groupKey )
             {

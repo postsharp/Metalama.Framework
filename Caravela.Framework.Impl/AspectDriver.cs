@@ -58,7 +58,9 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new( ImmutableList.Create( diagnostic ),
+                return new(  
+                    false,
+                    ImmutableList.Create( diagnostic ),
                     ImmutableList.Create<IAdvice>(),
                     ImmutableList.Create<IAspectSource>() );
             }

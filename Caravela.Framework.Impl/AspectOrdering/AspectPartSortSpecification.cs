@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
         public AspectOrderSpecification( AspectOrderAttribute attribute, Location location )
         {
-            this.OrderedParts = attribute.OrderedAspectParts;
+            this.OrderedParts = attribute.OrderedAspectLayers;
             this.DiagnosticLocation = location;
         }
         

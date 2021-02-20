@@ -47,6 +47,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
+        public bool Equals( IType other ) => this._typeSymbol.Equals( ((ITypeInternal) other).TypeSymbol );
+
         public override string ToString() => this._typeSymbol.ToString();
     }
 }

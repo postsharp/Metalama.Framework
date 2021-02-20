@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl
 {
@@ -9,36 +11,41 @@ namespace Caravela.Framework.Impl
     /// </summary>
     internal static class Invariant
     {
-
         /// <summary>
         /// Checks that a given condition is true and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-        /// <param name="description">An error that is typically constructed as "X must be Y".</param>
-        public static void Assert( [DoesNotReturnIf( false )] bool condition, string description )
+        [Conditional("DEBUG")]
+        public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
             if ( !condition )
             {
-                throw new AssertionFailedException( description );
+                throw new AssertionFailedException( );
             }
         }
 
-        public static void Implies( bool premise, bool conclusion, string description )
+        [Conditional("DEBUG")]
+        public static void Implies( bool premise, bool conclusion )
         {
             if ( premise && !conclusion )
             {
-                throw new AssertionFailedException( description );
+                throw new AssertionFailedException( );
             }
         }
 
 
-        public static T Assert<T>( this T obj, Predicate<T> predicate, string message )
+#if !DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static T Assert<T>( this T obj, Predicate<T> predicate )
             where T : class
         {
+#if DEBUG
             if ( !predicate(obj) )
             {
-                throw new AssertionFailedException( message );
+                throw new AssertionFailedException(  );
             }
+#endif
 
             return obj;
         }
@@ -50,20 +57,29 @@ namespace Caravela.Framework.Impl
         /// <typeparam name="T"></typeparam>
         /// <param name="obj"></param>
         /// <returns></returns>
+#if !DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif 
         public static T AssertNotNull<T>( this T? obj )
             where T : class
         {
+#if DEBUG            
             if ( obj == null )
             {
                 throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
             }
+#endif
             
             return obj;
         }
 
+#if !DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif         
         public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
             where T : class
         {
+#if DEBUG
             if ( items == null )
             {
                 throw new AssertionFailedException( $"The enumeration must no be not null." );
@@ -79,6 +95,7 @@ namespace Caravela.Framework.Impl
 
                 i++;
             }
+#endif
             
             return items!;
             

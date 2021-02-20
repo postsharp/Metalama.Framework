@@ -1,34 +1,6 @@
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// Gives access to configuration options (typically values pulled from MSBuild). The
-    /// typical implementation is <see cref="AnalyzerBuildOptionsSource"/>, but other implementations can be used for testing.
-    /// </summary>
-    public interface IBuildOptionsSource
-    {
-        /// <summary>
-        /// Gets a configuration value.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        bool TryGetValue( string name, out string? value );
-    }
-
-    public interface IBuildOptions
-    {
-         bool AttachDebugger { get; }
-         bool MapPdbToTransformedCode { get; }
-         
-         /// <summary>
-         /// Gets the directory in which the code for the compile-time assembly should be stored, or a null or empty
-         /// string to mean that the generated code should not be stored.
-         /// </summary>
-         string? CompileTimeProjectDirectory { get; }
-         
-    }
-
-    /// <summary>
     /// Default implementation of <see cref="IBuildOptions"/>, based on a <see cref="IBuildOptionsSource"/>
     /// reading options passed by MSBuild.
     /// </summary>

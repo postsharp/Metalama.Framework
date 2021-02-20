@@ -12,19 +12,19 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectType
     {
-        private IReadOnlyList<OrderedAspectPart>? _parts;
+        private IReadOnlyList<OrderedAspectLayer>? _parts;
         public string Name => this.Type.FullName;
 
         public IAspectDriver AspectDriver { get; }
 
-        public IReadOnlyList<AspectPart> UnorderedParts { get; }
+        public IReadOnlyList<AspectLayer> UnorderedLayers { get; }
 
-        public IReadOnlyList<OrderedAspectPart> Parts 
+        public IReadOnlyList<OrderedAspectLayer> Parts 
             => this._parts ?? throw new InvalidOperationException("Method UpdateFromOrderedParts has not been called.");
 
-        internal void UpdateFromOrderedParts( IReadOnlyList<OrderedAspectPart> allOrderedParts )
+        internal void UpdateFromOrderedParts( IReadOnlyList<OrderedAspectLayer> allOrderedParts )
         {
-            this._parts = allOrderedParts.Where( p => p.AspectType == this ).ToImmutableArray();
+            this._parts = allOrderedParts.Where( p => p.AspectLayerId.AspectName == this.Name ).ToImmutableArray();
         }
 
         public INamedType Type { get; }
@@ -35,22 +35,22 @@ namespace Caravela.Framework.Impl
             this.AspectDriver = aspectDriver;
 
 
-            var partArrayBuilder = ImmutableArray.CreateBuilder<AspectPart>();
+            var partArrayBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
             
             // Add the default part.
-            partArrayBuilder.Add( new AspectPart( this ) );
+            partArrayBuilder.Add( new AspectLayer( this, null ) );
 
-            // Add the parts defined in [ProvidesAspectParts].
-            var aspectPartsAttributeType = aspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ProvidesAspectPartsAttribute) );
-            var aspectPartsAttributeData = aspectType.Attributes.Where( a => a.Type.Is( aspectPartsAttributeType ) ).SingleOrDefault();
+            // Add the parts defined in [ProvidesAspectLayers].
+            var aspectLayersAttributeType = aspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ProvidesAspectLayersAttribute) );
+            var aspectLayersAttributeData = aspectType.Attributes.Where( a => a.Type.Is( aspectLayersAttributeType ) ).SingleOrDefault();
 
-            if ( aspectPartsAttributeData != null )
+            if ( aspectLayersAttributeData != null )
             {
-                var aspectPartsAttribute = (ProvidesAspectPartsAttribute) compileTimeAssemblyLoader.CreateAttributeInstance( aspectPartsAttributeData );
-                partArrayBuilder.AddRange( aspectPartsAttribute.Parts.Select( partName => new AspectPart( this, partName ) ) );
+                var aspectLayersAttribute = (ProvidesAspectLayersAttribute) compileTimeAssemblyLoader.CreateAttributeInstance( aspectLayersAttributeData );
+                partArrayBuilder.AddRange( aspectLayersAttribute.Parts.Select( partName => new AspectLayer( this, partName ) ) );
             }
 
-            this.UnorderedParts = partArrayBuilder.ToImmutable();
+            this.UnorderedLayers = partArrayBuilder.ToImmutable();
         }
     }
 }

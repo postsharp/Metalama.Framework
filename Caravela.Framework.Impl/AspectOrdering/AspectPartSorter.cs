@@ -10,39 +10,39 @@ namespace Caravela.Framework.Impl.AspectOrdering
     /// <summary>
     /// Compares and sorts dependency objects.
     /// </summary>
-    internal static class AspectPartSorter
+    internal static class AspectLayerSorter
     {
         public static bool TrySort(
-            ImmutableArray<AspectPart> unsortedAspectParts,
+            ImmutableArray<AspectLayer> unsortedAspectLayers,
             IReadOnlyList<IAspectOrderingSource> aspectOrderingSources,
             Action<Diagnostic> reportDiagnostic,
-            out ImmutableArray<OrderedAspectPart> sortedAspectParts )
+            out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
             => TrySort(
-                unsortedAspectParts, 
+                unsortedAspectLayers, 
                 aspectOrderingSources.SelectMany( s => s.GetAspectOrderSpecification() ).ToImmutableArray(),
                 reportDiagnostic, 
-                out sortedAspectParts );
+                out sortedAspectLayers );
         
         public static bool TrySort(
-            ImmutableArray<AspectPart> unsortedAspectParts,
+            ImmutableArray<AspectLayer> unsortedAspectLayers,
             IReadOnlyList<AspectOrderSpecification> relationships, 
             Action<Diagnostic> reportDiagnostic,
-            out ImmutableArray<OrderedAspectPart> sortedAspectParts )
+            out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         {
             // Build a graph of dependencies between unorderedTransformations.
-            var n = unsortedAspectParts.Length;
+            var n = unsortedAspectLayers.Length;
 
             Dictionary<string, int> partNameToIndexMapping =
-                unsortedAspectParts
-                    .Select((t, i) => (t.FullName, Index: i))
+                unsortedAspectLayers
+                    .Select((t, i) => (t.Id.FullName, Index: i))
                     .ToDictionary(x => x.FullName!, x => x.Index);
             
             ImmutableMultiValueDictionary<string, int> aspectNameToIndicesMapping = 
-                unsortedAspectParts
-                    .Select((t, i) => ( AspectName: t.AspectType.Name, Index: i))
+                unsortedAspectLayers
+                    .Select((t, i) => ( AspectName: t.AspectName, Index: i))
                     .ToMultiValueDictionary( p => p.AspectName, p => p.Index );
 
-            var aspectPartNameToLocationsMappingBuilder = ImmutableMultiValueDictionary<string, AspectOrderSpecification>.CreateBuilder();
+            var aspectLayerNameToLocationsMappingBuilder = ImmutableMultiValueDictionary<string, AspectOrderSpecification>.CreateBuilder();
 
 
             Graph graph = new Graph(n);
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         if (!previousIndices.IsEmpty)
                         {
                             // Index the relationship so we can later resolve locations.
-                            aspectPartNameToLocationsMappingBuilder.AddRange( currentIndices, i => unsortedAspectParts[i].FullName, i => relationship );
+                            aspectLayerNameToLocationsMappingBuilder.AddRange( currentIndices, i => unsortedAspectLayers[i].Id.FullName, i => relationship );
                             
                             // Add edges to previous nodes.
                             foreach ( var previousIndex in previousIndices )
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 }
             }
 
-            var aspectPartNameToLocationsMapping = aspectPartNameToLocationsMappingBuilder.ToImmutable();
+            var aspectLayerNameToLocationsMapping = aspectLayerNameToLocationsMappingBuilder.ToImmutable();
 
             // Perform a breadth-first search on the graph.
             int[] distances = graph.GetInitialVector();
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             if (cycle >= 0)
             {
                 // Build a string containing the unorderedTransformations of the cycle.
-                Stack<int> cycleStack = new Stack<int>(unsortedAspectParts.Length);
+                Stack<int> cycleStack = new Stack<int>(unsortedAspectLayers.Length);
 
                 var cursor = cycle;
                 do
@@ -146,9 +146,9 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 }
                 while (cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != AbstractGraph.NotDiscovered);
 
-                var cycleNodes = cycleStack.Select(cursor => unsortedAspectParts[cursor].FullName);
+                var cycleNodes = cycleStack.Select(cursor => unsortedAspectLayers[cursor].Id.FullName);
                 var cycleLocations = cycleNodes
-                    .SelectMany( c => aspectPartNameToLocationsMapping[c] )
+                    .SelectMany( c => aspectLayerNameToLocationsMapping[c] )
                     .Select( s => s.DiagnosticLocation )
                     .Where( l => l != null )
                     .GroupBy( l => l )
@@ -181,14 +181,14 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             // Build the ordered list of aspects and assign the distance.
             // Note that we don't detect cycles because some aspect types that are present in the compilation may actually be ununsed.
-            var sortedAspectPartsBuilder = ImmutableArray.CreateBuilder<OrderedAspectPart>(n);
+            var sortedAspectLayersBuilder = ImmutableArray.CreateBuilder<OrderedAspectLayer>(n);
             for (var i = 0; i < n; i++)
             {
                 var order = distances[sortedIndexes[i]];
-                sortedAspectPartsBuilder.Add( new OrderedAspectPart( order, unsortedAspectParts[sortedIndexes[i]]) );
+                sortedAspectLayersBuilder.Add( new OrderedAspectLayer( order, unsortedAspectLayers[sortedIndexes[i]]) );
             }
 
-            sortedAspectParts = sortedAspectPartsBuilder.ToImmutable();
+            sortedAspectLayers = sortedAspectLayersBuilder.ToImmutable();
 
             return true;
 

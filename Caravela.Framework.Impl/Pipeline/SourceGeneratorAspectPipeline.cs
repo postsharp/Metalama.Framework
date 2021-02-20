@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Caravela.Framework.Impl.AspectOrdering;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.CompileTime;
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         
         /// <inheritdoc/>
-        protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this );
     }
 }

@@ -22,7 +22,7 @@ namespace Caravela.Framework.Advices
 
         /// <summary>
         /// Gets or sets the aspect part to which the advice belongs, or <c>null</c> if it belongs to the default part.
-        /// Aspect parts must be declared using the <see cref="ProvidesAspectPartsAttribute"/> custom attribute.
+        /// Aspect parts must be declared using the <see cref="ProvidesAspectLayersAttribute"/> custom attribute.
         /// </summary>
         public string? PartName { get; set; }
     }

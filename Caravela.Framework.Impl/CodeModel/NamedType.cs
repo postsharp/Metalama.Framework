@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
         {
-            INamespaceSymbol => null,
+            INamespaceSymbol => this.Compilation,
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
             _ => throw new NotImplementedException()
         };
@@ -160,6 +160,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         INamedType ICodeElementLink<INamedType>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<INamedType>(compilation);
 
+        public bool Equals( IType other ) => this.TypeSymbol.Equals( ((ITypeInternal) other).TypeSymbol );
+        
         public override string ToString() => this.TypeSymbol.ToString();
     }
 }

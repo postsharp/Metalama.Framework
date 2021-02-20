@@ -31,15 +31,20 @@ namespace Caravela.Framework.Impl
             this._adviceFactory = adviceFactory;
         }
 
-        internal AspectInstanceResult ToResult() =>
-            this.ErrorCount == 0 && !this._skipped
+        internal AspectInstanceResult ToResult()
+        {
+            bool success = this.ErrorCount == 0;
+            return success && !this._skipped
                 ? new(
+                    success,
                     this.Diagnostics.ToImmutableArray(),
                     this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
                     Array.Empty<IAspectSource>() )
                 : new(
+                    success,
                     this.Diagnostics.ToImmutableArray(),
                     Array.Empty<IAdvice>(),
                     Array.Empty<IAspectSource>() );
+        }
     }
 }

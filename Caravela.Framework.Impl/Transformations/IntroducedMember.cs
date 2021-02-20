@@ -20,20 +20,20 @@ namespace Caravela.Framework.Impl.Transformations
         public MemberDeclarationSyntax Syntax { get; }
 
         /// <summary>
-        /// Gets the <see cref="AspectPart"/> that emitted the current <see cref="IntroducedMember"/>.
+        /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="IntroducedMember"/>.
         /// </summary>
-        public AspectPartId AspectPart { get; }
+        public AspectLayerId AspectLayerId { get; }
 
         /// <summary>
         /// Gets the semantic of the introduced member as supported by the linker.
         /// </summary>
         public IntroducedMemberSemantic Semantic { get; }
 
-        public IntroducedMember( IMemberIntroduction introductor, MemberDeclarationSyntax syntax, AspectPartId aspectPart, IntroducedMemberSemantic semantic )
+        public IntroducedMember( IMemberIntroduction introductor, MemberDeclarationSyntax syntax, AspectLayerId aspectLayerId, IntroducedMemberSemantic semantic )
         {
             this.Introductor = introductor;
             this.Syntax = syntax;
-            this.AspectPart = aspectPart;
+            this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
         }
     }

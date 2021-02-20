@@ -9,15 +9,15 @@ namespace Caravela.Framework.Project
     {
         public AspectOrderAttribute( params Type[] orderedAspectTypes )
         {
-            this.OrderedAspectParts = orderedAspectTypes.Select( t => t.FullName + ":*" ).ToArray();
+            this.OrderedAspectLayers = orderedAspectTypes.Select( t => t.FullName + ":*" ).ToArray();
         }
 
-        public AspectOrderAttribute( params string[] orderedAspectParts )
+        public AspectOrderAttribute( params string[] orderedAspectLayers )
         {
-            this.OrderedAspectParts = orderedAspectParts;
+            this.OrderedAspectLayers = orderedAspectLayers;
         }
 
-        public IReadOnlyList<string> OrderedAspectParts { get; }
+        public IReadOnlyList<string> OrderedAspectLayers { get; }
         
         
     }

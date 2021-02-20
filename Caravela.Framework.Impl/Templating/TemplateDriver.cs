@@ -24,8 +24,7 @@ namespace Caravela.Framework.Impl.Templating
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
             Invariant.Assert( 
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null, 
-                "the default location for diagnostics cannot be null" );
+                templateExpansionContext.DiagnosticSink.DefaultLocation != null );
             
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )

@@ -25,13 +25,11 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         {
             Invariant.Implies( 
                 typeof(T) == typeof(IConstructor), 
-                symbol.GetCodeElementKind() == CodeElementKind.Constructor,
-                "Expected a constructor symbol.");
+                symbol.GetCodeElementKind() == CodeElementKind.Constructor);
                     
             Invariant.Implies( 
                 typeof(T) == typeof(IMethod), 
-                symbol.GetCodeElementKind() == CodeElementKind.Method,
-                "Expected a constructor symbol.");
+                symbol.GetCodeElementKind() == CodeElementKind.Method);
 
             return symbol;
         }
@@ -104,15 +102,15 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         }
 
         [Obsolete("Use the factory method.")]
-        internal  CodeElementLink( ICodeElementLink<T> link )
+        internal CodeElementLink( ICodeElementLink<T> link )
         {
             this.Target = link;
         }
         
         [Obsolete("Use the factory method.")]
-        internal  CodeElementLink( T link )
+        internal CodeElementLink( T link )
         {
-            Invariant.Assert( link is ICodeElementLink<T>, "The type must implement ICodeElementLink" );
+            Invariant.Assert( link is ICodeElementLink<T> );
             this.Target = link;
         }
 

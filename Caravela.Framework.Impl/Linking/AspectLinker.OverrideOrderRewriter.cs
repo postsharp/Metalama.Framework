@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Caravela.Framework.Impl.AspectOrdering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.Collections;
@@ -15,16 +16,16 @@ namespace Caravela.Framework.Impl.Linking
         public class OverrideOrderRewriter : CSharpSyntaxRewriter
         {
             private readonly CSharpCompilation _compilation;
-            private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
+            private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableMultiValueDictionary<ISymbol, IntroducedMember> _overrideLookup;
 
             public OverrideOrderRewriter( 
                 CSharpCompilation compilation, 
-                IReadOnlyList<AspectPart> orderedAspectParts, 
+                IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, 
                 ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
                 this._compilation = compilation;
-                this._orderedAspectParts = orderedAspectParts;
+                this._orderedAspectLayers = orderedAspectLayers;
                 this._overrideLookup = overrideLookup;
             }
 
@@ -47,8 +48,8 @@ namespace Caravela.Framework.Impl.Linking
                     if (!overrides.IsEmpty)
                     {
                         var lastOverride =
-                            this._orderedAspectParts
-                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart.Equals( x ) )) )
+                            this._orderedAspectLayers
+                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
                             .Where(x => x.Value != null)
                             .Last().Value;
 
@@ -101,9 +102,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 // TODO: optimize.
                 var currentMethodPosition =
-                    this._orderedAspectParts
+                    this._orderedAspectLayers
                     .Select( ( x, i ) => (Index: i, Value: x) )
-                    .Single( x => x.Value.AspectName== annotation.AspectTypeName && x.Value.PartName == annotation.PartName )
+                    .Single( x => x.Value.AspectLayerId == annotation.AspectLayerId )
                     .Index;
 
                 // The callee is the original/introduced method.
@@ -117,8 +118,8 @@ namespace Caravela.Framework.Impl.Linking
                 var overrides = this._overrideLookup[declarationSymbol];
 
                 var precedingOverrides =
-                    this._orderedAspectParts
-                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart.Equals( x ) )) )
+                    this._orderedAspectLayers
+                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
                     .Where( x => x.Value != null && x.Index < currentMethodPosition );
 
                 // TODO: simplify

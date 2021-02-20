@@ -1,4 +1,5 @@
 using Caravela.Framework.Project;
+using System;
 
 namespace Caravela.Framework.Code
 {
@@ -8,7 +9,7 @@ namespace Caravela.Framework.Code
     /// derive from <see cref="IType"/>.
     /// </summary>
     [CompileTime]
-    public interface IType : IDisplayable
+    public interface IType : IDisplayable, IEquatable<IType>
     {
         /// <summary>
         /// Gets the kind of type.

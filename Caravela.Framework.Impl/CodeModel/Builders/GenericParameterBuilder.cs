@@ -51,5 +51,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         protected override ICodeElement GetForCompilation( CompilationModel compilation ) => compilation == this.Compilation ? this : throw new AssertionFailedException();
 
         IGenericParameter ICodeElementLink<IGenericParameter>.GetForCompilation( CompilationModel compilation ) => (IGenericParameter) this.GetForCompilation( compilation );
+        bool IEquatable<IType>.Equals( IType other ) => throw new NotImplementedException();
     }
 }

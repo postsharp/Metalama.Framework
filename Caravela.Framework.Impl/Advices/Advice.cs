@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public ICodeElement TargetDeclaration { get; }
 
-        public AspectPartId AspectPartId { get; }
+        public AspectLayerId AspectLayerId { get; }
 
         public string? PartName { get; set; }
 
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             this.Aspect = aspect;
             this.TargetDeclaration = targetDeclaration;
-            this.AspectPartId = new AspectPartId( this.Aspect.AspectType, this.PartName );
+            this.AspectLayerId = new AspectLayerId( this.Aspect.AspectType, this.PartName );
         }
 
         public abstract AdviceResult ToResult( ICompilation compilation );

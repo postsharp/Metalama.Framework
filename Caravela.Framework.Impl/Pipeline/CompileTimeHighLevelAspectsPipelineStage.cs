@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.AspectOrdering;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -11,22 +12,23 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class CompileTimeHighLevelAspectsPipelineStage : HighLevelAspectsPipelineStage
     {
-        public CompileTimeHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) : base( aspectParts, assemblyLoader, properties )
+        public CompileTimeHighLevelAspectsPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) 
+            : base( aspectLayers, assemblyLoader, properties )
         {
         }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode( PipelineStageResult input, AspectPartResult aspectPartResult )
+        protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
-            var linker = new AspectLinker( new AdviceLinkerInput( input.Compilation, aspectPartResult.Compilation, aspectPartResult.Transformations, input.AspectParts ) );
+            var linker = new AspectLinker( new AdviceLinkerInput( input.Compilation, pipelineStepResult.Compilation, pipelineStepResult.NonObservableTransformations, input.AspectLayers ) );
             var linkerResult = linker.ToResult();
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
-                input.AspectParts,
-                aspectPartResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
-                aspectPartResult.Transformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
-                aspectPartResult.AspectSources );
+                input.AspectLayers,
+                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
+                pipelineStepResult.NonObservableTransformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
+                pipelineStepResult.ExternalAspectSources );
         }
     }
 }

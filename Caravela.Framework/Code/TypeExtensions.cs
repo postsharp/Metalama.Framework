@@ -24,8 +24,7 @@ namespace Caravela.Framework.Code
         /// given as an <see cref="IType"/>.
         /// </summary>
         /// <returns></returns>
-        public static bool Is( this IType left, IType right ) =>
-            left.TypeFactory.Is( left, right );
+        public static bool Is( this IType left, IType right ) => left.TypeFactory.Is( left, right );
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
@@ -33,7 +32,8 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <param name="right">Another type.</param>
         /// <returns></returns>
-        public static bool Is( this IType left, Type right ) =>
-            left.TypeFactory.Is( left, right );
+        public static bool Is( this IType left, Type right ) => left.TypeFactory.Is( left, right );
+
+
     }
 }

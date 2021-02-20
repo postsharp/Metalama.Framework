@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        public override PipelineStageResult ToResult( PipelineStageResult input )
+        public override PipelineStageResult Execute( PipelineStageResult input )
         {
             var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
             var diagnostics = new List<Diagnostic>();
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Pipeline
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
                 newCompilation,
-                input.AspectParts,
+                input.AspectLayers,
                 input.Diagnostics.Concat( diagnostics ).ToList(),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );

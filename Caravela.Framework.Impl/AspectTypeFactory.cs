@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl
             {
                 var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                // TODO: create AspectParts properly
+                // TODO: create AspectLayers properly
                 aspectType = new( attributeType, aspectDriver, this._compileTimeAssemblyLoader );
 
                 this._aspectTypes.Add( attributeType, aspectType );

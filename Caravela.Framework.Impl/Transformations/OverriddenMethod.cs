@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     this.OverriddenDeclaration,
                     this.OverriddenDeclaration.Compilation,
-                    new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ),
+                    new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectLayerId ),
                     context.DiagnosticSink );
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
                             newMethodBody,
                             null ),
-                        this.Advice.AspectPartId,
+                        this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.MethodOverride )
                 };
 

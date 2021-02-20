@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Collections;
@@ -64,8 +65,8 @@ namespace Caravela.Framework.Impl.Linking
 
             // Second pass. Count references to modified methods.
             Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
-            List<(AspectPart AspectPart, int Version)> aspectParts = new();
-            aspectParts.AddRange( this._input.OrderedAspectParts.Select( ( ar, i ) => (ar, i + 1) ) );
+            List<(OrderedAspectLayer AspectLayer, int Version)> aspectLayers = new();
+            aspectLayers.AddRange( this._input.OrderedAspectLayers.Select( ( ar, i ) => (ar, i + 1) ) );
 
             foreach ( var syntaxTree in newSyntaxTrees )
             {
@@ -82,8 +83,8 @@ namespace Caravela.Framework.Impl.Linking
                             break;
 
                         case LinkerAnnotationOrder.Default: // Next one.
-                            var originatingVersion = aspectParts.Where(
-                                    p => p.AspectPart.AspectType.Name == linkerAnnotation.AspectTypeName && p.AspectPart.PartName == linkerAnnotation.PartName )
+                            var originatingVersion = aspectLayers.Where(
+                                    p => p.AspectLayer.AspectLayerId == linkerAnnotation.AspectLayerId )
                                 .Select( p => p.Version ).First();
                             targetVersion = originatingVersion + 1;
                             break;
@@ -143,7 +144,7 @@ namespace Caravela.Framework.Impl.Linking
             var symbolOverridesLookup =
                 symbolOverrides.ToMultiValueDictionary( x => x.Symbol, x => x.IntroducedMember, StructuralSymbolComparer.Instance );
 
-            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectParts, symbolOverridesLookup );
+            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectLayers, symbolOverridesLookup );
 
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {

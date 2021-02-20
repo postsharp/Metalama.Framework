@@ -1,5 +1,3 @@
-// unset
-
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
 using System;
@@ -40,5 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IGenericParameter GetForCompilation( CompilationModel compilation ) =>
             compilation == this.Compilation ? this : throw new AssertionFailedException();
+
+        public bool Equals( IType other ) => throw new NotImplementedException();
     }
 }

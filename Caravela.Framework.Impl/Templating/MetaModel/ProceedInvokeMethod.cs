@@ -14,12 +14,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     internal class ProceedInvokeMethod : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
-        private readonly AspectPartId? _aspectPartId;
+        private readonly AspectLayerId _aspectLayerId;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
+        public ProceedInvokeMethod( IMethod originalDeclaration, AspectLayerId aspectLayerId  )
         {
             this._originalDeclaration = originalDeclaration;
-            this._aspectPartId = aspectPartId;
+            this._aspectLayerId = aspectLayerId;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
@@ -83,10 +83,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                         SeparatedList(
                             this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
 
-            if ( this._aspectPartId != null )
-            {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectName, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
-            }
+            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
 
             return invocation;
         }

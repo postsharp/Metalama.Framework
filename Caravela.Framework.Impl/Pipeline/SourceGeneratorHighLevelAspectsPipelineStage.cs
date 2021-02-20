@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -17,14 +18,15 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorHighLevelAspectsPipelineStage : HighLevelAspectsPipelineStage
     {
-        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<AspectPart> aspectParts, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) : base( aspectParts, assemblyLoader, properties )
+        public SourceGeneratorHighLevelAspectsPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) 
+            : base( aspectLayers, assemblyLoader, properties )
         {
         }
 
         /// <inheritdoc/>
-        protected override PipelineStageResult GenerateCode( PipelineStageResult input, AspectPartResult aspectPartResult )
+        protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
-            var transformations = aspectPartResult.Compilation.GetAllObservableTransformations();
+            var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
             DiagnosticList diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
@@ -87,10 +89,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return new PipelineStageResult(
                 input.Compilation,
-                input.AspectParts,
-                input.Diagnostics.Concat( aspectPartResult.Diagnostics ),
+                input.AspectLayers,
+                input.Diagnostics.Concat( pipelineStepResult.Diagnostics ),
                 Array.Empty<ResourceDescription>(),
-                input.AspectSources.Concat( aspectPartResult.AspectSources ),
+                input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
                 input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
         }
     }

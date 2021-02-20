@@ -13,13 +13,13 @@ namespace Caravela.Framework.Aspects
     /// (specified by a null or empty string) is always included by default.
     /// </summary>
     [AttributeUsage( AttributeTargets.Class )]
-    public sealed class ProvidesAspectPartsAttribute : Attribute
+    public sealed class ProvidesAspectLayersAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProvidesAspectPartsAttribute"/> class.
+        /// Initializes a new instance of the <see cref="ProvidesAspectLayersAttribute"/> class.
         /// </summary>
         /// <param name="parts">An ordered list of aspect parts.</param>
-        public ProvidesAspectPartsAttribute( params string[] parts )
+        public ProvidesAspectLayersAttribute( params string[] parts )
         {
             this.Parts = parts;
         }

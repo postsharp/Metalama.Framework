@@ -8,13 +8,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class CompilationModel : ICompilation
+    internal class CompilationModel : ICompilation, ICodeElementLink<ICompilation>
     {
         public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
         {
@@ -33,6 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
         private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allAttributesByType;
+        private ImmutableDictionary<CodeElementLink<ICodeElement>, int> _depthsCache = ImmutableDictionary.Create<CodeElementLink<ICodeElement>, int>();
 
         public CodeElementFactory Factory { get; }
 
@@ -63,6 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this.Revision = prototype.Revision + 1;
             this.RoslynCompilation = prototype.RoslynCompilation;
+            
             this._transformations = prototype._transformations.AddRange(
                 introducedElements, 
                 t => new CodeElementLink<ICodeElement>( t.ContainingElement ), 
@@ -81,6 +84,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Concat( introducedElements.OfType<IAttributeLink>() )
                     .Select( a => new AttributeLink( a ) );
             
+            // TODO: this cache may need to be smartly invalidated when we have interface introductions.
+            this._depthsCache = prototype._depthsCache;
 
             this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
@@ -130,6 +135,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IDiagnosticLocation? DiagnosticLocation => null;
 
+        public IEnumerable<INamedType> GetAllAttributeTypes() 
+            => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allAttributesByType[new CodeElementLink<INamedType>( type )].Select( a => a.GetForCompilation( this ) );
 
@@ -143,7 +150,67 @@ namespace Caravela.Framework.Impl.CodeModel
                 yield return (group.Key.GetForCompilation( this ), group);
             }
         }
+
+        public int GetDepth( ICodeElement codeElement )
+        {
+            var link = CodeElementLink.FromLink( (ICodeElementLink<ICodeElement>) codeElement );
+            
+            if ( this._depthsCache.TryGetValue( link, out var value ) )
+            {
+                return value;
+            }
+            else
+            {
+                switch (codeElement)
+                {
+                    case INamedType namedType:
+                        return this.GetDepth( namedType );
+                    
+                    case ICompilation:
+                        return 0;
+                    
+                    default:
+                    {
+                        var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
+                        this._depthsCache = this._depthsCache.SetItem( link, depth );
+                        return depth;
+                    }
+                }
+            }
+        }
         
-        
+        public int GetDepth( INamedType namedType )
+        {
+            var link = CodeElementLink.FromLink( (ICodeElementLink<ICodeElement>) namedType );
+            
+            if ( this._depthsCache.TryGetValue( link, out var depth ) )
+            {
+                return depth;
+            }
+            else
+            {
+                depth = this.GetDepth( namedType.ContainingElement! );
+                
+                if ( namedType.BaseType != null )
+                {
+                    depth = Math.Max( depth, this.GetDepth( namedType.BaseType ) );
+                }
+
+                foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
+                {
+                    depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+                }
+
+                depth++;
+              
+                this._depthsCache = this._depthsCache.SetItem( link, depth );
+
+                return depth;
+            }
+        }
+
+        public ICompilation GetForCompilation( CompilationModel compilation ) => compilation;
+
+        public object? Target => this.RoslynCompilation;
     }
 }

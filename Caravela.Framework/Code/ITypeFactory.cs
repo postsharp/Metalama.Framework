@@ -58,5 +58,5 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <returns></returns>
         bool Is( IType left, Type right );
-    }
+   }
 }
