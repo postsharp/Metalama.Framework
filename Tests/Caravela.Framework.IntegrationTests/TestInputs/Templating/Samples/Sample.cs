@@ -6,7 +6,7 @@ using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Templating.UnitTests.Misc.Sample
+namespace Caravela.Framework.IntegrationTests.Templating.Samples.Sample
 {
     class Aspect
     {

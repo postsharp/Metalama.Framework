@@ -5,7 +5,7 @@ using System;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.ReturnStatement.ReturnVoidProceedAndDefault
+namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnVoidProceedAndDefault
 {
     class Aspect
     {

@@ -6,7 +6,7 @@ using static System.Math;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.LocalVariables.NameClashWithTargetSymbols
+namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.NameClashWithTargetSymbols
 {
     class Aspect
     {

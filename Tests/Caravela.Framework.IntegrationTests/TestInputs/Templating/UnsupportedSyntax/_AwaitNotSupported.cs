@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.UnsupportedSyntax.AwaitNotSupported
+namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.AwaitNotSupported
 {
     class Aspect
     {

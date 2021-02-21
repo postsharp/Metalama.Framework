@@ -13,8 +13,8 @@ namespace Caravela.Framework.IntegrationTests.Templating
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\CSharpSyntax" )]
-        public Task CSharpSyntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        [FromDirectory( @"TestInputs\Templating\Syntax" )]
+        public Task Syntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"TestInputs\Templating\LocalVariables" )]

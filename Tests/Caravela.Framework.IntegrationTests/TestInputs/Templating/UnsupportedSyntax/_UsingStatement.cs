@@ -4,7 +4,7 @@ using System.IO;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.CSharpSyntax.UsingStatement
+namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.UsingStatement
 {
     class Aspect
     {

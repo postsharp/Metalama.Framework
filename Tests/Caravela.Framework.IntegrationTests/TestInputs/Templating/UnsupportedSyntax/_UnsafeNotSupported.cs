@@ -5,7 +5,7 @@ using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.UnsupportedSyntax.UnsafeNotSupported
+namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.UnsafeNotSupported
 {
     class Aspect
     {

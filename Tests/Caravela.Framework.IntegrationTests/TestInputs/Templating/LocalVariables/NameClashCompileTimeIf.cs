@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Templating.UnitTests.LocalVariables.NameClashCompileTimeIf
+namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.NameClashCompileTimeIf
 {
     class Aspect
     {
