@@ -23,7 +23,6 @@ namespace Caravela.TestFramework.Aspects
 
         public virtual async Task<TestResult> Run( string testName, string testSource )
         {
-
             testSource = CommonSnippets.CaravelaUsings + testSource;
 
             // Source.

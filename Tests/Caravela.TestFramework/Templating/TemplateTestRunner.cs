@@ -23,7 +23,18 @@ namespace Caravela.TestFramework.Templating
 {
     public class TemplateTestRunner
     {
-        public virtual async Task<TestResult> Run( TestInput testInput )
+        private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
+
+        public TemplateTestRunner() : this( Array.Empty<CSharpSyntaxVisitor>() )
+        {
+        }
+
+        public TemplateTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
+        {
+            this._testAnalyzers = testAnalyzers;
+        }
+
+        public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
             var testSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
 
@@ -50,7 +61,7 @@ namespace Caravela.TestFramework.Templating
             var templateSyntaxRoot = (await testDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await testDocument.GetSemanticModelAsync())!;
 
-            foreach ( var testAnalyzer in this.GetTestAnalyzers() )
+            foreach ( var testAnalyzer in this._testAnalyzers )
             {
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
@@ -72,7 +83,7 @@ namespace Caravela.TestFramework.Templating
             var transformedTemplateText = transformedTemplateSyntax.SyntaxTree.GetText();
             var transformedTemplatePath = Path.Combine( Environment.CurrentDirectory, "generated", Path.ChangeExtension( testInput.TestName, ".cs" ) );
             var transformedTemplateDirectory = Path.GetDirectoryName( transformedTemplatePath );
-            if ( !Directory.Exists(transformedTemplateDirectory))
+            if ( !Directory.Exists( transformedTemplateDirectory ) )
             {
                 Directory.CreateDirectory( transformedTemplateDirectory );
             }
@@ -84,10 +95,10 @@ namespace Caravela.TestFramework.Templating
 
             // Create a SyntaxTree that maps to the file we have just written.
             var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
-            var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create( 
-                (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(), 
-                (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options, 
-                transformedTemplatePath, 
+            var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
+                (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
+                (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options,
+                transformedTemplatePath,
                 Encoding.UTF8 );
 
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
@@ -110,7 +121,7 @@ namespace Caravela.TestFramework.Templating
             if ( !emitResult.Success )
             {
                 this.ReportDiagnostics( result, emitResult.Diagnostics );
-                
+
                 result.ErrorMessage = "Final compilation failed.";
                 return result;
             }
@@ -167,11 +178,6 @@ namespace Caravela.TestFramework.Templating
                 .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
                 ;
             return project;
-        }
-
-        protected virtual IEnumerable<CSharpSyntaxVisitor> GetTestAnalyzers()
-        {
-            yield break;
         }
 
         protected virtual void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
