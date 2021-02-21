@@ -13,7 +13,27 @@ namespace Caravela.Framework.IntegrationTests.Templating
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating" )]
-        public Task All( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        [FromDirectory( @"TestInputs\Templating\CSharpSyntax" )]
+        public Task CSharpSyntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\LocalVariables" )]
+        public Task LocalVariables( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\Proceed" )]
+        public Task Proceed( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\Return" )]
+        public Task Return( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\Samples" )]
+        public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        //[Theory]
+        //[FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
+        //public Task UnsupportedSyntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
     }
 }
