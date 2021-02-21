@@ -16,17 +16,17 @@
         }
         public static global::System.Int32 __Add__LogAttribute(int a, int b)
         {
-            Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
+            Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
             try
             {
                 global::System.Int32 result;
                 result = __Add__OriginalBody(a, b);
-                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
+                Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
                 return (int)result;
             }
             catch (Exception e)
             {
-                Console.WriteLine("Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
+                Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
                 throw;
             }
         }

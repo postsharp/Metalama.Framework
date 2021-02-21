@@ -48,7 +48,11 @@ namespace Caravela.TestFramework.Aspects
             // If the region is not found then compare the complete transformed code.
             var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
-            var actualTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".actual_transformed.txt" );
+            var actualTransformedPath = Path.Combine(
+                this.ProjectDirectory,
+                @"obj\transformed",
+                Path.GetDirectoryName( testPath ) ?? "",
+                Path.GetFileNameWithoutExtension( testPath ) + ".transformed.txt" );
 
             var targetTextSpan = TestSyntaxHelper.FindRegionSpan( testResult.TransformedTargetSyntax, "Target" );
             testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );

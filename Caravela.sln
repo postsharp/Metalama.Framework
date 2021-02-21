@@ -49,9 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Buil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Aspects.UnitTests", "Tests\Caravela.Framework.Aspects.UnitTests\Caravela.Framework.Aspects.UnitTests.csproj", "{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Templating.UnitTests", "Tests\Caravela.Framework.Templating.UnitTests\Caravela.Framework.Templating.UnitTests.csproj", "{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Caravela.Framework.IntegrationTests", "Tests\Caravela.Framework.IntegrationTests\Caravela.Framework.IntegrationTests.csproj", "{69EB8F34-975E-46AD-8EA1-A592A629CCD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,14 +115,14 @@ Global
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69EB8F34-975E-46AD-8EA1-A592A629CCD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69EB8F34-975E-46AD-8EA1-A592A629CCD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69EB8F34-975E-46AD-8EA1-A592A629CCD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69EB8F34-975E-46AD-8EA1-A592A629CCD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,8 +136,8 @@ Global
 		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{4638D4AE-4CF2-49C3-9671-F39F33AD0AEF} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B} = {19660464-978E-4457-846E-B399BB6A3884}
-		{E1A1712C-7707-4AA9-9484-4C1004DA6FB0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{A7509AF7-8868-4DF1-B7B3-F7B8FD8395BB} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{69EB8F34-975E-46AD-8EA1-A592A629CCD6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

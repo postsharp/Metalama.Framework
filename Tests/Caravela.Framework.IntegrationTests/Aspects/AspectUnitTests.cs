@@ -4,7 +4,7 @@ using Caravela.TestFramework.Aspects;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Aspects.UnitTests
+namespace Caravela.Framework.IntegrationTests.Aspects
 {
     public class AspectUnitTests : AspectUnitTestBase
     {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Aspects.UnitTests
         }
 
         [Theory]
-        [FromDirectory( "Samples" )]
+        [FromDirectory( @"TestInputs\Aspects\Samples" )]
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
     }
 }

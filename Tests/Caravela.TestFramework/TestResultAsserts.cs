@@ -49,6 +49,7 @@ namespace Caravela.UnitTestFramework
             {
                 if ( actualOutputPath != null )
                 {
+                    Directory.CreateDirectory( Path.GetDirectoryName( actualOutputPath ) );
                     File.WriteAllText( actualOutputPath, actual );
                 }
 

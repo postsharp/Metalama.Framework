@@ -1,7 +1,8 @@
 ﻿using System;
+using Caravela.Framework.Aspects;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Aspects.UnitTests.Samples.SimpleLogging
+namespace Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging
 {
     public class LogAttribute : OverrideMethodAspect
     {

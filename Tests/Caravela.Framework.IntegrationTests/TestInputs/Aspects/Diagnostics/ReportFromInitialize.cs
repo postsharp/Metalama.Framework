@@ -1,11 +1,12 @@
-﻿using Caravela.Framework.Code;
-using System;
+﻿using System;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Aspects.UnitTests.Diagnostics.ReportFromInitialize
+namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInitialize
 {
     public class ErrorAttribute : Attribute, IAspect<IMethod>
     {
-        public static Caravela.Framework.Diagnostics.DiagnosticDescriptor Error1 = new( "MY001", Caravela.Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}." );
+        public static Framework.Diagnostics.DiagnosticDescriptor Error1 = new( "MY001", Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}." );
         public void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
             Error1.Report( aspectBuilder.TargetDeclaration );
