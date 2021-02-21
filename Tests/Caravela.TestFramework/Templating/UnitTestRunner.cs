@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.Templating
 {
-    public class UnitTestRunner : TestRunner
+    public class UnitTestRunner : TemplateTestRunner
     {
         private readonly ITestOutputHelper _logger;
         private readonly UsedSyntaxKindsCollector _usedSyntaxKindsCollector = new UsedSyntaxKindsCollector();

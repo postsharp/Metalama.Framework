@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,14 +14,13 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using System.IO;
 
-namespace Caravela.TestFramework
+namespace Caravela.TestFramework.Aspects
 {
     public class AspectTestRunner
     {
         public bool HandlesException { get; set; } = true;
-        
+
         public virtual async Task<TestResult> Run( string testName, string testSource )
         {
 
@@ -37,9 +37,9 @@ namespace Caravela.TestFramework
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
-            
+
             var diagnostics = initialCompilation.GetDiagnostics();
-            
+
             result.Diagnostics.AddRange( diagnostics );
 
             if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
@@ -51,7 +51,7 @@ namespace Caravela.TestFramework
             try
             {
                 var context = new AspectTestPipelineContext( testName, initialCompilation, result );
-                CompileTimeAspectPipeline pipeline = new CompileTimeAspectPipeline( context );
+                var pipeline = new CompileTimeAspectPipeline( context );
                 if ( pipeline.TryExecute( out var resultCompilation ) )
                 {
                     result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
@@ -67,7 +67,7 @@ namespace Caravela.TestFramework
             {
                 result.ErrorMessage = "Unhandled exception: " + exception.ToString();
             }
-            
+
             return result;
         }
 

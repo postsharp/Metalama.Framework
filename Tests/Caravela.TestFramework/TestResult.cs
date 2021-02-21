@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Sdk;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 

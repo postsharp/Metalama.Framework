@@ -1,3 +1,4 @@
+using Caravela.TestFramework.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;

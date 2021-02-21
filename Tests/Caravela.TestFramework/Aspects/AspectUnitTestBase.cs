@@ -1,31 +1,27 @@
-using Caravela.TestFramework;
+using System.IO;
+using System.Threading.Tasks;
 using Caravela.UnitTestFramework;
 using Microsoft.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Caravela.Framework.Aspects.UnitTests
+namespace Caravela.TestFramework.Aspects
 {
     public abstract class AspectUnitTestBase
     {
         private readonly ITestOutputHelper _logger;
 
-        public static string ProjectDirectory { get; } =
-            Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
-                    .Single( a => a.Key == "ProjectDirectory" ).Value!;
+        protected string ProjectDirectory { get; }
 
         public AspectUnitTestBase( ITestOutputHelper logger )
         {
             this._logger = logger;
+            this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
         }
 
         protected async Task<TestResult> RunPipelineAsync( string testPath )
         {
-            var sourceAbsolutePath = Path.Combine( ProjectDirectory, testPath );
+            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, testPath );
 
             var testSource = await File.ReadAllTextAsync( sourceAbsolutePath );
             var testRunner = new AspectTestRunner() { HandlesException = false };
@@ -34,7 +30,7 @@ namespace Caravela.Framework.Aspects.UnitTests
 
         protected async Task AssertTransformedSourceEqualAsync( string testPath )
         {
-            var sourceAbsolutePath = Path.Combine( ProjectDirectory, testPath );
+            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, testPath );
 
             var testResult = await this.RunPipelineAsync( testPath );
 
