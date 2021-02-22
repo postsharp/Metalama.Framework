@@ -150,6 +150,7 @@ namespace Caravela.Framework.Impl.Pipeline
             
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
+                .Where( t => !t.IsAbstract )
                 .SelectMany( at => at.Layers )
                 .ToImmutableArray();
 
