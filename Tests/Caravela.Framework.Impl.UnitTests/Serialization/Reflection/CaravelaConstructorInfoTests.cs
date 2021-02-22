@@ -1,4 +1,5 @@
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ReflectionMocks;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Impl.Serialization.Reflection;
@@ -62,7 +63,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var methods = type.Constructors;
             var single = methods.Single();
             var p = (single as Constructor)!;
-            var actual = new CaravelaConstructorInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaConstructorInfo( p ) ).ToString();
+            var actual = new CaravelaConstructorInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CompileTimeConstructorInfo( p ) ).ToString();
             return actual;
         }
 

@@ -9,7 +9,11 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private List<(IAspectSource Source, INamedType Type)> _aspectSources = new ();
 
+        public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
+
         public IEnumerable<INamedType> AspectTypes => this._aspectSources.Select( a => a.Type ).Distinct();
+
+        public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
         public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType )
             => this._aspectSources

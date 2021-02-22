@@ -23,5 +23,7 @@ namespace Caravela.Framework.Aspects
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <returns></returns>
         IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default );
+
+        IAdviceFactory ForLayer( string layerName );
     }
 }

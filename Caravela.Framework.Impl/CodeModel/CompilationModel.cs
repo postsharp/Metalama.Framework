@@ -34,6 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
         private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allAttributesByType;
+        private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, CodeElementLink<ICodeElement>> _allAspectExclusions;
         private ImmutableDictionary<CodeElementLink<ICodeElement>, int> _depthsCache = ImmutableDictionary.Create<CodeElementLink<ICodeElement>, int>();
 
         public CodeElementFactory Factory { get; }
@@ -54,6 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
             this._allAttributesByType = ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink>
                 .Create( allAttributes, a => a.AttributeType, CodeElementLinkEqualityComparer<CodeElementLink<INamedType>>.Instance );
+            
         }
 
         /// <summary>
@@ -134,7 +136,8 @@ namespace Caravela.Framework.Impl.CodeModel
         ICompilation ICodeElement.Compilation => this;
 
         public IDiagnosticLocation? DiagnosticLocation => null;
-
+        
+        
         public IEnumerable<INamedType> GetAllAttributeTypes() 
             => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )

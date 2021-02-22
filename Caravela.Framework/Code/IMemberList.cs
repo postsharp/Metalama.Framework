@@ -14,6 +14,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <param name="name">The member name (not including the namespace, for types).</param>
         /// <returns></returns>
-        IEnumerable<T> Named( string name );
+        IEnumerable<T> OfName( string name );
     }
 }

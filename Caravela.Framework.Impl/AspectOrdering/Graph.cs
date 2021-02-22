@@ -27,14 +27,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
             _ = SimpleLinkedListNode<int>.Remove( ref this._predecessors[successor], predecessor );
         }
 
-        public override bool HasEdge(int predecessor, int successor)
+        public override bool HasEdge( int predecessor, int successor )
         {
             var current = this._successors[predecessor];
 
             while ( current != null )
             {
                 if ( current.Value == successor )
+                {
                     return true;
+                }
 
                 current = current.Next;
             }
@@ -48,9 +50,8 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             distances[initialNode] = 0;
 
-            Queue<NodeInfo> queue = new Queue<NodeInfo>( n );
-            queue.Enqueue( new NodeInfo
-                {Node = initialNode, NodesInPath = new SimpleLinkedListNode<int>( initialNode, null )} );
+            Queue<NodeInfo> queue = new( n );
+            queue.Enqueue( new NodeInfo {Node = initialNode, NodesInPath = new SimpleLinkedListNode<int>( initialNode, null )} );
 
 
             while ( queue.Count > 0 )
@@ -87,16 +88,13 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         directPredecessors[successor] = current;
                         return successor;
                     }
-                    else if ( successorDistance == NotDiscovered || successorDistance < newSucccessorDistance )
+
+                    if ( successorDistance == NotDiscovered || successorDistance < newSucccessorDistance )
                     {
                         distances[successor] = newSucccessorDistance;
                         directPredecessors[successor] = current;
 
-                        queue.Enqueue( new NodeInfo
-                        {
-                            Node = successor,
-                            NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath )
-                        } );
+                        queue.Enqueue( new NodeInfo {Node = successor, NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath )} );
                     }
                     else if ( successorDistance == Cycle )
                     {

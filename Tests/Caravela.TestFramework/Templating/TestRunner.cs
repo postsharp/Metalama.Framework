@@ -64,6 +64,7 @@ namespace Caravela.TestFramework.Templating
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
+
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
             if ( !templaceCompilerSuccess )

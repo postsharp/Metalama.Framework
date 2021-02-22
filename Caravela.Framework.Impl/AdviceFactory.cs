@@ -43,5 +43,7 @@ namespace Caravela.Framework.Impl
 
             return advice;
         }
+
+        public IAdviceFactory ForLayer( string layerName ) => throw new System.NotImplementedException();
     }
 }

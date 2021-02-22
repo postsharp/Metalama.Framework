@@ -8,6 +8,7 @@ namespace Caravela.Framework.Impl.Pipeline
     internal class EvaluateAspectSourcesPipelineStep : PipelineStep
     {
         private List<IAspectSource> _aspectSources = new List<IAspectSource>();
+
         public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer) : base(new PipelineStepId(aspectLayer.AspectLayerId, -1), aspectLayer)
         {
         }

@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Properties;
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
-                    CaravelaType.Create(
+                    CompileTimeType.Create(
                         allProperties.Single().Type ) )
                 .ToString();
 

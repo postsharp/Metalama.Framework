@@ -1,3 +1,4 @@
+using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -62,13 +63,13 @@ namespace Caravela.Framework.Impl.Serialization
             // Reflection types
             var typeSerializer = new CaravelaTypeSerializer();
             var methodInfoSerializer = new CaravelaMethodInfoSerializer( typeSerializer );
-            this.RegisterSerializer( typeof( CaravelaType ), typeSerializer );
-            this.RegisterSerializer( typeof( CaravelaMethodInfo ), methodInfoSerializer );
-            this.RegisterSerializer( typeof( CaravelaConstructorInfo ), new CaravelaConstructorInfoSerializer( typeSerializer ) );
-            this.RegisterSerializer( typeof( CaravelaEventInfo ), new CaravelaEventInfoSerializer( typeSerializer ) );
-            this.RegisterSerializer( typeof( CaravelaParameterInfo ), new CaravelaParameterInfoSerializer( methodInfoSerializer ) );
+            this.RegisterSerializer( typeof( CompileTimeType ), typeSerializer );
+            this.RegisterSerializer( typeof( CompileTimeMethodInfo ), methodInfoSerializer );
+            this.RegisterSerializer( typeof( CompileTimeConstructorInfo ), new CaravelaConstructorInfoSerializer( typeSerializer ) );
+            this.RegisterSerializer( typeof( CompileTimeEventInfo ), new CaravelaEventInfoSerializer( typeSerializer ) );
+            this.RegisterSerializer( typeof( CompileTimeParameterInfo ), new CaravelaParameterInfoSerializer( methodInfoSerializer ) );
             this.RegisterSerializer( typeof( CaravelaReturnParameterInfoSerializer ), new CaravelaReturnParameterInfoSerializer( methodInfoSerializer ) );
-            this.RegisterSerializer( typeof( CaravelaLocationInfo ), new CaravelaLocationInfoSerializer( this ) );
+            this.RegisterSerializer( typeof( CompileTimeLocationInfo ), new CaravelaLocationInfoSerializer( this ) );
         }
 
         /// <summary>

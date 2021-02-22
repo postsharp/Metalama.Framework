@@ -13,16 +13,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
         private readonly int size;
 
-        protected AbstractGraph(int size)
+        protected AbstractGraph( int size )
         {
             this.size = size;
         }
 
         public int[] GetInitialVector()
         {
-            int n = this.size;
+            var n = this.size;
             int[] vector = new int[n];
-            for (int i = 0; i < n; i++)
+            for ( var i = 0; i < n; i++ )
             {
                 vector[i] = NotDiscovered;
             }
@@ -31,29 +31,33 @@ namespace Caravela.Framework.Impl.AspectOrdering
         }
 
 
-        public abstract void AddEdge(int predecessor, int successor);
+        public abstract void AddEdge( int predecessor, int successor );
 
-        public abstract void RemoveEdge(int predecessor, int successor);
+        public abstract void RemoveEdge( int predecessor, int successor );
 
-        public abstract bool HasEdge(int predecessor, int successor);
+        public abstract bool HasEdge( int predecessor, int successor );
 
-        public abstract int DoBreadthFirstSearch(int initialNode, int[] distances, int[] directPredecessors);
+        public abstract int DoBreadthFirstSearch( int initialNode, int[] distances, int[] directPredecessors );
 
         public string Serialize()
         {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new();
 
-            stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0};", this.size);
+            stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0};", this.size );
 
-            for (int i = 0; i < this.size; i++)
+            for ( var i = 0; i < this.size; i++ )
             {
-                for (int j = 0; j < this.size; j++)
+                for ( var j = 0; j < this.size; j++ )
                 {
-                    if (i == j)
+                    if ( i == j )
+                    {
                         continue;
+                    }
 
-                    if (this.HasEdge(i, j))
-                        stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0},{1};", i, j);
+                    if ( this.HasEdge( i, j ) )
+                    {
+                        stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0},{1};", i, j );
+                    }
                 }
             }
 

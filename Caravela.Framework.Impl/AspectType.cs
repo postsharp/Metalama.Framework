@@ -1,39 +1,40 @@
-﻿using Caravela.Framework.Aspects;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
-using System;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectType
     {
-        private IReadOnlyList<OrderedAspectLayer>? _parts;
+        private readonly IAspectDriver? _aspectDriver;
         public string Name => this.Type.FullName;
+        
+        public AspectType BaseAspectType { get; }
 
-        public IAspectDriver AspectDriver { get; }
+        public IAspectDriver AspectDriver => this._aspectDriver.AssertNotNull();
 
-        public IReadOnlyList<AspectLayer> UnorderedLayers { get; }
-
-        public IReadOnlyList<OrderedAspectLayer> Parts 
-            => this._parts ?? throw new InvalidOperationException("Method UpdateFromOrderedParts has not been called.");
-
-        internal void UpdateFromOrderedParts( IReadOnlyList<OrderedAspectLayer> allOrderedParts )
-        {
-            this._parts = allOrderedParts.Where( p => p.AspectLayerId.AspectName == this.Name ).ToImmutableArray();
-        }
-
+        public IReadOnlyList<AspectLayer> Layers { get; }
+        
         public INamedType Type { get; }
 
-        public AspectType( INamedType aspectType, IAspectDriver aspectDriver, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        public bool IsAbstract => this.Type.IsAbstract;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AspectType"/> class.
+        /// </summary>
+        /// <param name="aspectType"></param>
+        /// <param name="aspectDriver">Can be null for testing.</param>
+        public AspectType( INamedType aspectType, AspectType? baseAspectType,  IAspectDriver? aspectDriver )
         {
             this.Type = aspectType;
-            this.AspectDriver = aspectDriver;
-
+            this.BaseAspectType = baseAspectType;
+            this._aspectDriver = aspectDriver;
 
             var partArrayBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
             
@@ -46,11 +47,11 @@ namespace Caravela.Framework.Impl
 
             if ( aspectLayersAttributeData != null )
             {
-                var aspectLayersAttribute = (ProvidesAspectLayersAttribute) compileTimeAssemblyLoader.CreateAttributeInstance( aspectLayersAttributeData );
-                partArrayBuilder.AddRange( aspectLayersAttribute.Parts.Select( partName => new AspectLayer( this, partName ) ) );
+                var aspectLayersAttribute = AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<ProvidesAspectLayersAttribute>(  aspectLayersAttributeData );
+                partArrayBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( this, partName ) ) );
             }
 
-            this.UnorderedLayers = partArrayBuilder.ToImmutable();
+            this.Layers = partArrayBuilder.ToImmutable();
         }
     }
 }

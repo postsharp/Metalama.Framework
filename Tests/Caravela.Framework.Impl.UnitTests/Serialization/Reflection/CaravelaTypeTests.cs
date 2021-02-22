@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
@@ -67,7 +68,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
-            var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
+            var actual = new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
             return actual;
         }
 
@@ -75,7 +76,7 @@ namespace Caravela.Framework.Impl.UnitTests.Templating.Serialization.Reflection
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
-            var actual = new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
+            var actual = new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
             return actual;
         }
 

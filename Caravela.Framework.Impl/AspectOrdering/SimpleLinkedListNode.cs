@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
     /// <remarks>There is no node implementing the <i>list</i>. Everything
     /// is a <i>node</i>. When using the <see cref="IEnumerable{T}"/> interface,
     /// you get an enumeration of the current node and all the next nodes.</remarks>
-    [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
+    [SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
     internal sealed class SimpleLinkedListNode<T>
     {
         private SimpleLinkedListNode()
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// </summary>
         /// <param name="value">Node value.</param>
         /// <param name="next">Next node.</param>
-        public SimpleLinkedListNode(T value, SimpleLinkedListNode<T>? next)
+        public SimpleLinkedListNode( T value, SimpleLinkedListNode<T>? next )
         {
             this.Value = value;
             this.Next = next;
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             SimpleLinkedListNode<T>? cursor = this;
             SimpleLinkedListNode<T> last = this;
 
-            while (cursor != null)
+            while ( cursor != null )
             {
                 last = cursor;
                 cursor = cursor.Next;
@@ -69,28 +69,25 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// </summary>
         /// <param name="node">Reference to the head node. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">Value.</param>
-        [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        public static void Insert(ref SimpleLinkedListNode<T>? node, T value)
-        {
-            node = new SimpleLinkedListNode<T>(value, node);
-        }
+        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
+        public static void Insert( ref SimpleLinkedListNode<T>? node, T value ) => node = new SimpleLinkedListNode<T>( value, node );
 
         /// <summary>
         /// Appends a value at the end of a list.
         /// </summary>
         /// <param name="node">Reference to a node of the list. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">Value.</param>
-        [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        public static void Append(ref SimpleLinkedListNode<T> node, T value)
+        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
+        public static void Append( ref SimpleLinkedListNode<T> node, T value )
         {
-            if (node == null)
+            if ( node == null )
             {
-                node = new SimpleLinkedListNode<T>(value, null);
+                node = new SimpleLinkedListNode<T>( value, null );
             }
             else
             {
                 SimpleLinkedListNode<T> last = node.GetLast();
-                last.Next = new SimpleLinkedListNode<T>(value, null);
+                last.Next = new SimpleLinkedListNode<T>( value, null );
             }
         }
 
@@ -105,15 +102,15 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// The 'right' list (<paramref name="list"/>) is cloned, so
         /// nodes are never shared between lists.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        public static void Append(ref SimpleLinkedListNode<T> node, SimpleLinkedListNode<T> list)
+        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
+        public static void Append( ref SimpleLinkedListNode<T> node, SimpleLinkedListNode<T> list )
         {
-            if (list == null)
+            if ( list == null )
             {
                 return;
             }
 
-            if (node == null)
+            if ( node == null )
             {
                 node = list.Clone();
             }
@@ -131,32 +128,31 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// <param name="node">Reference to the head node. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">The value to remove.</param>
         /// <returns><c>true</c> if the node was found and removed, otherwise <c>false</c>.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        public static bool Remove(ref SimpleLinkedListNode<T>? node, T value)
+        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
+        public static bool Remove( ref SimpleLinkedListNode<T>? node, T value )
         {
-            if (node == null)
+            if ( node == null )
             {
                 return false;
             }
-            else if ((value == null && node.Value == null) || Equals(node.Value, value))
+
+            if ( (value == null && node.Value == null) || Equals( node.Value, value ) )
             {
                 node = node.Next;
                 return true;
             }
-            else
+
+            SimpleLinkedListNode<T> previousNode = node;
+
+            for ( var cursor = node.Next; cursor != null; cursor = cursor.Next )
             {
-                SimpleLinkedListNode<T> previousNode = node;
-
-                for (var cursor = node.Next; cursor != null; cursor = cursor.Next)
+                if ( (value == null && cursor.Value == null) || Equals( cursor.Value, value ) )
                 {
-                    if ((value == null && cursor.Value == null) || Equals(cursor.Value, value))
-                    {
-                        previousNode.Next = cursor.Next;
-                        return true;
-                    }
-
-                    previousNode = cursor;
+                    previousNode.Next = cursor.Next;
+                    return true;
                 }
+
+                previousNode = cursor;
             }
 
             return false;
@@ -168,16 +164,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// <returns>A copy of the current node.</returns>
         private SimpleLinkedListNode<T> Clone()
         {
-            SimpleLinkedListNode<T> clonedRoot = new SimpleLinkedListNode<T>();
+            SimpleLinkedListNode<T> clonedRoot = new();
 
             SimpleLinkedListNode<T> cursor = this;
             SimpleLinkedListNode<T> clonedCursor = clonedRoot;
 
-            while (true)
+            while ( true )
             {
                 clonedRoot.Value = cursor.Value;
 
-                if (cursor.Next != null)
+                if ( cursor.Next != null )
                 {
                     clonedCursor.Next = new SimpleLinkedListNode<T>();
                     clonedCursor = clonedCursor.Next;

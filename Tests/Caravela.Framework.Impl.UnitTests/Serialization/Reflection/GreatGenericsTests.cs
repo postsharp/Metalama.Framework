@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
@@ -115,27 +116,27 @@ class User {
 
         private void TestSerializable( string context, IType type, Action<Type> withResult, string expectedCode )
         {
-            this.TestExpression<Type>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( type ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<Type>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( type ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IMethod method, Action<MethodInfo> withResult, string expectedCode )
         {
-            this.TestExpression<MethodInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( method ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<MethodInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeMethodInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
         {
-            this.TestExpression<ConstructorInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaConstructorInfo.Create( method ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<ConstructorInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeConstructorInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable<T>( string context, IProperty property, Action<T> withResult, string expectedCode )
         {
-            this.TestExpression<T>( context, CaravelaPropertyInfoTests.StripLocationInfo( this._serializers.SerializeToRoslynCreationExpression( CaravelaLocationInfo.Create( property ) ).ToString() ), withResult, expectedCode );
+            this.TestExpression<T>( context, CaravelaPropertyInfoTests.StripLocationInfo( this._serializers.SerializeToRoslynCreationExpression( CompileTimeLocationInfo.Create( property ) ).ToString() ), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IEvent @event, Action<EventInfo> withResult, string expectedCode )
         {
-            this.TestExpression<EventInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaEventInfo.Create( @event ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<EventInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeEventInfo.Create( @event ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestExpression<T>( string context, string expression, Action<T> withResult, string expectedCode )

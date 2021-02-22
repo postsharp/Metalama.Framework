@@ -1,35 +1,51 @@
 ﻿using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.CodeModel;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectTypeFactory
     {
+        private readonly CompilationModel _compilation;
         private readonly AspectDriverFactory _aspectDriverFactory;
-        private readonly CompileTimeAssemblyLoader _compileTimeAssemblyLoader;
 
         private readonly Dictionary<INamedType, AspectType> _aspectTypes = new();
 
-        public AspectTypeFactory( AspectDriverFactory aspectDriverFactory, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        public AspectTypeFactory( CompilationModel compilation, AspectDriverFactory aspectDriverFactory )
         {
+            this._compilation = compilation;
             this._aspectDriverFactory = aspectDriverFactory;
-            this._compileTimeAssemblyLoader = compileTimeAssemblyLoader;
         }
 
-        public AspectType GetAspectType( INamedType attributeType )
+        public IEnumerable<AspectType> GetAspectTypes(  IEnumerable<INamedType> attributeTypes )
         {
-            if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
+
+            foreach ( var attributeType in attributeTypes.OrderBy( at => this._compilation.GetDepth( at ) ) )
             {
-                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
+                AspectType? baseAspectType;
+                if ( attributeType.BaseType != null )
+                {
+                    _ = this._aspectTypes.TryGetValue( attributeType.BaseType, out baseAspectType );
+                }
+                else
+                {
+                    baseAspectType = null;
+                }
+                
+                if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
+                {
+                    var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                // TODO: create AspectLayers properly
-                aspectType = new( attributeType, aspectDriver, this._compileTimeAssemblyLoader );
+                    aspectType = new ( attributeType, baseAspectType, aspectDriver );
 
-                this._aspectTypes.Add( attributeType, aspectType );
+                    this._aspectTypes.Add( attributeType, aspectType );
+                }    
             }
+            
+            
 
-            return aspectType;
+            return attributeTypes.Select( at => this._aspectTypes[at] );
         }
     }
 }

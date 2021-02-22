@@ -132,17 +132,21 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create aspect types.
             var driverFactory = new AspectDriverFactory( compilation, this.Context.Plugins );
-            var aspectTypeFactory = new AspectTypeFactory( driverFactory, this.CompileTimeAssemblyLoader );
+            var aspectTypeFactory = new AspectTypeFactory( compilation, driverFactory );
 
-            var aspectTypes = GetAspectTypes( compilation )
-                .Select( at => aspectTypeFactory.GetAspectType( at ) );
+
+            var aspectTypes = aspectTypeFactory.GetAspectTypes( GetAspectTypes( compilation ) ).ToImmutableArray();
             
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
-                .SelectMany( at => at.UnorderedLayers )
+                .SelectMany( at => at.Layers )
                 .ToImmutableArray();
 
-            var aspectOrderSources = new[] {new AttributeAspectOrderingSource( compilation, this.CompileTimeAssemblyLoader )};
+            var aspectOrderSources = new IAspectOrderingSource[]
+            {
+                new AttributeAspectOrderingSource( compilation ),
+                new AspectLayerOrderingSource( aspectTypes )
+            };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, this.Context.ReportDiagnostic, out var sortedAspectLayers ) )
             {
@@ -150,15 +154,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
             
-            this.AspectLayers = sortedAspectLayers
-                .ToImmutableArray();
-
-            // Update the aspects back with an ordered list of parts (not sure why we would need that).
-            foreach ( var aspectType in aspectTypes )
-            {
-                aspectType.UpdateFromOrderedParts( sortedAspectLayers );
-            }
-
+            this.AspectLayers = sortedAspectLayers.ToImmutableArray();
+            
             this.Stages = this.AspectLayers
                 .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compilation, this.CompileTimeAssemblyLoader ) )
@@ -186,7 +183,8 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var iAspect = compilation.Factory.GetTypeByReflectionType( typeof( IAspect ) )!;
 
-            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) && !t.IsAbstract);
+            // We need to return abstract classes but not interfaces.
+            return compilation.DeclaredAndReferencedTypes.Where( t => t.Is( iAspect ) && t.TypeKind == TypeKind.Class);
         }
 
         private static object GetGroupingKey( IAspectDriver driver ) =>
@@ -203,12 +201,12 @@ namespace Caravela.Framework.Impl.Pipeline
             };
 
         /// <summary>
-        /// Creates an instance of <see cref="HighLevelAspectsPipelineStage"/>.
+        /// Creates an instance of <see cref="HighLevelPipelineStage"/>.
         /// </summary>
         /// <param name="parts"></param>
         /// <param name="compileTimeAssemblyLoader"></param>
         /// <returns></returns>
-        protected abstract HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
+        protected abstract HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
 
         private PipelineStage CreateStage( object groupKey, IReadOnlyList<OrderedAspectLayer> parts, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
@@ -218,7 +216,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
+                    return new LowLevelPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
 
                 case nameof( AspectDriver ):
 

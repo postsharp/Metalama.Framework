@@ -46,8 +46,8 @@ namespace Caravela.Framework.Impl.Transformations
             {
                 // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
                 string methodName =
-                    this.Advice.PartName != null
-                        ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
+                    this.Advice.LayerName != null
+                        ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.LayerName}"
                         : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
 
                 // TODO: This is temporary.
