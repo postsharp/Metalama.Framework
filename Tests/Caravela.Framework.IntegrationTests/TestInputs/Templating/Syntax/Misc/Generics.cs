@@ -1,3 +1,4 @@
+#pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
 using System;
 using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
