@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-        protected internal override ISymbol Symbol => this.ParameterSymbol;
+        public override ISymbol Symbol => this.ParameterSymbol;
 
         public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
         IParameter ICodeElementLink<IParameter>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<IParameter>( compilation );

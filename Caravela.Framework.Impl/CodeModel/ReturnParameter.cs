@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IMember DeclaringMember { get; }
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         public ICodeElement? ContainingElement => this.DeclaringMember;
 
         public abstract IAttributeList Attributes { get; }

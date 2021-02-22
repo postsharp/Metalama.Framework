@@ -2,6 +2,7 @@
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,13 +16,13 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : Member, INamedType, ITypeInternal, ICodeElementLink<INamedType>
+    internal sealed class NamedType : Member, INamedType, ITypeInternal, ICodeElementLink<INamedType>, ISdkNamedType
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
+        ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
 
-        protected internal override ISymbol Symbol => this.TypeSymbol;
+        public override ISymbol Symbol => this.TypeSymbol;
 
         internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {

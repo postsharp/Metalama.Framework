@@ -215,5 +215,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public ICompilation GetForCompilation( CompilationModel compilation ) => compilation;
 
         public object? Target => this.RoslynCompilation;
+        
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
     }
 }

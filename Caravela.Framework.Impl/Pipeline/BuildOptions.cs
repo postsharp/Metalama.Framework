@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
@@ -18,6 +20,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool MapPdbToTransformedCode => this.GetBooleanOption( "CaravelaDebugTransformedCode" );
 
         public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
+
+        public string CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
         public bool WriteUnhandledExceptionsToFile => true;
 

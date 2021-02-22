@@ -3,6 +3,9 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -10,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this._typeSymbol;
+        ITypeSymbol? ISdkType.TypeSymbol => this._typeSymbol;
 
         internal GenericParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {
@@ -41,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        protected internal override ISymbol Symbol => this._typeSymbol;
+        public override ISymbol Symbol => this._typeSymbol;
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 

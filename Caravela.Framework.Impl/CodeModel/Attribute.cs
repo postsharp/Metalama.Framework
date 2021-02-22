@@ -22,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this.ContainingElement = containingElement;
         }
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         public ICodeElement ContainingElement { get; }
 
         IAttributeList ICodeElement.Attributes => AttributeList.Empty;

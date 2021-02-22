@@ -27,6 +27,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+
         public ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Builder );
 
         [Memo]

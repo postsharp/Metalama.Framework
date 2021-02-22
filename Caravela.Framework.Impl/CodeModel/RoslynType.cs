@@ -1,4 +1,5 @@
 using Caravela.Framework.Code;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this.Symbol;
+        ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;
 
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
         public override string ToString() => this.Symbol.ToString();

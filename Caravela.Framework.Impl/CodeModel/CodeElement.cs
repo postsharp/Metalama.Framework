@@ -3,13 +3,14 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     
-    internal abstract class CodeElement : ICodeElement, IHasDiagnosticLocation, ICodeElementLink<ICodeElement>
+    internal abstract class CodeElement : ISdkCodeElement, IHasDiagnosticLocation, ICodeElementLink<ICodeElement>
     {
         protected CodeElement( CompilationModel compilation )
         {
@@ -19,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel
         internal CompilationModel Compilation { get; }
 
         ICompilation ICodeElement.Compilation => this.Compilation;
+
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
         [Memo]
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
@@ -32,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract CodeElementKind ElementKind { get; }
 
-        protected internal abstract ISymbol Symbol { get; }
+        public abstract ISymbol Symbol { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override CodeElementKind ElementKind => CodeElementKind.Field;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public override ISymbol Symbol => this._symbol;
 
         public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
         {

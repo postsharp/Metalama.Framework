@@ -24,6 +24,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
 
         public override ICodeElement ContainingElement { get; }
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+
+        ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
 
         IAttributeList ICodeElement.Attributes => AttributeList.Empty;
 
