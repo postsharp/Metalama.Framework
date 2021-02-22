@@ -11,7 +11,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForTests.SimpleF
         dynamic Template()
         {
 
-
             for (int i = 0; i < 3; i++)
             {
                 try
@@ -23,7 +22,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForTests.SimpleF
                 }
 
             }
-
 
             throw new Exception();
         }

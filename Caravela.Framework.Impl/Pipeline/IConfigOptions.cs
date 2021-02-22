@@ -17,15 +17,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
     public interface IBuildOptions
     {
-         bool AttachDebugger { get; }
-         bool MapPdbToTransformedCode { get; }
-         
-         /// <summary>
-         /// Gets the directory in which the code for the compile-time assembly should be stored, or a null or empty
-         /// string to mean that the generated code should not be stored.
-         /// </summary>
-         string? CompileTimeProjectDirectory { get; }
-         
+        bool AttachDebugger { get; }
+        bool MapPdbToTransformedCode { get; }
+
+        /// <summary>
+        /// Gets the directory in which the code for the compile-time assembly should be stored, or a null or empty
+        /// string to mean that the generated code should not be stored.
+        /// </summary>
+        string? CompileTimeProjectDirectory { get; }
     }
 
     /// <summary>
@@ -60,10 +59,10 @@ namespace Caravela.Framework.Impl.Pipeline
                 return defaultValue;
             }
         }
-        
+
         private string? GetStringOption( string name, string defaultValue = null )
         {
-            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString )  )
+            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) )
             {
                 return flagString;
             }

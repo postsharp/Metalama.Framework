@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl
     {
         public static T GetService<T>( this IServiceProvider serviceProvider )
         {
-            var service = (T?) serviceProvider.GetService( typeof(T) );
+            var service = (T?) serviceProvider.GetService( typeof( T ) );
             if ( service == null )
             {
                 throw new AssertionFailedException();
@@ -14,7 +14,5 @@ namespace Caravela.Framework.Impl
 
             return service;
         }
-        
-        
     }
 }

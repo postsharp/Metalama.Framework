@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
@@ -28,8 +26,8 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 
             private readonly TemplateCompiler _templateCompiler;
             private bool _addTemplateUsings;
+            private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
 
-            readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
             public bool Success { get; private set; } = true;
 
             public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
@@ -42,7 +40,6 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                 this._templateCompiler = templateCompiler;
             }
 
-           
             public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 node = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
@@ -117,7 +114,6 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                     var success =
                         this._templateCompiler.TryCompile( node, this.Compilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
 
-                    
                     if ( success )
                     {
                         this._addTemplateUsings = true;

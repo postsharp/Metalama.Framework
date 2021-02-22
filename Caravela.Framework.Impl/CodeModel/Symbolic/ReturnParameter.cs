@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract IType ParameterType { get; }
 
-        public string Name => throw new NotSupportedException("Cannot get the name of a return parameter.");
+        public string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
 
         public int Index => -1;
 

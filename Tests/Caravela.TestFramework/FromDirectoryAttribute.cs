@@ -26,7 +26,7 @@ namespace Caravela.TestFramework
             // Debugger.Launch();
 
             var projectDirectory = TestEnvironment.GetProjectDirectory( testMethod.DeclaringType!.Assembly );
-            
+
             List<object[]> tests = new();
 
             void AddTestsInDirectory( string dirPath )

@@ -76,7 +76,7 @@ namespace Caravela.TestFramework.Templating
 
             var unsupportedSyntaxKinds = new HashSet<SyntaxKind>();
             var unsupportedDiagnostics = testResult.Diagnostics
-                .Where(d => d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) );
+                .Where( d => d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) );
 
             foreach ( var diagnostic in unsupportedDiagnostics )
             {

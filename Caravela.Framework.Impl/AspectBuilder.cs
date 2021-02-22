@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -14,7 +11,7 @@ namespace Caravela.Framework.Impl
         where T : class, ICodeElement
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
-        
+
         public UserDiagnosticList UserDiagnostics { get; } = new UserDiagnosticList();
 
         public T TargetDeclaration { get; }
@@ -33,11 +30,9 @@ namespace Caravela.Framework.Impl
         }
 
         internal AspectInstanceResult ToResult() =>
-            new( 
-                 this.UserDiagnostics.ToImmutableArray(), 
-                this._declarativeAdvices.AddRange( this._adviceFactory.Advices ), 
-                ImmutableList.Create<IAspectSource>() );
-
-
+            new(
+                 this.UserDiagnostics.ToImmutableArray(),
+                 this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
+                 ImmutableList.Create<IAspectSource>() );
     }
 }

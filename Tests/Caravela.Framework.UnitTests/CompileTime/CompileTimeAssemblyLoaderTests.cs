@@ -41,15 +41,15 @@ class A : Attribute
             var roslynCompilation = CreateRoslynCompilation( code );
             var compilation = new CompilationModel( roslynCompilation );
 
-            var builder = new CompileTimeAssemblyBuilder(serviceProvider, roslynCompilation );
-            var loader = new CompileTimeAssemblyLoader(serviceProvider, roslynCompilation, builder );
+            var builder = new CompileTimeAssemblyBuilder( serviceProvider, roslynCompilation );
+            var loader = new CompileTimeAssemblyLoader( serviceProvider, roslynCompilation, builder );
 
             var attribute = Xunit.Assert.IsAssignableFrom<System.Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
             Xunit.Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
         }
     }
 
-    class Options : IBuildOptions
+    internal class Options : IBuildOptions
     {
         public bool AttachDebugger => throw new System.NotImplementedException();
 

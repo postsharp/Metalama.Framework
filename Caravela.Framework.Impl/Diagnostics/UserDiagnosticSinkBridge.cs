@@ -4,13 +4,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-
     /// <summary>
     /// An implementation of <see cref="IUserDiagnosticSink"/> that writes into a <see cref="IDiagnosticSink"/>.
     /// </summary>
     internal class UserDiagnosticSinkBridge : UserDiagnosticSink
-    { 
-        private IDiagnosticSink _sink;
+    {
+        private readonly IDiagnosticSink _sink;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserDiagnosticSinkBridge"/> class.
@@ -20,7 +19,6 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             this._sink = sink;
         }
-
 
         /// <inheritdoc/>
         protected override void Report( Diagnostic diagnostic ) => this._sink.AddDiagnostic( diagnostic );

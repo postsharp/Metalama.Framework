@@ -26,7 +26,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.TypeO
         }
     }
 
-
     [CompileTime]
     public class MyClass1 { }
 

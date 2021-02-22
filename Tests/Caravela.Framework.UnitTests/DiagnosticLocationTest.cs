@@ -12,7 +12,7 @@ namespace Caravela.Framework.UnitTests
         [Fact]
         public void TestLocations()
         {
-            
+
             var code = @"
 class C<T> : object
 {
@@ -29,7 +29,7 @@ class C<T> : object
 
             var type = compilation.DeclaredTypes.Single();
             var method = type.Methods.OfName( "Method" ).Single();
-            
+
             // Type
             AssertLocation( "C", type.GetLocation() );
             AssertLocation( "T", type.GenericParameters.Single().GetLocation() );
@@ -43,7 +43,7 @@ class C<T> : object
             AssertLocation( "M", method.GenericParameters.Single().GetLocation() );
             AssertLocation( "parameter", method.Parameters.Single().GetLocation() );
             AssertLocation( "Method", method.ReturnParameter.GetLocation() );
-            
+
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetLocation() );
             var property = type.Properties.OfName( "Property" ).Single();
@@ -65,6 +65,5 @@ class C<T> : object
 
             Xunit.Assert.Equal( expectedText, actualText );
         }
-
     }
 }

@@ -46,18 +46,18 @@ class TargetCode
                 toString.Invoke(
                     new RuntimeExpression( (ExpressionSyntax) generator.ThisExpression() ),
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ),
-                @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))");
+                @"((global::TargetCode)(this)).ToString((global::System.String)(""x""))" );
 
             AssertEx.DynamicEquals(
                 toString.Invoke(
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 42 ) ),
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( 43 ) ) ),
-                @"((global::TargetCode)(42)).ToString((global::System.String)(43))");
+                @"((global::TargetCode)(42)).ToString((global::System.String)(43))" );
 
             // Test static call.
             AssertEx.DynamicEquals(
                 fooMethod.Invoke( null ),
-                @"global::TargetCode.Foo()");
+                @"global::TargetCode.Foo()" );
 
             // Test exception related to the 'instance' parameter.
             AssertEx.ThrowsWithDiagnostic(
@@ -71,7 +71,7 @@ class TargetCode
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
 
             // Test in/out.
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
             AssertEx.DynamicEquals(
                 byRefMethod.Invoke(
                     null,
@@ -84,7 +84,7 @@ class TargetCode
                 () => byRefMethod.Invoke(
                         null,
                         new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
-                        new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ));
+                        new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ) );
         }
 
         [Fact]

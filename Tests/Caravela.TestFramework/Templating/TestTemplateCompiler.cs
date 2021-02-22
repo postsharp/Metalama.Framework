@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

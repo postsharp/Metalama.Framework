@@ -43,7 +43,7 @@ namespace Caravela.TestFramework.Templating
 
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
             var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );
-            if ( roslynTargetMethodSymbol == null)
+            if ( roslynTargetMethodSymbol == null )
             {
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
@@ -64,7 +64,7 @@ namespace Caravela.TestFramework.Templating
 
         public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
 
-        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => _diagnostics;
+        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => this._diagnostics;
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

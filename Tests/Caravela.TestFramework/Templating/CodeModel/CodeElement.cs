@@ -19,7 +19,7 @@ namespace Caravela.TestFramework.Templating.CodeModel
         internal CompilationModel Compilation { get; }
 
         ICompilation ICodeElement.Compilation => this.Compilation;
-        
+
         public virtual ICodeElement? ContainingElement => throw new NotImplementedException();
 
         public IReadOnlyList<IAttribute> Attributes => throw new NotImplementedException();

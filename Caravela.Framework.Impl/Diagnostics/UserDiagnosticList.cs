@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     internal class UserDiagnosticList : UserDiagnosticSink, IReadOnlyList<Diagnostic>
     {
-        
+
         private List<Diagnostic>? _diagnostics;
 
         /// <inheritdoc/>
@@ -19,13 +19,13 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._diagnostics ??= new List<Diagnostic>();
             this._diagnostics.Add( diagnostic );
         }
-        
+
         public IEnumerator<Diagnostic> GetEnumerator() => this._diagnostics?.GetEnumerator() ?? Enumerable.Empty<Diagnostic>().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public int Count => this._diagnostics?.Count ?? 0;
 
-        public Diagnostic this[ int index ] => this._diagnostics.AssertNotNull()[index];
+        public Diagnostic this[int index] => this._diagnostics.AssertNotNull()[index];
     }
 }

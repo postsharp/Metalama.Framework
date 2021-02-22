@@ -4,10 +4,8 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -17,9 +15,9 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly IMethod _targetMethod;
 
-        public TemplateExpansionContext( 
+        public TemplateExpansionContext(
             object templateInstance,
-            IMethod targetMethod, 
+            IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl )
         {
@@ -47,7 +45,7 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
+            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
             {
                 return ReturnStatement();
             }

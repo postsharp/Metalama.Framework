@@ -29,6 +29,5 @@ namespace Caravela.Framework.IntegrationTests.Aspects
             Assert.False( testResult.Success );
             Assert.Contains( testResult.Diagnostics.Where( d => d.Severity != DiagnosticSeverity.Hidden ), d => d.Id == "MY001" );
         }
-
     }
 }

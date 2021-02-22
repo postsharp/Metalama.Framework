@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            using CompileTimeAspectPipeline pipeline = new( new AspectPipelineContext( transformerContext ));
+            using CompileTimeAspectPipeline pipeline = new( new AspectPipelineContext( transformerContext ) );
             if ( pipeline.TryExecute( out var compilation ) )
             {
                 return compilation;

@@ -6,10 +6,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInit
 {
     public class ErrorAttribute : Attribute, IAspect<IMethod>
     {
-        public static Framework.Diagnostics.DiagnosticDescriptor Error1 = new( "MY001", Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}." );
-        public void Initialize( IAspectBuilder<IMethod> aspectBuilder )
+        public static Framework.Diagnostics.DiagnosticDescriptor Error1 = new("MY001", Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}.");
+        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
-            Error1.Report( aspectBuilder.TargetDeclaration );
+            Error1.Report(aspectBuilder.TargetDeclaration);
         }
     }
 
@@ -17,10 +17,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInit
     internal class TargetClass
     {
         [Error]
-        public static int Add( int a, int b )
+        public static int Add(int a, int b)
         {
-            if ( a == 0 )
-                throw new ArgumentOutOfRangeException( nameof( a ) );
+            if (a == 0)
+                throw new ArgumentOutOfRangeException(nameof(a));
             return a + b;
         }
     }

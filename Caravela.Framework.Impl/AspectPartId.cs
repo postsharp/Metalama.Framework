@@ -9,9 +9,9 @@ namespace Caravela.Framework.Impl
         {
         }
 
-        public bool Equals(AspectPartId? other)
+        public bool Equals( AspectPartId? other )
         {
-            if ( object.ReferenceEquals(other, null) )
+            if ( object.ReferenceEquals( other, null ) )
             {
                 return false;
             }

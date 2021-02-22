@@ -23,12 +23,12 @@ namespace Caravela.Framework.Diagnostics
         /// Gets the diagnostic identifier.
         /// </summary>
         public string Id { get; }
-        
+
         /// <summary>
         /// Gets the message formatting string.
         /// </summary>
         public string MessageFormat { get; }
-        
+
         /// <summary>
         /// Gets the diagnostics severity.
         /// </summary>
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Diagnostics
             var diagnosticContext = DiagnosticContext.Current;
             diagnosticContext.Sink?.Report( target?.DiagnosticLocation ?? diagnosticContext.DefaultTarget?.DiagnosticLocation, this, args );
         }
-        
+
         /// <summary>
         /// Reports an instance of the current <see cref="DiagnosticDescriptor"/> for a given location. 
         /// </summary>
@@ -55,7 +55,7 @@ namespace Caravela.Framework.Diagnostics
             var diagnosticContext = DiagnosticContext.Current;
             diagnosticContext.Sink?.Report( location, this, args );
         }
-        
+
         /// <summary>
         /// Reports an instance of the current <see cref="DiagnosticDescriptor"/> for the default target in the current execution context.
         /// </summary>

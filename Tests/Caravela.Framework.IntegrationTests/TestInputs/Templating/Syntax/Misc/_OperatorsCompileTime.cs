@@ -46,7 +46,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.OperatorsC
             };
             bool y = (i >= 2);
 
-
             var t = (x, y);
             (x, y) = t;
 

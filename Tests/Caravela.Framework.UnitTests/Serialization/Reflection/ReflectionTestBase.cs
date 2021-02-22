@@ -1,4 +1,3 @@
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection

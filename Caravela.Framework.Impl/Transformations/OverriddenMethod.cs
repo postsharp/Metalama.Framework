@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
@@ -47,22 +46,22 @@ namespace Caravela.Framework.Impl.Transformations
                 this.Advice.PartName != null
                 ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
                 : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
-            
+
             Debug.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
 
             // TODO: This is temporary.
-            var expansionContext = new TemplateExpansionContext( 
+            var expansionContext = new TemplateExpansionContext(
                 this.Advice.Aspect.Aspect,
                 this.OverriddenDeclaration,
                 this.OverriddenDeclaration.Compilation,
-                new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ));
+                new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ) );
             var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            
+
             var newMethodBody = new TemplateDriver(
                 this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
                 .ExpandDeclaration( expansionContext );
 
-            var overrides = new[] 
+            var overrides = new[]
             {
                 new IntroducedMember(
                     this,

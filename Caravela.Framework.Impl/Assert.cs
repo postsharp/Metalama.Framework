@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -17,7 +16,7 @@ namespace Caravela.Framework.Impl
         {
             if ( !condition )
             {
-                throw new AssertionFailedException("Assertion failed: " + message + ".");
+                throw new AssertionFailedException( "Assertion failed: " + message + "." );
             }
         }
 

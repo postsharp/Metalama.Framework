@@ -28,7 +28,7 @@ namespace Caravela.TestFramework
         public SyntaxNode? TransformedTargetSyntax { get; set; }
 
         public SourceText? TransformedTargetSource { get; set; }
-        
+
         public bool Success { get; set; }
 
         void IDiagnosticSink.AddDiagnostic( Diagnostic diagnostic ) => this.Diagnostics.Add( diagnostic );

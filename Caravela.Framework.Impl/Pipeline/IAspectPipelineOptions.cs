@@ -10,6 +10,5 @@
         /// pipeline, and <c>true</c> for a compile-time pipeline.
         /// </summary>
         bool CanTransformCompilation { get; }
-        
     }
 }

@@ -8,18 +8,18 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging
     {
         public override dynamic OverrideMethod()
         {
-            Console.WriteLine( target.Method.ToDisplayString() + " started." );
+            Console.WriteLine(target.Method.ToDisplayString() + " started.");
 
             try
             {
                 dynamic result = proceed();
 
-                Console.WriteLine( target.Method.ToDisplayString() + " succeeded." );
+                Console.WriteLine(target.Method.ToDisplayString() + " succeeded.");
                 return result;
             }
-            catch ( Exception e )
+            catch (Exception e)
             {
-                Console.WriteLine( target.Method.ToDisplayString() + " failed: " + e.Message );
+                Console.WriteLine(target.Method.ToDisplayString() + " failed: " + e.Message);
                 throw;
             }
         }
@@ -29,10 +29,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging
     internal class TargetClass
     {
         [Log]
-        public static int Add( int a, int b )
+        public static int Add(int a, int b)
         {
-            if ( a == 0 )
-                throw new ArgumentOutOfRangeException( nameof( a ) );
+            if (a == 0)
+                throw new ArgumentOutOfRangeException(nameof(a));
             return a + b;
         }
     }

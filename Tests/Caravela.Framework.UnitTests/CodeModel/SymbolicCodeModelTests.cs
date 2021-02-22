@@ -117,7 +117,7 @@ class TestAttribute : Attribute
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
             Xunit.Assert.Equal( "TestAttribute", attribute.Type.FullName );
-            Xunit.Assert.Equal<IReadOnlyList<object>>( new object?[] { 42, "foo", null }, attribute.ConstructorArguments );
+            Xunit.Assert.Equal<IReadOnlyList<object>>( expected: new object?[] { 42, "foo", null }, actual: attribute.ConstructorArguments );
             var namedArguments = attribute.NamedArguments;
             Xunit.Assert.Equal( 2, namedArguments.Count );
             Xunit.Assert.Equal<object>( 1, namedArguments.GetByName( "E" ) );

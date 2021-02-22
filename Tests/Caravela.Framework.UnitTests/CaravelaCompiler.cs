@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.CompileTime;
-using Xunit;
 
 namespace Caravela.Framework.UnitTests
 {

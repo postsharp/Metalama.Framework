@@ -14,11 +14,11 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public static SyntaxTokenList GetSyntaxModifiers( this ICodeElement codeElement )
         {
-            if (codeElement is Method method)
+            if ( codeElement is Method method )
             {
                 return ((BaseMethodDeclarationSyntax) method.Symbol.DeclaringSyntaxReferences.Single().GetSyntax()).Modifiers;
             }
-            else if (codeElement is IMethod imethod)
+            else if ( codeElement is IMethod imethod )
             {
                 return TokenList(
                     new SyntaxToken?[]
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Transformations
                             TokenList(), // TODO: modifiers
                             ParseTypeName( p.ParameterType.ToDisplayString() ),
                             Identifier( p.Name! ),
-                            null ) ) ));
+                            null ) ) ) );
         }
 
         public static SyntaxList<TypeParameterConstraintClauseSyntax> GetSyntaxConstraintClauses( this IMethod method )

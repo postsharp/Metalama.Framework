@@ -100,10 +100,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
                         if ( !arg.IsReferenceable )
                         {
-                            throw new InvalidUserCodeException( 
+                            throw new InvalidUserCodeException(
                                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
-                                arg.Syntax, 
-                                parameter.Name, 
+                                arg.Syntax,
+                                parameter.Name,
                                 parameter.DeclaringMember );
                         }
 
