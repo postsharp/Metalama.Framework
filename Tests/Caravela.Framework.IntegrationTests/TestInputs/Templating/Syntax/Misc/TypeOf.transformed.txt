@@ -1,0 +1,6 @@
+{
+    Console.WriteLine("System.String");
+    Console.WriteLine(typeof(string).FullName);
+    Console.WriteLine("Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.TypeOf.MyClass1");
+    return a;
+}

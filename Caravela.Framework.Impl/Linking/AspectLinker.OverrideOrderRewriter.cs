@@ -19,8 +19,8 @@ namespace Caravela.Framework.Impl.Linking
             private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableMultiValueDictionary<ISymbol, IntroducedMember> _overrideLookup;
 
-            public OverrideOrderRewriter( 
-                CSharpCompilation compilation, 
+            public OverrideOrderRewriter(
+                CSharpCompilation compilation,
                 IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, 
                 ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
@@ -33,24 +33,24 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var newMembers = new List<MemberDeclarationSyntax>();
 
-                foreach (var member in node.Members)
+                foreach ( var member in node.Members )
                 {
-                    if (member is not MethodDeclarationSyntax methodDeclaration)
+                    if ( member is not MethodDeclarationSyntax methodDeclaration )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         continue;
-                    }    
+                    }
 
                     var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member );
 
                     var overrides = this._overrideLookup[originalSymbol];
 
-                    if (!overrides.IsEmpty)
+                    if ( !overrides.IsEmpty )
                     {
                         var lastOverride =
                             this._orderedAspectLayers
                             .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
-                            .Where(x => x.Value != null)
+                            .Where( x => x.Value != null )
                             .Last().Value;
 
                         // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Linking
                             Block(
                                 originalSymbol.ReturnsVoid
                                 ? ExpressionStatement( invocation )
-                                : ReturnStatement( invocation)
+                                : ReturnStatement( invocation )
                             ) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );

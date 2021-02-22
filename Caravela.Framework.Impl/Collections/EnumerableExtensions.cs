@@ -58,11 +58,11 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>( 
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue,
-            IEqualityComparer<TKey> keyComparer = null)
+            IEqualityComparer<TKey> keyComparer = null )
             where TKey : notnull
          => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
     }

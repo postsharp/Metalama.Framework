@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType ParameterType { get; set; }
 
-        public string Name => this._name ?? throw new NotSupportedException("Cannot get the name of a return parameter.");
+        public string Name => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
 
         public int Index { get; }
 

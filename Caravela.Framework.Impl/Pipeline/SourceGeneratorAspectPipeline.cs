@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public bool TryExecute( [NotNullWhen( true )] out IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees )
         {
-            
+
             if ( !this.TryExecuteCore( out var result ) )
             {
                 additionalSyntaxTrees = null;
@@ -32,7 +32,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public override bool CanTransformCompilation => false;
 
-        
         /// <inheritdoc/>
         protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new SourceGeneratorPipelineStage( parts, compileTimeAssemblyLoader, this );

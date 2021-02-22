@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Caravela.TestFramework;
+using Caravela.TestFramework.Templating;
 using Caravela.UnitTestFramework;
 using Xunit;
 using Xunit.Abstractions;

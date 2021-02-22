@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly IMethod _targetMethod;
 
-        public TemplateExpansionContext( 
+        public TemplateExpansionContext(
             object templateInstance,
-            IMethod targetMethod, 
+            IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl,
             DiagnosticSink diagnosticSink )
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
+            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
             {
                 return ReturnStatement();
             }

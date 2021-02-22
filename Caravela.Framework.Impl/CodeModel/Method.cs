@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 }
 
                 var name = this._method.GenericArguments.Any()
-                    ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName( 
+                    ? (SimpleNameSyntax) this._method.Compilation.SyntaxGenerator.GenericName(
                         this._method.Name,
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : IdentifierName( this._method.Name );

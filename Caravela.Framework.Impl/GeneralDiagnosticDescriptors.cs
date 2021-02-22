@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl
                 true );
 
         public static readonly DiagnosticDescriptor CannotFindType =
-            new("CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true);
+            new( "CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true );
         
         public static readonly DiagnosticDescriptor CycleInAspectOrdering =
             new("CR0021", "A cycle was found in aspect ordering.", "A cycle was found in the specifications of aspect ordering between the following aspect part: {0}.", _caravelaCategory, Error, true);
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl
             true );
         
         public static readonly DiagnosticDescriptor CannotAddAdviceToPreviousPipelineStep = new(
-            "CR0022",
+            "CR0023",
             "Cannot add an advice to a previous step of the compilation pipeline.",
             "The aspect {0} cannot add an advice to {1} because this declaration has already been processed.",
             _caravelaCategory,
