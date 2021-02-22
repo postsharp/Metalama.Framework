@@ -2,7 +2,7 @@
 {
     public static class CommonSnippets
     {
-        // TODO: Remove the namespaces that are required only in the compiled template. They should be added automatically during template compilation.
+        // TODO: The required namespaces should be added automatically during template compilation.
         public const string CaravelaUsings = @"
 using System.Collections.Generic;
 

@@ -23,8 +23,6 @@ namespace Caravela.TestFramework.Aspects
 
         public virtual async Task<TestResult> Run( string testName, string testSource )
         {
-            testSource = CommonSnippets.CaravelaUsings + testSource;
-
             // Source.
             var project = this.CreateProject();
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
