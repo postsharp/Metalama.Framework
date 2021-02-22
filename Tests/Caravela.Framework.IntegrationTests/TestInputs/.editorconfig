@@ -1,26 +1,4 @@
 root = true
 
-# ReSharper inspection severities
-
 [*.cs]
 dotnet_analyzer_diagnostic.severity = suggestion
-# IDE1006: Naming Styles
-#dotnet_diagnostic.IDE1006.severity = none
-
-# SA1310: Field names should not contain underscore
-#dotnet_diagnostic.SA1310.severity = none
-
-# SA1601: Partial elements should be documented
-#dotnet_diagnostic.SA1601.severity = none
-
-# SA1649: File name should match first type name
-#dotnet_diagnostic.SA1649.severity = none
-
-# SA1124: Do not use regions
-#dotnet_diagnostic.SA1124.severity = none
-
-# SA1503: Braces should not be omitted
-#dotnet_diagnostic.SA1503.severity = none
-
-# IDE0011: Add braces to 'if' statement
-#dotnet_diagnostic.IDE0011.severity = none

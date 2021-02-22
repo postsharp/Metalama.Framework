@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.TestFramework
 {
-    public static class TestSyntaxHelper
+    internal static class TestSyntaxHelper
     {
         public static TextSpan? FindRegionSpan( SyntaxNode? node, string regionName )
         {

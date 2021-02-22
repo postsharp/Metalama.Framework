@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.TestFramework.Templating
 {
-    public class UsedSyntaxKindsCollector : CSharpSyntaxWalker
+    internal class UsedSyntaxKindsCollector : CSharpSyntaxWalker
     {
         private bool _visitingTemplateClass;
 

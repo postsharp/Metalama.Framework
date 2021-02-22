@@ -21,19 +21,34 @@ using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.TestFramework.Templating
 {
+    /// <summary>
+    /// Executes template integration tests by compiling and expanding a template method in the input source file.
+    /// </summary>
     public class TemplateTestRunner
     {
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateTestRunner"/> class.
+        /// </summary>
         public TemplateTestRunner() : this( Array.Empty<CSharpSyntaxVisitor>() )
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateTestRunner"/> class.
+        /// </summary>
+        /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         public TemplateTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
         {
             this._testAnalyzers = testAnalyzers;
         }
 
+        /// <summary>
+        /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
+        /// </summary>
+        /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
+        /// <returns>The result of the test execution.</returns>
         public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
             var testSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
@@ -162,6 +177,10 @@ namespace Caravela.TestFramework.Templating
             return result;
         }
 
+        /// <summary>
+        /// Creates a new project that is used to compile the test source.
+        /// </summary>
+        /// <returns>A new project instance.</returns>
         protected virtual Project CreateProject()
         {
             var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
@@ -180,6 +199,11 @@ namespace Caravela.TestFramework.Templating
             return project;
         }
 
+        /// <summary>
+        /// Processes the diagnostics emitted during the test run.
+        /// </summary>
+        /// <param name="result">The current test result.</param>
+        /// <param name="diagnostics">The diagnostics to report.</param>
         protected virtual void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
         {
             result.Diagnostics.AddRange( diagnostics );

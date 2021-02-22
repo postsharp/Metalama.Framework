@@ -6,6 +6,9 @@ using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
+    /// <summary>
+    /// When applied on a test theory method specifies the directory from which to load the test source files for the given test theory method.
+    /// </summary>
     public class FromDirectoryAttribute : DataAttribute
     {
         private static readonly HashSet<string> _excludedDirectoryNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };

@@ -12,18 +12,44 @@ using Xunit.Abstractions;
 
 namespace Caravela.TestFramework.Templating
 {
+    /// <summary>
+    /// The base class for template integration tests.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// You can use <see cref="FromDirectoryAttribute"/> to execute one test method on many test inputs.
+    /// This is useful to write only one test method per category of tests.
+    /// </para>
+    /// </remarks>
     public abstract class TemplateUnitTestBase
     {
         private readonly ITestOutputHelper _logger;
 
+        /// <summary>
+        /// Gets the root directory path of the current test project.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The value of this property is read from <c>AssemblyMetadataAttribute</c> with <c>Key = "ProjectDirectory"</c>.
+        /// </para>
+        /// </remarks>
         protected string ProjectDirectory { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateUnitTestBase"/> class.
+        /// </summary>
+        /// <param name="logger">The Xunit logger.</param>
         public TemplateUnitTestBase( ITestOutputHelper logger )
         {
             this._logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
         }
 
+        /// <summary>
+        /// Runs the template test with the given path of the source file.
+        /// </summary>
+        /// <param name="relativeTestPath">The path of the test source file relative to the project directory.</param>
+        /// <returns>The result of the test execution.</returns>
         protected async Task<TestResult> RunTestAsync( string relativeTestPath )
         {
             var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
@@ -46,6 +72,11 @@ namespace Caravela.TestFramework.Templating
             return testResult;
         }
 
+        /// <summary>
+        /// Runs the template test with the given path of the source file and asserts that the result of the code transformation matches the expected result.
+        /// </summary>
+        /// <param name="relativeTestPath">The path of the test source file relative to the project directory.</param>
+        /// <returns>The async task.</returns>
         protected async Task AssertTransformedSourceEqualAsync( string relativeTestPath )
         {
             var testResult = await this.RunTestAsync( relativeTestPath );
@@ -67,7 +98,7 @@ namespace Caravela.TestFramework.Templating
             testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );
         }
 
-        protected async Task WriteSyntaxCoverageAsync( string relativeTestPath, TestResult testResult, UsedSyntaxKindsCollector usedSyntaxKindsCollector )
+        private async Task WriteSyntaxCoverageAsync( string relativeTestPath, TestResult testResult, UsedSyntaxKindsCollector usedSyntaxKindsCollector )
         {
             if ( !usedSyntaxKindsCollector.CollectedSyntaxKinds.Any() )
             {

@@ -17,11 +17,23 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.TestFramework.Aspects
 {
+    /// <summary>
+    /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
+    /// </summary>
     public class AspectTestRunner
     {
+        /// <summary>
+        /// Gets or sets a value indicating whether the test runner should handle or rethrow exceptions.
+        /// </summary>
         public bool HandlesException { get; set; } = true;
 
-        public virtual async Task<TestResult> Run( string testName, string testSource )
+        /// <summary>
+        /// Runs the aspect test with the given name and source.
+        /// </summary>
+        /// <param name="testName">The name of the test (usually the relative path to the test source file).</param>
+        /// <param name="testSource">The content of the test source file.</param>
+        /// <returns>The result of the test execution.</returns>
+        public virtual async Task<TestResult> RunAsync( string testName, string testSource )
         {
             // Source.
             var project = this.CreateProject();
@@ -68,6 +80,10 @@ namespace Caravela.TestFramework.Aspects
             return result;
         }
 
+        /// <summary>
+        /// Creates a new project that is used to compile the test source.
+        /// </summary>
+        /// <returns>A new project instance.</returns>
         protected virtual Project CreateProject()
         {
             var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
@@ -84,6 +100,10 @@ namespace Caravela.TestFramework.Aspects
             return project;
         }
 
+        /// <summary>
+        /// Gets a list of analyzers to invoke on the test source.
+        /// </summary>
+        /// <returns>A list of C# syntax visitors.</returns>
         protected virtual IEnumerable<CSharpSyntaxVisitor> GetTestAnalyzers()
         {
             yield break;

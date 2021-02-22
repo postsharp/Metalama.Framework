@@ -1,6 +1,6 @@
 ﻿namespace Caravela.TestFramework
 {
-    public static class CommonSnippets
+    internal static class CommonSnippets
     {
         // TODO: The required namespaces should be added automatically during template compilation.
         public const string CaravelaUsings = @"
