@@ -20,8 +20,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.TestFramework" />
-    <InternalsVisibleTo Include="Caravela.Framework.Impl.UnitTests" />
-    <InternalsVisibleTo Include="Caravela.Templating.UnitTests" />
+    <InternalsVisibleTo Include="Caravela.Framework.UnitTests" />
+    <InternalsVisibleTo Include="Caravela.Framework.IntegrationTests" />
     
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" GeneratePathProperty="true" />
     <None Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
@@ -96,7 +96,5 @@ namespace Caravela.Framework.Impl.CompileTime
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
     <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
   </Target>
-
-  
 
 </Project>

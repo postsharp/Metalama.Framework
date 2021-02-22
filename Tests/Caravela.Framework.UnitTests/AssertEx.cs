@@ -3,6 +3,7 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
+using Caravela.Framework.Impl;
 
 namespace Caravela.Framework.UnitTests
 {

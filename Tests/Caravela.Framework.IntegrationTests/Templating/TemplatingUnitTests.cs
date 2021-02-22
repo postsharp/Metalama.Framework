@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Caravela.TestFramework.Templating;
 using Caravela.UnitTestFramework;
@@ -39,9 +40,7 @@ namespace Caravela.Framework.IntegrationTests.Templating
         {
             var testResult = await this.RunTestAsync( testName );
             Assert.False( testResult.Success );
-            
-            // TODO: expose diagnostic ID's publicly in Caravela.Framework.Impl?
-            testResult.AssertContainsDiagnosticId( "CR0101" );
+            testResult.AssertContainsDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
     }
 }

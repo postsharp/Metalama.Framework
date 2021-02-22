@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using Xunit;
