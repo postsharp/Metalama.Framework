@@ -25,8 +25,8 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 " ).Usings;
 
             private readonly TemplateCompiler _templateCompiler;
-            private bool _addTemplateUsings;
             private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
+            private bool _addTemplateUsings;
 
             public bool Success { get; private set; } = true;
 

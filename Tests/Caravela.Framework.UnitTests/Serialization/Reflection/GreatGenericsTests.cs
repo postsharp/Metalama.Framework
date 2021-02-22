@@ -108,7 +108,7 @@ class User {
             this.TestSerializable( this._code, instantiatedBaseOrigin.Event( "Actioned" ), e =>
             {
                 Xunit.Assert.Equal( "Actioned", e.Name );
-                Xunit.Assert.Equal<Type>( typeof( Action<int> ), e.EventHandlerType );
+                Xunit.Assert.Equal<Type?>( typeof( Action<int> ), e.EventHandlerType );
             },
             @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")" );
         }

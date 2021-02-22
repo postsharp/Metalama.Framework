@@ -19,7 +19,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             {
                 Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
                 Xunit.Assert.Equal( "Method", info.Name );
-                Xunit.Assert.Equal<object>( 42, info.Invoke( null, new object[0] ) );
+                Xunit.Assert.Equal<object?>( 42, info.Invoke( null, new object[0] ) );
             } );
         }
 
@@ -34,7 +34,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             {
                 Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
                 Xunit.Assert.Equal( "Method", info.Name );
-                Xunit.Assert.Equal<object>( 42, info.MakeGenericMethod( new[] { typeof( int ) } ).Invoke( null, new object[] { 21 } ) );
+                Xunit.Assert.Equal<object?>( 42, info.MakeGenericMethod( new[] { typeof( int ) } ).Invoke( null, new object[] { 21 } ) );
             } );
         }
 

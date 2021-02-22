@@ -8,11 +8,9 @@ namespace Caravela.Framework.UnitTests
 {
     public class DiagnosticTests : TestBase
     {
-
         [Fact]
         public void TestLocations()
         {
-
             var code = @"
 class C<T> : object
 {

@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using System;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;
@@ -117,10 +117,10 @@ class TestAttribute : Attribute
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
             Xunit.Assert.Equal( "TestAttribute", attribute.Type.FullName );
-            Xunit.Assert.Equal<IReadOnlyList<object>>( expected: new object?[] { 42, "foo", null }, actual: attribute.ConstructorArguments );
+            Xunit.Assert.Equal<IReadOnlyList<object?>>( expected: new object?[] { 42, "foo", null }, actual: attribute.ConstructorArguments );
             var namedArguments = attribute.NamedArguments;
             Xunit.Assert.Equal( 2, namedArguments.Count );
-            Xunit.Assert.Equal<object>( 1, namedArguments.GetByName( "E" ) );
+            Xunit.Assert.Equal<object?>( 1, namedArguments.GetByName( "E" ) );
             var types = Xunit.Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName( "Types" ) );
             Xunit.Assert.Equal( 3, types.Count );
             var type0 = Xunit.Assert.IsAssignableFrom<INamedType>( types[0] );
@@ -196,12 +196,12 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select( t => t.ToString() ) );
 
             var method = type.Methods.First();
 
             Xunit.Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
-            Xunit.Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Xunit.Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).GenericArguments.Select( t => t.ToString() ) );
         }
 
         [Fact]
@@ -226,10 +226,10 @@ class MyAttribute : Attribute
             Xunit.Assert.Equal( 2, attributes.Length );
 
             Xunit.Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
-            Xunit.Assert.Equal( "a", Xunit.Assert.Single<object>( attributes[0].ConstructorArguments ) );
+            Xunit.Assert.Equal( "a", Xunit.Assert.Single<object?>( attributes[0].ConstructorArguments ) );
 
             Xunit.Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
-            Xunit.Assert.Equal( "m", Xunit.Assert.Single<object>( attributes[1].ConstructorArguments ) );
+            Xunit.Assert.Equal( "m", Xunit.Assert.Single<object?>( attributes[1].ConstructorArguments ) );
         }
 
         [Fact]
@@ -431,7 +431,7 @@ class C
                 Xunit.Assert.True( parameter.DefaultValue.HasValue );
             }
 
-            Xunit.Assert.Equal<object>( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( (Func<IParameter, object>) (p => p.DefaultValue.Value) ) );
+            Xunit.Assert.Equal<object?>( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue.Value ) );
         }
 
         [Fact]

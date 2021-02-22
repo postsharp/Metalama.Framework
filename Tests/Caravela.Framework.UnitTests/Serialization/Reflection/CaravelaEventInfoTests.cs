@@ -22,7 +22,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             {
                 Xunit.Assert.NotNull( info.AddMethod );
                 Xunit.Assert.NotNull( info.RemoveMethod );
-                Xunit.Assert.Equal<Type>( typeof( Action ), info.EventHandlerType );
+                Xunit.Assert.Equal<Type?>( typeof( Action ), info.EventHandlerType );
                 Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }
@@ -38,7 +38,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             {
                 Xunit.Assert.NotNull( info.AddMethod );
                 Xunit.Assert.NotNull( info.RemoveMethod );
-                Xunit.Assert.Equal<Type>( typeof( Action ), info.EventHandlerType );
+                Xunit.Assert.Equal<Type?>( typeof( Action ), info.EventHandlerType );
                 Xunit.Assert.Equal( "Target", info.DeclaringType!.Name );
             } );
         }

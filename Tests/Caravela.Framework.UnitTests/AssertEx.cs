@@ -1,7 +1,7 @@
 using System;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
-using Caravela.Framework.Impl;
 
 namespace Caravela.Framework.UnitTests
 {

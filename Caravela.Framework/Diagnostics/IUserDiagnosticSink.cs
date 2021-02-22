@@ -8,9 +8,9 @@
         /// <summary>
         /// Reports a diagnpstic.
         /// </summary>
-        /// <param name="location">Location</param>
-        /// <param name="descriptor">Descriptor</param>
-        /// <param name="args">Arguments of the formatting string</param>
+        /// <param name="location">Location.</param>
+        /// <param name="descriptor">Descriptor.</param>
+        /// <param name="args">Arguments of the formatting string.</param>
         void Report( IDiagnosticLocation? location, DiagnosticDescriptor descriptor, object[] args );
     }
 }
