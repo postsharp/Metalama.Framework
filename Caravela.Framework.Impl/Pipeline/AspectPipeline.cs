@@ -101,7 +101,18 @@ namespace Caravela.Framework.Impl.Pipeline
                     if ( this.WriteUnhandledExceptionsToFile )
                     {
                         var guid = Guid.NewGuid();
-                        var path = Path.Combine( Path.GetTempPath(), $"caravela-{exception.GetType().Name}-{guid}.txt" );
+                        var crashReportDirectory = this.Context.BuildOptions.CrashReportDirectory;
+                        if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
+                        {
+                            crashReportDirectory = Path.GetTempPath();
+                        }
+
+                        if ( !Directory.Exists( crashReportDirectory ) )
+                        {
+                            Directory.CreateDirectory( crashReportDirectory );
+                        }
+                        
+                        var path = Path.Combine( crashReportDirectory, $"caravela-{exception.GetType().Name}-{guid}.txt" );
                         try
                         {
                             File.WriteAllText( path, exception.ToString() );
@@ -188,7 +199,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelAspectsPipelineStage( weaver, compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
+                    return new LowLevelAspectsPipelineStage( weaver, (ISdkNamedType) compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
 
                 case nameof( AspectDriver ):
 

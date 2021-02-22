@@ -26,6 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract IMember DeclaringMember { get; }
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         public ICodeElement? ContainingElement => this.DeclaringMember;
 
         public abstract IReadOnlyList<IAttribute> Attributes { get; }

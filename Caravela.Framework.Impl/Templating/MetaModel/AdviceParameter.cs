@@ -30,6 +30,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public int Index => this._parameter.Index;
 
+        CodeOrigin ICodeElement.Origin => this._parameter.Origin;
+
         public ICodeElement? ContainingElement => this._parameter.ContainingElement;
 
         public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
