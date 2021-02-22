@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Caravela.TestFramework.Templating;
+using Caravela.UnitTestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -32,8 +33,15 @@ namespace Caravela.Framework.IntegrationTests.Templating
         [FromDirectory( @"TestInputs\Templating\Samples" )]
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
-        //[Theory]
-        //[FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
-        //public Task UnsupportedSyntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
+        public async Task UnsupportedSyntax( string testName )
+        {
+            var testResult = await this.RunTestAsync( testName );
+            Assert.False( testResult.Success );
+            
+            // TODO: expose diagnostic ID's publicly in Caravela.Framework.Impl?
+            testResult.AssertContainsDiagnosticId( "CR0101" );
+        }
     }
 }

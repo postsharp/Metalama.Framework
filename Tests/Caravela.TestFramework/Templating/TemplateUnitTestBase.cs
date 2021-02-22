@@ -33,6 +33,14 @@ namespace Caravela.TestFramework.Templating
             var testSource = await File.ReadAllTextAsync( sourceAbsolutePath );
             var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, testSource, null ) );
 
+            foreach ( var diagnostic in testResult.Diagnostics )
+            {
+                if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                {
+                    this._logger.WriteLine( diagnostic.ToString() );
+                }
+            }
+
             await this.WriteSyntaxCoverageAsync( relativeTestPath, testResult, usedSyntaxKindsCollector );
 
             return testResult;
@@ -41,14 +49,6 @@ namespace Caravela.TestFramework.Templating
         protected async Task AssertTransformedSourceEqualAsync( string relativeTestPath )
         {
             var testResult = await this.RunTestAsync( relativeTestPath );
-
-            foreach ( var diagnostic in testResult.Diagnostics )
-            {
-                if ( diagnostic.Severity == DiagnosticSeverity.Error )
-                {
-                    this._logger.WriteLine( diagnostic.ToString() );
-                }
-            }
 
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
