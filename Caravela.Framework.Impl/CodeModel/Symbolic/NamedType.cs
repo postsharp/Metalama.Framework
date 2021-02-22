@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,9 +18,9 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
-        ITypeSymbol ITypeInternal.TypeSymbol => this.TypeSymbol;
+        ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
 
-        protected internal override ISymbol Symbol => this.TypeSymbol;
+        public override ISymbol Symbol => this.TypeSymbol;
 
         internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
         {

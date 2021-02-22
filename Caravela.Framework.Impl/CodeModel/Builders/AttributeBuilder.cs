@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         bool IEquatable<ICodeElement>.Equals( ICodeElement other ) => throw new NotImplementedException();
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
+
         ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
 
         IReadOnlyList<IAttribute> ICodeElement.Attributes => Array.Empty<IAttribute>();

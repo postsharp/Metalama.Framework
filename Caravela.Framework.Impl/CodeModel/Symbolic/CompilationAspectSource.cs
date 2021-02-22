@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             this._compilation.AllAttributesByType.GetByKey( aspectType ).Select( attribute =>
             {
                 var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
-                return new AspectInstance( aspect, attribute.ContainingElement!, attribute.Type );
+                return new AspectInstance( aspect, (ISdkCodeElement) attribute.ContainingElement!, attribute.Type );
             } );
     }
 }

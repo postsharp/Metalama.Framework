@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public override CodeElementKind ElementKind => CodeElementKind.Field;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public override ISymbol Symbol => this._symbol;
 
         public Field( IFieldSymbol symbol, NamedType containingElement ) : base( containingElement.Compilation )
         {

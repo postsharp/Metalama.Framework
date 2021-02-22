@@ -4,12 +4,13 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {
-    internal abstract class CodeElement : ICodeElement, IHasDiagnosticLocation
+    internal abstract class CodeElement : ISdkCodeElement, IHasDiagnosticLocation
     {
         protected CodeElement( CompilationModel compilation )
         {
@@ -19,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
         internal CompilationModel Compilation { get; }
 
         ICompilation ICodeElement.Compilation => this.Compilation;
+
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
         [Memo]
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
@@ -31,9 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public abstract CodeElementKind ElementKind { get; }
 
-        protected internal abstract ISymbol Symbol { get; }
-
-        private IEnumerable<CSharpSyntaxNode> ToSyntaxNodes() => this.Symbol.DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() );
+        public abstract ISymbol Symbol { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();

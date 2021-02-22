@@ -86,6 +86,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         ICodeElement? ICodeElement.ContainingElement => null;
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.Compilation;
