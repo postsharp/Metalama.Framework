@@ -4,12 +4,19 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInitialize
 {
-    public class ErrorAttribute : Attribute, IAspect<IMethod>
+    public class ErrorAttribute : OverrideMethodAspect
     {
-        public static Framework.Diagnostics.DiagnosticDescriptor Error1 = new("MY001", Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}.");
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
+        public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
-            Error1.Report(aspectBuilder.TargetDeclaration);
+            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Error");
+            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Warning, "MY002", "Warning");
+            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Info, "MY003", "Info");
+            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Hidden, "MY004", "Hidden");
+        }
+
+        public override dynamic? OverrideMethod()
+        {
+            throw new NotImplementedException("This code should not be emitted.");
         }
     }
 
@@ -20,7 +27,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInit
         public static int Add(int a, int b)
         {
             if (a == 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(a));
+            }
+
             return a + b;
         }
     }

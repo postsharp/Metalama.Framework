@@ -2,6 +2,7 @@ using System;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
+using Xunit;
 
 namespace Caravela.Framework.UnitTests
 {
@@ -26,7 +27,7 @@ namespace Caravela.Framework.UnitTests
             }
             catch ( InvalidUserCodeException e )
             {
-                Assert.Contains(  e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
+                Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDescriptor.Id );
             }
         }
     }

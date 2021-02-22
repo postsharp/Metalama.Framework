@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
@@ -27,7 +26,6 @@ namespace Caravela.TestFramework.Templating
 
             this.Compilation = compilation;
             
-
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             this.TemplateInstance = Activator.CreateInstance( templateType )!;
 
@@ -67,7 +65,7 @@ namespace Caravela.TestFramework.Templating
 
         public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
 
-        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => _diagnostics;
+        DiagnosticSink ITemplateExpansionContext.DiagnosticSink => this._diagnostics;
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

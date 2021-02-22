@@ -6,11 +6,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromTemp
 {
     public class LogAttribute : OverrideMethodAspect
     {
-
-        public static Framework.Diagnostics.DiagnosticDescriptor Error1 = new("MY001", Framework.Diagnostics.DiagnosticSeverity.Error, "Invalid method {0}.");
         public override dynamic OverrideMethod()
         {
-            Error1.Report(target.Method);
+            target.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Invalid method.");
+
             return proceed();
         }
     }
