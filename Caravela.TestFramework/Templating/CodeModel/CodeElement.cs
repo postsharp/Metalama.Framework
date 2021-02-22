@@ -38,5 +38,7 @@ namespace Caravela.TestFramework.Templating.CodeModel
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 
         IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
+
+        public CodeOrigin Origin => CodeOrigin.Source;
     }
 }
