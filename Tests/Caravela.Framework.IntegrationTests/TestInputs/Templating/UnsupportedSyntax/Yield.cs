@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;

@@ -8,7 +8,7 @@ namespace Caravela.TestFramework.Templating
 {
     public class UsedSyntaxKindsCollector : CSharpSyntaxWalker
     {
-        private bool visitingTemplateClass;
+        private bool _visitingTemplateClass;
 
         public HashSet<SyntaxKind> CollectedSyntaxKinds { get; } = new HashSet<SyntaxKind>();
 
@@ -21,7 +21,7 @@ namespace Caravela.TestFramework.Templating
 
             base.Visit( node );
 
-            if ( this.visitingTemplateClass )
+            if ( this._visitingTemplateClass )
             {
                 this.CollectedSyntaxKinds.Add( node.Kind() );
             }
@@ -31,13 +31,13 @@ namespace Caravela.TestFramework.Templating
         {
             if ( node.Identifier.ValueText == "Aspect" )
             {
-                this.visitingTemplateClass = true;
+                this._visitingTemplateClass = true;
                 this.CollectedSyntaxKinds.Add( node.Kind() );
             }
 
             base.VisitClassDeclaration( node );
 
-            this.visitingTemplateClass = false;
+            this._visitingTemplateClass = false;
         }
     }
 }

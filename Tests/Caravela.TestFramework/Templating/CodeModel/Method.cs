@@ -49,7 +49,9 @@ namespace Caravela.TestFramework.Templating.CodeModel
 
         public bool IsVirtual => throw new NotImplementedException();
 
-        public INamedType? DeclaringType => this._symbol.ContainingType == null ? null : new NamedType( this._symbol.ContainingType, this._compilation );
+        public INamedType DeclaringType => this._symbol.ContainingType != null
+            ? new NamedType( this._symbol.ContainingType, this._compilation )
+            : throw new InvalidOperationException( "The method's declaring type is null." );
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
