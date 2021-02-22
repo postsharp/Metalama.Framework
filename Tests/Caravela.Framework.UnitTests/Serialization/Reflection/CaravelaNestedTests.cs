@@ -16,7 +16,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target.Sub""))", serialized );
 
-            TestExpression( code, serialized, ( Type info ) => Xunit.Assert.Equal( "Sub", info.Name ) );
+            TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Sub", info.Name ) );
         }
 
         private string SerializeType( string code )

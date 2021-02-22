@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.Name = name;
         }
 
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers();
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 

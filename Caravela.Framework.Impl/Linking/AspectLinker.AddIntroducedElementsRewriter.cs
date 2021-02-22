@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,6 +17,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
         {
+            private DiagnosticSink _diagnosticSink;
             private static int _id;
 
             private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
@@ -21,13 +26,14 @@ namespace Caravela.Framework.Impl.Linking
 
             public ImmutableMultiValueDictionary<IMemberIntroduction, int> IntroducedSyntax { get; private set; }
 
-            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions ) : base()
+            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions, DiagnosticSink diagnosticSink ) : base()
             {
+                this._diagnosticSink = diagnosticSink;
                 this._memberIntroductors = introductions.OfType<IMemberIntroduction>().ToList();
                 this._interfaceImplementationIntroductors = introductions.OfType<IInterfaceImplementationIntroduction>().ToList();
 
                 var introducedMembers = this._memberIntroductors
-                    .SelectMany( t => t.GetIntroducedMembers().Select( x => (Introductor: t, Introduced: x) ) )
+                    .SelectMany( t => t.GetIntroducedMembers( new MemberIntroductionContext(diagnosticSink) ).Select( x => (Introductor: t, Introduced: x) ) )
                     .ToList();
 
                 this._introducedMemberLookup = introducedMembers.ToMultiValueDictionary( x => x.Introductor.InsertPositionNode, x => x.Introduced );

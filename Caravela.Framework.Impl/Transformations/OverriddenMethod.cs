@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -39,48 +40,50 @@ namespace Caravela.Framework.Impl.Transformations
             :
             ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
-        public IEnumerable<IntroducedMember> GetIntroducedMembers()
+        public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
-            string methodName =
-                this.Advice.PartName != null
-                ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
-                : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
-
-            Debug.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
-
-            // TODO: This is temporary.
-            var expansionContext = new TemplateExpansionContext(
-                this.Advice.Aspect.Aspect,
-                this.OverriddenDeclaration,
-                this.OverriddenDeclaration.Compilation,
-                new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ) );
-            var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-
-            var newMethodBody = new TemplateDriver(
-                this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                .ExpandDeclaration( expansionContext );
-
-            var overrides = new[]
+            using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
             {
-                new IntroducedMember(
-                    this,
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifiers(),
-                        this.OverriddenDeclaration.GetSyntaxReturnType(),
-                        null,
-                        Identifier( methodName ),
-                        this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxParameterList(),
-                        this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
-                        newMethodBody,
-                        null),
-                    this.Advice.AspectPartId,
-                    IntroducedMemberSemantic.MethodOverride )
-            };
+                // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
+                string methodName =
+                    this.Advice.PartName != null
+                        ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
+                        : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
 
-            return overrides;
+                // TODO: This is temporary.
+                var expansionContext = new TemplateExpansionContext(
+                    this.Advice.Aspect.Aspect,
+                    this.OverriddenDeclaration,
+                    this.OverriddenDeclaration.Compilation,
+                    new ProceedInvokeMethod( this.OverriddenDeclaration, this.Advice.AspectPartId ),
+                    context.DiagnosticSink );
+                var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
+
+                var newMethodBody = new TemplateDriver(
+                        this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
+                    .ExpandDeclaration( expansionContext );
+
+                var overrides = new[]
+                {
+                    new IntroducedMember(
+                        this,
+                        MethodDeclaration(
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.GetSyntaxModifiers(),
+                            this.OverriddenDeclaration.GetSyntaxReturnType(),
+                            null,
+                            Identifier( methodName ),
+                            this.OverriddenDeclaration.GetSyntaxTypeParameterList(),
+                            this.OverriddenDeclaration.GetSyntaxParameterList(),
+                            this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
+                            newMethodBody,
+                            null ),
+                        this.Advice.AspectPartId,
+                        IntroducedMemberSemantic.MethodOverride )
+                };
+
+                return overrides;
+            }
         }
 
         public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();

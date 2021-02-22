@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Impl.Collections;
@@ -26,9 +27,8 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            UserDiagnosticList diagnostics = new();
-            using var diagnosticContext = DiagnosticContext.WithSink( diagnostics );
-
+            DiagnosticList diagnostics = new(null);
+            
             var intermediateCompilation = this._input.Compilation;
 
             var allTransformations =
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var oldSyntaxTree = syntaxTreeGroup.Key;
 
-                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new( syntaxTreeGroup.Value );
+                AddIntroducedElementsRewriter addIntroducedElementsRewriter = new( syntaxTreeGroup.Value, diagnostics );
 
                 var newRoot = addIntroducedElementsRewriter.Visit( oldSyntaxTree.GetRoot() );
 
@@ -129,16 +129,16 @@ namespace Caravela.Framework.Impl.Linking
                 .ToDictionary( x => x.Id, x => x.Node );
 
             var symbolOverrides =
-                transformationsBySyntaxTree.SelectMany( g =>
-                    g.Value
-                    .OfType<IOverriddenElement>()
-                    .OfType<IMemberIntroduction>()
-                    .SelectMany( mi => mi.GetIntroducedMembers() )
-                    .Select( x => ((IOverriddenElement) x.Introductor).OverriddenElement switch
-                     {
-                        Method method => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
-                        MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder ), IntroducedMember: x)
-                    } )
+                transformationsBySyntaxTree.SelectMany(g =>
+                   g.Value
+                   .OfType<IOverriddenElement>()
+                   .OfType<IMemberIntroduction>()
+                   .SelectMany(mi => mi.GetIntroducedMembers( new MemberIntroductionContext(diagnostics) ))
+                   .Select(x => ((IOverriddenElement)x.Introductor).OverriddenElement switch
+                   {
+                       Method method => ( Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
+                       MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder), IntroducedMember: x)
+                   })
                 );
 
             var symbolOverridesLookup =
@@ -155,11 +155,11 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( resultingCompilation, diagnostics );
+            return new AdviceLinkerResult( resultingCompilation, diagnostics.Diagnostics );
 
-            ISymbol FindInIntermediateCompilation( ICodeElement codeElement )
+            ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
             {
-                if ( codeElement is MethodBuilder method )
+                if (codeElement is MethodBuilder method)
                 {
                     var pair = intermediateIntroducedSyntax[method].Single();
                     var symbol = intermediateCompilation.GetSemanticModel( pair.Tree ).GetDeclaredSymbol( nodeAnnotationIds[pair.NodeAnnotationId] );

@@ -30,7 +30,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization
         private void AssertSerialization<T>( string expected, T? o )
         {
             var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
-            Xunit.Assert.Equal( expected, creationExpression );
+            Assert.Equal( expected, creationExpression );
         }
     }
 }

@@ -93,6 +93,8 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public static DiagnosticLocation? ToDiagnosticLocation( this Location? location )
-            => location == null ? null : new DiagnosticLocation( location );
+        {
+            return location == null ? null : new DiagnosticLocation( location );
+        }
     }
 }

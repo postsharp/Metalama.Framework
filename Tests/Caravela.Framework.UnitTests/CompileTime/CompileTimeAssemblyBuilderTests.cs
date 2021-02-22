@@ -36,7 +36,7 @@ namespace Foo
 
             var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
 
-            Xunit.Assert.Equal( expected, actual );
+            Assert.Equal( expected, actual );
         }
     }
 }

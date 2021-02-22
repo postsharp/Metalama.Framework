@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var parts = str.Split( '$' );
 
-            Debug.Assert( Enum.TryParse<LinkerAnnotationOrder>( parts[2], out var order ), "Invalid order." );
+            Invariant.Assert( Enum.TryParse<LinkerAnnotationOrder>( parts[2], out var order ), "Invalid order." );
 
             return new LinkerAnnotation( parts[0], parts[1] == "" ? null : parts[1], order );
         }

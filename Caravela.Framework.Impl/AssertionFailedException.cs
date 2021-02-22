@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl
         {
             if ( this.Diagnostics.Count == 0 )
             {
-                return this.ToString();
+                return base.ToString();
             }
             else
             {

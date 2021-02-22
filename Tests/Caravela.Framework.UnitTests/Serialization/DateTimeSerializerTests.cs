@@ -20,7 +20,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization
         {
             var serializer = new DateTimeSerializer();
             var dt = dateTime;
-            Xunit.Assert.Equal( "System.DateTime.FromBinary(" + dt.ToBinary().ToString() + "L)", serializer.Serialize( dt ).ToString() );
+            Assert.Equal( "System.DateTime.FromBinary(" + dt.ToBinary().ToString() + "L)", serializer.Serialize( dt ).ToString() );
         }
     }
 }

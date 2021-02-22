@@ -66,7 +66,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization
             foreach ( var t in typesToTest )
             {
                 var actualName = TypeNameUtility.ToCSharpQualifiedName( t.Value );
-                Xunit.Assert.Equal( t.Key, actualName );
+                Assert.Equal( t.Key, actualName );
             }
         }
     }

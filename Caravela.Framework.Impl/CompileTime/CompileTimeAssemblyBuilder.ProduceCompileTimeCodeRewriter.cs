@@ -89,10 +89,10 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                             switch ( member )
                             {
                                 case MethodDeclarationSyntax method:
-                                    members.AddRange( this.VisitMethodDeclaration( method ) );
+                                    members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
                                     break;
                                 case TypeDeclarationSyntax nestedType:
-                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ) );
+                                    members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ).AssertNotNull() );
                                     break;
                                 default:
                                     members.Add( member );
@@ -117,18 +117,20 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                     if ( success )
                     {
                         this._addTemplateUsings = true;
+                        
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
                     }
                     else
                     {
                         this.Success = false;
                     }
 
-                    yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
-                    yield return (MethodDeclarationSyntax) transformedNode!;
+                   
                 }
                 else
                 {
-                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!;
+                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
                 }
             }
 

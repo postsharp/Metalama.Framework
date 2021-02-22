@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,6 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, AspectPartResult aspectPartResult )
         {
             var transformations = aspectPartResult.Compilation.ObservableTransformations;
+            DiagnosticList diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 
@@ -56,7 +58,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     switch ( transformation )
                     {
                         case IMemberIntroduction memberIntroduction:
-                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers().Select( m => m.Syntax ).ToArray() );
+                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( new MemberIntroductionContext(diagnostics) ).Select( m => m.Syntax ).ToArray() );
                             break;
 
                         default:

@@ -317,7 +317,7 @@ namespace Caravela.Framework.Impl.Collections
         {
             var height = this._head.Height;
 
-            Debug.Assert( height > 0, "Height must be strictly positive." );
+            Invariant.Assert( height > 0, "Height must be strictly positive." );
 
             var updates = new NodeDistance[height];
             distanceFromHead = 1;

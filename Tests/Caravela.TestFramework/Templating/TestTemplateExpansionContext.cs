@@ -19,13 +19,14 @@ namespace Caravela.TestFramework.Templating
     internal class TestTemplateExpansionContext : ITemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
-        private readonly UserDiagnosticList _diagnostics = new UserDiagnosticList();
+        private readonly DiagnosticList _diagnostics;
 
         public TestTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
             this.Compilation = compilation;
+            
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             this.TemplateInstance = Activator.CreateInstance( templateType )!;
@@ -33,6 +34,8 @@ namespace Caravela.TestFramework.Templating
             var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             this._targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
+
+            this._diagnostics = new DiagnosticList( this._targetMethod.DiagnosticLocation );
 
             var roslynTargetType = roslynCompilation.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
@@ -64,7 +67,7 @@ namespace Caravela.TestFramework.Templating
 
         public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
 
-        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => this._diagnostics;
+        IUserDiagnosticSink? ITemplateExpansionContext.DiagnosticSink => _diagnostics;
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

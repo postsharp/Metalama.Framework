@@ -61,15 +61,15 @@ class User {
                 nested.Method( "Method21" ),
                 ( m ) =>
             {
-                Xunit.Assert.Equal( "T2", m.ReturnType.Name );
-                Xunit.Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
+                Assert.Equal( "T2", m.ReturnType.Name );
+                Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
             },
                 @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).TypeHandle)" );
 
-            this.TestSerializable( this._code, (descendant.BaseType!).Method( "Method21" ), ( m ) =>
+            this.TestSerializable( this._code, descendant.BaseType!.Method( "Method21" ), ( m ) =>
             {
-                Xunit.Assert.Equal( "T3", m.ReturnType.Name );
-                Xunit.Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
+                Assert.Equal( "T3", m.ReturnType.Name );
+                Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
             },
             @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).GetGenericArguments()[0]).TypeHandle)" );
         }
@@ -85,30 +85,30 @@ class User {
 
             this.TestSerializable( this._code, instantiatedNested.Method( "Method21" ), ( m ) =>
             {
-                Xunit.Assert.Equal( typeof( float ), m.ReturnType );
-                Xunit.Assert.Equal( typeof( string ), m.GetParameters()[0].ParameterType );
+                Assert.Equal( typeof( float ), m.ReturnType );
+                Assert.Equal( typeof( string ), m.GetParameters()[0].ParameterType );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)" );
             this.TestSerializable( this._code, instantiatedNested.Constructors.Single(), ( ConstructorInfo c ) =>
             {
-                Xunit.Assert.Equal( typeof( string ), c.DeclaringType!.GenericTypeArguments[0] );
-                Xunit.Assert.Equal( typeof( float ), c.DeclaringType.GenericTypeArguments[1] );
-                Xunit.Assert.Equal( typeof( int ), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
+                Assert.Equal( typeof( string ), c.DeclaringType!.GenericTypeArguments[0] );
+                Assert.Equal( typeof( float ), c.DeclaringType.GenericTypeArguments[1] );
+                Assert.Equal( typeof( int ), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.#ctor""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)" );
-            this.TestSerializable( this._code, ((INamedType) instantiatedNested.ContainingElement!).Method( "Method" ), m => Xunit.Assert.Equal( typeof( string ), m.ReturnType ), @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String""))).TypeHandle)" );
-            this.TestSerializable( this._code, instantiatedDescendant.Property( "Field" ), ( FieldInfo f ) => Xunit.Assert.Equal( typeof( float ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
-            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "Field" ), ( FieldInfo f ) => Xunit.Assert.Equal( typeof( int ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
-            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "privateField" ), ( FieldInfo f ) => Xunit.Assert.Equal( typeof( int ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetField(""privateField"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
-            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "Property" ), ( PropertyInfo p ) => Xunit.Assert.Equal( typeof( int ), p.PropertyType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetProperty(""Property"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
-            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "privateProperty" ), ( PropertyInfo p ) => Xunit.Assert.Equal( typeof( int ), p.PropertyType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetProperty(""privateProperty"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
+            this.TestSerializable( this._code, ((INamedType) instantiatedNested.ContainingElement!).Method( "Method" ), m => Assert.Equal( typeof( string ), m.ReturnType ), @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.Method(`0)~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String""))).TypeHandle)" );
+            this.TestSerializable( this._code, instantiatedDescendant.Property( "Field" ), ( FieldInfo f ) => Assert.Equal( typeof( float ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
+            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "Field" ), ( FieldInfo f ) => Assert.Equal( typeof( int ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
+            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "privateField" ), ( FieldInfo f ) => Assert.Equal( typeof( int ), f.FieldType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetField(""privateField"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
+            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "Property" ), ( PropertyInfo p ) => Assert.Equal( typeof( int ), p.PropertyType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetProperty(""Property"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
+            this.TestSerializable( this._code, instantiatedBaseOrigin.Property( "privateProperty" ), ( PropertyInfo p ) => Assert.Equal( typeof( int ), p.PropertyType ), @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetProperty(""privateProperty"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance)" );
             this.TestSerializable( this._code, instantiatedBaseOrigin, t =>
             {
-                Xunit.Assert.Equal( "Origin`1", t.Name );
-                Xunit.Assert.Equal( typeof( int ), t.GenericTypeArguments[0] );
+                Assert.Equal( "Origin`1", t.Name );
+                Assert.Equal( typeof( int ), t.GenericTypeArguments[0] );
             }, @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")))" );
             this.TestSerializable( this._code, instantiatedBaseOrigin.Event( "Actioned" ), e =>
             {
-                Xunit.Assert.Equal( "Actioned", e.Name );
-                Xunit.Assert.Equal<Type?>( typeof( Action<int> ), e.EventHandlerType );
+                Assert.Equal( "Actioned", e.Name );
+                Assert.Equal( typeof( Action<int> ), e.EventHandlerType );
             },
             @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")" );
         }

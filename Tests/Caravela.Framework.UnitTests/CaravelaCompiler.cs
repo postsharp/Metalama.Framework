@@ -47,7 +47,7 @@ namespace Caravela.Framework.UnitTests
 
             Task.WhenAll( completion, outputPromise ).Wait();
 
-            Xunit.Assert.True( process.ExitCode == 0, outputPromise.Result );
+            Assert.True( process.ExitCode == 0, outputPromise.Result );
 
             return Path.Combine( dir, "bin/Debug/net48/test.dll" );
         }
