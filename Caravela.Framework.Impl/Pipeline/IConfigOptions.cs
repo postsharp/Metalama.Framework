@@ -78,10 +78,10 @@ namespace Caravela.Framework.Impl.Pipeline
                 return defaultValue;
             }
         }
-        
+
         private string? GetStringOption( string name, string defaultValue = null )
         {
-            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString )  )
+            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) )
             {
                 return flagString;
             }

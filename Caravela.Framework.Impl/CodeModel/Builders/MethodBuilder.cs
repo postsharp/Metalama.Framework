@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     }
                     : null
                     );
-            
+
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
 

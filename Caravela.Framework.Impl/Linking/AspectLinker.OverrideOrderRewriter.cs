@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Linking
             private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
             private readonly ImmutableMultiValueDictionary<ISymbol, IntroducedMember> _overrideLookup;
 
-            public OverrideOrderRewriter( 
-                CSharpCompilation compilation, 
-                IReadOnlyList<AspectPart> orderedAspectParts, 
+            public OverrideOrderRewriter(
+                CSharpCompilation compilation,
+                IReadOnlyList<AspectPart> orderedAspectParts,
                 ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
                 this._compilation = compilation;
@@ -32,24 +32,24 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var newMembers = new List<MemberDeclarationSyntax>();
 
-                foreach (var member in node.Members)
+                foreach ( var member in node.Members )
                 {
-                    if (member is not MethodDeclarationSyntax methodDeclaration)
+                    if ( member is not MethodDeclarationSyntax methodDeclaration )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         continue;
-                    }    
+                    }
 
                     var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member );
 
                     var overrides = this._overrideLookup[originalSymbol];
 
-                    if (!overrides.IsEmpty)
+                    if ( !overrides.IsEmpty )
                     {
                         var lastOverride =
                             this._orderedAspectParts
                             .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
-                            .Where(x => x.Value != null)
+                            .Where( x => x.Value != null )
                             .Last().Value;
 
                         // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
                             Block(
                                 originalSymbol.ReturnsVoid
                                 ? ExpressionStatement( invocation )
-                                : ReturnStatement( invocation)
+                                : ReturnStatement( invocation )
                             ) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Linking
                 var currentMethodPosition =
                     this._orderedAspectParts
                     .Select( ( x, i ) => (Index: i, Value: x) )
-                    .Single( x => x.Value.ToAspectPartId().AspectType== annotation.AspectTypeName && x.Value.ToAspectPartId().PartName == annotation.PartName )
+                    .Single( x => x.Value.ToAspectPartId().AspectType == annotation.AspectTypeName && x.Value.ToAspectPartId().PartName == annotation.PartName )
                     .Index;
 
                 // The callee is the original/introduced method.

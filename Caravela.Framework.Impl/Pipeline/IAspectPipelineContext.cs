@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-
     public interface IAspectPipelineContext
     {
         CancellationToken CancellationToken { get; }
@@ -18,11 +17,9 @@ namespace Caravela.Framework.Impl.Pipeline
         IList<ResourceDescription> ManifestResources { get; }
 
         IBuildOptions BuildOptions { get; }
-        
+
         void ReportDiagnostic( Diagnostic diagnostic );
-        
+
         bool HandleExceptions { get; }
     }
-
-    
 }

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Pipeline
     internal abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
         protected ServiceProvider ServiceProvider { get; } = new ServiceProvider();
-        
+
         /// <summary>
         /// Gets the list of <see cref="AspectPart"/> in the pipeline. This list is fixed for the whole pipeline.
         /// It is based on the aspects found in the project and its dependencies.
@@ -39,7 +39,6 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         public IAspectPipelineContext Context { get; }
 
-
         // TODO: move to service provider?
         protected CompileTimeAssemblyBuilder CompileTimeAssemblyBuilder { get; }
 
@@ -52,7 +51,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 Debugger.Launch();
             }
-            
+
             this.ServiceProvider.AddService( context.BuildOptions );
 
             this.Context = context;
@@ -122,18 +121,16 @@ namespace Caravela.Framework.Impl.Pipeline
                         {
                         }
 
-
                         Console.WriteLine( exception.ToString() );
 
-                        this.Context.ReportDiagnostic( Diagnostic.Create( 
-                            GeneralDiagnosticDescriptors.UncaughtException, 
-                            null, 
+                        this.Context.ReportDiagnostic( Diagnostic.Create(
+                            GeneralDiagnosticDescriptors.UncaughtException,
+                            null,
                             exception.ToDiagnosticString(),
                             path ) );
                     }
                     else
                     {
-                        
                     }
 
                     break;
@@ -141,7 +138,6 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public virtual bool WriteUnhandledExceptionsToFile => true;
-        
 
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
@@ -222,6 +218,5 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public abstract bool CanTransformCompilation { get; }
-
     }
 }

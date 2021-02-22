@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public bool IsReferenceable { get; }
 
         public ExpressionSyntax Syntax { get; }
-        
+
         /// <summary>
         /// Returns the <see cref="ExpressionSyntax"/> encapsulated by the current <see cref="RuntimeExpression"/>. Called from generated
         /// code. Do not remove.
@@ -44,7 +44,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
 
             return this._expressionType;
-            
         }
 
         private RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, bool isReferenceable )
@@ -79,12 +78,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this.Syntax = syntax;
         }
 
-        public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false ) 
+        public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
             : this( syntax, type?.GetSymbol(), isReferenceable )
         {
         }
-        
-        public RuntimeExpression( ExpressionSyntax syntax )  
+
+        public RuntimeExpression( ExpressionSyntax syntax )
             : this( syntax, (ITypeSymbol?) null, false )
         {
         }

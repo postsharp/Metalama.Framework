@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Caravela.Framework.Impl.DesignTime
 {
 
-    //[Generator]
+    // [Generator]
     public class MySourceGenerator : ISourceGenerator
     {
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
