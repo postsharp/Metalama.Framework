@@ -24,10 +24,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Sdk", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive", "Caravela.Reactive\Caravela.Reactive.csproj", "{BD041817-F150-43DD-A987-F815730777A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp", "Tests\Caravela.Framework.TestApp\Caravela.Framework.TestApp.csproj", "{5765A633-EC2E-4488-AF53-5FC912B39710}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Aspects", "Tests\Caravela.Framework.TestApp.Aspects\Caravela.Framework.TestApp.Aspects.csproj", "{522FB0EC-9534-40D7-95F8-F9C7D246CC85}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.GenerateMetaSyntaxRewriter", "Build\Caravela.Framework.GenerateMetaSyntaxRewriter\Caravela.Framework.GenerateMetaSyntaxRewriter.csproj", "{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}"
@@ -36,8 +32,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464
 	ProjectSection(SolutionItems) = preProject
 		Build\CopyToPublish.proj = Build\CopyToPublish.proj
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.TestApp.Library", "Tests\Caravela.Framework.TestApp.Library\Caravela.Framework.TestApp.Library.csproj", "{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
 EndProject
@@ -77,22 +71,10 @@ Global
 		{BD041817-F150-43DD-A987-F815730777A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD041817-F150-43DD-A987-F815730777A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD041817-F150-43DD-A987-F815730777A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5765A633-EC2E-4488-AF53-5FC912B39710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5765A633-EC2E-4488-AF53-5FC912B39710}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5765A633-EC2E-4488-AF53-5FC912B39710}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5765A633-EC2E-4488-AF53-5FC912B39710}.Release|Any CPU.Build.0 = Release|Any CPU
-		{522FB0EC-9534-40D7-95F8-F9C7D246CC85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{522FB0EC-9534-40D7-95F8-F9C7D246CC85}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{522FB0EC-9534-40D7-95F8-F9C7D246CC85}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{522FB0EC-9534-40D7-95F8-F9C7D246CC85}.Release|Any CPU.Build.0 = Release|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7160654-CDF6-478B-901B-C04C7C9E7B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -123,10 +105,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {19660464-978E-4457-846E-B399BB6A3884}
-		{5765A633-EC2E-4488-AF53-5FC912B39710} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
-		{522FB0EC-9534-40D7-95F8-F9C7D246CC85} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54} = {19660464-978E-4457-846E-B399BB6A3884}
-		{FCF6B68B-20B3-4AD3-B77D-6D6F560929B0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B} = {19660464-978E-4457-846E-B399BB6A3884}
 		{69EB8F34-975E-46AD-8EA1-A592A629CCD6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{7D8C16EE-B822-4AE3-B9C1-810C010573D6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
