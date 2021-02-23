@@ -13,7 +13,7 @@
     <RoslynVersion>3.8.0</RoslynVersion>
     <CaravelaCompilerVersion>3.8.6-preview</CaravelaCompilerVersion>
     
-    <!-- this can't be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
+    <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
     <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
 
   </PropertyGroup>

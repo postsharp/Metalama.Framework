@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Xunit;
 
 namespace Caravela.Framework.UnitTests
 {
@@ -20,6 +21,12 @@ namespace Caravela.Framework.UnitTests
 
         public static CSharpCompilation CreateRoslynCompilation( string? code, bool ignoreErrors = false )
         {
+            // Some tests need a reference to a type that is not compile-time (whatever the test runner).
+            var nonReferencedLibraryName = "System.Runtime.CompilerServices.VisualC";
+            Assert.True( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != nonReferencedLibraryName ), $"{nonReferencedLibraryName} must not be loaded" );
+            
+            var nonReferencedLibraryPath = Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, nonReferencedLibraryName + ".dll" );
+            
             var roslynCompilation = CSharpCompilation.Create( null! )
                 .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                 .AddReferences(
@@ -29,7 +36,9 @@ namespace Caravela.Framework.UnitTests
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
+                    MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ),
+                    MetadataReference.CreateFromFile( nonReferencedLibraryPath ));
 
             if ( code != null )
             {

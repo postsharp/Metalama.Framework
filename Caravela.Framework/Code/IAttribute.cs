@@ -31,7 +31,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the parameters passed to the <see cref="Constructor"/>.
         /// </summary>
-        IReadOnlyList<object?> ConstructorArguments { get; }
+        IReadOnlyList<TypedConstant> ConstructorArguments { get; }
 
         /// <summary>
         /// Gets the named arguments (either fields or properties) of the attribute.

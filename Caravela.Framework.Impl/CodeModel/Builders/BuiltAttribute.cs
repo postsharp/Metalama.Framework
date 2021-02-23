@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IMethod Constructor => this.Compilation.Factory.GetMethod( this.AttributeBuilder.Constructor );
 
-        public IReadOnlyList<object?> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
+        public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
 
         public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
     }

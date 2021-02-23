@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             }
 
             // TODO: diagnostic
-            throw new InvalidOperationException( "Can't directly access 'this' on a static method." );
+            throw new InvalidOperationException( "cannot directly access 'this' on a static method." );
         }
 
         RuntimeExpression IDynamicMemberDifferentiated.CreateMemberAccessExpression( string member ) => new( IdentifierName( Identifier( member ) ) );

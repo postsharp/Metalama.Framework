@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index { get; }
 
-        public OptionalValue DefaultValue { get; set; }
+        public TypedConstant DefaultValue { get; set; }
 
         public bool IsParams { get; set; }
 

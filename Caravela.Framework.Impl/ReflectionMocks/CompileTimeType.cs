@@ -22,6 +22,14 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             return new CompileTimeType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
+        public override string Namespace => ReflectionNameHelper.GetReflectionName( this.TypeSymbol.ContainingNamespace );
+
+        public override string Name => this.TypeSymbol.Name;
+        
+        public override string FullName => ReflectionNameHelper.GetReflectionName( this.TypeSymbol );
+        
+        ISymbol IReflectionMockCodeElement.Symbol => this.TypeSymbol;
+
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
@@ -29,10 +37,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override bool IsDefined( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Module Module => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         protected override TypeAttributes GetAttributeFlagsImpl() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -78,8 +82,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override Type BaseType => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override string FullName => ReflectionNameHelper.GetReflectionName( this.TypeSymbol );
-
         public override Guid GUID => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         protected override PropertyInfo GetPropertyImpl( string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
@@ -93,7 +95,5 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override Type GetInterface( string name, bool ignoreCase ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Type[] GetInterfaces() => throw CompileTimeMocksHelper.CreateNotSupportedException();
-
-        ISymbol IReflectionMockCodeElement.Symbol => this.TypeSymbol;
     }
 }
