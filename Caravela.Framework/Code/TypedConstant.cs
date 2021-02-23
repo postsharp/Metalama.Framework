@@ -5,7 +5,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
     /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments. For enum values whose type is not a compile-time
-    /// type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the num. For enum values whose
+    /// type, <see cref="Value"/> represents the underlying integer value and <see cref="Type"/> the type of the enum. For enum values whose
     /// type is compile-time, <see cref="Value"/> is of enum type.
     /// </summary>
     public readonly struct TypedConstant
@@ -14,7 +14,7 @@ namespace Caravela.Framework.Code
         private readonly IType? _type;
 
         /// <summary>
-        /// Gets a value indicating whether the value has been specified (even set to <c>null</c>).
+        /// Gets a value indicating whether the <see cref="Value"/> has been specified (including when it is set to <c>null</c>).
         /// </summary>
         public bool IsAssigned => this._type != null;
 
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Code
         public IType Type => this._type ?? throw new ArgumentNullException($"The {nameof(TypedConstant)} is unassigned.");
 
         /// <summary>
-        /// Gets a value indicating whether the value is null. Not to be confused with <see cref="IsAssigned"/>.
+        /// Gets a value indicating whether the value is <c>null</c>. Not to be confused with <see cref="IsAssigned"/>.
         /// </summary>
         public bool IsNull => this.Value == null;
 
