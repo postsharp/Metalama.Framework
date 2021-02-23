@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -29,9 +30,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
+            if ( type is CompileTimeType compileTimeType )
+            {
+                return compileTimeType.TypeSymbol;
+            }
+            
             if ( type.IsByRef )
             {
-                throw new ArgumentException( "Ref types can't be represented as Caravela types." );
+                throw new ArgumentException( "Ref types cannot be represented as Caravela types." );
             }
 
             if ( type.IsArray )

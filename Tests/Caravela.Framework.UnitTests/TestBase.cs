@@ -18,27 +18,39 @@ namespace Caravela.Framework.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = true;
 
-        public static CSharpCompilation CreateRoslynCompilation( string? code, bool ignoreErrors = false )
+        public static CSharpCompilation CreateRoslynCompilation( string? code, string? dependentCode = null, bool ignoreErrors = false )
         {
-            var roslynCompilation = CSharpCompilation.Create( null! )
-                .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                .AddReferences(
-                    new[] { "netstandard", "System.Runtime" }
-                        .Select( r => MetadataReference.CreateFromFile(
-                            Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
-                .AddReferences(
-                    MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
+            static CSharpCompilation CreateEmptyCompilation()
+            {
+                return CSharpCompilation.Create( null! )
+                    .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                    .AddReferences(
+                        new[] { "netstandard", "System.Runtime" }
+                            .Select( r => MetadataReference.CreateFromFile(
+                                Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
+                    .AddReferences(
+                        MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ));
+            }
+
+            var mainRoslynCompilation = CreateEmptyCompilation();
 
             if ( code != null )
             {
-                roslynCompilation = roslynCompilation.AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) );
+            }
+
+            if ( dependentCode != null )
+            {
+                var dependentCompilation = CreateEmptyCompilation().AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference( ) );
             }
 
             if ( !ignoreErrors )
             {
-                var diagnostics = roslynCompilation.GetDiagnostics();
+                var diagnostics = mainRoslynCompilation.GetDiagnostics();
                 if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
                 {
                     var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
@@ -47,12 +59,12 @@ namespace Caravela.Framework.UnitTests
                 }
             }
 
-            return roslynCompilation;
+            return mainRoslynCompilation;
         }
 
-        internal static CompilationModel CreateCompilation( string? code )
+        internal static CompilationModel CreateCompilation( string? code, string? dependentCode = null )
         {
-            var roslynCompilation = CreateRoslynCompilation( code );
+            var roslynCompilation = CreateRoslynCompilation( code, dependentCode );
 
             return CompilationModel.CreateInitialInstance( roslynCompilation );
         }

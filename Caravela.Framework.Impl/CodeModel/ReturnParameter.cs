@@ -4,6 +4,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int Index => -1;
 
-        OptionalValue IParameter.DefaultValue => default;
+        TypedConstant IParameter.DefaultValue => default;
 
         public bool IsParams => false;
 

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<object?> constructorArguments )
+        public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<TypedConstant> constructorArguments )
         {
             this.ContainingElement = containingElement;
             this.ConstructorArguments = constructorArguments;
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod Constructor { get; }
 
-        public IReadOnlyList<object?> ConstructorArguments { get; }
+        public IReadOnlyList<TypedConstant> ConstructorArguments { get; }
 
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
     }

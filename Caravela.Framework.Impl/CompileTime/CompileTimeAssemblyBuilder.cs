@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
-        // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
+        // cannot be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
 
         public CompileTimeAssemblyBuilder(
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._resources = resources;
         }
 
-        // TODO: creating the compile-time assembly like this means it can't use aspects itself; should it?
+        // TODO: creating the compile-time assembly like this means it cannot use aspects itself; should it?
         private Compilation? CreateCompileTimeAssembly( Compilation compilation )
         {
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );

@@ -7,7 +7,7 @@ namespace Caravela.Framework.Code
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        new OptionalValue DefaultValue { get; set; }
+        new TypedConstant DefaultValue { get; set; }
 
         /// <summary>
         /// Gets or sets the parameter type.

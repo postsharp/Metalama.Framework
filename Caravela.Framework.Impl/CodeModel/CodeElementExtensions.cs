@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.Editing;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -212,9 +213,9 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        internal static ExpressionSyntax? ToExpressionSyntax( this in OptionalValue value, CompilationModel compilation )
+        internal static ExpressionSyntax? ToExpressionSyntax( this in TypedConstant value, CompilationModel compilation )
         {
-            if ( value.HasValue )
+            if ( value.IsAssigned )
             {
                 return compilation.Factory.Serializers.SerializeToRoslynCreationExpression( value.Value );
             }

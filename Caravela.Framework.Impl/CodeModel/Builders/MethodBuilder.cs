@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
             var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
             parameter.DefaultValue = defaultValue;

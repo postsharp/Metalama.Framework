@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.Advices
 
             bool TryGetNamedArgument<TArg>( string name, [NotNullWhen( true )] out TArg? value )
             {
-                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue != null )
+                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue.Value != null )
                 {
-                    value = (TArg) objectValue;
+                    value = (TArg) objectValue.Value;
                     return true;
                 }
                 else

@@ -7,6 +7,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -39,22 +40,28 @@ namespace Caravela.Framework.Impl.CodeModel
         public IMethod Constructor => this._compilation.Factory.GetMethod( this._data.AttributeConstructor! );
 
         [Memo]
-        public IReadOnlyList<object?> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public IReadOnlyList<TypedConstant> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
         public INamedArgumentList NamedArguments =>
             new NamedArgumentsList(
                 this._data.NamedArguments
-                    .Select( kvp => new KeyValuePair<string, object?>( kvp.Key, this.Translate( kvp.Value ) ) ) );
+                    .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) ) );
 
-        private object? Translate( TypedConstant constant ) =>
-            constant.Kind switch
+        private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
+        {
+            var type = this._compilation.Factory.GetIType( constant.Type.AssertNotNull() );
+            
+            var value = constant.Kind switch
             {
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
                 TypedConstantKind.Type => constant.Value == null ? null : this._compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
-                _ => throw new ArgumentException( nameof( constant ) )
+                _ => throw new ArgumentException( nameof(constant) )
             };
+
+            return new TypedConstant( type, value );
+        }
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 

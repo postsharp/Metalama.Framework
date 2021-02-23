@@ -106,7 +106,7 @@ enum E
     F, G
 }
 
-[Test(42, ""foo"", null, E = E.G, Types = new[] { typeof(E), typeof(Action<,>), null })]
+[Test(42, ""foo"", null, E = E.G, Types = new[] { typeof(E), typeof(Action<,>), null, typeof(Action<E>), typeof(E*) })]
 class TestAttribute : Attribute
 {
     public TestAttribute(int i, string s, object o) {}
@@ -118,17 +118,17 @@ class TestAttribute : Attribute
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
-            Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments );
+            Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments.Select( a => a.Value ) );
             var namedArguments = attribute.NamedArguments;
             Assert.Equal( 2, namedArguments.Count );
-            Assert.Equal( 1, namedArguments.GetByName( "E" ) );
-            var types = Assert.IsAssignableFrom<IReadOnlyList<object?>>( namedArguments.GetByName( "Types" ) );
-            Assert.Equal( 3, types.Count );
-            var type0 = Assert.IsAssignableFrom<INamedType>( types[0] );
+            Assert.Equal( 1, namedArguments.GetValue( "E" ) );
+            var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( namedArguments.GetValue( "Types" ) );
+            Assert.Equal( 5, types.Count );
+            var type0 = Assert.IsAssignableFrom<INamedType>( types[0].Value );
             Assert.Equal( "E", type0.FullName );
-            var type1 = Assert.IsAssignableFrom<INamedType>( types[1] );
+            var type1 = Assert.IsAssignableFrom<INamedType>( types[1].Value );
             Assert.Equal( "System.Action<,>", type1.FullName );
-            Assert.Null( types[2] );
+            Assert.Null( types[2].Value );
         }
 
         [Fact]
@@ -227,10 +227,10 @@ class MyAttribute : Attribute
             Assert.Equal( 2, attributes.Length );
 
             Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
-            Assert.Equal( "a", Assert.Single( attributes[0].ConstructorArguments ) );
+            Assert.Equal( "a", Assert.Single( attributes[0].ConstructorArguments.Select( a => a.Value ) ) );
 
             Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
-            Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments ) );
+            Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments.Select( a => a.Value ) ) );
         }
 
         [Fact]
@@ -421,7 +421,7 @@ class C
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
-                Assert.False( parameter.DefaultValue.HasValue );
+                Assert.False( parameter.DefaultValue.IsAssigned );
                 Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
@@ -429,7 +429,7 @@ class C
 
             foreach ( var parameter in parametersWithDefaults )
             {
-                Assert.True( parameter.DefaultValue.HasValue );
+                Assert.True( parameter.DefaultValue.IsAssigned );
             }
 
             Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue.Value ) );

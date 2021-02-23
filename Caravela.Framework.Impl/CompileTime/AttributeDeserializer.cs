@@ -1,10 +1,14 @@
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using Attribute = System.Attribute;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -72,50 +76,75 @@ namespace Caravela.Framework.Impl.CompileTime
             return result;
         }
 
-        private object? TranslateAttributeArgument( object? roslynArgument, Type targetType )
+        private object? TranslateAttributeArgument( TypedConstant typedConstant, Type targetType ) => this.TranslateAttributeArgument( typedConstant.Value, typedConstant.Type, targetType );
+        
+        private object? TranslateAttributeArgument( object? value, IType sourceType, Type targetType )
         {
-            if ( roslynArgument == null )
+            if ( value == null )
             {
                 return null;
             }
 
-            switch ( roslynArgument )
+            switch ( value )
             {
+                case TypedConstant typedConstant:
+                    return this.TranslateAttributeArgument( typedConstant, targetType );
+                
                 case IType type:
                     if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
                     {
-                        throw new InvalidOperationException( $"System.Type can't be assigned to {targetType}" );
+                        throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
                     }
 
                     return this._compileTimeTypeResolver.GetCompileTimeType( type.GetSymbol(), true );
-
-                case IReadOnlyList<object?> list:
-                    if ( !targetType.IsArray )
+                
+                case string str:
+                    // Make sure we don't fall under the IEnumerable case.
+                    if ( !targetType.IsAssignableFrom( typeof( string ) ) )
                     {
-                        throw new InvalidOperationException( $"Array can't be assigned to {targetType}" );
+                        throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
                     }
 
-                    var array = Array.CreateInstance( targetType.GetElementType()!, list.Count );
+                    return str;
 
-                    for ( var i = 0; i < list.Count; i++ )
+                case IEnumerable list:
+                    // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
+                    var elementType = targetType.GetElementType() ?? typeof(object);
+
+                    var count = 0;
+                    foreach ( var unused in list )
                     {
-                        array.SetValue( this.TranslateAttributeArgument( list[i], targetType.GetElementType()! ), i );
+                        count++;
+                    }
+
+                    var array = Array.CreateInstance( elementType, count );
+
+                    var index = 0;
+                    foreach ( var item in list )
+                    {
+                        array.SetValue( this.TranslateAttributeArgument( item, sourceType, elementType ), index );
+                        index++;
                     }
 
                     return array;
 
                 default:
-                    if ( targetType.IsEnum )
+                    if ( sourceType is INamedType enumType && enumType.TypeKind == TypeKind.Enum && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
                     {
-                        return Enum.ToObject( targetType, roslynArgument );
+                        // Convert the underlying value of an enum to a strongly typed enum when we can.
+                        var enumReflectionType = this._compileTimeTypeResolver.GetCompileTimeType( enumTypeSymbol, false );
+                        if ( enumReflectionType != null )
+                        {
+                            value = Enum.ToObject( enumReflectionType, value );
+                        }
                     }
 
-                    if ( roslynArgument != null && !targetType.IsInstanceOfType( roslynArgument ) )
+                    if ( value != null && !targetType.IsInstanceOfType( value ) )
                     {
-                        throw new InvalidOperationException( $"{roslynArgument.GetType()} can't be assigned to {targetType}" );
+                        throw new InvalidOperationException( $"{value.GetType()} cannot be assigned to {targetType}" );
                     }
 
-                    return roslynArgument;
+                    return value;
             }
         }
 
