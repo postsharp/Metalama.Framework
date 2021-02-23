@@ -10,6 +10,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.
+    /// The current object is essentially a mutable list of <see cref="PipelineStep"/> instances. It exposes methods
+    /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
+    /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
+    /// </summary>
     internal class PipelineStepsState : IPipelineStepsResult
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
@@ -129,7 +135,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
                 else
                 {
-                    step = new PipelineStep( stepId, aspectLayer );
+                    step = new AdvicePipelineStep( stepId, aspectLayer );
                 }
 
                 _ = this._steps.Add( stepId, step );
@@ -160,7 +166,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     continue;
                 }
 
-                step.AddAdvice( advice );
+                ((AdvicePipelineStep) step).AddAdvice( advice );
             }
 
             return success;

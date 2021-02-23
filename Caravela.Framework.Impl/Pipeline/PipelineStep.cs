@@ -1,15 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    internal class PipelineStep
+    /// <summary>
+    /// A step executed by <see cref="HighLevelPipelineStage"/>.
+    /// </summary>
+    internal abstract class PipelineStep
     {
-        private List<Advice> _advices = new List<Advice>();
-
+      
         public PipelineStepId Id { get; }
 
         public OrderedAspectLayer AspectLayer { get; }
@@ -20,19 +19,15 @@ namespace Caravela.Framework.Impl.Pipeline
             this.AspectLayer = aspectLayer;
         }
 
-        public virtual CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
-        {
-            var adviceResults = this._advices
-                .Select( ai => ai.ToResult( compilation ) ).ToList();
+        /// <summary>
+        /// Executes the step.
+        /// </summary>
+        /// <param name="compilation"></param>
+        /// <param name="pipelineStepsState"></param>
+        /// <returns></returns>
+        public abstract CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState );
 
-            var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
-            var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
 
-            pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
 
-            return CompilationModel.CreateRevisedInstance( compilation, addedObservableIntroductions );
-        }
-
-        public void AddAdvice( Advice advice ) => this._advices.Add( advice );
     }
 }

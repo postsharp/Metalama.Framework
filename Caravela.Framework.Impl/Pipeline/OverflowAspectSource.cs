@@ -5,6 +5,9 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// An <see cref="IAspectSource"/> that stores aspect sources that are not a part of the current <see cref="PipelineStage"/>.
+    /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
         private List<(IAspectSource Source, INamedType Type)> _aspectSources = new();

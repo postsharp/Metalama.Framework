@@ -2,6 +2,9 @@ using System;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// The identifier of a <see cref="PipelineStepId"/>. For inequality comparison, see <see cref="PipelineStepIdComparer"/>.
+    /// </summary>
     internal readonly struct PipelineStepId : IEquatable<PipelineStepId>
     {
         public AspectLayerId AspectLayerId { get; }

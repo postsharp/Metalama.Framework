@@ -5,6 +5,10 @@ using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// The <see cref="PipelineStage"/> that evaluates aspect sources and adds aspect instances to other steps. This step runs
+    /// in a fake depth numbered -1 because it needs to run before any other step within the aspect type.
+    /// </summary>
     internal class EvaluateAspectSourcesPipelineStep : PipelineStep
     {
         private List<IAspectSource> _aspectSources = new List<IAspectSource>();
@@ -17,7 +21,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             pipelineStepsState.AddAspectInstances( this._aspectSources.SelectMany( s => s.GetAspectInstances( this.AspectLayer.AspectType.Type ) ) );
 
-            return base.Execute( compilation, pipelineStepsState );
+            return compilation;
         }
 
         public void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );

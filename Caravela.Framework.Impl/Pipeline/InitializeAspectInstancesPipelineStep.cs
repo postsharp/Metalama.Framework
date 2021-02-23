@@ -8,9 +8,12 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    internal class InitializeAspectInstancesPipelineStep : PipelineStep
+    /// <summary>
+    /// The <see cref="PipelineStep"/> that runs the default layer of each aspect. It runs the aspect initializer method.
+    /// </summary>
+    internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
     {
-        private List<AspectInstance> _aspectInstances = new List<AspectInstance>();
+        private readonly List<AspectInstance> _aspectInstances = new List<AspectInstance>();
 
         public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer )
         {

@@ -4,9 +4,13 @@ using Caravela.Framework.Impl.AspectOrdering;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// A comparer for <see cref="PipelineStepId"/>. It must be initialized with a collection of <see cref="OrderedAspectLayer"/> because
+    /// the <see cref="PipelineStepId"/> type itself does not contain enough information to compare itself.
+    /// </summary>
     internal class PipelineStepIdComparer : Comparer<PipelineStepId>
     {
-        private ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
+        private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
 
         public PipelineStepIdComparer( IEnumerable<OrderedAspectLayer> orderedAspectLayers )
         {

@@ -1,7 +1,9 @@
-// unset
-
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// Exposes build options in a strongly-typed manner. The production implementation is <see cref="BuildOptions"/>
+    /// but tests can provide their own implementation.
+    /// </summary>
     public interface IBuildOptions
     {
         /// <summary>
