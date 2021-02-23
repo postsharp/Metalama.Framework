@@ -1,4 +1,3 @@
-using Caravela.Framework.Code;
 using System;
 using System.Linq;
 using Caravela.Framework.Impl;
@@ -64,7 +63,6 @@ namespace Caravela.Framework.UnitTests
             
             var objectValue = this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
             Assert.Equal( 1, objectValue );
-
         }
 
         public enum TestEnum
