@@ -1,21 +1,23 @@
+using System;
+using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Proceed.AssignProceedWithManyReturns
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             dynamic result = proceed();
             return result;
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private bool Method(int a)
+        bool Method(int a)
         {
             if (a % 2 == 0)
             {

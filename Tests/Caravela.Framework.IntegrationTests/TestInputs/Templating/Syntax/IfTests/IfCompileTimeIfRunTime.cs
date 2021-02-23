@@ -1,13 +1,14 @@
 using System;
+using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.IfTests.IfCompileTimeIfRunTime
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             var p = target.Parameters[0];
             if (target.Method.Name == "NotNullMethod")
@@ -29,9 +30,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.IfTests.IfCompil
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private string Method(string a)
+        string Method(string a)
         {
             return a;
         }

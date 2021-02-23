@@ -4,10 +4,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.AwaitNotSupported
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private async Task<T> Template<T>()
+        async Task<T> Template<T>()
         {
             await Task.Yield();
 
@@ -16,9 +16,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.Await
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private async Task<int> Method(int a, int b)
+        async Task<int> Method(int a, int b)
         {
             return await Task.FromResult(a + b);
         }

@@ -1,13 +1,16 @@
 using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.LambdaNotSupported
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             Action<object> action = (object p) =>
             {
@@ -22,9 +25,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.Lambd
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private int Method(int a, int b)
+        int Method(int a, int b)
         {
             return a + b;
         }

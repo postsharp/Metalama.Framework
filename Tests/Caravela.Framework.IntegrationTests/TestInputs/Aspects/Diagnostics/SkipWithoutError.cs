@@ -1,6 +1,6 @@
-﻿using System;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.SkipWithoutError
 {

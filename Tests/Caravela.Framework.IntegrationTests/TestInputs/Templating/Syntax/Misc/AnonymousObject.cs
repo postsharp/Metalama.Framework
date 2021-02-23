@@ -1,13 +1,14 @@
 using System;
+using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.AnonymousObject
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             var x = new
             {
@@ -31,9 +32,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.Anony
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private int Method(int a, int b)
+        int Method(int a, int b)
         {
             return a + b;
         }

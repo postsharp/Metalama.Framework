@@ -1,15 +1,17 @@
 using System;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Samples.Sample
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             var parameters = new object[target.Parameters.Count];
             var stringBuilder = compileTime(new StringBuilder());
@@ -50,9 +52,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Samples.Sample
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private int Method(int a, int b, out int c)
+        int Method(int a, int b, out int c)
         {
             c = a - b;
             return a + b;

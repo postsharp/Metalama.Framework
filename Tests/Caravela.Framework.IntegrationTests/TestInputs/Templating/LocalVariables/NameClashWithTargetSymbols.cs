@@ -1,14 +1,17 @@
 using System;
+using System.Collections.Generic;
+
+using System.Text;
 using static System.Math;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.NameClashWithTargetSymbols
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             var PI = 3.14d;
             Console.WriteLine(PI);
@@ -23,9 +26,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.NameClas
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private double Method(double r)
+        double Method(double r)
         {
             double area = PI * r * r;
             return area;

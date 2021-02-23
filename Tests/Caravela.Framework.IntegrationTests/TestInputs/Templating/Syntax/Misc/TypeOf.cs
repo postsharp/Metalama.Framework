@@ -1,5 +1,6 @@
 #pragma warning disable CS8600, CS8603
 using System;
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 using Caravela.TestFramework.Templating;
@@ -7,10 +8,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.TypeOf
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             string s = compileTime(typeof(string).FullName);
             Console.WriteLine(s);
@@ -29,9 +30,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.TypeO
     [CompileTime]
     public class MyClass1 { }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private string Method(string a)
+        string Method(string a)
         {
             return a;
         }

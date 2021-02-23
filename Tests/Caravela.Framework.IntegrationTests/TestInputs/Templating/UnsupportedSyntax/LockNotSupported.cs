@@ -1,14 +1,18 @@
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.LockNotSupported
 {
-    internal class Aspect
+    class Aspect
     {
         private static readonly object o = new object();
 
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             dynamic result;
             lock (o)
@@ -19,9 +23,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.LockN
         }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private int Method(int a, int b)
+        int Method(int a, int b)
         {
             return a + b;
         }

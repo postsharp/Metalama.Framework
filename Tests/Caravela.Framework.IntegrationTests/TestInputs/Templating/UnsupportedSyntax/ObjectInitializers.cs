@@ -1,13 +1,14 @@
+using System;
 using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.ObjectInitializers
 {
-    internal class Aspect
+    class Aspect
     {
         [TestTemplate]
-        private dynamic Template()
+        dynamic Template()
         {
             var a = new Entity1
             {
@@ -26,21 +27,20 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.ObjectInit
         }
     }
 
-    internal record Entity1
+    record Entity1
     {
         public int Property1 { get; set; }
-
         public IList<Entity2> Property2 { get; set; } = new List<Entity2>();
     }
 
-    internal struct Entity2
+    struct Entity2
     {
         public int Property1 { get; set; }
     }
 
-    internal class TargetCode
+    class TargetCode
     {
-        private object Method(object a)
+        object Method(object a)
         {
             return a;
         }
