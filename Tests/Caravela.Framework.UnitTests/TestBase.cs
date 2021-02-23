@@ -23,7 +23,8 @@ namespace Caravela.Framework.UnitTests
         {
             // Some tests need a reference to a type that is not compile-time (whatever the test runner).
             var nonReferencedLibraryName = "System.Runtime.CompilerServices.VisualC";
-            Assert.True( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != nonReferencedLibraryName ), $"{nonReferencedLibraryName} must not be loaded" );
+            var allLoadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().Select( a => a.GetName().Name );
+            Assert.DoesNotContain( nonReferencedLibraryName, allLoadedAssemblies );
             
             var nonReferencedLibraryPath = Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, nonReferencedLibraryName + ".dll" );
             
