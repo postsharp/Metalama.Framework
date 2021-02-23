@@ -1,3 +1,4 @@
+using Caravela.Framework.Code;
 using System;
 using System.Linq;
 using Caravela.Framework.Impl;
@@ -11,10 +12,10 @@ namespace Caravela.Framework.UnitTests
     public class AttributeDeserializerTests : TestBase
     {
 
-        private object? GetDeserializedProperty(string property, string value)
+        private object? GetDeserializedProperty(string property, string value, string? dependentCode = null )
         {
             var code = $@"[assembly: Caravela.Framework.UnitTests.AttributeDeserializerTests.TestAttribute( {property} = {value} )]";
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilation( code, dependentCode: dependentCode );
             AttributeDeserializer deserializer = new( new SystemTypeResolver() );
             var attribute = compilation.Attributes.Single();
             var deserializedAttribute = deserializer.CreateAttribute( attribute );
@@ -57,8 +58,13 @@ namespace Caravela.Framework.UnitTests
         [Fact]
         public void TestNonRunTimeType()
         {
-            var value = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(System.Runtime.CompilerServices.IsBoxed)" );
-            Assert.Equal( "System.Runtime.CompilerServices.IsBoxed", Assert.IsType<CompileTimeType>( value ).FullName );
+            var dependentCode = "public class MyExternClass {} public enum MyExternEnum { A, B }";
+            var typeValue = this.GetDeserializedProperty( nameof(TestAttribute.TypeProperty), "typeof(MyExternClass)", dependentCode );
+            Assert.Equal( "MyExternClass", Assert.IsType<CompileTimeType>( typeValue ).FullName );
+            
+            var objectValue = this.GetDeserializedProperty( nameof(TestAttribute.ObjectProperty), "MyExternEnum.B", dependentCode );
+            Assert.Equal( 1, objectValue );
+
         }
 
         public enum TestEnum
