@@ -21,7 +21,7 @@ namespace Caravela.TestFramework.Templating
             if ( this._method is MethodDeclarationSyntax method )
             {
                 if ( method.ReturnType is PredefinedTypeSyntax predefinedType &&
-                    predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword )
+                     predefinedType.Keyword.Kind() == SyntaxKind.VoidKeyword )
                 {
                     return IdentifierName( "__Void" );
                 }

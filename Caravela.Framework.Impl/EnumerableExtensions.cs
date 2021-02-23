@@ -18,6 +18,7 @@ namespace Caravela.Framework.Impl
             }
             else if ( a.Count == 0 )
             {
+                // ReSharper disable once RedundantExplicitArrayCreation
                 return new T[] { b! };
             }
             else

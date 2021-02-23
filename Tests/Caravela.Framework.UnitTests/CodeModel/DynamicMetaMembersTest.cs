@@ -81,9 +81,9 @@ class TargetCode
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                 () => byRefMethod.Invoke(
-                        null,
-                        new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
-                        new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ) );
+                    null,
+                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "x" ) ),
+                    new RuntimeExpression( (ExpressionSyntax) generator.IdentifierName( "y" ) ) ) );
         }
 
         [Fact]
@@ -195,9 +195,8 @@ class TargetCode
     void C()
     {
     }
-}"
-
-    ;
+}";
+            
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes.Single();
             var method = type.Methods.OfName( "A" ).Single();

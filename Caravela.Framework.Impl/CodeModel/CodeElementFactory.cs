@@ -124,13 +124,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IType GetIType( IType type )
         {
-            if ( type.Compilation == this )
+            if ( type.Compilation == this._compilation )
             {
                 return type;
             }
-            else if ( type is ICodeElementLink<INamedType> namedType )
+            else if ( type is ITypeInternal typeInternal )
             {
-                return namedType.GetForCompilation( this._compilation );
+                return this.GetIType( typeInternal.TypeSymbol.AssertNotNull() );
             }
             else
             {

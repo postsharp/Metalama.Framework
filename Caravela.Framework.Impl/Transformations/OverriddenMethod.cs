@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -84,23 +83,5 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
-
-        private class ProceedToNext : IProceedImpl
-        {
-            public StatementSyntax CreateAssignStatement( string returnValueLocalName )
-            {
-                throw new NotImplementedException();
-            }
-
-            public StatementSyntax CreateReturnStatement()
-            {
-                throw new NotImplementedException();
-            }
-
-            public TypeSyntax CreateTypeSyntax()
-            {
-                throw new NotImplementedException();
-            }
-        }
     }
 }

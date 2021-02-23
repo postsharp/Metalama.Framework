@@ -88,11 +88,12 @@ namespace Caravela.Framework.Impl.Pipeline
                         }
 
                         var path = Path.Combine( crashReportDirectory, $"caravela-{exception.GetType().Name}-{guid}.txt" );
+
                         try
                         {
                             File.WriteAllText( path, exception.ToString() );
                         }
-                        catch
+                        catch ( IOException )
                         {
                         }
 

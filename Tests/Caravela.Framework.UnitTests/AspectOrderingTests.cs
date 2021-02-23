@@ -19,7 +19,7 @@ namespace Caravela.Framework.UnitTests
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[] { new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation ) };
-            var onDiagnostics = new Action<Diagnostic>( d => throw new AssertionFailedException() );
+            var onDiagnostics = new Action<Diagnostic>( _ => throw new AssertionFailedException() );
 
             Assert.True(
                 AspectLayerSorter.TrySort(

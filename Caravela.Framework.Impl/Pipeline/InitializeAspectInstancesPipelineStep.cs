@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
             success &= pipelineStepsState.AddAdvices( addedAdvices );
 
             // It's not clear if we should continue at that time. An error here may result in more errors later.
+            _ = success;
 
             return base.Execute( compilation, pipelineStepsState );
         }

@@ -684,7 +684,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            var forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : this._requiredVariableDeclarationScope;
+            var forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Default;
             if ( forcedScope != SymbolDeclarationScope.Default )
             {
                 if ( this.TrySetLocalVariableScope( local, forcedScope ) )

@@ -71,7 +71,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static string ComputeHash( string input )
         {
+#pragma warning disable CA5350
             using var sha1 = SHA1.Create();
+#pragma warning restore CA5350
             var hash = sha1.ComputeHash( Encoding.UTF8.GetBytes( input ) );
             return BitConverter.ToString( hash ).Replace( "-", "" );
         }

@@ -7,6 +7,8 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+// ReSharper disable RedundantUsingDirective
 using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 

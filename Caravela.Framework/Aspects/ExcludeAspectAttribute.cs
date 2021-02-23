@@ -7,8 +7,9 @@ namespace Caravela.Framework.Aspects
     public class ExcludeAspectAttribute : Attribute
     {
         [Obsolete( "Not implemented." )]
-        public ExcludeAspectAttribute( params Type[] exludedAspectTypes )
+        public ExcludeAspectAttribute( params Type[] excludedAspectTypes )
         {
+            _ = excludedAspectTypes;
         }
     }
 }

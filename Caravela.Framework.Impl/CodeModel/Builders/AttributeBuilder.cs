@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder
+    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
     {
         public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<object?> constructorArguments )
         {

@@ -246,9 +246,9 @@ class C
             var compilation = CreateCompilation( code );
 
             var parameterTypes = from type in compilation.DeclaredTypes
-                                 from method in type.Methods
-                                 from parameter in method.Parameters
-                                 select parameter.ParameterType;
+                from method in type.Methods
+                from parameter in method.Parameters
+                select parameter.ParameterType;
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
@@ -300,7 +300,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
