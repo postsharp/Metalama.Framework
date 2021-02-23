@@ -3,6 +3,10 @@
   <Import Project="Versions.props"/>
   <Import Project="Directories.props"/>
 
+  <PropertyGroup>
+    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
   <!-- Properties of NuGet packages-->
   <PropertyGroup>
     <Authors>PostSharp Technologies</Authors>
@@ -35,6 +39,9 @@
     <NoWarn Condition="'$(Configuration)'!='Release'">1591,1572,1573</NoWarn>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)'=='True'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
   
   <!-- Assembly metadata -->
   <ItemGroup>
@@ -54,8 +61,7 @@
 
     <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
     <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
-
-    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+   
   </PropertyGroup>
 
   <ItemGroup>
