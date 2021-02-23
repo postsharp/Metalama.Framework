@@ -109,11 +109,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            switch (symbol)
+            switch ( symbol )
             {
                 case ITypeSymbol type when type.Name == "dynamic":
                     return AddToCache( SymbolDeclarationScope.RunTimeOnly );
-                
+
                 case ITypeSymbol type:
                 {
                     if ( symbol is INamedTypeSymbol namedType )
@@ -157,11 +157,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     break;
                 }
-                
-                case INamespaceSymbol namespaceSymbol:
+
+                case INamespaceSymbol:
                     // Namespace can be either runtime, buildtime or both. We don't do more now but we may have TODO it based on assemblies defining the namespace.
                     return AddToCache( SymbolDeclarationScope.Default );
-                    break;
             }
 
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );

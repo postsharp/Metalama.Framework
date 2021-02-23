@@ -25,6 +25,5 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         public IReadOnlyList<Diagnostic> Diagnostics => (IReadOnlyList<Diagnostic>?) this._diagnostics ?? Array.Empty<Diagnostic>();
-
     }
 }

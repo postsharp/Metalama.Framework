@@ -20,7 +20,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the generic parameters of the current method.
         /// </summary>
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        IGenericParameterList GenericParameters { get; }
 
         /// <summary>
         /// Gets the generic arguments of the current method.

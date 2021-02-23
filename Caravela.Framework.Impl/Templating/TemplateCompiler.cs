@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -56,7 +55,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 iterations++;
 
-                Invariant.Assert( iterations < 32, "too many iterations" );
+                Invariant.Assert( iterations < 32 );
 
                 annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
 
@@ -83,7 +82,7 @@ namespace Caravela.Framework.Impl.Templating
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
-         => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
+            => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
         public bool TryCompile(
             SyntaxNode sourceSyntaxRoot,

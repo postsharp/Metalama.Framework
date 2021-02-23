@@ -1,20 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal abstract class CodeElementBuilder : ICodeElementBuilder
+    /// <summary>
+    /// Base class implementing <see cref="ICodeElementBuilder"/>. These classes are returned by introduction advices so the user can continue
+    /// specifying the introduced code element. They are bound to the <see cref="CompilationModel"/> that created them, but implement
+    /// <see cref="ICodeElementLink{T}"/> so they can resolve, using <see cref="CodeElementFactory"/>, to the consuming <see cref="CompilationModel"/>.
+    /// 
+    /// </summary>
+    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
     {
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
         public abstract ICodeElement? ContainingElement { get; }
 
-        IReadOnlyList<IAttribute> ICodeElement.Attributes => this.Attributes;
+        IAttributeList ICodeElement.Attributes => this.Attributes;
 
-        public List<AttributeBuilder> Attributes { get; } = new List<AttributeBuilder>();
+        public AttributeBuilderList Attributes { get; } = new AttributeBuilderList();
 
         public abstract CodeElementKind ElementKind { get; }
 
@@ -24,11 +31,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public abstract bool Equals( ICodeElement other );
-
         public bool IsReadOnly { get; private set; }
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new System.NotImplementedException();
+        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotImplementedException();
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 
@@ -38,5 +43,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
+
+        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
+
+        ISymbol? ISdkCodeElement.Symbol => null;
     }
 }

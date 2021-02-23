@@ -44,16 +44,16 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 var factoryMethod = allFactoryMethods.Where( m => m.Name == factoryMethodName )
                     .OrderByDescending( m => m.GetParameters().Length )
                     .ThenByDescending( delegate ( MethodInfo m )
-                     {
-                         // Prefer tokens to strings and lists to arrays.
-                         var p = m.GetParameters();
-                         if ( p.Length == 0 )
-                         {
-                             return 0;
-                         }
+                    {
+                        // Prefer tokens to strings and lists to arrays.
+                        var p = m.GetParameters();
+                        if ( p.Length == 0 )
+                        {
+                            return 0;
+                        }
 
-                         return p[0].ParameterType == typeof( string ) || p[0].ParameterType.IsArray ? 1 : 2;
-                     } )
+                        return p[0].ParameterType == typeof( string ) || p[0].ParameterType.IsArray ? 1 : 2;
+                    } )
                     .FirstOrDefault();
 
                 if ( factoryMethod == null )

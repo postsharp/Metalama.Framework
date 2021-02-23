@@ -8,7 +8,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of an integration test run.
     /// </summary>
-    public class TestResult 
+    public class TestResult
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResult"/> class.
@@ -18,7 +18,7 @@ namespace Caravela.TestFramework
         {
             this.TemplateDocument = templateDocument;
         }
-        
+
         /// <summary>
         /// Gets or sets a list of diagnostics emitted during test run.
         /// </summary>

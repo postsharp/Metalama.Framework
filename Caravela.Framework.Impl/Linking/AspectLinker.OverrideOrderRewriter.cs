@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -15,16 +16,16 @@ namespace Caravela.Framework.Impl.Linking
         public class OverrideOrderRewriter : CSharpSyntaxRewriter
         {
             private readonly CSharpCompilation _compilation;
-            private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
+            private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableMultiValueDictionary<ISymbol, IntroducedMember> _overrideLookup;
 
             public OverrideOrderRewriter(
                 CSharpCompilation compilation,
-                IReadOnlyList<AspectPart> orderedAspectParts,
+                IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
                 ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
                 this._compilation = compilation;
-                this._orderedAspectParts = orderedAspectParts;
+                this._orderedAspectLayers = orderedAspectLayers;
                 this._overrideLookup = overrideLookup;
             }
 
@@ -34,23 +35,23 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach ( var member in node.Members )
                 {
-                    if ( member is not MethodDeclarationSyntax methodDeclaration )
+                    if ( member is not MethodDeclarationSyntax )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         continue;
                     }
 
-                    var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member );
+                    var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member ).AssertNotNull();
 
                     var overrides = this._overrideLookup[originalSymbol];
 
                     if ( !overrides.IsEmpty )
                     {
                         var lastOverride =
-                            this._orderedAspectParts
-                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
-                            .Where( x => x.Value != null )
-                            .Last().Value;
+                            this._orderedAspectLayers
+                                .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
+                                .Where( x => x.Value != null )
+                                .Last().Value.AssertNotNull();
 
                         // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
                         var originalMethodDeclaration = (MethodDeclarationSyntax) member;
@@ -59,25 +60,20 @@ namespace Caravela.Framework.Impl.Linking
 
                         var invocation = InvocationExpression(
                             !originalSymbol.IsStatic
-                            ? MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName( lastOverrideName )
-                                )
-                            : IdentifierName( lastOverrideName ),
+                                ? MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName( lastOverrideName ))
+                                : IdentifierName( lastOverrideName ),
                             ArgumentList(
                                 SeparatedList(
-                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
-                                    )
-                                )
-                            );
+                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
 
                         newMembers.Add( originalMethodDeclaration.WithBody(
                             Block(
                                 originalSymbol.ReturnsVoid
-                                ? ExpressionStatement( invocation )
-                                : ReturnStatement( invocation )
-                            ) ) );
+                                    ? ExpressionStatement( invocation )
+                                    : ReturnStatement( invocation )) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
                     }
@@ -101,24 +97,24 @@ namespace Caravela.Framework.Impl.Linking
 
                 // TODO: optimize.
                 var currentMethodPosition =
-                    this._orderedAspectParts
+                    this._orderedAspectLayers
                     .Select( ( x, i ) => (Index: i, Value: x) )
-                    .Single( x => x.Value.ToAspectPartId().AspectType == annotation.AspectTypeName && x.Value.ToAspectPartId().PartName == annotation.PartName )
+                    .Single( x => x.Value.AspectLayerId == annotation.AspectLayerId )
                     .Index;
 
                 // The callee is the original/introduced method.
-                var callee = (IMethodSymbol?) this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var callee = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 var declarationSyntax = (MethodDeclarationSyntax) callee.DeclaringSyntaxReferences.Single().GetSyntax();
 
-                var declarationSymbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( declarationSyntax );
+                var declarationSymbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( declarationSyntax ).AssertNotNull();
 
                 // Now look for IntroducedMembers targeting this syntax.
                 var overrides = this._overrideLookup[declarationSymbol];
 
                 var precedingOverrides =
-                    this._orderedAspectParts
-                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectPart == x.ToAspectPartId() )) )
+                    this._orderedAspectLayers
+                    .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
                     .Where( x => x.Value != null && x.Index < currentMethodPosition );
 
                 // TODO: simplify
@@ -132,24 +128,20 @@ namespace Caravela.Framework.Impl.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )
-                                    ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                     else
                     {
-                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value.AssertNotNull();
 
                         return
                             InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )
-                                    ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                 }
                 else if ( node.Expression is IdentifierNameSyntax identifier )
@@ -160,22 +152,22 @@ namespace Caravela.Framework.Impl.Linking
                         return
                             InvocationExpression(
                                 IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                     else
                     {
-                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value.AssertNotNull();
 
                         return
                             InvocationExpression(
                                 IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                 }
                 else
+                {
                     throw new NotImplementedException();
+                }
             }
 
             private static string GetOriginalBodyMethodName( string methodName )

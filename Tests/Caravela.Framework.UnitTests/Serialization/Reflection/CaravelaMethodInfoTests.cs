@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );
             var method = (Method) single;
-            var actual = new CaravelaMethodInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaMethodInfo( method ) ).ToString();
+            var actual = new CaravelaMethodInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CompileTimeMethodInfo( method ) ).ToString();
             return actual;
         }
     }

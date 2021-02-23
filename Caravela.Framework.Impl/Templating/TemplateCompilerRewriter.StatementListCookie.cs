@@ -12,7 +12,9 @@ namespace Caravela.Framework.Impl.Templating
             private readonly string _initialVariableName;
             private readonly List<StatementSyntax> _initialList;
 
-            public StatementListCookie( TemplateCompilerRewriter parent, string initialVariableName,
+            public StatementListCookie(
+                TemplateCompilerRewriter parent,
+                string initialVariableName,
                 List<StatementSyntax> initialList )
             {
                 this._parent = parent;

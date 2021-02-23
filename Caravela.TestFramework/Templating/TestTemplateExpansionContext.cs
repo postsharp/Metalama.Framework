@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Method = Caravela.TestFramework.Templating.CodeModel.Method;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -25,7 +24,7 @@ namespace Caravela.TestFramework.Templating
             var roslynCompilation = compilation.RoslynCompilation;
 
             this.Compilation = compilation;
-            
+
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             this.TemplateInstance = Activator.CreateInstance( templateType )!;
 

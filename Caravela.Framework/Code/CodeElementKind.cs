@@ -9,6 +9,11 @@ namespace Caravela.Framework.Code
     public enum CodeElementKind
     {
         /// <summary>
+        /// Not a valid code element represented by <see cref="ICodeElement"/>.
+        /// </summary>
+        None,
+
+        /// <summary>
         /// <see cref="ICompilation"/>.
         /// </summary>
         Compilation,
@@ -44,12 +49,28 @@ namespace Caravela.Framework.Code
         Parameter,
 
         /// <summary>
-        /// <see cref="GenericParameter"/>.
+        /// <see cref="IGenericParameter"/>.
         /// </summary>
         GenericParameter,
 
+        /// <summary>
+        /// <see cref="IAttribute"/>.
+        /// </summary>
         Attribute,
-        Resource,
-        Constructor
+
+        /// <summary>
+        /// <see cref="IManagedResource"/>.
+        /// </summary>
+        ManagedResource,
+
+        /// <summary>
+        /// <see cref="IConstructor"/>.
+        /// </summary>
+        Constructor,
+        
+        /// <summary>
+        /// See <see cref="IAssembly"/>.
+        /// </summary>
+        Assembly,
     }
 }

@@ -32,21 +32,21 @@ namespace Caravela.Framework.Impl.Templating
                             continue;
 
                         case BlockSyntax subBlock:
+                        {
+                            var mustFlatten = subBlock.HasFlattenBlockAnnotation();
+
+                            if ( mustFlatten ||
+                                 !subBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )
                             {
-                                var mustFlatten = subBlock.HasFlattenBlockAnnotation();
-
-                                if ( mustFlatten ||
-                                    !subBlock.Statements.Any( s => s is LocalDeclarationStatementSyntax ) )
-                                {
-                                    Flatten( subBlock );
-                                }
-                                else
-                                {
-                                    statements.Add( processedStatement );
-                                }
-
-                                break;
+                                Flatten( subBlock );
                             }
+                            else
+                            {
+                                statements.Add( processedStatement );
+                            }
+
+                            break;
+                        }
 
                         default:
                             statements.Add( processedStatement );

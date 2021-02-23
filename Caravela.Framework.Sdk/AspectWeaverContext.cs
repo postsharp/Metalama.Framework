@@ -1,8 +1,7 @@
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Sdk
 {
@@ -26,7 +25,6 @@ namespace Caravela.Framework.Sdk
         /// </summary>
         public CSharpCompilation Compilation { get; }
 
-
         private readonly Action<Diagnostic> _addDiagnostic;
 
         // TODO: support reading existing resources
@@ -37,7 +35,7 @@ namespace Caravela.Framework.Sdk
         /// </summary>
         /// <param name="resource"></param>
         public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
-        
+
         internal AspectWeaverContext(
             ISdkNamedType aspectType,
             IReadOnlyList<AspectInstance> aspectInstances,
@@ -57,6 +55,5 @@ namespace Caravela.Framework.Sdk
         /// </summary>
         /// <param name="diagnostic"></param>
         public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );
-
     }
 }

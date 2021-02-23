@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
+    /// <summary>
+    /// The context in which an <see cref="AspectPipeline"/> is executed. Gives information about the outside.
+    /// </summary>
     public interface IAspectPipelineContext
     {
         CancellationToken CancellationToken { get; }

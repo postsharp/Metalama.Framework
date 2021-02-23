@@ -21,6 +21,6 @@
         /// </summary>
         /// <param name="input">The inputs.</param>
         /// <returns></returns>
-        public abstract PipelineStageResult ToResult( PipelineStageResult input );
+        public abstract PipelineStageResult Execute( PipelineStageResult input );
     }
 }

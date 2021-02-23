@@ -29,7 +29,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects
             Assert.True( testResult.Success );
             Assert.DoesNotContain( "This code should not be emitted.", testResult.TransformedTargetSource?.ToString() );
         }
-        
+
         [Fact]
         public async Task ReportFromTemplate()
         {

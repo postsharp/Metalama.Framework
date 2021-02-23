@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
             else
             {
                 var underlyingType = Enum.GetUnderlyingType( o.GetType() );
-                var literal = (_unsignedTypes.Contains( underlyingType )) ? Literal( Convert.ToUInt64( o ) ) : Literal( Convert.ToInt64( o ) );
+                var literal = _unsignedTypes.Contains( underlyingType ) ? Literal( Convert.ToUInt64( o ) ) : Literal( Convert.ToInt64( o ) );
                 return CastExpression(
                     ParseTypeName( typeName ),
                     ParenthesizedExpression(

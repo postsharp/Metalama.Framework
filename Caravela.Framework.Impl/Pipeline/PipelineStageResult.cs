@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -40,11 +41,11 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the list of ordered aspect parts.
         /// </summary>
-        public IReadOnlyList<AspectPart> AspectParts { get; }
+        public IReadOnlyList<OrderedAspectLayer> AspectLayers { get; }
 
         public PipelineStageResult(
             CSharpCompilation compilation,
-            IReadOnlyList<AspectPart> aspectParts,
+            IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IReadOnlyList<Diagnostic>? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
@@ -54,7 +55,7 @@ namespace Caravela.Framework.Impl.Pipeline
             this.Diagnostics = diagnostics ?? Array.Empty<Diagnostic>();
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
-            this.AspectParts = aspectParts;
+            this.AspectLayers = aspectLayers;
             this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableDictionary<string, SyntaxTree>.Empty;
         }
     }

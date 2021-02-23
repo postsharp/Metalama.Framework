@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public bool Equals( DiagnosticLocation? other )
         {
-            if ( ReferenceEquals( null, other ) )
+            if ( other == null )
             {
                 return false;
             }
@@ -36,7 +36,6 @@ namespace Caravela.Framework.Impl.Diagnostics
             {
                 return false;
             }
-
 
             return this.Location.SourceTree == other.Location.SourceTree &&
                    this.Location.SourceSpan == other.Location.SourceSpan;

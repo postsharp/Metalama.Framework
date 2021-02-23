@@ -42,6 +42,7 @@ dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:war
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
 
 # Expression-level preferences
+csharp_style_deconstructed_variable_declaration = true:none
 dotnet_style_coalesce_expression = true:warning
 dotnet_style_collection_initializer = true:warning
 dotnet_style_explicit_tuple_names = true:warning
@@ -50,8 +51,8 @@ dotnet_style_object_initializer = true:suggestion
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 dotnet_style_prefer_auto_properties = true:warning
 dotnet_style_prefer_compound_assignment = true:warning
-dotnet_style_prefer_conditional_expression_over_assignment = true:silent
-dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_prefer_conditional_expression_over_assignment = true:none
+dotnet_style_prefer_conditional_expression_over_return = true:none
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = false:warning
@@ -88,7 +89,7 @@ csharp_style_expression_bodied_properties = when_on_single_line:warning
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
 csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
 csharp_style_prefer_not_pattern = true:suggestion
-csharp_style_prefer_pattern_matching = false:silent
+csharp_style_prefer_pattern_matching = false:none
 csharp_style_prefer_switch_expression = true:suggestion
 
 # Null-checking preferences
@@ -289,7 +290,7 @@ dotnet_diagnostic.SA1201.severity = suggestion
 dotnet_diagnostic.SA1601.severity = suggestion
 
 # SA1003: Symbols should be spaced correctly
-dotnet_diagnostic.SA1003.severity = silent
+dotnet_diagnostic.SA1003.severity = none
 
 # SA1622: Generic type parameter documentation should have text
 dotnet_diagnostic.SA1622.severity = suggestion
@@ -310,7 +311,7 @@ dotnet_diagnostic.SA1011.severity = none
 dotnet_diagnostic.SA1118.severity = suggestion
 
 # SA1413: Use trailing comma in multi-line initializers
-dotnet_diagnostic.SA1413.severity = suggestion
+dotnet_diagnostic.SA1413.severity = none
 
 # SA1122: Use string.Empty for empty strings
 dotnet_diagnostic.SA1122.severity = none
@@ -400,10 +401,10 @@ dotnet_diagnostic.IDE0018.severity = warning
 dotnet_diagnostic.IDE0020.severity = suggestion
 
 # IDE0023: Use expression body for operators
-dotnet_diagnostic.IDE0023.severity = warning
+dotnet_diagnostic.IDE0023.severity = none
 
 # IDE0024: Use expression body for operators
-dotnet_diagnostic.IDE0024.severity = warning
+dotnet_diagnostic.IDE0024.severity = none
 
 # IDE0025: Use expression body for properties
 dotnet_diagnostic.IDE0025.severity = warning
@@ -445,7 +446,7 @@ dotnet_diagnostic.IDE0040.severity = warning
 dotnet_diagnostic.IDE0041.severity = warning
 
 # IDE0042: Deconstruct variable declaration
-dotnet_diagnostic.IDE0042.severity = warning
+dotnet_diagnostic.IDE0042.severity = none
 
 # IDE0047: Remove unnecessary parentheses
 dotnet_diagnostic.IDE0047.severity = warning
@@ -517,17 +518,17 @@ dotnet_diagnostic.SA1618.severity = suggestion
 dotnet_diagnostic.SA1021.severity = none
 
 # SA1402: File may only contain a single type
-dotnet_diagnostic.SA1402.severity = silent
+dotnet_diagnostic.SA1402.severity = none
 
 # SA1604: Element documentation should have summary
 dotnet_diagnostic.SA1604.severity = none
 
 # SA1620: Generic type parameter documentation should match type parameters
-dotnet_diagnostic.SA1620.severity = silent
+dotnet_diagnostic.SA1620.severity = none
 
 
 # SA1028: Code should not contain trailing whitespace
-dotnet_diagnostic.SA1028.severity = silent
+dotnet_diagnostic.SA1028.severity = none
 
 # SA1024: Deference symbol '*' should not be followed by a space.
-dotnet_diagnostic.SA1023.severity = silent
+dotnet_diagnostic.SA1023.severity = none

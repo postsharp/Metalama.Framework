@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,12 +14,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     internal class ProceedInvokeMethod : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
-        private readonly AspectPartId? _aspectPartId;
+        private readonly AspectLayerId _aspectLayerId;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
+        public ProceedInvokeMethod( IMethod originalDeclaration, AspectLayerId aspectLayerId )
         {
             this._originalDeclaration = originalDeclaration;
-            this._aspectPartId = aspectPartId;
+            this._aspectLayerId = aspectLayerId;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
@@ -74,19 +74,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var invocation =
                 InvocationExpression(
                     !this._originalDeclaration.IsStatic
-                    ? MemberAccessExpression(
+                        ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this._originalDeclaration.Name ) )
-                    : IdentifierName( this._originalDeclaration.Name ),
+                        : IdentifierName( this._originalDeclaration.Name ),
                     ArgumentList(
                         SeparatedList(
                             this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
-            if ( this._aspectPartId != null )
-            {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
-            }
+            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
 
             return invocation;
         }

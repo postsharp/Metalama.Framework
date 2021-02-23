@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -24,8 +24,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new SyntaxToken?[]
                     {
                         imethod.IsStatic ? Token( SyntaxKind.StaticKeyword ) : null
-                    }.Where( x => x != null ).Select( x => x.Value )
-                    );
+                    }.Where( x => x != null ).Select( x => x!.Value ));
             }
 
             throw new AssertionFailedException();
@@ -41,8 +40,8 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: generics
             return
                 method.GenericParameters.Count > 0
-                ? throw new NotImplementedException()
-                : null;
+                    ? throw new NotImplementedException()
+                    : null;
         }
 
         public static ParameterListSyntax GetSyntaxParameterList( this IMethod method )

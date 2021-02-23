@@ -30,8 +30,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return new RuntimeExpression(
                     array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) ),
-                    false );
+                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) ) );
             }
         }
     }

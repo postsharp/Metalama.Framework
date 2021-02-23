@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal static class ReferenceAssemblyLocator
     {
-        private static readonly string project = $@"
+        private static readonly string _project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static IEnumerable<string> GetReferenceAssemblies()
         {
-            var hash = ComputeHash( project );
+            var hash = ComputeHash( _project );
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );
 
             var referenceAssemlyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             Directory.CreateDirectory( tempProjectDirectory );
 
-            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), project );
+            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _project );
 
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 CreateNoWindow = true,
                 RedirectStandardOutput = true
             };
-            var process = Process.Start( psi );
+            var process = Process.Start( psi ).AssertNotNull();
 
             var lines = new List<string>();
             process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
@@ -71,7 +71,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static string ComputeHash( string input )
         {
+#pragma warning disable CA5350
             using var sha1 = SHA1.Create();
+#pragma warning restore CA5350
             var hash = sha1.ComputeHash( Encoding.UTF8.GetBytes( input ) );
             return BitConverter.ToString( hash ).Replace( "-", "" );
         }

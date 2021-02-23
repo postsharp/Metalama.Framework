@@ -52,7 +52,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             var roslynSeverity = MapSeverity( severity );
             var warningLevel = severity == Severity.Error ? 0 : 1;
 
-            var diagnostic = Diagnostic.Create( id,
+            var diagnostic = Diagnostic.Create( 
+                id,
                 "Caravela.User",
                 new NonLocalizableString( formatMessage ),
                 roslynSeverity,

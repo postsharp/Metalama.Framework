@@ -21,10 +21,10 @@ namespace Caravela.Framework.Advices
         ICodeElement TargetDeclaration { get; }
 
         /// <summary>
-        /// Gets or sets the aspect part to which the advice belongs, or <c>null</c> if it belongs to the default part.
-        /// Aspect parts must be declared using the <see cref="ProvidesAspectPartsAttribute"/> custom attribute.
+        /// Gets the name of the aspect layer to which the advice belongs, or <c>null</c> if it belongs to the default layer.
+        /// Aspect parts must be declared using the <see cref="ProvidesAspectLayersAttribute"/> custom attribute.
         /// </summary>
-        public string? PartName { get; set; }
+        public string? LayerName { get; }
     }
 
     /// <summary>

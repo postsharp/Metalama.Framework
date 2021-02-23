@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {

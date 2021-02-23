@@ -26,16 +26,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool HasNonNullableValueTypeConstraint { get; set; }
 
-        Code.TypeKind IType.TypeKind => Code.TypeKind.GenericParameter;
+        TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
-        // TODO: Here we have a design problem.
-        public ITypeFactory TypeFactory => throw new NotSupportedException();
+        ICompilation IType.Compilation => this.Compilation;
 
         public override ICodeElement? ContainingElement { get; }
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template ) : base()
+        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template )
         {
             this.ContainingElement = containingMethod;
             this._template = template;
@@ -45,7 +44,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
-
-        public override bool Equals( ICodeElement other ) => throw new NotImplementedException();
     }
 }

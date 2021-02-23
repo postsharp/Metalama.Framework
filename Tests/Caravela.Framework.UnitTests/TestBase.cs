@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -12,7 +12,7 @@ namespace Caravela.Framework.UnitTests
     public class TestBase
     {
         /// <summary>
-        /// Flag that determines whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
+        /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but neccessary during development, at least, since an incorrect syntax tree
         /// can easily be produced.
         /// </summary>
@@ -25,7 +25,7 @@ namespace Caravela.Framework.UnitTests
                 .AddReferences(
                     new[] { "netstandard", "System.Runtime" }
                         .Select( r => MetadataReference.CreateFromFile(
-                             Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
+                            Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
@@ -54,7 +54,7 @@ namespace Caravela.Framework.UnitTests
         {
             var roslynCompilation = CreateRoslynCompilation( code );
 
-            return new CompilationModel( roslynCompilation );
+            return CompilationModel.CreateInitialInstance( roslynCompilation );
         }
 
         public static object? ExecuteExpression( string context, string expression )

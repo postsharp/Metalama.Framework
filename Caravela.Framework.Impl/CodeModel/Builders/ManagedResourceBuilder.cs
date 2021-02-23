@@ -11,18 +11,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public ResourceDescription ToResourceDescription()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new System.NotImplementedException();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        public bool Equals( ICodeElement other ) => throw new System.NotImplementedException();
+        public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
         public ICodeElement? ContainingElement => null;
 
         public IReadOnlyList<IAttribute> Attributes => Array.Empty<IAttribute>();
 
-        public CodeElementKind ElementKind => CodeElementKind.Resource;
+        public CodeElementKind ElementKind => CodeElementKind.ManagedResource;
 
         public bool IsReadOnly => true;
 

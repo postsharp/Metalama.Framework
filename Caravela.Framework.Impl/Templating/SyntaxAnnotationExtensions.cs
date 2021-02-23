@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( existingScope != SymbolDeclarationScope.Default )
             {
-                Invariant.Assert( existingScope == scope, "the scopes must be equal" );
+                Invariant.Assert( existingScope == scope );
                 return node;
             }
 
@@ -154,13 +154,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public static T WithSymbolAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
-            =>
-            node.WithAdditionalAnnotations( source.GetAnnotations( SemanticAnnotationMap.AnnotationKinds ) );
+            => node.WithAdditionalAnnotations( source.GetAnnotations( SemanticAnnotationMap.AnnotationKinds ) );
 
         public static T WithTemplateAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
-            =>
-            node.WithAdditionalAnnotations( source.GetAnnotations( _templateAnnotationKinds ) );
+            => node.WithAdditionalAnnotations( source.GetAnnotations( _templateAnnotationKinds ) );
 
         public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
@@ -168,8 +166,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static T AddNoDeepIndentAnnotation<T>( this T node )
             where T : SyntaxNode
-            =>
-            node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
+            => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
 

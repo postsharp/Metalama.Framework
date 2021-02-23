@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
@@ -42,7 +43,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Field" );
-            var actual = new CaravelaLocationInfoSerializer( new ObjectSerializers() ).Serialize( new CaravelaLocationInfo( (Field) single ) ).ToString();
+            var actual = new CaravelaLocationInfoSerializer( new ObjectSerializers() ).Serialize( new CompileTimeLocationInfo( (Field) single ) ).ToString();
             return actual;
         }
 

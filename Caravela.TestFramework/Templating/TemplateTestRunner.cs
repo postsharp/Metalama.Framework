@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
@@ -142,7 +142,7 @@ namespace Caravela.TestFramework.Templating
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
-            buildTimeDebugStream?.Seek( 0, SeekOrigin.Begin );
+            buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
             var assembly = assemblyLoadContext.LoadFromStream( buildTimeAssemblyStream, buildTimeDebugStream );
 
@@ -151,10 +151,10 @@ namespace Caravela.TestFramework.Templating
                 var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                Invariant.Assert( templateMethod != null, "Cannot find the template method." );
+                Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = new CompilationModel( compilationForInitialDiagnostics );
+                var caravelaCompilation = CompilationModel.CreateInitialInstance( compilationForInitialDiagnostics );
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );
@@ -189,12 +189,12 @@ namespace Caravela.TestFramework.Templating
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
+                    .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                    .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
                 ;
             return project;
         }

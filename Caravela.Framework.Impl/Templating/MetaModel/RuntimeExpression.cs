@@ -12,11 +12,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     public sealed class RuntimeExpression
     {
-        private ITypeSymbol? _expressionType;
         private readonly string? _expressionTypeName;
+        private ITypeSymbol? _expressionType;
 
         /// <summary>
-        /// Determines whether it is legal to use the 'out' or 'ref' argument modifier with this expression.
+        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
         public bool IsReferenceable { get; }
 
@@ -76,10 +76,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression( ExpressionSyntax syntax, bool isNull )
         {
             this.Syntax = syntax;
+            _ = isNull; 
         }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
-            : this( syntax, type?.GetSymbol(), isReferenceable )
+            : this( syntax, type.GetSymbol(), isReferenceable )
         {
         }
 
@@ -139,7 +140,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <returns></returns>
         public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
         {
-            var expressionType = this.GetExpressionType( targetType.TypeFactory );
+            var expressionType = this.GetExpressionType( targetType.Compilation.TypeFactory );
 
             var targetTypeSymbol = targetType.GetSymbol();
 
