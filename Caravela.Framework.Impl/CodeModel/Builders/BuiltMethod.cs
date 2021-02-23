@@ -1,19 +1,19 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class BuiltMethod : BuiltMember, IMethod, IMemberLink<IMethod>
     {
-        public BuiltMethod(MethodBuilder builder,  CompilationModel compilation) : base(compilation)
+        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {
             this.MethodBuilder = builder;
         }
-        
+
         public MethodBuilder MethodBuilder { get; }
 
         public override CodeElementBuilder Builder => this.MethodBuilder;
@@ -25,8 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IParameterList Parameters =>
             new ParameterList(
-                this.MethodBuilder.Parameters.AsBuilderList.Select( 
-                    CodeElementLink.FromLink<IParameter> ),
+                this.MethodBuilder.Parameters.AsBuilderList.Select(CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ),
                 this.Compilation );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
@@ -36,14 +35,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.MethodBuilder.ReturnParameter, this.Compilation );
 
-        [Memo] 
+        [Memo]
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.ParameterType );
 
         [Memo]
         public IGenericParameterList GenericParameters =>
-            new GenericParameterList( 
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( 
-                    CodeElementLink.FromLink<IGenericParameter> ),
+            new GenericParameterList(
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ),
                 this.Compilation );
 
         public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();

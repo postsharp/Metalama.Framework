@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -33,10 +32,10 @@ namespace Caravela.Framework.Impl.Linking
             var parts = str.Split( '$' );
 
             var parseSuccess = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
-            
+
             Invariant.Assert( parseSuccess );
 
-            return new LinkerAnnotation( AspectLayerId.FromString(  parts[0] ), order );
+            return new LinkerAnnotation( AspectLayerId.FromString( parts[0] ), order );
         }
     }
 }

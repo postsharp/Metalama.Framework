@@ -1,13 +1,10 @@
-// unset
-
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltParameter : BuiltCodeElement, IParameter, ICodeElementLink<IParameter>
+    internal class BuiltParameter : BuiltCodeElement, IParameter
     {
-        public BuiltParameter( ParameterBuilder builder, CompilationModel compilation) : base(compilation)
+        public BuiltParameter( ParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
             this.ParameterBuilder = builder;
         }
@@ -31,8 +28,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IMember DeclaringMember => this.Compilation.Factory.GetCodeElement( this.ParameterBuilder.DeclaringMember );
-
-        public IParameter GetForCompilation( CompilationModel compilation ) =>
-            this.Compilation == compilation ? this : this.Compilation.Factory.GetParameter( this.ParameterBuilder );
     }
 }

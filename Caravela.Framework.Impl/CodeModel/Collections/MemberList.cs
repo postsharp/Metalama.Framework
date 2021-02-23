@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TCodeElement : class, IMember
         where TSource : IMemberLink<TCodeElement>
     {
-        protected MemberList(IEnumerable<TSource> sourceItems, CompilationModel compilation) : base(sourceItems, compilation)
+        protected MemberList( IEnumerable<TSource> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation )
         {
         }
 
@@ -17,7 +17,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// </summary>
         protected MemberList()
         {
-            
         }
 
         public IEnumerable<TCodeElement> OfName( string name )

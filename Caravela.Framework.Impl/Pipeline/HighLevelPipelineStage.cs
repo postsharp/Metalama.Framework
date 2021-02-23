@@ -1,13 +1,8 @@
-using Caravela.Framework.Impl.Advices;
+using System.Collections.Generic;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
-using System.Collections.Generic;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -29,19 +24,18 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var compilation = CompilationModel.CreateInitialInstance(input.Compilation);
-            PipelineStepsState pipelineStepsState = new PipelineStepsState( 
+            var compilation = CompilationModel.CreateInitialInstance( input.Compilation );
+            var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
-                compilation, 
-                input.AspectSources.Concat( new CompilationAspectSource( compilation, this. _assemblyLoader) ) );
+                compilation,
+                input.AspectSources.Concat( new CompilationAspectSource( compilation, this._assemblyLoader ) ) );
             pipelineStepsState.Execute();
 
             return this.GenerateCode( input, pipelineStepsState );
         }
-        
 
         /// <summary>
-        /// Generates the code required by the aspects of a given <see cref="PipelineStepResult"/>, and combine it with an input
+        /// Generates the code required by the aspects whose execution resulted in a given <see cref="IPipelineStepsResult"/>, and combine it with an input
         /// <see cref="PipelineStageResult"/> to produce an output <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <param name="input"></param>

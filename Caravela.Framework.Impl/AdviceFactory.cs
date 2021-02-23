@@ -10,7 +10,6 @@ namespace Caravela.Framework.Impl
 {
     internal class AdviceFactory : IAdviceFactory
     {
-        private readonly ICompilation _compilation;
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
 
@@ -18,9 +17,8 @@ namespace Caravela.Framework.Impl
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
-        public AdviceFactory( ICompilation compilation, INamedType aspectType, AspectInstance aspect )
+        public AdviceFactory( INamedType aspectType, AspectInstance aspect )
         {
-            this._compilation = compilation;
             this._aspectType = aspectType;
             this._aspect = aspect;
         }

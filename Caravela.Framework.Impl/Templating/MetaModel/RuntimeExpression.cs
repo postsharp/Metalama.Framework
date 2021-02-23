@@ -12,11 +12,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     /// </summary>
     public sealed class RuntimeExpression
     {
-        private ITypeSymbol? _expressionType;
         private readonly string? _expressionTypeName;
+        private ITypeSymbol? _expressionType;
 
         /// <summary>
-        /// Determines whether it is legal to use the 'out' or 'ref' argument modifier with this expression.
+        /// Gets a value indicating whether it is legal to use the <c>out</c> or <c>ref</c> argument modifier with this expression.
         /// </summary>
         public bool IsReferenceable { get; }
 

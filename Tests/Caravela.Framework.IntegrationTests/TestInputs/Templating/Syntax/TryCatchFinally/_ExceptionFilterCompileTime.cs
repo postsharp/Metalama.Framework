@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.TryCatchFinally.ExceptionFilterCompileTime
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             int a = target.Parameters.Count;
             int b = 0;
@@ -26,9 +25,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.TryCatchFinally.
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method()
+        private int Method()
         {
             return 42;
         }

@@ -1,6 +1,6 @@
-using Caravela.Framework.Impl.AspectOrdering;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Impl.AspectOrdering;
 
 namespace Caravela.Framework.Impl.Pipeline
 {

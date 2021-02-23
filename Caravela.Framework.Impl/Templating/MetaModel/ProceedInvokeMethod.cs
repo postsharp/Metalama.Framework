@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         private readonly IMethod _originalDeclaration;
         private readonly AspectLayerId _aspectLayerId;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectLayerId aspectLayerId  )
+        public ProceedInvokeMethod( IMethod originalDeclaration, AspectLayerId aspectLayerId )
         {
             this._originalDeclaration = originalDeclaration;
             this._aspectLayerId = aspectLayerId;

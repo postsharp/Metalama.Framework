@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -8,10 +8,10 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
 
         public static MethodList Empty { get; } = new MethodList();
-        
+
         private MethodList() { }
 
-        public MethodList(IEnumerable<MemberLink<IMethod>> sourceItems, CompilationModel compilation) : base(sourceItems, compilation)
+        public MethodList( IEnumerable<MemberLink<IMethod>> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation )
         {
         }
     }

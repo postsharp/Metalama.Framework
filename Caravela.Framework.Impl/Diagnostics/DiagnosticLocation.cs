@@ -37,7 +37,6 @@ namespace Caravela.Framework.Impl.Diagnostics
                 return false;
             }
 
-
             return this.Location.SourceTree == other.Location.SourceTree &&
                    this.Location.SourceSpan == other.Location.SourceSpan;
         }

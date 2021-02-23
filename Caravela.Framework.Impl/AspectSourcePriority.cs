@@ -10,33 +10,30 @@ namespace Caravela.Framework.Impl
     internal enum AspectSourcePriority
     {
         // First (lower) priorities are evaluated first. Order matters.
-        
+
         /// <summary>
         /// Aspects added because of aspect inheritance.
         /// </summary>
         Inherited,
 
         /// <summary>
-        /// Exclusions
+        /// Exclusions.
         /// </summary>
         Exclusion,
-        
+
         /// <summary>
         /// Aspects defined by custom attributes.
         /// </summary>
         FromAttribute,
-        
-        
+
         /// <summary>
         /// Provided implicitly by <see cref="RequiresAspectAttribute"/>.
         /// </summary>
         Implicit,
-        
-        
+
         /// <summary>
         /// A source that performs aggregation of aspects and does not need to be aggregated again.
         /// </summary>
         Aggregate
-        
     }
 }

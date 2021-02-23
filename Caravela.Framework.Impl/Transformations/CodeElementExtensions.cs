@@ -24,8 +24,7 @@ namespace Caravela.Framework.Impl.Transformations
                     new SyntaxToken?[]
                     {
                         imethod.IsStatic ? Token( SyntaxKind.StaticKeyword ) : null
-                    }.Where( x => x != null ).Select( x => x.Value )
-                    );
+                    }.Where( x => x != null ).Select( x => x!.Value ));
             }
 
             throw new AssertionFailedException();

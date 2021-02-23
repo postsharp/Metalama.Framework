@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
@@ -8,7 +6,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class BuildOptions : IBuildOptions
     {
-        private IBuildOptionsSource _source;
+        private readonly IBuildOptionsSource _source;
 
         public BuildOptions( IBuildOptionsSource source )
         {
@@ -21,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
 
-        public string CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
+        public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
         public bool WriteUnhandledExceptionsToFile => true;
 
@@ -37,7 +35,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        private string? GetStringOption( string name, string defaultValue = null )
+        private string? GetStringOption( string name, string? defaultValue = null )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) )
             {

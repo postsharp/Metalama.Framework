@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Event : Member, IEvent, IMemberLink<IEvent>
+    internal class Event : Member, IEvent
     {
         private readonly IEventSymbol _symbol;
 
@@ -33,6 +33,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => false;
 
         public override bool IsAsync => false;
-        IEvent ICodeElementLink<IEvent>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<IEvent>( compilation );
     }
 }

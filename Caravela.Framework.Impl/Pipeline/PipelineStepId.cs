@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.Pipeline
             this.Depth = depth;
         }
 
-        public bool Equals(PipelineStepId other) => this.AspectLayerId.Equals(other.AspectLayerId) && this.Depth == other.Depth;
+        public bool Equals( PipelineStepId other ) => this.AspectLayerId.Equals( other.AspectLayerId ) && this.Depth == other.Depth;
 
-        public override bool Equals(object? obj) => obj is PipelineStepId other && this.Equals(other);
+        public override bool Equals( object? obj ) => obj is PipelineStepId other && this.Equals( other );
 
         public override int GetHashCode()
         {
@@ -25,6 +25,5 @@ namespace Caravela.Framework.Impl.Pipeline
                 return (this.AspectLayerId.GetHashCode() * 397) ^ this.Depth;
             }
         }
-
     }
 }

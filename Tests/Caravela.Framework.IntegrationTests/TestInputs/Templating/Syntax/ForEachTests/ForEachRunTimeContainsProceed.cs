@@ -7,10 +7,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.ForEachRunTimeContainsProceed
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             IEnumerable<int> array = Enumerable.Range(1, 2);
             foreach (var i in array)
@@ -22,9 +22,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.For
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(int a, int bb)
+        private void Method(int a, int bb)
         {
             Console.WriteLine(a + bb);
         }

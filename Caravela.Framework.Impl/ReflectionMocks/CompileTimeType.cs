@@ -1,10 +1,10 @@
+using System;
+using System.Globalization;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Globalization;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static CompileTimeType Create( IType type )
         {
-            return new CompileTimeType( ((type as ITypeInternal)!).TypeSymbol );
+            return new CompileTimeType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();

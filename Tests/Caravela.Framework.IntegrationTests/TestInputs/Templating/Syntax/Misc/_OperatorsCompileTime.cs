@@ -1,15 +1,14 @@
 #pragma warning disable CS8600, CS8603
 using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.OperatorsCompileTime
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             int i = target.Parameters.Count;
 
@@ -68,9 +67,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.OperatorsC
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        object Method(int a, int b)
+        private object Method(int a, int b)
         {
             return a + b;
         }

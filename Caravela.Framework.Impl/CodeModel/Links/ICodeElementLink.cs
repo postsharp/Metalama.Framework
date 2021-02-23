@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// </summary>
         object? Target { get; }
     }
-        
+
     /// <summary>
     /// Represents a link that can be resolved to an element of code by <see cref="GetForCompilation"/>.
     /// </summary>

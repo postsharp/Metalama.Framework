@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IAttributeLink
+    internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder
     {
         public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<object?> constructorArguments )
         {
@@ -22,8 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 
-
         public override ICodeElement ContainingElement { get; }
+
         CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
 
         ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
@@ -41,15 +39,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<object?> ConstructorArguments { get; }
 
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
-
-        public IDiagnosticLocation? DiagnosticLocation => null;
-        IAttribute ICodeElementLink<IAttribute>.GetForCompilation( CompilationModel compilation ) => compilation.Factory.GetAttribute( this );
-        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => throw new NotImplementedException();
-
-        object? ICodeElementLink.Target => this;
-
-        CodeElementLink<INamedType> IAttributeLink.AttributeType => new CodeElementLink<INamedType>(this.Constructor.DeclaringType);
-
-        CodeElementLink<ICodeElement> IAttributeLink.DeclaringElement => new CodeElementLink<ICodeElement>( this.ContainingElement );
     }
 }

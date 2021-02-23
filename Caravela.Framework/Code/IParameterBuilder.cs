@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
         new OptionalValue DefaultValue { get; set; }
 
         /// <summary>
-        /// Gets the parameter type.
+        /// Gets or sets the parameter type.
         /// </summary>
         new IType ParameterType { get; set; }
     }

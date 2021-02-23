@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
 
     internal static class EnumerableExtensions
     {
+        public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
+            where T : class
+            => items.Where( i => i != null )!;
+
         public static IReadOnlyList<T> ConcatNotNull<T>( this IReadOnlyList<T> a, T? b )
         {
             if ( b == null )
@@ -23,7 +28,7 @@ namespace Caravela.Framework.Impl
                 return l;
             }
         }
-        
+
         public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, T b )
         {
             if ( a.Count == 0 )

@@ -1,6 +1,6 @@
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {

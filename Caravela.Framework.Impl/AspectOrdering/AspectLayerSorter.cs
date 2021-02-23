@@ -1,9 +1,9 @@
-﻿using Caravela.Framework.Impl.Collections;
-using Microsoft.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.AspectOrdering
 {
@@ -32,21 +32,20 @@ namespace Caravela.Framework.Impl.AspectOrdering
             // Build a graph of dependencies between unorderedTransformations.
             var n = unsortedAspectLayers.Length;
 
-            Dictionary<string, int> partNameToIndexMapping =
+            var partNameToIndexMapping =
                 unsortedAspectLayers
                     .Select( ( t, i ) => (t.AspectLayerId.FullName, Index: i) )
                     .ToDictionary( x => x.FullName!, x => x.Index );
 
-            ImmutableMultiValueDictionary<string, int> aspectNameToIndicesMapping =
+            var aspectNameToIndicesMapping =
                 unsortedAspectLayers
                     .Select( ( t, i ) => (t.AspectName, Index: i) )
                     .ToMultiValueDictionary( p => p.AspectName, p => p.Index );
 
             var aspectLayerNameToLocationsMappingBuilder = ImmutableMultiValueDictionary<string, AspectOrderSpecification>.CreateBuilder();
 
-
             Graph graph = new( n );
-            bool[] hasPredecessor = new bool[n];
+            var hasPredecessor = new bool[n];
 
             foreach ( var relationship in relationships )
             {
@@ -100,8 +99,8 @@ namespace Caravela.Framework.Impl.AspectOrdering
             var aspectLayerNameToLocationsMapping = aspectLayerNameToLocationsMappingBuilder.ToImmutable();
 
             // Perform a breadth-first search on the graph.
-            int[] distances = graph.GetInitialVector();
-            int[] predecessors = graph.GetInitialVector();
+            var distances = graph.GetInitialVector();
+            var predecessors = graph.GetInitialVector();
 
             var cycle = -1;
             for ( var i = 0; i < n; i++ )
@@ -169,7 +168,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             }
 
             // Sort the distances vector.
-            int[] sortedIndexes = new int[n];
+            var sortedIndexes = new int[n];
             for ( var i = 0; i < n; i++ )
             {
                 sortedIndexes[i] = i;

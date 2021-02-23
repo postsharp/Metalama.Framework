@@ -1,14 +1,13 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal abstract class Member : CodeElement, IMember, IMemberLink<IMember>
+    internal abstract class Member : CodeElement, IMember
     {
         public bool IsSealed => this.Symbol.IsSealed;
 
@@ -60,7 +59,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public string Name => this.Symbol.Name;
 
         INamedType IMember.DeclaringType => this.DeclaringType;
-        
-        IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<IMember>(compilation);
     }
 }

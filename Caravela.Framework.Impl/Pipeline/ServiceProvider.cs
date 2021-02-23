@@ -7,7 +7,9 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
 
-        public void AddService<T>( T service ) => this._services.Add( typeof( T ), service );
+        public void AddService<T>( T service )
+            where T : notnull
+            => this._services.Add( typeof( T ), service );
 
         public object? GetService( Type serviceType )
         {

@@ -109,59 +109,58 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            switch (symbol)
+            switch ( symbol )
             {
                 case ITypeSymbol type when type.Name == "dynamic":
                     return AddToCache( SymbolDeclarationScope.RunTimeOnly );
-                
+
                 case ITypeSymbol type:
-                {
-                    if ( symbol is INamedTypeSymbol namedType )
                     {
-                        // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
-                        // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
-
-                        // From base type.
-                        if ( type.BaseType != null )
+                        if ( symbol is INamedTypeSymbol namedType )
                         {
-                            var scopeFromBaseType = this.GetSymbolDeclarationScope( type.BaseType );
+                            // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
+                            // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
-                            if ( scopeFromBaseType != SymbolDeclarationScope.Default )
+                            // From base type.
+                            if ( type.BaseType != null )
                             {
-                                return AddToCache( scopeFromBaseType );
+                                var scopeFromBaseType = this.GetSymbolDeclarationScope( type.BaseType );
+
+                                if ( scopeFromBaseType != SymbolDeclarationScope.Default )
+                                {
+                                    return AddToCache( scopeFromBaseType );
+                                }
+                            }
+
+                            // From interfaces.
+                            foreach ( var iface in type.AllInterfaces )
+                            {
+                                var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
+
+                                if ( scopeFromInterface != SymbolDeclarationScope.Default )
+                                {
+                                    return AddToCache( scopeFromInterface );
+                                }
+                            }
+
+                            // From generic arguments.
+                            foreach ( var genericArgument in namedType.TypeArguments )
+                            {
+                                var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
+
+                                if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
+                                {
+                                    return AddToCache( scopeFromGenericArgument );
+                                }
                             }
                         }
 
-                        // From interfaces.
-                        foreach ( var iface in type.AllInterfaces )
-                        {
-                            var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
-
-                            if ( scopeFromInterface != SymbolDeclarationScope.Default )
-                            {
-                                return AddToCache( scopeFromInterface );
-                            }
-                        }
-
-                        // From generic arguments.
-                        foreach ( var genericArgument in namedType.TypeArguments )
-                        {
-                            var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
-
-                            if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
-                            {
-                                return AddToCache( scopeFromGenericArgument );
-                            }
-                        }
+                        break;
                     }
 
-                    break;
-                }
-                
                 case INamespaceSymbol namespaceSymbol:
                     // Namespace can be either runtime, buildtime or both. We don't do more now but we may have TODO it based on assemblies defining the namespace.
                     return AddToCache( SymbolDeclarationScope.Default );
-                    break;
             }
 
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );

@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.SimpleAssignments
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             var n = target.Parameters.Count; // build-time
                                              //var n = runTime(target.Method.Parameters.Count); // run-time
@@ -25,9 +24,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.SimpleAs
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method(int a)
         {
             return a;
         }

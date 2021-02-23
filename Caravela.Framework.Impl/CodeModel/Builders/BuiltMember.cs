@@ -7,10 +7,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class BuiltMember : BuiltCodeElement, IMember, IMemberLink<IMember>
     {
-        protected BuiltMember(CompilationModel compilation) : base(compilation)
+        protected BuiltMember( CompilationModel compilation ) : base( compilation )
         {
         }
-        
+
         public abstract MemberBuilder MemberBuilder { get; }
 
         public Accessibility Accessibility => this.MemberBuilder.Accessibility;

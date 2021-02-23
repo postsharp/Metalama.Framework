@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateClassMembers
 {
-    class Aspect : BaseAspect
+    internal class Aspect : BaseAspect
     {
         public Aspect() : this("Result = {0}")
         {
@@ -16,7 +15,7 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateCl
         }
 
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             dynamic result = proceed();
 
@@ -31,7 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateCl
         }
     }
 
-    abstract class BaseAspect
+    internal abstract class BaseAspect
     {
         protected BaseAspect(string formatString)
         {
@@ -42,9 +41,10 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateCl
 
         public abstract string Format(object o);
     }
-    class TargetCode
+
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method(int a)
         {
             return a;
         }

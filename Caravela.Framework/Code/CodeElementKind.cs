@@ -12,7 +12,7 @@ namespace Caravela.Framework.Code
         /// Not a valid code element represented by <see cref="ICodeElement"/>.
         /// </summary>
         None,
-        
+
         /// <summary>
         /// <see cref="ICompilation"/>.
         /// </summary>
@@ -54,19 +54,19 @@ namespace Caravela.Framework.Code
         GenericParameter,
 
         /// <summary>
-        /// <see cref="IAttribute"/>
+        /// <see cref="IAttribute"/>.
         /// </summary>
         Attribute,
-        
+
         /// <summary>
-        /// <see cref="IManagedResource"/>
+        /// <see cref="IManagedResource"/>.
         /// </summary>
         ManagedResource,
-        
+
         /// <summary>
-        /// <see cref="IConstructor"/>
+        /// <see cref="IConstructor"/>.
         /// </summary>
         Constructor,
- 
+        Assembly,
     }
 }

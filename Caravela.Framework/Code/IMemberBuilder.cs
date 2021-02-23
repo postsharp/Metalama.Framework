@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets or sets the accessibility of the member.
         /// </summary>
-        Accessibility Accessibility { get; set; }
+        new Accessibility Accessibility { get; set; }
 
         /// <summary>
         /// Gets or sets the member name.

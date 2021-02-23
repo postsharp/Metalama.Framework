@@ -6,8 +6,6 @@ namespace Caravela.Framework.Aspects
     {
         public ExcludeAspectAttribute( params Type[] exludedAspectTypes )
         {
-            
         }
-        
     }
 }

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <remarks>
     /// This interface does not have dictionary semantics because the order of setting members must be preserved.
     /// </remarks>
-    public interface INamedArgumentList : IReadOnlyList<KeyValuePair<string, object>>
+    public interface INamedArgumentList : IReadOnlyList<KeyValuePair<string, object?>>
     {
         /// <summary>
         /// Tries to get a named argument and returns <c>true</c> if such argument was defined, even if its value was set to <c>null</c>.
@@ -24,6 +24,5 @@ namespace Caravela.Framework.Code
         /// <param name="name"></param>
         /// <returns></returns>
         object? GetByName( string name );
-
     }
 }

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
         private readonly object? _value;
 
         /// <summary>
-        /// Determines whether the value has been specified (even set to <c>null</c>).
+        /// Gets a value indicating whether the value has been specified (even set to <c>null</c>).
         /// </summary>
         public bool HasValue { get; }
 

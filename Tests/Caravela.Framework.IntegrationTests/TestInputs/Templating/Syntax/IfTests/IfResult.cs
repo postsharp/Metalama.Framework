@@ -1,15 +1,13 @@
 #pragma warning disable CS8600, CS8603
-using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.IfTests.IfResult
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             dynamic result = proceed();
 
@@ -22,9 +20,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.IfTests.IfResult
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(object a)
+        private string Method(object a)
         {
             return a?.ToString();
         }

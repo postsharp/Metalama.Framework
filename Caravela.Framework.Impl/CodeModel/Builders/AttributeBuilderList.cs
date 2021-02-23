@@ -1,5 +1,5 @@
-using Caravela.Framework.Code;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -7,6 +7,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         IEnumerator<IAttribute> IEnumerable<IAttribute>.GetEnumerator() => this.GetEnumerator();
 
-        IAttribute IReadOnlyList<IAttribute>.this[ int index ] => this[index];
+        IAttribute IReadOnlyList<IAttribute>.this[int index] => this[index];
     }
 }

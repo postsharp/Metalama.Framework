@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -16,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class AspectLinker
     {
-        private const string IntroducedSyntaxAnnotationId = "AspectLinker_IntroducedSyntax";
+        private const string _introducedSyntaxAnnotationId = "AspectLinker_IntroducedSyntax";
 
         private readonly AdviceLinkerInput _input;
 
@@ -27,8 +26,8 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            DiagnosticList diagnostics = new(null);
-            
+            DiagnosticList diagnostics = new( null );
+
             var intermediateCompilation = this._input.Compilation;
 
             var allTransformations =
@@ -59,8 +58,7 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
                 intermediateIntroducedSyntax = intermediateIntroducedSyntax.Merge(
                     addIntroducedElementsRewriter.IntroducedSyntax.SelectMany( x => x.Select( id => (x.Key, Tree: newSyntaxTree, NodeAnnotationId: id) ) )
-                    .ToMultiValueDictionary( x => x.Key, x => (x.Tree, x.NodeAnnotationId) )
-                    );
+                    .ToMultiValueDictionary( x => x.Key, x => (x.Tree, x.NodeAnnotationId) ));
             }
 
             // Second pass. Count references to modified methods.
@@ -97,7 +95,9 @@ namespace Caravela.Framework.Impl.Linking
                     var symbolInfo = intermediateCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
 
                     if ( symbolInfo.Symbol == null )
+                    {
                         continue;
+                    }
 
                     var symbol = symbolInfo.Symbol.AssertNotNull();
                     var symbolVersion = (symbol, targetVersion);
@@ -123,28 +123,27 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation.SyntaxTrees
                 .SelectMany( st =>
                      st.GetRoot()
-                     .GetAnnotatedNodes( IntroducedSyntaxAnnotationId )
-                     .Select( sn => (Node: sn, Id: sn.GetAnnotations( IntroducedSyntaxAnnotationId ).Select( a => int.Parse( a.Data ) ).Single()) )
-                    )
+                     .GetAnnotatedNodes( _introducedSyntaxAnnotationId )
+                     .Select( sn => (Node: sn, Id: sn.GetAnnotations( _introducedSyntaxAnnotationId ).Select( a => int.Parse( a.Data ) ).Single()) ))
                 .ToDictionary( x => x.Id, x => x.Node );
 
             var symbolOverrides =
-                transformationsBySyntaxTree.SelectMany(g =>
-                   g.Value
-                   .OfType<IOverriddenElement>()
-                   .OfType<IMemberIntroduction>()
-                   .SelectMany(mi => mi.GetIntroducedMembers( new MemberIntroductionContext(diagnostics) ))
-                   .Select(x => ((IOverriddenElement)x.Introductor).OverriddenElement switch
-                   {
-                       Method method => ( Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
-                       MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder), IntroducedMember: x)
-                   })
-                );
+                transformationsBySyntaxTree.SelectMany( g =>
+                    g.Value
+                    .OfType<IOverriddenElement>()
+                    .OfType<IMemberIntroduction>()
+                    .SelectMany( mi => mi.GetIntroducedMembers( new MemberIntroductionContext( diagnostics ) ) )
+                    .Select( x => ((IOverriddenElement) x.Introductor).OverriddenElement switch
+                     {
+                        Method method => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
+                        MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder ), IntroducedMember: x),
+                        _ => throw new AssertionFailedException()
+                    } ));
 
             var symbolOverridesLookup =
-                symbolOverrides.ToMultiValueDictionary( x => x.Symbol, x => x.IntroducedMember, StructuralSymbolComparer.Instance );
+                symbolOverrides.ToMultiValueDictionary( x => x.Symbol.AssertNotNull(), x => x.IntroducedMember, StructuralSymbolComparer.Instance );
 
-            OverrideOrderRewriter rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectLayers, symbolOverridesLookup );
+            var rewriter = new OverrideOrderRewriter( intermediateCompilation, this._input.OrderedAspectLayers, symbolOverridesLookup );
 
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {
@@ -157,12 +156,12 @@ namespace Caravela.Framework.Impl.Linking
 
             return new AdviceLinkerResult( resultingCompilation, diagnostics.Diagnostics );
 
-            ISymbol FindInIntermediateCompilation(ICodeElement codeElement)
+            ISymbol FindInIntermediateCompilation( ICodeElement codeElement )
             {
-                if (codeElement is MethodBuilder method)
+                if ( codeElement is MethodBuilder method )
                 {
                     var pair = intermediateIntroducedSyntax[method].Single();
-                    var symbol = intermediateCompilation.GetSemanticModel( pair.Tree ).GetDeclaredSymbol( nodeAnnotationIds[pair.NodeAnnotationId] );
+                    var symbol = intermediateCompilation.GetSemanticModel( pair.Tree ).GetDeclaredSymbol( nodeAnnotationIds[pair.NodeAnnotationId] ).AssertNotNull();
                     return symbol;
                 }
 

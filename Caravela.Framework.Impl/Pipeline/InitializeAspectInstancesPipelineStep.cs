@@ -1,10 +1,10 @@
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -12,16 +12,16 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private List<AspectInstance> _aspectInstances = new List<AspectInstance>();
 
-        public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(stepId, aspectLayer)
+        public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer )
         {
         }
-        
+
         public void AddAspectInstance( AspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance );
 
-        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState ) 
+        public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {
             var aspectDriver = (AspectDriver) this.AspectLayer.AspectType.AspectDriver;
-            
+
             var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
             var aspectInitializerDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics );
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Pipeline
             pipelineStepsState.AddDiagnostics( aspectInitializerDiagnostics );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
-            
+
             // It's not clear if we should continue at that time. An error here may result in more errors later.
 
             return base.Execute( compilation, pipelineStepsState );

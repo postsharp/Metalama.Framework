@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder, ICodeElementLink<IGenericParameter>
+    internal sealed class GenericParameterBuilder : CodeElementBuilder, IGenericParameterBuilder
     {
         private readonly IGenericParameter _template;
 
@@ -46,11 +45,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        
-        // TODO: Implement compilation-consistent model.
-        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => compilation == this.Compilation ? this : throw new AssertionFailedException();
-
-        IGenericParameter ICodeElementLink<IGenericParameter>.GetForCompilation( CompilationModel compilation ) => (IGenericParameter) this.GetForCompilation( compilation );
         bool IEquatable<IType>.Equals( IType other ) => throw new NotImplementedException();
     }
 }

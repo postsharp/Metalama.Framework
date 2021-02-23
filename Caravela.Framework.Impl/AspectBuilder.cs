@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         private bool _skipped;
-        
+
         public T TargetDeclaration { get; }
 
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -21,10 +21,11 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
+
         public void SkipAspect() => this._skipped = true;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
-         : base( targetDeclaration.DiagnosticLocation )
+            : base( targetDeclaration.DiagnosticLocation )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl
 
         internal AspectInstanceResult ToResult()
         {
-            bool success = this.ErrorCount == 0;
+            var success = this.ErrorCount == 0;
             return success && !this._skipped
                 ? new(
                     success,

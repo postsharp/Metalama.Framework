@@ -15,7 +15,7 @@ namespace Caravela.Framework.Code
     public interface INamedType : IType, IMember
     {
         /// <summary>
-        /// Determines whether the type is marked as partial in source code. 
+        /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
         /// </summary>
         bool IsPartial { get; }
 

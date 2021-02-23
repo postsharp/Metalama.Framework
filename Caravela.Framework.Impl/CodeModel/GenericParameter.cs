@@ -1,6 +1,4 @@
-﻿using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -50,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ITypeFactory IType.TypeFactory => this.Compilation.Factory;
 
-        public bool Equals( IType other ) => this._typeSymbol.Equals( ((ITypeInternal) other).TypeSymbol );
+        public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this._typeSymbol.ToString();
     }

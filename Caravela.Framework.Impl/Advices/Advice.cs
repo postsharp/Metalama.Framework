@@ -26,6 +26,4 @@ namespace Caravela.Framework.Impl.Advices
 
         public abstract AdviceResult ToResult( ICompilation compilation );
     }
-    
-    
 }

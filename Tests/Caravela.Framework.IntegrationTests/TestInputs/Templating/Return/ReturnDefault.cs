@@ -1,15 +1,13 @@
 #pragma warning disable CS8600, CS8603
-using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnDefault
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             try
             {
@@ -23,9 +21,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnD
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method(int a)
         {
             return 42 / a;
         }

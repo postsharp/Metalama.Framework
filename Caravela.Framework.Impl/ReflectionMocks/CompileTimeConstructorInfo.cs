@@ -1,10 +1,10 @@
+using System;
+using System.Globalization;
+using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Globalization;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {

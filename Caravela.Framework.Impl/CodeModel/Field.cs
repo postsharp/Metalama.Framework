@@ -1,9 +1,7 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel

@@ -1,6 +1,5 @@
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         public DiagnosticSink DiagnosticSink { get; }
-        
+
         // TODO: add lexical scope here.
     }
 

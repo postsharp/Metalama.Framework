@@ -1,6 +1,6 @@
+using System;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 typeName += ", " + typeSymbol.ContainingAssembly.Name;
             }
-                
+
             var type = Type.GetType( typeName );
             if ( type == null )
             {

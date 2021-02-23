@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.AspectOrdering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 
@@ -34,18 +34,20 @@ namespace Caravela.Framework.Impl.Pipeline
                     pipeline.Context.ManifestResources.Add( resource );
                 }
 
+                var compileTimeAssemblyBuilder = pipeline.CompileTimeAssemblyBuilder.AssertNotNull();
+
                 if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    var compileTimeAssembly = pipeline.CompileTimeAssemblyBuilder.EmitCompileTimeAssembly( result.Compilation );
+                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( result.Compilation );
 
                     if ( compileTimeAssembly != null )
                     {
                         pipeline.Context.ManifestResources.Add( new ResourceDescription(
-                            pipeline.CompileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 
-                outputCompilation = pipeline.CompileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
+                outputCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
                 return true;
             }
             catch ( Exception exception ) when ( this.Context.HandleExceptions )
@@ -55,8 +57,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
         }
-
-  
 
         protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new CompileTimePipelineStage( parts, compileTimeAssemblyLoader, this );

@@ -117,7 +117,7 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                     if ( success )
                     {
                         this._addTemplateUsings = true;
-                        
+
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                         yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
                     }
@@ -125,8 +125,6 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                     {
                         this.Success = false;
                     }
-
-                   
                 }
                 else
                 {

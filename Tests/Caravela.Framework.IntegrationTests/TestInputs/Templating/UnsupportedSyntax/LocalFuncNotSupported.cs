@@ -1,16 +1,13 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.LocalFuncNotSupported
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             void LocalFunc(dynamic p)
             {
@@ -25,9 +22,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.Local
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method(int a, int b)
         {
             return a + b;
         }

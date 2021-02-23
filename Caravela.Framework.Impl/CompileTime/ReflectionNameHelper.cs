@@ -1,6 +1,6 @@
-using Microsoft.CodeAnalysis;
 using System;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         Format( typeSymbol );
                         sb.Append( '+' );
                         break;
-                    
+
                     case INamespaceSymbol namespaceSymbol:
                         if ( !namespaceSymbol.IsGlobalNamespace )
                         {
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
 
                         break;
-                    
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -54,16 +54,15 @@ namespace Caravela.Framework.Impl.CompileTime
                             Format( arrayTypeSymbol.ElementType );
                             sb.Append( "[]" );
                             break;
-                        
+
                         default:
                             throw new NotImplementedException( $"Don't know how to get the reflection name of '{symbol}'." );
                     }
                 }
-                
             }
-            
+
             Format( s );
-      
+
             return sb.ToString();
         }
     }

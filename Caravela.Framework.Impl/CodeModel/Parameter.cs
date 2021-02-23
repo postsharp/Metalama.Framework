@@ -1,12 +1,11 @@
-﻿using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
+﻿using System;
+using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class Parameter : CodeElement, IParameter, ICodeElementLink<IParameter>
+    internal class Parameter : CodeElement, IParameter
     {
         public IParameterSymbol ParameterSymbol { get; }
 
@@ -45,6 +44,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public override ISymbol Symbol => this.ParameterSymbol;
 
         public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
-        IParameter ICodeElementLink<IParameter>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<IParameter>( compilation );
     }
 }

@@ -18,8 +18,6 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.TestFramework.Templating
 {
@@ -87,7 +85,6 @@ namespace Caravela.TestFramework.Templating
             var templaceCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
-
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
@@ -157,7 +154,7 @@ namespace Caravela.TestFramework.Templating
                 Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = CompilationModel.CreateInitialInstance(compilationForInitialDiagnostics);
+                var caravelaCompilation = CompilationModel.CreateInitialInstance( compilationForInitialDiagnostics );
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );

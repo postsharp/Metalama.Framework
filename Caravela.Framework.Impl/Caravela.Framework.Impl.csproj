@@ -16,7 +16,11 @@
 
     <Compile Remove="CodeModel\Before\**" />
 
+    <Compile Remove="Serialization\Reflection\**" />
+
     <None Remove="CodeModel\Before\**" />
+
+    <None Remove="Serialization\Reflection\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -97,11 +101,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
   <ItemGroup>
     <EmbeddedResource Remove="CodeModel\Before\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="CodeModel\Source" />
-    <Folder Include="Serialization\Reflection" />
+    <EmbeddedResource Remove="Serialization\Reflection\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

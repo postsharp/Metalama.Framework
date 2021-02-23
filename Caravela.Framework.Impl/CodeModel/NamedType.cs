@@ -1,4 +1,8 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -6,17 +10,13 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : Member, INamedType, ITypeInternal, ICodeElementLink<INamedType>, ISdkNamedType
+    internal sealed class NamedType : Member,  ITypeInternal, ISdkNamedType
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 
@@ -51,16 +51,16 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
 
         [Memo]
-        public INamedTypeList NestedTypes => new NamedTypeList( this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>(t) ), this.Compilation );
+        public INamedTypeList NestedTypes => new NamedTypeList( this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>( t ) ), this.Compilation );
 
         [Memo]
         public IPropertyList Properties =>
-            new PropertyList( 
+            new PropertyList(
                 this.TypeSymbol.GetMembers().Select(
                     m => m switch
                     {
-                        IPropertySymbol p => new MemberLink<IProperty>(p),
-                        IFieldSymbol { IsImplicitlyDeclared: false } f => new MemberLink<IProperty>(f),
+                        IPropertySymbol p => new MemberLink<IProperty>( p ),
+                        IFieldSymbol { IsImplicitlyDeclared: false } f => new MemberLink<IProperty>( f ),
                         _ => default
                     } ),
                 this.Compilation );
@@ -82,11 +82,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     .OfType<IMethodSymbol>()
                     .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
                     .Select( m => new MemberLink<IMethod>( m ) )
-                    .Concat( this.Compilation.GetObservableTransformationsOnElement(this)
+                    .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
                         .OfType<MethodBuilder>()
-                        .Select( m => new MemberLink<IMethod>(m) )),
+                        .Select( m => new MemberLink<IMethod>( m ) ) ),
                 this.Compilation );
-
 
         [Memo]
         public IConstructorList Constructors
@@ -125,9 +124,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IGenericParameterList GenericParameters =>
             new GenericParameterList(
                 this.TypeSymbol.TypeParameters
-                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>(tp) ),
+                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ),
                 this.Compilation );
-        
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
@@ -159,10 +157,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        INamedType ICodeElementLink<INamedType>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<INamedType>(compilation);
-
         public bool Equals( IType other ) => this.TypeSymbol.Equals( ((ITypeInternal) other).TypeSymbol );
-        
+
         public override string ToString() => this.TypeSymbol.ToString();
     }
 }

@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.AspectOrdering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public OverrideOrderRewriter(
                 CSharpCompilation compilation,
-                IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, 
+                IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
                 ImmutableMultiValueDictionary<ISymbol, IntroducedMember> overrideLookup )
             {
                 this._compilation = compilation;
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Linking
                         continue;
                     }
 
-                    var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member );
+                    var originalSymbol = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( member ).AssertNotNull();
 
                     var overrides = this._overrideLookup[originalSymbol];
 
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Linking
                             this._orderedAspectLayers
                             .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
                             .Where( x => x.Value != null )
-                            .Last().Value;
+                            .Last().Value.AssertNotNull();
 
                         // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
                         var originalMethodDeclaration = (MethodDeclarationSyntax) member;
@@ -63,22 +63,17 @@ namespace Caravela.Framework.Impl.Linking
                             ? MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 ThisExpression(),
-                                IdentifierName( lastOverrideName )
-                                )
+                                IdentifierName( lastOverrideName ))
                             : IdentifierName( lastOverrideName ),
                             ArgumentList(
                                 SeparatedList(
-                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) )
-                                    )
-                                )
-                            );
+                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
 
                         newMembers.Add( originalMethodDeclaration.WithBody(
                             Block(
                                 originalSymbol.ReturnsVoid
                                 ? ExpressionStatement( invocation )
-                                : ReturnStatement( invocation )
-                            ) ) );
+                                : ReturnStatement( invocation )) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
                     }
@@ -108,11 +103,11 @@ namespace Caravela.Framework.Impl.Linking
                     .Index;
 
                 // The callee is the original/introduced method.
-                var callee = (IMethodSymbol?) this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var callee = (IMethodSymbol) this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 var declarationSyntax = (MethodDeclarationSyntax) callee.DeclaringSyntaxReferences.Single().GetSyntax();
 
-                var declarationSymbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( declarationSyntax );
+                var declarationSymbol = this._compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( declarationSyntax ).AssertNotNull();
 
                 // Now look for IntroducedMembers targeting this syntax.
                 var overrides = this._overrideLookup[declarationSymbol];
@@ -133,24 +128,20 @@ namespace Caravela.Framework.Impl.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )
-                                    ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                     else
                     {
-                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value.AssertNotNull();
 
                         return
                             InvocationExpression(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )
-                                    ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                 }
                 else if ( node.Expression is IdentifierNameSyntax identifier )
@@ -161,22 +152,22 @@ namespace Caravela.Framework.Impl.Linking
                         return
                             InvocationExpression(
                                 IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                     else
                     {
-                        var overrideImmediatelyBefore = precedingOverrides.Last().Value;
+                        var overrideImmediatelyBefore = precedingOverrides.Last().Value.AssertNotNull();
 
                         return
                             InvocationExpression(
                                 IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )
-                            );
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
                     }
                 }
                 else
+                {
                     throw new NotImplementedException();
+                }
             }
 
             private static string GetOriginalBodyMethodName( string methodName )

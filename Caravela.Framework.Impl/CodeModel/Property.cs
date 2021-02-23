@@ -1,14 +1,14 @@
-﻿using Caravela.Framework.Code;
+﻿using System;
+using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Linq;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Property : Member, IProperty, IMemberLink<IProperty>
+    internal sealed class Property : Member, IProperty
     {
         private readonly IPropertySymbol _symbol;
 
@@ -63,8 +63,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasBase => true;
 
         public IPropertyInvocation Base => new PropertyInvocation<Property>( this ).Base;
-
-        IProperty ICodeElementLink<IProperty>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation<IProperty>( compilation );
 
         public override string ToString() => this._symbol.ToString();
 

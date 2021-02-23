@@ -5,7 +5,6 @@ using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 

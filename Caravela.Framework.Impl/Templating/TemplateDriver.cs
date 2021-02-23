@@ -3,9 +3,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -20,12 +18,11 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
 
-   
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
-            Invariant.Assert( 
+            Invariant.Assert(
                 templateExpansionContext.DiagnosticSink.DefaultLocation != null );
-            
+
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
             {

@@ -1,11 +1,10 @@
 using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder, ICodeElementLink<IParameter>
+    internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
     {
         private readonly string? _name;
 
@@ -41,9 +40,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        // TODO: Implement compilation-consistent model.
-        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => this;
-
         internal ParameterSyntax ToDeclarationSyntax()
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
@@ -53,7 +49,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.DefaultValue.ToExpressionSyntax( this.Compilation ),
                 this.RefKind.ToRoslynRefKind() );
         }
-
-        IParameter ICodeElementLink<IParameter>.GetForCompilation( CompilationModel compilation ) => (IParameter) this.GetForCompilation( compilation );
     }
 }

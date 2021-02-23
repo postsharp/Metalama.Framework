@@ -1,10 +1,9 @@
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Sdk;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -12,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompilationModel _compilation;
         private readonly CompileTimeAssemblyLoader _loader;
-        
+
         public CompilationAspectSource( CompilationModel compilation, CompileTimeAssemblyLoader loader )
         {
             this._compilation = compilation;
@@ -25,8 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             get
             {
-                var aspectType = this._compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
-                return this._compilation.GetAllAttributeTypes().Where( t => t.Is(aspectType) && t.TypeKind == TypeKind.Class );
+                var aspectType = this._compilation.Factory.GetTypeByReflectionType( typeof( IAspect ) );
+                return this._compilation.GetAllAttributeTypes().Where( t => t.Is( aspectType ) && t.TypeKind == TypeKind.Class );
             }
         }
 

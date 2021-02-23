@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
-using System;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;
@@ -93,7 +91,7 @@ class C
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
             Assert.Equal( "Inner", innerLocalFunction.Name );
-            
+
             Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
         }
 
@@ -199,7 +197,7 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t!.ToString()! ) );
 
             var method = type.Methods.First();
 

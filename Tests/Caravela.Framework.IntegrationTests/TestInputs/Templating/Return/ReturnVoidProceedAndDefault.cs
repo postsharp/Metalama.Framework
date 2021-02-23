@@ -5,10 +5,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnVoidProceedAndDefault
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             try
             {
@@ -21,9 +21,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnV
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(int a, int b)
+        private void Method(int a, int b)
         {
             Console.WriteLine(a / b);
         }

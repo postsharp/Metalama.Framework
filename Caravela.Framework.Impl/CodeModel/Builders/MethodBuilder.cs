@@ -5,7 +5,6 @@ using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +15,7 @@ using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal, IMemberLink<IMethod>
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
     {
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -68,7 +67,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         bool IMethod.IsOpenGeneric => true;
 
-        
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
 
@@ -94,9 +92,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        // TODO: Implement compilation-consistent model.
-        protected override ICodeElement GetForCompilation( CompilationModel compilation ) => this;
-
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
@@ -110,15 +105,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     this.Accessibility.ToRoslynAccessibility(),
                     this.ToDeclarationModifiers(),
                     !this.ReturnParameter.ParameterType.Is( typeof( void ) )
-                    ? new[]
-                    {
-                        ReturnStatement(
-                            LiteralExpression(
-                                SyntaxKind.DefaultLiteralExpression,
-                                Token (SyntaxKind.DefaultKeyword)))
-                    }
-                    : null
-                    );
+                        ? new[]
+                        {
+                            ReturnStatement(
+                                LiteralExpression(
+                                    SyntaxKind.DefaultLiteralExpression,
+                                    Token (SyntaxKind.DefaultKeyword)))
+                        }
+                        : null);
 
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction ) };
         }
@@ -133,7 +127,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             // TODO: implement.
             return Array.Empty<ISymbol>();
         }
-
-        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => throw new NotImplementedException();
     }
 }

@@ -33,7 +33,7 @@ namespace Caravela.Framework.Code
         OptionalValue DefaultValue { get; }
 
         /// <summary>
-        /// 
+        /// Gets a value indicating whether the parameter has the <c>params</c> modifier.
         /// </summary>
         bool IsParams { get; }
 

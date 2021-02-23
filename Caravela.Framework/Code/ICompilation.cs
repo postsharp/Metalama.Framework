@@ -1,5 +1,5 @@
-﻿using Caravela.Framework.Project;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Caravela.Framework.Project;
 
 // TODO: InternalImplement
 namespace Caravela.Framework.Code

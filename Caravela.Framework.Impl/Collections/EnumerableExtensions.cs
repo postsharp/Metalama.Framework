@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Collections
 {
@@ -62,7 +61,7 @@ namespace Caravela.Framework.Impl.Collections
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue,
-            IEqualityComparer<TKey> keyComparer = null )
+            IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
          => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
     }

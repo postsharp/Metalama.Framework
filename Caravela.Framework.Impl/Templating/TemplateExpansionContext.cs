@@ -29,8 +29,8 @@ namespace Caravela.Framework.Impl.Templating
             this.CurrentLexicalScope = new TemplateDriverLexicalScope( this, (IMethodInternal) targetMethod );
             this.DiagnosticSink = diagnosticSink;
             Invariant.Assert( diagnosticSink.DefaultLocation != null );
-            Invariant.Assert( 
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ));
+            Invariant.Assert(
+                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ) );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;

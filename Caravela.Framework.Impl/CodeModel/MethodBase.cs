@@ -1,10 +1,10 @@
+using System;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
 using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -32,11 +32,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( s => new MemberLink<IMethod>( s ) ),
                 this.Compilation );
 
-
         [Memo]
         public IParameterList Parameters =>
             new ParameterList(
-                this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>(p) ),
+                this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>( p ) ),
                 this.Compilation );
 
         MethodKind IMethodBase.MethodKind => this.MethodSymbol.MethodKind switch

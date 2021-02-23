@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl
 {
@@ -15,24 +14,23 @@ namespace Caravela.Framework.Impl
         /// Checks that a given condition is true and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-        [Conditional("DEBUG")]
+        [Conditional( "DEBUG" )]
         public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
             if ( !condition )
             {
-                throw new AssertionFailedException( );
+                throw new AssertionFailedException();
             }
         }
 
-        [Conditional("DEBUG")]
+        [Conditional( "DEBUG" )]
         public static void Implies( bool premise, bool conclusion )
         {
             if ( premise && !conclusion )
             {
-                throw new AssertionFailedException( );
+                throw new AssertionFailedException();
             }
         }
-
 
 #if !DEBUG
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -41,15 +39,14 @@ namespace Caravela.Framework.Impl
             where T : class
         {
 #if DEBUG
-            if ( !predicate(obj) )
+            if ( !predicate( obj ) )
             {
-                throw new AssertionFailedException(  );
+                throw new AssertionFailedException();
             }
 #endif
 
             return obj;
         }
-
 
         /// <summary>
         /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
@@ -59,7 +56,7 @@ namespace Caravela.Framework.Impl
         /// <returns></returns>
 #if !DEBUG
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif 
+#endif
         public static T AssertNotNull<T>( this T? obj )
             where T : class
         {
@@ -69,7 +66,7 @@ namespace Caravela.Framework.Impl
                 throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
             }
 #endif
-            
+
             return obj;
         }
 
@@ -90,15 +87,14 @@ namespace Caravela.Framework.Impl
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must no be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof( T ).Name} must no be not null." );
                 }
 
                 i++;
             }
 #endif
-            
+
             return items!;
-            
         }
     }
 }

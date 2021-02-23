@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     {
         // Intentionally using the struct and not the interface to avoid memory allocation.
         CodeElementLink<INamedType> AttributeType { get; }
+
         CodeElementLink<ICodeElement> DeclaringElement { get; }
     }
 }

@@ -1,11 +1,11 @@
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -70,15 +70,21 @@ namespace Caravela.Framework.Impl.CodeModel
             return this.GetTypeByReflectionName( type.FullName );
         }
 
-        
+        internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
+           => (IAssembly) this._cache.GetOrAdd(
+               assemblySymbol.ToLink(),
+               l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly ) ?
+                new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
+            : this._compilation );
+
         internal IType GetIType( ITypeSymbol typeSymbol )
             => (IType) this._cache.GetOrAdd( typeSymbol.ToLink(), l => CodeModelFactory.CreateIType( (ITypeSymbol) l.Symbol!, this._compilation ) );
-        
+
         internal NamedType GetNamedType( INamedTypeSymbol typeSymbol )
             => (NamedType) this._cache.GetOrAdd( typeSymbol.ToLink(), s => new NamedType( (INamedTypeSymbol) s.Symbol!, this._compilation ) );
 
         internal GenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (GenericParameter) this._cache.GetOrAdd( typeParameterSymbol.ToLink(), tp => new GenericParameter((ITypeParameterSymbol) tp.Symbol!, this._compilation ) );
+            => (GenericParameter) this._cache.GetOrAdd( typeParameterSymbol.ToLink(), tp => new GenericParameter( (ITypeParameterSymbol) tp.Symbol!, this._compilation ) );
 
         internal IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Method( (IMethodSymbol) ms.Symbol!, this._compilation ) );
@@ -92,7 +98,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IParameter GetParameter( IParameterSymbol parameterSymbol, Member declaringMember )
             => (IParameter) this._cache.GetOrAdd( parameterSymbol.ToLink(), ms => new Parameter( (IParameterSymbol) ms.Symbol!, this._compilation ) );
 
-        
         internal IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => (IConstructor) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Constructor( (IMethodSymbol) ms.Symbol!, this._compilation ) );
 
@@ -102,30 +107,31 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToLink(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
 
-        
-        
-        internal ICodeElement GetCodeElement( ISymbol symbol ) =>
+        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default) =>
             symbol switch
             {
                 INamespaceSymbol => this._compilation,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
-                IMethodSymbol method => method.GetCodeElementKind() == CodeElementKind.Method ? this.GetMethod( method ) : this.GetConstructor( method ),
+                IMethodSymbol method =>
+                    kind == CodeElementSpecialKind.ReturnParameter 
+                        ? this.GetReturnParameter( method )
+                        : method.GetCodeElementKind() == CodeElementKind.Method 
+                            ? this.GetMethod( method )
+                            : this.GetConstructor( method ),
                 IPropertySymbol property => this.GetProperty( property ),
                 IFieldSymbol field => this.GetProperty( field ),
                 ITypeParameterSymbol typeParameter => this.GetGenericParameter( typeParameter ),
-                IAssemblySymbol => this._compilation,
                 IParameterSymbol parameter => this.GetParameter( parameter ),
-                IEventSymbol @event => this.GetEvent( @event),
+                IEventSymbol @event => this.GetEvent( @event ),
+                IAssemblySymbol assembly => this.GetAssembly( assembly ),
                 _ => throw new ArgumentException( nameof( symbol ) )
             };
 
-        
-
         IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank ) =>
-            (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol, rank ) );
+            (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
         IPointerType ITypeFactory.MakePointerType( IType pointedType ) =>
-            (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol ) );
+            (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
         bool ITypeFactory.Is( IType left, IType right ) =>
             this.RoslynCompilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
@@ -136,22 +142,21 @@ namespace Caravela.Framework.Impl.CodeModel
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
 
         public IAttribute GetAttribute( AttributeBuilder attributeBuilder )
-            => (IAttribute) this._cache.GetOrAdd( 
-                CodeElementLink.FromLink( attributeBuilder ),
+            => (IAttribute) this._cache.GetOrAdd(
+                CodeElementLink.FromBuilder( attributeBuilder ),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilation ) );
 
         public IParameter GetParameter( ParameterBuilder parameterBuilder )
-            => (IParameter) this._cache.GetOrAdd( 
-                CodeElementLink.FromLink( parameterBuilder ),
+            => (IParameter) this._cache.GetOrAdd(
+                CodeElementLink.FromBuilder( parameterBuilder ),
                 l => new BuiltParameter( (ParameterBuilder) l.Target!, this._compilation ) );
-        
-        public IGenericParameter? GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
-            => (IGenericParameter) this._cache.GetOrAdd( 
-                CodeElementLink.FromLink( genericParameterBuilder ),
+
+        public IGenericParameter GetGenericParameter( GenericParameterBuilder genericParameterBuilder )
+            => (IGenericParameter) this._cache.GetOrAdd(
+                CodeElementLink.FromBuilder( genericParameterBuilder ),
                 l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilation ) );
 
-
-        public ICodeElement? GetCodeElement( CodeElementBuilder builder )
+        public ICodeElement GetCodeElement( CodeElementBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
@@ -160,8 +165,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 _ => throw new AssertionFailedException(),
             };
-
-   
 
         public IType GetIType( IType type )
         {
@@ -176,7 +179,7 @@ namespace Caravela.Framework.Impl.CodeModel
             else
             {
                 // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-                return this.GetIType( ((ITypeInternal) type).TypeSymbol );
+                return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
             }
         }
 
@@ -194,9 +197,12 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-      
-
         public IMethod GetMethod( IMethod attributeBuilderConstructor )
+        {
+            throw new NotImplementedException();
+        }
+
+        public IParameter GetReturnParameter( IMethodSymbol method )
         {
             throw new NotImplementedException();
         }

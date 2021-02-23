@@ -32,8 +32,6 @@ namespace Caravela.Framework.Impl.CompileTime
             AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
         }
 
-  
-
         private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
         {
             var typeArguments = new List<ITypeSymbol>();
@@ -48,7 +46,6 @@ namespace Caravela.Framework.Impl.CompileTime
             return typeArguments;
         }
 
-  
         private static Assembly Load( byte[] assembly )
         {
             // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targetting)
@@ -123,13 +120,12 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var typeArguments = CollectTypeArguments( namedTypeSymbol );
 
-                result = result.MakeGenericType( typeArguments.Select( typeSymbol1 => this.GetCompileTimeType(typeSymbol1, fallbackToMock ) ).ToArray() );
+                result = result.MakeGenericType( typeArguments.Select( typeSymbol1 => this.GetCompileTimeType( typeSymbol1, fallbackToMock ) ).ToArray() );
             }
 
             return result;
         }
 
-      
         private byte[]? GetResourceBytes( string assemblyPath, string resourceName )
         {
             var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );

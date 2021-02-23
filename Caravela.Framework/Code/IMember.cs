@@ -46,7 +46,7 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsNew { get; }
 
-         /// <summary>
+        /// <summary>
         /// Gets a value indicating whether the member is <c>async</c>.
         /// </summary>
         bool IsAsync { get; }

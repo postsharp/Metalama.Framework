@@ -35,15 +35,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
             };
 
-    
-        
         /// <summary>
-        /// Determines whether a symbol is exposed to the user code model.
+        /// Gets a value indicating whether a symbol is exposed to the user code model.
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
         public static bool IsVisible( this ISymbol m ) => !m.IsImplicitlyDeclared || (m.Kind == SymbolKind.Method && m.MetadataName == ".ctor");
-        
+
         /// <summary>
         /// Select all code elements recursively contained in a given code element (i.e. all children of the tree).
         /// </summary>
@@ -72,16 +70,16 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <returns></returns>
         public static IEnumerable<ISymbol> GetContainedSymbols( this ISymbol symbol ) =>
             symbol switch
-                    {
-                        IAssemblySymbol compilation => compilation.GetTypes(),
-                        INamedTypeSymbol namedType => namedType.GetMembers().Where( IsVisible ).Concat( namedType.TypeParameters ),
-                        IMethodSymbol method => method.Parameters.Concat<ISymbol>( method.TypeParameters ),
-                        IPropertySymbol property => property.Parameters,
-                        _ => null
-                    };
+            {
+                IAssemblySymbol compilation => compilation.GetTypes(),
+                INamedTypeSymbol namedType => namedType.GetMembers().Where( IsVisible ).Concat( namedType.TypeParameters ),
+                IMethodSymbol method => method.Parameters.Concat<ISymbol>( method.TypeParameters ),
+                IPropertySymbol property => property.Parameters,
+                _ => Array.Empty<ISymbol>()
+            };
 
         public static IEnumerable<AttributeLink> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol ) =>
-            attributes.Select( a => new AttributeLink( a, CodeElementLink.FromSymbol(declaringSymbol) ) );
+            attributes.Select( a => new AttributeLink( a, CodeElementLink.FromSymbol( declaringSymbol ) ) );
 
         public static IEnumerable<AttributeLink> GetAllAttributes( this ISymbol symbol ) =>
             symbol switch
@@ -90,12 +88,19 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetAttributes()
                     .ToAttributeLinks( method )
                     .Concat( method.GetReturnTypeAttributes()
-                        .Select( a => new AttributeLink( a, new ReturnParameterLink( method ).ToSymbolicLink() ) ) ),
+                        .Select( a => new AttributeLink( a,  CodeElementLink.ReturnParameter( method ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 
-        public static CodeElementLink<ICodeElement> ToLink( this ISymbol symbol ) => CodeElementLink.FromSymbol(symbol);
-        
+        public static CodeElementLink<ICodeElement> ToLink( this ISymbol symbol ) => CodeElementLink.FromSymbol( symbol );
+
+        public static CodeElementLink<T> ToLink<T>( this T codeElement )
+            where T : class, ICodeElement
+            => ((ICodeElementInternal) codeElement).ToLink().Cast<T>();
+
+        public static MemberLink<T> ToMemberLink<T>( this T member )
+            where T : class, IMember
+            => new MemberLink<T>( ((ICodeElementInternal) member).ToLink() );
 
         public static Location? GetLocation( this ICodeElement codeElement )
             => codeElement switch

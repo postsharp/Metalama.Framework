@@ -1,4 +1,5 @@
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Sdk
 {
@@ -7,6 +8,5 @@ namespace Caravela.Framework.Sdk
     /// </summary>
     public interface ISdkNamedType : INamedType, ISdkType
     {
-        
     }
 }

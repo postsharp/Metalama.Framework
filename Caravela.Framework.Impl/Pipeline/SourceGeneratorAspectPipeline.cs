@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.AspectOrdering;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
 
-            additionalSyntaxTrees = result.AdditionalSyntaxTrees;
+            additionalSyntaxTrees = result.AssertNotNull().AdditionalSyntaxTrees;
             return true;
         }
 

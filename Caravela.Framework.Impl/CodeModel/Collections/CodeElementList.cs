@@ -1,18 +1,19 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal abstract class CodeElementList<TCodeElement, TSource> : IReadOnlyList<TCodeElement> 
+    internal abstract class CodeElementList<TCodeElement, TSource> : IReadOnlyList<TCodeElement>
         where TCodeElement : class, ICodeElement
         where TSource : ICodeElementLink<TCodeElement>
     {
         private readonly CompilationModel? _compilation;
         private volatile TCodeElement?[]? _targetItems;
+
         protected ImmutableArray<TSource> SourceItems { get; }
 
         protected CodeElementList( IEnumerable<TSource> sourceItems, CompilationModel compilation )
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             bool canMoveToImmutable;
             if ( sourceItems is IReadOnlyCollection<TSource> collection )
             {
-                builder = ImmutableArray.CreateBuilder<TSource>(collection.Count);
+                builder = ImmutableArray.CreateBuilder<TSource>( collection.Count );
                 canMoveToImmutable = true;
             }
             else
@@ -43,9 +44,8 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             this._compilation = compilation;
         }
 
-        
         /// <summary>
-        /// Builds an empty list.
+        /// Initializes a new instance of the <see cref="CodeElementList{TCodeElement, TSource}"/> class representing an empty list.
         /// </summary>
         protected CodeElementList()
         {
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IEnumerator<TCodeElement> GetEnumerator()
         {
-            for ( int i = 0; i < this.Count; i++ )
+            for ( var i = 0; i < this.Count; i++ )
             {
                 yield return this[i];
             }
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this.SourceItems.Length;
 
-        public TCodeElement this[ int index ]
+        public TCodeElement this[int index]
         {
             get
             {

@@ -1,16 +1,17 @@
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
     internal class PipelineStep
     {
         private List<Advice> _advices = new List<Advice>();
-         
+
         public PipelineStepId Id { get; }
+
         public OrderedAspectLayer AspectLayer { get; }
 
         public PipelineStep( PipelineStepId id, OrderedAspectLayer aspectLayer )
@@ -26,14 +27,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
             var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
-            
+
             pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
 
-            return CompilationModel.CreateRevisedInstance(compilation, addedObservableIntroductions);
+            return CompilationModel.CreateRevisedInstance( compilation, addedObservableIntroductions );
         }
 
         public void AddAdvice( Advice advice ) => this._advices.Add( advice );
-
-        
     }
 }

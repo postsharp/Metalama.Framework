@@ -1,12 +1,12 @@
+using System.Reflection;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeParameterInfo : ParameterInfo, IReflectionMockCodeElement
     {
-        
+
         public IParameterSymbol ParameterSymbol { get; }
 
         public ICodeElement ContainingMember { get; }

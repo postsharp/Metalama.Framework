@@ -1,9 +1,10 @@
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
-using System;
-using System.Linq;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// The base class for the read-only facade of introduced code elements, represented by <see cref="CodeElementBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltCodeElement : ICodeElement, ICodeElementLink<ICodeElement>
+    internal abstract class BuiltCodeElement : ICodeElementInternal
     {
         protected BuiltCodeElement( CompilationModel compilation )
         {
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public CompilationModel Compilation { get; }
-        
+
         public abstract CodeElementBuilder Builder { get; }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
@@ -33,7 +34,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IAttributeList Attributes =>
-            new AttributeList( this.Builder.Attributes.Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ), this.Compilation );
+            new AttributeList( 
+                this.Builder.Attributes
+                    .Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ),
+                this.Compilation );
 
         public CodeElementKind ElementKind => this.Builder.ElementKind;
 
@@ -42,8 +46,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         protected ICodeElement GetForCompilation( CompilationModel compilation )
             => this.Compilation == compilation ? this : compilation.Factory.GetCodeElement( this.Builder );
 
-        ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation( compilation );
+        ISymbol? ISdkCodeElement.Symbol => null;
 
-        object? ICodeElementLink.Target => throw new NotSupportedException();
+        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this.Builder );
     }
 }

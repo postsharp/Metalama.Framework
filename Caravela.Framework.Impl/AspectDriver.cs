@@ -5,10 +5,8 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
@@ -58,7 +56,7 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new(  
+                return new(
                     false,
                     ImmutableList.Create( diagnostic ),
                     ImmutableList.Create<IAdvice>(),
@@ -68,7 +66,7 @@ namespace Caravela.Framework.Impl
             var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
-                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
+                codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
 

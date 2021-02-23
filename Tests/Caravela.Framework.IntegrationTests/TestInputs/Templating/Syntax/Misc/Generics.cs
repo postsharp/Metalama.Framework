@@ -1,15 +1,13 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
-using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.Generics
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             A<Aspect, int, string> x = new C<object, int, string>();
             target.Parameters[0].Value = x;
@@ -18,26 +16,27 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.Gener
         }
     }
 
-    interface A<in T1, out T2, T3> : B
+    internal interface A<in T1, out T2, T3> : B
         where T1 : class, new()
         where T2 : struct
     {
     }
 
-    interface B
+    internal interface B
     {
     }
 
-    class C<T1, T2, T3> : A<T1, T2, T3>
+    internal class C<T1, T2, T3> : A<T1, T2, T3>
         where T1 : class, new()
         where T2 : struct
     {
-        B c1;
-        D.E c2;
-        (int i, string) t;
-        event Action1<T1> Event1;
+        private B c1;
+        private D.E c2;
+        private (int i, string) t;
 
-        ref int M<T>(ref int n)
+        private event Action1<T1> Event1;
+
+        private ref int M<T>(ref int n)
            where T : D.E
         {
             return ref n;
@@ -56,20 +55,21 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.Gener
         }
     }
 
-    class D
+    internal class D
     {
         public class E
         {
             public static E operator !(E e) => null;
+
             public static implicit operator D(E e) => null;
         }
     }
 
-    delegate void Action1<T>(in int i) where T : class;
+    internal delegate void Action1<T>(in int i) where T : class;
 
-    class TargetCode
+    internal class TargetCode
     {
-        object Method(object a)
+        private object Method(object a)
         {
             return a;
         }

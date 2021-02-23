@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Aspects
 {
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+    [AttributeUsage( AttributeTargets.Assembly, AllowMultiple = true )]
     public class AspectOrderAttribute : Attribute
     {
         public AspectOrderAttribute( params Type[] orderedAspectTypes )
@@ -18,7 +18,5 @@ namespace Caravela.Framework.Aspects
         }
 
         public IReadOnlyList<string> OrderedAspectLayers { get; }
-        
-        
     }
 }

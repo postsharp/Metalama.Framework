@@ -1,16 +1,15 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltAttribute : BuiltCodeElement, IAttribute, ICodeElementLink<IAttribute>
+    internal class BuiltAttribute : BuiltCodeElement, IAttribute
     {
-        public BuiltAttribute(AttributeBuilder builder, CompilationModel compilation) : base(compilation)
+        public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
         {
             this.AttributeBuilder = builder;
         }
-        
+
         public AttributeBuilder AttributeBuilder { get; }
 
         public override CodeElementBuilder Builder => this.AttributeBuilder;
@@ -24,8 +23,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IReadOnlyList<object?> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
 
         public INamedArgumentList NamedArguments => this.AttributeBuilder.NamedArguments;
-
-        public IAttribute GetForCompilation( CompilationModel compilation ) =>
-            compilation == this.Compilation ? this : throw new AssertionFailedException();
     }
 }

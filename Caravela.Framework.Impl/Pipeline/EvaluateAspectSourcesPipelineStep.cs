@@ -1,7 +1,7 @@
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private List<IAspectSource> _aspectSources = new List<IAspectSource>();
 
-        public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer) : base(new PipelineStepId(aspectLayer.AspectLayerId, -1), aspectLayer)
+        public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base( new PipelineStepId( aspectLayer.AspectLayerId, -1 ), aspectLayer )
         {
         }
 

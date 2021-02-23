@@ -1,6 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
@@ -11,7 +11,6 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     /// <typeparam name="T"></typeparam>
     internal class CodeElementLinkEqualityComparer<T> : IEqualityComparer<T>
         where T : ICodeElementLink
-    
     {
         public static readonly CodeElementLinkEqualityComparer<T> Instance = new CodeElementLinkEqualityComparer<T>();
 
@@ -36,7 +35,6 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             }
         }
 
-
         public int GetHashCode( T? obj )
         {
             if ( obj == null )
@@ -55,7 +53,6 @@ namespace Caravela.Framework.Impl.CodeModel.Links
                     return RuntimeHelpers.GetHashCode( obj.Target );
                 }
             }
-
         }
     }
 }

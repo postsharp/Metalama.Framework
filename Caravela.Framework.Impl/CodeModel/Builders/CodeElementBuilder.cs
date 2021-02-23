@@ -2,8 +2,8 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// <see cref="ICodeElementLink{T}"/> so they can resolve, using <see cref="CodeElementFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementLink<ICodeElement>
+    internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
     {
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
@@ -31,7 +31,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        
         public bool IsReadOnly { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new System.NotImplementedException();
@@ -45,10 +44,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
 
-        ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) => this.GetForCompilation( compilation );
-        protected abstract ICodeElement GetForCompilation( CompilationModel compilation );
+        public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
 
-        // We are a link to ourselves.
-        object? ICodeElementLink.Target => this;
+        ISymbol? ISdkCodeElement.Symbol => null;
     }
 }

@@ -1,9 +1,8 @@
-using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 

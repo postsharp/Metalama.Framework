@@ -1,18 +1,18 @@
-using Caravela.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
         public static AttributeDeserializer SystemTypesDeserializer { get; } = new AttributeDeserializer( new SystemTypeResolver() );
-        
-        private ICompileTimeTypeResolver _compileTimeTypeResolver;
+
+        private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
 
         public AttributeDeserializer( ICompileTimeTypeResolver compileTimeTypeResolver )
         {
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public T CreateAttribute<T>( IAttribute attribute )
             where T : Attribute
-            => (T) this.CreateAttribute( attribute, typeof(T) );
+            => (T) this.CreateAttribute( attribute, typeof( T ) );
 
         public Attribute CreateAttribute( IAttribute attribute )
         {
@@ -31,43 +31,41 @@ namespace Caravela.Framework.Impl.CompileTime
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false ).AssertNotNull();
 
-        
-
-            return this.CreateAttribute(attribute, type);
+            return this.CreateAttribute( attribute, type );
         }
 
-        private Attribute CreateAttribute(IAttribute attribute, Type type)
+        private Attribute CreateAttribute( IAttribute attribute, Type type )
         {
             var constructorSymbol = attribute.Constructor.GetSymbol();
-            var constructor = type?.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
+            var constructor = type.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
 
             if ( constructor == null )
             {
                 throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
             }
-            
+
             var parameters = attribute.ConstructorArguments.Select(
-                (a, i) => this.TranslateAttributeArgument(a, constructor.GetParameters()[i].ParameterType)).ToArray();
-            var result = (Attribute?) constructor.Invoke(parameters);
+                ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) ).ToArray();
 
+            var result = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
 
-            foreach (var (name, value) in attribute.NamedArguments)
+            foreach ( var (name, value) in attribute.NamedArguments )
             {
                 PropertyInfo? property;
                 FieldInfo? field;
 
-                if ((property = type.GetProperty(name)) != null)
+                if ( (property = type.GetProperty( name )) != null )
                 {
-                    property.SetValue(result, this.TranslateAttributeArgument(value, property.PropertyType));
+                    property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
                 }
-                else if ((field = type.GetField(name)) != null)
+                else if ( (field = type.GetField( name )) != null )
                 {
-                    field.SetValue(result, this.TranslateAttributeArgument(value, field.FieldType));
+                    field.SetValue( result, this.TranslateAttributeArgument( value, field.FieldType ) );
                 }
                 else
                 {
                     throw new InvalidOperationException(
-                        $"Cannot find a field or property {name} in type {constructor.DeclaringType.Name}");
+                        $"Cannot find a field or property {name} in type {constructor.DeclaringType.Name}" );
                 }
             }
 
@@ -120,9 +118,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return roslynArgument;
             }
         }
-        
-        
-   
+
         private bool ParametersMatch( ParameterInfo[] reflectionParameters, ImmutableArray<IParameterSymbol> roslynParameters )
         {
             if ( reflectionParameters.Length != roslynParameters.Length )
@@ -140,8 +136,5 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return true;
         }
-
-
-
     }
 }

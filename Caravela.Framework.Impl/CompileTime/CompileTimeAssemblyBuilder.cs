@@ -1,11 +1,12 @@
-﻿using Caravela.Framework.Impl.Pipeline;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -83,8 +84,8 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !produceCompileTimeCodeRewriter.Success )
             {
                 // We don't want to continue with the control flow if we have a user error here, so we throw an exception.
-                throw new InvalidUserCodeException( 
-                    "Cannot create the compile-time assembly.", 
+                throw new InvalidUserCodeException(
+                    "Cannot create the compile-time assembly.",
                     produceCompileTimeCodeRewriter.Diagnostics.ToImmutableArray() );
             }
 
@@ -157,7 +158,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
 
                 compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
-                HashSet<string> names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
                 foreach ( var tree in compilation.SyntaxTrees )
                 {
                     // Find a decent and unique name.
@@ -166,7 +167,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( names.Contains( treeName ) )
                     {
                         var treeNameSuffix = treeName;
-                        for ( int i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
+                        for ( var i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
                         {
                             // Intentionally empty.
                         }

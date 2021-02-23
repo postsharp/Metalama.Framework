@@ -1,17 +1,16 @@
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltGenericParameter : BuiltCodeElement, IGenericParameter, ICodeElementLink<IGenericParameter>
+    internal class BuiltGenericParameter : BuiltCodeElement, IGenericParameter
     {
-        public BuiltGenericParameter(GenericParameterBuilder builder, CompilationModel compilation) : base(compilation)
+        public BuiltGenericParameter( GenericParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
             this.GenericParameterBuilder = builder;
         }
-        
+
         public GenericParameterBuilder GenericParameterBuilder { get; }
 
         public override CodeElementBuilder Builder => this.GenericParameterBuilder;
@@ -35,9 +34,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool HasReferenceTypeConstraint => this.GenericParameterBuilder.HasReferenceTypeConstraint;
 
         public bool HasNonNullableValueTypeConstraint => this.GenericParameterBuilder.HasNonNullableValueTypeConstraint;
-
-        public IGenericParameter GetForCompilation( CompilationModel compilation ) =>
-            compilation == this.Compilation ? this : throw new AssertionFailedException();
 
         public bool Equals( IType other ) => throw new NotImplementedException();
     }

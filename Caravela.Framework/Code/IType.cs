@@ -1,5 +1,5 @@
-using Caravela.Framework.Project;
 using System;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
 {
@@ -21,6 +21,5 @@ namespace Caravela.Framework.Code
         /// This member is used by <see cref="TypeExtensions"/> and is not meant to be used directly in user code.
         /// </summary>
         ITypeFactory TypeFactory { get; }
-
     }
 }

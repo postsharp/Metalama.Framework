@@ -6,10 +6,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.ForEachCompileTimeForEachRunTime
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             IEnumerable<int> array = Enumerable.Range(1, 2);
 
@@ -29,9 +29,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.For
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method(int a, int b)
         {
             return a + b;
         }

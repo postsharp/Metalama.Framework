@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         public int[] GetInitialVector()
         {
             var n = this.size;
-            int[] vector = new int[n];
+            var vector = new int[n];
             for ( var i = 0; i < n; i++ )
             {
                 vector[i] = NotDiscovered;
@@ -29,7 +29,6 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             return vector;
         }
-
 
         public abstract void AddEdge( int predecessor, int successor );
 

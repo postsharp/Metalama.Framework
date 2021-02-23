@@ -1,5 +1,4 @@
 using System.Linq;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Xunit;
@@ -56,11 +55,11 @@ class C<T> : object
                 Assert.Null( location );
                 return;
             }
-            
+
             Assert.NotNull( location );
 
             var actualText = location!.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
-            
+
             Assert.Equal( expectedText, actualText );
         }
     }

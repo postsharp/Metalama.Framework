@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
     {
-        public SourceGeneratorPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) 
+        public SourceGeneratorPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties )
             : base( aspectLayers, assemblyLoader, properties )
         {
         }
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     switch ( transformation )
                     {
                         case IMemberIntroduction memberIntroduction:
-                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( new MemberIntroductionContext(diagnostics) ).Select( m => m.Syntax ).ToArray() );
+                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( new MemberIntroductionContext( diagnostics ) ).Select( m => m.Syntax ).ToArray() );
                             break;
 
                         default:

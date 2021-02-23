@@ -1,10 +1,9 @@
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.AspectOrdering;
-using FakeItEasy;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.AspectOrdering;
+using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Caravela.Framework.UnitTests
@@ -15,13 +14,11 @@ namespace Caravela.Framework.UnitTests
         {
             var compilation = CreateCompilation( code );
 
-
             var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() );
             var aspectTypes = aspectNamedTypes.Select( aspectType => new AspectType( aspectType, null, null ) ).ToArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
-
-            var dependencies = new IAspectOrderingSource[] {new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation )};
+            var dependencies = new IAspectOrderingSource[] { new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation ) };
             var onDiagnostics = new Action<Diagnostic>( d => throw new AssertionFailedException() );
 
             Assert.True(
@@ -113,7 +110,6 @@ class Aspect2 {}
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 2, Aspect2:Layer1 => 3", ordered );
         }
-
 
         [Fact]
         public void TwoPartiallyOrderedDoubleLayerAspects()

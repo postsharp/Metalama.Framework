@@ -1,16 +1,16 @@
-using Caravela.Framework.Code;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class NamedArgumentsList : Collection<KeyValuePair<string, object>>, INamedArgumentList
+    internal class NamedArgumentsList : Collection<KeyValuePair<string, object?>>, INamedArgumentList
     {
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public NamedArgumentsList( IEnumerable<KeyValuePair<string, object?>> source ) 
+        public NamedArgumentsList( IEnumerable<KeyValuePair<string, object?>> source )
         {
             foreach ( var item in source )
             {
@@ -18,7 +18,9 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
         }
 
-        public NamedArgumentsList() { }
+        public NamedArgumentsList() 
+        {
+        }
 
         public bool TryGetByName( string name, out object? value )
         {

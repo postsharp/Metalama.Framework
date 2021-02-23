@@ -1,16 +1,14 @@
-﻿using Caravela.Framework.Code;
+﻿using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    
-    internal abstract class CodeElement : ISdkCodeElement, IHasDiagnosticLocation, ICodeElementLink<ICodeElement>
+    internal abstract class CodeElement : ICodeElementInternal, IHasDiagnosticLocation
     {
         protected CodeElement( CompilationModel compilation )
         {
@@ -27,15 +25,17 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
-        public IAttributeList Attributes =>
-            new AttributeList( 
-                this.Symbol.GetAttributes()
-                .Select( a => new AttributeLink(a, CodeElementLink.FromSymbol<ICodeElement>(this.Symbol)) ),
+        public virtual IAttributeList Attributes =>
+            new AttributeList(
+                this.Symbol!.GetAttributes()
+                .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ),
                 this.Compilation );
 
         public abstract CodeElementKind ElementKind { get; }
 
         public abstract ISymbol Symbol { get; }
+
+        public virtual CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromSymbol( this.Symbol );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();
@@ -43,15 +43,5 @@ namespace Caravela.Framework.Impl.CodeModel
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 
         IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
-
-        protected T GetForCompilation<T>( CompilationModel compilation )
-            where T : ICodeElement 
-            => compilation == this.Compilation ? (T) (object) this : throw new AssertionFailedException();
-
-        ICodeElement ICodeElementLink<ICodeElement>.GetForCompilation( CompilationModel compilation ) =>
-            this.GetForCompilation<ICodeElement>( compilation );
-            
-
-        object? ICodeElementLink.Target => this.Symbol;
-   }
+    }
 }

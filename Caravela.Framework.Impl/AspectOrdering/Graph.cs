@@ -51,8 +51,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             distances[initialNode] = 0;
 
             Queue<NodeInfo> queue = new( n );
-            queue.Enqueue( new NodeInfo {Node = initialNode, NodesInPath = new SimpleLinkedListNode<int>( initialNode, null )} );
-
+            queue.Enqueue( new NodeInfo { Node = initialNode, NodesInPath = new SimpleLinkedListNode<int>( initialNode, null ) } );
 
             while ( queue.Count > 0 )
             {
@@ -94,7 +93,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         distances[successor] = newSucccessorDistance;
                         directPredecessors[successor] = current;
 
-                        queue.Enqueue( new NodeInfo {Node = successor, NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath )} );
+                        queue.Enqueue( new NodeInfo { Node = successor, NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath ) } );
                     }
                     else if ( successorDistance == Cycle )
                     {

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             this._aspectType = aspectType;
             this.AspectLayerId = new AspectLayerId( aspectType, layerName );
         }
-        
+
         // Constructor for testing only.
         public AspectLayer( string aspectTypeName, string? layerName )
         {
@@ -23,8 +23,11 @@ namespace Caravela.Framework.Impl.AspectOrdering
         public AspectLayerId AspectLayerId { get; }
 
         public bool IsDefault => this.AspectLayerId.IsDefault;
+
         public string AspectName => this.AspectLayerId.AspectName;
+
         public string? LayerName => this.AspectLayerId.LayerName;
+
         public bool Equals( AspectLayerId other ) => this.AspectLayerId == other;
 
         public override int GetHashCode() => this.AspectLayerId.GetHashCode();

@@ -1,4 +1,5 @@
-using Caravela.Framework.Aspects;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
@@ -6,59 +7,61 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
     internal class PipelineStepsState : IPipelineStepsResult
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
+        private readonly PipelineStepIdComparer _comparer;
+        private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
+        private readonly List<INonObservableTransformation> _nonObservableTransformations = new List<INonObservableTransformation>();
+        private readonly OverflowAspectSource _overflowAspectSource = new OverflowAspectSource();
         private PipelineStep? _currentStep;
-        private PipelineStepIdComparer _comparer;
-        private List<Diagnostic> _diagnostics = new List<Diagnostic>();
-        private List<INonObservableTransformation> _nonObservableTransformations = new List<INonObservableTransformation>();
-        private OverflowAspectSource _overflowAspectSource = new OverflowAspectSource();
+
         public CompilationModel Compilation { get; private set; }
+
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+
         public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
 
-        public IReadOnlyList<IAspectSource> ExternalAspectSources => new[]{this._overflowAspectSource};
+        public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
-        public PipelineStepsState( 
+        public PipelineStepsState(
             IEnumerable<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
             IReadOnlyList<IAspectSource> inputAspectSources )
         {
             this.Compilation = inputCompilation;
+
             // Create an empty collection of steps.
             this._comparer = new PipelineStepIdComparer( aspectLayers );
             this._steps = new SkipListIndexedDictionary<PipelineStepId, PipelineStep>( this._comparer );
-            
+
             // Add the initial steps.
             foreach ( var aspectLayer in aspectLayers )
             {
                 if ( aspectLayer.AspectLayerId.IsDefault )
                 {
                     var step = new EvaluateAspectSourcesPipelineStep( aspectLayer );
-                    
+
                     _ = this._steps.Add( step.Id, step );
                 }
             }
-            
+
             // Add the initial sources.
             this.AddAspectSources( inputAspectSources );
         }
 
         public void Execute()
         {
-            
+
             var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
             {
                 this._currentStep = enumerator.Current.Value;
-                this.Compilation = this._currentStep!.Execute( this.Compilation, this );    
+                this.Compilation = this._currentStep!.Execute( this.Compilation, this );
             }
         }
 
@@ -89,7 +92,6 @@ namespace Caravela.Framework.Impl.Pipeline
                                     aspectType ) );
                             success = false;
                             continue;
-
                         }
 
                         var typedStep = (EvaluateAspectSourcesPipelineStep) step;
@@ -101,17 +103,16 @@ namespace Caravela.Framework.Impl.Pipeline
             return success;
         }
 
-        private bool TryGetOrAddStep( AspectLayerId aspectLayerId, int depth, bool allowAddToCurrentLayer, [NotNullWhen(true)] out PipelineStep? step )
+        private bool TryGetOrAddStep( AspectLayerId aspectLayerId, int depth, bool allowAddToCurrentLayer, [NotNullWhen( true )] out PipelineStep? step )
         {
             var stepId = new PipelineStepId( aspectLayerId, depth );
-            
+
             var aspectLayer = this._comparer.GetOrderedAspectLayer( aspectLayerId );
 
-          
             if ( this._currentStep != null )
             {
                 var currentLayerOrder = this._currentStep.AspectLayer.Order;
-                
+
                 if ( aspectLayer.Order < currentLayerOrder || (!allowAddToCurrentLayer && aspectLayer.Order == currentLayerOrder) )
                 {
                     // Cannot add a step before the current one.
@@ -119,7 +120,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
             }
-            
+
             if ( !this._steps.TryGetValue( stepId, out step ) )
             {
                 if ( aspectLayer.IsDefault )
@@ -139,15 +140,19 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public bool AddAdvices( IEnumerable<Advice> advices )
         {
+            Invariant.Assert( this._currentStep != null );
+
             var success = true;
+
             foreach ( var advice in advices )
             {
                 var depth = this.Compilation.GetDepth( advice.TargetDeclaration );
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
-                    this._diagnostics.Add( 
-                        Diagnostic.Create( GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
+                    this._diagnostics.Add(
+                        Diagnostic.Create( 
+                            GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
                             this._currentStep.AspectLayer.AspectType.Type.GetLocation(),
                             this._currentStep.AspectLayer.AspectType.Type,
                             advice.TargetDeclaration ) );
@@ -171,12 +176,12 @@ namespace Caravela.Framework.Impl.Pipeline
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();
                 }
-                
-                ((InitializeAspectInstancesPipelineStep)step).AddAspectInstance( aspectInstance );
+
+                ((InitializeAspectInstancesPipelineStep) step).AddAspectInstance( aspectInstance );
             }
         }
 
-        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics ) 
+        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics )
             => this._diagnostics.AddRange( diagnostics );
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations ) =>

@@ -1,7 +1,7 @@
-﻿using Caravela.Framework.Impl.AspectOrdering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 

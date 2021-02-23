@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
-
-#pragma warning disable CA1000 // Do not declare static members on generic types
 
 namespace Caravela.Framework.Impl.AspectOrdering
 {
@@ -14,62 +11,14 @@ namespace Caravela.Framework.Impl.AspectOrdering
     /// <remarks>There is no node implementing the <i>list</i>. Everything
     /// is a <i>node</i>. When using the <see cref="IEnumerable{T}"/> interface,
     /// you get an enumeration of the current node and all the next nodes.</remarks>
-    [SuppressMessage( "Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix" )]
     internal sealed class SimpleLinkedListNode<T>
     {
-        private SimpleLinkedListNode()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new node.
-        /// </summary>
-        /// <param name="value">Node value.</param>
-        /// <param name="next">Next node.</param>
-        public SimpleLinkedListNode( T value, SimpleLinkedListNode<T>? next )
-        {
-            this.Value = value;
-            this.Next = next;
-        }
-
-
-        /// <summary>
-        /// Gets or sets the node value.
-        /// </summary>
-        public T? Value { get; set; }
-
-        /// <summary>
-        /// Gets the next node.
-        /// </summary>
-        public SimpleLinkedListNode<T>? Next { get; internal set; }
-
-#pragma warning disable CA1024 // Use properties where appropriate
-        /// <summary>
-        /// Gets the last node in the list.
-        /// </summary>
-        /// <returns>The last node in the list.</returns>
-        public SimpleLinkedListNode<T> GetLast()
-#pragma warning restore CA1024 // Use properties where appropriate
-        {
-            SimpleLinkedListNode<T>? cursor = this;
-            SimpleLinkedListNode<T> last = this;
-
-            while ( cursor != null )
-            {
-                last = cursor;
-                cursor = cursor.Next;
-            }
-
-            return last;
-        }
-
 
         /// <summary>
         /// Inserts a value at the beginning of a list.
         /// </summary>
         /// <param name="node">Reference to the head node. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">Value.</param>
-        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
         public static void Insert( ref SimpleLinkedListNode<T>? node, T value ) => node = new SimpleLinkedListNode<T>( value, node );
 
         /// <summary>
@@ -77,7 +26,6 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// </summary>
         /// <param name="node">Reference to a node of the list. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">Value.</param>
-        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
         public static void Append( ref SimpleLinkedListNode<T> node, T value )
         {
             if ( node == null )
@@ -86,7 +34,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             }
             else
             {
-                SimpleLinkedListNode<T> last = node.GetLast();
+                var last = node.GetLast();
                 last.Next = new SimpleLinkedListNode<T>( value, null );
             }
         }
@@ -102,7 +50,6 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// The 'right' list (<paramref name="list"/>) is cloned, so
         /// nodes are never shared between lists.
         /// </remarks>
-        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
         public static void Append( ref SimpleLinkedListNode<T> node, SimpleLinkedListNode<T> list )
         {
             if ( list == null )
@@ -116,11 +63,10 @@ namespace Caravela.Framework.Impl.AspectOrdering
             }
             else
             {
-                SimpleLinkedListNode<T> last = node.GetLast();
+                var last = node.GetLast();
                 last.Next = list.Clone();
             }
         }
-
 
         /// <summary>
         /// Finds a node in a list and removes it.
@@ -128,7 +74,6 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// <param name="node">Reference to the head node. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">The value to remove.</param>
         /// <returns><c>true</c> if the node was found and removed, otherwise <c>false</c>.</returns>
-        [SuppressMessage( "Microsoft.Design", "CA1045:DoNotPassTypesByReference" )]
         public static bool Remove( ref SimpleLinkedListNode<T>? node, T value )
         {
             if ( node == null )
@@ -142,7 +87,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 return true;
             }
 
-            SimpleLinkedListNode<T> previousNode = node;
+            var previousNode = node;
 
             for ( var cursor = node.Next; cursor != null; cursor = cursor.Next )
             {
@@ -158,6 +103,49 @@ namespace Caravela.Framework.Impl.AspectOrdering
             return false;
         }
 
+        private SimpleLinkedListNode()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SimpleLinkedListNode{T}"/> class.
+        /// </summary>
+        /// <param name="value">Node value.</param>
+        /// <param name="next">Next node.</param>
+        public SimpleLinkedListNode( T value, SimpleLinkedListNode<T>? next )
+        {
+            this.Value = value;
+            this.Next = next;
+        }
+
+        /// <summary>
+        /// Gets or sets the node value.
+        /// </summary>
+        public T? Value { get; set; }
+
+        /// <summary>
+        /// Gets or sets the next node.
+        /// </summary>
+        public SimpleLinkedListNode<T>? Next { get; internal set; }
+
+        /// <summary>
+        /// Gets the last node in the list.
+        /// </summary>
+        /// <returns>The last node in the list.</returns>
+        public SimpleLinkedListNode<T> GetLast()
+        {
+            var cursor = this;
+            var last = this;
+
+            while ( cursor != null )
+            {
+                last = cursor;
+                cursor = cursor.Next;
+            }
+
+            return last;
+        }
+
         /// <summary>
         /// Clone the current node (but not the value).
         /// </summary>
@@ -166,8 +154,8 @@ namespace Caravela.Framework.Impl.AspectOrdering
         {
             SimpleLinkedListNode<T> clonedRoot = new();
 
-            SimpleLinkedListNode<T> cursor = this;
-            SimpleLinkedListNode<T> clonedCursor = clonedRoot;
+            var cursor = this;
+            var clonedCursor = clonedRoot;
 
             while ( true )
             {

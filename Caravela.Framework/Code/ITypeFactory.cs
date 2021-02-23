@@ -18,7 +18,7 @@ namespace Caravela.Framework.Code
         /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
         /// </para>
         /// <para>
-        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.MakeGenericType"/>.
+        /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="INamedType.WithGenericArguments(IType[])"/>.
         /// </para>
         /// </remarks>
         INamedType GetTypeByReflectionName( string reflectionName );
@@ -46,17 +46,17 @@ namespace Caravela.Framework.Code
         IPointerType MakePointerType( IType pointedType );
 
         /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
         /// given as an <see cref="IType"/>.
         /// </summary>
         /// <returns></returns>
         bool Is( IType left, IType right );
 
         /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Determines whether the current type is assignable to another given type,
+        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
         /// given as a reflection <see cref="Type"/>.
         /// </summary>
         /// <returns></returns>
         bool Is( IType left, Type right );
-   }
+    }
 }

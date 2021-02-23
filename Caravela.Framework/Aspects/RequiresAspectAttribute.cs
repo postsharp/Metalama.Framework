@@ -6,8 +6,6 @@ namespace Caravela.Framework.Aspects
     {
         public RequiresAspectAttribute( params Type[] requiredAspectTypes )
         {
-            
         }
-        
     }
 }

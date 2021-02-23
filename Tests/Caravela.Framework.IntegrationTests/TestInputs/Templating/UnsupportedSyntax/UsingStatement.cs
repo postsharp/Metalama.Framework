@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.UsingStatement
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             using (new MemoryStream())
             {
@@ -19,9 +17,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.UsingState
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method(int a)
         {
             return a;
         }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,7 +33,6 @@ namespace Caravela.Framework.Impl.Pipeline
                 return input;
             }
 
-
             var resources = new List<ResourceDescription>();
 
             var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.Add, resources.Add );
@@ -59,5 +57,4 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.AspectSources );
         }
     }
-  
 }

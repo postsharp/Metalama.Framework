@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.ForEachParameter
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
             int i = compileTime(0);
             foreach (var p in target.Parameters)
@@ -23,9 +22,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.For
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method(int a, int b)
         {
             return a + b;
         }

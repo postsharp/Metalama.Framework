@@ -4,10 +4,10 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Yield
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        IEnumerable<int> Template()
+        private IEnumerable<int> Template()
         {
             yield return 1;
 
@@ -19,9 +19,9 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Yield
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        IEnumerable<int> Method(int a)
+        private IEnumerable<int> Method(int a)
         {
             yield return a;
         }

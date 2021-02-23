@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
@@ -8,8 +7,9 @@ namespace Caravela.Framework.Impl
     internal interface IAspectSource
     {
         AspectSourcePriority Priority { get; }
-        
+
         IEnumerable<INamedType> AspectTypes { get; }
+
         IEnumerable<ICodeElement> GetExclusions( INamedType aspectType );
 
         /// <summary>
