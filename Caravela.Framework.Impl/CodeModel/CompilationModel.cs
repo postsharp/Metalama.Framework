@@ -219,13 +219,11 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();
-       
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
         {
             throw new NotImplementedException();
         }
-
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 

@@ -1,7 +1,7 @@
+using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
