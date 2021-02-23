@@ -25,10 +25,10 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                             SyntaxFactory.IdentifierName( "Intrinsics" ) ),
                         SyntaxFactory.IdentifierName( methodName ) ) )
                 .AddArgumentListArguments(
-                            SyntaxFactory.Argument(
-                                SyntaxFactory.LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    SyntaxFactory.Literal( documentationId ) ) ) );
+                    SyntaxFactory.Argument(
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            SyntaxFactory.Literal( documentationId ) ) ) );
         }
     }
 }

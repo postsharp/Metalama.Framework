@@ -76,7 +76,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     if ( this.WriteUnhandledExceptionsToFile )
                     {
                         var guid = Guid.NewGuid();
-                        var crashReportDirectory = this.Context.BuildOptions.CrashReportDirectory;
+                        var crashReportDirectory = this.Context.BuildOptions.GetCrashReportDirectoryOrDefault();
                         if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
                         {
                             crashReportDirectory = Path.GetTempPath();

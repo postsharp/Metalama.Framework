@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public static BlockSyntax WithFlattenBlockAnnotation( this BlockSyntax block ) =>
-        block.WithAdditionalAnnotations( _flattenBlockAnnotation );
+            block.WithAdditionalAnnotations( _flattenBlockAnnotation );
 
         public static bool HasFlattenBlockAnnotation( this BlockSyntax block ) =>
             block.HasAnnotation( _flattenBlockAnnotation );

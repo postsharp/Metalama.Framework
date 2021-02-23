@@ -197,7 +197,7 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t!.ToString()! ) );
+            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t!.ToString()! ) );
 
             var method = type.Methods.First();
 
@@ -422,7 +422,7 @@ class C
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.HasValue );
-                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue.Value );
+                Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 );
@@ -445,7 +445,7 @@ class C
             Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
             Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
 
-            Assert.Throws<System.ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
 
         [Fact]

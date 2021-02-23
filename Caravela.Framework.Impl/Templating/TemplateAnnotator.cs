@@ -586,15 +586,15 @@ namespace Caravela.Framework.Impl.Templating
 
                 var transformedNode =
                     ForEachStatement(
-                        default,
-                        node.ForEachKeyword,
-                        node.OpenParenToken,
-                        node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
-                        node.InKeyword,
-                        annotatedExpression,
-                        node.CloseParenToken,
-                        annotatedStatement )
+                            default,
+                            node.ForEachKeyword,
+                            node.OpenParenToken,
+                            node.Type,
+                            node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
+                            node.InKeyword,
+                            annotatedExpression,
+                            node.CloseParenToken,
+                            annotatedStatement )
                         .AddScopeAnnotation( localScope )
                         .WithSymbolAnnotationsFrom( node );
 

@@ -26,8 +26,5 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="pipelineStepsState"></param>
         /// <returns></returns>
         public abstract CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState );
-
-
-
     }
 }

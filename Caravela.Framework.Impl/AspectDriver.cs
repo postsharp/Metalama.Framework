@@ -14,25 +14,21 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriver : IAspectDriver
     {
-        public INamedType AspectType { get; }
-
-        private readonly CompilationModel _compilation;
-
         private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
+
+        public INamedType AspectType { get; }
 
         public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
             this.AspectType = aspectType;
 
-            this._compilation = compilation;
-
             var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
-            (from method in aspectType.Methods
-             from attribute in method.Attributes
-             where attribute.Type.Is( iAdviceAttribute )
-             select (attribute, method)).ToList();
+                (from method in aspectType.Methods
+                    from attribute in method.Attributes
+                    where attribute.Type.Is( iAdviceAttribute )
+                    select (attribute, method)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )

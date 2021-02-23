@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 foreach ( var aspectType in aspectSource.AspectTypes )
                 {
-                    var aspectLayerId = new AspectLayerId( aspectType, null );
+                    var aspectLayerId = new AspectLayerId( aspectType );
 
                     if ( !this._comparer.Contains( aspectLayerId ) )
                     {
@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.Pipeline
             foreach ( var aspectInstance in aspectInstances )
             {
                 var depth = this.Compilation.GetDepth( aspectInstance.CodeElement );
-                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectType, null ), depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectType ), depth, true, out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();

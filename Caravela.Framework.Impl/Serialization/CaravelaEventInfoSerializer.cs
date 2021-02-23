@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                         typeCreation,
                         IdentifierName( "GetEvent" ) ) )
                 .AddArgumentListArguments(
-                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
+                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
                 .NormalizeWhitespace();
         }
     }

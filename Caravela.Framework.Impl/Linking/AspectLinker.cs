@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            DiagnosticList diagnostics = new( null );
+            DiagnosticList diagnostics = new();
 
             var intermediateCompilation = this._input.Compilation;
 

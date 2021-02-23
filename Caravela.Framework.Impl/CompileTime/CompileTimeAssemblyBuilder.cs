@@ -140,7 +140,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return new Version( major, minor, build, revision ).ToString();
         }
 
-        private MemoryStream Emit( Compilation compilation, Compilation input )
+        private MemoryStream Emit( Compilation compilation )
         {
             var stream = new MemoryStream();
 
@@ -223,7 +223,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return null;
             }
 
-            var stream = this.Emit( compileTimeCompilation, compilation );
+            var stream = this.Emit( compileTimeCompilation );
 
             stream = Callbacks.AssemblyRewriter?.Invoke( stream ) ?? stream;
 

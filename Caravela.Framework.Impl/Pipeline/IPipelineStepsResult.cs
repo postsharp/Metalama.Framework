@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
-    /// A read-only view of <see cref="PipelineStepsState"/>/
+    /// A read-only view of <see cref="PipelineStepsState"/>.
     /// </summary>
     internal interface IPipelineStepsResult
     {

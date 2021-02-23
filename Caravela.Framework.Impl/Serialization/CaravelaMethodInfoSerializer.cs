@@ -10,16 +10,6 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
     {
         private readonly CaravelaTypeSerializer _typeSerializer;
 
-        public CaravelaMethodInfoSerializer( CaravelaTypeSerializer typeSerializer )
-        {
-            this._typeSerializer = typeSerializer;
-        }
-
-        public override ExpressionSyntax Serialize( CompileTimeMethodInfo o )
-        {
-            return CreateMethodBase( this._typeSerializer, o );
-        }
-
         public static ExpressionSyntax CreateMethodBase( CaravelaTypeSerializer typeSerializer, IReflectionMockMember info ) =>
             CreateMethodBase( typeSerializer, (IMethodSymbol) info.Symbol, info.DeclaringTypeSymbol );
 
@@ -71,6 +61,16 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                 typeExpression,
                 IdentifierName( "TypeHandle" ) );
             return typeHandle;
+        }
+
+        public CaravelaMethodInfoSerializer( CaravelaTypeSerializer typeSerializer )
+        {
+            this._typeSerializer = typeSerializer;
+        }
+
+        public override ExpressionSyntax Serialize( CompileTimeMethodInfo o )
+        {
+            return CreateMethodBase( this._typeSerializer, o );
         }
     }
 }

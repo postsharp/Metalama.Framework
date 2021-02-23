@@ -27,7 +27,6 @@ namespace Caravela.Framework.Impl.Collections
 
                     if ( children != null )
                     {
-                        var i = 0;
                         foreach ( var child in children )
                         {
                             if ( !list.Add( child ) )
@@ -36,8 +35,6 @@ namespace Caravela.Framework.Impl.Collections
                             }
 
                             PopulateDescendants( child );
-
-                            i++;
                         }
                     }
                 }
@@ -63,6 +60,6 @@ namespace Caravela.Framework.Impl.Collections
             Func<TItem, TValue> getValue,
             IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
-         => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
+            => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
     }
 }

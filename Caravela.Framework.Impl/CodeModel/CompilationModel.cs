@@ -9,13 +9,14 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CompilationModel : ICompilation, ICodeElementLink<ICompilation>
+    internal class CompilationModel : ICompilation, ICodeElementInternal
     {
         public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
         {
@@ -178,11 +179,11 @@ namespace Caravela.Framework.Impl.CodeModel
                         return 0;
 
                     default:
-                        {
-                            var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
-                            this._depthsCache = this._depthsCache.SetItem( link, depth );
-                            return depth;
-                        }
+                    {
+                        var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
+                        this._depthsCache = this._depthsCache.SetItem( link, depth );
+                        return depth;
+                    }
                 }
             }
         }
@@ -217,10 +218,21 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        ICompilation ICodeElementLink<ICompilation>.GetForCompilation( CompilationModel compilation ) => compilation;
+        CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();
+       
 
-        object? ICodeElementLink.Target => this.RoslynCompilation;
+        string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
+        {
+            throw new NotImplementedException();
+        }
+
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
+        ISymbol? ISdkCodeElement.Symbol => throw new NotImplementedException();
+
+        IAttributeList ICodeElement.Attributes => throw new NotImplementedException();
+
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => throw new NotImplementedException();
     }
 }

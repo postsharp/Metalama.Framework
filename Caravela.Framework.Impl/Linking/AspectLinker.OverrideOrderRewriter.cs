@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach ( var member in node.Members )
                 {
-                    if ( member is not MethodDeclarationSyntax methodDeclaration )
+                    if ( member is not MethodDeclarationSyntax )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
                         continue;
@@ -49,9 +49,9 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         var lastOverride =
                             this._orderedAspectLayers
-                            .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
-                            .Where( x => x.Value != null )
-                            .Last().Value.AssertNotNull();
+                                .Select( ( x, i ) => (Index: i, Value: overrides.SingleOrDefault( o => o.AspectLayerId.Equals( x ) )) )
+                                .Where( x => x.Value != null )
+                                .Last().Value.AssertNotNull();
 
                         // This is method override - we need to move the body into another method called __{MethodName}__OriginalMethod.
                         var originalMethodDeclaration = (MethodDeclarationSyntax) member;
@@ -60,11 +60,11 @@ namespace Caravela.Framework.Impl.Linking
 
                         var invocation = InvocationExpression(
                             !originalSymbol.IsStatic
-                            ? MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName( lastOverrideName ))
-                            : IdentifierName( lastOverrideName ),
+                                ? MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    ThisExpression(),
+                                    IdentifierName( lastOverrideName ))
+                                : IdentifierName( lastOverrideName ),
                             ArgumentList(
                                 SeparatedList(
                                     originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
@@ -72,8 +72,8 @@ namespace Caravela.Framework.Impl.Linking
                         newMembers.Add( originalMethodDeclaration.WithBody(
                             Block(
                                 originalSymbol.ReturnsVoid
-                                ? ExpressionStatement( invocation )
-                                : ReturnStatement( invocation )) ) );
+                                    ? ExpressionStatement( invocation )
+                                    : ReturnStatement( invocation )) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
                     }

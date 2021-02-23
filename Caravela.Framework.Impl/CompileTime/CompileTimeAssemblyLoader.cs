@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
         private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
-        private AttributeDeserializer _attributeDeserializer;
+        private readonly AttributeDeserializer _attributeDeserializer;
 
         public CompileTimeAssemblyLoader( IServiceProvider serviceProvider, CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {

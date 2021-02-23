@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
-           CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
+            CastExpression( targetType, CastExpression( IdentifierName( nameof( Object ) ), expression ) );
 
         private static string NormalizeSpace( string statementComment )
         {
@@ -264,17 +264,17 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
             if ( this.GetTransformationKind( node.Expression ) != TransformationKind.Transform &&
-                this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol )
+                 this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ParenthesizedExpression(
-                            CastFromDynamic(
-                                IdentifierName( nameof( IDynamicMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
-                        IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
-                     .AddArgumentListArguments( Argument( LiteralExpression(
-                         SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ParenthesizedExpression(
+                                CastFromDynamic(
+                                    IdentifierName( nameof( IDynamicMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                            IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
+                    .AddArgumentListArguments( Argument( LiteralExpression(
+                        SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
             }
 
             return base.VisitMemberAccessExpression( node );
@@ -286,7 +286,7 @@ namespace Caravela.Framework.Impl.Templating
                 this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
             if ( this.GetTransformationKind( node ) != TransformationKind.Transform &&
-                node.ArgumentList.Arguments.Any( ArgumentIsDynamic ) )
+                 node.ArgumentList.Arguments.Any( ArgumentIsDynamic ) )
             {
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
@@ -349,26 +349,26 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     // List<StatementSyntax> statements = new List<StatementSyntax>();
                     this._currentMetaStatementList!.Add( LocalDeclarationStatement(
-                        VariableDeclaration( GenericName( Identifier( "List" ) )
-                                .WithTypeArgumentList(
-                                    TypeArgumentList(
-                                        SingletonSeparatedList<TypeSyntax>(
-                                            IdentifierName( nameof( StatementSyntax ) ) ) ) ) )
-                            .WithVariables(
-                                SingletonSeparatedList(
-                                    VariableDeclarator(
-                                            Identifier( this._currentStatementListVariableName! ) )
-                                        .WithInitializer(
-                                            EqualsValueClause(
-                                                ObjectCreationExpression(
-                                                    GenericName(
-                                                            Identifier( "List" ) )
-                                                        .WithTypeArgumentList(
-                                                            TypeArgumentList(
-                                                                SingletonSeparatedList<TypeSyntax>(
-                                                                    IdentifierName( nameof( StatementSyntax ) ) ) ) ),
-                                                    ArgumentList(),
-                                                    default ) ) ) ) ) )
+                            VariableDeclaration( GenericName( Identifier( "List" ) )
+                                    .WithTypeArgumentList(
+                                        TypeArgumentList(
+                                            SingletonSeparatedList<TypeSyntax>(
+                                                IdentifierName( nameof( StatementSyntax ) ) ) ) ) )
+                                .WithVariables(
+                                    SingletonSeparatedList(
+                                        VariableDeclarator(
+                                                Identifier( this._currentStatementListVariableName! ) )
+                                            .WithInitializer(
+                                                EqualsValueClause(
+                                                    ObjectCreationExpression(
+                                                        GenericName(
+                                                                Identifier( "List" ) )
+                                                            .WithTypeArgumentList(
+                                                                TypeArgumentList(
+                                                                    SingletonSeparatedList<TypeSyntax>(
+                                                                        IdentifierName( nameof( StatementSyntax ) ) ) ) ),
+                                                        ArgumentList(),
+                                                        default ) ) ) ) ) )
                         .WithLeadingTrivia( this.GetIndentation() ) );
 
                     var metaStatements = this.ToMetaStatements( node.Statements );
@@ -388,7 +388,7 @@ namespace Caravela.Framework.Impl.Templating
 
                         // Wrap in using(OpenTemplateLexicalScope())
                         var usingStatement = UsingStatement(
-                            Block( this._currentMetaStatementList ) )
+                                Block( this._currentMetaStatementList ) )
                             .WithExpression( InvocationExpression( IdentifierName( nameof( OpenTemplateLexicalScope ) ) ) );
 
                         // Block( Func<StatementSyntax[]>( delegate { ... } )
@@ -513,7 +513,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
         {
             if ( node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
-                this._semanticAnnotationMap.GetType( node.Expression )!.Kind != SymbolKind.DynamicType )
+                 this._semanticAnnotationMap.GetType( node.Expression )!.Kind != SymbolKind.DynamicType )
             {
                 return this.DeepIndent( InvocationExpression( IdentifierName( nameof( InterpolatedStringText ) ) )
                     .WithArgumentList(
@@ -621,9 +621,9 @@ namespace Caravela.Framework.Impl.Templating
 
             return InvocationExpression(
                 IdentifierName( nameof( TemplateDeclaratorIdentifier ) ) ).WithArgumentList( ArgumentList( SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
-                {
-                    Argument(this.CreateLiteralExpression(token.Text))
-                } ) ) );
+            {
+                Argument(this.CreateLiteralExpression(token.Text))
+            } ) ) );
         }
 
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
@@ -723,9 +723,9 @@ namespace Caravela.Framework.Impl.Templating
                                         IdentifierName(nameof(IProceedImpl.CreateAssignStatement))),
                                     ArgumentList(
                                         SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]
-                                            {
-                                                Argument(this.CreateLiteralExpression(returnVariableName)),
-                                            }))))
+                                        {
+                                            Argument(this.CreateLiteralExpression(returnVariableName)),
+                                        }))))
                         } ) ) );
 
                 createBlock = this.DeepIndent( createBlock );
@@ -762,8 +762,8 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 return InvocationExpression(
-                    IdentifierName( nameof( TemplateSyntaxFactory.TemplateReturnStatement ) ) ).AddArgumentListArguments(
-                        Argument( this.Transform( node.Expression ) ) );
+                    IdentifierName( nameof( TemplateReturnStatement ) ) ).AddArgumentListArguments(
+                    Argument( this.Transform( node.Expression ) ) );
             }
         }
 

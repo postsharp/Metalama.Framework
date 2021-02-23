@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private List<(IAspectSource Source, INamedType Type)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, INamedType Type)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 

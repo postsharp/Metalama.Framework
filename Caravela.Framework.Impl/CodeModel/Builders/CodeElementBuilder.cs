@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsReadOnly { get; private set; }
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new System.NotImplementedException();
+        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotImplementedException();
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 

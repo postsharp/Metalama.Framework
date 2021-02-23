@@ -14,8 +14,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         public class AddIntroducedElementsRewriter : CSharpSyntaxRewriter
         {
-            private DiagnosticSink _diagnosticSink;
             private static int _id;
+            private readonly DiagnosticSink _diagnosticSink;
 
             private readonly IReadOnlyList<IMemberIntroduction> _memberIntroductors;
             private readonly IReadOnlyList<IInterfaceImplementationIntroduction> _interfaceImplementationIntroductors;
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public ImmutableMultiValueDictionary<IMemberIntroduction, int> IntroducedSyntax { get; private set; }
 
-            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions, DiagnosticSink diagnosticSink ) : base()
+            public AddIntroducedElementsRewriter( IEnumerable<ISyntaxTreeTransformation> introductions, DiagnosticSink diagnosticSink )
             {
                 this._diagnosticSink = diagnosticSink;
                 this._memberIntroductors = introductions.OfType<IMemberIntroduction>().ToList();

@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 {
     internal class TemplateContextImpl : ITemplateContext
     {
-        private IDiagnosticSink _diagnosticSink;
+        private readonly IDiagnosticSink _diagnosticSink;
 
         public IMethod Method { get; }
 
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             if ( this._allowExpression )
             {
-                return new( ThisExpression(), this._type, false );
+                return new( ThisExpression(), this._type );
             }
 
             // TODO: diagnostic

@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
@@ -25,8 +27,15 @@ namespace Caravela.Framework.Impl.Pipeline
 
         /// <summary>
         /// Gets the directory in which crash reports are stored, or a null or empty string to store
-        /// in the temporary directory.
+        /// in the temporary directory. Use <see cref="BuildOptionsExtensions.GetCrashReportDirectoryOrDefault"/>
+        /// to get a non-null value.
         /// </summary>
         string? CrashReportDirectory { get; }
+    }
+
+    internal static class BuildOptionsExtensions
+    {
+        public static string GetCrashReportDirectoryOrDefault( this IBuildOptions options )
+            => options.CrashReportDirectory ?? Path.Combine( Path.GetTempPath(), "Caravela", "Crashes" );
     }
 }

@@ -40,8 +40,8 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: generics
             return
                 method.GenericParameters.Count > 0
-                ? throw new NotImplementedException()
-                : null;
+                    ? throw new NotImplementedException()
+                    : null;
         }
 
         public static ParameterListSyntax GetSyntaxParameterList( this IMethod method )

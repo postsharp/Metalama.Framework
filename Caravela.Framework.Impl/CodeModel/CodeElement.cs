@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual IAttributeList Attributes =>
             new AttributeList(
                 this.Symbol!.GetAttributes()
-                .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ),
+                    .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ),
                 this.Compilation );
 
         public abstract CodeElementKind ElementKind { get; }

@@ -74,10 +74,10 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
 
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
-                                                SyntaxFactory.ParseName( declaringType.Namespace, 0, true ),
-                                                default,
-                                                default,
-                                                SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
+                        SyntaxFactory.ParseName( declaringType.Namespace ),
+                        default,
+                        default,
+                        SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
                 }
 
                 var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );

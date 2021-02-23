@@ -28,11 +28,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 else
                 {
                     expression = (ExpressionSyntax) this._parent.Compilation.SyntaxGenerator.TupleExpression(
-                       this._parent._parameters.Select(
-                           p =>
-                               p.IsOut()
-                                   ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
-                                   : SyntaxFactory.IdentifierName( p.Name ) ) );
+                        this._parent._parameters.Select(
+                            p =>
+                                p.IsOut()
+                                    ? this._parent.Compilation.SyntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() )
+                                    : SyntaxFactory.IdentifierName( p.Name ) ) );
                 }
 
                 return new RuntimeExpression( expression );

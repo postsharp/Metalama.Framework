@@ -36,19 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IType IMethodBuilder.ReturnType
         {
             get => this.ReturnParameter.ParameterType;
-            set
-            {
-                if ( this.ReturnParameter == null )
-                {
-                    throw new InvalidOperationException();
-                }
-                else if ( value == null )
-                {
-                    throw new ArgumentNullException( nameof( value ) );
-                }
-
-                this.ReturnParameter.ParameterType = value;
-            }
+            set => this.ReturnParameter.ParameterType = value ?? throw new ArgumentNullException( nameof( value ) );
         }
 
         IType IMethod.ReturnType => this.ReturnParameter.ParameterType;

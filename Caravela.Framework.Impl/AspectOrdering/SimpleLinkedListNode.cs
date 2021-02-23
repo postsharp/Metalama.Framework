@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// </summary>
         /// <param name="node">Reference to a node of the list. May safely be a reference to a <c>null</c> node.</param>
         /// <param name="value">Value.</param>
-        public static void Append( ref SimpleLinkedListNode<T> node, T value )
+        public static void Append( ref SimpleLinkedListNode<T>? node, T value )
         {
             if ( node == null )
             {
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         /// The 'right' list (<paramref name="list"/>) is cloned, so
         /// nodes are never shared between lists.
         /// </remarks>
-        public static void Append( ref SimpleLinkedListNode<T> node, SimpleLinkedListNode<T> list )
+        public static void Append( ref SimpleLinkedListNode<T>? node, SimpleLinkedListNode<T>? list )
         {
             if ( list == null )
             {
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             return false;
         }
-
+        
         private SimpleLinkedListNode()
         {
         }

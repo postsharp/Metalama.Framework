@@ -1,6 +1,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
@@ -79,6 +80,9 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public static CodeElementLink<ICodeElement> ReturnParameter( IMethodSymbol methodSymbol )
             => new CodeElementLink<ICodeElement>( methodSymbol, CodeElementSpecialKind.ReturnParameter );
+
+        internal static CodeElementLink<ICodeElement> Compilation()
+            => new CodeElementLink<ICodeElement>( null, CodeElementSpecialKind.Compilation );
     }
 
     /// <summary>
@@ -90,10 +94,14 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     {
         private readonly CodeElementSpecialKind _kind;
 
-        internal CodeElementLink( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
+        internal CodeElementLink( ISymbol? symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
         {
             this._kind = kind;
-            CodeElementLink.AssertValidType<T>( symbol );
+
+            if ( symbol != null )
+            {
+                CodeElementLink.AssertValidType<T>( symbol );
+            }
 
             this.Target = symbol;
         }
@@ -118,8 +126,8 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         internal static T GetForCompilation( object? link, CompilationModel compilation, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
             => link switch
             {
+                null => kind == CodeElementSpecialKind.Compilation ? (T) (object) compilation : throw new AssertionFailedException(),
                 ISymbol symbol => (T) compilation.Factory.GetCodeElement( symbol.AssertValidType<T>(), kind ),
-
                 CodeElementBuilder builder => (T) compilation.Factory.GetCodeElement( builder ),
 
                 _ => throw new AssertionFailedException()
@@ -132,11 +140,5 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         public CodeElementLink<TOut> Cast<TOut>() 
             where TOut : class, ICodeElement 
             => new CodeElementLink<TOut>( this.Target, this._kind );
-    }
-
-    internal enum CodeElementSpecialKind
-    {
-        Default,
-        ReturnParameter
     }
 }

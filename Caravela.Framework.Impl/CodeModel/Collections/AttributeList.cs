@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeList"/> class that contains no element.
         /// </summary>
-        private AttributeList() : base()
+        private AttributeList()
         {
         }
     }

@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Templating
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
-         => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
+            => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
         public bool TryCompile(
             SyntaxNode sourceSyntaxRoot,

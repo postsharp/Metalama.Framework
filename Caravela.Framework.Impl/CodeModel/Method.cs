@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IType> GenericArguments =>
             this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
 
-        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType?.IsOpenGeneric == true;
+        public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
 
         public object Invoke( object? instance, params object[] args ) => new MethodInvocation( this ).Invoke( instance, args );
 

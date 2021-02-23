@@ -11,5 +11,5 @@ namespace Caravela.Framework.Impl.Linking
         CompilationModel CompilationModel,
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations,
         IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers
-        );
+    );
 }

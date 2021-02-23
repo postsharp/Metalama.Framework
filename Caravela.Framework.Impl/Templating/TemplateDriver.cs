@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal partial class TemplateDriver
+    internal class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
             catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {
                 ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
-                throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
+                throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
             }
 
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );

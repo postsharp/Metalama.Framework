@@ -18,8 +18,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._method = method;
             }
 
-            public bool HasBase => true;
-
             public IMethodInvocation Base => throw new InvalidOperationException();
 
             public object Invoke( object? instance, params object[] args )

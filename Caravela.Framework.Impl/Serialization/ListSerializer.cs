@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             return ObjectCreationExpression(
-                QualifiedName(
+                    QualifiedName(
                         QualifiedName(
                             QualifiedName(
                                 IdentifierName( "System" ),
@@ -36,11 +36,11 @@ namespace Caravela.Framework.Impl.Serialization
                             IdentifierName( "Generic" ) ),
                         GenericName(
                                 Identifier( "List" ) )
-                        .WithTypeArgumentList(
-                            TypeArgumentList(
-                                SingletonSeparatedList(
-                                    ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
-                    .WithInitializer(
+                            .WithTypeArgumentList(
+                                TypeArgumentList(
+                                    SingletonSeparatedList(
+                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
+                .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
                         SeparatedList( lt ) ) )

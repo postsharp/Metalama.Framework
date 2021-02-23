@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template ) : base()
+        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template )
         {
             this.ContainingElement = containingMethod;
             this._template = template;

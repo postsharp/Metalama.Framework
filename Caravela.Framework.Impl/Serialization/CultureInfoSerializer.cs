@@ -17,12 +17,12 @@ namespace Caravela.Framework.Impl.Serialization
                             IdentifierName( "Globalization" ) ),
                         IdentifierName( "CultureInfo" ) ) )
                 .AddArgumentListArguments(
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( o.Name ) ) ),
-                                Argument(
-                                    LiteralExpression( o.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) )
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            Literal( o.Name ) ) ),
+                    Argument(
+                        LiteralExpression( o.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) )
                 .NormalizeWhitespace();
         }
     }

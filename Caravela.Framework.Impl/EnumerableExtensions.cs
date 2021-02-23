@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl
             }
             else if ( a.Count == 0 )
             {
-                return new[] { b };
+                return new T[] { b! };
             }
             else
             {

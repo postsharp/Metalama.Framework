@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         if ( !previousIndices.IsEmpty )
                         {
                             // Index the relationship so we can later resolve locations.
-                            aspectLayerNameToLocationsMappingBuilder.AddRange( currentIndices, i => unsortedAspectLayers[i].AspectLayerId.FullName, i => relationship );
+                            aspectLayerNameToLocationsMappingBuilder.AddRange( currentIndices, i => unsortedAspectLayers[i].AspectLayerId.FullName, _ => relationship );
 
                             // Add edges to previous nodes.
                             foreach ( var previousIndex in previousIndices )
@@ -141,13 +141,14 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 {
                     cycleStack.Push( cursor );
                     cursor = predecessors[cursor];
-                } while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != AbstractGraph.NotDiscovered );
+                }
+                while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != AbstractGraph.NotDiscovered );
 
-                var cycleNodes = cycleStack.Select( cursor => unsortedAspectLayers[cursor].AspectLayerId.FullName );
+                var cycleNodes = cycleStack.Select( index => unsortedAspectLayers[index].AspectLayerId.FullName );
                 var cycleLocations = cycleNodes
                     .SelectMany( c => aspectLayerNameToLocationsMapping[c] )
                     .Select( s => s.DiagnosticLocation )
-                    .Where( l => l != null )
+                    .WhereNotNull()
                     .GroupBy( l => l )
                     .OrderByDescending( g => g.Count() )
                     .Select( g => g.Key );

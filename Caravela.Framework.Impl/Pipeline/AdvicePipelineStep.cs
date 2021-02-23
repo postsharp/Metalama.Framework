@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public AdvicePipelineStep(PipelineStepId id, OrderedAspectLayer aspectLayer) : base(id, aspectLayer)
         {
         }
+
         public void AddAdvice( Advice advice ) => this._advices.Add( advice );
         
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
@@ -30,6 +31,5 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return CompilationModel.CreateRevisedInstance( compilation, addedObservableIntroductions );
         }
-
     }
 }

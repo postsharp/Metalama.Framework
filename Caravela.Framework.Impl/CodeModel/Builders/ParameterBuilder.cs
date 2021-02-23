@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMember DeclaringMember { get; }
 
-        public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind ) : base()
+        public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind )
         {
             this.DeclaringMember = containingMethod;
             this.Index = index;

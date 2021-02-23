@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             {
                 var attributeInstance = AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<AspectOrderAttribute>( 
                     new Attribute( attribute.attribute, this._compilation, this._compilation.Factory.GetAssembly( attribute.assembly ) ) );
-                return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax()?.GetLocation() );
+                return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() );
             } );
         }
     }

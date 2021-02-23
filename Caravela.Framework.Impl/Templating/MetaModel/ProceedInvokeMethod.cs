@@ -74,11 +74,11 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var invocation =
                 InvocationExpression(
                     !this._originalDeclaration.IsStatic
-                    ? MemberAccessExpression(
+                        ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this._originalDeclaration.Name ) )
-                    : IdentifierName( this._originalDeclaration.Name ),
+                        : IdentifierName( this._originalDeclaration.Name ),
                     ArgumentList(
                         SeparatedList(
                             this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );

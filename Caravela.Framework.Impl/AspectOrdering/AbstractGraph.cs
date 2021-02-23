@@ -11,16 +11,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
         public const int NotDiscovered = int.MaxValue;
         public const int Cycle = int.MinValue;
 
-        private readonly int size;
+        private readonly int _size;
 
         protected AbstractGraph( int size )
         {
-            this.size = size;
+            this._size = size;
         }
 
         public int[] GetInitialVector()
         {
-            var n = this.size;
+            var n = this._size;
             var vector = new int[n];
             for ( var i = 0; i < n; i++ )
             {
@@ -42,11 +42,11 @@ namespace Caravela.Framework.Impl.AspectOrdering
         {
             StringBuilder stringBuilder = new();
 
-            stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0};", this.size );
+            stringBuilder.AppendFormat( CultureInfo.InvariantCulture, "{0};", this._size );
 
-            for ( var i = 0; i < this.size; i++ )
+            for ( var i = 0; i < this._size; i++ )
             {
-                for ( var j = 0; j < this.size; j++ )
+                for ( var j = 0; j < this._size; j++ )
                 {
                     if ( i == j )
                     {

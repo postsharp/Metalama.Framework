@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
-            if ( Caravela.Compiler.CaravelaCompilerInfo.IsActive || context.Compilation is not CSharpCompilation )
+            if ( Compiler.CaravelaCompilerInfo.IsActive || context.Compilation is not CSharpCompilation )
             {
                 return;
             }

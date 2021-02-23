@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl
 {
     internal readonly struct AspectLayerId : IEquatable<AspectLayerId>, IEquatable<AspectLayer>
     {
-        private static readonly char[] separators = { ':' };
+        private static readonly char[] _separators = { ':' };
 
         public static bool operator ==( AspectLayerId left, AspectLayerId right ) => left.Equals( right );
 
@@ -25,6 +25,19 @@ namespace Caravela.Framework.Impl
             this.AspectName = aspectName;
             this.LayerName = layerName;
         }
+        
+        public static AspectLayerId FromString( string s )
+        {
+            var parts = s.Split( _separators );
+            if ( parts.Length == 1 )
+            {
+                return new AspectLayerId( parts[0] );
+            }
+            else
+            {
+                return new AspectLayerId( parts[0], parts.Length == 2 ? parts[1] : null );
+            }
+        }
 
         public bool IsDefault => this.LayerName == null;
 
@@ -35,19 +48,6 @@ namespace Caravela.Framework.Impl
         public string FullName => this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
 
         public override string ToString() => this.FullName;
-
-        public static AspectLayerId FromString( string s )
-        {
-            var parts = s.Split( separators );
-            if ( parts.Length == 1 )
-            {
-                return new AspectLayerId( parts[0] );
-            }
-            else
-            {
-                return new AspectLayerId( parts[0], parts.Length == 2 ? parts[1] : null );
-            }
-        }
 
         public bool Equals( AspectLayerId other ) =>
             StringComparer.Ordinal.Equals( this.AspectName, other.AspectName ) && StringComparer.Ordinal.Equals( this.LayerName, other.LayerName );

@@ -11,6 +11,9 @@ using PostSharp.Sdk.Extensibility;
 
 namespace Caravela.Obfuscator
 {
+    // ReSharper disable MemberCanBePrivate.Global
+    // ReSharper disable UnusedAutoPropertyAccessor.Global
+    
     /// <summary>
     /// A PostSharp SDK task that obfuscates the input assembly.
     /// </summary>
@@ -44,6 +47,7 @@ namespace Caravela.Obfuscator
         /// Gets or sets the project path.
         /// </summary>
         [ConfigurableProperty]
+        
         public string? RootPath { get; set; }
 
         /// <summary>
@@ -64,7 +68,7 @@ namespace Caravela.Obfuscator
             // Scan all types to find out what must be obfuscated.
             while ( typeEnumerator.MoveNext() )
             {
-                var type = (TypeDefDeclaration) typeEnumerator.Current;
+                var type = (TypeDefDeclaration) typeEnumerator.Current!;
 
                 // Ignore the type if public or serializable.
                 this.PrepareType( type );
@@ -104,7 +108,7 @@ namespace Caravela.Obfuscator
             if ( !string.IsNullOrEmpty( this.MapFile ) )
             {
                 Message.Write( MessageLocation.Unknown, SeverityType.Info, "OB001", "Writing obfuscation map to {0}.", this.MapFile );
-                using ( TextWriter writer = File.CreateText( this.MapFile ) )
+                using ( TextWriter writer = File.CreateText( this.MapFile! ) )
                 {
                     this._currentObfuscationTable.Write( writer );
                 }
@@ -117,7 +121,7 @@ namespace Caravela.Obfuscator
         {
             if ( this.Project.Module.SourceDocuments != null )
             {
-                var rootFullPath = string.IsNullOrEmpty( this.RootPath ) ? null : Path.GetFullPath( this.RootPath );
+                var rootFullPath = string.IsNullOrEmpty( this.RootPath ) ? null : Path.GetFullPath( this.RootPath! );
 
                 foreach ( var sourceDocument in this.Project.Module.SourceDocuments )
                 {
@@ -372,7 +376,7 @@ namespace Caravela.Obfuscator
                                     this.Project.Module,
                                     implementedInterfaceType.GetGenericContext(),
                                     translatedInterfaceMethod.GetGenericContext()
-                                                             .GetGenericMethodParameters() );
+                                        .GetGenericMethodParameters() );
 
                                 if ( !translatedInterfaceMethod.MapGenericArguments( genericMap ).DefinitionMatchesReference( method ) )
                                 {
@@ -452,7 +456,7 @@ namespace Caravela.Obfuscator
 
                 // Ignore public fields and fields of serializable types, or fields with a special name.
                 if ( field.IsPublic() ||
-                     (((field.DeclaringType.Attributes & TypeAttributes.Serializable) != 0) &&
+                     ((field.DeclaringType.Attributes & TypeAttributes.Serializable) != 0 &&
                       (field.Attributes & (FieldAttributes.NotSerialized | FieldAttributes.SpecialName | FieldAttributes.RTSpecialName)) != 0) )
                 {
                     continue;

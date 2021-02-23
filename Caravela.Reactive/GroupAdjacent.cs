@@ -187,7 +187,7 @@ namespace MoreLinq
             }
 
             return GroupAdjacentImpl( source, keySelector, elementSelector, CreateGroupAdjacentGrouping,
-                                     comparer ?? EqualityComparer<TKey>.Default );
+                comparer ?? EqualityComparer<TKey>.Default );
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace MoreLinq
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
 
             return GroupAdjacentImpl( source, keySelector, i => i, ResultSelectorWrapper,
-                                     EqualityComparer<TKey>.Default );
+                EqualityComparer<TKey>.Default );
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace MoreLinq
             // This should be removed once the target framework is bumped to something that supports covariance
             TResult ResultSelectorWrapper( TKey key, IList<TSource> group ) => resultSelector( key, group );
             return GroupAdjacentImpl( source, keySelector, i => i, ResultSelectorWrapper,
-                                     comparer ?? EqualityComparer<TKey>.Default );
+                comparer ?? EqualityComparer<TKey>.Default );
         }
 
         private static IEnumerable<TResult> GroupAdjacentImpl<TSource, TKey, TElement, TResult>(
@@ -353,7 +353,7 @@ namespace MoreLinq
         [Serializable]
         private
 #endif
-        sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
+            sealed class Grouping<TKey, TElement> : IGrouping<TKey, TElement>
         {
             private readonly IEnumerable<TElement> _members;
 

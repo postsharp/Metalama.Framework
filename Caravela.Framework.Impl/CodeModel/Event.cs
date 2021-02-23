@@ -1,5 +1,4 @@
 ﻿using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel

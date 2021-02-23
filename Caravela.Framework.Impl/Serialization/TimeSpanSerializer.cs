@@ -15,10 +15,10 @@ namespace Caravela.Framework.Impl.Serialization
                         IdentifierName( "System" ),
                         IdentifierName( "TimeSpan" ) ) )
                 .AddArgumentListArguments(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.Ticks ) ) ) )
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.NumericLiteralExpression,
+                            Literal( o.Ticks ) ) ) )
                 .NormalizeWhitespace();
         }
     }

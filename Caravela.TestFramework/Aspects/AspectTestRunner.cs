@@ -74,7 +74,7 @@ namespace Caravela.TestFramework.Aspects
             }
             catch ( Exception exception ) when ( this.HandlesException )
             {
-                result.ErrorMessage = "Unhandled exception: " + exception.ToString();
+                result.ErrorMessage = "Unhandled exception: " + exception;
             }
 
             return result;
@@ -92,10 +92,10 @@ namespace Caravela.TestFramework.Aspects
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
-                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
+                    .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
+                    .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
                 ;
             return project;
         }
@@ -146,8 +146,6 @@ namespace Caravela.TestFramework.Aspects
             public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testName );
 
             public string? CrashReportDirectory => null;
-
-            public bool WriteUnhandledExceptionsToFile => true;
         }
     }
 }

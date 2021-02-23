@@ -133,9 +133,9 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             creationExpression = creationExpression.WithInitializer(
-                InitializerExpression(
-                    SyntaxKind.CollectionInitializerExpression,
-                    SeparatedList<ExpressionSyntax>( lt ) ) )
+                    InitializerExpression(
+                        SyntaxKind.CollectionInitializerExpression,
+                        SeparatedList<ExpressionSyntax>( lt ) ) )
                 .NormalizeWhitespace();
             return creationExpression;
         }

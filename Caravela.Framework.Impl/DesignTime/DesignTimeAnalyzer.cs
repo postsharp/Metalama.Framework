@@ -16,10 +16,6 @@ namespace Caravela.Framework.Impl.DesignTime
             CompilerServiceProvider.Initialize();
         }
 
-        public DesignTimeAnalyzer()
-        {
-        }
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray<DiagnosticDescriptor>.Empty;
 
         public override void Initialize( AnalysisContext analysisContext )

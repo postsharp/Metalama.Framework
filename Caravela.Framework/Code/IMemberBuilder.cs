@@ -3,6 +3,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows to complete the construction of a member that has been created by an advice.
     /// </summary>
+    // ReSharper disable once PossibleInterfaceMemberAmbiguity
     public interface IMemberBuilder : IMember, ICodeElementBuilder
     {
         /// <summary>

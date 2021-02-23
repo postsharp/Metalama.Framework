@@ -142,7 +142,7 @@ namespace Caravela.TestFramework.Templating
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
-            buildTimeDebugStream?.Seek( 0, SeekOrigin.Begin );
+            buildTimeDebugStream.Seek( 0, SeekOrigin.Begin );
             var assemblyLoadContext = new AssemblyLoadContext( null, true );
             var assembly = assemblyLoadContext.LoadFromStream( buildTimeAssemblyStream, buildTimeDebugStream );
 
@@ -189,12 +189,12 @@ namespace Caravela.TestFramework.Templating
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
-                .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
+                    .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                    .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
                 ;
             return project;
         }

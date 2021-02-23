@@ -35,11 +35,11 @@ namespace Caravela.Framework.Impl.CodeModel
             => this.GetIType( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
         
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
-           => (IAssembly) this._cache.GetOrAdd(
-               assemblySymbol.ToLink(),
-               l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly ) ?
-                new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
-            : this._compilation );
+            => (IAssembly) this._cache.GetOrAdd(
+                assemblySymbol.ToLink(),
+                l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly ) ?
+                    new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
+                    : this._compilation );
 
         internal IType GetIType( ITypeSymbol typeSymbol )
             => (IType) this._cache.GetOrAdd( typeSymbol.ToLink(), l => CodeModelFactory.CreateIType( (ITypeSymbol) l.Symbol!, this._compilation ) );

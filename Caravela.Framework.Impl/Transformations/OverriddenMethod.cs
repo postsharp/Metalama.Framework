@@ -33,9 +33,9 @@ namespace Caravela.Framework.Impl.Transformations
         // TODO: Temporary
         public SyntaxTree TargetSyntaxTree =>
             this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
-            ? introduction.TargetSyntaxTree
-            :
-            ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+                ? introduction.TargetSyntaxTree
+                :
+                ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

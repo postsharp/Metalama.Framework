@@ -33,7 +33,8 @@ namespace Caravela.Framework.Impl.CodeModel
         IParameterList IProperty.Parameters => ParameterList.Empty;
 
         // TODO: pseudo-accessors
-        [Memo] public IMethod? Getter => null;
+        [Memo] 
+        public IMethod? Getter => null;
 
         [Memo]
         public IMethod? Setter => null;

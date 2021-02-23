@@ -311,10 +311,10 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         internal static string ToDisplayString( this CodeElementKind kind )
-         => kind switch
-         {
-             CodeElementKind.GenericParameter => "generic parameter",
-             _ => kind.ToString().ToLowerInvariant()
-         };
+            => kind switch
+            {
+                CodeElementKind.GenericParameter => "generic parameter",
+                _ => kind.ToString().ToLowerInvariant()
+            };
     }
 }

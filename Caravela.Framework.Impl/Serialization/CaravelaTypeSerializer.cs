@@ -48,17 +48,17 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
 
                 // expr.GetGenericArguments()[ordinal]
                 return ElementAccessExpression(
-                    InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            declaringExpression,
-                            IdentifierName( "GetGenericArguments" ) ) ) )
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                declaringExpression,
+                                IdentifierName( "GetGenericArguments" ) ) ) )
                     .AddArgumentListArguments(
                         Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
             }
 
             if ( symbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedSymbol &&
-                !SymbolEqualityComparer.Default.Equals( namedSymbol.OriginalDefinition, namedSymbol ) )
+                 !SymbolEqualityComparer.Default.Equals( namedSymbol.OriginalDefinition, namedSymbol ) )
             {
                 var basicType = namedSymbol.ConstructUnboundGenericType();
                 var arguments = new List<ExpressionSyntax>();
