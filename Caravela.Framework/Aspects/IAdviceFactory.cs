@@ -24,6 +24,13 @@ namespace Caravela.Framework.Aspects
         /// <returns></returns>
         IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default );
 
+        /// <summary>
+        /// Gets a factory objects that allows to add advices to other layers than the default one.
+        /// </summary>
+        /// <param name="layerName">Name of the layer to which advices created by the returned factory will belong.
+        /// Layers must be declared by the aspect using <see cref="ProvidesAspectLayersAttribute"/>.
+        /// </param>
+        /// <returns></returns>
         IAdviceFactory ForLayer( string layerName );
     }
 }

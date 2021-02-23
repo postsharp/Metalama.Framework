@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -22,55 +20,20 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._compilation = compilation;
         }
+        
+        public ObjectSerializers Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
 
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
-            var symbol = this.RoslynCompilation.GetTypeByMetadataName( reflectionName );
-
-            if ( symbol == null )
-            {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotFindType, reflectionName );
-            }
-
+            var symbol = this._compilation.ReflectionMapper.GetTypeByReflectionName( reflectionName );
             return this.GetNamedType( symbol );
         }
 
-        public ObjectSerializers Serializers { get; } = new();
-
         public IType GetTypeByReflectionType( Type type )
-        {
-            if ( type.IsByRef )
-            {
-                throw new ArgumentException( "Ref types can't be represented as Caravela types." );
-            }
-
-            if ( type.IsArray )
-            {
-                var elementType = this.GetTypeByReflectionType( type.GetElementType() );
-
-                return elementType.MakeArrayType( type.GetArrayRank() );
-            }
-
-            if ( type.IsPointer )
-            {
-                var pointedToType = this.GetTypeByReflectionType( type.GetElementType() );
-
-                return pointedToType.MakePointerType();
-            }
-
-            if ( type.IsConstructedGenericType )
-            {
-                var genericDefinition = this.GetTypeByReflectionName( type.GetGenericTypeDefinition().FullName );
-                var genericArguments = type.GenericTypeArguments.Select( this.GetTypeByReflectionType ).ToArray();
-
-                return genericDefinition.WithGenericArguments( genericArguments! );
-            }
-
-            return this.GetTypeByReflectionName( type.FullName );
-        }
-
+            => this.GetIType( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
+        
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
            => (IAssembly) this._cache.GetOrAdd(
                assemblySymbol.ToLink(),
@@ -134,16 +97,6 @@ namespace Caravela.Framework.Impl.CodeModel
         IPointerType ITypeFactory.MakePointerType( IType pointedType ) =>
             (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
-        bool ITypeFactory.Is( IType left, IType right ) =>
-            this.RoslynCompilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
-
-        bool ITypeFactory.Is( IType left, Type right ) =>
-            this.RoslynCompilation.HasImplicitConversion(
-                ((ITypeInternal) left).TypeSymbol,
-                ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
-
-        public IEqualityComparer<ICodeElement> InvariantComparer => CodeElementEqualityComparer.Instance;
-
         public IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
                 CodeElementLink.FromBuilder( attributeBuilder ),
@@ -171,7 +124,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IType GetIType( IType type )
         {
-            if ( type.TypeFactory == this )
+            if ( type.Compilation == this )
             {
                 return type;
             }

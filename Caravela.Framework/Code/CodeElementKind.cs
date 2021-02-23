@@ -67,6 +67,10 @@ namespace Caravela.Framework.Code
         /// <see cref="IConstructor"/>.
         /// </summary>
         Constructor,
+        
+        /// <summary>
+        /// See <see cref="IAssembly"/>.
+        /// </summary>
         Assembly,
     }
 }

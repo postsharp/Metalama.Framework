@@ -1,4 +1,3 @@
-using System;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
@@ -9,7 +8,7 @@ namespace Caravela.Framework.Code
     /// derive from <see cref="IType"/>.
     /// </summary>
     [CompileTime]
-    public interface IType : IDisplayable, IEquatable<IType>
+    public interface IType : IDisplayable
     {
         /// <summary>
         /// Gets the kind of type.
@@ -17,9 +16,9 @@ namespace Caravela.Framework.Code
         TypeKind TypeKind { get; }
 
         /// <summary>
-        /// Gets the service used to compare this type or construct other types.
-        /// This member is used by <see cref="TypeExtensions"/> and is not meant to be used directly in user code.
+        /// Gets the <see cref="ICompilation"/> to which this type belongs (which does not mean that the type is declared
+        /// by the main project of the compilation).
         /// </summary>
-        ITypeFactory TypeFactory { get; }
+        ICompilation Compilation { get; }
     }
 }

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
-        ITypeFactory IType.TypeFactory => throw new NotSupportedException();
+        ICompilation IType.Compilation => this.Compilation;
 
         public override ICodeElement? ContainingElement { get; }
 
@@ -44,7 +44,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             throw new NotImplementedException();
         }
-
-        bool IEquatable<IType>.Equals( IType other ) => throw new NotImplementedException();
     }
 }

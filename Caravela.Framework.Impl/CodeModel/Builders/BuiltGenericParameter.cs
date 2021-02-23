@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 
-        public ITypeFactory TypeFactory => this.Compilation.Factory;
+        ICompilation IType.Compilation => this.Compilation;
 
         public string Name => this.GenericParameterBuilder.Name;
 
@@ -34,7 +34,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool HasReferenceTypeConstraint => this.GenericParameterBuilder.HasReferenceTypeConstraint;
 
         public bool HasNonNullableValueTypeConstraint => this.GenericParameterBuilder.HasNonNullableValueTypeConstraint;
-
-        public bool Equals( IType other ) => throw new NotImplementedException();
     }
 }

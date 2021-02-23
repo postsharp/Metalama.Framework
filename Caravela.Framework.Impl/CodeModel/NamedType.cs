@@ -152,7 +152,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReadOnlyList<INamedType> ImplementedInterfaces => this.TypeSymbol.AllInterfaces.Select( this.Compilation.Factory.GetNamedType ).ToImmutableArray();
 
-        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
+        ICompilation IType.Compilation => this.Compilation;
 
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );

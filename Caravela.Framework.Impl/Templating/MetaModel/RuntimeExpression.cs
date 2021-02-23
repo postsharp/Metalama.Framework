@@ -139,7 +139,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         /// <returns></returns>
         public ExpressionSyntax ToTypedExpression( IType targetType, bool addsParenthesis = false )
         {
-            var expressionType = this.GetExpressionType( targetType.TypeFactory );
+            var expressionType = this.GetExpressionType( targetType.Compilation.TypeFactory );
 
             var targetTypeSymbol = targetType.GetSymbol();
 

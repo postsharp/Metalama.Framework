@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
-        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
+        ICompilation IType.Compilation => this.Compilation;
 
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 

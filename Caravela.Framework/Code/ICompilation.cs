@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// Represents a set of types compiled together. Commonly known as a "project", but this is not exactly it.
     /// </summary>
     [CompileTime]
-    public interface ICompilation : ICodeElement
+    public interface ICompilation : IAssembly
     {
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
@@ -24,5 +24,11 @@ namespace Caravela.Framework.Code
         /// Gets the list of managed resources in the current compilation.
         /// </summary>
         IReadOnlyList<IManagedResource> ManagedResources { get; }
+
+        /// <summary>
+        /// Gets a service allowing to compare types and code elements considers equal two instances that represent
+        /// the same type or code element even if they belong to different compilation versions.
+        /// </summary>
+        ICodeElementComparer InvariantComparer { get; }
     }
 }

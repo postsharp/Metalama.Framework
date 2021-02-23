@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl
             partArrayBuilder.Add( new AspectLayer( this, null ) );
 
             // Add the parts defined in [ProvidesAspectLayers].
-            var aspectLayersAttributeType = aspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( ProvidesAspectLayersAttribute ) );
+            var aspectLayersAttributeType = ((ICodeElement) aspectType).Compilation.TypeFactory.GetTypeByReflectionType( typeof( ProvidesAspectLayersAttribute ) );
             var aspectLayersAttributeData = aspectType.Attributes.Where( a => a.Type.Is( aspectLayersAttributeType ) ).SingleOrDefault();
 
             if ( aspectLayersAttributeData != null )

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
@@ -45,24 +44,5 @@ namespace Caravela.Framework.Code
         /// <param name="pointedType"></param>
         /// <returns></returns>
         IPointerType MakePointerType( IType pointedType );
-
-        /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
-        /// given as an <see cref="IType"/>.
-        /// </summary>
-        /// <returns></returns>
-        bool Is( IType left, IType right );
-
-        /// <summary>
-        /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
-        /// given as a reflection <see cref="Type"/>.
-        /// </summary>
-        /// <returns></returns>
-        bool Is( IType left, Type right );
-
-        /// <summary>
-        /// Gets a equality comparer that considers that two objects refering to the same code element in two different compilation revisions are equal.
-        /// </summary>
-        IEqualityComparer<ICodeElement> InvariantComparer { get; }
     }
 }

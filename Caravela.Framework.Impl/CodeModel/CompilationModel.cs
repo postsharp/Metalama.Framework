@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal class CompilationModel : ICompilation, ICodeElementLink<ICompilation>, IAssembly
+    internal class CompilationModel : ICompilation, ICodeElementLink<ICompilation>
     {
         public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
         {
@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel
             return new CompilationModel( prototype, introducedElements );
         }
 
+        public ReflectionMapper ReflectionMapper { get; }
+
         private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
         private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allAttributesByType;
         private ImmutableDictionary<CodeElementLink<ICodeElement>, int> _depthsCache = ImmutableDictionary.Create<CodeElementLink<ICodeElement>, int>();
@@ -41,7 +43,9 @@ namespace Caravela.Framework.Impl.CodeModel
         private CompilationModel( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
-
+            this.ReflectionMapper = new ReflectionMapper( roslynCompilation );
+            this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, roslynCompilation );
+            
             this._transformations = ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation>
                 .Empty
                 .WithKeyComparer( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
@@ -65,6 +69,8 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this.Revision = prototype.Revision + 1;
             this.RoslynCompilation = prototype.RoslynCompilation;
+            this.ReflectionMapper = prototype.ReflectionMapper;
+            this.InvariantComparer = prototype.InvariantComparer;
 
             this._transformations = prototype._transformations.AddRange(
                 introducedElements,
@@ -123,6 +129,8 @@ namespace Caravela.Framework.Impl.CodeModel
         ITypeFactory ICompilation.TypeFactory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
+
+        public ICodeElementComparer InvariantComparer { get; }
 
         ICodeElement? ICodeElement.ContainingElement => null;
 
@@ -209,9 +217,9 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public ICompilation GetForCompilation( CompilationModel compilation ) => compilation;
+        ICompilation ICodeElementLink<ICompilation>.GetForCompilation( CompilationModel compilation ) => compilation;
 
-        public object? Target => this.RoslynCompilation;
+        object? ICodeElementLink.Target => this.RoslynCompilation;
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
     }

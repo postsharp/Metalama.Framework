@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract TypeKind TypeKind { get; }
 
-        ITypeFactory IType.TypeFactory => this.Compilation.Factory;
+        ICompilation IType.Compilation => this.Compilation;
 
         ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;
 
