@@ -14,13 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     {
         public static readonly CodeElementLinkEqualityComparer<T> Instance = new CodeElementLinkEqualityComparer<T>();
 
-        private static ISymbol? GetSymbol( T link )
-            => link.Target switch
-            {
-                ISymbol symbol => symbol,
-                CodeElement codeElement => codeElement.Symbol,
-                _ => null
-            };
+        private static ISymbol? GetSymbol( T link ) => link.Target as ISymbol;
 
         public bool Equals( T x, T y )
         {

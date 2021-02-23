@@ -33,27 +33,11 @@ namespace Caravela.Framework.Code
         /// </summary>
         public CodeElementKind ElementKind { get; }
 
+        /// <summary>
+        /// Gets the <see cref="ICompilation"/> to which the current code element belongs. Note that the same logical code element can be
+        /// represented by different object instances, each in a different compilation. Within the same compilation, each code element
+        /// is represented by only one object instance.
+        /// </summary>
         ICompilation Compilation { get; }
-    }
-
-    /// <summary>
-    /// Origins of an element of code.
-    /// </summary>
-    public enum CodeOrigin
-    {
-        /// <summary>
-        /// Source code.
-        /// </summary>
-        Source,
-
-        /// <summary>
-        /// Roslyn code generator.
-        /// </summary>
-        Generator,
-
-        /// <summary>
-        /// Aspect (introduction).
-        /// </summary>
-        Aspect
     }
 }

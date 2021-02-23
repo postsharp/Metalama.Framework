@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -140,6 +141,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation.HasImplicitConversion(
                 ((ITypeInternal) left).TypeSymbol,
                 ((ITypeInternal) this.GetTypeByReflectionType( right ))?.TypeSymbol ?? throw new ArgumentException( $"Could not resolve type {right}.", nameof( right ) ) );
+
+        public IEqualityComparer<ICodeElement> InvariantComparer => CodeElementEqualityComparer.Instance;
 
         public IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
