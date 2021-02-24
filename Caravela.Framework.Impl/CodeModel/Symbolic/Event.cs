@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         private readonly IEventSymbol _symbol;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public override ISymbol Symbol => this._symbol;
 
         public Event( IEventSymbol symbol, NamedType containingElement ) : base( containingElement.Compilation )
         {

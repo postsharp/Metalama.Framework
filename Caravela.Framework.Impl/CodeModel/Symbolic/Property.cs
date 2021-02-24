@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
     {
         private readonly IPropertySymbol _symbol;
 
-        protected internal override ISymbol Symbol => this._symbol;
+        public override ISymbol Symbol => this._symbol;
 
         public Property( IPropertySymbol symbol, NamedType declaringType ) : base( declaringType.Compilation )
         {

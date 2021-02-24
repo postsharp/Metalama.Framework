@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl.CodeModel.Symbolic
             this.ContainingElement = containingElement;
         }
 
+        CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
+
         public ICodeElement ContainingElement { get; }
 
         IReadOnlyList<IAttribute> ICodeElement.Attributes => Array.Empty<IAttribute>();

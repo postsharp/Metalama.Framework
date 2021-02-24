@@ -56,5 +56,7 @@ class A : Attribute
         public bool MapPdbToTransformedCode => throw new System.NotImplementedException();
 
         public string? CompileTimeProjectDirectory => null;
+
+        public string CrashReportDirectory => null;
     }
 }

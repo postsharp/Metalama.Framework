@@ -128,6 +128,8 @@ namespace Caravela.TestFramework
 
             public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testName );
 
+            public string CrashReportDirectory => null;
+
             public bool WriteUnhandledExceptionsToFile => true;
         }
     }
