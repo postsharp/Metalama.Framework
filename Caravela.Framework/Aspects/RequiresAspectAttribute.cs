@@ -5,7 +5,7 @@ namespace Caravela.Framework.Aspects
 
     /// <summary>
     /// Custom attribute that, when applied to an aspect type, specifies that all instances of the target aspect type
-    /// require an instance of each aspect type from the given list. These aspect types must have a public default constructor.
+    /// require an instance of each aspect type from a given list. These aspect types must have a public default constructor.
     /// (Not implemented.)
     /// </summary>
     [Obsolete("Not implemented.")]
