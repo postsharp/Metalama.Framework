@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+#if !DEBUG
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Caravela.Framework.Impl
 {
@@ -70,7 +73,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj;
+            return obj!;
         }
 
 #if !DEBUG
