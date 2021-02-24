@@ -12,7 +12,7 @@
 
     <PropertyGroup>
         <PackagesDir>$(OutputPath)</PackagesDir>
-        <ShippingDir>..\shipping</ShippingDir>
+        <ShippingDir>..\publish</ShippingDir>
     </PropertyGroup>
     
     <ItemGroup>
