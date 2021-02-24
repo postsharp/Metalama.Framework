@@ -1,16 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Symbolic;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
@@ -48,26 +43,19 @@ namespace Caravela.Framework.Impl.Transformations
         {
             using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
             {
-                // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
-                string methodName =
-                    this.Advice.PartName != null
-                        ? $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}__{this.Advice.PartName}"
-                        : $"__{this.OverriddenDeclaration.Name}__{this.Advice.Aspect.Aspect.GetType().Name}";
+                var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectPartId, this.OverriddenDeclaration );
 
-            Invariant.Assert( DiagnosticContext.Current.Sink != null, "DiagnosticContext.Current.Sink must be set" );
+                var expansionContext = new TemplateExpansionContext(
+                    this.Advice.Aspect.Aspect,
+                    this.OverriddenDeclaration,
+                    this.OverriddenDeclaration.Compilation,
+                    context.ProceedImplementationFactory.Get( this.Advice.AspectPartId, this.OverriddenDeclaration ),
+                    context.LexicalScope,
+                    context.DiagnosticSink
+                    );
 
-            // TODO: This is temporary.
-            var expansionContext = new TemplateExpansionContext( 
-                this.Advice.Aspect.Aspect,
-                this.OverriddenDeclaration,
-                this.OverriddenDeclaration.Compilation,
-                new LinkerCallProceedImpl( this.OverriddenDeclaration, this.Advice.AspectPartId ));
-            var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
+                var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
             
-            var newMethodBody = new TemplateDriver(
-                this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                .ExpandDeclaration( expansionContext );
-
                 var newMethodBody = new TemplateDriver(
                         this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
                     .ExpandDeclaration( expansionContext );
@@ -78,7 +66,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this,
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.GetSyntaxModifiers(),
+                            this.OverriddenDeclaration.GetSyntaxModifierList(),
                             this.OverriddenDeclaration.GetSyntaxReturnType(),
                             null,
                             Identifier( methodName ),

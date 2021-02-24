@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.UnitTests.Linker
             A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
-            A.CallTo( () => transformation.GetIntroducedMembers() ).Returns(
+            A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
                 new[] { new IntroducedMember( transformation, overrideSyntax, aspectPart, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IOverriddenElement) transformation).OverriddenElement ).Returns( targetMethod );
 
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.UnitTests.Linker
             A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
-            A.CallTo( () => transformation.GetIntroducedMembers() ).Returns(
+            A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
                 new[] { new IntroducedMember( transformation, overrideSyntax, aspectPart, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IObservableTransformation) transformation).ContainingElement ).Returns( targetType );
 

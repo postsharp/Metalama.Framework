@@ -23,27 +23,4 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         MemberDeclarationSyntax InsertPositionNode { get; }
     }
-
-    internal readonly struct MemberIntroductionContext
-    {
-        public MemberIntroductionContext( DiagnosticSink diagnosticSink )
-        {
-            this.DiagnosticSink = diagnosticSink;
-        }
-
-        public DiagnosticSink DiagnosticSink { get; }
-        
-        // TODO: add lexical scope here.
-    }
-
-    internal enum IntroducedMemberSemantic
-    {
-        Introduction,
-        MethodOverride,
-        GetterOverride,
-        SetterOverride,
-        AdderOverride,
-        RemoverOverride,
-        RaiserOverride
-    }
 }

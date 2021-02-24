@@ -4,6 +4,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -37,7 +38,7 @@ namespace Caravela.Framework.Impl.Templating
         ICompilation Compilation { get; }
 
         /// <summary>
-        /// Gets the lexical scope which allows the template method to define new unique identifiers within the target code element.
+        /// Gets or sets the lexical scope which allows the template method to define new unique identifiers within the target code element.
         /// </summary>
         ITemplateExpansionLexicalScope CurrentLexicalScope { get; }
 
@@ -51,5 +52,7 @@ namespace Caravela.Framework.Impl.Templating
         StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression );
         
         DiagnosticSink DiagnosticSink { get; }
+
+        IDisposable OpenNestedScope();
     }
 }

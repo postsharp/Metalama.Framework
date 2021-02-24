@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class TemplateContextImpl :  ITemplateContext
+    internal class TemplateContextImpl : ITemplateContext
     {
         private IDiagnosticSink _diagnosticSink;
         public IMethod Method { get; }

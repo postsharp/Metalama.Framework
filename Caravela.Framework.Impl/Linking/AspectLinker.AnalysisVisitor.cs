@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    public partial class AspectLinker
+    internal partial class AspectLinker
     {
         /// <summary>
         /// This visitor collect

@@ -11,15 +11,15 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class LinkerCallProceedImpl : IProceedImpl
+    internal class LinkerOverrideProceedImpl : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
-        private readonly AspectPartId? _aspectPartId;
+        private readonly AspectPartId _aspectPartId;
 
-        public LinkerCallProceedImpl( IMethod originalDeclaration, AspectPartId? aspectPartId = null )
+        public LinkerOverrideProceedImpl( AspectPartId aspectPartId, IMethod overridenDeclaration )
         {
-            this._originalDeclaration = originalDeclaration;
             this._aspectPartId = aspectPartId;
+            this._originalDeclaration = overridenDeclaration;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()

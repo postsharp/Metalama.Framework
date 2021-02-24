@@ -37,4 +37,15 @@ namespace Caravela.Framework.Impl.Transformations
             this.Semantic = semantic;
         }
     }
+
+    internal enum IntroducedMemberSemantic
+    {
+        Introduction,
+        MethodOverride,
+        GetterOverride,
+        SetterOverride,
+        AdderOverride,
+        RemoverOverride,
+        RaiserOverride
+    }
 }
