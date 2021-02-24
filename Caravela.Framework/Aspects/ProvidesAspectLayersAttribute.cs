@@ -19,9 +19,9 @@ namespace Caravela.Framework.Aspects
     /// custom attribute.
     /// </para>
     /// <para>
-    /// In case the aspect type is not annotated with <see cref="ProvidesAspectLayersAttribute"/>,  base aspect types
-    /// are inspected until one attribute is found. If none is found no aspect layer is defined for the derived type.
-    /// If both a base type and a derived type define a <see cref="ProvidesAspectLayersAttribute"/>, only the attribute
+    /// In case the aspect type is not annotated with <see cref="ProvidesAspectLayersAttribute"/>, base aspect types
+    /// are inspected until one attribute is found. If no attribute is found then no aspect layer is defined for the derived type.
+    /// If both a base type and a derived type define a <see cref="ProvidesAspectLayersAttribute"/> then only the attribute
     /// defined on the derived type is considered.
     /// </para>
     /// </remarks>
@@ -31,8 +31,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Initializes a new instance of the <see cref="ProvidesAspectLayersAttribute"/> class.
         /// </summary>
-        /// <param name="layers">An ordered list of aspect parts, which cannot include an empty or null string that denotes
-        /// the default layer.</param>
+        /// <param name="layers">An ordered list non-null and non-empty strings specifying the layer names.</param>
         public ProvidesAspectLayersAttribute( params string[] layers )
         {
             this.Layers = layers;
