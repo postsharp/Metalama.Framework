@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections;
 using System.Collections.Immutable;
@@ -69,7 +72,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     throw new InvalidOperationException(
-                        $"Cannot find a field or property {name} in type {constructor.DeclaringType.Name}" );
+                        $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
                 }
             }
 

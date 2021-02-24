@@ -1,4 +1,7 @@
-﻿namespace Caravela.TestFramework
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace Caravela.TestFramework
 {
     /// <summary>
     /// Represents the parameters of the integration test input.

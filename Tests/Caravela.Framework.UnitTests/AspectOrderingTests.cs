@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -14,8 +17,10 @@ namespace Caravela.Framework.UnitTests
         {
             var compilation = CreateCompilation( code );
 
+            var aspectTypeFactory = new AspectTypeFactory( compilation, new AspectDriverFactory( compilation, ImmutableArray<object>.Empty ) );
+            
             var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() );
-            var aspectTypes = aspectNamedTypes.Select( aspectType => new AspectType( aspectType, null, null ) ).ToArray();
+            var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[] { new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation ) };
@@ -128,6 +133,22 @@ class Aspect2 {}
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
+        }
+
+        [Fact]
+        public void InheritedAspects()
+        {
+            var code = @"
+using Caravela.Framework.Aspects;
+
+[ProvidesAspectLayersAttribute(""Layer1"")]
+class Aspect1 {}
+
+class Aspect2 : Aspect1 {}
+";
+
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
         }
     }
 }

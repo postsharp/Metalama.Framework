@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.Advices;
@@ -56,13 +59,14 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Add the initial sources.
+            // TODO: process failure of the next line.
             this.AddAspectSources( inputAspectSources );
         }
 
         public void Execute()
         {
 
-            var enumerator = this._steps.GetEnumerator();
+            using var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
             {

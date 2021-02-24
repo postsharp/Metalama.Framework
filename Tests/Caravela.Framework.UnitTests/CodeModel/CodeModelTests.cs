@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +14,7 @@ using static Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.UnitTests
 {
-    public class SymbolicCodeModelTests : TestBase
+    public class CodeModelTests : TestBase
     {
         [Fact]
         public void ObjectIdentity()
@@ -278,7 +281,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var propertyNames = type.Properties.Select( p => p.Name );
 
@@ -330,7 +333,7 @@ class C : IDisposable
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var methodKinds = new[]
             {
@@ -372,7 +375,7 @@ class C<T>
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
@@ -394,7 +397,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.Select( p => p.RefKind ) );
             Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.Select( m => m.ReturnParameter.RefKind ) );
@@ -413,7 +416,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var method = type.Methods.First();
 
@@ -464,7 +467,7 @@ class C<T>
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var fieldTypes = type.Properties.Select( p => (INamedType) p.Type );
 
@@ -507,7 +510,7 @@ class C<TC>
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) )!;
             var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) )!;
@@ -519,6 +522,39 @@ class C<TC>
             Assert.Equal( "(TC, int)", openTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
             Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(string, int)", closedTypeMethod.WithGenericArguments( intType ).ReturnType.ToString() );
+        }
+
+        [Fact]
+        public void Depth()
+        {
+            var code = @"
+class C 
+{
+    void M() { void N() {} }
+
+    class D : C, L
+    {
+    }
+}
+
+interface I {}
+interface J : I {}
+interface K : I {}
+interface L : J, K {}
+";
+            
+            var compilation = CreateCompilation( code );
+
+            var type = compilation.DeclaredTypes.OfName( "C" ).Single();
+
+            Assert.Equal( 3, compilation.GetDepth( type ) );
+            Assert.Equal( 4, compilation.GetDepth( type.Methods.OfName( "M" ).Single() ) );
+            Assert.Equal( 5, compilation.GetDepth( type.Methods.OfName( "M" ).Single().LocalFunctions.Single() ) );
+            Assert.Equal( 1, compilation.GetDepth( compilation.DeclaredTypes.OfName( "I" ).Single() ) );
+            Assert.Equal( 2, compilation.GetDepth( compilation.DeclaredTypes.OfName( "J" ).Single() ) );
+            Assert.Equal( 2, compilation.GetDepth( compilation.DeclaredTypes.OfName( "K" ).Single() ) );
+            Assert.Equal( 3, compilation.GetDepth( compilation.DeclaredTypes.OfName( "L" ).Single() ) );
+            Assert.Equal( 4, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -41,16 +44,22 @@ namespace Caravela.Framework.Impl
             // Add the default part.
             partArrayBuilder.Add( new AspectLayer( this, null ) );
 
-            // Add the parts defined in [ProvidesAspectLayers].
+            // Add the parts defined in [ProvidesAspectLayers]. If it is not defined in the current type, look up in the base classes.
             var aspectLayersAttributeType = ((ICodeElement) aspectType).Compilation.TypeFactory.GetTypeByReflectionType( typeof( ProvidesAspectLayersAttribute ) );
-            var aspectLayersAttributeData = aspectType.Attributes.Where( a => a.Type.Is( aspectLayersAttributeType ) ).SingleOrDefault();
 
-            if ( aspectLayersAttributeData != null )
+            for ( var type = this; type != null; type = type.BaseAspectType )
             {
-                var aspectLayersAttribute = AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<ProvidesAspectLayersAttribute>( aspectLayersAttributeData );
-                partArrayBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( this, partName ) ) );
+                var aspectLayersAttributeData = type.Type.Attributes.SingleOrDefault( a => a.Type.Is( aspectLayersAttributeType ) );
+ 
+                if ( aspectLayersAttributeData != null )
+                {
+                    var aspectLayersAttribute =
+                        AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<ProvidesAspectLayersAttribute>( aspectLayersAttributeData );
+                    partArrayBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( this, partName ) ) );
+                    break;
+                }
             }
-
+            
             this.Layers = partArrayBuilder.ToImmutable();
         }
     }
