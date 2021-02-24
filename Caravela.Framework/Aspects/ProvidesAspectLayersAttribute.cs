@@ -28,8 +28,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Initializes a new instance of the <see cref="ProvidesAspectLayersAttribute"/> class.
         /// </summary>
-        /// <param name="layers">An ordered list of aspect parts, which cannot include an empty or null string that denotes
-        /// the default layer.</param>
+        /// <param name="layers">An ordered list non-null and non-empty strings specifying the layer names.</param>
         public ProvidesAspectLayersAttribute( params string[] layers )
         {
             this.Layers = layers;
