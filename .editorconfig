@@ -1,5 +1,6 @@
-# Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
+
+file_header_template = Copyright (c) SharpCrafters s.r.o. All rights reserved.\nThis project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 # C# files
 [*.cs]
@@ -20,7 +21,6 @@ insert_final_newline = false
 # Organize usings
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = false
-file_header_template = unset
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = true:warning
@@ -486,6 +486,10 @@ dotnet_diagnostic.IDE0071.severity = warning
 
 # IDE0072: Add missing cases
 dotnet_diagnostic.IDE0072.severity = suggestion
+
+# IDE0073: File header
+dotnet_diagnostic.IDE0073.severity = warning
+
 
 # IDE0075: Simplify conditional expression
 dotnet_diagnostic.IDE0075.severity = warning
