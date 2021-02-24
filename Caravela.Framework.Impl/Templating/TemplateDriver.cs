@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal class TemplateDriver
+    public class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
@@ -23,9 +23,6 @@ namespace Caravela.Framework.Impl.Templating
 
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
-            Invariant.Assert(
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null );
-
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
             {

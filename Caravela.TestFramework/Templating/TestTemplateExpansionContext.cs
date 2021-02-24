@@ -51,7 +51,7 @@ namespace Caravela.TestFramework.Templating
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
-            this._targetMethod = new Method( roslynTargetMethodSymbol, compilation );
+            this._targetMethod = compilation.Factory.GetMethod( roslynTargetMethodSymbol );
 
             this.ProceedImplementation = new TestProceedImpl( roslynTargetMethod );
             this.CurrentLexicalScope = new TestLexicalScope( this, semanticModel, roslynTargetMethod );

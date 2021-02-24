@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;

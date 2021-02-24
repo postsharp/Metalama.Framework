@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used at compile time.
     /// </summary>
-    internal class CompileTimeAspectPipeline : AspectPipeline
+    public class CompileTimeAspectPipeline : AspectPipeline
     {
         public CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context )
         {
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        private protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new CompileTimePipelineStage( parts, compileTimeAssemblyLoader, this );
 
         public override bool CanTransformCompilation => true;

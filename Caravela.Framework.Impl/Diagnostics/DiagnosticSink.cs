@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    internal abstract partial class DiagnosticSink : IDiagnosticSink
+    public abstract partial class DiagnosticSink : IDiagnosticSink
     {
 
         protected DiagnosticSink( IDiagnosticLocation? defaultLocation = null )

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <remarks>
     /// The template driver requires an instance of the expansion context before it can invoke the template method.
     /// </remarks>
-    internal interface ITemplateExpansionContext
+    public interface ITemplateExpansionContext
     {
         /// <summary>
         /// Gets the element of code to which a template was applied.

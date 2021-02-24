@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating;
@@ -154,7 +153,6 @@ namespace Caravela.TestFramework.Templating
                 var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
                 var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
 
-                Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
                 var caravelaCompilation = CompilationModel.CreateInitialInstance( compilationForInitialDiagnostics );
