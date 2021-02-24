@@ -1,10 +1,12 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.ComponentModel.Design;
 using System.IO;
 using Caravela.Framework.DesignTime.Vsix;
 using Microsoft;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 
 namespace CustomCommandSample
@@ -20,11 +22,11 @@ namespace CustomCommandSample
 
         public static async Task InitializeAsync( MyPackage package )
         {
-            ShowDiffCommand instance = new ShowDiffCommand( package );
+            var instance = new ShowDiffCommand( package );
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-           
-            var commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
+
+            var commandService = await package.GetServiceAsync( typeof( IMenuCommandService ) ) as OleMenuCommandService;
             Assumes.Present( commandService );
 
             // must match the button GUID and ID specified in the .vsct file
@@ -33,15 +35,37 @@ namespace CustomCommandSample
             commandService.AddCommand(cmd);
         }
 
+        private static string? GetIntermediateDirectory( string intermediateDirectory )
+        {
+
+            if ( Directory.Exists( Path.Combine( intermediateDirectory, "transformed" ) ) )
+            {
+                return intermediateDirectory;
+            }
+            else
+            {
+                foreach ( var child in Directory.GetDirectories( intermediateDirectory ) )
+                {
+                    var childIntermediate = GetIntermediateDirectory( child );
+
+                    if ( childIntermediate != null )
+                    {
+                        return childIntermediate;
+                    }
+                }
+
+                return null;
+            }
+        }
+
         private void Execute()
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-
             var activeDocumentPath = this._package.DTE.ActiveDocument.FullName;
             var activeProjectPath = this._package.DTE.ActiveDocument.ProjectItem.ContainingProject.FullName;
 
-            var relativePath = new Uri( activeProjectPath ).MakeRelative( new Uri( activeDocumentPath ) ).Replace( "/", "\\" );
+            var relativePath = new Uri( activeProjectPath ).MakeRelativeUri( new Uri( activeDocumentPath ) ).ToString().Replace( "/", "\\" );
 
             // TODO: Implement properly.
             var intermediateDirectory = GetIntermediateDirectory( Path.Combine( Path.GetDirectoryName( activeProjectPath ), "obj\\Debug" ));
@@ -54,36 +78,12 @@ namespace CustomCommandSample
                     this.DiffFilesUsingDefaultTool( this._package, activeDocumentPath, transformedDocumentPath );
                 }
             }
-
         }
 
-        private static string GetIntermediateDirectory( string intermediateDirectory )
+        private void DiffFilesUsingDefaultTool( MyPackage package, string file1, string file2 )
         {
-            
-            if ( Directory.Exists( Path.Combine( intermediateDirectory, "transformed" ) ) )
-            {
-                return intermediateDirectory;
-            }
-            else
-            {
-                foreach ( var child in Directory.GetDirectories( intermediateDirectory ) )
-                {
-                    string childIntermediate = GetIntermediateDirectory( child );
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-                    if ( childIntermediate != null )
-                    {
-                        return childIntermediate;
-                    }
-                }
-
-                return null;
-
-            }
-
-        }
-
-        private void DiffFilesUsingDefaultTool( MyPackage _package, string file1, string file2 )
-        {
             // https://github.com/madskristensen/FileDiffer/blob/master/src/Commands/DiffFilesCommand.cs
 
             // This is the guid and id for the Tools.DiffFiles command
@@ -91,7 +91,7 @@ namespace CustomCommandSample
             var diffFilesId = 256;
             object args = $"\"{file1}\" \"{file2}\"";
 
-            _package.DTE.Commands.Raise( diffFilesCmd, diffFilesId, ref args, ref args );
+            package.DTE.Commands.Raise( diffFilesCmd, diffFilesId, ref args, ref args );
         }
     }
 }
