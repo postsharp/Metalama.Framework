@@ -151,7 +151,7 @@ namespace Caravela.TestFramework.Templating
             try
             {
                 var aspectType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
-                var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public );
+                var templateMethod = aspectType.GetMethod( "Template_Template", BindingFlags.Instance | BindingFlags.Public )!;
 
                 var driver = new TemplateDriver( templateMethod );
 
