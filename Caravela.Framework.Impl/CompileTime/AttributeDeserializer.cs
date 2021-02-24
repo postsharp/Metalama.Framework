@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     throw new InvalidOperationException(
-                        $"Cannot find a field or property {name} in type {constructor.DeclaringType.Name}" );
+                        $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
                 }
             }
 

@@ -56,13 +56,14 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // Add the initial sources.
+            // TODO: process failure of the next line.
             this.AddAspectSources( inputAspectSources );
         }
 
         public void Execute()
         {
 
-            var enumerator = this._steps.GetEnumerator();
+            using var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
             {

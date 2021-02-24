@@ -42,14 +42,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type.IsArray )
             {
-                var elementType = this.GetTypeSymbol( type.GetElementType().AssertNotNull() );
+                var elementType = this.GetTypeSymbol( type.GetElementType()! );
                 
                 return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
             }
 
             if ( type.IsPointer )
             {
-                var pointedToType = this.GetTypeSymbol( type.GetElementType().AssertNotNull() );
+                var pointedToType = this.GetTypeSymbol( type.GetElementType()! );
 
                 return this._compilation.CreatePointerTypeSymbol( pointedToType );
             }
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 return genericDefinition.Construct( genericArguments! );
             }
 
-            return this.GetTypeByReflectionName( type.FullName );
+            return this.GetTypeByReflectionName( type.FullName.AssertNotNull() );
         }
 
         public ITypeSymbol GetTypeSymbol( Type type ) =>

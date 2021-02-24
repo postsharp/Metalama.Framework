@@ -5,5 +5,6 @@
     /// </summary>
     public interface IAssembly : ICodeElement
     {
+        string? Name { get; }
     }
 }
