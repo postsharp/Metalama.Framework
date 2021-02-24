@@ -1,0 +1,21 @@
+﻿.CompileTime {
+    background-color: #E8F2FF;
+}
+.CompileTimeVariable {
+    background-color: #C6D1DD;
+}
+.RunTime {
+    background-color: antiquewhite;
+}
+.TemplateKeyword {
+    background-color: #FFFF22;
+}
+.Dynamic {
+    background-color: #FFFFBB;
+}
+.Conflict {
+    background-color: red;
+}
+.Default {
+    background-color: lightcoral;
+}

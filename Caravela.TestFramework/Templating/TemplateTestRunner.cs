@@ -55,7 +55,8 @@ namespace Caravela.TestFramework.Templating
 
             // Source.
             var project = this.CreateProject();
-            var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
+            var templateSourceText = SourceText.From( testSource, encoding: Encoding.UTF8 );
+            var testDocument = project.AddDocument( "Test.cs", templateSourceText );
 
             var result = new TestResult( testDocument );
 
@@ -82,13 +83,13 @@ namespace Caravela.TestFramework.Templating
             }
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var templaceCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+            var templateCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             this.ReportDiagnostics( result, templateCompiler.Diagnostics );
 
-            if ( !templaceCompilerSuccess )
+            if ( !templateCompilerSuccess )
             {
                 result.ErrorMessage = "Template compiler failed.";
                 return result;
@@ -171,6 +172,10 @@ namespace Caravela.TestFramework.Templating
             {
                 assemblyLoadContext.Unload();
             }
+
+            var highlightedTemplatePath = Path.ChangeExtension( transformedTemplatePath, ".html" );
+            new TemplateHighlightingWriter( highlightedTemplatePath, templateSourceText, annotatedTemplateSyntax )
+                .Write();
 
             result.Success = true;
 
