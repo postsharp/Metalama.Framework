@@ -37,8 +37,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-    <!-- Disable XML doc warnings in the debug build -->
-    <NoWarn Condition="'$(Configuration)'!='Release'">1591,1572,1573</NoWarn>
+    <!-- Disable XML doc warnings for now -->
+    <NoWarn>1591,1572,1573</NoWarn>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)'=='True'">
