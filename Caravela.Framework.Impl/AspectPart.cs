@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl
 
             var newCompilation = new CompilationModel( input.Compilation, addedObservableIntroductions );
 
-            return input.WithNewResults( 
+            return input.WithNewResults(
                 newCompilation,
                 aspectInitializerDiagnostics.Concat( adviceResults.SelectMany( ar => ar.Diagnostics ) ).ToList(),
                 addedAspectSources.ToList(),

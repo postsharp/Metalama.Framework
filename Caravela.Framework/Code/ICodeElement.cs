@@ -1,6 +1,6 @@
-using Caravela.Framework.Diagnostics;
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
@@ -16,8 +16,8 @@ namespace Caravela.Framework.Code
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
         /// of the current code element.
         /// </summary>
-         CodeOrigin Origin { get; }
-        
+        CodeOrigin Origin { get; }
+
         /// <summary>
         /// Gets the containing element of code, such as a <see cref="INamedType"/> for nested
         /// types or for methods. If the containing element is a namespace or
@@ -47,12 +47,12 @@ namespace Caravela.Framework.Code
         /// Source code.
         /// </summary>
         Source,
-        
+
         /// <summary>
         /// Roslyn code generator.
         /// </summary>
         Generator,
-        
+
         /// <summary>
         /// Aspect (introduction).
         /// </summary>

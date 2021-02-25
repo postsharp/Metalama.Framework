@@ -1,9 +1,8 @@
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,7 +19,7 @@ namespace Caravela.Framework.Impl
         {
             this.Diagnostics = Array.Empty<Diagnostic>();
         }
-        
+
         public AssertionFailedException( string message, IReadOnlyList<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;
@@ -44,11 +43,11 @@ namespace Caravela.Framework.Impl
                     stringBuilder.Append( "   | " );
                     stringBuilder.AppendLine( diagnostic.ToString() );
                 }
+
                 stringBuilder.AppendLine( "   +----- " );
 
                 return stringBuilder.ToString();
             }
-
         }
     }
 }

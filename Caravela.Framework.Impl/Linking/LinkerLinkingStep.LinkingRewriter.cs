@@ -1,11 +1,8 @@
-﻿using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Transformations;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -96,13 +93,13 @@ namespace Caravela.Framework.Impl.Linking
                         GetInvocationTarget(),
                         ArgumentList( SeparatedList( method.ParameterList.Parameters.Select( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
 
-                if ( targetSymbol.ReturnsVoid)
+                if ( targetSymbol.ReturnsVoid )
                 {
-                    return Block (ReturnStatement( invocation ));
+                    return Block( ReturnStatement( invocation ) );
                 }
                 else
                 {
-                    return Block(ExpressionStatement( invocation ));
+                    return Block( ExpressionStatement( invocation ) );
                 }
 
                 ExpressionSyntax GetInvocationTarget()
@@ -120,9 +117,9 @@ namespace Caravela.Framework.Impl.Linking
 
             private BlockSyntax? GetRewrittenMethodBody( SemanticModel semanticModel, MethodDeclarationSyntax method, IMethodSymbol symbol )
             {
-                var inliningRewriter = new InliningRewriter(this._referenceRegistry, semanticModel, symbol);
+                var inliningRewriter = new InliningRewriter( this._referenceRegistry, semanticModel, symbol );
 
-                return (BlockSyntax)inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();
+                return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();
             }
 
             private MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )

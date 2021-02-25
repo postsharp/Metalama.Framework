@@ -55,8 +55,6 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-  
-
         protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new CompileTimeHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this );
 

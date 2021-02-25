@@ -7,6 +7,5 @@ namespace Caravela.Framework.Sdk
     /// </summary>
     public interface ISdkNamedType : INamedType, ISdkType
     {
-        
     }
 }

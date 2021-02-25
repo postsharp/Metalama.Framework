@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -57,9 +55,8 @@ namespace Caravela.Framework.Impl.Linking
     internal partial class LinkerIntroductionStep
     {
         // Transformations grouped by target syntax trees, preserved order.
-        private readonly CSharpCompilation _initialCompilation;        
+        private readonly CSharpCompilation _initialCompilation;
         private readonly IReadOnlyList<ISyntaxTreeTransformation> _transformations;
-
 
         private LinkerIntroductionStep( CSharpCompilation initialCompilation, IReadOnlyList<ISyntaxTreeTransformation> transformations )
         {
@@ -67,7 +64,7 @@ namespace Caravela.Framework.Impl.Linking
             this._transformations = transformations;
         }
 
-        public static LinkerIntroductionStep Create(AspectLinkerInput input)
+        public static LinkerIntroductionStep Create( AspectLinkerInput input )
         {
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
@@ -89,7 +86,7 @@ namespace Caravela.Framework.Impl.Linking
 
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in this._transformations.OfType<IMemberIntroduction>() )
-            {   
+            {
                 var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, context.GetLexicalScope( memberIntroduction ), proceedImplFactory );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
@@ -126,12 +123,12 @@ namespace Caravela.Framework.Impl.Linking
 
             public Compilation IntermediateCompilation { get; set; }
 
-            public Context( Compilation initialCompilation)
+            public Context( Compilation initialCompilation )
             {
                 this.IntermediateCompilation = initialCompilation;
             }
 
-            public void ReplaceSyntaxTree(SyntaxTree initialSyntaxTree, SyntaxTree intermediateSyntaxTree)
+            public void ReplaceSyntaxTree( SyntaxTree initialSyntaxTree, SyntaxTree intermediateSyntaxTree )
             {
                 this.TransformationRegistry.RegisterIntermediateSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
                 this.IntermediateCompilation = this.IntermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
@@ -141,12 +138,12 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // TODO: This will need to be changed for other transformations than methods.
 
-                if ( introduction is IOverriddenElement overriddenElement)
+                if ( introduction is IOverriddenElement overriddenElement )
                 {
-                    if ( !this._lexicalScopeRegistry.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope) )
+                    if ( !this._lexicalScopeRegistry.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
                     {
-                        this._lexicalScopeRegistry[overriddenElement.OverriddenElement] = lexicalScope = 
-                            LinkerLexicalScope.CreateEmpty(LinkerLexicalScope.CreateFromMethod( (IMethodInternal) overriddenElement.OverriddenElement ));
+                        this._lexicalScopeRegistry[overriddenElement.OverriddenElement] = lexicalScope =
+                            LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromMethod( (IMethodInternal) overriddenElement.OverriddenElement ) );
 
                         return lexicalScope;
                     }

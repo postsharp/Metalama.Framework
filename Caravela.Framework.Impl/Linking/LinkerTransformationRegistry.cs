@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly Dictionary<IntroducedMember, (SyntaxTree OriginalSyntaxTree, int AnnotationId, MemberDeclarationSyntax AnnotatedSyntax)> _introducedMemberToMarkId;
         private readonly Dictionary<int, (SyntaxTree OriginalSyntaxTree, IntroducedMember IntroducedMember, MemberDeclarationSyntax AnnotatedSyntax)> _introducedMarkIdToMember;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
-        
+
         public LinkerTransformationRegistry()
         {
             this._introducedMembers = new Dictionary<IMemberIntroduction, IReadOnlyList<IntroducedMember>>();
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
             this._introducedTreeMap = new Dictionary<SyntaxTree, SyntaxTree>();
         }
 
-        public void RegisterIntroducedMembers( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers)
+        public void RegisterIntroducedMembers( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
         {
             if ( this._frozen )
             {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Linking
 
             this._introducedMembers.Add( memberIntroduction, introducedMembers.ToList() );
 
-            foreach (var introducedMember in introducedMembers)
+            foreach ( var introducedMember in introducedMembers )
             {
                 var annotationId = this._nextAnnotationId++;
                 var annotatedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( new SyntaxAnnotation( _introducedSyntaxAnnotationId, annotationId.ToString() ) );
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Linking
         public IEnumerable<MemberDeclarationSyntax> GetIntroducedSyntaxNodesOnPosition( MemberDeclarationSyntax position )
         {
             // TODO: Optimize.
-            return this._introducedMembers.SelectMany( kvp => kvp.Value.Select( i => (kvp.Key.InsertPositionNode, IntroducedMember: i) ) ).Where( p => p.InsertPositionNode == position ).Select(p => p.IntroducedMember.Syntax );
+            return this._introducedMembers.SelectMany( kvp => kvp.Value.Select( i => (kvp.Key.InsertPositionNode, IntroducedMember: i) ) ).Where( p => p.InsertPositionNode == position ).Select( p => p.IntroducedMember.Syntax );
         }
 
         public IReadOnlyList<IntroducedMember> GetMethodOverridesForSymbol( IMethodSymbol symbol )
@@ -85,7 +85,6 @@ namespace Caravela.Framework.Impl.Linking
             var id = int.Parse( annotation.Data );
             var memberRecord = this._introducedMarkIdToMember[id];
 
-            memberRecord
 
             return introducedMembers;
         }

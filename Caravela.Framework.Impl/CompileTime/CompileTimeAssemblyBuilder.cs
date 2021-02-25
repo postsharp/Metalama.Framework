@@ -1,23 +1,21 @@
-﻿using Caravela.Framework.Impl.Pipeline;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeAssemblyBuilder
     {
         private static readonly IEnumerable<MetadataReference> _fixedReferences;
-
 
         private readonly IServiceProvider _serviceProvider;
         private readonly ISymbolClassifier _symbolClassifier;
@@ -49,18 +47,17 @@ namespace Caravela.Framework.Impl.CompileTime
                 .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
         }
 
-
         // can't be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
         public CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; set; }
-      
+
         public CompileTimeAssemblyBuilder(
             IServiceProvider serviceProvider,
-            Compilation roslynCompilation, 
+            Compilation roslynCompilation,
             IEnumerable<ResourceDescription>? resources = null )
-            : this( 
+            : this(
                 serviceProvider,
-                new SymbolClassifier( roslynCompilation ), 
-                new TemplateCompiler(), 
+                new SymbolClassifier( roslynCompilation ),
+                new TemplateCompiler(),
                 resources )
         {
         }
@@ -86,8 +83,8 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( !produceCompileTimeCodeRewriter.Success )
             {
                 // We don't want to continue with the control flow if we have a user error here, so we throw an exception.
-                throw new InvalidUserCodeException( 
-                    "Cannot create the compile-time assembly.", 
+                throw new InvalidUserCodeException(
+                    "Cannot create the compile-time assembly.",
                     produceCompileTimeCodeRewriter.Diagnostics.ToImmutableArray() );
             }
 
@@ -150,7 +147,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
             EmitResult? result;
-            
+
             // Write the generated files to disk if we should.
             if ( !string.IsNullOrWhiteSpace( compileTimeProjectDirectory ) )
             {
@@ -158,9 +155,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     Directory.CreateDirectory( compileTimeProjectDirectory );
                 }
-                
+
                 compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
-                HashSet<string> names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
                 foreach ( var tree in compilation.SyntaxTrees )
                 {
                     // Find a decent and unique name.
@@ -169,7 +166,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( names.Contains( treeName ) )
                     {
                         var treeNameSuffix = treeName;
-                        for ( int i = 1; names.Contains(  treeName = treeNameSuffix + "_" + i  ); i++ )
+                        for ( var i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
                         {
                             // Intentionally empty.
                         }
@@ -189,14 +186,14 @@ namespace Caravela.Framework.Impl.CompileTime
                     var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8 );
                     compilation = compilation.ReplaceSyntaxTree( tree, newTree );
                 }
-                
+
                 var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
-                
-                result = compilation.Emit( stream, manifestResources: this._resources, options: options);
+
+                result = compilation.Emit( stream, manifestResources: this._resources, options: options );
             }
             else
             {
-                 result = compilation.Emit( stream, manifestResources: this._resources );
+                result = compilation.Emit( stream, manifestResources: this._resources );
             }
 
             if ( !result.Success )

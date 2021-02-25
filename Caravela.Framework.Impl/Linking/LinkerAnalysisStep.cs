@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
         private readonly Compilation _intermediateCompilation;
 
-        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectPart> orderedAspectParts)
+        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectPart> orderedAspectParts )
         {
             this._intermediateCompilation = intermediateCompilation;
             this._orderedAspectParts = orderedAspectParts;

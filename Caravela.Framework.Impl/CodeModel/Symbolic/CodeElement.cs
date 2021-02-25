@@ -6,7 +6,6 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel.Symbolic
 {

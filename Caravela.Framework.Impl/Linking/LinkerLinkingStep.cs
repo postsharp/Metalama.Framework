@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
-using Caravela.Framework.Impl.Collections;
+﻿using System.Collections.Generic;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
@@ -35,7 +27,6 @@ namespace Caravela.Framework.Impl.Linking
         //
         // Ideal inlined call will be a single method A, which will contain logic from all aspects.
 
-
         private readonly DiagnosticList _diagnostics;
         private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
         private readonly LinkerTransformationRegistry _transformationRegistry;
@@ -50,7 +41,7 @@ namespace Caravela.Framework.Impl.Linking
             this._referenceRegistry = referenceRegistry;
         }
 
-        public static LinkerLinkingStep Create( IReadOnlyList<AspectPart> orderedAspectParts, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry)
+        public static LinkerLinkingStep Create( IReadOnlyList<AspectPart> orderedAspectParts, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
         {
             return new LinkerLinkingStep( orderedAspectParts, transformationRegistry, intermediateCompilation, referenceRegistry );
         }

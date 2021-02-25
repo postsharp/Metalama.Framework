@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,9 +13,9 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly IMethod _targetMethod;
 
-        public TemplateExpansionContext( 
+        public TemplateExpansionContext(
             object templateInstance,
-            IMethod targetMethod, 
+            IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl,
             ITemplateExpansionLexicalScope lexicalScope,
@@ -32,9 +29,9 @@ namespace Caravela.Framework.Impl.Templating
             this.DiagnosticSink = diagnosticSink;
 
             Invariant.Assert( diagnosticSink.DefaultLocation != null, "diagnosticSink.DefaultLocation cannot be null" );
-            Invariant.Assert( 
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ), 
-                "the default location of the DiagnosticSink must be equal to targetMethod");
+            Invariant.Assert(
+                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ),
+                "the default location of the DiagnosticSink must be equal to targetMethod" );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -54,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
+            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
             {
                 return ReturnStatement();
             }
@@ -72,7 +69,7 @@ namespace Caravela.Framework.Impl.Templating
         public IDisposable OpenNestedScope()
         {
             var nestedScope = this.CurrentLexicalScope.OpenNestedScope();
-            var cookie = new LexicalScopeCookie(this, this.CurrentLexicalScope, nestedScope);
+            var cookie = new LexicalScopeCookie( this, this.CurrentLexicalScope, nestedScope );
             this.CurrentLexicalScope = nestedScope;
             return cookie;
         }
@@ -85,7 +82,7 @@ namespace Caravela.Framework.Impl.Templating
             private readonly ITemplateExpansionLexicalScope _previousScope;
             private readonly ITemplateExpansionLexicalScope _newScope;
 
-            public LexicalScopeCookie(TemplateExpansionContext context, ITemplateExpansionLexicalScope previousScope, ITemplateExpansionLexicalScope newScope )
+            public LexicalScopeCookie( TemplateExpansionContext context, ITemplateExpansionLexicalScope previousScope, ITemplateExpansionLexicalScope newScope )
             {
                 this._context = context;
                 this._previousScope = previousScope;

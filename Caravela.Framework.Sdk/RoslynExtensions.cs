@@ -4,11 +4,11 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Sdk
 {
-    [Obsolete("Will be removed in a next release.")]
+    [Obsolete( "Will be removed in a next release." )]
     public static class RoslynExtensions
     {
-        
-        [Obsolete("Will be removed in a next release.")]
+
+        [Obsolete( "Will be removed in a next release." )]
         public static TCompilation ReplaceAllTrees<TCompilation>( this TCompilation compilation, Func<SyntaxTree, SyntaxTree> replacer )
             where TCompilation : Compilation
         {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Sdk
             return compilation;
         }
 
-        [Obsolete("Will be removed in a next release.")]
+        [Obsolete( "Will be removed in a next release." )]
         public static TCompilation VisitAllTrees<TCompilation>( this CSharpSyntaxRewriter rewriter, TCompilation compilation )
             where TCompilation : Compilation =>
             compilation.ReplaceAllTrees( tree => tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );

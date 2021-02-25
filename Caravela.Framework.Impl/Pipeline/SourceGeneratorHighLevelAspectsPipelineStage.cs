@@ -60,10 +60,10 @@ namespace Caravela.Framework.Impl.Pipeline
                     {
                         case IMemberIntroduction memberIntroduction:
                             // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
-                            var introductionContext = new MemberIntroductionContext( 
-                                diagnostics, 
-                                new LinkerIntroductionNameProvider(), 
-                                LinkerLexicalScope.CreateEmpty(), 
+                            var introductionContext = new MemberIntroductionContext(
+                                diagnostics,
+                                new LinkerIntroductionNameProvider(),
+                                LinkerLexicalScope.CreateEmpty(),
                                 new LinkerProceedImplementationFactory() );
 
                             classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );

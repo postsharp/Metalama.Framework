@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -23,7 +22,6 @@ namespace Caravela.Framework.Impl
             }
         }
 
-
         /// <summary>
         /// Checks that a reference is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
@@ -37,7 +35,7 @@ namespace Caravela.Framework.Impl
             {
                 throw new AssertionFailedException( $"Assertion failed: the reference to {typeof( T ).Name} must no be not null." );
             }
-            
+
             return obj;
         }
 
@@ -54,14 +52,13 @@ namespace Caravela.Framework.Impl
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"Assertion failed: the {i}-th {typeof(T).Name} must no be not null." );
+                    throw new AssertionFailedException( $"Assertion failed: the {i}-th {typeof( T ).Name} must no be not null." );
                 }
 
                 i++;
             }
-            
+
             return items!;
-            
         }
     }
 }

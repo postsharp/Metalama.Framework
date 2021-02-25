@@ -1,10 +1,7 @@
-﻿using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Templating;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Templating;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -14,7 +11,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly HashSet<string> _definedIdentifiers = new HashSet<string>();
         private readonly ITemplateExpansionLexicalScope? _parentScope;
         private readonly List<LinkerLexicalScope> _nestedScopes = new List<LinkerLexicalScope>();
-        
+
         public ITemplateExpansionLexicalScope? Parent { get; }
 
         public IReadOnlyCollection<string> DefinedIdentifiers => this._definedIdentifiers;
@@ -97,25 +94,25 @@ namespace Caravela.Framework.Impl.Linking
             return new LinkerLexicalScope( overriddenElement.LookupSymbols().Select( x => x.Name ) );
         }
 
-        internal static LinkerLexicalScope CreateEmpty(ITemplateExpansionLexicalScope? parent = null)
+        internal static LinkerLexicalScope CreateEmpty( ITemplateExpansionLexicalScope? parent = null )
         {
             return new LinkerLexicalScope( parent );
         }
 
         internal LinkerLexicalScope GetTransitiveClosure()
         {
-            return new LinkerLexicalScope( GetTransitiveClosureIdentifiers(this) );
+            return new LinkerLexicalScope( GetTransitiveClosureIdentifiers( this ) );
 
-            static IEnumerable<string> GetTransitiveClosureIdentifiers(ITemplateExpansionLexicalScope scope)
+            static IEnumerable<string> GetTransitiveClosureIdentifiers( ITemplateExpansionLexicalScope scope )
             {
                 foreach ( var identifier in scope.DefinedIdentifiers )
                 {
                     yield return identifier;
                 }
 
-                foreach (var nestedScope in scope.NestedScopes)
+                foreach ( var nestedScope in scope.NestedScopes )
                 {
-                    foreach ( var identifier in GetTransitiveClosureIdentifiers(nestedScope) )
+                    foreach ( var identifier in GetTransitiveClosureIdentifiers( nestedScope ) )
                     {
                         yield return identifier;
                     }

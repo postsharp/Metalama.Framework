@@ -4,7 +4,7 @@
     {
         public LinkerReferenceRegistry ReferenceRegistry { get; }
 
-        public LinkerAnalysisStepResult(LinkerReferenceRegistry referenceRegistry)
+        public LinkerAnalysisStepResult( LinkerReferenceRegistry referenceRegistry )
         {
             this.ReferenceRegistry = referenceRegistry;
         }

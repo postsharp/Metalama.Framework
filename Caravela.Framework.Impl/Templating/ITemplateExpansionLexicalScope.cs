@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -28,7 +26,7 @@ namespace Caravela.Framework.Impl.Templating
         /// Determines whether a given name is defined in this scope.
         /// </summary>
         /// <param name="name">Name.</param>
-        /// <param name="includeParentScope">True if lookup should include parent scopes.</param>
+        /// <param name="includeAncestorScopes">True if lookup should include ancestor scopes.</param>
         /// <returns></returns>
         bool IsDefined( string name, bool includeAncestorScopes = true );
 
@@ -67,15 +65,16 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Determines whether a name can be defined in the scope. The name should not collide with any name in ancestors and nested scopes.
         /// </summary>
-        /// <param name="name">Name</param>
+        /// <param name="scope">Scope.</param>
+        /// <param name="name">Name.</param>
         /// <returns>True.</returns>
-        public static bool IsDefineable( this ITemplateExpansionLexicalScope scope, string name)
+        public static bool IsDefineable( this ITemplateExpansionLexicalScope scope, string name )
         {
             return scope.IsDefined( name, true ) || IsDefinedInNestedScope( scope, name );
 
-            static bool IsDefinedInNestedScope(ITemplateExpansionLexicalScope scope, string name)
+            static bool IsDefinedInNestedScope( ITemplateExpansionLexicalScope scope, string name )
             {
-                foreach (var nestedScope in scope.NestedScopes)
+                foreach ( var nestedScope in scope.NestedScopes )
                 {
                     if ( nestedScope.IsDefined( name, false ) )
                     {

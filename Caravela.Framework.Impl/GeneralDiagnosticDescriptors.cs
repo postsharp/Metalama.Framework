@@ -70,6 +70,6 @@ namespace Caravela.Framework.Impl
                 true );
 
         public static readonly DiagnosticDescriptor CannotFindType =
-            new("CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true);
+            new( "CR0020", "Cannot find a type", "Cannot find the type '{0}'.", _caravelaCategory, Error, true );
     }
 }

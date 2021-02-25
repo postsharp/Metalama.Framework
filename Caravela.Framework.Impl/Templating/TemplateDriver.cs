@@ -3,9 +3,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -19,13 +17,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
-   
+
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
-            Invariant.Assert( 
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null, 
+            Invariant.Assert(
+                templateExpansionContext.DiagnosticSink.DefaultLocation != null,
                 "the default location for diagnostics cannot be null" );
-            
+
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
             {
@@ -46,7 +44,7 @@ namespace Caravela.Framework.Impl.Templating
             catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {
                 ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
-                throw new Exception( "this line is unreachable, but is necessary to make the compiler happy" );
+                throw new InvalidOperationException( "this line is unreachable, but is necessary to make the compiler happy" );
             }
 
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );

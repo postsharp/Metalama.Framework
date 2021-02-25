@@ -1,5 +1,3 @@
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

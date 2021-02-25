@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public static SyntaxTokenList GetSyntaxModifierList( this ICodeElement codeElement )
         {
-            if (codeElement is IMethod imethod)
+            if ( codeElement is IMethod imethod )
             {
                 // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
                 var tokens = new List<SyntaxToken>();
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Transformations
                     tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
                 }
 
-                if (imethod.IsVirtual)
+                if ( imethod.IsVirtual )
                 {
                     tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
                 }
@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Transformations
                             TokenList(), // TODO: modifiers
                             ParseTypeName( p.ParameterType.ToDisplayString() ),
                             Identifier( p.Name! ),
-                            null ) ) ));
+                            null ) ) ) );
         }
 
         public static SyntaxList<TypeParameterConstraintClauseSyntax> GetSyntaxConstraintClauses( this IMethod method )

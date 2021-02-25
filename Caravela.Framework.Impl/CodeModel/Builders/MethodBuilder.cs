@@ -116,15 +116,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                 SyntaxKind.DefaultLiteralExpression,
                                 Token (SyntaxKind.DefaultKeyword)))
                     }
-                    : null
-                    );
-            
+                    : null );
+
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectPartId, IntroducedMemberSemantic.Introduction ) };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax)x.GetSyntax() ).FirstOrDefault();
-        
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
         public IReadOnlyList<ISymbol> LookupSymbols()

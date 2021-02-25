@@ -12,6 +12,7 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         public CSharpCompilation FinalCompilation { get; }
+
         public DiagnosticList Diagnostics { get; }
     }
 }

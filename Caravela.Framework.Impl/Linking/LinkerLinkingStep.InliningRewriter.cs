@@ -1,11 +1,8 @@
-﻿using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Transformations;
+﻿using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -38,12 +35,12 @@ namespace Caravela.Framework.Impl.Linking
                     return null;
                 }
 
-                if (updatedExpression.Kind() == SyntaxKind.Block)
+                if ( updatedExpression.Kind() == SyntaxKind.Block )
                 {
                     return updatedExpression;
                 }
 
-                return node.Update( this.VisitList( node.AttributeLists ), (ExpressionSyntax)updatedExpression, this.VisitToken( node.SemicolonToken ) );
+                return node.Update( this.VisitList( node.AttributeLists ), (ExpressionSyntax) updatedExpression, this.VisitToken( node.SemicolonToken ) );
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -61,8 +58,8 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 // If the body is inlineable, inline it.
-                var resolvedSymbol = (IMethodSymbol)this._referenceRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
-                if (this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
+                var resolvedSymbol = (IMethodSymbol) this._referenceRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
+                if ( this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
                     var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, resolvedSymbol, null, this.GetNextReturnLabelId() );
@@ -79,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var annotation = node.Right.GetLinkerAnnotation();
 
-                if (annotation == null)
+                if ( annotation == null )
                 {
                     return base.VisitAssignmentExpression( node );
                 }
@@ -94,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body
-                    var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, resolvedSymbol, this.GetAssignmentVariableName(node.Left), this.GetNextReturnLabelId() );
+                    var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, resolvedSymbol, this.GetAssignmentVariableName( node.Left ), this.GetNextReturnLabelId() );
                     var declaration = (MethodDeclarationSyntax) resolvedSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
                     return innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
                 }
@@ -104,7 +101,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private static ExpressionSyntax ReplaceCallTarget( ExpressionSyntax expression, IMethodSymbol methodSymbol)
+            private static ExpressionSyntax ReplaceCallTarget( ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
@@ -125,7 +122,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         return Block(
                                 ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) ),
-                                GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value) ) ) );
+                                GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
                     }
                     else
                     {
@@ -133,7 +130,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
-                return base.VisitReturnStatement(node);
+                return base.VisitReturnStatement( node );
             }
 
             private string? GetAssignmentVariableName( ExpressionSyntax left )

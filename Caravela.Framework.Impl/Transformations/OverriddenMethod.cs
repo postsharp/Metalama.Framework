@@ -51,11 +51,10 @@ namespace Caravela.Framework.Impl.Transformations
                     this.OverriddenDeclaration.Compilation,
                     context.ProceedImplementationFactory.Get( this.Advice.AspectPartId, this.OverriddenDeclaration ),
                     context.LexicalScope,
-                    context.DiagnosticSink
-                    );
+                    context.DiagnosticSink );
 
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-            
+
                 var newMethodBody = new TemplateDriver(
                         this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
                     .ExpandDeclaration( expansionContext );
@@ -90,7 +89,7 @@ namespace Caravela.Framework.Impl.Transformations
                 // TODO: Select a good syntax reference if there are multiple (partial class, partial method).
                 var methodSymbol = (this.OverriddenDeclaration as Method)?.Symbol;
 
-                if (methodSymbol != null)
+                if ( methodSymbol != null )
                 {
                     return methodSymbol.DeclaringSyntaxReferences.Select( x => (MethodDeclarationSyntax) x.GetSyntax() ).First();
                 }

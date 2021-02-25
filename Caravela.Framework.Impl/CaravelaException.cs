@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -35,9 +35,8 @@ namespace Caravela.Framework.Impl
         {
             this.Diagnostics = ImmutableArray.Create( diagnostic );
         }
-        
+
         private static string GetMessage( string message, IReadOnlyList<Diagnostic> diagnostics )
             => message + Environment.NewLine + string.Join( Environment.NewLine, diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) );
-
     }
 }

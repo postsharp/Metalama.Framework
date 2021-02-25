@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
         private bool _skipped;
-        
+
         public T TargetDeclaration { get; }
 
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
 
         public IAdviceFactory AdviceFactory => this._adviceFactory;
+
         public void SkipAspect() => this._skipped = true;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )

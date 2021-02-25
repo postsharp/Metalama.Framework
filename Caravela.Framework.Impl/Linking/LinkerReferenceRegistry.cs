@@ -1,17 +1,15 @@
-﻿using Caravela.Framework.Impl.Transformations;
+﻿using System;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerReferenceRegistry
     {
-        private LinkerTransformationRegistry _transformationRegistry;
+        private readonly LinkerTransformationRegistry _transformationRegistry;
 
         public bool IsOverrideTarget( IMethodSymbol? symbol )
         {
+            throw new NotImplementedException();
         }
 
         public bool IsBodyInlineable( IMethodSymbol? symbol )
