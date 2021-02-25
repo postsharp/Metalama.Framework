@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 
 namespace Caravela.Framework.Code
@@ -9,7 +7,6 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IProperty : IMember, IPropertyInvocation
     {
-
         /// <summary>
         /// Gets the <c>in</c>, <c>ref</c>, <c>ref readonly</c> property type modifier.
         /// </summary>
@@ -40,7 +37,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the list of parameters of the property, if it is an indexer.
         /// </summary>
-        IReadOnlyList<IParameter> Parameters { get; }
+        IParameterList Parameters { get; }
 
         /// <summary>
         /// Gets the property getter, or <c>null</c> if the property is write-only. In case of automatic properties, this property returns

@@ -2,7 +2,8 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
@@ -64,7 +65,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );
             var e = (single as Event)!;
-            var actual = new CaravelaEventInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CaravelaEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
+            var actual = new CaravelaEventInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingElement! ) ).ToString();
             return actual;
         }
 

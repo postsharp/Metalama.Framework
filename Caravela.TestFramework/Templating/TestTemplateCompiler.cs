@@ -94,11 +94,7 @@ namespace Caravela.TestFramework.Templating
 
                 if ( this._parent._transformedNodes.TryGetValue( node, out var transformedNodes ) )
                 {
-                    var transformedNode = transformedNodes[this._item];
-                    if ( transformedNode != null )
-                    {
-                        return transformedNode;
-                    }
+                    return transformedNodes[this._item];
                 }
 
                 return base.Visit( node );

@@ -13,14 +13,15 @@ namespace Caravela.Framework.Impl.Advices
 
         public ICodeElement TargetDeclaration { get; }
 
-        public AspectPartId AspectPartId => new AspectPartId( this.Aspect.AspectType, this.PartName );
+        public AspectLayerId AspectLayerId { get; }
 
-        public string? PartName { get; set; }
+        public string? LayerName { get; set; }
 
         protected Advice( AspectInstance aspect, ICodeElement targetDeclaration )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = targetDeclaration;
+            this.AspectLayerId = new AspectLayerId( this.Aspect.AspectType, this.LayerName );
         }
 
         public abstract AdviceResult ToResult( ICompilation compilation );

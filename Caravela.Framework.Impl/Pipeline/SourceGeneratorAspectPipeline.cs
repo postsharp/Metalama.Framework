@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 
@@ -25,14 +26,14 @@ namespace Caravela.Framework.Impl.Pipeline
                 return false;
             }
 
-            additionalSyntaxTrees = result.AdditionalSyntaxTrees;
+            additionalSyntaxTrees = result.AssertNotNull().AdditionalSyntaxTrees;
             return true;
         }
 
         public override bool CanTransformCompilation => false;
 
         /// <inheritdoc/>
-        protected override HighLevelAspectsPipelineStage CreateStage( IReadOnlyList<AspectPart> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new SourceGeneratorHighLevelAspectsPipelineStage( parts, compileTimeAssemblyLoader, this );
+        protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+            => new SourceGeneratorPipelineStage( parts, compileTimeAssemblyLoader, this );
     }
 }

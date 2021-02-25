@@ -44,7 +44,7 @@ namespace NS
             var c1 = types[0];
             Assert.Equal( "C", c1.Name );
             Assert.Equal( "C", c1.FullName );
-            Assert.Null( c1.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c1.ContainingElement );
 
             var d = c1.NestedTypes.Single();
             Assert.Equal( "D", d.Name );
@@ -54,7 +54,7 @@ namespace NS
             var c2 = types[1];
             Assert.Equal( "C", c2.Name );
             Assert.Equal( "NS.C", c2.FullName );
-            Assert.Null( c2.ContainingElement );
+            Assert.IsAssignableFrom<ICompilation>( c2.ContainingElement );
         }
 
         [Fact]
@@ -91,6 +91,7 @@ class C
 
             var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
             Assert.Equal( "Inner", innerLocalFunction.Name );
+
             Assert.Same( outerLocalFunction, innerLocalFunction.ContainingElement );
         }
 
@@ -196,7 +197,7 @@ class C<T1, T2>
 
             var type = compilation.DeclaredTypes.Single();
 
-            Xunit.Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t.ToString() ) );
+            Assert.Equal( new[] { "T1", "T2" }, type.GenericArguments.Select<IType, string>( t => t!.ToString()! ) );
 
             var method = type.Methods.First();
 
@@ -245,9 +246,9 @@ class C
             var compilation = CreateCompilation( code );
 
             var parameterTypes = from type in compilation.DeclaredTypes
-                                 from method in type.Methods
-                                 from parameter in method.Parameters
-                                 select parameter.ParameterType;
+                from method in type.Methods
+                from parameter in method.Parameters
+                select parameter.ParameterType;
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
@@ -299,7 +300,7 @@ class C
 
             var compilation = CreateCompilation( code );
 
-            var type = Assert.Single( compilation.DeclaredTypes );
+            var type = Assert.Single( compilation.DeclaredTypes )!;
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
@@ -421,7 +422,7 @@ class C
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.HasValue );
-                Assert.Throws<System.InvalidOperationException>( () => parameter.DefaultValue.Value );
+                Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 );
@@ -444,7 +445,7 @@ class C
             Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
             Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
 
-            Assert.Throws<System.ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
         }
 
         [Fact]

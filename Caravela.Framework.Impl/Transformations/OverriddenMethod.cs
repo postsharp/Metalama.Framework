@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Transformations
                             this.OverriddenDeclaration.GetSyntaxConstraintClauses(),
                             newMethodBody,
                             null ),
-                        this.Advice.AspectPartId,
+                        this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.MethodOverride )
                 };
 

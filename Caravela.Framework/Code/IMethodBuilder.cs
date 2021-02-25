@@ -1,9 +1,25 @@
 namespace Caravela.Framework.Code
 {
+    /// <summary>
+    /// Allows to complete the construction of a method that has been created by an advice.
+    /// </summary>
     public interface IMethodBuilder : IMethod, IMemberBuilder
     {
-        IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue optionalValue = default );
+        /// <summary>
+        /// Appends a parameter to the method.
+        /// </summary>
+        /// <param name="name">Parameter name.</param>
+        /// <param name="type">Parameter type.</param>
+        /// <param name="refKind"><c>out</c>, <c>ref</c>...</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
+        IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, OptionalValue defaultValue = default );
 
+        /// <summary>
+        /// Adds a generic parameter to the method.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>A <see cref="IParameterBuilder"/> that allows you to further build the new parameter.</returns>
         IGenericParameterBuilder AddGenericParameter( string name );
 
         /// <remarks>

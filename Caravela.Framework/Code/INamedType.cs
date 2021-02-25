@@ -12,9 +12,12 @@ namespace Caravela.Framework.Code
     /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
     /// </para>
     /// </remarks>
+    // ReSharper disable once PossibleInterfaceMemberAmbiguity
     public interface INamedType : IType, IMember
     {
-
+        /// <summary>
+        /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
+        /// </summary>
         bool IsPartial { get; }
 
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
@@ -54,7 +57,7 @@ namespace Caravela.Framework.Code
         /// Gets the generic parameters of the type, or an empty collection if the
         /// type is not generic.
         /// </summary>
-        IReadOnlyList<IGenericParameter> GenericParameters { get; }
+        IGenericParameterList GenericParameters { get; }
 
         /// <summary>
         /// Gets a value indicating whether this type or any of its containers does not have generic arguments set.
@@ -64,28 +67,34 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>
-        IReadOnlyList<INamedType> NestedTypes { get; }
+        INamedTypeList NestedTypes { get; }
 
         /// <summary>
         /// Gets the list of properties and fields defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReadOnlyList<IProperty> Properties { get; }
+        IPropertyList Properties { get; }
 
         /// <summary>
         /// Gets the list of events defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IReadOnlyList<IEvent> Events { get; }
+        IEventList Events { get; }
 
         /// <summary>
         /// Gets the list of methods defined by the current type, but not those inherited from the base
         /// type, and not constructors.
         /// </summary>
-        IReadOnlyList<IMethod> Methods { get; }
+        IMethodList Methods { get; }
 
-        IReadOnlyList<IConstructor> Constructors { get; }
+        /// <summary>
+        /// Gets the list of constructors, including the implicit default constructor if any, but not the static constructor. 
+        /// </summary>
+        IConstructorList Constructors { get; }
 
+        /// <summary>
+        /// Gets the static constructor.
+        /// </summary>
         IConstructor? StaticConstructor { get; }
 
         /// <summary>

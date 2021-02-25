@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.UnitTests.Templating.Serialization.Reflection
         {
             var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
-            return new CaravelaTypeSerializer().Serialize( CaravelaType.Create( single ) ).ToString();
+            return new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
         }
 
         public CaravelaNestedTests( ITestOutputHelper helper ) : base( helper )

@@ -18,10 +18,10 @@ namespace Caravela.Framework.Impl.Serialization
                             IdentifierName( "DateTime" ) ),
                         IdentifierName( "FromBinary" ) ) )
                 .AddArgumentListArguments(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal( o.ToBinary() ) ) ) );
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.NumericLiteralExpression,
+                            Literal( o.ToBinary() ) ) ) );
         }
     }
 }

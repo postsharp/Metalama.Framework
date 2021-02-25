@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    public static class LinkerAnnotationExtensions
+    internal static class LinkerAnnotationExtensions
     {
         public const string AnnotationKind = "CaravelaAspectLinker";
 

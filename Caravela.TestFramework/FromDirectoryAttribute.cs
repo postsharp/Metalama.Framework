@@ -51,7 +51,7 @@ namespace Caravela.TestFramework
                         continue;
                     }
 
-                    tests.Add( new[] { Path.GetRelativePath( projectDirectory, testPath ) } );
+                    tests.Add( new object[] { Path.GetRelativePath( projectDirectory, testPath ) } );
                 }
             }
 

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Collections
 
             HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
 
-            void PopulateDescendants( T c )
+            void PopulateDescendants( T? c )
             {
                 recursionCheck++;
 
@@ -58,8 +58,8 @@ namespace Caravela.Framework.Impl.Collections
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             Func<TItem, TValue> getValue,
-            IEqualityComparer<TKey> keyComparer = null )
+            IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
-         => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
+            => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
     }
 }

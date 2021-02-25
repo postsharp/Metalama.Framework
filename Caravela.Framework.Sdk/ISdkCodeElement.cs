@@ -14,6 +14,6 @@ namespace Caravela.Framework.Sdk
         /// if <see cref="ICodeElement.Origin"/> is <see cref="CodeOrigin.Aspect"/>. Note that the symbol returned can be linked to a different
         /// Roslyn compilation than the one provided to the aspect weaver.
         /// </summary>
-        ISymbol Symbol { get; }
+        ISymbol? Symbol { get; }
     }
 }

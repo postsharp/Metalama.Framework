@@ -25,22 +25,27 @@ namespace Caravela.Framework.Impl
         public void SkipAspect() => this._skipped = true;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
-         : base( targetDeclaration.DiagnosticLocation )
+            : base( targetDeclaration.DiagnosticLocation )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
             this._adviceFactory = adviceFactory;
         }
 
-        internal AspectInstanceResult ToResult() =>
-            this.ErrorCount == 0 && !this._skipped
+        internal AspectInstanceResult ToResult()
+        {
+            var success = this.ErrorCount == 0;
+            return success && !this._skipped
                 ? new(
+                    success,
                     this.Diagnostics.ToImmutableArray(),
                     this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
                     Array.Empty<IAspectSource>() )
                 : new(
+                    success,
                     this.Diagnostics.ToImmutableArray(),
                     Array.Empty<IAdvice>(),
                     Array.Empty<IAspectSource>() );
+        }
     }
 }

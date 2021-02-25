@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         {
             if ( this._allowExpression )
             {
-                return new( ThisExpression(), this._type, false );
+                return new( ThisExpression(), this._type );
             }
 
             // TODO: diagnostic

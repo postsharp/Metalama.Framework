@@ -1,6 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl
         {
             if ( type is ITypeInternal sourceNamedType )
             {
-                return sourceNamedType.TypeSymbol;
+                return sourceNamedType.TypeSymbol.AssertNotNull();
             }
             else
             {

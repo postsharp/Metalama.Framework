@@ -7,7 +7,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
@@ -15,25 +14,21 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriver : IAspectDriver
     {
-        public INamedType AspectType { get; }
-
-        private readonly CompilationModel _compilation;
-
         private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
+
+        public INamedType AspectType { get; }
 
         public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
             this.AspectType = aspectType;
 
-            this._compilation = compilation;
-
             var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
-            (from method in aspectType.Methods
-             from attribute in method.Attributes
-             where attribute.Type.Is( iAdviceAttribute )
-             select (attribute, method)).ToList();
+                (from method in aspectType.Methods
+                    from attribute in method.Attributes
+                    where attribute.Type.Is( iAdviceAttribute )
+                    select (attribute, method)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
@@ -57,7 +52,9 @@ namespace Caravela.Framework.Impl
                 var diagnostic = Diagnostic.Create(
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
 
-                return new( ImmutableList.Create( diagnostic ),
+                return new(
+                    false,
+                    ImmutableList.Create( diagnostic ),
                     ImmutableList.Create<IAdvice>(),
                     ImmutableList.Create<IAspectSource>() );
             }
@@ -65,7 +62,7 @@ namespace Caravela.Framework.Impl
             var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
-                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
+                codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
             aspectOfT.Initialize( aspectBuilder );
 

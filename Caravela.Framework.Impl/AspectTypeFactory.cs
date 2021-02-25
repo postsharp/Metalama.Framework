@@ -1,32 +1,49 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl
 {
     internal class AspectTypeFactory
     {
+        private readonly CompilationModel _compilation;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
         private readonly Dictionary<INamedType, AspectType> _aspectTypes = new();
 
-        public AspectTypeFactory( AspectDriverFactory aspectDriverFactory )
+        public AspectTypeFactory( CompilationModel compilation, AspectDriverFactory aspectDriverFactory )
         {
+            this._compilation = compilation;
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public AspectType GetAspectType( INamedType attributeType )
+        public IEnumerable<AspectType> GetAspectTypes( IEnumerable<INamedType> attributeTypes )
         {
-            if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
+
+            foreach ( var attributeType in attributeTypes.OrderBy( at => this._compilation.GetDepth( at ) ) )
             {
-                var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
+                AspectType? baseAspectType;
+                if ( attributeType.BaseType != null )
+                {
+                    _ = this._aspectTypes.TryGetValue( attributeType.BaseType, out baseAspectType );
+                }
+                else
+                {
+                    baseAspectType = null;
+                }
 
-                // TODO: create AspectParts properly
-                aspectType = new( attributeType, aspectDriver, new string?[] { null } );
+                if ( !this._aspectTypes.TryGetValue( attributeType, out var aspectType ) )
+                {
+                    var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                this._aspectTypes.Add( attributeType, aspectType );
+                    aspectType = new( attributeType, baseAspectType, aspectDriver );
+
+                    this._aspectTypes.Add( attributeType, aspectType );
+                }
             }
 
-            return aspectType;
+            return attributeTypes.Select( at => this._aspectTypes[at] );
         }
     }
 }

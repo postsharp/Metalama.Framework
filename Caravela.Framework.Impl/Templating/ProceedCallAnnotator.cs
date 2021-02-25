@@ -9,8 +9,8 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal class ProceedCallAnnotator : CSharpSyntaxRewriter
     {
-        private int calls;
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private int _calls;
 
         public ProceedCallAnnotator( SemanticAnnotationMap semanticAnnotationMap )
         {
@@ -55,15 +55,21 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this.IsProceed( node.Expression ) )
             {
-                if ( this.calls > 0 )
+                if ( this._calls > 0 )
                 {
-                    this.Diagnostics.Add( Diagnostic.Create( "CA07", "Annotation",
-                        $"The {node} method cannot be called twice in a template method.",
-                        DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error, true, 0, location: Location.Create( node.SyntaxTree, node.Span ) ) );
+                    this.Diagnostics.Add( 
+                        Diagnostic.Create( 
+                            "CA07", 
+                            "Annotation",
+                            $"The {node} method cannot be called twice in a template method.",
+                            DiagnosticSeverity.Error,
+                            DiagnosticSeverity.Error, 
+                            true, 
+                            0,
+                            location: Location.Create( node.SyntaxTree, node.Span ) ) );
                 }
 
-                this.calls++;
+                this._calls++;
                 return node.AddCallsProceedAnnotation();
             }
             else

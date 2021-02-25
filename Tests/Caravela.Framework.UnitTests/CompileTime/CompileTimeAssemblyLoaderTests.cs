@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Pipeline;
 using Xunit;
@@ -39,7 +39,7 @@ class A : Attribute
             serviceProvider.AddService<IBuildOptions>( new Options() );
 
             var roslynCompilation = CreateRoslynCompilation( code );
-            var compilation = new CompilationModel( roslynCompilation );
+            var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
             var builder = new CompileTimeAssemblyBuilder( serviceProvider, roslynCompilation );
             var loader = new CompileTimeAssemblyLoader( serviceProvider, roslynCompilation, builder );
@@ -57,6 +57,6 @@ class A : Attribute
 
         public string? CompileTimeProjectDirectory => null;
 
-        public string CrashReportDirectory => null;
+        public string? CrashReportDirectory => null;
     }
 }

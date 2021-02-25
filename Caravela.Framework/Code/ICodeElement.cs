@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
 
@@ -10,7 +8,7 @@ namespace Caravela.Framework.Code
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTime]
-    public interface ICodeElement : IDisplayable, IDiagnosticTarget, IEquatable<ICodeElement>
+    public interface ICodeElement : IDisplayable, IDiagnosticTarget
     {
         /// <summary>
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
@@ -28,34 +26,18 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the collection of custom attributes on the element of code.
         /// </summary>
-        IReadOnlyList<IAttribute> Attributes { get; }
+        IAttributeList Attributes { get; }
 
         /// <summary>
         /// Gets the kind of element of code.
         /// </summary>
         public CodeElementKind ElementKind { get; }
 
-        ICompilation Compilation { get; }
-    }
-
     /// <summary>
-    /// Origins of an element of code.
+        /// Gets the <see cref="ICompilation"/> to which the current code element belongs. Note that the same logical code element can be
+        /// represented by different object instances, each in a different compilation. Within the same compilation, each code element
+        /// is represented by only one object instance.
     /// </summary>
-    public enum CodeOrigin
-    {
-        /// <summary>
-        /// Source code.
-        /// </summary>
-        Source,
-
-        /// <summary>
-        /// Roslyn code generator.
-        /// </summary>
-        Generator,
-
-        /// <summary>
-        /// Aspect (introduction).
-        /// </summary>
-        Aspect
+        ICompilation Compilation { get; }
     }
 }

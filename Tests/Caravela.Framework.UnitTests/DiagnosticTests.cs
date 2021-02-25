@@ -1,5 +1,4 @@
 using System.Linq;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Xunit;

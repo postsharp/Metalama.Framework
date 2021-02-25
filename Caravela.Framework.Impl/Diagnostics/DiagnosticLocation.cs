@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public bool Equals( DiagnosticLocation? other )
         {
-            if ( ReferenceEquals( null, other ) )
+            if ( other == null )
             {
                 return false;
             }

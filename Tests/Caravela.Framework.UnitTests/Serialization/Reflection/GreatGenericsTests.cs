@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
-using Caravela.Framework.Impl.Serialization.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -60,18 +60,18 @@ class User {
                 this._code,
                 nested.Method( "Method21" ),
                 ( m ) =>
-            {
-                Assert.Equal( "T2", m.ReturnType.Name );
-                Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
-            },
+                {
+                    Assert.Equal( "T2", m.ReturnType.Name );
+                    Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
+                },
                 @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).TypeHandle)" );
 
             this.TestSerializable( this._code, descendant.BaseType!.Method( "Method21" ), ( m ) =>
-            {
-                Assert.Equal( "T3", m.ReturnType.Name );
-                Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
-            },
-            @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).GetGenericArguments()[0]).TypeHandle)" );
+                {
+                    Assert.Equal( "T3", m.ReturnType.Name );
+                    Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
+                },
+                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Descendant`1"")).GetGenericArguments()[0]).TypeHandle)" );
         }
 
         [Fact]
@@ -88,7 +88,7 @@ class User {
                 Assert.Equal( typeof( float ), m.ReturnType );
                 Assert.Equal( typeof( string ), m.GetParameters()[0].ParameterType );
             }, @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1.NestedInOrigin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Single""))).TypeHandle)" );
-            this.TestSerializable( this._code, instantiatedNested.Constructors.Single(), ( ConstructorInfo c ) =>
+            this.TestSerializable( this._code, instantiatedNested.Constructors.Single(), c =>
             {
                 Assert.Equal( typeof( string ), c.DeclaringType!.GenericTypeArguments[0] );
                 Assert.Equal( typeof( float ), c.DeclaringType.GenericTypeArguments[1] );
@@ -106,36 +106,36 @@ class User {
                 Assert.Equal( typeof( int ), t.GenericTypeArguments[0] );
             }, @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")))" );
             this.TestSerializable( this._code, instantiatedBaseOrigin.Event( "Actioned" ), e =>
-            {
-                Assert.Equal( "Actioned", e.Name );
-                Assert.Equal( typeof( Action<int> ), e.EventHandlerType );
-            },
-            @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")" );
+                {
+                    Assert.Equal( "Actioned", e.Name );
+                    Assert.Equal( typeof( Action<int> ), e.EventHandlerType );
+                },
+                @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Origin`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))).GetEvent(""Actioned"")" );
         }
 
         private void TestSerializable( string context, IType type, Action<Type> withResult, string expectedCode )
         {
-            this.TestExpression<Type>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaType.Create( type ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<Type>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( type ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IMethod method, Action<MethodInfo> withResult, string expectedCode )
         {
-            this.TestExpression<MethodInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaMethodInfo.Create( method ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<MethodInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeMethodInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IConstructor method, Action<ConstructorInfo> withResult, string expectedCode )
         {
-            this.TestExpression<ConstructorInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaConstructorInfo.Create( method ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<ConstructorInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeConstructorInfo.Create( method ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestSerializable<T>( string context, IProperty property, Action<T> withResult, string expectedCode )
         {
-            this.TestExpression<T>( context, CaravelaPropertyInfoTests.StripLocationInfo( this._serializers.SerializeToRoslynCreationExpression( CaravelaLocationInfo.Create( property ) ).ToString() ), withResult, expectedCode );
+            this.TestExpression<T>( context, CaravelaPropertyInfoTests.StripLocationInfo( this._serializers.SerializeToRoslynCreationExpression( CompileTimeLocationInfo.Create( property ) ).ToString() ), withResult, expectedCode );
         }
 
         private void TestSerializable( string context, IEvent @event, Action<EventInfo> withResult, string expectedCode )
         {
-            this.TestExpression<EventInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CaravelaEventInfo.Create( @event ) ).ToString(), withResult, expectedCode );
+            this.TestExpression<EventInfo>( context, this._serializers.SerializeToRoslynCreationExpression( CompileTimeEventInfo.Create( @event ) ).ToString(), withResult, expectedCode );
         }
 
         private void TestExpression<T>( string context, string expression, Action<T> withResult, string expectedCode )

@@ -2,7 +2,7 @@
 
 namespace Caravela.Framework.Impl.Linking
 {
-    public enum LinkerAnnotationOrder
+    internal enum LinkerAnnotationOrder
     {
         /// <summary>
         /// Calls the semantic in the state it is after the current aspect has been applied.
@@ -15,29 +15,27 @@ namespace Caravela.Framework.Impl.Linking
         Original,
     }
 
-    public record LinkerAnnotation(
+    internal record LinkerAnnotation(
 
-        // Name of the aspect that is adding the semantic invocation to the syntax tree.
-        string? AspectTypeName,
-
-        // Part of the aspect that is adding the semantic invocation to the syntax tree.
-        string? PartName,
+        AspectLayerId AspectLayerId,
 
         // Determines which version of the semantic must be invoked.
         LinkerAnnotationOrder Order )
     {
         public override string ToString()
         {
-            return $"{this.AspectTypeName}${this.PartName}${this.Order}";
+            return $"{this.AspectLayerId.FullName}${this.Order}";
         }
 
         public static LinkerAnnotation FromString( string str )
         {
             var parts = str.Split( '$' );
 
-            Invariant.Assert( Enum.TryParse<LinkerAnnotationOrder>( parts[2], out var order ), "Invalid order." );
+            var parseSuccess = Enum.TryParse<LinkerAnnotationOrder>( parts[1], out var order );
 
-            return new LinkerAnnotation( parts[0], parts[1] == "" ? null : parts[1], order );
+            Invariant.Assert( parseSuccess );
+
+            return new LinkerAnnotation( AspectLayerId.FromString( parts[0] ), order );
         }
     }
 }

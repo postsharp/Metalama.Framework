@@ -16,7 +16,11 @@
 
     <Compile Remove="CodeModel\Before\**" />
 
+    <Compile Remove="Serialization\Reflection\**" />
+
     <None Remove="CodeModel\Before\**" />
+
+    <None Remove="Serialization\Reflection\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -69,10 +73,15 @@ namespace Caravela.Framework.Impl.CompileTime
       </PackageVersionsCode>
     </PropertyGroup>
     
+    <PropertyGroup>
+      <_PackagesVersion_g_cs_Existed Condition="Exists('CompileTime/PackageVersions.g.cs')">True</_PackagesVersion_g_cs_Existed>
+    </PropertyGroup>
+    
     <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
 
     <ItemGroup>
-      <Compile Include="CompileTime/PackageVersions.g.cs" />
+      <!-- If this is not the first build, the file exists and has been included by wildcards, so we need to exclude it first. -->
+      <Compile Include="CompileTime/PackageVersions.g.cs" Condition="'$(_PackagesVersion_g_cs_Existed)'!='True'" />
     </ItemGroup>
   </Target>
 
@@ -92,6 +101,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
   <ItemGroup>
     <EmbeddedResource Remove="CodeModel\Before\**" />
+    <EmbeddedResource Remove="Serialization\Reflection\**" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

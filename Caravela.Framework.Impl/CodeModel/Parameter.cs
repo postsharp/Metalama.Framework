@@ -1,0 +1,48 @@
+﻿using System;
+using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
+using RefKind = Caravela.Framework.Code.RefKind;
+
+namespace Caravela.Framework.Impl.CodeModel
+{
+    internal class Parameter : CodeElement, IParameter
+    {
+        public IParameterSymbol ParameterSymbol { get; }
+
+        [Memo]
+        public Member DeclaringMember => (Member) this.Compilation.Factory.GetCodeElement( this.ParameterSymbol.ContainingSymbol );
+
+        IMember IParameter.DeclaringMember => this.DeclaringMember;
+
+        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
+        {
+            this.ParameterSymbol = symbol;
+        }
+
+        public RefKind RefKind => this.ParameterSymbol.RefKind switch
+        {
+            Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
+            Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
+            Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
+            Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
+            _ => throw new InvalidOperationException( $"Roslyn RefKind {this.ParameterSymbol.RefKind} not recognized." )
+        };
+
+        [Memo]
+        public IType ParameterType => this.Compilation.Factory.GetIType( this.ParameterSymbol.Type );
+
+        public string Name => this.ParameterSymbol.Name;
+
+        public int Index => this.ParameterSymbol.Ordinal;
+
+        public bool IsParams => this.ParameterSymbol.IsParams;
+
+        public override ICodeElement ContainingElement => this.DeclaringMember;
+
+        public override CodeElementKind ElementKind => CodeElementKind.Parameter;
+
+        public override ISymbol Symbol => this.ParameterSymbol;
+
+        public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
+    }
+}

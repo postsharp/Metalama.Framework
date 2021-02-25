@@ -1,36 +1,34 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public class CodeElementEqualityComparer : IEqualityComparer<ICodeElement>
+    internal class CodeElementEqualityComparer : ICodeElementComparer
     {
-        public static readonly CodeElementEqualityComparer Instance = new CodeElementEqualityComparer();
+        private readonly Compilation _compilation;
+        private readonly ReflectionMapper _reflectionMapper;
+        private readonly CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>> _innerComparer = CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance;
 
-        public bool Equals( ICodeElement x, ICodeElement y )
+        public CodeElementEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
         {
-            if ( x is CodeElement cx && y is CodeElement cy )
-            {
-                return SymbolEqualityComparer.Default.Equals( cx.Symbol, cy.Symbol );
-            }
-            else
-            {
-                return x == y;
-            }
+            this._reflectionMapper = reflectionMapper;
+            this._compilation = compilation;
         }
 
-        public int GetHashCode( ICodeElement obj )
-        {
-            if ( obj is CodeElement cx )
-            {
-                return SymbolEqualityComparer.Default.GetHashCode( cx.Symbol );
-            }
-            else
-            {
-                return obj.GetHashCode();
-            }
-        }
+        public bool Equals( ICodeElement x, ICodeElement y ) => this._innerComparer.Equals( x.ToLink(), y.ToLink() );
+
+        public int GetHashCode( ICodeElement obj ) => this._innerComparer.GetHashCode( obj.ToLink() );
+
+        public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+
+        public int GetHashCode( IType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
+
+        public bool Is( IType left, IType right ) =>
+            this._compilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
+
+        public bool Is( IType left, Type right ) =>
+            this._compilation.HasImplicitConversion( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ));
     }
 }

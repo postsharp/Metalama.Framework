@@ -1,0 +1,35 @@
+using Caravela.Framework.Impl.ReflectionMocks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+namespace Caravela.Framework.Impl.Serialization.Reflection
+{
+    internal class CaravelaReturnParameterInfoSerializer : TypedObjectSerializer<CompileTimeReturnParameterInfo>
+    {
+        private readonly CaravelaMethodInfoSerializer _methodInfoSerializer;
+
+        public CaravelaReturnParameterInfoSerializer( CaravelaMethodInfoSerializer methodInfoSerializer )
+        {
+            this._methodInfoSerializer = methodInfoSerializer;
+        }
+
+        public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo o )
+        {
+            var methodBaseExpression = this._methodInfoSerializer.Serialize( new CompileTimeMethodInfo( o.Method ) );
+            return MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    ParenthesizedExpression(
+                        CastExpression(
+                            QualifiedName(
+                                QualifiedName(
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "MethodInfo" ) ),
+                            methodBaseExpression ) ),
+                    IdentifierName( "ReturnParameter" ) )
+                .NormalizeWhitespace();
+        }
+    }
+}

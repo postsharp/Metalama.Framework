@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -586,15 +586,15 @@ namespace Caravela.Framework.Impl.Templating
 
                 var transformedNode =
                     ForEachStatement(
-                        default,
-                        node.ForEachKeyword,
-                        node.OpenParenToken,
-                        node.Type,
-                        node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
-                        node.InKeyword,
-                        annotatedExpression,
-                        node.CloseParenToken,
-                        annotatedStatement )
+                            default,
+                            node.ForEachKeyword,
+                            node.OpenParenToken,
+                            node.Type,
+                            node.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ),
+                            node.InKeyword,
+                            annotatedExpression,
+                            node.CloseParenToken,
+                            annotatedStatement )
                         .AddScopeAnnotation( localScope )
                         .WithSymbolAnnotationsFrom( node );
 
@@ -684,7 +684,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            var forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : this._requiredVariableDeclarationScope;
+            var forcedScope = this._forceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Default;
             if ( forcedScope != SymbolDeclarationScope.Default )
             {
                 if ( this.TrySetLocalVariableScope( local, forcedScope ) )

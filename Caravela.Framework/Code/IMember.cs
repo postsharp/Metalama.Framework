@@ -26,14 +26,29 @@ namespace Caravela.Framework.Code
         /// </summary>
         bool IsVirtual { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>sealed</c>.
+        /// </summary>
         bool IsSealed { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>readonly</c>.
+        /// </summary>
         bool IsReadOnly { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>override</c>.
+        /// </summary>
         bool IsOverride { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>new</c>.
+        /// </summary>
         bool IsNew { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the member is <c>async</c>.
+        /// </summary>
         bool IsAsync { get; }
 
         /// <summary>

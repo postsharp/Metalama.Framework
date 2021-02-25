@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private static (MarkedTextSpan, MarkedTextSpan) Split( in MarkedTextSpan textSpan, int splitPosition )
+        private static (MarkedTextSpan Span1, MarkedTextSpan Span2) Split( in MarkedTextSpan textSpan, int splitPosition )
         {
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
             {
@@ -163,14 +163,14 @@ namespace Caravela.Framework.Impl.Templating
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )
         {
-            var previousSpan = new ClassifiedTextSpan();
+            var previousSpan = default(ClassifiedTextSpan);
 
             foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
             {
                 var classifiedSpan = pair.Value;
 
                 if ( classifiedSpan.Classification == previousSpan.Classification &&
-                    classifiedSpan.Span.Start == previousSpan.Span.End )
+                     classifiedSpan.Span.Start == previousSpan.Span.End )
                 {
                     previousSpan = new ClassifiedTextSpan( TextSpan.FromBounds( previousSpan.Span.Start, classifiedSpan.Span.End ), classifiedSpan.Classification );
                 }

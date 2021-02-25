@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal partial class TemplateDriver
+    internal class TemplateDriver
     {
         private readonly MethodInfo _templateMethod;
 
@@ -21,8 +21,7 @@ namespace Caravela.Framework.Impl.Templating
         public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
         {
             Invariant.Assert(
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null,
-                "the default location for diagnostics cannot be null" );
+                templateExpansionContext.DiagnosticSink.DefaultLocation != null );
 
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
             catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
             {
                 ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
-                throw new InvalidOperationException( "this line is unreachable, but is necessary to make the compiler happy" );
+                throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
             }
 
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );

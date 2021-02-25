@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -34,7 +33,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public ICodeElement? ContainingElement => this._parameter.ContainingElement;
 
-        public IReadOnlyList<IAttribute> Attributes => this._parameter.Attributes;
+        public IAttributeList Attributes => this._parameter.Attributes;
 
         public CodeElementKind ElementKind => this._parameter.ElementKind;
 

@@ -74,7 +74,15 @@ namespace Caravela.Framework.Impl.Collections
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains( KeyValuePair<TKey, TValue> item ) => this.ContainsKey( item.Key );
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex ) => throw new NotImplementedException();
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex )
+        {
+            var i = arrayIndex;
+            foreach ( var value in this )
+            {
+                array[i] = value;
+                i++;
+            }
+        }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove( KeyValuePair<TKey, TValue> item ) => this.Remove( item.Key );
 
@@ -316,7 +324,7 @@ namespace Caravela.Framework.Impl.Collections
         {
             var height = this._head.Height;
 
-            Invariant.Assert( height > 0, "Height must be strictly positive." );
+            Invariant.Assert( height > 0 );
 
             var updates = new NodeDistance[height];
             distanceFromHead = 1;
@@ -739,7 +747,15 @@ namespace Caravela.Framework.Impl.Collections
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-            public void CopyTo( TValue[] array, int arrayIndex ) => throw new NotImplementedException();
+            public void CopyTo( TValue[] array, int arrayIndex )
+            {
+                var i = arrayIndex;
+                foreach ( var value in this )
+                {
+                    array[i] = value;
+                    i++;
+                }
+            }
 
             public int Count => this._parent.Count;
 

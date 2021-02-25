@@ -10,7 +10,7 @@
         GenericParameter,
         Interface,
         Pointer,
-        Struct,
+        Struct
 
         // FunctionPointer
     }
