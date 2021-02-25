@@ -85,7 +85,6 @@ namespace Caravela.Framework.Impl.Linking
             var id = int.Parse( annotation.Data );
             var memberRecord = this._introducedMarkIdToMember[id];
 
-
             return introducedMembers;
         }
     }

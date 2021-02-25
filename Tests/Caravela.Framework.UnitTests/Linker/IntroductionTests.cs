@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
