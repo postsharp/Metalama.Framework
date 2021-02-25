@@ -26,5 +26,10 @@ namespace Caravela.Framework.Impl.Linking
         {
             throw new NotImplementedException();
         }
+
+        internal bool HasSimpleReturn( IMethodSymbol contextSymbol )
+        {
+            throw new NotImplementedException();
+        }
     }
 }

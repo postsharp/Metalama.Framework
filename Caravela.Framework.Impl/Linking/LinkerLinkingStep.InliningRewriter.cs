@@ -46,11 +46,11 @@ namespace Caravela.Framework.Impl.Linking
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
                 // TODO: out, ref parameters.
-
                 var annotation = node.GetLinkerAnnotation();
 
                 if ( annotation == null )
                 {
+                    // Normal invocation.
                     return base.VisitInvocationExpression( node );
                 }
 
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( ReplaceCallTarget( node.Expression, resolvedSymbol ), node.ArgumentList );
+                    return node.Update( this.ReplaceCallTarget( node.Expression, resolvedSymbol ), node.ArgumentList );
                 }
             }
 
@@ -91,17 +91,37 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body
-                    var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, resolvedSymbol, this.GetAssignmentVariableName( node.Left ), this.GetNextReturnLabelId() );
-                    var declaration = (MethodDeclarationSyntax) resolvedSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                    return innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
+                    return this.GetInlinedMethodBody( resolvedSymbol, this.GetAssignmentVariableName( node.Left ) );
                 }
                 else
                 {
-                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( ReplaceCallTarget( invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( this.ReplaceCallTarget( invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
                 }
             }
 
-            private static ExpressionSyntax ReplaceCallTarget( ExpressionSyntax expression, IMethodSymbol methodSymbol )
+            private SyntaxNode? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string returnVariableName)
+            {
+                var labelId = this.GetNextReturnLabelId();
+                var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
+                var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                var rewrittenBlock = innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
+
+                if ( this._referenceRegistry.HasSimpleReturn( this._contextSymbol ) )
+                {
+                    return rewrittenBlock;
+                }
+                else
+                {
+                    return
+                        Block(
+                            (StatementSyntax)rewrittenBlock.AssertNotNull(),
+                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() )
+                            );
+                }
+            }
+
+            private ExpressionSyntax ReplaceCallTarget( ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
@@ -116,24 +136,37 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Inner inlining (i.e. multiple methods inlined into one). Return statements need to be transformed to assign (for non-void method) + jump.
 
-                    // TODO: Elide jump when possible (end flow), alternatively replace with other non-goto statements for better generated code quality.
-
-                    if ( node.Expression != null )
+                    if ( this._referenceRegistry.HasSimpleReturn( this._contextSymbol ) )
                     {
-                        return Block(
-                                ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) ),
-                                GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
+                        if ( node.Expression != null )
+                        {
+                            return ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) );
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
                     else
                     {
-                        return GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+
+                        if ( node.Expression != null )
+                        {
+                            return Block(
+                                    ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) ),
+                                    GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
+                        }
+                        else
+                        {
+                            return GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                        }
                     }
                 }
 
                 return base.VisitReturnStatement( node );
             }
 
-            private string? GetAssignmentVariableName( ExpressionSyntax left )
+            private string GetAssignmentVariableName( ExpressionSyntax left )
             {
                 switch ( left.Kind() )
                 {
