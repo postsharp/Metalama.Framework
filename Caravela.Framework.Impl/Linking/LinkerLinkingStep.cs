@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -28,28 +29,28 @@ namespace Caravela.Framework.Impl.Linking
         // Ideal inlined call will be a single method A, which will contain logic from all aspects.
 
         private readonly DiagnosticList _diagnostics;
-        private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
+        private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
         private readonly LinkerTransformationRegistry _transformationRegistry;
         private readonly CSharpCompilation _intermediateCompilation;
         private readonly LinkerReferenceRegistry _referenceRegistry;
 
-        public LinkerLinkingStep( IReadOnlyList<AspectPart> orderedAspectParts, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
+        public LinkerLinkingStep( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
         {
-            this._orderedAspectParts = orderedAspectParts;
+            this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
             this._intermediateCompilation = intermediateCompilation;
             this._referenceRegistry = referenceRegistry;
         }
 
-        public static LinkerLinkingStep Create( IReadOnlyList<AspectPart> orderedAspectParts, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
+        public static LinkerLinkingStep Create( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
         {
-            return new LinkerLinkingStep( orderedAspectParts, transformationRegistry, intermediateCompilation, referenceRegistry );
+            return new LinkerLinkingStep( orderedAspectLayers, transformationRegistry, intermediateCompilation, referenceRegistry );
         }
 
         public LinkerLinkingStepResult Execute()
         {
             var finalCompilation = this._intermediateCompilation;
-            var rewriter = new LinkingRewriter( this._orderedAspectParts, this._transformationRegistry, this._intermediateCompilation, this._referenceRegistry );
+            var rewriter = new LinkingRewriter( this._orderedAspectLayers, this._transformationRegistry, this._intermediateCompilation, this._referenceRegistry );
 
             foreach ( var syntaxTree in finalCompilation.SyntaxTrees )
             {

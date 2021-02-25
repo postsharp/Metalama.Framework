@@ -5,6 +5,6 @@ namespace Caravela.Framework.Impl.Transformations
 {
     internal abstract class ProceedImplementationFactory
     {
-        public abstract IProceedImpl Get( AspectPartId aspectPartId, IMethod overriddenDeclaration );
+        public abstract IProceedImpl Get( AspectLayerId aspectLayerId, IMethod overriddenDeclaration );
     }
 }

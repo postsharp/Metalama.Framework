@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Linking;
 using Xunit;
 
@@ -41,12 +42,12 @@ class T
             var compilationModel = CreateCompilation( code );
 
             var aspectType = CreateFakeAspectType();
-            var aspectPart = new AspectPart( aspectType, null );
+            var aspectLayer = new AspectLayer( aspectType, null );
 
             var targetMethod = compilationModel.DeclaredTypes.OfName( "T" ).Single().Methods.OfName( "Foo" ).Single();
-            var overrideTransformation = CreateFakeMethodOverride( aspectPart.ToAspectPartId(), targetMethod, CreateOverrideSyntax( aspectPart.ToAspectPartId(), targetMethod ) );
+            var overrideTransformation = CreateFakeMethodOverride( aspectLayer.AspectLayerId, targetMethod, CreateOverrideSyntax( aspectLayer.AspectLayerId, targetMethod ) );
 
-            var input = new AspectLinkerInput( compilationModel.RoslynCompilation, compilationModel, new[] { overrideTransformation }, new[] { aspectPart } );
+            var input = new AspectLinkerInput( compilationModel.RoslynCompilation, compilationModel, new[] { overrideTransformation }, new[] { new OrderedAspectLayer( 1, aspectLayer ) } );
             var linker = new AspectLinker( input );
             var result = linker.ToResult();
 

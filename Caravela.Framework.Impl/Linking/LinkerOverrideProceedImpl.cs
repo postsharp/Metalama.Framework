@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,11 +14,11 @@ namespace Caravela.Framework.Impl.Linking
     internal class LinkerOverrideProceedImpl : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
-        private readonly AspectPartId _aspectPartId;
+        private readonly AspectLayerId _aspectLayerId;
 
-        public LinkerOverrideProceedImpl( AspectPartId aspectPartId, IMethod overridenDeclaration )
+        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration )
         {
-            this._aspectPartId = aspectPartId;
+            this._aspectLayerId = aspectLayerId;
             this._originalDeclaration = overridenDeclaration;
         }
 
@@ -83,9 +83,9 @@ namespace Caravela.Framework.Impl.Linking
                         SeparatedList(
                             this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
-            if ( this._aspectPartId != null )
+            if ( this._aspectLayerId != null )
             {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectPartId.AspectType, this._aspectPartId.PartName, LinkerAnnotationOrder.Default ) );
+                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
             }
 
             return invocation;

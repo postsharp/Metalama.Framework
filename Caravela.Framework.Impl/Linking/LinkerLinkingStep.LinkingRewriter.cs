@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,16 +15,16 @@ namespace Caravela.Framework.Impl.Linking
             private readonly CSharpCompilation _intermediateCompilation;
             private readonly LinkerTransformationRegistry _transformationRegistry;
             private readonly LinkerReferenceRegistry _referenceRegistry;
-            private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
+            private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
 
             public LinkingRewriter(
-                IReadOnlyList<AspectPart> orderedAspectParts,
+                IReadOnlyList<AspectLayer> orderedAspectLayers,
                 LinkerTransformationRegistry transformationRegistry,
                 CSharpCompilation intermediateCompilation,
                 LinkerReferenceRegistry referenceRegistry )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._orderedAspectParts = orderedAspectParts;
+                this._orderedAspectLayers = orderedAspectLayers;
                 this._transformationRegistry = transformationRegistry;
                 this._referenceRegistry = referenceRegistry;
             }

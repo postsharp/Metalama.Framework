@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -7,18 +8,18 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerAnalysisStep
     {
-        private readonly IReadOnlyList<AspectPart> _orderedAspectParts;
+        private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
         private readonly Compilation _intermediateCompilation;
 
-        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectPart> orderedAspectParts )
+        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectLayer> orderedAspectLayers )
         {
             this._intermediateCompilation = intermediateCompilation;
-            this._orderedAspectParts = orderedAspectParts;
+            this._orderedAspectLayers = orderedAspectLayers;
         }
 
-        public static LinkerAnalysisStep Create( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectPart> orderedAspectParts )
+        public static LinkerAnalysisStep Create( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectLayer> orderedAspectLayers )
         {
-            return new LinkerAnalysisStep( intermediateCompilation, orderedAspectParts );
+            return new LinkerAnalysisStep( intermediateCompilation, orderedAspectLayers );
         }
 
         public LinkerAnalysisStepResult Execute()
@@ -26,8 +27,8 @@ namespace Caravela.Framework.Impl.Linking
             var referenceRegistry = new LinkerReferenceRegistry();
 
             Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
-            List<(AspectPart AspectPart, int Version)> aspectParts = new();
-            aspectParts.AddRange( this._orderedAspectParts.Select( ( ar, i ) => (ar, i + 1) ) );
+            List<(AspectLayer AspectLayer, int Version)> aspectLayers = new();
+            aspectLayers.AddRange( this._orderedAspectLayers.Select( ( ar, i ) => (ar, i + 1) ) );
 
             foreach ( var syntaxTree in this._intermediateCompilation.SyntaxTrees )
             {
@@ -44,8 +45,8 @@ namespace Caravela.Framework.Impl.Linking
                             break;
 
                         case LinkerAnnotationOrder.Default: // Next one.
-                            var originatingVersion = aspectParts.Where(
-                                    p => p.AspectPart.AspectType.Name == linkerAnnotation.AspectTypeName && p.AspectPart.PartName == linkerAnnotation.PartName )
+                            var originatingVersion = aspectLayers.Where(
+                                    p => p.AspectLayer.AspectLayerId == linkerAnnotation.AspectLayerId )
                                 .Select( p => p.Version ).First();
                             targetVersion = originatingVersion + 1;
                             break;

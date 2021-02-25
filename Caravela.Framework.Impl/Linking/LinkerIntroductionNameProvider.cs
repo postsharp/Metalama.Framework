@@ -4,12 +4,12 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        internal override string GetOverrideName( AspectPartId aspectPart, IMethod overriddenDeclaration )
+        internal override string GetOverrideName( AspectLayerId aspectLayer, IMethod overriddenDeclaration )
         {
             return
-                aspectPart.PartName != null
-                    ? $"__{overriddenDeclaration.Name}__{aspectPart.AspectType}__{aspectPart.PartName}"
-                    : $"__{overriddenDeclaration.Name}__{aspectPart.AspectType}";
+                aspectLayer.LayerName != null
+                    ? $"__{overriddenDeclaration.Name}__{aspectLayer.AspectName}__{aspectLayer.LayerName}"
+                    : $"__{overriddenDeclaration.Name}__{aspectLayer.AspectName}";
         }
     }
 }

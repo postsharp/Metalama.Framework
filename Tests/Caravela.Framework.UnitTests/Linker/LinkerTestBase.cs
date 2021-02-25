@@ -16,7 +16,7 @@ namespace Caravela.Framework.UnitTests.Linker
 {
     public class LinkerTestBase : TestBase
     {
-        internal static INonObservableTransformation CreateFakeMethodOverride( AspectPartId aspectPart, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
+        internal static INonObservableTransformation CreateFakeMethodOverride( AspectLayerId AspectLayer, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
         {
             var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>() );
 
@@ -24,13 +24,13 @@ namespace Caravela.Framework.UnitTests.Linker
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                new[] { new IntroducedMember( transformation, overrideSyntax, aspectPart, IntroducedMemberSemantic.MethodOverride ) } );
+                new[] { new IntroducedMember( transformation, overrideSyntax, AspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IOverriddenElement) transformation).OverriddenElement ).Returns( targetMethod );
 
             return (INonObservableTransformation) transformation;
         }
 
-        internal static IObservableTransformation CreateFakeMethodIntroduction( AspectPartId aspectPart, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
+        internal static IObservableTransformation CreateFakeMethodIntroduction( AspectLayerId AspectLayer, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
         {
             var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<IObservableTransformation>().Implements<IMemberIntroduction>() );
 
@@ -38,7 +38,7 @@ namespace Caravela.Framework.UnitTests.Linker
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                new[] { new IntroducedMember( transformation, overrideSyntax, aspectPart, IntroducedMemberSemantic.MethodOverride ) } );
+                new[] { new IntroducedMember( transformation, overrideSyntax, AspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IObservableTransformation) transformation).ContainingElement ).Returns( targetType );
 
             return (IObservableTransformation) transformation;
@@ -78,7 +78,7 @@ namespace Caravela.Framework.UnitTests.Linker
             }
         }
 
-        internal static MemberDeclarationSyntax CreateOverrideSyntax( AspectPartId aspectPart, IMethod targetMethod )
+        internal static MemberDeclarationSyntax CreateOverrideSyntax( AspectLayerId aspectLayer, IMethod targetMethod )
         {
             var originalSyntax = targetMethod.ToSyntaxNode<MethodDeclarationSyntax>();
             var invocation =
@@ -89,14 +89,14 @@ namespace Caravela.Framework.UnitTests.Linker
                             ThisExpression(),
                             IdentifierName( targetMethod.Name ) )
                     : IdentifierName( targetMethod.Name ) )
-                .AddLinkerAnnotation( new LinkerAnnotation( aspectPart.AspectType, aspectPart.PartName, LinkerAnnotationOrder.Default ) );
+                .AddLinkerAnnotation( new LinkerAnnotation( aspectLayer, LinkerAnnotationOrder.Default ) );
 
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
                 originalSyntax.Modifiers,
                 originalSyntax.ReturnType,
                 originalSyntax.ExplicitInterfaceSpecifier,
-                Identifier( $"__{targetMethod.Name}__{aspectPart.AspectType}" ),
+                Identifier( $"__{targetMethod.Name}__{aspectLayer.AspectName}" ),
                 originalSyntax.TypeParameterList,
                 originalSyntax.ParameterList,
                 originalSyntax.ConstraintClauses,
@@ -107,13 +107,13 @@ namespace Caravela.Framework.UnitTests.Linker
                 null );
         }
 
-        internal static AspectType CreateFakeAspectType( params string[] aspectParts )
+        internal static AspectType CreateFakeAspectType( params string[] aspectLayers )
         {
             var aspectCodeType = A.Fake<INamedType>( o => o.Strict() );
             A.CallTo( () => aspectCodeType.FullName ).Returns( "TestAspect" );
             var aspectDriver = A.Fake<IAspectDriver>( o => o.Strict() );
 
-            return new AspectType( aspectCodeType, aspectDriver, new string?[] { null }.Concat( aspectParts ) );
+            return new AspectType( aspectCodeType, null, aspectDriver );
         }
     }
 }

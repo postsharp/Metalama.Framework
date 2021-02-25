@@ -20,11 +20,11 @@ namespace Caravela.Framework.Impl.Linking
             var introductionStepResult = introductionStep.Execute();
 
             // Second pass. Count references to modified methods.
-            var analysisStep = LinkerAnalysisStep.Create( this._input.Compilation, this._input.OrderedAspectParts );
+            var analysisStep = LinkerAnalysisStep.Create( this._input.Compilation, this._input.OrderedAspectLayers );
             var analysisStepResult = analysisStep.Execute();
 
             // Third pass. Linking.
-            var linkingStep = LinkerLinkingStep.Create( this._input.OrderedAspectParts, introductionStepResult.TransformationRegistry, introductionStepResult.IntermediateCompilation, analysisStepResult.ReferenceRegistry );
+            var linkingStep = LinkerLinkingStep.Create( this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry, introductionStepResult.IntermediateCompilation, analysisStepResult.ReferenceRegistry );
             var linkingStepResult = linkingStep.Execute();
 
             // TODO: diagnostics.

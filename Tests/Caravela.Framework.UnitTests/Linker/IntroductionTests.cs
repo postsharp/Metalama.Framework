@@ -2,7 +2,8 @@
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.CodeModel.Symbolic;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Xunit;
@@ -32,14 +33,14 @@ class T
             var compilationModel = CreateCompilation( code );
 
             var aspectType = CreateFakeAspectType();
-            var aspectPart = new AspectPart( aspectType, null );
+            var aspectLayer = new AspectLayer( aspectType, null );
 
             var targetType= compilationModel.DeclaredTypes.OfName( "T" ).Single();
             var introducedMethodSyntax = CreateIntroducedMethodSyntax( false, Accessibility.Public, "void", "Foo" );
-            var introduceMethodTransformation = CreateFakeMethodIntroduction(aspectPart.ToAspectPartId(), targetType, introducedMethodSyntax);
-            compilationModel = new CompilationModel( compilationModel, new[] { introduceMethodTransformation } );
+            var introduceMethodTransformation = CreateFakeMethodIntroduction( aspectLayer.AspectLayerId, targetType, introducedMethodSyntax);
+            compilationModel = CompilationModel.CreateRevisedInstance( compilationModel, new[] { introduceMethodTransformation } );
 
-            var input = new AspectLinkerInput( compilationModel.RoslynCompilation, compilationModel, Array.Empty<INonObservableTransformation>(), new[] { aspectPart } );
+            var input = new AspectLinkerInput( compilationModel.RoslynCompilation, compilationModel, Array.Empty<INonObservableTransformation>(), new[] { new OrderedAspectLayer( 1, aspectLayer) } );
             var linker = new AspectLinker( input );
             var result = linker.ToResult();
 

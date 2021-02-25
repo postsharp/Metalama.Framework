@@ -69,7 +69,8 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
             var allTransformations =
-                input.CompilationModel.ObservableTransformations.Values
+                input.CompilationModel.GetAllObservableTransformations()
+                .SelectMany(x => x.Transformations)
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();

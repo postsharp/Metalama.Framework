@@ -6,9 +6,9 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerProceedImplementationFactory : ProceedImplementationFactory
     {
-        public override IProceedImpl Get( AspectPartId aspectPartId, IMethod overriddenDeclaration )
+        public override IProceedImpl Get( AspectLayerId aspectLayerId, IMethod overriddenDeclaration )
         {
-            return new LinkerOverrideProceedImpl( aspectPartId, overriddenDeclaration );
+            return new LinkerOverrideProceedImpl( aspectLayerId, overriddenDeclaration );
         }
     }
 }
