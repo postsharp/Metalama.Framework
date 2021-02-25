@@ -425,6 +425,8 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
+            InvocationExpressionSyntax updatedInvocation;
+
             if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.CompileTimeOnly )
             {
                 // If the expression on the left meta is compile-time (because of rules on the symbol),
@@ -436,35 +438,48 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     var parameterType = this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type;
 
+                    ArgumentSyntax transformedArgument;
+
                     // dynamic or dynamic[]
                     if ( parameterType is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } )
                     {
-                        transformedArguments.Add( (ArgumentSyntax) this.VisitArgument( argument )! );
+                        transformedArgument = ( ArgumentSyntax) this.VisitArgument( argument )!;
                     }
                     else
                     {
                         using ( this.EnterForceCompileTimeExpression() )
                         {
-                            transformedArguments.Add( (ArgumentSyntax) this.VisitArgument( argument )! );
+                            transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
                         }
                     }
+
+                    transformedArgument = transformedArgument.WithTriviaFrom( argument );
+                    transformedArguments.Add( transformedArgument );
                 }
 
-                var updatedInvocation = node.Update(
+                updatedInvocation = node.Update(
                     transformedExpression,
-                    ArgumentList( SeparatedList( transformedArguments ) ) );
+                    ArgumentList(
+                        node.ArgumentList.OpenParenToken,
+                        SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
+                        node.ArgumentList.CloseParenToken) );
 
-                return updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                updatedInvocation = updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {
                 // If the expression on the left of the parenthesis is not compile-time,
                 // we cannot take a decision on the parent expression.
 
-                return node.Update(
-                    transformedExpression,
-                    (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
+                var transformedArgumentList = (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!;
+                transformedArgumentList = transformedArgumentList.WithOpenParenToken( node.ArgumentList.OpenParenToken );
+                transformedArgumentList = transformedArgumentList.WithCloseParenToken( node.ArgumentList.CloseParenToken );
+                updatedInvocation = node.Update( transformedExpression, transformedArgumentList );
             }
+
+            updatedInvocation = updatedInvocation.WithTriviaFrom( node );
+
+            return updatedInvocation;
         }
 
         public override SyntaxNode? VisitArgument( ArgumentSyntax node )
