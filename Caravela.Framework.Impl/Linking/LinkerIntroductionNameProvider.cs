@@ -9,10 +9,12 @@ namespace Caravela.Framework.Impl.Linking
     {
         internal override string GetOverrideName( AspectLayerId aspectLayer, IMethod overriddenDeclaration )
         {
+            var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
+            var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" )?.Replace( ".", "_" );
             return
-                aspectLayer.LayerName != null
-                    ? $"__{overriddenDeclaration.Name}__{aspectLayer.AspectName}__{aspectLayer.LayerName}"
-                    : $"__{overriddenDeclaration.Name}__{aspectLayer.AspectName}";
+                cleanLayerName != null
+                    ? $"__{overriddenDeclaration.Name}__{cleanAspectName}__{cleanLayerName}"
+                    : $"__{overriddenDeclaration.Name}__{cleanAspectName}";
         }
     }
 }

@@ -11,6 +11,7 @@ using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly Dictionary<IMemberIntroduction, IReadOnlyList<IntroducedMember>> _introducedMembers;
         private readonly Dictionary<IntroducedMember, (SyntaxTree OriginalSyntaxTree, int AnnotationId, MemberDeclarationSyntax AnnotatedSyntax)> _introducedMemberToMarkId;
         private readonly Dictionary<int, (SyntaxTree OriginalSyntaxTree, IntroducedMember IntroducedMember, MemberDeclarationSyntax AnnotatedSyntax)> _introducedMarkIdToMember;
-        private readonly Dictionary<string, ICodeElement> _overrideTargetsByOriginalSymbolName;
+        private readonly Dictionary<ISymbol, ICodeElement> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<ICodeElement, List<IntroducedMember>> _overrideMap;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
@@ -43,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking
             this._introducedMarkIdToMember = new Dictionary<int, (SyntaxTree, IntroducedMember, MemberDeclarationSyntax)>();
             this._introducedTreeMap = new Dictionary<SyntaxTree, SyntaxTree>();
             this._overrideMap = new Dictionary<ICodeElement, List<IntroducedMember>>();
-            this._overrideTargetsByOriginalSymbolName = new Dictionary<string, ICodeElement>();
+            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Instance );
         }
 
         public void SetIntroducedMembers( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -60,6 +61,18 @@ namespace Caravela.Framework.Impl.Linking
                 var annotationId = this._nextAnnotationId++;
                 var annotatedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( new SyntaxAnnotation( _introducedSyntaxAnnotationId, annotationId.ToString() ) );
 
+                /* This is for debugging, if we want to have it in intermediate compilations, we would need to remove it afterwards.
+#if DEBUG
+                
+                // Add trivia with the introduced syntax id.
+                annotatedSyntax = annotatedSyntax.WithLeadingTrivia(
+                    annotatedSyntax.HasLeadingTrivia
+                    ? new[] { Whitespace( "\n" ), Comment($"// Introduction (ID:{annotationId})"), Whitespace("\n") }.Concat(annotatedSyntax.GetLeadingTrivia())
+                    : new[] { Whitespace( "\n" ), Comment( $"// Introduction (ID:{annotationId})"), Whitespace( "\n" ) }
+                    );
+#endif
+                */
+
                 if ( memberIntroduction is IOverriddenElement overrideTransformation )
                 {
                     if (!this._overrideMap.TryGetValue( overrideTransformation.OverriddenElement, out var overrideList) )
@@ -71,13 +84,18 @@ namespace Caravela.Framework.Impl.Linking
 
                     if ( overrideTransformation.OverriddenElement is CodeElement codeElement)
                     {
-                        this._overrideTargetsByOriginalSymbolName[codeElement.Symbol.ToDisplayString( SymbolDisplayFormat.FullyQualifiedFormat )] = codeElement;
+                        this._overrideTargetsByOriginalSymbolName[codeElement.Symbol] = codeElement;
                     }
                 }
 
                 this._introducedMemberToMarkId.Add( introducedMember, (memberIntroduction.TargetSyntaxTree, annotationId, annotatedSyntax) );
                 this._introducedMarkIdToMember.Add( annotationId, (memberIntroduction.TargetSyntaxTree, introducedMember, annotatedSyntax) );
             }
+        }
+
+        internal IEnumerable<IntroducedMember> GetIntroducedMembers()
+        {
+            return this._introducedMembers.Values.SelectMany( x => x );
         }
 
         public void SetIntermediateSyntaxTreeMapping( SyntaxTree originalTree, SyntaxTree intermediateTree )
@@ -108,17 +126,28 @@ namespace Caravela.Framework.Impl.Linking
         public IEnumerable<MemberDeclarationSyntax> GetIntroducedSyntaxNodesOnPosition( MemberDeclarationSyntax position )
         {
             // TODO: Optimize.
-            return this._introducedMembers.SelectMany( kvp => kvp.Value.Select( i => (kvp.Key.InsertPositionNode, IntroducedMember: i) ) ).Where( p => p.InsertPositionNode == position ).Select( p => p.IntroducedMember.Syntax );
+            return 
+                this._introducedMembers
+                .SelectMany( kvp =>
+                    from im in kvp.Value
+                    let imr = this._introducedMemberToMarkId[im]
+                    select (kvp.Key.InsertPositionNode, IntroducedMember: im, AnnotatedSyntax: imr.AnnotatedSyntax)
+                    )
+                .Where( p => p.InsertPositionNode == position )
+                .Select( p => p.AnnotatedSyntax );
         }
 
         public ISymbol GetSymbolForIntroducedMember( IntroducedMember introducedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Syntax.SyntaxTree];
-
-            int annotationId = this._introducedMemberToMarkId[introducedMember].AnnotationId;
+            var introducedMemberRecord = this._introducedMemberToMarkId[introducedMember];
+            var intermediateSyntaxTree = this._introducedTreeMap[introducedMemberRecord.OriginalSyntaxTree];
 
             // TODO: Precompute, it's really really slow (visits the whole tree).
-            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetAnnotatedNodes( _introducedSyntaxAnnotationId ).Where( x => int.Parse( x.GetAnnotations( _introducedSyntaxAnnotationId ).Single().Data ) == annotationId ).Single();
+            var intermediateSyntax = 
+                intermediateSyntaxTree.GetRoot()
+                .GetAnnotatedNodes( _introducedSyntaxAnnotationId )
+                .Where( x => int.Parse( x.GetAnnotations( _introducedSyntaxAnnotationId ).Single().Data ) == introducedMemberRecord.AnnotationId )
+                .Single();
 
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();
         }
@@ -132,9 +161,8 @@ namespace Caravela.Framework.Impl.Linking
             if ( annotation == null )
             {
                 // Original code declaration - we should be able to get ICodeElement by symbol name.
-                var symbolName = symbol.ToDisplayString( SymbolDisplayFormat.FullyQualifiedFormat );
 
-                if (!this._overrideTargetsByOriginalSymbolName.TryGetValue(symbolName, out var originalElement ))
+                if (!this._overrideTargetsByOriginalSymbolName.TryGetValue( symbol, out var originalElement ))
                 {
                     return Array.Empty<IntroducedMember>();
                 }
@@ -147,7 +175,15 @@ namespace Caravela.Framework.Impl.Linking
                 var id = int.Parse( annotation.Data );
                 var memberRecord = this._introducedMarkIdToMember[id];
                 var introducedElement = (ICodeElement)memberRecord.IntroducedMember.Introductor;
-                return this._overrideMap[introducedElement];
+
+                if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
+                {
+                    return overrides;
+                }
+                else
+                {
+                    return Array.Empty<IntroducedMember>();
+                }
             }
         }
 

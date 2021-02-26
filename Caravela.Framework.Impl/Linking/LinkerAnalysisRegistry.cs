@@ -12,19 +12,33 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerAnalysisRegistry
     {
-        private bool _frozen;
         private readonly LinkerTransformationRegistry _transformationRegistry;
+        private readonly Dictionary<(ISymbol Symbol, AspectLayerId? Layer), int> _symbolReferenceCounters;
         private readonly Dictionary<IMethodSymbol, (bool HasSimpleReturn, object? Dummy)> _bodyAnalysisResults;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
 
+        private bool _frozen;
+
         public LinkerAnalysisRegistry(LinkerTransformationRegistry transformationRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers)
         {
+            this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
+            this._bodyAnalysisResults = new Dictionary<IMethodSymbol, (bool, object?)>();
         }
 
         public void Freeze()
         {
             this._frozen = true;
+        }
+
+        public void AddReferenceCount(ISymbol symbol, AspectLayerId? referencedLayer)
+        {
+            if (!this._symbolReferenceCounters.TryGetValue((symbol, referencedLayer), out var count) )
+            {
+                count = 0;
+            }
+
+            this._symbolReferenceCounters[(symbol, referencedLayer)] = count + 1;
         }
 
         public void SetBodyAnalysisResults(IMethodSymbol symbol, bool hasSimpleReturn)
@@ -44,8 +58,33 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool IsBodyInlineable( IMethodSymbol symbol )
         {
-            // TODO: Consume reference analysis results.
-            return false;
+            return true;
+            if (this.IsOverrideTarget(symbol))
+            {
+                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, null), out int counter ) )
+                {
+                    return true;
+                }
+
+                return counter <= 1;
+            }
+            else
+            {
+                var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol( symbol );
+
+                //if ( introducedMember == null )
+                //{
+                    throw new InvalidOperationException();
+                //}
+
+                //var overrideTarget = this._transformationRegistry.GetOverrideTarget(symbol);
+                //if ( !this._symbolReferenceCounters.TryGetValue( (overrideTarget, introducedMember.AspectLayerId), out var counter ) )
+                //{
+                //    return true;
+                //}
+
+                //return counter <= 1;
+            }
         }
 
         public bool IsOverrideMethod( IMethodSymbol symbol )
@@ -60,6 +99,19 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.Introductor is OverriddenMethod;
         }
 
+        internal ISymbol GetLastOverride( IMethodSymbol symbol )
+        {
+            var overrides = this._transformationRegistry.GetMethodOverridesForSymbol( symbol );
+            var lastOverride = overrides.LastOrDefault();
+
+            if ( lastOverride == null )
+            {
+                return symbol;
+            }
+
+            return this._transformationRegistry.GetSymbolForIntroducedMember( lastOverride );
+        }
+
         /// <summary>
         /// Resolves an annotated symbol referenced by an introduced method body, while respecting aspect layer ordering.
         /// </summary>
@@ -72,22 +124,35 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Other things than methods.
             var overrides = this._transformationRegistry.GetMethodOverridesForSymbol( (IMethodSymbol) referencedSymbol );
 
+            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) );
+            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
+
             // TODO: Optimize.
             var previousLayerOverride = (
-                from o in overrides
-                join oal in this._orderedAspectLayers on o.AspectLayerId equals oal.AspectLayerId
-                where oal.Order < this._orderedAspectLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Order
-                orderby oal.Order
+                from o in overrides                
+                join oal in indexedLayers
+                    on o.AspectLayerId equals oal.AspectLayerId
+                where oal.Index < annotationLayerIndex
+                orderby oal.Index
                 select o
-                ).Last();
+                ).LastOrDefault();
+
+            if ( previousLayerOverride == null )
+            {
+                return referencedSymbol;
+            }
 
             return this._transformationRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        public bool HasSimpleReturn( IMethodSymbol contextSymbol )
+        public bool HasSimpleReturn( IMethodSymbol methodSymbol)
         {
-            // TODO: Consume analysis result.
-            return false;
+            if (!this._bodyAnalysisResults.TryGetValue( methodSymbol, out var result) )
+            {
+                return false;
+            }    
+
+            return result.HasSimpleReturn;
         }
     }
 }

@@ -42,7 +42,7 @@ class T
 
             var compilationModel = CreateCompilation( code );
 
-            var aspectType = CreateFakeAspectType();
+            var aspectType = CreateFakeAspectType(compilationModel);
             var aspectLayer = new AspectLayer( aspectType, null );
 
             var targetMethod = compilationModel.DeclaredTypes.OfName( "T" ).Single().Methods.OfName( "Foo" ).Single();

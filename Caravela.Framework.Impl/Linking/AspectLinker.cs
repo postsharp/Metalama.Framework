@@ -18,16 +18,21 @@ namespace Caravela.Framework.Impl.Linking
 
         public AspectLinkerResult ToResult()
         {
-            // First pass. Add all transformations to the compilation, but we don't link them yet.
+            // First pass. Add all transformations to the compilation, resulting in intermediate compilation.
             var introductionStep = LinkerIntroductionStep.Create( this._input );
             var introductionStepResult = introductionStep.Execute();
 
-            // Second pass. Count references to modified methods.
+            // Second pass. Count references to modified methods on semantic models of intermediate compilation.
             var analysisStep = LinkerAnalysisStep.Create( this._input.Compilation, this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry );
             var analysisStepResult = analysisStep.Execute();
 
-            // Third pass. Linking.
-            var linkingStep = LinkerLinkingStep.Create( this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry, introductionStepResult.IntermediateCompilation, analysisStepResult.ReferenceRegistry );
+            // Third pass. Link an inline intermediate compilation.
+            var linkingStep = LinkerLinkingStep.Create( 
+                this._input.OrderedAspectLayers, 
+                introductionStepResult.TransformationRegistry, 
+                introductionStepResult.IntermediateCompilation, 
+                analysisStepResult.ReferenceRegistry );
+
             var linkingStepResult = linkingStep.Execute();
 
             // TODO: diagnostics.

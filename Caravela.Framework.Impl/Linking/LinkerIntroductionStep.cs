@@ -102,15 +102,21 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateCompilation = this._initialCompilation;
 
             // Process syntax trees one by one.
+            Rewriter addIntroducedElementsRewriter = new( context.TransformationRegistry, diagnostics );
+
             foreach ( var initialSyntaxTree in this._initialCompilation.SyntaxTrees )
             {
-                Rewriter addIntroducedElementsRewriter = new( context.TransformationRegistry, diagnostics );
-
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
+
+#if DEBUG
+                // Improve readibility of intermediate compilation in debug builds.
+                newRoot = newRoot.NormalizeWhitespace();
+#endif
+
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
                 context.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
-                intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
             // Push the intermediate compilation.

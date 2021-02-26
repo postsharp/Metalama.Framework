@@ -12,6 +12,7 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
+    // TODO: Consider having an abstract base for simple testing.
     internal class AspectType
     {
         private readonly IAspectDriver? _aspectDriver;
@@ -53,6 +54,7 @@ namespace Caravela.Framework.Impl
  
                 if ( aspectLayersAttributeData != null )
                 {
+                    // TODO: Using global state makes it impossible to test.
                     var aspectLayersAttribute =
                         AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<ProvidesAspectLayersAttribute>( aspectLayersAttributeData );
                     partArrayBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( this, partName ) ) );

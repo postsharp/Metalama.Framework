@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class LinkerAnalysisStep
+    internal partial class LinkerAnalysisStep
     {
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
         private readonly Compilation _intermediateCompilation;
@@ -29,31 +29,25 @@ namespace Caravela.Framework.Impl.Linking
 
         public LinkerAnalysisStepResult Execute()
         {
-            var referenceRegistry = new LinkerAnalysisRegistry( this._transformationRegistry, this._orderedAspectLayers );
-
-            Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
-            List<(AspectLayer AspectLayer, int Version)> aspectLayers = new();
-            aspectLayers.AddRange( this._orderedAspectLayers.Select( ( ar, i ) => ((AspectLayer)ar, i + 1) ) );
+            var analysisRegistry = new LinkerAnalysisRegistry( this._transformationRegistry, this._orderedAspectLayers );
+            var indexedAspectLayers = this._orderedAspectLayers.Select( ( ar, i ) => (Layer: (AspectLayer) ar, Index: i) );
 
             foreach ( var syntaxTree in this._intermediateCompilation.SyntaxTrees )
             {
                 foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
                 {
                     var linkerAnnotation = referencingNode.GetLinkerAnnotation()!;
-                    int targetVersion;
+                    AspectLayerId? targetLayer;
 
                     // Determine which version of the semantic is being invoked.
                     switch ( linkerAnnotation.Order )
                     {
-                        case LinkerAnnotationOrder.Original:
-                            targetVersion = 0;
+                        case LinkerAnnotationOrder.Original: // Original
+                            targetLayer = null;
                             break;
 
                         case LinkerAnnotationOrder.Default: // Next one.
-                            var originatingVersion = aspectLayers.Where(
-                                    p => p.AspectLayer.AspectLayerId == linkerAnnotation.AspectLayerId )
-                                .Select( p => p.Version ).First();
-                            targetVersion = originatingVersion + 1;
+                            targetLayer = linkerAnnotation.AspectLayerId;
                             break;
 
                         default:
@@ -69,20 +63,22 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     var symbol = symbolInfo.Symbol.AssertNotNull();
-                    var symbolVersion = (symbol, targetVersion);
+                    var symbolVersion = (symbol, targetLayer);
 
-                    if ( referenceCounts.TryGetValue( symbolVersion, out var count ) )
-                    {
-                        referenceCounts[symbolVersion] = count + 1;
-                    }
-                    else
-                    {
-                        referenceCounts[symbolVersion] = 1;
-                    }
+                    analysisRegistry.AddReferenceCount( symbol, targetLayer );
                 }
             }
 
-            return new LinkerAnalysisStepResult( referenceRegistry );
+            // Analyze introduced method bodies.
+            foreach ( var introducedMember in this._transformationRegistry.GetIntroducedMembers())
+            {
+                var symbol = (IMethodSymbol)this._transformationRegistry.GetSymbolForIntroducedMember( introducedMember );
+                var methodBodyVisitor = new MethodBodyWalker();
+                methodBodyVisitor.Visit( introducedMember.Syntax );
+                analysisRegistry.SetBodyAnalysisResults( symbol, methodBodyVisitor.ReturnStatementCount <= 1 );
+            }
+
+            return new LinkerAnalysisStepResult( analysisRegistry );
         }
     }
 }

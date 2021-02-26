@@ -8,6 +8,8 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class StructuralSymbolComparer : IEqualityComparer<ISymbol>
     {
+        // TODO: At this point the default display string seems to be enough for comparison.
+
         public static readonly StructuralSymbolComparer Instance = new StructuralSymbolComparer();
 
         public bool Equals( ISymbol x, ISymbol y )

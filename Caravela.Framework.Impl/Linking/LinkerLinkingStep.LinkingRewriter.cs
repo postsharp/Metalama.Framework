@@ -70,8 +70,22 @@ namespace Caravela.Framework.Impl.Linking
                     else if ( this._referenceRegistry.IsOverrideTarget( symbol ) )
                     {
                         // Override target, i.e. original method or introduced method stub.
-                        var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
-                        newMembers.Add( transformedMethod );
+                        var lastOverrideSymbol = (IMethodSymbol)this._referenceRegistry.GetLastOverride( symbol );
+
+                        if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
+                        {
+                            // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
+                            newMembers.Add( method.WithBody( this.GetTrampolineBody( method, lastOverrideSymbol ) ) );
+                        }
+                        else
+                        {
+                            // Body of the last (outermost) override is inlineable. We will run inlining on the override's body and place replace the current body with the result.
+                            var lastOverrideSyntax = (MethodDeclarationSyntax)lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
+                            // Inline overrides into this method.
+                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+                            newMembers.Add( transformedMethod );
+                        }
 
                         if ( !this._referenceRegistry.IsBodyInlineable( symbol ) )
                         {
@@ -97,7 +111,7 @@ namespace Caravela.Framework.Impl.Linking
                         GetInvocationTarget(),
                         ArgumentList( SeparatedList( method.ParameterList.Parameters.Select( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
 
-                if ( targetSymbol.ReturnsVoid )
+                if ( !targetSymbol.ReturnsVoid )
                 {
                     return Block( ReturnStatement( invocation ) );
                 }

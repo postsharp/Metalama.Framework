@@ -1,0 +1,23 @@
+
+    [Override]
+    internal class TargetClass
+    {
+        public void TargetMethod()
+        {
+            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine("This is the original method.");
+        }
+
+        public void __TargetMethod__OriginalBody()
+        {
+            Console.WriteLine("This is the original method.");
+        }
+
+        public void __TargetMethod__OverrideAttribute()
+        {
+            Console.WriteLine("This is the overriding method.");
+            this.__TargetMethod__OriginalBody();
+            return;
+        }
+    }
+    

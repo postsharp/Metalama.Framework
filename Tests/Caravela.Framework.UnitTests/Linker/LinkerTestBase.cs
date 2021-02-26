@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -21,9 +24,10 @@ namespace Caravela.Framework.UnitTests.Linker
     {
         internal static INonObservableTransformation CreateFakeMethodOverride( AspectLayerId aspectLayer, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
         {
-            var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>() );
+            var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>().Implements<ICodeElement>() );
 
             A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
+            A.CallTo( () => transformation.ToString() ).Returns( "Override" );
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
@@ -35,9 +39,10 @@ namespace Caravela.Framework.UnitTests.Linker
 
         internal static IObservableTransformation CreateFakeMethodIntroduction( AspectLayerId aspectLayer, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
         {
-            var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<IObservableTransformation>().Implements<IMemberIntroduction>() );
+            var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<IObservableTransformation>().Implements<IMemberIntroduction>().Implements<ICodeElement>() );
 
             A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
+            A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
@@ -110,10 +115,15 @@ namespace Caravela.Framework.UnitTests.Linker
                 null );
         }
 
-        internal static AspectType CreateFakeAspectType( params string[] aspectLayers )
+        internal static AspectType CreateFakeAspectType( CompilationModel compilation, params string[] aspectLayers )
         {
-            var aspectCodeType = A.Fake<INamedType>( o => o.Strict() );
+            var aspectCodeType = A.Fake<INamedType>( o => o.Implements<ICodeElement>().Strict() );
             A.CallTo( () => aspectCodeType.FullName ).Returns( "TestAspect" );
+            A.CallTo( () => ((ICodeElement) aspectCodeType).Compilation ).Returns( compilation );
+            var attributeList = A.Fake<IAttributeList>( o => o.Strict() );
+            A.CallTo( () => attributeList.GetEnumerator() ).ReturnsLazily( _ => ((IEnumerable<IAttribute>)Array.Empty<IAttribute>()).GetEnumerator() );
+            A.CallTo( () => aspectCodeType.Attributes ).Returns( attributeList );
+
             var aspectDriver = A.Fake<IAspectDriver>( o => o.Strict() );
 
             return new AspectType( aspectCodeType, null, aspectDriver );

@@ -65,9 +65,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
-                    var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, resolvedSymbol, null, this.GetNextReturnLabelId() );
-                    var declaration = (MethodDeclarationSyntax) resolvedSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                    return innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
+                    return this.GetInlinedMethodBody( resolvedSymbol, null );
                 }
                 else
                 {
@@ -102,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private SyntaxNode? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string returnVariableName)
+            private SyntaxNode? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string? returnVariableName)
             {
                 var labelId = this.GetNextReturnLabelId();
                 var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
@@ -138,11 +136,15 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Inner inlining (i.e. multiple methods inlined into one). Return statements need to be transformed to assign (for non-void method) + jump.
 
-                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) || this._analysisRegistry.IsOverrideTarget(this._contextSymbol) )
                     {
                         if ( node.Expression != null )
                         {
-                            return ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) );
+                            return ExpressionStatement( 
+                                AssignmentExpression( 
+                                    SyntaxKind.SimpleAssignmentExpression, 
+                                    IdentifierName( this._returnVariableName.AssertNotNull() ), 
+                                    node.Expression ) );
                         }
                         else
                         {
@@ -151,16 +153,23 @@ namespace Caravela.Framework.Impl.Linking
                     }
                     else
                     {
-
                         if ( node.Expression != null )
                         {
                             return Block(
-                                    ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnVariableName.AssertNotNull() ), node.Expression ) ),
-                                    GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
+                                    ExpressionStatement( 
+                                        AssignmentExpression( 
+                                            SyntaxKind.SimpleAssignmentExpression, 
+                                            IdentifierName( this._returnVariableName.AssertNotNull() ), 
+                                            node.Expression ) ),
+                                    GotoStatement( 
+                                        SyntaxKind.GotoStatement, 
+                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
                         }
                         else
                         {
-                            return GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                            return GotoStatement( 
+                                SyntaxKind.GotoStatement, 
+                                IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
                         }
                     }
                 }

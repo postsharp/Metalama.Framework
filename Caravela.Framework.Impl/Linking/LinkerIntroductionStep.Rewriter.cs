@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,6 +43,7 @@ namespace Caravela.Framework.Impl.Linking
                 void AddIntroductionsOnPosition( List<MemberDeclarationSyntax> members, MemberDeclarationSyntax position )
                 {
                     var introducedSyntaxNodes = this._introductionRegistry.GetIntroducedSyntaxNodesOnPosition( position );
+
                     members.AddRange( introducedSyntaxNodes );
                 }
             }
