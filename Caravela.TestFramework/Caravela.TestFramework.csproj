@@ -15,11 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
+    <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj"  />
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
-    <ProjectReference Include="..\Caravela.Reactive\Caravela.Reactive.csproj" />
   </ItemGroup>
 
   <ItemGroup>
