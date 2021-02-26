@@ -19,7 +19,7 @@ using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public class CompilationModel : ICompilation, ICodeElementInternal
+    internal class CompilationModel : ICompilation, ICodeElementInternal
     {
         public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
         {

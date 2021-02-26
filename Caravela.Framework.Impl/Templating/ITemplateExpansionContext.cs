@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <remarks>
     /// The template driver requires an instance of the expansion context before it can invoke the template method.
     /// </remarks>
-    public interface ITemplateExpansionContext
+    internal interface ITemplateExpansionContext
     {
         /// <summary>
         /// Gets the element of code to which a template was applied.

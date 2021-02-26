@@ -1,0 +1,56 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
+using System.Threading;
+using Caravela.Framework.Impl.Pipeline;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+namespace Caravela.TestFramework
+{
+    public partial class AspectTestRunner
+    {
+        private class AspectTestPipelineContext : IAspectPipelineContext, IBuildOptions
+        {
+            private readonly string _testName;
+            private readonly TestResult _testResult;
+
+            public AspectTestPipelineContext( string testName, CSharpCompilation compilation, TestResult testResult )
+            {
+                this.Compilation = compilation;
+                this._testName = testName;
+                this._testResult = testResult;
+                this.ManifestResources = new List<ResourceDescription>();
+            }
+
+            public CSharpCompilation Compilation { get; }
+
+            ImmutableArray<object> IAspectPipelineContext.Plugins => ImmutableArray<object>.Empty;
+
+            public IList<ResourceDescription> ManifestResources { get; }
+
+            CancellationToken IAspectPipelineContext.CancellationToken => CancellationToken.None;
+
+            IBuildOptions IAspectPipelineContext.BuildOptions => this;
+
+            void IAspectPipelineContext.ReportDiagnostic( Diagnostic diagnostic )
+            {
+                this._testResult.AddDiagnostic( diagnostic );
+            }
+
+            public bool HandleExceptions => false;
+
+            bool IBuildOptions.AttachDebugger => false;
+
+            bool IBuildOptions.MapPdbToTransformedCode => true;
+
+            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testName );
+
+            public string? CrashReportDirectory => null;
+        }
+    }
+}

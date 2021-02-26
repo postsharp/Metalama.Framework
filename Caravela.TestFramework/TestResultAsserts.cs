@@ -4,13 +4,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Caravela.UnitTestFramework
+namespace Caravela.TestFramework
 {
     public static class TestResultAsserts
     {

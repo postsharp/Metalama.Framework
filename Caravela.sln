@@ -37,9 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Obfuscator", "Buil
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.DesignTime.Contracts", "Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj", "{2D3EE834-B910-4F2F-8069-F95CE8D0D933}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.IntegrationTests", "Tests\Caravela.Framework.IntegrationTests\Caravela.Framework.IntegrationTests.csproj", "{69EB8F34-975E-46AD-8EA1-A592A629CCD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.Integration", "Tests\Caravela.Framework.Tests.Integration\Caravela.Framework.Tests.Integration.csproj", "{69EB8F34-975E-46AD-8EA1-A592A629CCD6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.UnitTests", "Tests\Caravela.Framework.UnitTests\Caravela.Framework.UnitTests.csproj", "{7D8C16EE-B822-4AE3-B9C1-810C010573D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.UnitTests", "Tests\Caravela.Framework.Tests.UnitTests\Caravela.Framework.Tests.UnitTests.csproj", "{7D8C16EE-B822-4AE3-B9C1-810C010573D6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "Caravela.TestFramework\Caravela.TestFramework.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
