@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Caravela.TestFramework" />
+	  <!-- We cannot use InternalsVisibleTo for Caravela.TestFramework because of obfuscation in the release build. -->
     <InternalsVisibleTo Include="Caravela.Framework.UnitTests" />
     <InternalsVisibleTo Include="Caravela.Framework.IntegrationTests" />
     

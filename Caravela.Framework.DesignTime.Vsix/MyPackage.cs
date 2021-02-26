@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using CustomCommandSample;
@@ -24,13 +27,9 @@ namespace Caravela.Framework.DesignTime.Vsix
             await this.JoinableTaskFactory.SwitchToMainThreadAsync( cancellationToken );
 
             // Query service asynchronously from the UI thread
-            this.DTE = (DTE) await this.GetServiceAsync( typeof( DTE ) );
-
-
+            this.DTE = (DTE) await this.GetServiceAsync( typeof( DTE ) )!;
 
             await ShowDiffCommand.InitializeAsync( this );
         }
-
-
     }
 }

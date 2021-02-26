@@ -1,2 +1,4 @@
 is_global = true
-build_property.DebugCaravela =
+build_property.DebugCaravela = 
+build_property.CaravelaCrashReportDirectory = 
+build_property.CaravelaCompileTimeProjectDirectory =

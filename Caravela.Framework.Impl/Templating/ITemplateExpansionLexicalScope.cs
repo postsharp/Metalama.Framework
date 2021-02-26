@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating
     /// <summary>
     /// Represents a lexical scope which allows the template method to define new unique identifiers within the target code element.
     /// </summary>
-    internal interface ITemplateExpansionLexicalScope : IDisposable
+    public interface ITemplateExpansionLexicalScope : IDisposable
     {
         /// <summary>
         /// Creates a new unique identifier name based on the given name.

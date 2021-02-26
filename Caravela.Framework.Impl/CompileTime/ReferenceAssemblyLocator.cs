@@ -12,7 +12,7 @@ using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal static class ReferenceAssemblyLocator
+    public static class ReferenceAssemblyLocator
     {
         private static readonly string _project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>

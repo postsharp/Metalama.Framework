@@ -1,31 +1,28 @@
-﻿// Copyright (c) "ESH-Repository" source code contributors. All Rights Reserved.
-// Licensed under the Microsoft Public License (MS-PL).
-// See LICENSE.md in the "ESH-Repository" root for license information.
-// "ESH-Repository" root address: https://github.com/Art-Stea1th/Enhanced-Syntax-Highlighting
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.DesignTime.Contracts;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Classification;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Caravela.Framework.DesignTime.Contracts;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Caravela.Framework.DesignTime.Vsix.Classifier
 {
     internal sealed class Classifier : IClassifier, IDisposable
     {
-        private readonly IClassificationTypeRegistryService _registryService;
         private static readonly IList<ClassificationSpan> _emptyList = new List<ClassificationSpan>( 0 ).AsReadOnly();
-
+        private readonly IClassificationTypeRegistryService _registryService;
+        private readonly ConcurrentQueue<SnapshotSpan> _spansQueue = new ConcurrentQueue<SnapshotSpan>();
         private Document? _document;
         private Task<IReadOnlyClassifiedTextSpanCollection?>? _lastGetClassificationsTask;
         private ITextSnapshot? _snapshot;
-        readonly ConcurrentQueue<SnapshotSpan> _spansQueue = new ConcurrentQueue<SnapshotSpan>();
-        CancellationTokenSource? _cancellationTokenSource;
+        private CancellationTokenSource? _cancellationTokenSource;
 
         public Classifier( ITextBuffer textBuffer, IClassificationTypeRegistryService registryService )
         {
@@ -81,8 +78,9 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                 return _emptyList;
             }
 
-
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
             var classifier = this._lastGetClassificationsTask.Result;
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
             if ( classifier == null )
             {
@@ -103,18 +101,10 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
                 var snapshotSpan = new SnapshotSpan( snapshot, classifiedSpan.Span.Start, classifiedSpan.Span.Length );
 
                 resultList.Add( new ClassificationSpan( snapshotSpan, classificationType ) );
-
-
             }
 
-
             return resultList;
-
-
-            
         }
-
-        
 
         private async Task<IReadOnlyClassifiedTextSpanCollection?> GetClassificationsAsync( Document document, CancellationToken cancellationToken )
         {
@@ -136,28 +126,24 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
             {
                 return null;
             }
-          
 
             if ( classificationService.TryGetClassifiedTextSpans( model, root, out var classifier ) )
             {
                 // Notify that we now have data for these spans.
                 foreach ( var span in this._spansQueue )
                 {
-                    this.ClassificationChanged?.Invoke( this, new ClassificationChangedEventArgs( span )  );
+                    this.ClassificationChanged?.Invoke( this, new ClassificationChangedEventArgs( span ) );
                 }
 
                 return classifier;
-
             }
 
-
             return null;
-
         }
 
         private IClassificationType? GetClassificationType( TextSpanClassification classification )
         {
-            string? name = classification switch
+            var name = classification switch
             {
                 TextSpanClassification.Dynamic => FormatDefinitions.SpecialName,
                 TextSpanClassification.TemplateKeyword => FormatDefinitions.SpecialName,
@@ -176,7 +162,6 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
 
         public void Dispose()
         {
-            
         }
     }
 }
