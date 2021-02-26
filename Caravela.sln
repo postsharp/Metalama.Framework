@@ -28,7 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{19660464-978E-4457-846E-B399BB6A3884}"
 	ProjectSection(SolutionItems) = preProject
-		Build\CopyToPublish.proj = Build\CopyToPublish.proj
+		Build\CopyToPublishDir.proj = Build\CopyToPublishDir.proj
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Impl.Package", "Caravela.Framework.Impl.Package\Caravela.Framework.Impl.Package.csproj", "{D7160654-CDF6-478B-901B-C04C7C9E7B6C}"
