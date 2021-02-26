@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework.Templating.Annotation;
 using Caravela.TestFramework.Templating.Highlighting;
 using Caravela.UnitTestFramework;
 using Microsoft.CodeAnalysis;
@@ -177,6 +178,26 @@ namespace Caravela.TestFramework.Templating
             var actualHighlightedSource = await File.ReadAllTextAsync( actualHighlightedPath );
 
             Assert.Equal( expectedHighlightedSource, actualHighlightedSource );
+        }
+
+        protected async Task<TestResult> RunAnnotationTestAsync( string relativeTestPath )
+        {
+            var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var testRunner = new AnnotationUnitTestRunner();
+            var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
+
+            this.WriteDiagnostics( testResult.Diagnostics );
+
+            return testResult;
+        }
+
+        protected async Task AssertTriviasPreservedByAnnotator( string relativeTestPath )
+        {
+            var testResult = await this.RunHighlightingTestAsync( relativeTestPath );
+
+            // There is an assertion in the TemplateTestRunnerBase.RunAsync checking that annotated syntax is equal to the original syntax.
+            Assert.True( testResult.Success, testResult.ErrorMessage );
         }
     }
 }

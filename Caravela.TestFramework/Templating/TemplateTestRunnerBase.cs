@@ -41,11 +41,6 @@ namespace Caravela.TestFramework.Templating
         {
             var testSource = CommonSnippets.CaravelaUsings + testInput.TestSource;
 
-            //TODO: create test
-            //var tree = CSharpSyntaxTree.ParseText( testSource );
-            //TriviaAdder triviaAdder = new();
-            //var templateRootWithTrivias = triviaAdder.Visit( tree.GetRoot() );
-
             // Source.
             var project = this.CreateProject();
             var templateSourceText = SourceText.From( testSource.ToString(), encoding: Encoding.UTF8 );
