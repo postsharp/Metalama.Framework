@@ -16,28 +16,14 @@ namespace Caravela.TestFramework.Aspects
     /// This is useful to write only one test method per category of tests.
     /// </para>
     /// </remarks>
-    public abstract class AspectUnitTestBase
+    public abstract class AspectUnitTestBase : UnitTestBase
     {
-        private readonly ITestOutputHelper _logger;
-
-        /// <summary>
-        /// Gets the root directory path of the current test project.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The value of this property is read from <c>AssemblyMetadataAttribute</c> with <c>Key = "ProjectDirectory"</c>.
-        /// </para>
-        /// </remarks>
-        protected string ProjectDirectory { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectUnitTestBase"/> class.
         /// </summary>
         /// <param name="logger">The Xunit logger.</param>
-        public AspectUnitTestBase( ITestOutputHelper logger )
+        public AspectUnitTestBase( ITestOutputHelper logger ) : base( logger )
         {
-            this._logger = logger;
-            this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
         }
 
         /// <summary>
@@ -69,7 +55,7 @@ namespace Caravela.TestFramework.Aspects
             {
                 if ( diagnostic.Severity == DiagnosticSeverity.Error )
                 {
-                    this._logger.WriteLine( diagnostic.ToString() );
+                    this.Logger.WriteLine( diagnostic.ToString() );
                 }
             }
 

@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.UnitTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "Caravela.TestFramework\Caravela.TestFramework.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Reactive", "Caravela.Reactive\Caravela.Reactive.csproj", "{A205936C-0562-497D-BB55-7482CBE042BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A205936C-0562-497D-BB55-7482CBE042BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A205936C-0562-497D-BB55-7482CBE042BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A205936C-0562-497D-BB55-7482CBE042BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A205936C-0562-497D-BB55-7482CBE042BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework.Templating.Highlighting;
 using Caravela.UnitTestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -45,27 +46,32 @@ namespace Caravela.TestFramework.Templating
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
         }
 
-        /// <summary>
-        /// Runs the template test with the given path of the source file.
-        /// </summary>
-        /// <param name="relativeTestPath">The path of the test source file relative to the project directory.</param>
-        /// <returns>The result of the test execution.</returns>
-        protected async Task<TestResult> RunTestAsync( string relativeTestPath )
+        private void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
-            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
-
-            var usedSyntaxKindsCollector = new UsedSyntaxKindsCollector();
-            var testRunner = new TemplateTestRunner( new[] { usedSyntaxKindsCollector } );
-            var testSource = await File.ReadAllTextAsync( sourceAbsolutePath );
-            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, testSource, null ) );
-
-            foreach ( var diagnostic in testResult.Diagnostics )
+            foreach ( var diagnostic in diagnostics )
             {
                 if ( diagnostic.Severity == DiagnosticSeverity.Error )
                 {
                     this._logger.WriteLine( diagnostic.ToString() );
                 }
             }
+        }
+
+        /// <summary>
+        /// Runs the template test with the given path of the source file.
+        /// </summary>
+        /// <param name="relativeTestPath">The path of the test source file relative to the project directory.</param>
+        /// <returns>The result of the test execution.</returns>
+        protected async Task<TestResult> RunTemplateTestAsync( string relativeTestPath )
+        {
+            var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+
+            var usedSyntaxKindsCollector = new UsedSyntaxKindsCollector();
+            var testRunner = new TemplateTestRunner( new[] { usedSyntaxKindsCollector } );
+            var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
+
+            this.WriteDiagnostics( testResult.Diagnostics );
 
             await this.WriteSyntaxCoverageAsync( relativeTestPath, testResult, usedSyntaxKindsCollector );
 
@@ -79,7 +85,7 @@ namespace Caravela.TestFramework.Templating
         /// <returns>The async task.</returns>
         protected async Task AssertTransformedSourceEqualAsync( string relativeTestPath )
         {
-            var testResult = await this.RunTestAsync( relativeTestPath );
+            var testResult = await this.RunTemplateTestAsync( relativeTestPath );
 
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
@@ -90,7 +96,8 @@ namespace Caravela.TestFramework.Templating
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
-                @"obj\transformed",
+                "obj",
+                "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
 
@@ -128,12 +135,48 @@ namespace Caravela.TestFramework.Templating
 
             var filePath = Path.Combine(
                 this.ProjectDirectory,
-                @"obj\SyntaxCover",
+                "obj",
+                "SyntaxCover",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 relativeTestPath + ".txt" );
 
             Directory.CreateDirectory( Path.GetDirectoryName( filePath ) );
             await File.WriteAllTextAsync( filePath, syntaxKindsText );
+        }
+
+        protected async Task<TestResult> RunHighlightingTestAsync( string relativeTestPath )
+        {
+            var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var testRunner = new HighlightingUnitTestRunner();
+            var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
+
+            this.WriteDiagnostics( testResult.Diagnostics );
+
+            return testResult;
+        }
+
+        protected async Task AssertHighlightedSourceEqualAsync( string relativeTestPath )
+        {
+            var testResult = await this.RunHighlightingTestAsync( relativeTestPath );
+
+            Assert.True( testResult.Success, testResult.ErrorMessage );
+
+            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var expectedHighlightedPath = Path.Combine( 
+                Path.GetDirectoryName( sourceAbsolutePath )!,
+                Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".highlighted.html" );
+            var expectedHighlightedSource = await File.ReadAllTextAsync( expectedHighlightedPath );
+            
+            var actualHighlightedPath = Path.Combine(
+                this.ProjectDirectory,
+                "obj",
+                "highlighted",
+                Path.GetDirectoryName( relativeTestPath ) ?? "",
+                Path.GetFileNameWithoutExtension( relativeTestPath ) + ".highlighted.html" );
+            var actualHighlightedSource = await File.ReadAllTextAsync( actualHighlightedPath );
+
+            Assert.Equal( expectedHighlightedSource, actualHighlightedSource );
         }
     }
 }

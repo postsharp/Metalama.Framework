@@ -17,6 +17,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using Xunit;
 using DiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.TestFramework.Templating
@@ -24,14 +25,13 @@ namespace Caravela.TestFramework.Templating
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
     /// </summary>
-    public class TemplateTestRunner
+    internal class TemplateTestRunner : TemplateTestRunnerBase
     {
-        private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplateTestRunner"/> class.
         /// </summary>
-        public TemplateTestRunner() : this( Array.Empty<CSharpSyntaxVisitor>() )
+        public TemplateTestRunner()
+            : base()
         {
         }
 
@@ -40,8 +40,8 @@ namespace Caravela.TestFramework.Templating
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         public TemplateTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
+            : base( testAnalyzers )
         {
-            this._testAnalyzers = testAnalyzers;
         }
 
         /// <summary>
@@ -49,60 +49,21 @@ namespace Caravela.TestFramework.Templating
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <returns>The result of the test execution.</returns>
-        public virtual async Task<TestResult> RunAsync( TestInput testInput )
+        public override async Task<TestResult> RunAsync( TestInput testInput )
         {
-            var testSource = CommonSnippets.CaravelaUsings + testInput.TemplateSource;
+            var result = await base.RunAsync( testInput );
 
-            // Source.
-            var project = this.CreateProject();
-            var templateSourceText = SourceText.From( testSource, encoding: Encoding.UTF8 );
-            var testDocument = project.AddDocument( "Test.cs", templateSourceText );
-
-            var result = new TestResult( testDocument );
-
-            var compilationForInitialDiagnostics = CSharpCompilation.Create(
-                "assemblyName",
-                new[] { (await testDocument.GetSyntaxTreeAsync())! },
-                project.MetadataReferences,
-                (CSharpCompilationOptions) project.CompilationOptions! );
-            var diagnostics = compilationForInitialDiagnostics.GetDiagnostics();
-            this.ReportDiagnostics( result, diagnostics );
-
-            if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            if ( !result.Success )
             {
-                result.ErrorMessage = "Initial diagnostics failed.";
                 return result;
             }
 
-            var templateSyntaxRoot = (await testDocument.GetSyntaxRootAsync())!;
-            var templateSemanticModel = (await testDocument.GetSemanticModelAsync())!;
-
-            foreach ( var testAnalyzer in this._testAnalyzers )
-            {
-                testAnalyzer.Visit( templateSyntaxRoot );
-            }
-
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var templateCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-            result.TransformedTemplateSyntax = transformedTemplateSyntax;
-
-            this.ReportDiagnostics( result, templateCompiler.Diagnostics );
-
-            if ( !templateCompilerSuccess )
-            {
-                result.ErrorMessage = "Template compiler failed.";
-                return result;
-            }
+            result.Success = false;
 
             // Write the transformed code to disk.
-            var transformedTemplateText = transformedTemplateSyntax.SyntaxTree.GetText();
-            var transformedTemplatePath = Path.Combine( Environment.CurrentDirectory, "generated", Path.ChangeExtension( testInput.TestName, ".cs" ) );
-            var transformedTemplateDirectory = Path.GetDirectoryName( transformedTemplatePath );
-            if ( !Directory.Exists( transformedTemplateDirectory ) )
-            {
-                Directory.CreateDirectory( transformedTemplateDirectory );
-            }
+            var transformedTemplateText = result.TransformedTemplateSyntax!.SyntaxTree.GetText();
+            var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
             using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
@@ -110,7 +71,7 @@ namespace Caravela.TestFramework.Templating
             }
 
             // Create a SyntaxTree that maps to the file we have just written.
-            var oldTransformedTemplateSyntaxTree = transformedTemplateSyntax.SyntaxTree;
+            var oldTransformedTemplateSyntaxTree = result.TransformedTemplateSyntax.SyntaxTree;
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
                 (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
                 (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options,
@@ -121,8 +82,8 @@ namespace Caravela.TestFramework.Templating
             var finalCompilation = CSharpCompilation.Create(
                 "assemblyName",
                 new[] { newTransformedTemplateSyntaxTree },
-                project.MetadataReferences,
-                (CSharpCompilationOptions) project.CompilationOptions! );
+                result.Project.MetadataReferences,
+                (CSharpCompilationOptions) result.Project.CompilationOptions! );
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
@@ -155,11 +116,11 @@ namespace Caravela.TestFramework.Templating
                 Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = CompilationModel.CreateInitialInstance( compilationForInitialDiagnostics );
+                var caravelaCompilation = CompilationModel.CreateInitialInstance( (CSharpCompilation) result.InitialCompilation );
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );
-                var formattedOutput = Formatter.Format( output, project.Solution.Workspace );
+                var formattedOutput = Formatter.Format( output, result.Project.Solution.Workspace );
 
                 result.TransformedTargetSource = formattedOutput.GetText();
             }
@@ -173,45 +134,9 @@ namespace Caravela.TestFramework.Templating
                 assemblyLoadContext.Unload();
             }
 
-            var highlightedTemplatePath = Path.ChangeExtension( transformedTemplatePath, ".html" );
-            new TemplateHighlightingWriter( highlightedTemplatePath, templateSourceText, annotatedTemplateSyntax )
-                .Write();
-
             result.Success = true;
 
             return result;
-        }
-
-        /// <summary>
-        /// Creates a new project that is used to compile the test source.
-        /// </summary>
-        /// <returns>A new project instance.</returns>
-        protected virtual Project CreateProject()
-        {
-            var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
-
-            var guid = Guid.NewGuid();
-            var workspace1 = new AdhocWorkspace();
-            var solution = workspace1.CurrentSolution;
-            var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                    .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                    .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestTemplateAttribute ).Assembly.Location ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( IReactiveCollection<> ).Assembly.Location ) )
-                ;
-            return project;
-        }
-
-        /// <summary>
-        /// Processes the diagnostics emitted during the test run.
-        /// </summary>
-        /// <param name="result">The current test result.</param>
-        /// <param name="diagnostics">The diagnostics to report.</param>
-        protected virtual void ReportDiagnostics( TestResult result, IReadOnlyList<Diagnostic> diagnostics )
-        {
-            result.Diagnostics.AddRange( diagnostics );
         }
     }
 }

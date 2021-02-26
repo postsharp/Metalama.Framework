@@ -38,7 +38,7 @@ namespace Caravela.Framework.IntegrationTests.Templating
         [FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
         public async Task UnsupportedSyntax( string testName )
         {
-            var testResult = await this.RunTestAsync( testName );
+            var testResult = await this.RunTemplateTestAsync( testName );
             Assert.False( testResult.Success );
             testResult.AssertContainsDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }
