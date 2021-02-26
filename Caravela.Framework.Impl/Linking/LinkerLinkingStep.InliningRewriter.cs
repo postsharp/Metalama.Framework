@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,15 +14,15 @@ namespace Caravela.Framework.Impl.Linking
     {
         private class InliningRewriter : CSharpSyntaxRewriter
         {
-            private readonly LinkerReferenceRegistry _referenceRegistry;
+            private readonly LinkerAnalysisRegistry _analysisRegistry;
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _contextSymbol;
             private readonly string? _returnVariableName;
             private readonly int? _returnLabelId;
 
-            public InliningRewriter( LinkerReferenceRegistry referenceRegistry, SemanticModel semanticModel, IMethodSymbol contextSymbol, string? returnVariableName = null, int? returnLabelId = null )
+            public InliningRewriter( LinkerAnalysisRegistry referenceRegistry, SemanticModel semanticModel, IMethodSymbol contextSymbol, string? returnVariableName = null, int? returnLabelId = null )
             {
-                this._referenceRegistry = referenceRegistry;
+                this._analysisRegistry = referenceRegistry;
                 this._semanticModel = semanticModel;
                 this._contextSymbol = contextSymbol;
                 this._returnVariableName = returnVariableName;
@@ -58,11 +61,11 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 // If the body is inlineable, inline it.
-                var resolvedSymbol = (IMethodSymbol) this._referenceRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
-                if ( this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
+                if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body.
-                    var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, resolvedSymbol, null, this.GetNextReturnLabelId() );
+                    var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, resolvedSymbol, null, this.GetNextReturnLabelId() );
                     var declaration = (MethodDeclarationSyntax) resolvedSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
                     return innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
                 }
@@ -87,8 +90,8 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
 
                 // We are on an assignment of a method return value to a variable.      
-                var resolvedSymbol = (IMethodSymbol) this._referenceRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
-                if ( this._referenceRegistry.IsBodyInlineable( resolvedSymbol ) )
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
+                if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // Inline the method body
                     return this.GetInlinedMethodBody( resolvedSymbol, this.GetAssignmentVariableName( node.Left ) );
@@ -102,12 +105,12 @@ namespace Caravela.Framework.Impl.Linking
             private SyntaxNode? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string returnVariableName)
             {
                 var labelId = this.GetNextReturnLabelId();
-                var innerRewriter = new InliningRewriter( this._referenceRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
+                var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
                 var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                 var rewrittenBlock = innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
 
-                if ( this._referenceRegistry.HasSimpleReturn( this._contextSymbol ) )
+                if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
                 {
                     return rewrittenBlock;
                 }
@@ -116,8 +119,7 @@ namespace Caravela.Framework.Impl.Linking
                     return
                         Block(
                             (StatementSyntax)rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() )
-                            );
+                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ));
                 }
             }
 
@@ -136,7 +138,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // Inner inlining (i.e. multiple methods inlined into one). Return statements need to be transformed to assign (for non-void method) + jump.
 
-                    if ( this._referenceRegistry.HasSimpleReturn( this._contextSymbol ) )
+                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
                     {
                         if ( node.Expression != null )
                         {

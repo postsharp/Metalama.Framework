@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -56,12 +59,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         // Transformations grouped by target syntax trees, preserved order.
         private readonly CSharpCompilation _initialCompilation;
+        private readonly CompilationModel _finalCompilationModel;
         private readonly IReadOnlyList<ISyntaxTreeTransformation> _transformations;
 
-        private LinkerIntroductionStep( CSharpCompilation initialCompilation, IReadOnlyList<ISyntaxTreeTransformation> transformations )
+        private LinkerIntroductionStep( CSharpCompilation initialCompilation, CompilationModel finalCompilationModel, IReadOnlyList<ISyntaxTreeTransformation> transformations )
         {
             this._initialCompilation = initialCompilation;
             this._transformations = transformations;
+            this._finalCompilationModel = finalCompilationModel;
         }
 
         public static LinkerIntroductionStep Create( AspectLinkerInput input )
@@ -75,12 +80,12 @@ namespace Caravela.Framework.Impl.Linking
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();
 
-            return new LinkerIntroductionStep( input.Compilation, allTransformations );
+            return new LinkerIntroductionStep( input.Compilation, input.CompilationModel, allTransformations );
         }
 
         public LinkerIntroductionStepOutput Execute()
         {
-            var context = new Context( this._initialCompilation );
+            var context = new Context( this._initialCompilation, this._finalCompilationModel );
             var diagnostics = new DiagnosticList( null );
             var nameProvider = new LinkerIntroductionNameProvider();
             var proceedImplFactory = new LinkerProceedImplementationFactory();
@@ -91,7 +96,7 @@ namespace Caravela.Framework.Impl.Linking
                 var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, context.GetLexicalScope( memberIntroduction ), proceedImplFactory );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-                context.TransformationRegistry.RegisterIntroducedMembers( memberIntroduction, introducedMembers );
+                context.TransformationRegistry.SetIntroducedMembers( memberIntroduction, introducedMembers );
             }
 
             var intermediateCompilation = this._initialCompilation;
@@ -104,9 +109,12 @@ namespace Caravela.Framework.Impl.Linking
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                context.TransformationRegistry.RegisterIntermediateSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                context.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
                 intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
+
+            // Push the intermediate compilation.
+            context.TransformationRegistry.SetIntermediateCompilation( intermediateCompilation );
 
             // Freeze the introduction registry, it should not be changed after this point.
             context.TransformationRegistry.Freeze();
@@ -120,18 +128,19 @@ namespace Caravela.Framework.Impl.Linking
 
             public Dictionary<ICodeElement, LinkerLexicalScope> LexicalScopesByOverriddenElement { get; } = new Dictionary<ICodeElement, LinkerLexicalScope>();
 
-            public LinkerTransformationRegistry TransformationRegistry { get; } = new LinkerTransformationRegistry();
+            public LinkerTransformationRegistry TransformationRegistry { get; }
 
             public Compilation IntermediateCompilation { get; set; }
 
-            public Context( Compilation initialCompilation )
+            public Context( Compilation initialCompilation, CompilationModel finalCompilationModel )
             {
                 this.IntermediateCompilation = initialCompilation;
+                this.TransformationRegistry = new LinkerTransformationRegistry( finalCompilationModel );
             }
 
             public void ReplaceSyntaxTree( SyntaxTree initialSyntaxTree, SyntaxTree intermediateSyntaxTree )
             {
-                this.TransformationRegistry.RegisterIntermediateSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                this.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
                 this.IntermediateCompilation = this.IntermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 

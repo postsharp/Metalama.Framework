@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
@@ -16,7 +19,7 @@ namespace Caravela.Framework.UnitTests.Linker
 {
     public class LinkerTestBase : TestBase
     {
-        internal static INonObservableTransformation CreateFakeMethodOverride( AspectLayerId AspectLayer, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
+        internal static INonObservableTransformation CreateFakeMethodOverride( AspectLayerId aspectLayer, IMethod targetMethod, MemberDeclarationSyntax overrideSyntax )
         {
             var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>() );
 
@@ -24,13 +27,13 @@ namespace Caravela.Framework.UnitTests.Linker
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetMethod.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                new[] { new IntroducedMember( transformation, overrideSyntax, AspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
+                new[] { new IntroducedMember( transformation, overrideSyntax, aspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IOverriddenElement) transformation).OverriddenElement ).Returns( targetMethod );
 
             return (INonObservableTransformation) transformation;
         }
 
-        internal static IObservableTransformation CreateFakeMethodIntroduction( AspectLayerId AspectLayer, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
+        internal static IObservableTransformation CreateFakeMethodIntroduction( AspectLayerId aspectLayer, INamedType targetType, MemberDeclarationSyntax overrideSyntax )
         {
             var transformation = (IMemberIntroduction) A.Fake<object>( o => o.Strict().Implements<IObservableTransformation>().Implements<IMemberIntroduction>() );
 
@@ -38,7 +41,7 @@ namespace Caravela.Framework.UnitTests.Linker
             A.CallTo( () => transformation.InsertPositionNode ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>() );
             A.CallTo( () => transformation.TargetSyntaxTree ).Returns( targetType.ToSyntaxNode<MemberDeclarationSyntax>().SyntaxTree );
             A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                new[] { new IntroducedMember( transformation, overrideSyntax, AspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
+                new[] { new IntroducedMember( transformation, overrideSyntax, aspectLayer, IntroducedMemberSemantic.MethodOverride ) } );
             A.CallTo( () => ((IObservableTransformation) transformation).ContainingElement ).Returns( targetType );
 
             return (IObservableTransformation) transformation;

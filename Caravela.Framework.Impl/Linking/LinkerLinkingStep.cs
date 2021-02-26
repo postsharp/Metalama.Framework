@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
@@ -32,9 +35,9 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
         private readonly LinkerTransformationRegistry _transformationRegistry;
         private readonly CSharpCompilation _intermediateCompilation;
-        private readonly LinkerReferenceRegistry _referenceRegistry;
+        private readonly LinkerAnalysisRegistry _referenceRegistry;
 
-        public LinkerLinkingStep( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
+        public LinkerLinkingStep( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerAnalysisRegistry referenceRegistry )
         {
             this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
@@ -42,7 +45,7 @@ namespace Caravela.Framework.Impl.Linking
             this._referenceRegistry = referenceRegistry;
         }
 
-        public static LinkerLinkingStep Create( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerReferenceRegistry referenceRegistry )
+        public static LinkerLinkingStep Create( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerAnalysisRegistry referenceRegistry )
         {
             return new LinkerLinkingStep( orderedAspectLayers, transformationRegistry, intermediateCompilation, referenceRegistry );
         }

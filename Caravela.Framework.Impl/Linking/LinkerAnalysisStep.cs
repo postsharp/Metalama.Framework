@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
@@ -8,27 +11,29 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerAnalysisStep
     {
-        private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
+        private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
         private readonly Compilation _intermediateCompilation;
+        private readonly LinkerTransformationRegistry _transformationRegistry;
 
-        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectLayer> orderedAspectLayers )
+        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry )
         {
             this._intermediateCompilation = intermediateCompilation;
             this._orderedAspectLayers = orderedAspectLayers;
+            this._transformationRegistry = transformationRegistry;
         }
 
-        public static LinkerAnalysisStep Create( CSharpCompilation intermediateCompilation, IReadOnlyList<AspectLayer> orderedAspectLayers )
+        public static LinkerAnalysisStep Create( CSharpCompilation intermediateCompilation, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry )
         {
-            return new LinkerAnalysisStep( intermediateCompilation, orderedAspectLayers );
+            return new LinkerAnalysisStep( intermediateCompilation, orderedAspectLayers, transformationRegistry );
         }
 
         public LinkerAnalysisStepResult Execute()
         {
-            var referenceRegistry = new LinkerReferenceRegistry();
+            var referenceRegistry = new LinkerAnalysisRegistry( this._transformationRegistry, this._orderedAspectLayers );
 
             Dictionary<(ISymbol Symbol, int Version), int> referenceCounts = new();
             List<(AspectLayer AspectLayer, int Version)> aspectLayers = new();
-            aspectLayers.AddRange( this._orderedAspectLayers.Select( ( ar, i ) => (ar, i + 1) ) );
+            aspectLayers.AddRange( this._orderedAspectLayers.Select( ( ar, i ) => ((AspectLayer)ar, i + 1) ) );
 
             foreach ( var syntaxTree in this._intermediateCompilation.SyntaxTrees )
             {

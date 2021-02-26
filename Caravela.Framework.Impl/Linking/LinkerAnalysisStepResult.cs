@@ -1,10 +1,13 @@
-﻿namespace Caravela.Framework.Impl.Linking
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerAnalysisStepResult
     {
-        public LinkerReferenceRegistry ReferenceRegistry { get; }
+        public LinkerAnalysisRegistry ReferenceRegistry { get; }
 
-        public LinkerAnalysisStepResult( LinkerReferenceRegistry referenceRegistry )
+        public LinkerAnalysisStepResult( LinkerAnalysisRegistry referenceRegistry )
         {
             this.ReferenceRegistry = referenceRegistry;
         }

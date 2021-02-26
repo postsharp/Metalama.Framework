@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
@@ -14,14 +17,14 @@ namespace Caravela.Framework.Impl.Linking
         {
             private readonly CSharpCompilation _intermediateCompilation;
             private readonly LinkerTransformationRegistry _transformationRegistry;
-            private readonly LinkerReferenceRegistry _referenceRegistry;
+            private readonly LinkerAnalysisRegistry _referenceRegistry;
             private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
 
             public LinkingRewriter(
                 IReadOnlyList<AspectLayer> orderedAspectLayers,
                 LinkerTransformationRegistry transformationRegistry,
                 CSharpCompilation intermediateCompilation,
-                LinkerReferenceRegistry referenceRegistry )
+                LinkerAnalysisRegistry referenceRegistry )
             {
                 this._intermediateCompilation = intermediateCompilation;
                 this._orderedAspectLayers = orderedAspectLayers;

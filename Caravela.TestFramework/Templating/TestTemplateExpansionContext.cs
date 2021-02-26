@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.TestFramework.Templating
 {
-    internal class TestTemplateExpansionContext : ITemplateExpansionContext
+    internal class TestTemplateExpansionContext : ITemplateExpansionContext, IDisposable
     {
         private readonly IMethod _targetMethod;
         private readonly DiagnosticList _diagnostics;
@@ -89,6 +89,10 @@ namespace Caravela.TestFramework.Templating
             }
 
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
+        }
+
+        public void Dispose()
+        {
         }
 
         public IDisposable OpenNestedScope()
