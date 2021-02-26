@@ -25,8 +25,8 @@
 
   <ItemGroup>
 	  <!-- We cannot use InternalsVisibleTo for Caravela.TestFramework because of obfuscation in the release build. -->
-    <InternalsVisibleTo Include="Caravela.Framework.UnitTests" />
-    <InternalsVisibleTo Include="Caravela.Framework.IntegrationTests" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
     
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" GeneratePathProperty="true" />
     <None Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />

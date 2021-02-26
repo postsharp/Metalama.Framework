@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    public static class RoslynExtensions
+    internal static class RoslynExtensions
     {
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {

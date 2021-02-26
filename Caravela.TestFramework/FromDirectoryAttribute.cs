@@ -11,6 +11,7 @@ namespace Caravela.TestFramework
 {
     /// <summary>
     /// When applied on a test theory method specifies the directory from which to load the test source files for the given test theory method.
+    /// Files whose name start with an underscore (<c>_</c>) are ignored.
     /// </summary>
     public class FromDirectoryAttribute : DataAttribute
     {

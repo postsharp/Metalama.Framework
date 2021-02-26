@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Creates instances of <see cref="ICodeElement"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    public class CodeElementFactory : ITypeFactory
+    internal class CodeElementFactory : ITypeFactory
     {
         private readonly CompilationModel _compilation;
         private readonly ConcurrentDictionary<CodeElementLink<ICodeElement>, object> _cache = new( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
         
-        internal ObjectSerializers Serializers { get; } = new();
+        public ObjectSerializers Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
 
