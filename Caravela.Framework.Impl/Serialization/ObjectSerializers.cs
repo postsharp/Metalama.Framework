@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -91,7 +94,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// </summary>
         /// <param name="o">An object to serialize.</param>
         /// <returns>An expression that would create the object.</returns>
-        /// <exception cref="InvalidUserCodeException">When the object can't be serialized, for example if it's of an unsupported type.</exception>
+        /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
         public ExpressionSyntax SerializeToRoslynCreationExpression( object? o )
         {
             if ( o == null )

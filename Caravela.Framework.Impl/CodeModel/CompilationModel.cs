@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -174,9 +177,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     case INamedType namedType:
                         return this.GetDepth( namedType );
-
+                    
                     case ICompilation:
                         return 0;
+                    
+                    case IAssembly:
+                        // Order with Compilation matters. We want the root compilation to be ordered first.
+                        return 1;
 
                     default:
                     {
@@ -232,5 +239,7 @@ namespace Caravela.Framework.Impl.CodeModel
         IAttributeList ICodeElement.Attributes => throw new NotImplementedException();
 
         IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => throw new NotImplementedException();
+
+        public string? Name => this.RoslynCompilation.AssemblyName;
     }
 }

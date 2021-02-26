@@ -1,9 +1,13 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -20,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int Index => -1;
 
-        OptionalValue IParameter.DefaultValue => default;
+        TypedConstant IParameter.DefaultValue => default;
 
         public bool IsParams => false;
 

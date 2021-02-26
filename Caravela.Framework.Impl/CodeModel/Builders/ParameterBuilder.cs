@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index { get; }
 
-        public OptionalValue DefaultValue { get; set; }
+        public TypedConstant DefaultValue { get; set; }
 
         public bool IsParams { get; set; }
 

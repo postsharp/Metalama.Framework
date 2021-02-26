@@ -1,7 +1,11 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -43,6 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override ISymbol Symbol => this.ParameterSymbol;
 
-        public OptionalValue DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue ? new OptionalValue( this.ParameterSymbol.ExplicitDefaultValue ) : default;
+        public TypedConstant DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue 
+            ? new TypedConstant( this.Compilation.Factory.GetIType( this.ParameterType ), this.ParameterSymbol.ExplicitDefaultValue ) : default;
     }
 }

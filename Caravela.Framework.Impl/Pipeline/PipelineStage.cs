@@ -1,4 +1,7 @@
-﻿namespace Caravela.Framework.Impl.Pipeline
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
     /// Groups a set of transformations that, within the group, do not require the Roslyn compilation

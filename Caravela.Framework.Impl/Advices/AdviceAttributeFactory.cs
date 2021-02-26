@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Caravela.Framework.Advices;
@@ -16,9 +19,9 @@ namespace Caravela.Framework.Impl.Advices
 
             bool TryGetNamedArgument<TArg>( string name, [NotNullWhen( true )] out TArg? value )
             {
-                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue != null )
+                if ( namedArguments.TryGetValue( name, out var objectValue ) && objectValue.Value != null )
                 {
-                    value = (TArg) objectValue;
+                    value = (TArg) objectValue.Value;
                     return true;
                 }
                 else

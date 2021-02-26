@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -22,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index => this.ParameterBuilder.Index;
 
-        public OptionalValue DefaultValue => this.ParameterBuilder.DefaultValue;
+        public TypedConstant DefaultValue => this.ParameterBuilder.DefaultValue;
 
         public bool IsParams => this.ParameterBuilder.IsParams;
 

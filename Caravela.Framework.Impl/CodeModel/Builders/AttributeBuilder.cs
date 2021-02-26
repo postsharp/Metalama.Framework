@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
@@ -8,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<object?> constructorArguments )
+        public AttributeBuilder( ICodeElement containingElement, IMethod constructor, IReadOnlyList<TypedConstant> constructorArguments )
         {
             this.ContainingElement = containingElement;
             this.ConstructorArguments = constructorArguments;
@@ -37,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod Constructor { get; }
 
-        public IReadOnlyList<object?> ConstructorArguments { get; }
+        public IReadOnlyList<TypedConstant> ConstructorArguments { get; }
 
         INamedArgumentList IAttribute.NamedArguments => this.NamedArguments;
     }

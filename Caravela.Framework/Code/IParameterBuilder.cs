@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 namespace Caravela.Framework.Code
 {
     public interface IParameterBuilder : IParameter, ICodeElementBuilder
@@ -7,7 +10,7 @@ namespace Caravela.Framework.Code
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        new OptionalValue DefaultValue { get; set; }
+        new TypedConstant DefaultValue { get; set; }
 
         /// <summary>
         /// Gets or sets the parameter type.

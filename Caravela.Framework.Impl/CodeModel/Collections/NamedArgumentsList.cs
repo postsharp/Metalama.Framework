@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,11 +9,11 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-    internal class NamedArgumentsList : Collection<KeyValuePair<string, object?>>, INamedArgumentList
+    internal class NamedArgumentsList : Collection<KeyValuePair<string, TypedConstant>>, INamedArgumentList
     {
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public NamedArgumentsList( IEnumerable<KeyValuePair<string, object?>> source )
+        public NamedArgumentsList( IEnumerable<KeyValuePair<string, TypedConstant>> source )
         {
             foreach ( var item in source )
             {
@@ -22,10 +25,10 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
         }
 
-        public bool TryGetByName( string name, out object? value )
+        public bool TryGetByName( string name, out TypedConstant value )
         {
             var named = this.Items.Where( p => p.Key == name );
-            var enumerator = named.GetEnumerator();
+            using var enumerator = named.GetEnumerator();
             if ( enumerator.MoveNext() )
             {
                 value = enumerator.Current.Value;
@@ -33,15 +36,15 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
             else
             {
-                value = null;
+                value = default;
                 return false;
             }
         }
 
-        public object? GetByName( string name )
+        public object? GetValue( string name )
         {
             _ = this.TryGetByName( name, out var value );
-            return value;
+            return value.Value;
         }
     }
 }
