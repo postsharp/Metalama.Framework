@@ -1,14 +1,14 @@
 ﻿using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.ClassDeclaration
+namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Identifiers.TargetIdentifier
 {
-    //TODO: How to have a compile-time only declaration? See TemplateAnnotator.VisitClassDeclaration
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
+            target.ToString();
             return proceed();
         }
     }

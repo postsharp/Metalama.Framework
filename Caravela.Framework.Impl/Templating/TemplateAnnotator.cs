@@ -101,6 +101,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
+                    //TODO: Should this still be here?
                     // TODO: remove this coercion
                     if ( this._forceCompileTimeOnlyExpression )
                     {
@@ -231,7 +232,7 @@ namespace Caravela.Framework.Impl.Templating
                         break;
 
                     case SymbolDeclarationScope.CompileTimeOnly:
-                        // If all child scopes are build-time, the parent is build-time too.
+                        // If all child scopes are compile-time, the parent is compile-time too.
                         break;
                 }
             }
@@ -366,6 +367,7 @@ namespace Caravela.Framework.Impl.Templating
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
                 if ( (symbol is ILocalSymbol localSymbol &&
+                    //TODO: What's the difference between "localScope" and "scope" here?
                       this._localScopes.TryGetValue( localSymbol, out var localScope ) &&
                       localScope == SymbolDeclarationScope.CompileTimeOnly) ||
                      symbol.GetAttributes().Any( a =>
@@ -380,6 +382,7 @@ namespace Caravela.Framework.Impl.Templating
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
                 }
 
+                //TODO: Are there any other test cases?
                 return annotatedNode;
             }
             else
@@ -388,6 +391,19 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        //TODO: for "compileTimeClass.field.ToString", this method is called 6 times. Do we want to optimize?
+        //node.ToString()
+        //"compileTimeClass.field.ToString"
+        //node.ToString()
+        //"compileTimeClass.field"
+        //node.ToString()
+        //"compileTimeClass.field"
+        //node.ToString()
+        //"compileTimeClass.field.ToString"
+        //node.ToString()
+        //"compileTimeClass.field"
+        //node.ToString()
+        //"compileTimeClass.field"
         public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
             var transformedName = (SimpleNameSyntax) this.Visit( node.Name )!;
@@ -443,7 +459,7 @@ namespace Caravela.Framework.Impl.Templating
                     // dynamic or dynamic[]
                     if ( parameterType is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } )
                     {
-                        transformedArgument = ( ArgumentSyntax) this.VisitArgument( argument )!;
+                        transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
                     }
                     else
                     {
@@ -462,7 +478,7 @@ namespace Caravela.Framework.Impl.Templating
                     ArgumentList(
                         node.ArgumentList.OpenParenToken,
                         SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
-                        node.ArgumentList.CloseParenToken) );
+                        node.ArgumentList.CloseParenToken ) );
 
                 updatedInvocation = updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
@@ -746,6 +762,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
 
+                //TODO: Why is this code not removed?
                 // TODO: We are no longer relying on other assignments than initialization, so this code should be removed.
                 var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
