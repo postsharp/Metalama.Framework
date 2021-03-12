@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Linking
             var introductionStepResult = introductionStep.Execute();
 
             // Second pass. Count references to modified methods on semantic models of intermediate compilation.
-            var analysisStep = LinkerAnalysisStep.Create( this._input.Compilation, this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry );
+            var analysisStep = LinkerAnalysisStep.Create( introductionStepResult.IntermediateCompilation, this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry );
             var analysisStepResult = analysisStep.Execute();
 
             // Third pass. Link an inline intermediate compilation.

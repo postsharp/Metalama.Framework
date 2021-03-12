@@ -30,7 +30,6 @@ namespace Caravela.Framework.Impl.Linking
         public LinkerAnalysisStepResult Execute()
         {
             var analysisRegistry = new LinkerAnalysisRegistry( this._transformationRegistry, this._orderedAspectLayers );
-            var indexedAspectLayers = this._orderedAspectLayers.Select( ( ar, i ) => (Layer: (AspectLayer) ar, Index: i) );
 
             foreach ( var syntaxTree in this._intermediateCompilation.SyntaxTrees )
             {
@@ -63,7 +62,6 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     var symbol = symbolInfo.Symbol.AssertNotNull();
-                    var symbolVersion = (symbol, targetLayer);
 
                     analysisRegistry.AddReferenceCount( symbol, targetLayer );
                 }

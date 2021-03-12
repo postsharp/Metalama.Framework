@@ -1,0 +1,16 @@
+
+    [Introduction]
+    internal class TargetClass
+    {
+        public void IntroducedMethod_Void()
+        {
+            Console.WriteLine("This is introduced method.");
+        }
+
+        public global::System.Int32 IntroducedMethod_Int()
+        {
+            Console.WriteLine("This is introduced method.");
+            return default;
+        }
+    }
+    

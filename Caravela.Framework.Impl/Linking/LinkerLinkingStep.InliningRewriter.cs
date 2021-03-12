@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,6 +15,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         private class InliningRewriter : CSharpSyntaxRewriter
         {
+            private static string _inlineableBlockAnnotationId = "AspectLinkerInlineableBlock";
+
             private readonly LinkerAnalysisRegistry _analysisRegistry;
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _contextSymbol;
@@ -40,10 +43,145 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( updatedExpression.Kind() == SyntaxKind.Block )
                 {
-                    return updatedExpression;
+                    return updatedExpression.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                 }
 
                 return node.Update( this.VisitList( node.AttributeLists ), (ExpressionSyntax) updatedExpression, this.VisitToken( node.SemicolonToken ) );
+            }
+            /*
+            public override SyntaxNode? VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
+            {
+                // Variable declaration - if there is inlineable call, we need to break this statement into multiple declarations.
+
+                // First go through all declared variables and look if there is a linker annotated invocation.
+                bool anyBlockifiedInitializer = false;
+                Dictionary<VariableDeclaratorSyntax, SyntaxNode?> rewrittenDeclarators = new Dictionary<VariableDeclaratorSyntax, SyntaxNode?>();
+                foreach (var declarator in node.Declaration.Variables)
+                {
+                    var initializerExpr = declarator.Initializer?.Value;
+                    var annotation = initializerExpr?.GetLinkerAnnotation();                    
+                    if ( annotation != null )
+                    {
+                        // This is a linker annotated invocation: var x = ..., >> y = Foo(...) <<, z = ...;
+                        // If the target is not inlineable, rewrite the call to the final destination.
+                        // If the target is inlineable, break the variable declaration into following block:
+                        // var x = ...; 
+                        // <return_type> y;
+                        // <inlined_body>
+                        // var z = ...;
+                        var calleeSymbol = this._semanticModel.GetSymbolInfo( initializerExpr.AssertNotNull() ).Symbol.AssertNotNull();
+
+                        // If the body is inlineable, inline it.
+                        var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation );
+                        if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
+                        {
+                            // Inline the method body.
+                            return this.GetInlinedMethodBody( resolvedSymbol, null );
+                        }
+                        else
+                        {
+                            return initializerExpr.Update( this.ReplaceCallTarget( node.Expression, resolvedSymbol ), node.ArgumentList );
+                        }
+
+                        if ( updatedInitializerExpression != declarator.Initializer )
+                        {
+                            if ( updatedInitializerExpression is BlockSyntax )
+                            {
+                                anyBlockifiedInitializer = true;
+                            }
+
+                            rewrittenDeclarators[declarator] = updatedInitializerExpression;
+                        }
+                    }
+                }
+
+                if ( anyBlockifiedInitializer )
+                {
+                    List<StatementSyntax> variableStatements = new List<StatementSyntax>();
+
+                    foreach ( var declarator in node.Declaration.Variables )
+                    {
+                        if ( rewrittenDeclarators.TryGetValue( declarator, out SyntaxNode updatedInitializerExpression ) )
+                        {
+                            if ( updatedInitializerExpression is BlockSyntax blockSyntax )
+                            {
+                                variableStatements.Add( node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( new[] { declarator.WithInitializer( null ) } ) ) ) );
+                                variableStatements.Add( blockSyntax );
+                            }
+                            else
+                            {
+                                variableStatements.Add(
+                                    node.WithDeclaration(
+                                        node.Declaration.WithVariables(
+                                            SeparatedList(
+                                                new[]
+                                                {
+                                                    declarator.WithInitializer(
+                                                        declarator.Initializer?.WithValue((ExpressionSyntax)updatedInitializerExpression ) )
+                                                } ) ) ) );
+                            }                            
+                        }
+                        else
+                        {
+                            variableStatements.Add( node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( new[] { declarator } ) ) ) );
+                        }
+                    }
+
+                    return Block( variableStatements ).WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                }
+                else if ( rewrittenDeclarators.Count > 0 )
+                {
+                    return node.WithDeclaration(
+                        node.Declaration.WithVariables(
+                            SeparatedList(
+                                node.Declaration.Variables
+                                .Select( v =>
+                                    rewrittenDeclarators.ContainsKey( v )
+                                    ? v.WithInitializer( EqualsValueClause( (ExpressionSyntax) rewrittenDeclarators[v] ) )
+                                    : v ) ) ) );
+                }
+                else
+                {
+                    return node;
+                }
+            }*/
+
+            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            {
+                // TODO: This should move to a separate rewriter and unite with what template compiler currently does (or should do).
+                var newSyntax = base.VisitBlock( node );
+
+                if ( newSyntax is BlockSyntax newBlock )
+                {
+                    var statements = new List<StatementSyntax>();
+                    bool anyInlined = false;
+
+                    foreach ( var statement in newBlock.Statements)
+                    {
+                        if ( statement.GetAnnotations( _inlineableBlockAnnotationId ).Any() )
+                        {
+                            anyInlined = true;
+                            statements.AddRange( ((BlockSyntax) statement).Statements );
+                        }
+                        else
+                        {
+                            statements.Add( statement );
+                        }
+                    }
+
+                    if ( anyInlined )
+                    {
+                        return newBlock.WithStatements( List( statements ) );
+                    }
+                    else
+                    {
+                        return newBlock;
+                    }
+                }
+                else
+                {
+                    return newSyntax;
+                }
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -69,7 +207,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( this.ReplaceCallTarget( node.Expression, resolvedSymbol ), node.ArgumentList );
+                    return node.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
                 }
             }
 
@@ -96,17 +234,20 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( this.ReplaceCallTarget( invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( this.ReplaceCallTarget( (IMethodSymbol)calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
                 }
             }
 
-            private SyntaxNode? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string? returnVariableName)
+            private BlockSyntax? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string? returnVariableName)
             {
                 var labelId = this.GetNextReturnLabelId();
                 var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
                 var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
-                var rewrittenBlock = innerRewriter.VisitBlock( declaration.Body.AssertNotNull() );
+                var rewrittenBlock =
+                    returnVariableName == null && this._analysisRegistry.IsOverrideTarget( calledMethodSymbol )
+                    ? declaration.Body.AssertNotNull()
+                    : (BlockSyntax)innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
 
                 if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
                 {
@@ -116,35 +257,70 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return
                         Block(
-                            (StatementSyntax)rewrittenBlock.AssertNotNull(),
+                            rewrittenBlock.AssertNotNull(),
                             LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ));
                 }
             }
 
-            private ExpressionSyntax ReplaceCallTarget( ExpressionSyntax expression, IMethodSymbol methodSymbol )
+            private ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
-                return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                if ( originalSymbol == methodSymbol )
+                {
+                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
+                }
+                else
+                {
+                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                }
             }
 
             public override SyntaxNode? VisitReturnStatement( ReturnStatementSyntax node )
             {
                 // TODO: ref return etc.
 
+                var linkerAnnotation = node.Expression?.GetLinkerAnnotation();
+                if (linkerAnnotation != null)
+                {
+                    // This is an annotated invocation. By visiting the expression, we will either get a invocation or a block if the invocation target is inlineable.
+
+                    var updatedExpression = this.Visit( node.Expression );
+
+                    if ( updatedExpression == null )
+                    {
+                        return null;
+                    }
+                    
+                    if (updatedExpression.Kind() == SyntaxKind.Block)
+                    {
+                        return updatedExpression.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                    }
+
+                    return node.WithExpression( (ExpressionSyntax) updatedExpression );
+                }
+
                 if ( this._returnLabelId != null )
                 {
-                    // Inner inlining (i.e. multiple methods inlined into one). Return statements need to be transformed to assign (for non-void method) + jump.
+                    // We are in the inner inlining case and we have a return label we need to jump to instead of returning.
 
                     if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) || this._analysisRegistry.IsOverrideTarget(this._contextSymbol) )
                     {
+                        // 
                         if ( node.Expression != null )
                         {
-                            return ExpressionStatement( 
-                                AssignmentExpression( 
-                                    SyntaxKind.SimpleAssignmentExpression, 
-                                    IdentifierName( this._returnVariableName.AssertNotNull() ), 
-                                    node.Expression ) );
+                            if ( this._returnVariableName != null )
+                            {
+                                return ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName( this._returnVariableName ),
+                                        node.Expression ) );
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                         else
                         {
@@ -174,7 +350,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
-                return base.VisitReturnStatement( node );
+                return node;
             }
 
             private string GetAssignmentVariableName( ExpressionSyntax left )

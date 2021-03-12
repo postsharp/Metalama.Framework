@@ -1,0 +1,22 @@
+    internal class TargetClass
+    {
+        [Override]
+        public void TargetMethod_Void_TwoReturns(int x)
+        {
+            Console.WriteLine("This is beginning of the overriding method.");
+            dynamic result;
+            result = proceed();
+            Console.WriteLine("This is end of the overriding method.");
+            return result;
+        }
+
+        [Override]
+        public int TargetMethod_Int_TwoReturns(int x)
+        {
+            Console.WriteLine("This is beginning of the overriding method.");
+            dynamic result;
+            result = proceed();
+            Console.WriteLine("This is end of the overriding method.");
+            return result;
+        }
+    }

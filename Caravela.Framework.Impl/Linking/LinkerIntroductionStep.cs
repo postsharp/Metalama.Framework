@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.Linking
             //       Maybe have all transformations already together in the input?
             var allTransformations =
                 input.CompilationModel.GetAllObservableTransformations()
-                .SelectMany(x => x.Transformations)
+                .SelectMany( x => x.Transformations )
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();
@@ -99,7 +99,7 @@ namespace Caravela.Framework.Impl.Linking
                 context.TransformationRegistry.SetIntroducedMembers( memberIntroduction, introducedMembers );
             }
 
-            var intermediateCompilation = this._initialCompilation;
+            context.IntermediateCompilation = this._initialCompilation;
 
             // Process syntax trees one by one.
             Rewriter addIntroducedElementsRewriter = new( context.TransformationRegistry, diagnostics );
@@ -116,16 +116,16 @@ namespace Caravela.Framework.Impl.Linking
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
                 context.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
-                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                context.IntermediateCompilation = context.IntermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
             // Push the intermediate compilation.
-            context.TransformationRegistry.SetIntermediateCompilation( intermediateCompilation );
+            context.TransformationRegistry.SetIntermediateCompilation( context.IntermediateCompilation );
 
             // Freeze the introduction registry, it should not be changed after this point.
             context.TransformationRegistry.Freeze();
 
-            return new LinkerIntroductionStepOutput( intermediateCompilation, context.TransformationRegistry );
+            return new LinkerIntroductionStepOutput( context.IntermediateCompilation, context.TransformationRegistry );
         }
 
         private class Context
@@ -136,18 +136,12 @@ namespace Caravela.Framework.Impl.Linking
 
             public LinkerTransformationRegistry TransformationRegistry { get; }
 
-            public Compilation IntermediateCompilation { get; set; }
+            public CSharpCompilation IntermediateCompilation { get; set; }
 
-            public Context( Compilation initialCompilation, CompilationModel finalCompilationModel )
+            public Context( CSharpCompilation initialCompilation, CompilationModel finalCompilationModel )
             {
                 this.IntermediateCompilation = initialCompilation;
                 this.TransformationRegistry = new LinkerTransformationRegistry( finalCompilationModel );
-            }
-
-            public void ReplaceSyntaxTree( SyntaxTree initialSyntaxTree, SyntaxTree intermediateSyntaxTree )
-            {
-                this.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
-                this.IntermediateCompilation = this.IntermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
             public ITemplateExpansionLexicalScope GetLexicalScope( IMemberIntroduction introduction )

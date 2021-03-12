@@ -1,0 +1,36 @@
+    internal class TargetClass
+    {
+        [Override]
+        public void TargetMethod_Void_TwoReturns(int x)
+        {
+            Console.WriteLine("This is the overriding method.");
+            while (x > 0)
+            {
+                if (x == 42)
+                {
+                    return;
+                }
+
+                x--;
+            }
+            return;
+        }
+
+        [Override]
+        public int TargetMethod_Int_TwoReturns(int x)
+        {
+            Console.WriteLine("This is the overriding method.");
+            while (x > 0)
+            {
+                if (x == 42)
+                {
+                    return 42;
+                }
+
+                x--;
+            }
+
+            return 0;
+        }
+    }
+    

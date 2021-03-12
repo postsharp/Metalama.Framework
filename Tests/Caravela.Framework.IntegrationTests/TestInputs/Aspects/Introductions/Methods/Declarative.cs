@@ -12,7 +12,14 @@ namespace Caravela.Framework.Aspects.UnitTests.Introductions.Methods.Declarative
         }
 
         [IntroduceMethod]
-        public int IntroducedMethod()
+        public void IntroducedMethod_Void()
+        {
+            Console.WriteLine("This is introduced method.");
+            proceed();
+        }
+
+        [IntroduceMethod]
+        public int IntroducedMethod_Int()
         {
             Console.WriteLine( "This is introduced method." );
             return proceed();

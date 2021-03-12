@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -24,6 +25,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ParameterBuilderList Parameters { get; } = new();
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
+
+        public AspectLinkerOptions? LinkerOptions { get; }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
@@ -70,9 +73,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {
+            this.LinkerOptions = linkerOptions;
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
@@ -106,7 +110,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         }
                         : null);
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction ) };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions ) };
         }
 
         // TODO: Temporary

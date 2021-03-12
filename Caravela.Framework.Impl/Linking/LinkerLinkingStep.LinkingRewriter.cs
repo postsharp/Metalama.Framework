@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Linking
                 this._referenceRegistry = referenceRegistry;
             }
 
-            private static string GetOriginalBodyMethodName( string methodName )
+            internal static string GetOriginalBodyMethodName( string methodName )
                 => $"__{methodName}__OriginalBody";
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )

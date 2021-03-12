@@ -4,18 +4,8 @@
     {
         public global::System.Int32 IntroducedMethod(global::System.Int32 x, global::System.Int32 y)
         {
-            return this.__IntroducedMethod__IntroductionAttribute(x, y);
-        }
-
-        public global::System.Int32 __IntroducedMethod__OriginalBody(global::System.Int32 x, global::System.Int32 y)
-        {
-            return default;
-        }
-
-        public global::System.Int32 __IntroducedMethod__IntroductionAttribute(int x, int y)
-        {
             Console.WriteLine("This is introduced method.");
-            return this.__IntroducedMethod__OriginalBody(x, y);
+            return default;
         }
     }
     

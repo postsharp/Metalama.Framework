@@ -4,8 +4,10 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Aspects.UnitTests.Overrides.Methods.Declarative
+namespace Caravela.Framework.Aspects.UnitTests.Overrides.Methods.TargetWithMultipleReturns
 {
+    // This tests 
+
     public class OverrideAttribute : Attribute, IAspect<IMethod>
     {
         public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
@@ -24,29 +26,33 @@ namespace Caravela.Framework.Aspects.UnitTests.Overrides.Methods.Declarative
     internal class TargetClass
     {
         [Override]
-        public void TargetMethod_Void()
+        public void TargetMethod_Void_TwoReturns(int x)
         {
-            Console.WriteLine("This is the original method.");
+            while (x > 0)
+            {
+                if (x == 42)
+                {
+                    return;
+                }
+
+                x--;
+            }
         }
 
         [Override]
-        public void TargetMethod_Void(int x, int y)
+        public int TargetMethod_Int_TwoReturns(int x)
         {
-            Console.WriteLine($"This is the original method {x} {y}.");
-        }
+            while (x > 0)
+            {
+                if (x == 42)
+                {
+                    return 42;
+                }
 
-        [Override]
-        public int TargetMethod_Int()
-        {
-            Console.WriteLine("This is the original method.");
-            return 42;
-        }
+                x--;
+            }
 
-        [Override]
-        public int TargetMethod_Int(int x, int y)
-        {
-            Console.WriteLine($"This is the original method {x} {y}.");
-            return x + y;
+            return 0;
         }
     }
     #endregion

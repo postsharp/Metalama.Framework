@@ -53,16 +53,21 @@ namespace Caravela.Framework.UnitTests
 
             if ( !ignoreErrors )
             {
-                var diagnostics = mainRoslynCompilation.GetDiagnostics();
-                if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
-                {
-                    var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
-
-                    throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
-                }
+                CheckRoslynDiagnostics( mainRoslynCompilation );
             }
 
             return mainRoslynCompilation;
+        }
+
+        public static void CheckRoslynDiagnostics( CSharpCompilation mainRoslynCompilation )
+        {
+            var diagnostics = mainRoslynCompilation.GetDiagnostics();
+            if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
+            {
+                var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
+
+                throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
+            }
         }
 
         internal static CompilationModel CreateCompilation( string? code, string? dependentCode = null )

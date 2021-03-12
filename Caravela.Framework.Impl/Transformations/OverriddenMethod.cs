@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
@@ -24,7 +25,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IMethod TemplateMethod { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod )
+        public AspectLinkerOptions? LinkerOptions { get; }
+
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
         {
             Invariant.Assert( advice != null );
             Invariant.Assert( overriddenDeclaration != null );
@@ -33,6 +36,7 @@ namespace Caravela.Framework.Impl.Transformations
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
             this.TemplateMethod = templateMethod;
+            this.LinkerOptions = linkerOptions;
         }
 
         // TODO: Temporary
@@ -78,7 +82,8 @@ namespace Caravela.Framework.Impl.Transformations
                             newMethodBody,
                             null ),
                         this.Advice.AspectLayerId,
-                        IntroducedMemberSemantic.MethodOverride )
+                        IntroducedMemberSemantic.MethodOverride,
+                        this.LinkerOptions )
                 };
 
                 return overrides;

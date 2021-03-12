@@ -174,11 +174,17 @@ namespace Caravela.Framework.Impl.Linking
                 // Introduced declaration - we should get ICodeElement from introduced member.
                 var id = int.Parse( annotation.Data );
                 var memberRecord = this._introducedMarkIdToMember[id];
-                var introducedElement = (ICodeElement)memberRecord.IntroducedMember.Introductor;
 
-                if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
+                if ( memberRecord.IntroducedMember.Introductor is ICodeElement introducedElement )
                 {
-                    return overrides;
+                    if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
+                    {
+                        return overrides;
+                    }
+                    else
+                    {
+                        return Array.Empty<IntroducedMember>();
+                    }
                 }
                 else
                 {

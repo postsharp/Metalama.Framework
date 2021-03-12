@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -23,6 +24,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
+            this._symbolReferenceCounters = new Dictionary<(ISymbol Symbol, AspectLayerId? Layer), int>();
             this._bodyAnalysisResults = new Dictionary<IMethodSymbol, (bool, object?)>();
         }
 
@@ -58,10 +60,18 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool IsBodyInlineable( IMethodSymbol symbol )
         {
-            return true;
             if (this.IsOverrideTarget(symbol))
             {
-                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, null), out int counter ) )
+                if ( symbol.GetAttributes()
+                    .Any( x => 
+                        x.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName 
+                        && x.NamedArguments
+                            .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?)x.Value.Value == true ) ))
+                {
+                    return false;
+                }
+
+                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, null), out var counter ) )
                 {
                     return true;
                 }
@@ -72,18 +82,24 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol( symbol );
 
-                //if ( introducedMember == null )
-                //{
-                    throw new InvalidOperationException();
-                //}
+                if ( introducedMember == null )
+                {
+                    throw new AssertionFailedException();
+                }
 
-                //var overrideTarget = this._transformationRegistry.GetOverrideTarget(symbol);
-                //if ( !this._symbolReferenceCounters.TryGetValue( (overrideTarget, introducedMember.AspectLayerId), out var counter ) )
-                //{
-                //    return true;
-                //}
+                if ( introducedMember.LinkerOptions?.ForceNotInlineable == true )
+                {
+                    return false;
+                }
 
-                //return counter <= 1;
+                var overrideTarget = introducedMember;
+                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, introducedMember.AspectLayerId), out var counter ) )
+                {
+                    // This is likely the last
+                    return true;
+                }
+
+                return counter <= 1;
             }
         }
 
@@ -96,7 +112,7 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            return introducedMember.Introductor is OverriddenMethod;
+            return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride;
         }
 
         internal ISymbol GetLastOverride( IMethodSymbol symbol )

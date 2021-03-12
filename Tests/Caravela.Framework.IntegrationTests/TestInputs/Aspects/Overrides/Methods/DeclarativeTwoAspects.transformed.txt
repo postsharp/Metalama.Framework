@@ -1,22 +1,43 @@
-
-    [Override]
     internal class TargetClass
     {
-        public void TargetMethod()
+        [InnerOverride]
+        [OuterOverride]
+        public void TargetMethod_Void()
         {
-            this.__TargetMethod__OverrideAttribute();
-        }
-
-        public void __TargetMethod__OriginalBody()
-        {
+            Console.WriteLine("This is the outer overriding template method.");
+            Console.WriteLine("This is the inner overriding template method.");
             Console.WriteLine("This is the original method.");
+            return;
         }
 
-        public void __TargetMethod__OverrideAttribute()
+        [InnerOverride]
+        [OuterOverride]
+        public void TargetMethod_Void(int x, int y)
         {
-            Console.WriteLine("This is the overriding method.");
-            this.__TargetMethod__OriginalBody();
+            Console.WriteLine("This is the outer overriding template method.");
+            Console.WriteLine("This is the inner overriding template method.");
+            Console.WriteLine($"This is the original method {x} {y}.");
             return;
+        }
+
+        [InnerOverride]
+        [OuterOverride]
+        public int TargetMethod_Int()
+        {
+            Console.WriteLine("This is the outer overriding template method.");
+            Console.WriteLine("This is the inner overriding template method.");
+            Console.WriteLine("This is the original method.");
+            return 42;
+        }
+
+        [InnerOverride]
+        [OuterOverride]
+        public int TargetMethod_Int(int x, int y)
+        {
+            Console.WriteLine("This is the outer overriding template method.");
+            Console.WriteLine("This is the inner overriding template method.");
+            Console.WriteLine($"This is the original method {x} {y}.");
+            return x + y;
         }
     }
     

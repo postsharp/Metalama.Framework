@@ -2,13 +2,13 @@
 using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Aspects.UnitTests.Overrides.Methods.OrderedAdvices;
+using Caravela.Framework.Aspects.UnitTests.Overrides.Methods.DeclarativeTwoAspects;
 using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 
-namespace Caravela.Framework.Aspects.UnitTests.Overrides.Methods.OrderedAdvices
+namespace Caravela.Framework.Aspects.UnitTests.Overrides.Methods.DeclarativeTwoAspects
 {
     public class InnerOverrideAttribute : Attribute, IAspect<IMethod>
     {
