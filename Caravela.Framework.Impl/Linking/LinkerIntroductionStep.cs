@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Linking
             // Freeze the introduction registry, it should not be changed after this point.
             context.TransformationRegistry.Freeze();
 
-            return new LinkerIntroductionStepOutput( context.IntermediateCompilation, context.TransformationRegistry );
+            return new LinkerIntroductionStepOutput( diagnostics, context.IntermediateCompilation, context.TransformationRegistry );
         }
 
         private class Context

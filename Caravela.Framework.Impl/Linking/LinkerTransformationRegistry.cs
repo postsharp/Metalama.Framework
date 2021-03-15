@@ -190,6 +190,28 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
+        public IReadOnlyList<IMethodSymbol> GetOverriddenMethods()
+        {
+            // TODO: This is not efficient.
+            var overriddenMethods = new List<IMethodSymbol>();
+            foreach ( var intermediateSyntaxTree in this._intermediateCompilation.AssertNotNull().SyntaxTrees)
+            {
+                var semanticModel = this._intermediateCompilation.AssertNotNull().GetSemanticModel( intermediateSyntaxTree );
+
+                foreach (var methodDeclaration in intermediateSyntaxTree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())
+                {
+                    var methodSymbol = semanticModel.GetDeclaredSymbol( methodDeclaration );
+
+                    if (methodSymbol != null && this._overrideTargetsByOriginalSymbolName.ContainsKey(methodSymbol ))
+                    {
+                        overriddenMethods.Add( methodSymbol );
+                    }
+                }
+            }
+
+            return overriddenMethods;
+        }
+
         public IntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();

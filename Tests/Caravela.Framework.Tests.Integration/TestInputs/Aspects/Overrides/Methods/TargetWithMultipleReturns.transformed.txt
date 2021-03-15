@@ -8,11 +8,14 @@
             {
                 if (x == 42)
                 {
-                    return;
+                    goto __aspect_return_1;
                 }
 
                 x--;
             }
+
+        __aspect_return_1:
+            ;
             return;
         }
 

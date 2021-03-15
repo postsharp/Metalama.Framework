@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -66,6 +69,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
+            // TODO: Do thbis on demand in analysis registry.
             // Analyze introduced method bodies.
             foreach ( var introducedMember in this._transformationRegistry.GetIntroducedMembers() )
             {
@@ -74,10 +78,17 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: partial methods.
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( introducedMember.Syntax );
-                analysisRegistry.SetBodyAnalysisResults( symbol, methodBodyVisitor.ReturnStatementCount <= 1 );
+                analysisRegistry.SetBodyAnalysisResults( symbol, symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
 
                 // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
                 // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+            }
+
+            foreach (var symbol in this._transformationRegistry.GetOverriddenMethods())
+            {
+                var methodBodyVisitor = new MethodBodyWalker();
+                methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );
+                analysisRegistry.SetBodyAnalysisResults( symbol, symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
             }
 
             return new LinkerAnalysisStepResult( analysisRegistry );

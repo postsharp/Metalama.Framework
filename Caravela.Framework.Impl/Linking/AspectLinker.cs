@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Linking
             var linkingStepResult = linkingStep.Execute();
 
             // TODO: diagnostics.
-            return new( linkingStepResult.FinalCompilation, Array.Empty<Diagnostic>() );
+            return new( linkingStepResult.FinalCompilation, introductionStepResult.Diagnostics.Diagnostics );
         }
     }
 }

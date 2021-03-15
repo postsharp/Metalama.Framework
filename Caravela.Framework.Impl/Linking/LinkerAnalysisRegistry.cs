@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Linking
             this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
             this._symbolReferenceCounters = new Dictionary<(ISymbol Symbol, AspectLayerId? Layer), int>();
-            this._bodyAnalysisResults = new Dictionary<IMethodSymbol, (bool, object?)>();
+            this._bodyAnalysisResults = new Dictionary<IMethodSymbol, (bool, object?)>( SymbolEqualityComparer.Default );
         }
 
         public void Freeze()

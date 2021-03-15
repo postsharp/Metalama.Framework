@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker
     public partial class MethodOverrideJumpTests : Helpers.LinkerTestBase
     {
         [Fact]
-        public void ReturnsVoid_BeforeAfterStatements()
+        public void ReturnsVoid_ForcedJump()
         {
             var code = @"
 class T
@@ -56,7 +56,8 @@ class T
         }
 
         Test(""Original End"");
-    __aspect_return_1:
+        __aspect_return_1:
+            ;
         Test(""After"");
     }
 }
@@ -71,7 +72,7 @@ class T
         }
 
         [Fact]
-        public void ReturnsInt_BeforeAfterStatements()
+        public void ReturnsInt_ForcedJump()
         {
             var code = @"
 class T
@@ -80,19 +81,23 @@ class T
     {
     }
 
-    [PseudoForceNotInlineable]
-    int Foo()
+    int Foo(int x)
     {
-        Test(""Original"");
-        return 42;
+        Test(""Original Start"");
+        if (x == 0)
+        {
+            return 42;
+        }
+        Test(""Original End"");
+        return x;
     }
 
     [PseudoOverride(Foo, TestAspect)]
-    int Foo_Override()
+    int Foo_Override(int x)
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo());
+        result = link(this.Foo(x));
         Test(""After"");
         return result;
     }
@@ -106,21 +111,24 @@ class T
     {
     }
 
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    int Foo()
+    int Foo(int x)
     {
         Test(""Before"");
         int result;
-        result = this.__Foo__OriginalBody();
+        Test(""Original Start"");
+        if (x == 0)
+        {
+            result = 42;
+            goto __aspect_return_1;
+        }
+
+        Test(""Original End"");
+        result = x;
+        goto __aspect_return_1;
+        __aspect_return_1:
+            ;
         Test(""After"");
         return result;
-    }
-
-    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
-    int __Foo__OriginalBody()
-    {
-        Test(""Original"");
-        return 42;
     }
 }
 ";

@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using static System.Math;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;

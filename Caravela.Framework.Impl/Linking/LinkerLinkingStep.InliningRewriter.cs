@@ -155,22 +155,8 @@ namespace Caravela.Framework.Impl.Linking
                 if ( newSyntax is BlockSyntax newBlock )
                 {
                     var statements = new List<StatementSyntax>();
-                    var anyInlined = false;
 
-                    foreach ( var statement in newBlock.Statements )
-                    {
-                        if ( statement.GetAnnotations( _inlineableBlockAnnotationId ).Any() )
-                        {
-                            anyInlined = true;
-                            statements.AddRange( ((BlockSyntax) statement).Statements );
-                        }
-                        else
-                        {
-                            statements.Add( statement );
-                        }
-                    }
-
-                    if ( anyInlined )
+                    if ( FlattenBlock( newBlock, statements ) )
                     {
                         return newBlock.WithStatements( List( statements ) );
                     }
@@ -183,6 +169,26 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return newSyntax;
                 }
+            }
+
+            private static bool FlattenBlock(BlockSyntax block, List<StatementSyntax> statementList )
+            {
+                var anyFlattened = false;
+
+                foreach ( var statement in block.Statements )
+                {
+                    if ( statement.GetAnnotations( _inlineableBlockAnnotationId ).Any() )
+                    {
+                        anyFlattened = true;
+                        FlattenBlock( (BlockSyntax) statement, statementList );
+                    }
+                    else
+                    {
+                        statementList.Add( statement );
+                    }
+                }
+
+                return anyFlattened;
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -242,13 +248,14 @@ namespace Caravela.Framework.Impl.Linking
             private BlockSyntax? GetInlinedMethodBody( IMethodSymbol calledMethodSymbol, string? returnVariableName )
             {
                 var labelId = this.GetNextReturnLabelId();
+
                 var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
                 var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                 var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
                 rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturn( calledMethodSymbol ) )
+                if ( this._analysisRegistry.HasSimpleReturn( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null ) )
                 {
                     return rewrittenBlock;
                 }
@@ -303,53 +310,77 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this._returnLabelId != null )
                 {
                     // We are in the inner inlining case and we have a return label we need to jump to instead of returning.
-
-                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                    if ( node.Expression != null )
                     {
-                        if ( node.Expression != null )
+                        if ( this._returnVariableName != null )
                         {
-                            if ( this._returnVariableName != null )
+                            if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
                             {
-                                return ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName( this._returnVariableName ),
-                                        node.Expression ) );
+                                return
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            IdentifierName( this._returnVariableName ),
+                                            node.Expression ) );
                             }
                             else
                             {
-                                return null;
+                                return
+                                    Block(
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( this._returnVariableName.AssertNotNull() ),
+                                                node.Expression ) ),
+                                        GotoStatement(
+                                            SyntaxKind.GotoStatement,
+                                            IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) )
+                                    .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                             }
                         }
                         else
                         {
-                            return null;
+                            return node;
                         }
                     }
                     else
                     {
-                        if ( node.Expression != null )
+                        if ( this._returnVariableName == null )
                         {
-                            return Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( this._returnVariableName.AssertNotNull() ),
-                                            node.Expression ) ),
+                            if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
+                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                            }
                         }
                         else
                         {
-                            return GotoStatement(
-                                SyntaxKind.GotoStatement,
-                                IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                            // This happens when a template assigns result into a variable but is then applied on a void method.
+                            return
+                                GotoStatement(
+                                    SyntaxKind.GotoStatement,
+                                    IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
                         }
                     }
                 }
+                else
+                {
+                    if ( this._returnVariableName == null )
+                    {
+                        return node;
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException();
+                    }
+                }
 
-                return node;
             }
 
             private string GetAssignmentVariableName( ExpressionSyntax left )

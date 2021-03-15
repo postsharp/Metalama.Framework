@@ -16,12 +16,12 @@ namespace Caravela.Framework.Impl.Linking
         private class Rewriter : CSharpSyntaxRewriter
         {
             private readonly DiagnosticSink _diagnosticSink;
-            private readonly LinkerTransformationRegistry _introductionRegistry;
+            private readonly LinkerTransformationRegistry _transformationRegistry;
 
-            public Rewriter( LinkerTransformationRegistry introductionRegistry, DiagnosticSink diagnosticSink ) : base()
+            public Rewriter( LinkerTransformationRegistry transformationRegistry, DiagnosticSink diagnosticSink ) : base()
             {
                 this._diagnosticSink = diagnosticSink;
-                this._introductionRegistry = introductionRegistry;
+                this._transformationRegistry = transformationRegistry;
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -32,6 +32,8 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     members.Add( member );
 
+
+
                     AddIntroductionsOnPosition( members, member );
                 }
 
@@ -41,7 +43,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 void AddIntroductionsOnPosition( List<MemberDeclarationSyntax> members, MemberDeclarationSyntax position )
                 {
-                    var introducedSyntaxNodes = this._introductionRegistry.GetIntroducedSyntaxNodesOnPosition( position );
+                    var introducedSyntaxNodes = this._transformationRegistry.GetIntroducedSyntaxNodesOnPosition( position );
 
                     members.AddRange( introducedSyntaxNodes );
                 }
