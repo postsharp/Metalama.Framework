@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Description>Provides a base class AspectUnitTestBase that allows you to unit test Caravela aspects with xUnit.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,10 @@
     <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
     <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
   </ItemGroup>
 
 </Project>

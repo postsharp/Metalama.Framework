@@ -8,7 +8,6 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
@@ -110,7 +109,7 @@ namespace Caravela.Framework.Impl.Linking
 
 #if DEBUG
                 // Improve readibility of intermediate compilation in debug builds.
-                newRoot = newRoot.NormalizeWhitespace();
+                newRoot = Microsoft.CodeAnalysis.SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
 #endif
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );

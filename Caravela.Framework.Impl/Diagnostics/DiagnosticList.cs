@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// <summary>
     /// A list of <see cref="Diagnostic"/> that implements <see cref="IDiagnosticSink"/>.
     /// </summary>
-    internal class DiagnosticList : DiagnosticSink
+    public class DiagnosticList : DiagnosticSink
     {
 
         private List<Diagnostic>? _diagnostics;

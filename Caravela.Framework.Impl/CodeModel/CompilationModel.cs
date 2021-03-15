@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return new CompilationModel( roslynCompilation );
         }
 
-        public static CompilationModel CreateRevisedInstance( CompilationModel prototype, IEnumerable<IObservableTransformation> introducedElements )
+        internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IEnumerable<IObservableTransformation> introducedElements )
         {
             if ( !introducedElements.Any() )
             {
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CodeModel
             return new CompilationModel( prototype, introducedElements );
         }
 
-        public ReflectionMapper ReflectionMapper { get; }
+        internal ReflectionMapper ReflectionMapper { get; }
 
         private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
         private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allAttributesByType;
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
 
-        public CSharpSyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
+        internal CSharpSyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
 
         public int Revision { get; }
 
@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
-        internal CSharpCompilation RoslynCompilation { get; }
+        public CSharpCompilation RoslynCompilation { get; }
 
         ITypeFactory ICompilation.TypeFactory => this.Factory;
 
@@ -152,10 +152,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );
 
-        public ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( ICodeElement codeElement )
+        internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( ICodeElement codeElement )
             => this._transformations[codeElement.ToLink()];
 
-        public IEnumerable<(ICodeElement DeclaringElement, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
+        internal IEnumerable<(ICodeElement DeclaringElement, IEnumerable<IObservableTransformation> Transformations)> GetAllObservableTransformations()
         {
             foreach ( var group in this._transformations )
             {
@@ -163,7 +163,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public int GetDepth( ICodeElement codeElement )
+        internal int GetDepth( ICodeElement codeElement )
         {
             var link = codeElement.ToLink();
 
@@ -195,7 +195,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public int GetDepth( INamedType namedType )
+        internal int GetDepth( INamedType namedType )
         {
             var link = namedType.ToLink<ICodeElement>();
 

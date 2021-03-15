@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    internal class ServiceProvider : IServiceProvider
+    public class ServiceProvider : IServiceProvider
     {
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
 

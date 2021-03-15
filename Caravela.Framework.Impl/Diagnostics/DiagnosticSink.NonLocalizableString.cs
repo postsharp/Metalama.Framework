@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    internal abstract partial class DiagnosticSink
+    public abstract partial class DiagnosticSink
     {
         private class NonLocalizableString : LocalizableString
         {
