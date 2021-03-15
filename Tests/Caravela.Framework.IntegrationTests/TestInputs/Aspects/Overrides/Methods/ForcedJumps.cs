@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;

@@ -70,17 +70,17 @@ namespace Caravela.Framework.Impl.Linking
                     else if ( this._referenceRegistry.IsOverrideTarget( symbol ) )
                     {
                         // Override target, i.e. original method or introduced method stub.
-                        var lastOverrideSymbol = (IMethodSymbol)this._referenceRegistry.GetLastOverride( symbol );
+                        var lastOverrideSymbol = (IMethodSymbol) this._referenceRegistry.GetLastOverride( symbol );
 
                         if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            newMembers.Add( method.WithBody( this.GetTrampolineBody( method, lastOverrideSymbol ) ) );
+                            newMembers.Add( method.WithBody( this.GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
                         }
                         else
                         {
                             // Body of the last (outermost) override is inlineable. We will run inlining on the override's body and place replace the current body with the result.
-                            var lastOverrideSyntax = (MethodDeclarationSyntax)lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                            var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
                             var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private BlockSyntax? GetTrampolineBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+            private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 var invocation =
                     InvocationExpression(

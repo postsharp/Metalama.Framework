@@ -43,6 +43,7 @@ namespace Caravela.Framework.Impl.Linking
             this._transformationRegistry = transformationRegistry;
             this._intermediateCompilation = intermediateCompilation;
             this._referenceRegistry = referenceRegistry;
+            this._diagnostics = new DiagnosticList();
         }
 
         public static LinkerLinkingStep Create( IReadOnlyList<AspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry, CSharpCompilation intermediateCompilation, LinkerAnalysisRegistry referenceRegistry )

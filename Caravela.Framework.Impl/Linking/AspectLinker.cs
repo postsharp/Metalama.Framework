@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.Linking
             var analysisStepResult = analysisStep.Execute();
 
             // Third pass. Link an inline intermediate compilation.
-            var linkingStep = LinkerLinkingStep.Create( 
-                this._input.OrderedAspectLayers, 
-                introductionStepResult.TransformationRegistry, 
-                introductionStepResult.IntermediateCompilation, 
+            var linkingStep = LinkerLinkingStep.Create(
+                this._input.OrderedAspectLayers,
+                introductionStepResult.TransformationRegistry,
+                introductionStepResult.IntermediateCompilation,
                 analysisStepResult.ReferenceRegistry );
 
             var linkingStepResult = linkingStep.Execute();

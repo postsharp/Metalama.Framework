@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Linq;
-using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.UnitTests.Linker.Helpers;
 using Xunit;
@@ -35,7 +34,7 @@ class T
     void Foo_Override(int x)
     {
         Test(""Before"");
-        link(this.Foo());
+        link(this.Foo(x));
         Test(""After"");
     }
 }
@@ -54,10 +53,11 @@ class T
         Test(""Original Start"");
         if (x == 0)
         {
-            goto __after;
+            goto __aspect_return_1;
         }
+
         Test(""Original End"");
-    __after:
+    __aspect_return_1:
         Test(""After"");
     }
 }

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
                 {
-                    var linkerAnnotation = referencingNode.GetLinkerAnnotation()!;
+                    var linkerAnnotation = referencingNode.GetLinkerAnnotation().AssertNotNull();
                     AspectLayerId? targetLayer;
 
                     // Determine which version of the semantic is being invoked.
@@ -68,12 +67,17 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // Analyze introduced method bodies.
-            foreach ( var introducedMember in this._transformationRegistry.GetIntroducedMembers())
+            foreach ( var introducedMember in this._transformationRegistry.GetIntroducedMembers() )
             {
-                var symbol = (IMethodSymbol)this._transformationRegistry.GetSymbolForIntroducedMember( introducedMember );
+                var symbol = (IMethodSymbol) this._transformationRegistry.GetSymbolForIntroducedMember( introducedMember );
+
+                // TODO: partial methods.
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( introducedMember.Syntax );
                 analysisRegistry.SetBodyAnalysisResults( symbol, methodBodyVisitor.ReturnStatementCount <= 1 );
+
+                // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
             }
 
             return new LinkerAnalysisStepResult( analysisRegistry );

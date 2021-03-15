@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public IReadOnlyList<ITemplateExpansionLexicalScope> NestedScopes => this._nestedScopes;
 
-        private LinkerLexicalScope( IEnumerable<string?> symbolNames )
+        private LinkerLexicalScope( IEnumerable<string> symbolNames )
         {
             this._parentScope = null;
 

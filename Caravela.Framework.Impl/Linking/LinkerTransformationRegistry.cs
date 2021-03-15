@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -34,9 +32,9 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool _frozen;
         private int _nextAnnotationId;
-        private CSharpCompilation _intermediateCompilation;
+        private CSharpCompilation? _intermediateCompilation;
 
-        public LinkerTransformationRegistry(CompilationModel compilationModel)
+        public LinkerTransformationRegistry( CompilationModel compilationModel )
         {
             this._compilationModel = compilationModel;
             this._introducedMembers = new Dictionary<IMemberIntroduction, IReadOnlyList<IntroducedMember>>();
@@ -75,14 +73,14 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( memberIntroduction is IOverriddenElement overrideTransformation )
                 {
-                    if (!this._overrideMap.TryGetValue( overrideTransformation.OverriddenElement, out var overrideList) )
+                    if ( !this._overrideMap.TryGetValue( overrideTransformation.OverriddenElement, out var overrideList ) )
                     {
-                        this._overrideMap[overrideTransformation.OverriddenElement] = overrideList = new List<IntroducedMember>();                        
+                        this._overrideMap[overrideTransformation.OverriddenElement] = overrideList = new List<IntroducedMember>();
                     }
 
                     overrideList.Add( introducedMember );
 
-                    if ( overrideTransformation.OverriddenElement is CodeElement codeElement)
+                    if ( overrideTransformation.OverriddenElement is CodeElement codeElement )
                     {
                         this._overrideTargetsByOriginalSymbolName[codeElement.Symbol] = codeElement;
                     }
@@ -126,13 +124,12 @@ namespace Caravela.Framework.Impl.Linking
         public IEnumerable<MemberDeclarationSyntax> GetIntroducedSyntaxNodesOnPosition( MemberDeclarationSyntax position )
         {
             // TODO: Optimize.
-            return 
+            return
                 this._introducedMembers
                 .SelectMany( kvp =>
                     from im in kvp.Value
                     let imr = this._introducedMemberToMarkId[im]
-                    select (kvp.Key.InsertPositionNode, IntroducedMember: im, AnnotatedSyntax: imr.AnnotatedSyntax)
-                    )
+                    select (kvp.Key.InsertPositionNode, IntroducedMember: im, AnnotatedSyntax: imr.AnnotatedSyntax) )
                 .Where( p => p.InsertPositionNode == position )
                 .Select( p => p.AnnotatedSyntax );
         }
@@ -143,13 +140,13 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateSyntaxTree = this._introducedTreeMap[introducedMemberRecord.OriginalSyntaxTree];
 
             // TODO: Precompute, it's really really slow (visits the whole tree).
-            var intermediateSyntax = 
+            var intermediateSyntax =
                 intermediateSyntaxTree.GetRoot()
                 .GetAnnotatedNodes( _introducedSyntaxAnnotationId )
                 .Where( x => int.Parse( x.GetAnnotations( _introducedSyntaxAnnotationId ).Single().Data ) == introducedMemberRecord.AnnotationId )
                 .Single();
 
-            return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();
+            return this._intermediateCompilation.AssertNotNull().GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();
         }
 
         public IReadOnlyList<IntroducedMember> GetMethodOverridesForSymbol( IMethodSymbol symbol )
@@ -162,7 +159,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // Original code declaration - we should be able to get ICodeElement by symbol name.
 
-                if (!this._overrideTargetsByOriginalSymbolName.TryGetValue( symbol, out var originalElement ))
+                if ( !this._overrideTargetsByOriginalSymbolName.TryGetValue( symbol, out var originalElement ) )
                 {
                     return Array.Empty<IntroducedMember>();
                 }
@@ -198,7 +195,7 @@ namespace Caravela.Framework.Impl.Linking
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
             var annotation = declaringSyntax.GetAnnotations( _introducedSyntaxAnnotationId ).SingleOrDefault();
 
-            if (annotation == null)
+            if ( annotation == null )
             {
                 return null;
             }

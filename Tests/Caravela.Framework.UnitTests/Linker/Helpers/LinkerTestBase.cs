@@ -10,13 +10,10 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.UnitTests.Linker.Helpers
 {
@@ -85,12 +82,12 @@ namespace Caravela.Framework.UnitTests.Linker.Helpers
             return linkerInput;
         }
 
-        internal static CSharpCompilation GetCleanCompilation(CSharpCompilation compilation)
+        internal static CSharpCompilation GetCleanCompilation( CSharpCompilation compilation )
         {
-            CSharpCompilation cleanCompilation = compilation;
-            CleaningRewriter rewriter = new CleaningRewriter();
+            var cleanCompilation = compilation;
+            var rewriter = new CleaningRewriter();
 
-            foreach (var syntaxTree in compilation.SyntaxTrees)
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 var cleanSyntaxTree = syntaxTree.WithRootAndOptions( rewriter.Visit( syntaxTree.GetRoot() ).AssertNotNull(), syntaxTree.Options );
                 cleanCompilation = cleanCompilation.ReplaceSyntaxTree( syntaxTree, cleanSyntaxTree );
@@ -156,11 +153,11 @@ namespace Caravela.Framework.UnitTests.Linker.Helpers
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];
 
-                    A.CallTo( () => ((IMemberIntroduction)overriddenElement).InsertPositionNode).Returns( (MemberDeclarationSyntax)insertPositionNode );
+                    A.CallTo( () => ((IMemberIntroduction) overriddenElement).InsertPositionNode ).Returns( (MemberDeclarationSyntax) insertPositionNode );
                     A.CallTo( () => overriddenElement.OverriddenElement ).Returns( overridenMember );
                     A.CallTo( () => ((IMemberIntroduction) overriddenElement).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
                 }
-                else if (transformation is IObservableTransformation observableTransformation)
+                else if ( transformation is IObservableTransformation observableTransformation )
                 {
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName;
 
@@ -168,7 +165,7 @@ namespace Caravela.Framework.UnitTests.Linker.Helpers
                     var insertPositionNode = nodeIdToSyntaxNode[insertPositionNodeId];
 
                     var containingElement = nodeIdToCodeElement[containingNodeId];
-                    var symbolHelperElement = (IMethod)nodeIdToCodeElement[symbolHelperNodeId];
+                    var symbolHelperElement = (IMethod) nodeIdToCodeElement[symbolHelperNodeId];
 
                     A.CallTo( () => observableTransformation.ContainingElement ).Returns( containingElement );
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPositionNode ).Returns( (MemberDeclarationSyntax) insertPositionNode );
@@ -196,7 +193,7 @@ namespace Caravela.Framework.UnitTests.Linker.Helpers
                     A.CallTo( () => ((IMethod) observableTransformation).IsStatic ).Returns( symbolHelperElement.IsStatic );
                     A.CallTo( () => ((IMethod) observableTransformation).IsVirtual ).Returns( symbolHelperElement.IsVirtual );
                     A.CallTo( () => ((IMethod) observableTransformation).MethodKind ).Returns( symbolHelperElement.MethodKind );
-                    A.CallTo( () => ((IMethod) observableTransformation).Name ).Returns( introducedElementName );
+                    A.CallTo( () => ((IMethod) observableTransformation).Name ).Returns( introducedElementName.AssertNotNull() );
                 }
             }
         }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private bool _frozen;
 
-        public LinkerAnalysisRegistry(LinkerTransformationRegistry transformationRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers)
+        public LinkerAnalysisRegistry( LinkerTransformationRegistry transformationRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
             this._orderedAspectLayers = orderedAspectLayers;
             this._transformationRegistry = transformationRegistry;
@@ -33,9 +33,9 @@ namespace Caravela.Framework.Impl.Linking
             this._frozen = true;
         }
 
-        public void AddReferenceCount(ISymbol symbol, AspectLayerId? referencedLayer)
+        public void AddReferenceCount( ISymbol symbol, AspectLayerId? referencedLayer )
         {
-            if (!this._symbolReferenceCounters.TryGetValue((symbol, referencedLayer), out var count) )
+            if ( !this._symbolReferenceCounters.TryGetValue( (symbol, referencedLayer), out var count ) )
             {
                 count = 0;
             }
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Linking
             this._symbolReferenceCounters[(symbol, referencedLayer)] = count + 1;
         }
 
-        public void SetBodyAnalysisResults(IMethodSymbol symbol, bool hasSimpleReturn)
+        public void SetBodyAnalysisResults( IMethodSymbol symbol, bool hasSimpleReturn )
         {
             if ( this._frozen )
             {
@@ -60,13 +60,13 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool IsBodyInlineable( IMethodSymbol symbol )
         {
-            if (this.IsOverrideTarget(symbol))
+            if ( this.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.GetAttributes()
-                    .Any( x => 
-                        x.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName 
+                    .Any( x =>
+                        x.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName
                         && x.NamedArguments
-                            .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?)x.Value.Value == true ) ))
+                            .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) ) )
                 {
                     return false;
                 }
@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
                 var overrideTarget = introducedMember;
                 if ( !this._symbolReferenceCounters.TryGetValue( (symbol, introducedMember.AspectLayerId), out var counter ) )
                 {
-                    // This is likely the last
+                    // This is the last override.
                     return true;
                 }
 
@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool IsOverrideMethod( IMethodSymbol symbol )
         {
-            var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol(symbol);
+            var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol( symbol );
 
             if ( introducedMember == null )
             {
@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.Linking
 
             // TODO: Optimize.
             var previousLayerOverride = (
-                from o in overrides                
+                from o in overrides
                 join oal in indexedLayers
                     on o.AspectLayerId equals oal.AspectLayerId
                 where oal.Index < annotationLayerIndex
@@ -161,12 +161,12 @@ namespace Caravela.Framework.Impl.Linking
             return this._transformationRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        public bool HasSimpleReturn( IMethodSymbol methodSymbol)
+        public bool HasSimpleReturn( IMethodSymbol methodSymbol )
         {
-            if (!this._bodyAnalysisResults.TryGetValue( methodSymbol, out var result) )
+            if ( !this._bodyAnalysisResults.TryGetValue( methodSymbol, out var result ) )
             {
                 return false;
-            }    
+            }
 
             return result.HasSimpleReturn;
         }

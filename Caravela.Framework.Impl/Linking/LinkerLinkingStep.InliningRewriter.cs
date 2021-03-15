@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         private class InliningRewriter : CSharpSyntaxRewriter
         {
-            private static string _inlineableBlockAnnotationId = "AspectLinkerInlineableBlock";
+            private static readonly string _inlineableBlockAnnotationId = "AspectLinkerInlineableBlock";
 
             private readonly LinkerAnalysisRegistry _analysisRegistry;
             private readonly SemanticModel _semanticModel;
@@ -48,6 +48,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return node.Update( this.VisitList( node.AttributeLists ), (ExpressionSyntax) updatedExpression, this.VisitToken( node.SemicolonToken ) );
             }
+
             /*
             public override SyntaxNode? VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
             {
@@ -154,9 +155,9 @@ namespace Caravela.Framework.Impl.Linking
                 if ( newSyntax is BlockSyntax newBlock )
                 {
                     var statements = new List<StatementSyntax>();
-                    bool anyInlined = false;
+                    var anyInlined = false;
 
-                    foreach ( var statement in newBlock.Statements)
+                    foreach ( var statement in newBlock.Statements )
                     {
                         if ( statement.GetAnnotations( _inlineableBlockAnnotationId ).Any() )
                         {
@@ -234,22 +235,20 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( this.ReplaceCallTarget( (IMethodSymbol)calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update( node.Left, node.OperatorToken, InvocationExpression( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
                 }
             }
 
-            private BlockSyntax? GetInlinedMethodBody(IMethodSymbol calledMethodSymbol, string? returnVariableName)
+            private BlockSyntax? GetInlinedMethodBody( IMethodSymbol calledMethodSymbol, string? returnVariableName )
             {
                 var labelId = this.GetNextReturnLabelId();
                 var innerRewriter = new InliningRewriter( this._analysisRegistry, this._semanticModel, calledMethodSymbol, returnVariableName, labelId );
                 var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
-                var rewrittenBlock =
-                    returnVariableName == null && this._analysisRegistry.IsOverrideTarget( calledMethodSymbol )
-                    ? declaration.Body.AssertNotNull()
-                    : (BlockSyntax)innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
+                var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
+                rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                if ( this._analysisRegistry.HasSimpleReturn( calledMethodSymbol ) )
                 {
                     return rewrittenBlock;
                 }
@@ -258,7 +257,8 @@ namespace Caravela.Framework.Impl.Linking
                     return
                         Block(
                             rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ));
+                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ) )
+                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                 }
             }
 
@@ -266,7 +266,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
-                if ( originalSymbol == methodSymbol )
+                if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
                 {
                     return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
                 }
@@ -281,7 +281,7 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: ref return etc.
 
                 var linkerAnnotation = node.Expression?.GetLinkerAnnotation();
-                if (linkerAnnotation != null)
+                if ( linkerAnnotation != null )
                 {
                     // This is an annotated invocation. By visiting the expression, we will either get a invocation or a block if the invocation target is inlineable.
 
@@ -291,8 +291,8 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         return null;
                     }
-                    
-                    if (updatedExpression.Kind() == SyntaxKind.Block)
+
+                    if ( updatedExpression.Kind() == SyntaxKind.Block )
                     {
                         return updatedExpression.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                     }
@@ -304,9 +304,8 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     // We are in the inner inlining case and we have a return label we need to jump to instead of returning.
 
-                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) || this._analysisRegistry.IsOverrideTarget(this._contextSymbol) )
+                    if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
                     {
-                        // 
                         if ( node.Expression != null )
                         {
                             if ( this._returnVariableName != null )
@@ -332,19 +331,19 @@ namespace Caravela.Framework.Impl.Linking
                         if ( node.Expression != null )
                         {
                             return Block(
-                                    ExpressionStatement( 
-                                        AssignmentExpression( 
-                                            SyntaxKind.SimpleAssignmentExpression, 
-                                            IdentifierName( this._returnVariableName.AssertNotNull() ), 
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            IdentifierName( this._returnVariableName.AssertNotNull() ),
                                             node.Expression ) ),
-                                    GotoStatement( 
-                                        SyntaxKind.GotoStatement, 
+                                    GotoStatement(
+                                        SyntaxKind.GotoStatement,
                                         IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) );
                         }
                         else
                         {
-                            return GotoStatement( 
-                                SyntaxKind.GotoStatement, 
+                            return GotoStatement(
+                                SyntaxKind.GotoStatement,
                                 IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
                         }
                     }
