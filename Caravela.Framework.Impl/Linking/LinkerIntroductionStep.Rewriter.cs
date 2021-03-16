@@ -32,8 +32,6 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     members.Add( member );
 
-
-
                     AddIntroductionsOnPosition( members, member );
                 }
 

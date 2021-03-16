@@ -7,10 +7,10 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Linker
 {
-    public partial class MethodOverrideJumpTests : Helpers.LinkerTestBase
+    public partial class MethodOverrideNotInlineableTests : Helpers.LinkerTestBase
     {
         [Fact]
-        public void ReturnsVoid_FJ()
+        public void ReturnsVoid_I_NI()
         {
             var code = @"
 class T
@@ -19,21 +19,17 @@ class T
     {
     }
 
-    void Foo(int x)
+    [PseudoForceNotInlineable]
+    void Foo()
     {
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            return;
-        }
-        Test(""Original End"");
+        Test(""Original"");
     }
 
     [PseudoOverride(Foo, TestAspect)]
-    void Foo_Override(int x)
+    void Foo_Override()
     {
         Test(""Before"");
-        link(this.Foo(x));
+        link(this.Foo());
         Test(""After"");
     }
 }
@@ -46,18 +42,72 @@ class T
     {
     }
 
-    void Foo(int x)
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void Foo()
     {
         Test(""Before"");
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            goto __aspect_return_1;
+        this.__Foo__OriginalBody();
+        Test(""After"");
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void __Foo__OriginalBody()
+    {
+        Test(""Original"");
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
         }
 
-        Test(""Original End"");
-        __aspect_return_1:
-            ;
+        [Fact]
+        public void ReturnsVoid_NI_I()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    void Foo()
+    {
+        Test(""Original"");
+    }
+
+    [PseudoForceNotInlineable]
+    [PseudoOverride(Foo, TestAspect)]
+    void Foo_Override()
+    {
+        Test(""Before"");
+        link(this.Foo());
+        Test(""After"");
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    void Foo()
+    {
+        this.Foo_Override();
+    }
+
+    void Foo_Override()
+    {
+        Test(""Before"");
+        Test(""Original"");
         Test(""After"");
     }
 }
@@ -72,7 +122,7 @@ class T
         }
 
         [Fact]
-        public void ReturnsVoid_NJ_FJ()
+        public void ReturnsVoid_NI_NI()
         {
             var code = @"
 class T
@@ -81,249 +131,220 @@ class T
     {
     }
 
-    void Foo(int x)
-    {
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            return;
-        }
-        Test(""Original End"");
-    }
-
-    [PseudoOverride(Foo, TestAspect1)]
-    void Foo_Override1(int x)
-    {
-        Test(""Before1"");
-        link(this.Foo(x));
-        Test(""After1"");
-    }
-
-    [PseudoOverride(Foo, TestAspect2)]
-    void Foo_Override2(int x)
-    {
-        Test(""Before2"");
-        link(this.Foo(x));
-        Test(""After2"");
-    }
-}
-";
-
-            var expectedCode = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    void Foo(int x)
-    {
-        Test(""Before2"");
-        Test(""Before1"");
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            goto __aspect_return_2;
-        }
-
-        Test(""Original End"");
-        __aspect_return_2:
-            ;
-        Test(""After1"");
-        Test(""After2"");
-    }
-}
-";
-
-            var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
-            var result = linker.ToResult();
-
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
-            Assert.Equal( expectedCode.Trim(), transformedText );
-        }
-
-        [Fact]
-        public void ReturnsVoid_FJ_NJ()
-        {
-            var code = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    void Foo(int x)
+    [PseudoForceNotInlineable]
+    void Foo()
     {
         Test(""Original"");
-    }
-
-    [PseudoOverride(Foo, TestAspect1)]
-    void Foo_Override1(int x)
-    {
-        Test(""Before1"");
-        if (x == 0)
-        {
-            return;
-        }
-        link(this.Foo(x));
-        Test(""After1"");
-    }
-
-    [PseudoOverride(Foo, TestAspect2)]
-    void Foo_Override2(int x)
-    {
-        Test(""Before2"");
-        link(this.Foo(x));
-        Test(""After2"");
-    }
-}
-";
-
-            var expectedCode = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    void Foo(int x)
-    {
-        Test(""Before2"");
-        Test(""Before1"");
-        if (x == 0)
-        {
-            goto __aspect_return_1;
-        }
-
-        Test(""Original"");
-        Test(""After1"");
-        __aspect_return_1:
-            ;
-        Test(""After2"");
-    }
-}
-";
-
-            var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
-            var result = linker.ToResult();
-
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
-            Assert.Equal( expectedCode.Trim(), transformedText );
-        }
-
-        [Fact]
-        public void ReturnsVoid_FJ_FJ()
-        {
-            var code = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    void Foo(int x)
-    {
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            return;
-        }
-
-        Test(""Original End"");
-    }
-
-    [PseudoOverride(Foo, TestAspect1)]
-    void Foo_Override1(int x)
-    {
-        Test(""Before1"");
-        if (x == 0)
-        {
-            return;
-        }
-        link(this.Foo(x));
-        Test(""After1"");
-    }
-
-    [PseudoOverride(Foo, TestAspect2)]
-    void Foo_Override2(int x)
-    {
-        Test(""Before2"");
-        link(this.Foo(x));
-        Test(""After2"");
-    }
-}
-";
-
-            var expectedCode = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    void Foo(int x)
-    {
-        Test(""Before2"");
-        Test(""Before1"");
-        if (x == 0)
-        {
-            goto __aspect_return_1;
-        }
-
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            goto __aspect_return_2;
-        }
-
-        Test(""Original End"");
-        __aspect_return_2:
-            ;
-        Test(""After1"");
-        __aspect_return_1:
-            ;
-        Test(""After2"");
-    }
-}
-";
-
-            var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
-            var result = linker.ToResult();
-
-            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
-            Assert.Equal( expectedCode.Trim(), transformedText );
-        }
-
-        [Fact]
-        public void ReturnsInt_FJ()
-        {
-            var code = @"
-class T
-{
-    void Test(string s)
-    {
-    }
-
-    int Foo(int x)
-    {
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            return 42;
-        }
-        Test(""Original End"");
-        return x;
     }
 
     [PseudoOverride(Foo, TestAspect)]
-    int Foo_Override(int x)
+    [PseudoForceNotInlineable]
+    void Foo_Override()
+    {
+        Test(""Before"");
+        link(this.Foo());
+        Test(""After"");
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void Foo()
+    {
+        this.Foo_Override();
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void __Foo__OriginalBody()
+    {
+        Test(""Original"");
+    }
+
+    void Foo_Override()
+    {
+        Test(""Before"");
+        this.__Foo__OriginalBody();
+        Test(""After"");
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
+        }
+
+        [Fact]
+        public void ReturnsVoid_NI_I_NI()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    [PseudoForceNotInlineable]
+    void Foo()
+    {
+        Test(""Original"");
+    }
+
+    [PseudoOverride(Foo, TestAspect1)]
+    void Foo_Override1()
+    {
+        Test(""Before1"");
+        link(this.Foo());
+        Test(""After1"");
+    }
+
+    [PseudoOverride(Foo, TestAspect2)]
+    [PseudoForceNotInlineable]
+    void Foo_Override2()
+    {
+        Test(""Before2"");
+        link(this.Foo());
+        Test(""After2"");
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void Foo()
+    {
+        this.Foo_Override2();
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    void __Foo__OriginalBody()
+    {
+        Test(""Original"");
+    }
+
+    void Foo_Override2()
+    {
+        Test(""Before2"");
+        Test(""Before1"");
+        this.__Foo__OriginalBody();
+        Test(""After1"");
+        Test(""After2"");
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
+        }
+
+        [Fact]
+        public void ReturnsVoid_I_NI_I()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    void Foo()
+    {
+        Test(""Original"");
+    }
+
+    [PseudoOverride(Foo, TestAspect1)]
+    [PseudoForceNotInlineable]
+    void Foo_Override1()
+    {
+        Test(""Before1"");
+        link(this.Foo());
+        Test(""After1"");
+    }
+
+    [PseudoOverride(Foo, TestAspect2)]
+    void Foo_Override2()
+    {
+        Test(""Before2"");
+        link(this.Foo());
+        Test(""After2"");
+    }
+}
+";
+
+            var expectedCode = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    void Foo()
+    {
+        Test(""Before2"");
+        this.Foo_Override1();
+        Test(""After2"");
+    }
+
+    void Foo_Override1()
+    {
+        Test(""Before1"");
+        Test(""Original"");
+        Test(""After1"");
+    }
+}
+";
+
+            var linkerInput = CreateLinkerInput( code );
+            var linker = new AspectLinker( linkerInput );
+            var result = linker.ToResult();
+
+            var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
+            Assert.Equal( expectedCode.Trim(), transformedText );
+        }
+
+        [Fact]
+        public void ReturnsInt_I_NI()
+        {
+            var code = @"
+class T
+{
+    void Test(string s)
+    {
+    }
+
+    [PseudoForceNotInlineable]
+    int Foo()
+    {
+        Test(""Original"");
+        return 42;
+    }
+
+    [PseudoOverride(Foo, TestAspect)]
+    int Foo_Override()
     {
         Test(""Before"");
         int result;
-        result = link(this.Foo(x));
+        result = link(this.Foo());
         Test(""After"");
         return result;
     }
@@ -337,24 +358,21 @@ class T
     {
     }
 
-    int Foo(int x)
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    int Foo()
     {
         Test(""Before"");
         int result;
-        Test(""Original Start"");
-        if (x == 0)
-        {
-            result = 42;
-            goto __aspect_return_1;
-        }
-
-        Test(""Original End"");
-        result = x;
-        goto __aspect_return_1;
-        __aspect_return_1:
-            ;
+        result = this.__Foo__OriginalBody();
         Test(""After"");
         return result;
+    }
+
+    [Caravela.Framework.Aspects.AspectLinkerOptions(ForceNotInlineable = true)]
+    int __Foo__OriginalBody()
+    {
+        Test(""Original"");
+        return 42;
     }
 }
 ";

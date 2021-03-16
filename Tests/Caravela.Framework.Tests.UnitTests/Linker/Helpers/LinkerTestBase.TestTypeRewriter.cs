@@ -74,7 +74,15 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 if ( this.HasPseudoAttribute( node ) )
                 {
-                    return this.ProcessPseudoAttributeNode( node );
+                    var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
+
+                    if (!isPseudoMember)
+                    {
+                        newNode = AssignNodeId( newNode );
+                        this._currentInsertPosition = (MemberDeclarationSyntax)newNode.AssertNotNull();
+                    }
+
+                    return newNode;
                 }
 
                 // Non-pseudo methods become the next insert positions.
@@ -89,7 +97,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
             }
 
-            private SyntaxNode? ProcessPseudoAttributeNode( MethodDeclarationSyntax node )
+            private SyntaxNode? ProcessPseudoAttributeNode( MethodDeclarationSyntax node, out bool isPseudoMember )
             {
                 var newAttributeLists = new List<AttributeListSyntax>();
                 AttributeSyntax? pseudoIntroductionAttribute = null;
@@ -144,14 +152,17 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 if ( pseudoIntroductionAttribute != null )
                 {
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
+                    isPseudoMember = true;
                     return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, forceNotInlineable );
                 }
                 else if ( pseudoOverrideAttribute != null )
                 {
+                    isPseudoMember = true;
                     return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, forceNotInlineable );
                 }
                 else if ( forceNotInlineable )
                 {
+                    isPseudoMember = false;
                     // If pseudo attribute is on the target declaration, generate the attribute there.
                     newAttributeLists.Add(
                         AttributeList(
@@ -171,6 +182,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                             .WithNameEquals( NameEquals( IdentifierName( "ForceNotInlineable" ) ) ) ) ) ) ) ) );
                 }
 
+                isPseudoMember = false;
                 return node.WithAttributeLists( List( newAttributeLists ) );
             }
 
