@@ -7,7 +7,7 @@
             return x;
         }
 
-        public int ExistingMethod()
+        public global::System.Int32 ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return (int)42;
