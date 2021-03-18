@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Transforms the initial C# compilation using all transformations and aspect ordering determined in earlier stages.
+    /// </summary>
     internal partial class AspectLinker
     {
 
@@ -15,7 +18,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AspectLinkerResult ToResult()
         {
-            // First pass. Add all transformations to the compilation, resulting in intermediate compilation.
+            // First pass. Adds all transformations to the compilation, resulting in intermediate compilation.
             var introductionStep = LinkerIntroductionStep.Create( this._input );
             var introductionStepResult = introductionStep.Execute();
 
@@ -23,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
             var analysisStep = LinkerAnalysisStep.Create( introductionStepResult.IntermediateCompilation, this._input.OrderedAspectLayers, introductionStepResult.TransformationRegistry );
             var analysisStepResult = analysisStep.Execute();
 
-            // Third pass. Link an inline intermediate compilation.
+            // Third pass. Link, inline and prune intermediate compilation. This results in the final Compilation.
             var linkingStep = LinkerLinkingStep.Create(
                 this._input.OrderedAspectLayers,
                 introductionStepResult.TransformationRegistry,
@@ -32,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var linkingStepResult = linkingStep.Execute();
 
-            // TODO: diagnostics.
+            // Return the final compilation and all diagnostics from all linking steps.
             return new( linkingStepResult.FinalCompilation, introductionStepResult.Diagnostics.Diagnostics );
         }
     }

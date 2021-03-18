@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl.Linking
                 var annotationId = this._nextAnnotationId++;
                 var annotatedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( new SyntaxAnnotation( _introducedSyntaxAnnotationId, annotationId.ToString() ) );
 
-                /* This is for debugging, if we want to have it in intermediate compilations, we would need to remove it afterwards.
+                /* This was for debugging, if we want to have it in intermediate compilations, we would need to remove it afterwards.
 #if DEBUG
                 
                 // Add trivia with the introduced syntax id.

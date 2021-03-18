@@ -14,8 +14,8 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
 
             advice.Builder.Name = "IntroducedMethod";
             advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) );
-            advice.Builder.AddParameter( "x", advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) ) );
-            advice.Builder.AddParameter( "y", advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) ) );
+            advice.Builder.AddParameter( "x", typeof(int) );
+            advice.Builder.AddParameter( "y", typeof(int) );
         }
 
         [IntroduceMethodTemplate]

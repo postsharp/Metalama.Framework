@@ -5,6 +5,8 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.IgnoreExisting
 {
+    // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
+
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
         public void Initialize( IAspectBuilder<INamedType> aspectBuilder )

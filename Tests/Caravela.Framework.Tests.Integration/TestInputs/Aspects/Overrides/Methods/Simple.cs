@@ -4,16 +4,13 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Declarative
+namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
 {
-    public class OverrideAttribute : Attribute, IAspect<IMethod>
-    {
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
-        {
-        }
+    // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 
-        [OverrideMethod]
-        public dynamic Template()
+    public class OverrideAttribute : OverrideMethodAspect
+    {
+        public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the overriding method.");
             return proceed();

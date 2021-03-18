@@ -9,10 +9,26 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal record AspectLinkerInput(
-        CSharpCompilation Compilation,
-        CompilationModel CompilationModel,
-        IReadOnlyList<INonObservableTransformation> NonObservableTransformations,
-        IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers
-    );
+    internal struct AspectLinkerInput
+    {
+        public CSharpCompilation Compilation { get; }
+
+        public CompilationModel CompilationModel { get; }
+
+        public IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
+
+        public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
+
+        public AspectLinkerInput(
+            CSharpCompilation compilation, 
+            CompilationModel compilationModel, 
+            IReadOnlyList<INonObservableTransformation> nonObservableTransformations,
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+        {
+            this.Compilation = compilation;
+            this.CompilationModel = compilationModel;
+            this.NonObservableTransformations = nonObservableTransformations;
+            this.OrderedAspectLayers = orderedAspectLayers;
+        }
+    }
 }

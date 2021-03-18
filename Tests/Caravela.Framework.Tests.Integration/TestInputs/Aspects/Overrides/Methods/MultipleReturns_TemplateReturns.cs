@@ -4,18 +4,16 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.TargetWithMultipleReturns
+namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.MultipleReturns_TemplateReturns
 {
-    public class OverrideAttribute : Attribute, IAspect<IMethod>
-    {
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
-        {
-        }
+    // Tests overrides where the target method contains multiple returns and template returns the result directly.
+    // Template returns the result directly.
 
-        [OverrideMethod]
-        public dynamic Template()
+    public class OverrideAttribute : OverrideMethodAspect
+    {
+        public override dynamic OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
+            Console.WriteLine("Override.");
             return proceed();
         }
     }
@@ -35,6 +33,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.TargetWi
 
                 x--;
             }
+
+            if (x > 0)
+                return;
         }
 
         [Override]
@@ -49,6 +50,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.TargetWi
 
                 x--;
             }
+
+            if (x > 0)
+                return -1;
 
             return 0;
         }

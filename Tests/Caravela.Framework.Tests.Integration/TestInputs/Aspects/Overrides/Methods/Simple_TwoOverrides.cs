@@ -2,35 +2,27 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.DeclarativeTwoAspects;
+using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.DeclarativeTwoAspects
+namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides
 {
-    public class InnerOverrideAttribute : Attribute, IAspect<IMethod>
-    {
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
-        {
-        }
+    // Tests two OverrideMethod aspect with trivial template on methods with trivial bodies.
 
-        [OverrideMethod]
-        public dynamic Template()
+    public class InnerOverrideAttribute : OverrideMethodAspect
+    {
+        public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the inner overriding template method.");
             return proceed();
         }
     }
 
-    public class OuterOverrideAttribute : Attribute, IAspect<IMethod>
+    public class OuterOverrideAttribute : OverrideMethodAspect
     {
-        public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
-        {
-        }
-
-        [OverrideMethod]
-        public dynamic Template()
+        public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the outer overriding template method.");
             return proceed();
