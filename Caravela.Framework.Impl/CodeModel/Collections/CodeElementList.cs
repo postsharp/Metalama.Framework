@@ -14,10 +14,11 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TCodeElement : class, ICodeElement
         where TSource : ICodeElementLink<TCodeElement>
     {
-        private readonly CompilationModel? _compilation;
         private volatile TCodeElement?[]? _targetItems;
 
         protected ImmutableArray<TSource> SourceItems { get; }
+
+        internal CompilationModel? Compilation { get; }
 
         protected CodeElementList( IEnumerable<TSource> sourceItems, CompilationModel compilation )
         {
@@ -44,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
 
             this.SourceItems = canMoveToImmutable ? builder.MoveToImmutable() : builder.ToImmutable();
-            this._compilation = compilation;
+            this.Compilation = compilation;
         }
 
         /// <summary>
@@ -81,7 +82,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 var targetItem = targetItems[index];
                 if ( targetItem == null )
                 {
-                    targetItem = this.SourceItems[index].GetForCompilation( this._compilation! );
+                    targetItem = this.SourceItems[index].GetForCompilation( this.Compilation! );
                     _ = Interlocked.CompareExchange( ref targetItems[index], targetItem, null );
                 }
 

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         private readonly string? _name;
 
-        public RefKind RefKind { get; }
+        public RefKind RefKind { get; set; }
 
         public IType ParameterType { get; set; }
 

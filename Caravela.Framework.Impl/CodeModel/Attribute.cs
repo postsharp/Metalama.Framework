@@ -37,10 +37,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
-        public INamedType Type => this._compilation.Factory.GetNamedType( this._data.AttributeClass! );
+        public INamedType Type => this._compilation.Factory.GetNamedType( this._data.AttributeClass.AssertNotNull() );
 
         [Memo]
-        public IMethod Constructor => this._compilation.Factory.GetMethod( this._data.AttributeConstructor! );
+        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this._data.AttributeConstructor.AssertNotNull() );
 
         [Memo]
         public IReadOnlyList<TypedConstant> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();

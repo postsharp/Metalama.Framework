@@ -37,7 +37,6 @@ namespace Caravela.Framework.Impl
 
         public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope, AspectLinkerOptions? aspectLinkerOptions = null )
         {
-            // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
             var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, aspectLinkerOptions );
             this._advices.Add( advice );

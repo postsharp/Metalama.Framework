@@ -382,7 +382,6 @@ namespace Caravela.Framework.Impl.Linking
                         throw new AssertionFailedException();
                     }
                 }
-
             }
 
             private string GetAssignmentVariableName( ExpressionSyntax left )

@@ -46,5 +46,17 @@ namespace Caravela.Framework.Impl
                 throw new ArgumentOutOfRangeException( nameof( method ), "This is not a source symbol." );
             }
         }
+
+        public static IMethodSymbol GetSymbol( this IConstructor method )
+        {
+            if ( method is Constructor sourceConstructor )
+            {
+                return (IMethodSymbol) sourceConstructor.Symbol;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException( nameof( method ), "This is not a source symbol." );
+            }
+        }
     }
 }

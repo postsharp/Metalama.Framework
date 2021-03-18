@@ -1,0 +1,11 @@
+
+    [Introduction]
+    internal class TargetClass
+    {
+        public int ExistingMethod()
+        {
+            Console.WriteLine("This is introduced method.");
+            return (int)42;
+        }
+    }
+    

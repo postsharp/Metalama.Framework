@@ -78,7 +78,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     if (!isPseudoMember)
                     {
-                        newNode = AssignNodeId( newNode );
+                        newNode = AssignNodeId( newNode.AssertNotNull() );
                         this._currentInsertPosition = (MemberDeclarationSyntax)newNode.AssertNotNull();
                     }
 
@@ -162,7 +162,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 }
                 else if ( forceNotInlineable )
                 {
-                    isPseudoMember = false;
                     // If pseudo attribute is on the target declaration, generate the attribute there.
                     newAttributeLists.Add(
                         AttributeList(

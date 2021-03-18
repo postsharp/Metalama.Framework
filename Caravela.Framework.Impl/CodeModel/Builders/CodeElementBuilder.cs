@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -36,7 +37,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsReadOnly { get; private set; }
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotImplementedException();
+        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
+        {
+            // TODO: How to handle ambiguous match (e.g. due to null argument values)?
+            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).Single();
+            var ctorArguments = constructorArguments.Select( ( ca, i ) => new Code.TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) ).ToList();
+            return new AttributeBuilder( this, ctor, ctorArguments );
+        }
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 

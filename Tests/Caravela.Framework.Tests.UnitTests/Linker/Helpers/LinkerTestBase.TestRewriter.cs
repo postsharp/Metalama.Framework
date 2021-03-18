@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
         private const string _testTemporaryNodeAnnotationId = "LinkerTestTemporaryNode";
         private static int _nextNodeId;
 
-        public static T AssignNodeId<T>( T node )
+        public static T? AssignNodeId<T>( T? node )
             where T : SyntaxNode
         {
             if ( node.GetAnnotations( _testNodeIdAnnotationId ).Any() )
