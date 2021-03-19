@@ -4,6 +4,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.MemberAccess.CompileTimeFieldMemberAccess
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
