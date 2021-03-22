@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -9,7 +12,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    internal abstract partial class DiagnosticSink : IDiagnosticSink
+    public abstract partial class DiagnosticSink : IDiagnosticSink
     {
 
         protected DiagnosticSink( IDiagnosticLocation? defaultLocation = null )

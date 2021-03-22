@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -8,6 +11,7 @@ namespace Caravela.TestFramework
 {
     /// <summary>
     /// When applied on a test theory method specifies the directory from which to load the test source files for the given test theory method.
+    /// Files whose name start with an underscore (<c>_</c>) are ignored.
     /// </summary>
     public class FromDirectoryAttribute : DataAttribute
     {

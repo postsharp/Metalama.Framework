@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -137,9 +140,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<IType> GenericArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
         [Memo]
+        public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
+
+        [Memo]
         public override ICodeElement? ContainingElement => this.TypeSymbol.ContainingSymbol switch
         {
-            INamespaceSymbol => this.Compilation,
+            INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
             _ => throw new NotImplementedException()
         };

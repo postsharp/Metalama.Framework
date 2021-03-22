@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -9,7 +12,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private const string _templateCategory = "Template";
 
-        public static readonly DiagnosticDescriptor CannotReferenceRuntimeExpressionFromBuildTimeExpression
+        internal static readonly DiagnosticDescriptor CannotReferenceRuntimeExpressionFromBuildTimeExpression
             = new DiagnosticDescriptor(
                 "CR0100",
                 "Cannot reference a run-time expression from a compile-time expression",
@@ -27,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
                 DiagnosticSeverity.Error,
                 true );
 
-        public static readonly DiagnosticDescriptor ReturnTypeDoesNotMatch
+        internal static readonly DiagnosticDescriptor ReturnTypeDoesNotMatch
             = new DiagnosticDescriptor(
                 "CR0102",
                 "The value returned by the template does not match the target's return type.",
@@ -36,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating
                 DiagnosticSeverity.Error,
                 true );
 
-        public static readonly DiagnosticDescriptor LocalVariableAmbiguousCoercion
+        internal static readonly DiagnosticDescriptor LocalVariableAmbiguousCoercion
             = new DiagnosticDescriptor(
                 "CR0103",
                 "The local variable '{local.Name}' is both coerced to be run-time and build-time",

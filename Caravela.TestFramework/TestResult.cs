@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -8,33 +11,40 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of an integration test run.
     /// </summary>
-    public class TestResult
+    public sealed class TestResult
     {
+        private readonly List<Diagnostic> _diagnostics = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResult"/> class.
         /// </summary>
         /// <param name="templateDocument">The source code document of the template.</param>
-        public TestResult( Project project, Document templateDocument, Compilation initialCompilation )
+        internal TestResult( Project project, Document templateDocument, Compilation initialCompilation )
         {
             this.Project = project;
             this.TemplateDocument = templateDocument;
             this.InitialCompilation = initialCompilation;
         }
 
-        /// <summary>
-        /// Gets or sets a list of diagnostics emitted during test run.
-        /// </summary>
-        public List<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
+        internal void AddDiagnostic( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
+
+        internal void AddDiagnostics( IEnumerable<Diagnostic> diagnostics ) => this._diagnostics.AddRange( diagnostics );
 
         /// <summary>
-        /// Gets or sets a primary error message emitted during test run.
+        /// Gets the list of diagnostics emitted during test run.
         /// </summary>
-        public string? ErrorMessage { get; set; }
+        public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
 
         /// <summary>
-        /// Gets or sets an exception thrown during test run.
+        /// Gets the primary error message emitted during test run.
         /// </summary>
-        public Exception? Exception { get; set; }
+        public string? ErrorMessage { get; internal set; }
+
+        /// <summary>
+        /// Gets the exception thrown during test run, if any. This member is set only if <see cref="AspectTestRunner.HandlesException"/> is
+        /// set to <c>true</c>.
+        /// </summary>
+        public Exception? Exception { get; internal set; }
 
         /// <summary>
         /// Gets the test project.
@@ -42,43 +52,43 @@ namespace Caravela.TestFramework
         public Project Project { get; }
 
         /// <summary>
-        /// Gets a source code document of the template.
+        /// Gets the source code document of the template.
         /// </summary>
         public Document TemplateDocument { get; }
 
         /// <summary>
-        /// Gets an initial compilation of the test project.
+        /// Gets the initial compilation of the test project.
         /// </summary>
         public Compilation InitialCompilation { get; }
 
         /// <summary>
-        /// Gets or sets a result compilation of the test project.
+        /// Gets or sets the result compilation of the test project.
         /// </summary>
         public Compilation? ResultCompilation { get; set; }
 
         /// <summary>
-        /// Gets or sets an annotated syntax tree of the template.
+        /// Gets or sets the root <see cref="SyntaxNode"/> of the template annotated with template annotations from <see cref="AnnotationExtensions"/>.
         /// </summary>
-        public SyntaxNode? AnnotatedTemplateSyntax { get; set; }
+        internal SyntaxNode? AnnotatedTemplateSyntax { get; set; }
 
         /// <summary>
-        /// Gets or sets a transformed syntax tree of the template.
+        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the template.
         /// </summary>
-        public SyntaxNode? TransformedTemplateSyntax { get; set; }
+        public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a transformed syntax tree of the target code element.
+        /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.
         /// </summary>
-        public SyntaxNode? TransformedTargetSyntax { get; set; }
+        public SyntaxNode? TransformedTargetSyntax { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a transformed source of the target code element.
+        /// Gets the transformed <see cref="SourceText"/> of the target code element.
         /// </summary>
-        public SourceText? TransformedTargetSource { get; set; }
+        public SourceText? TransformedTargetSource { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the test run succeeded.
+        /// Gets a value indicating whether the test run succeeded.
         /// </summary>
-        public bool Success { get; set; }
+        public bool Success { get; internal set; }
     }
 }

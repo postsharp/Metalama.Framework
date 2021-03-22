@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,7 +12,7 @@ using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal static class ReferenceAssemblyLocator
+    public static class ReferenceAssemblyLocator
     {
         private static readonly string _project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>

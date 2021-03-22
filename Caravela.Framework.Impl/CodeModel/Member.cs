@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System;
 using System.Linq;
 using Caravela.Framework.Code;
@@ -38,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool IsVirtual => this.Symbol.IsVirtual;
 
         [Memo]
-        public NamedType DeclaringType => this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType );
+        public INamedType DeclaringType => this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType );
 
         protected Member( CompilationModel compilation ) : base( compilation )
         {

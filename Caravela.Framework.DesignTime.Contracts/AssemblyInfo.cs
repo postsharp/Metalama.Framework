@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using System.Runtime.InteropServices;
 
 // It is essential that GUIDs in this project are unchanged, as it is key to type equivalence.

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -21,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    internal abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
+    public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
         protected ServiceProvider ServiceProvider { get; } = new ServiceProvider();
 
@@ -39,10 +42,10 @@ namespace Caravela.Framework.Impl.Pipeline
         protected IAspectPipelineContext Context { get; private set; }
 
         // TODO: move to service provider?
-        protected CompileTimeAssemblyBuilder? CompileTimeAssemblyBuilder { get; private set; }
+        private protected CompileTimeAssemblyBuilder? CompileTimeAssemblyBuilder { get; private set; }
 
         // TODO: move to service provider?
-        protected CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; private set; }
+        private protected CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; private set; }
 
         protected AspectPipeline( IAspectPipelineContext context )
         {
@@ -120,7 +123,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="pipelineStageResult"></param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        protected bool TryExecuteCore( [NotNullWhen(true)] out PipelineStageResult? pipelineStageResult )
+        private protected bool TryExecuteCore( [NotNullWhen(true)] out PipelineStageResult? pipelineStageResult )
         {
             var roslynCompilation = this.Context.Compilation;
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
@@ -205,7 +208,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="parts"></param>
         /// <param name="compileTimeAssemblyLoader"></param>
         /// <returns></returns>
-        protected abstract HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
+        private protected abstract HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader );
 
         private PipelineStage CreateStage( object groupKey, IReadOnlyList<OrderedAspectLayer> parts, CompilationModel compilation, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {

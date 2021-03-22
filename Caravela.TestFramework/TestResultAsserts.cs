@@ -1,13 +1,15 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.IO;
 using System.Linq;
-using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Caravela.UnitTestFramework
+namespace Caravela.TestFramework
 {
     public static class TestResultAsserts
     {

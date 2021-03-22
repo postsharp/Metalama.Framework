@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using Microsoft.CodeAnalysis;
 using Xunit.Abstractions;
 
 namespace Caravela.TestFramework
@@ -14,7 +15,7 @@ namespace Caravela.TestFramework
     /// </remarks>
     public abstract class UnitTestBase
     {
-        protected readonly ITestOutputHelper Logger;
+        protected ITestOutputHelper Logger { get; }
 
         /// <summary>
         /// Gets the root directory path of the current test project.
@@ -34,6 +35,17 @@ namespace Caravela.TestFramework
         {
             this.Logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
+        }
+
+        protected void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
+        {
+            foreach ( var diagnostic in diagnostics )
+            {
+                if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                {
+                    this.Logger.WriteLine( diagnostic.ToString() );
+                }
+            }
         }
     }
 }

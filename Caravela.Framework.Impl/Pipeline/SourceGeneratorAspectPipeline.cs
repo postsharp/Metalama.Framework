@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.AspectOrdering;
@@ -33,7 +36,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public override bool CanTransformCompilation => false;
 
         /// <inheritdoc/>
-        protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+        private protected override HighLevelPipelineStage CreateStage( IReadOnlyList<OrderedAspectLayer> parts, CompileTimeAssemblyLoader compileTimeAssemblyLoader )
             => new SourceGeneratorPipelineStage( parts, compileTimeAssemblyLoader, this );
     }
 }

@@ -33,10 +33,12 @@
   <!-- Code quality and documentation -->
   <PropertyGroup>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
-     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!-- Disable XML doc warnings in the debug build -->
-    <NoWarn Condition="'$(Configuration)'!='Release'">1591,1572,1573</NoWarn>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+    <!-- Disable XML doc warnings for now -->
+    <NoWarn>1591,1572,1573</NoWarn>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)'=='True'">
