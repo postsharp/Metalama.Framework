@@ -370,7 +370,6 @@ namespace Caravela.Framework.Impl.Templating
                      symbol.GetAttributes().Any( a =>
                          a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
                 {
-                    //TODO: Changing TemplateKeyword to CompileTimeVariable doesn't fix the bug.
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&

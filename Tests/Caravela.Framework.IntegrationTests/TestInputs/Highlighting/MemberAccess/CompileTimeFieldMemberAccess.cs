@@ -5,22 +5,20 @@ using static Caravela.Framework.Aspects.TemplateContext;
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.MemberAccess.CompileTimeFieldMemberAccess
 {
     [CompileTime]
+    class CompileTimeClass
+    {
+        public int field;
+    }
+
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
             CompileTimeClass compiletimeClass = new();
-            //TODO: The compiletimeClass should probably not be highlighted as a template keyword.
             compiletimeClass.field.ToString();
             return proceed();
         }
-    }
-
-    [CompileTime]
-    class CompileTimeClass
-    {
-        //TODO: Should this declaration be highlighted?
-        public int field;
     }
 }

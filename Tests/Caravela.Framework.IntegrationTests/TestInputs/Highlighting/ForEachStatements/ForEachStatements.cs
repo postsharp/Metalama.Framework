@@ -27,7 +27,7 @@ namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.ForEachSta
 
             foreach (var x in compileTimeObject.compileTimeEnumerable)
             {
-                //TODO: x should not be highlighted as template keyword here.
+                // TODO: x should not be highlighted as template keyword here. #28396
                 x.ToString();
             }
 

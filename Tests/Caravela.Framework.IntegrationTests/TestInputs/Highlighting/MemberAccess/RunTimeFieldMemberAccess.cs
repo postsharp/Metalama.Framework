@@ -4,22 +4,21 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.MemberAccess.RunTimeFieldMemberAccess
 {
+    class RunTimeClass
+    {
+        public int field;
+    }
+
     [CompileTime]
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: On the first line the runtimeClass is highlighted as a compile-time variable,
-            // but on the second line it is not.
-            RunTimeClass runtimeClass = new();
-            runtimeClass.field.ToString();
+            // TODO: The runTimeObject variable shouldn't be highlighted as a compile-time variable. #28397
+            RunTimeClass runTimeObject = new();
+            runTimeObject.field.ToString();
             return proceed();
         }
-    }
-
-    class RunTimeClass
-    {
-        public int field;
     }
 }
