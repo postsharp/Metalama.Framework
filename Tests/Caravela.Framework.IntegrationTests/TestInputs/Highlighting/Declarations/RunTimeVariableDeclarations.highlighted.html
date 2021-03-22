@@ -1,0 +1,65 @@
+﻿<html>
+<head>
+<!-- Just one of these paths is supposed to work. -->
+<link rel='stylesheet' href='..\..\..\..\..\..\..\Caravela.TestFramework\Templating\Highlighting\highlighting.css' />
+<link rel='stylesheet' href='..\..\..\..\..\..\Caravela.TestFramework\Templating\Highlighting\highlighting.css' />
+</head>
+<body><pre>
+
+using System.Collections.Generic;
+
+using Caravela.Framework.Aspects;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
+using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
+using System;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
+{
+    class RuntimeClass
+    {
+        public void RunTimeMethod()
+        {
+        }
+    }
+
+    [CompileTime]
+    <span class='CompileTime'>class Aspect
+</span>    <span class='CompileTime'>{
+</span>        [TestTemplate]
+        <span class='CompileTime'>dynamic Template()
+</span>        <span class='CompileTime'>{
+</span>            <span class='RunTime'>var </span><span class='CompileTimeVariable'>runTimeClassInstance</span><span class='RunTime'> = new RuntimeClass();
+</span>
+            <span class='RunTime'>int </span><span class='CompileTimeVariable'>scalar</span><span class='RunTime'> = 0;
+</span>            <span class='RunTime'>int[] </span><span class='CompileTimeVariable'>array</span><span class='RunTime'> = new int[10];
+</span>            <span class='RunTime'>object </span><span class='CompileTimeVariable'>@object</span><span class='RunTime'> = "";
+</span>            <span class='RunTime'>string </span><span class='CompileTimeVariable'>@string</span><span class='RunTime'> = "";
+</span>            <span class='RunTime'>Action </span><span class='CompileTimeVariable'>action</span><span class='RunTime'> = runTimeClassInstance.RunTimeMethod;
+</span>            <span class='RunTime'>(int, byte) </span><span class='CompileTimeVariable'>tuple</span><span class='RunTime'> = (0, 1);
+</span>            <span class='RunTime'>Tuple<int, byte> </span><span class='CompileTimeVariable'>generic</span><span class='RunTime'> = new Tuple<int, byte>(2, 3);
+</span>
+            <span class='RunTime'>return </span><span class='TemplateKeyword'>proceed</span><span class='CompileTime'>()</span><span class='RunTime'>;
+</span>        <span class='CompileTime'>}
+</span>    <span class='CompileTime'>}
+</span>}
+
+
+Legend:
+<span class='Default'>Default</span>
+<span class='RunTime'>RunTime</span>
+<span class='CompileTime'>CompileTime</span>
+<span class='Dynamic'>Dynamic</span>
+<span class='CompileTimeVariable'>CompileTimeVariable</span>
+<span class='TemplateKeyword'>TemplateKeyword</span>
+<span class='Conflict'>Conflict</span>
+</pre></body>
+</html>

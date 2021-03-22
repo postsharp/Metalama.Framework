@@ -1,0 +1,57 @@
+﻿<html>
+<head>
+<!-- Just one of these paths is supposed to work. -->
+<link rel='stylesheet' href='..\..\..\..\..\..\..\Caravela.TestFramework\Templating\Highlighting\highlighting.css' />
+<link rel='stylesheet' href='..\..\..\..\..\..\Caravela.TestFramework\Templating\Highlighting\highlighting.css' />
+</head>
+<body><pre>
+
+using System.Collections.Generic;
+
+using Caravela.Framework.Aspects;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Caravela.Framework.Impl.Templating.MetaModel;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
+using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
+using static Caravela.Framework.Aspects.TemplateContext;
+
+namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Identifiers.RunTimeMethodIdentifier
+{
+    class RunTimeClass
+    {
+        public void RunTimeMethod()
+        {
+        }
+    }
+
+    [CompileTime]
+    <span class='CompileTime'>class Aspect
+</span>    <span class='CompileTime'>{
+</span>        [TestTemplate]
+        <span class='CompileTime'>dynamic Template()
+</span>        <span class='CompileTime'>{
+</span>            <span class='RunTime'>var </span><span class='CompileTimeVariable'>runTimeObject</span><span class='RunTime'> = new RunTimeClass();
+</span>
+            <span class='RunTime'>runTimeObject.RunTimeMethod();
+</span>            <span class='RunTime'>return </span><span class='TemplateKeyword'>proceed</span><span class='CompileTime'>()</span><span class='RunTime'>;
+</span>        <span class='CompileTime'>}
+</span>    <span class='CompileTime'>}
+</span>}
+
+
+Legend:
+<span class='Default'>Default</span>
+<span class='RunTime'>RunTime</span>
+<span class='CompileTime'>CompileTime</span>
+<span class='Dynamic'>Dynamic</span>
+<span class='CompileTimeVariable'>CompileTimeVariable</span>
+<span class='TemplateKeyword'>TemplateKeyword</span>
+<span class='Conflict'>Conflict</span>
+</pre></body>
+</html>
