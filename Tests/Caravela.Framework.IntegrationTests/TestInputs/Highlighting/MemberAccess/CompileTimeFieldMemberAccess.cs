@@ -10,9 +10,9 @@ namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.MemberAcce
         [TestTemplate]
         dynamic Template()
         {
-            CompileTimeClass compileTimeClass = new();
-            //TODO: The compileTimeClass should probably not be highlighted as a template keyword.
-            compileTimeClass.field.ToString();
+            CompileTimeClass compiletimeClass = new();
+            //TODO: The compiletimeClass should probably not be highlighted as a template keyword.
+            compiletimeClass.field.ToString();
             return proceed();
         }
     }

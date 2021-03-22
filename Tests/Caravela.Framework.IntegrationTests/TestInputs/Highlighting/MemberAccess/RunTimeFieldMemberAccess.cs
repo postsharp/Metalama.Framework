@@ -10,10 +10,10 @@ namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.MemberAcce
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: On the first line the runTimeClass is highlighted as a compile-time variable,
+            //TODO: On the first line the runtimeClass is highlighted as a compile-time variable,
             // but on the second line it is not.
-            RunTimeClass runTimeClass = new();
-            runTimeClass.field.ToString();
+            RunTimeClass runtimeClass = new();
+            runtimeClass.field.ToString();
             return proceed();
         }
     }

@@ -1,9 +1,19 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Declarations.ClassDeclaration
 {
-    //TODO: How to have a compile-time only declaration? See TemplateAnnotator.VisitClassDeclaration
+    class RuntimeClass
+    {
+    }
+
+    [CompileTime]
+    class CompileTimeClass
+    {
+    }
+
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

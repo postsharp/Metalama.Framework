@@ -1,35 +1,32 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
 {
-    class Aspect
+    class RuntimeClass
     {
-        private void RunTimeMethod()
+        public void RunTimeMethod()
         {
         }
+    }
 
-        private byte runTimeField = 1;
-
-        private int[] runTimeArray = new int[11];
-
-        private object runTimeObject = "";
-
-        private string runTimeString = "";
-
+    [CompileTime]
+    class Aspect
+    {
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: Should all these be marked as compile-time variables?
-            int scalar = this.runTimeField;
-            int[] array = this.runTimeArray;
-            object @object = this.runTimeObject;
-            object constructedObject = new String(this.runTimeString.ToCharArray());
-            string @string = this.runTimeString;
-            Action action = this.RunTimeMethod;
-            (int, byte) tuple = (this.runTimeField, this.runTimeField);
-            Tuple<int, byte> generic = new Tuple<int, byte>(this.runTimeField, this.runTimeField);
+            var runTimeClassInstance = new RuntimeClass();
+
+            int scalar = 0;
+            int[] array = new int[10];
+            object @object = "";
+            string @string = "";
+            Action action = runTimeClassInstance.RunTimeMethod;
+            (int, byte) tuple = (0, 1);
+            Tuple<int, byte> generic = new Tuple<int, byte>(2, 3);
 
             return proceed();
         }

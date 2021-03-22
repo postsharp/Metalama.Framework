@@ -1,19 +1,25 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Identifiers.RunTimeMethodIdentifier
 {
-    class Aspect
+    class RunTimeClass
     {
-        //TODO: Why is this highlighted?
         public void RunTimeMethod()
         {
         }
+    }
 
+    [CompileTime]
+    class Aspect
+    {
         [TestTemplate]
         dynamic Template()
         {
-            this.RunTimeMethod();
+            var runTimeObject = new RunTimeClass();
+
+            runTimeObject.RunTimeMethod();
             return proceed();
         }
     }

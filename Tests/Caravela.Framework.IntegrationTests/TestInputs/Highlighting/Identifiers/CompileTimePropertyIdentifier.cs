@@ -4,16 +4,22 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Identifiers.CompileTimePropertyIdentifier
 {
+    [CompileTime]
+    class CompileTimeClass
+    {
+        public int CompileTimeProperty { get; set; }
+    }
+
+    [CompileTime]
+
     class Aspect
     {
-        [CompileTime]
-        public int CompileTimeProperty { get; set; }
-
-
         [TestTemplate]
         dynamic Template()
         {
-            this.CompileTimeProperty.ToString();
+            var compileTimeObject = new CompileTimeClass();
+
+            compileTimeObject.CompileTimeProperty.ToString();
             return proceed();
         }
     }

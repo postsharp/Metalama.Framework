@@ -5,61 +5,45 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.WhileStatements.WhileStatementsCallingProceed
 {
+    class RunTimeClass
+    {
+        public IList<int> runTimeList;
+    }
+
+    [CompileTime]
+    class CompileTimeClass
+    {
+        public IList<int> compileTimeList;
+    }
+
+    [CompileTime]
     class Aspect
     {
-        //TODO: This line should probably not be highlighted.
-        private IList<int> runTimeList;
-
-        //TODO: These lines should probably not be highlighted.
-        [CompileTime]
-        private IList<int> compileTimeList;
-
-        [CompileTime]
-        private int compileTimeIndex;
-
         [TestTemplate]
         dynamic Template()
         {
+            var runTimeObject = new RunTimeClass();
+            var compileTimeObject = new CompileTimeClass();
+
             int i = 0;
 
-            while (i < this.compileTimeList.Count)
+            while (i < compileTimeObject.compileTimeList.Count)
             {
-                this.compileTimeList[i].ToString();
-                var x = this.compileTimeList[i];
+                compileTimeObject.compileTimeList[i].ToString();
+                var x = compileTimeObject.compileTimeList[i];
                 x.ToString();
                 proceed();
                 i++;
             }
 
             int j = 0;
-            while (j < this.runTimeList.Count)
+            while (j < runTimeObject.runTimeList.Count)
             {
-                this.runTimeList[j].ToString();
-                var x = this.runTimeList[j];
+                runTimeObject.runTimeList[j].ToString();
+                var x = runTimeObject.runTimeList[j];
                 x.ToString();
                 proceed();
                 j++;
-            }
-
-            //TODO: Should a build-time index be allowed?
-            this.compileTimeIndex = 0;
-            while (this.compileTimeIndex < this.compileTimeList.Count)
-            {
-                this.compileTimeList[this.compileTimeIndex].ToString();
-                var x = this.compileTimeList[this.compileTimeIndex];
-                x.ToString();
-                proceed();
-                this.compileTimeIndex++;
-            }
-
-            this.compileTimeIndex = 0;
-            while (this.compileTimeIndex < this.runTimeList.Count)
-            {
-                this.runTimeList[this.compileTimeIndex].ToString();
-                var x = this.runTimeList[this.compileTimeIndex];
-                x.ToString();
-                proceed();
-                this.compileTimeIndex++;
             }
 
             return proceed();

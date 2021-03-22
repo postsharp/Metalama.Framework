@@ -5,24 +5,29 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
 {
-    class Aspect
+    [CompileTime]
+    class CompileTimeClass
     {
-        [CompileTime]
-        private void CompileTimeMethod()
+        public void CompileTimeMethod()
         {
         }
+    }
 
+    [CompileTime]
+    class Aspect
+    {
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: Should all these be marked as runtime? (Those initialized by literals yes.)
-            int scalar = 0;
-            int[] array = new int[10];
-            object @object = "";
-            string @string = "";
-            Action action = this.CompileTimeMethod;
-            (int, byte) tuple = (0, 1);
-            Tuple<int, byte> generic = new Tuple<int, byte>(2, 3);
+            var compiletimeClassInstance = new CompileTimeClass();
+
+            int scalar = compileTime(0);
+            int[] array = compileTime(new int[10]);
+            object @object = compileTime("");
+            string @string = compileTime("");
+            Action action = compiletimeClassInstance.CompileTimeMethod;
+            (int, byte) tuple = compileTime((0, (byte)1));
+            Tuple<int, byte> generic = compileTime(new Tuple<int, byte>(2, 3));
 
             return proceed();
         }

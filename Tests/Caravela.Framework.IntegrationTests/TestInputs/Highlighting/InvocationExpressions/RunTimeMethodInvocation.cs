@@ -1,9 +1,10 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.InvocationExpressions.RunTimeMethodInvocation
 {
-    class Aspect
+    class RunTimeClass
     {
         public void RunTimeMethod()
         {
@@ -20,24 +21,39 @@ namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Invocation
         public void RunTimeMethod(int param1, int param2, int param3)
         {
         }
+    }
 
+    [CompileTime]
+    class Aspect
+    {
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: highlighted as compile time variables here, but not when used as arguments.
-            int staticInt = 0;
-            dynamic dynamicInt = 1;
+            var runTimeObject = new RunTimeClass();
+
+            int staticallyTypedRunTimeInt = 0;
+            dynamic dynamicallyTypedRunTimeInt = 1;
+            int staticallyTypedCompileTimeInt = compileTime(0);
+            dynamic dynamicallyTypedCompileTimeInt = compileTime(1);
 
 
-            this.RunTimeMethod();
+            runTimeObject.RunTimeMethod();
 
-            this.RunTimeMethod(staticInt);
-            this.RunTimeMethod(staticInt, staticInt);
-            this.RunTimeMethod(staticInt, staticInt, staticInt);
+            runTimeObject.RunTimeMethod(staticallyTypedRunTimeInt);
+            runTimeObject.RunTimeMethod(staticallyTypedRunTimeInt, staticallyTypedRunTimeInt);
+            runTimeObject.RunTimeMethod(staticallyTypedRunTimeInt, staticallyTypedRunTimeInt, staticallyTypedRunTimeInt);
 
-            this.RunTimeMethod(dynamicInt);
-            this.RunTimeMethod(dynamicInt, dynamicInt);
-            this.RunTimeMethod(dynamicInt, dynamicInt, dynamicInt);
+            runTimeObject.RunTimeMethod(dynamicallyTypedRunTimeInt);
+            runTimeObject.RunTimeMethod(dynamicallyTypedRunTimeInt, dynamicallyTypedRunTimeInt);
+            runTimeObject.RunTimeMethod(dynamicallyTypedRunTimeInt, dynamicallyTypedRunTimeInt, dynamicallyTypedRunTimeInt);
+
+            runTimeObject.RunTimeMethod(staticallyTypedCompileTimeInt);
+            runTimeObject.RunTimeMethod(staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt);
+            runTimeObject.RunTimeMethod(staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt);
+
+            runTimeObject.RunTimeMethod(dynamicallyTypedCompileTimeInt);
+            runTimeObject.RunTimeMethod(dynamicallyTypedCompileTimeInt, dynamicallyTypedCompileTimeInt);
+            runTimeObject.RunTimeMethod(dynamicallyTypedCompileTimeInt, dynamicallyTypedCompileTimeInt, dynamicallyTypedCompileTimeInt);
 
             return proceed();
         }

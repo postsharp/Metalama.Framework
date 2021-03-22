@@ -5,52 +5,39 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.ForStatements.ForStatementsCallingProceedWithBreak
 {
+    class RunTimeClass
+    {
+        public IList<int> runTimeList;
+    }
+
+    [CompileTime]
+    class CompileTimeClass
+    {
+        public IList<int> compileTimeList;
+    }
+
+    [CompileTime]
     class Aspect
     {
-        //TODO: This line should probably not be highlighted.
-        private IList<int> runTimeList;
-
-        //TODO: These lines should probably not be highlighted.
-        [CompileTime]
-        private IList<int> compileTimeList;
-
-        [CompileTime]
-        private int compileTimeIndex;
-
         [TestTemplate]
         dynamic Template()
         {
-            for (int i = 0; i < this.compileTimeList.Count; i++)
+            var runTimeObject = new RunTimeClass();
+            var compileTimeObject = new CompileTimeClass();
+
+            for (int i = 0; i < compileTimeObject.compileTimeList.Count; i++)
             {
-                this.compileTimeList[i].ToString();
-                var x = this.compileTimeList[i];
+                compileTimeObject.compileTimeList[i].ToString();
+                var x = compileTimeObject.compileTimeList[i];
                 x.ToString();
                 proceed();
                 break;
             }
 
-            for (int i = 0; i < this.runTimeList.Count; i++)
+            for (int i = 0; i < runTimeObject.runTimeList.Count; i++)
             {
-                this.runTimeList[i].ToString();
-                var x = this.runTimeList[i];
-                x.ToString();
-                proceed();
-                break;
-            }
-
-            for (this.compileTimeIndex = 0; this.compileTimeIndex < this.compileTimeList.Count; this.compileTimeIndex++)
-            {
-                this.compileTimeList[this.compileTimeIndex].ToString();
-                var x = this.compileTimeList[this.compileTimeIndex];
-                x.ToString();
-                proceed();
-                break;
-            }
-
-            for (this.compileTimeIndex = 0; this.compileTimeIndex < this.runTimeList.Count; this.compileTimeIndex++)
-            {
-                this.runTimeList[this.compileTimeIndex].ToString();
-                var x = this.runTimeList[this.compileTimeIndex];
+                runTimeObject.runTimeList[i].ToString();
+                var x = runTimeObject.runTimeList[i];
                 x.ToString();
                 proceed();
                 break;
