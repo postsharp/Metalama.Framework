@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( ISymbol? symbol )
+        public static Location? GetLocationForDiagnosticReport( ISymbol? symbol )
         {
             if ( symbol == null )
             {
@@ -66,6 +67,9 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case TypeParameterSyntax typeParameter:
                     return typeParameter.Identifier.GetLocation();
+                
+                case VariableDeclaratorSyntax variable:
+                    return variable.Identifier.GetLocation();
 
                 default:
                     return syntax.GetLocation();
@@ -78,7 +82,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( AttributeData? attribute )
+        public static Location? GetLocationForDiagnosticReport( AttributeData? attribute )
         {
             if ( attribute == null )
             {
@@ -95,9 +99,29 @@ namespace Caravela.Framework.Impl.Diagnostics
             return application.GetSyntax().GetLocation();
         }
 
-        public static DiagnosticLocation? ToDiagnosticLocation( this Location? location )
+        public static DiagnosticLocation? ToDiagnosticLocation( this Location? location ) => location == null ? null : new DiagnosticLocation( location );
+
+        public static IEnumerable<DiagnosticLocation> ToDiagnosticLocation( this IEnumerable<Location> locations )
+            => locations.Select( l => l.ToDiagnosticLocation() ).WhereNotNull();
+
+        public static IEnumerable<Location> GetLocationsForDiagnosticSuppression( ISymbol symbol )
+            => symbol.DeclaringSyntaxReferences.Select( r => r.SyntaxTree.GetLocation( r.Span ) );
+
+        public static IEnumerable<Location> GetLocationsForDiagnosticSuppression( AttributeData? attribute )
         {
-            return location == null ? null : new DiagnosticLocation( location );
+            if ( attribute == null )
+            {
+                return Enumerable.Empty<Location>();
+            }
+
+            var application = attribute.ApplicationSyntaxReference;
+
+            if ( application == null )
+            {
+                return Enumerable.Empty<Location>();
+            }
+
+            return new[] { application.GetSyntax().GetLocation() };
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
+            using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
                 // Emit a method named __{OriginalName}__{AspectShortName}_{PartName}
                 var methodName =

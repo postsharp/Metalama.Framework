@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -32,9 +31,8 @@ namespace Caravela.Framework.Impl.Templating
             this.ProceedImplementation = proceedImpl;
             this.CurrentLexicalScope = new TemplateDriverLexicalScope( this, (IMethodInternal) targetMethod );
             this.DiagnosticSink = diagnosticSink;
-            Invariant.Assert( diagnosticSink.DefaultLocation != null );
-            Invariant.Assert(
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ) );
+            Invariant.Assert( diagnosticSink.DefaultScope != null );
+            Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;

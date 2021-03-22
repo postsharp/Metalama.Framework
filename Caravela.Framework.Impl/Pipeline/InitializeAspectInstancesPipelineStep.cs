@@ -30,11 +30,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
-            var aspectInitializerDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics );
+            var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
+            var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices ).Cast<Advice>();
 
-            pipelineStepsState.AddDiagnostics( aspectInitializerDiagnostics );
+            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
 

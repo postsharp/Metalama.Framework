@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -44,9 +45,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract bool Equals( ICodeElement other );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
+        public IDiagnosticLocation? LocationForDiagnosticReport => this.DeclaringMember.LocationForDiagnosticReport;
 
-        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetLocation();
+        IEnumerable<Location> IHasDiagnosticLocation.LocationsForDiagnosticSuppression => throw new NotSupportedException();
+
+        IEnumerable<IDiagnosticLocation> IDiagnosticScope.LocationsForDiagnosticSuppression => throw new NotSupportedException();
+
+        Location? IHasDiagnosticLocation.LocationForDiagnosticReport => this.DeclaringMember.GetLocationForDiagnosticReport();
 
         public abstract ISymbol? Symbol { get; }
 

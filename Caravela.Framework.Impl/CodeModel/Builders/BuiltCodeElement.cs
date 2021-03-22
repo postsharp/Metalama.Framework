@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -29,7 +30,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Builder.ToDisplayString( format, context );
 
-        public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
+        public IDiagnosticLocation? LocationForDiagnosticReport => this.Builder.LocationForDiagnosticReport;
+
+        public IEnumerable<IDiagnosticLocation> LocationsForDiagnosticSuppression => this.Builder.LocationsForDiagnosticSuppression;
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
 

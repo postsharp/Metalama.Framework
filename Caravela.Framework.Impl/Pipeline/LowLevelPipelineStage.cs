@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -29,7 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
             var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
-            var diagnostics = new List<Diagnostic>();
+            var diagnostics = new DiagnosticListBuilder();
 
             if ( !aspectInstances.Any() )
             {
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.Add, resources.Add );
+            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
 
             CSharpCompilation newCompilation;
             try
@@ -48,14 +49,14 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnostics.Add( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
+                diagnostics.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
             }
 
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
                 newCompilation,
                 input.AspectLayers,
-                input.Diagnostics.Concat( diagnostics ).ToList(),
+                input.Diagnostics.Concat( diagnostics.ToDiagnosticList() ),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
         }

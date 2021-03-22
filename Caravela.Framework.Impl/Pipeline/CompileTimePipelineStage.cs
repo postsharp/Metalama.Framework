@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Pipeline
             return new PipelineStageResult(
                 linkerResult.Compilation,
                 input.AspectLayers,
-                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
+                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.NonObservableTransformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
                 pipelineStepResult.ExternalAspectSources );
         }

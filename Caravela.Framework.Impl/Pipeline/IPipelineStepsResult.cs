@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
 
-        IReadOnlyList<Diagnostic> Diagnostics { get; }
+        DiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the list of aspect sources that are not a part of the current pipeline stage.

@@ -106,11 +106,18 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : class, IMember
             => new MemberLink<T>( ((ICodeElementInternal) member).ToLink() );
 
-        public static Location? GetLocation( this ICodeElement codeElement )
+        public static Location? GetLocationForDiagnosticReport( this ICodeElement codeElement )
             => codeElement switch
             {
-                IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
+                IHasDiagnosticLocation hasLocation => hasLocation.LocationForDiagnosticReport,
                 _ => null
+            };
+        
+        public static IEnumerable<Location> GetLocationsForDiagnosticSuppression( this ICodeElement codeElement )
+            => codeElement switch
+            {
+                IHasDiagnosticLocation hasLocation => hasLocation.LocationsForDiagnosticSuppression,
+                _ => Enumerable.Empty<Location>()
             };
 
         internal static void CheckArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? arguments )

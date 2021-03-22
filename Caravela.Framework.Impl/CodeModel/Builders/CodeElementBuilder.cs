@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -45,7 +47,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsReadOnly = true;
         }
 
-        public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
+        public IDiagnosticLocation? LocationForDiagnosticReport => this.ContainingElement?.LocationForDiagnosticReport;
+
+        // TODO: We may want to suppress diagnostics on introduced code elements, but the current design does not allow for that.
+        // A possible solution would have to return an IDiagnosticLocation that does not map to source code, but would be somehow
+        // understood by the aspect linker.
+        public IEnumerable<IDiagnosticLocation> LocationsForDiagnosticSuppression => Enumerable.Empty<IDiagnosticLocation>();
 
         public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
 

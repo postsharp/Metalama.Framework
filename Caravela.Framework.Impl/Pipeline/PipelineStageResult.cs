@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the set of diagnostics.
         /// </summary>
-        public IReadOnlyList<Diagnostic> Diagnostics { get; }
+        public DiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the list of managed resources.
@@ -49,13 +50,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public PipelineStageResult(
             CSharpCompilation compilation,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IReadOnlyList<Diagnostic>? diagnostics = null,
+            DiagnosticList? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees = null )
         {
             this.Compilation = compilation;
-            this.Diagnostics = diagnostics ?? Array.Empty<Diagnostic>();
+            this.Diagnostics = diagnostics ?? DiagnosticList.Empty;
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;

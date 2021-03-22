@@ -16,19 +16,26 @@ namespace Caravela.Framework.Diagnostics
         /// Reports a diagnostic by specifying its location.
         /// </summary>
         /// <param name="severity"></param>
-        /// <param name="location">Location.</param>
+        /// <param name="location">Location. If null, the location of the current target is used. </param>
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
         void ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args );
 
         /// <summary>
-        /// Reports a diagnostic and uses the default location for the current context.
+        /// Reports a diagnostic and uses the location of the current target.
         /// </summary>
         /// <param name="severity"></param>
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
         void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args );
+
+        /// <summary>
+        /// Suppresses a diagnostic by specifying its location.
+        /// </summary>
+        /// <param name="id">The id of the identifier to suppress.</param>
+        /// <param name="location">The scope in which the diagnostic must be suppressed.</param>
+        void SuppressDiagnostic( string id, IDiagnosticLocation? location = null );
     }
 }

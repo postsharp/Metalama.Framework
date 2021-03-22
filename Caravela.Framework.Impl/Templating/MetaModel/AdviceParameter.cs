@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -52,6 +53,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public IDiagnosticLocation? DiagnosticLocation => this._parameter.DiagnosticLocation;
+        public IDiagnosticLocation? LocationForDiagnosticReport => this._parameter.LocationForDiagnosticReport;
+
+        public IEnumerable<IDiagnosticLocation> LocationsForDiagnosticSuppression => this._parameter.LocationsForDiagnosticSuppression;
     }
 }

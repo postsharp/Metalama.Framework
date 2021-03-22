@@ -10,6 +10,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
@@ -53,13 +54,13 @@ namespace Caravela.Framework.Impl
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
                 var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocationForDiagnosticReport(), this.AspectType, codeElement, codeElement.ElementKind );
 
                 return new(
                     false,
-                    ImmutableList.Create( diagnostic ),
-                    ImmutableList.Create<IAdvice>(),
-                    ImmutableList.Create<IAspectSource>() );
+                    new DiagnosticList( ImmutableArray.Create( diagnostic ), null ),
+                    ImmutableArray<IAdvice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty );
             }
 
             var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );

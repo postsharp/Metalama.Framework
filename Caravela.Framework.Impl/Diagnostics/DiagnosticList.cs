@@ -1,32 +1,28 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Diagnostics;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    /// <summary>
-    /// A list of <see cref="Diagnostic"/> that implements <see cref="IDiagnosticSink"/>.
-    /// </summary>
-    public class DiagnosticList : DiagnosticSink
+    public class DiagnosticList
     {
+        public static DiagnosticList Empty { get; } = new DiagnosticList( null, null );
 
-        private List<Diagnostic>? _diagnostics;
+        public ImmutableArray<Diagnostic> ReportedDiagnostics { get; }
 
-        public DiagnosticList( IDiagnosticLocation? defaultLocation = null ) : base( defaultLocation )
+        public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; }
+
+        public DiagnosticList( ImmutableArray<Diagnostic>? diagnostics, ImmutableArray<ScopedSuppression>? suppressions )
         {
+            this.ReportedDiagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
+            this.DiagnosticSuppressions = suppressions ?? ImmutableArray<ScopedSuppression>.Empty;
         }
 
-        /// <inheritdoc/>
-        protected override void ReportDiagnostic( Diagnostic diagnostic )
-        {
-            this._diagnostics ??= new List<Diagnostic>();
-            this._diagnostics.Add( diagnostic );
-        }
-
-        public IReadOnlyList<Diagnostic> Diagnostics => (IReadOnlyList<Diagnostic>?) this._diagnostics ?? Array.Empty<Diagnostic>();
+        public DiagnosticList Concat( DiagnosticList other )
+            => new DiagnosticList( 
+                this.ReportedDiagnostics.AddRange( other.ReportedDiagnostics ),
+                this.DiagnosticSuppressions.AddRange( other.DiagnosticSuppressions ) );
     }
 }

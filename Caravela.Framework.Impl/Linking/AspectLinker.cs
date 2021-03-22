@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AdviceLinkerResult ToResult()
         {
-            DiagnosticList diagnostics = new();
+            DiagnosticListBuilder diagnostics = new();
 
             var intermediateCompilation = this._input.Compilation;
 
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Impl.Linking
                 resultingCompilation = resultingCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AdviceLinkerResult( resultingCompilation, diagnostics.Diagnostics );
+            return new AdviceLinkerResult( resultingCompilation, diagnostics.ToDiagnosticList() );
 
             ISymbol FindInIntermediateCompilation( ICodeElement codeElement )
             {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -43,8 +44,12 @@ namespace Caravela.Framework.Impl.CodeModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString();
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
+        public Location? LocationForDiagnosticReport => DiagnosticLocationHelper.GetLocationForDiagnosticReport( this.Symbol );
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
+        public IEnumerable<Location> LocationsForDiagnosticSuppression => DiagnosticLocationHelper.GetLocationsForDiagnosticSuppression( this.Symbol );
+
+        IEnumerable<IDiagnosticLocation> IDiagnosticScope.LocationsForDiagnosticSuppression => this.LocationsForDiagnosticSuppression.ToDiagnosticLocation();
+
+        IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => this.LocationForDiagnosticReport?.ToDiagnosticLocation();
     }
 }

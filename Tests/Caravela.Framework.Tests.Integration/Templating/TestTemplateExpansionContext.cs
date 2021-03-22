@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
     internal class TestTemplateExpansionContext : ITemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
-        private readonly DiagnosticList _diagnostics;
+        private readonly DiagnosticListBuilder _diagnostics;
 
         public TestTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             this._targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
 
-            this._diagnostics = new DiagnosticList( this._targetMethod.DiagnosticLocation );
+            this._diagnostics = new DiagnosticListBuilder( this._targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
             var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
