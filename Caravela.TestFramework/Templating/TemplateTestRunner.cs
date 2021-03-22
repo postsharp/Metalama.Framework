@@ -27,11 +27,12 @@ namespace Caravela.TestFramework.Templating
     /// </summary>
     internal class TemplateTestRunner : TemplateTestRunnerBase
     {
+        private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplateTestRunner"/> class.
         /// </summary>
-        public TemplateTestRunner()
-            : base()
+        public TemplateTestRunner() : this( Array.Empty<CSharpSyntaxVisitor>() )
         {
         }
 
@@ -40,8 +41,8 @@ namespace Caravela.TestFramework.Templating
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         public TemplateTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
-            : base( testAnalyzers )
         {
+            this._testAnalyzers = testAnalyzers;
         }
 
         /// <summary>
@@ -59,6 +60,32 @@ namespace Caravela.TestFramework.Templating
             }
 
             result.Success = false;
+
+            var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
+            var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
+
+            foreach ( var testAnalyzer in this._testAnalyzers )
+            {
+                testAnalyzer.Visit( templateSyntaxRoot );
+            }
+
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
+            var templateCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+
+            this.ReportDiagnostics( result, templateCompiler.Diagnostics );
+
+            if ( !templateCompilerSuccess )
+            {
+                result.ErrorMessage = "Template compiler failed.";
+                return result;
+            }
+
+            // Annotation shouldn't do any code transformations.
+            // Otherwise, highlighted spans don't match the actual code.
+            Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
+
+            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
+            result.TransformedTemplateSyntax = transformedTemplateSyntax;
 
             // Write the transformed code to disk.
             var transformedTemplateText = result.TransformedTemplateSyntax!.SyntaxTree.GetText();

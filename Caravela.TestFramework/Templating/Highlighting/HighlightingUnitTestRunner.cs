@@ -1,35 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.TestFramework.Templating.Highlighting
 {
-    internal class HighlightingUnitTestRunner : TemplateTestRunnerBase
+    internal class HighlightingUnitTestRunner : AnnotationUnitTestRunnerBase
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HighlightingUnitTestRunner"/> class.
-        /// </summary>
-        public HighlightingUnitTestRunner()
-            : base()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HighlightingUnitTestRunner"/> class.
-        /// </summary>
-        /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
-        public HighlightingUnitTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
-            : base( testAnalyzers )
-        {
-        }
-
         public override async Task<TestResult> RunAsync( TestInput testInput )
         {
             var result = await base.RunAsync( testInput );
@@ -54,8 +35,7 @@ namespace Caravela.TestFramework.Templating.Highlighting
             Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
 
             var sourceText = await result.TemplateDocument.GetTextAsync();
-            //TODO: Don't use the obsolete constructor
-            var classifier = new TextSpanClassifier( sourceText, true );
+            var classifier = new TextSpanClassifier( sourceText );
             classifier.Visit( result.AnnotatedTemplateSyntax );
 
             using ( var textWriter = new StreamWriter( highlightedTemplatePath, false, Encoding.UTF8 ) )
@@ -63,7 +43,7 @@ namespace Caravela.TestFramework.Templating.Highlighting
                 textWriter.WriteLine( "<html>" );
                 textWriter.WriteLine( "<head>" );
 
-                void WriteStyleSheetPaths( [CallerFilePath] string callingSourceFilePath = null )
+                void WriteStyleSheetPaths( [CallerFilePath] string? callingSourceFilePath = null )
                 {
 #pragma warning disable CS8604 // Possible null reference argument.
                     var styleSheetPath = Path.Combine( Path.GetDirectoryName( callingSourceFilePath ), "highlighting.css" );

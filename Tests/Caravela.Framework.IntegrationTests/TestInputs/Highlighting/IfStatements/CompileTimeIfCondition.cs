@@ -4,33 +4,42 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.IfStatements.CompileTimeIfCondition
 {
+    class RunTimeClass
+    {
+        public void RunTimeMethod()
+        {
+        }
+    }
+
+    [CompileTime]
+    class CompileTimeClass
+    {
+        public void CompileTimeMethod()
+        {
+        }
+    }
+
+    [CompileTime]
     class Aspect
     {
-        void RuntimeMethod()
-        {
-        }
-
-        [CompileTime]
-        void CompileTimeMethod()
-        {
-        }
-
         [TestTemplate]
         dynamic Template()
         {
-            int compileTimeVariable = 0;
+            var runTimeObject = new RunTimeClass();
+            var compileTimeObject = new CompileTimeClass();
 
-            //TODO: Should this be marked as compile-time?
+            int compileTimeVariable = compileTime(0);
+
             if (compileTimeVariable == 0)
             {
-                this.RuntimeMethod();
-                this.CompileTimeMethod();
+                runTimeObject.RunTimeMethod();
+                compileTimeObject.CompileTimeMethod();
                 target.Method.ToString();
             }
             else
             {
-                this.RuntimeMethod();
-                this.CompileTimeMethod();
+                runTimeObject.RunTimeMethod();
+                compileTimeObject.CompileTimeMethod();
                 target.Method.ToString();
             }
 

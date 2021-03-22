@@ -1,18 +1,23 @@
-﻿using Caravela.TestFramework.Templating;
+﻿using Caravela.Framework.Project;
+using Caravela.TestFramework.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.Identifiers.RunTimePropertyIdentifier
 {
+    class RunTimeClass
+    {
+        public int RunTimeProperty { get; set; }
+    }
+
+    [CompileTime]
     class Aspect
     {
-        //TODO: Why is this highlighted?
-        public int RunTimeProperty { get; set; }
-
-
         [TestTemplate]
         dynamic Template()
         {
-            this.RunTimeProperty.ToString();
+            var runTimeObject = new RunTimeClass();
+
+            runTimeObject.RunTimeProperty.ToString();
             return proceed();
         }
     }

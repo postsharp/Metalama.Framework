@@ -4,45 +4,44 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.InvocationExpressions.CompileTimeMethodInvocation
 {
-    class Aspect
+    [CompileTime]
+    class CompileTimeClass
     {
-        [CompileTime]
         public void CompileTimeMethod()
         {
         }
 
-        [CompileTime]
         public void CompileTimeMethod(int param)
         {
         }
 
-        [CompileTime]
         public void CompileTimeMethod(int param1, int param2)
         {
         }
 
-        [CompileTime]
         public void CompileTimeMethod(int param1, int param2, int param3)
         {
         }
+    }
 
+    [CompileTime]
+    class Aspect
+    {
         [TestTemplate]
         dynamic Template()
         {
-            //TODO: How to test this?
-            int staticInt = 0;
-            dynamic dynamicInt = 1;
+            var compileTimeObject = new CompileTimeClass();
+
+            // Run-time arguments are not allowed in build-time expressions.
+            int staticallyTypedCompileTimeInt = compileTime(0);
+            // Dynamically-typed compile-time arguments are not allowed in build-time expressions.
 
 
-            this.CompileTimeMethod();
+            compileTimeObject.CompileTimeMethod();
 
-            this.CompileTimeMethod(staticInt);
-            this.CompileTimeMethod(staticInt, staticInt);
-            this.CompileTimeMethod(staticInt, staticInt, staticInt);
-
-            this.CompileTimeMethod(dynamicInt);
-            this.CompileTimeMethod(dynamicInt, dynamicInt);
-            this.CompileTimeMethod(dynamicInt, dynamicInt, dynamicInt);
+            compileTimeObject.CompileTimeMethod(staticallyTypedCompileTimeInt);
+            compileTimeObject.CompileTimeMethod(staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt);
+            compileTimeObject.CompileTimeMethod(staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt, staticallyTypedCompileTimeInt);
 
             return proceed();
         }

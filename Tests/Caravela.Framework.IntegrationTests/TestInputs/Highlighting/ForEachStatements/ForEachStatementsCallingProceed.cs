@@ -5,25 +5,33 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.TestInputs.Highlighting.ForEachStatements.ForEachStatementsCallingProceed
 {
+    class RunTimeClass
+    {
+        public IEnumerable<int> runTimeEnumerable;
+    }
+
+    [CompileTime]
+    class CompileTimeClass
+    {
+        public IEnumerable<int> compileTimeEnumerable;
+    }
+
+    [CompileTime]
     class Aspect
     {
-        //TODO: This line should probably not be highlighted.
-        private IEnumerable<int> runTimeEnumerable;
-
-        //TODO: These lines should probably not be highlighted.
-        [CompileTime]
-        private IEnumerable<int> compileTimeEnumerable;
-
         [TestTemplate]
         dynamic Template()
         {
-            foreach (var x in compileTimeEnumerable)
+            var runTimeObject = new RunTimeClass();
+            var compileTimeObject = new CompileTimeClass();
+
+            foreach (var x in compileTimeObject.compileTimeEnumerable)
             {
                 x.ToString();
                 proceed();
             }
 
-            foreach (var x in runTimeEnumerable)
+            foreach (var x in runTimeObject.runTimeEnumerable)
             {
                 x.ToString();
                 proceed();

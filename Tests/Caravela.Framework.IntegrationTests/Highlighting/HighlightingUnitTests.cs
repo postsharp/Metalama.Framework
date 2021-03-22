@@ -17,10 +17,6 @@ namespace Caravela.Framework.IntegrationTests.Highlighting
         public Task Declarations( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Highlighting\LiteralExpressions" )]
-        public Task LiteralExpressions( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
-
-        [Theory]
         [FromDirectory( @"TestInputs\Highlighting\Identifiers" )]
         public Task Identifiers( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
@@ -41,18 +37,14 @@ namespace Caravela.Framework.IntegrationTests.Highlighting
         public Task ForEachStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Highlighting\CastExpressions" )]
-        public Task CastExpressions( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
-
-        [Theory]
         [FromDirectory( @"TestInputs\Highlighting\ForStatements" )]
         public Task ForStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
-        [Theory]
+        [Theory( Skip = "Not supported yet." )]
         [FromDirectory( @"TestInputs\Highlighting\WhileStatements" )]
         public Task WhileStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
-        [Theory]
+        [Theory( Skip = "Not supported yet." )]
         [FromDirectory( @"TestInputs\Highlighting\DoWhileStatements" )]
         public Task DoWhileStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
     }
