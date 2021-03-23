@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public DiagnosticList Diagnostics => this._diagnostics.ToDiagnosticList();
+        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToDiagnosticList();
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
                     this._diagnostics.ReportDiagnostic(
-                        Diagnostic.Create( 
+                        Diagnostic.Create(
                             GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
                             this._currentStep.AspectLayer.AspectType.Type.GetLocationForDiagnosticReport(),
                             this._currentStep.AspectLayer.AspectType.Type,

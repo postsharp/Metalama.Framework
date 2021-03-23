@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
                 case TypeParameterSyntax typeParameter:
                     return typeParameter.Identifier.GetLocation();
-                
+
                 case VariableDeclaratorSyntax variable:
                     return variable.Identifier.GetLocation();
 

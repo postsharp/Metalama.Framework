@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the set of diagnostics.
         /// </summary>
-        public DiagnosticList Diagnostics { get; }
+        public ImmutableDiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the list of managed resources.
@@ -50,13 +50,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public PipelineStageResult(
             CSharpCompilation compilation,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            DiagnosticList? diagnostics = null,
+            ImmutableDiagnosticList? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees = null )
         {
             this.Compilation = compilation;
-            this.Diagnostics = diagnostics ?? DiagnosticList.Empty;
+            this.Diagnostics = diagnostics ?? ImmutableDiagnosticList.Empty;
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;

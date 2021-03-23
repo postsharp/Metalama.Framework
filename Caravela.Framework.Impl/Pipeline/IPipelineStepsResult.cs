@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IReadOnlyList<INonObservableTransformation> NonObservableTransformations { get; }
 
-        DiagnosticList Diagnostics { get; }
+        ImmutableDiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the list of aspect sources that are not a part of the current pipeline stage.

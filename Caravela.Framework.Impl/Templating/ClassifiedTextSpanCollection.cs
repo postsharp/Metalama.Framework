@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )
         {
-            var previousSpan = default(ClassifiedTextSpan);
+            var previousSpan = default( ClassifiedTextSpan );
 
             foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
             {

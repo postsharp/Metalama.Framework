@@ -8,5 +8,5 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal record AdviceLinkerResult(
         CSharpCompilation Compilation,
-        DiagnosticList Diagnostics );
+        ImmutableDiagnosticList Diagnostics );
 }

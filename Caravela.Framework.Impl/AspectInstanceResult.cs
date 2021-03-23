@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl
 {
     internal record AspectInstanceResult(
         bool Success,
-        DiagnosticList Diagnostics,
+        ImmutableDiagnosticList Diagnostics,
         IReadOnlyList<IAdvice> Advices,
         IReadOnlyList<IAspectSource> AspectSources );
 }

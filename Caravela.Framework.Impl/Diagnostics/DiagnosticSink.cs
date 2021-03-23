@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
@@ -16,9 +18,9 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     public abstract partial class DiagnosticSink : IDiagnosticSink
     {
-        public IDiagnosticScope? DefaultScope { get; private set; }
+        public ICodeElement? DefaultScope { get; private set; }
 
-        protected DiagnosticSink( IDiagnosticScope? defaultScope )
+        protected DiagnosticSink( ICodeElement? defaultScope )
         {
             this.DefaultScope = defaultScope;
         }
@@ -31,7 +33,15 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// <param name="diagnostic"></param>
         public abstract void ReportDiagnostic( Diagnostic diagnostic );
 
-        public abstract void SuppressDiagnostic( string id, Location location );
+        public abstract void SuppressDiagnostic( string id, ICodeElement scope );
+        
+        public void SuppressDiagnostic( string id )
+        {
+            if ( this.DefaultScope != null )
+            {
+                this.SuppressDiagnostic( id, this.DefaultScope );
+            }
+        }
 
         private static RoslynDiagnosticSeverity MapSeverity( Severity severity ) =>
             severity switch
@@ -43,25 +53,20 @@ namespace Caravela.Framework.Impl.Diagnostics
                 _ => throw new AssertionFailedException()
             };
 
-        private IDiagnosticLocation? DefaultReportLocation => this.DefaultScope?.LocationForDiagnosticReport;
-
-        private IEnumerable<IDiagnosticLocation> DefaultSuppressLocations 
-            => this.DefaultScope?.LocationsForDiagnosticSuppression ?? Enumerable.Empty<IDiagnosticLocation>();
-
-        public IDisposable WithDefaultScope( IDiagnosticScope scope )
+        public IDisposable WithDefaultScope( ICodeElement scope )
         {
             var oldScope = this.DefaultScope;
             this.DefaultScope = scope;
             return new RestoreLocationCookie( this, oldScope );
         }
 
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args )
+        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
         {
-            var roslynLocation = ((DiagnosticLocation?) (location ?? this.DefaultReportLocation))?.Location;
+            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetLocationForDiagnosticReport();
             var roslynSeverity = MapSeverity( severity );
             var warningLevel = severity == Severity.Error ? 0 : 1;
 
-            var diagnostic = Diagnostic.Create( 
+            var diagnostic = Diagnostic.Create(
                 id,
                 "Caravela.User",
                 new NonLocalizableString( formatMessage, args ),
@@ -82,38 +87,12 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
         {
-            this.ReportDiagnostic( severity, this.DefaultReportLocation, id, formatMessage, args );
-        }
-
-        public void SuppressDiagnostic( string id, IDiagnosticLocation? location = null )
-        {
-            void Suppress(IDiagnosticLocation defaultLocation)
+            if ( this.DefaultScope == null )
             {
-                var roslynLocation = ((DiagnosticLocation) defaultLocation).Location;
-                if (roslynLocation != null)
-                {
-                    this.SuppressDiagnostic(id, roslynLocation);
-                }
+                throw new InvalidOperationException( "Cannot report a diagnostic when the default scope has not been defined." );
             }
 
-            if ( location == null )
-            {
-                foreach ( var defaultLocation in this.DefaultSuppressLocations )
-                {
-                    if ( defaultLocation != null )
-                    {
-                        Suppress(defaultLocation);
-                    }
-                    else
-                    {
-                        // It should never be null but, if it is by mistake, it's better to avoid an infinite recursion.
-                    }
-                }
-            }
-            else
-            {
-                Suppress( location );
-            }
+            this.ReportDiagnostic( severity, this.DefaultScope, id, formatMessage, args );
         }
     }
 }

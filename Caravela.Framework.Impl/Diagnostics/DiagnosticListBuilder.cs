@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
 
-        internal DiagnosticListBuilder( IDiagnosticScope? defaultScope = null )
+        internal DiagnosticListBuilder( ICodeElement? defaultScope = null )
             : base( defaultScope )
         {
         }
@@ -35,10 +36,10 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._diagnostics.AddRange( diagnostics );
         }
 
-        public override void SuppressDiagnostic( string id, Location location )
+        public override void SuppressDiagnostic( string id, ICodeElement scope )
         {
             this._suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
-            this._suppressions.Add( new ScopedSuppression(id, location) );
+            this._suppressions.Add( new ScopedSuppression( id, scope ) );
         }
 
         public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
@@ -47,7 +48,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._suppressions.AddRange( suppressions );
         }
 
-        public DiagnosticList ToDiagnosticList()
-            => new DiagnosticList( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable() );
+        public ImmutableDiagnosticList ToDiagnosticList()
+            => new ImmutableDiagnosticList( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable() );
     }
 }

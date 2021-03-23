@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl
             for ( var type = this; type != null; type = type.BaseAspectType )
             {
                 var aspectLayersAttributeData = type.Type.Attributes.SingleOrDefault( a => a.Type.Is( aspectLayersAttributeType ) );
- 
+
                 if ( aspectLayersAttributeData != null )
                 {
                     var aspectLayersAttribute =
@@ -59,7 +59,7 @@ namespace Caravela.Framework.Impl
                     break;
                 }
             }
-            
+
             this.Layers = partArrayBuilder.ToImmutable();
         }
     }

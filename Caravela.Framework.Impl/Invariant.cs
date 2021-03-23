@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl
         }
 
 #if !DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         public static T Assert<T>( this T obj, Predicate<T> predicate )
             where T : class
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl
         /// <param name="obj"></param>
         /// <returns></returns>
 #if !DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         public static T AssertNotNull<T>( this T? obj )
             where T : class
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl
         }
 
 #if !DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif         
         public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
             where T : class

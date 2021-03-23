@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                     return string.Format( formatProvider, this._text, formatProvider );
                 }
             }
-            
+
             protected override int GetHash()
             {
                 return this._text.GetHashCode();

@@ -1,13 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests
+namespace Caravela.Framework.Tests.UnitTests.CodeModel
 {
     public class DiagnosticTests : TestBase
     {
@@ -59,57 +58,6 @@ class C<T> : object
             // Attributes
             AssertLocation( "NonSerialized", type.Properties.OfName( "field1" ).Single().Attributes.Single().GetLocationForDiagnosticReport() );
         }
-        
-        [Fact]
-        public void TestLocationForDiagnosticSuppression()
-        {
-            var code = @"
-using System;
-using System.Runtime.InteropServices;
-class C<T> : object
-{
-    static C() {}
-    public C() {}
-    [NonSerialized]
-    int field1 = 0, field2;
-    void Method<M>([Out] int parameter) {}
-    int AutomaticProperty { get; set; }
-    int Property { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
-}
-";
-
-            var compilation = CreateCompilation( code );
-
-            var type = compilation.DeclaredTypes.Single();
-            var method = type.Methods.OfName( "Method" ).Single();
-
-            // Type
-            AssertLocation( "T", type.GenericParameters.Single().GetLocationsForDiagnosticSuppression() );
-
-            // Constructors
-            AssertLocation( "public C() {}", type.Constructors.Single().GetLocationsForDiagnosticSuppression() );
-            AssertLocation( "static C() {}", type.StaticConstructor!.GetLocationsForDiagnosticSuppression() );
-
-            // Methods
-            AssertLocation( "void Method<M>([Out] int parameter) {}", method.GetLocationsForDiagnosticSuppression() );
-            AssertLocation( "M", method.GenericParameters.Single().GetLocationsForDiagnosticSuppression() );
-            AssertLocation( "[Out] int parameter", method.Parameters.Single().GetLocationsForDiagnosticSuppression() );
-            
-            // Properties
-            AssertLocation( "int AutomaticProperty { get; set; }", type.Properties.OfName( "AutomaticProperty" ).Single().GetLocationsForDiagnosticSuppression() );
-            var property = type.Properties.OfName( "Property" ).Single();
-            AssertLocation( "get => throw new System.NotImplementedException();", property.Getter!.GetLocationsForDiagnosticSuppression() );
-            AssertLocation( "set => throw new System.NotImplementedException();", property.Setter!.GetLocationsForDiagnosticSuppression() );
-
-            // Fields
-            AssertLocation( "field1 = 0", type.Properties.OfName( "field1" ).Single().GetLocationsForDiagnosticSuppression() );
-            
-            // Attributes
-            AssertLocation( "NonSerialized", type.Properties.OfName( "field1" ).Single().Attributes.Single().GetLocationForDiagnosticReport() );
-        }
-
-        private static void AssertLocation( string? expectedText, IEnumerable<Location> location )
-            => AssertLocation( expectedText, location.SingleOrDefault() );
         
         private static void AssertLocation( string? expectedText, Location? location )
         {

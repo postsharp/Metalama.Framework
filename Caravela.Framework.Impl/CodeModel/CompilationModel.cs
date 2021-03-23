@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this.RoslynCompilation = roslynCompilation;
             this.ReflectionMapper = new ReflectionMapper( roslynCompilation );
             this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, roslynCompilation );
-            
+
             this._transformations = ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation>
                 .Empty
                 .WithKeyComparer( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
-                    .Cast<AttributeBuilder>() 
+                    .Cast<AttributeBuilder>()
                     .Concat( introducedElements.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeLink( a ) );
 
@@ -177,20 +177,20 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     case INamedType namedType:
                         return this.GetDepth( namedType );
-                    
+
                     case ICompilation:
                         return 0;
-                    
+
                     case IAssembly:
                         // Order with Compilation matters. We want the root compilation to be ordered first.
                         return 1;
 
                     default:
-                    {
-                        var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
-                        this._depthsCache = this._depthsCache.SetItem( link, depth );
-                        return depth;
-                    }
+                        {
+                            var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
+                            this._depthsCache = this._depthsCache.SetItem( link, depth );
+                            return depth;
+                        }
                 }
             }
         }
@@ -239,8 +239,6 @@ namespace Caravela.Framework.Impl.CodeModel
         IAttributeList ICodeElement.Attributes => throw new NotSupportedException();
 
         IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => throw new NotSupportedException();
-
-        public IEnumerable<IDiagnosticLocation> LocationsForDiagnosticSuppression => throw new NotSupportedException();
 
         public string? Name => this.RoslynCompilation.AssemblyName;
     }

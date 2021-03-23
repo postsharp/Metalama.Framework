@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._compilation = compilation;
         }
-        
+
         public INamedTypeSymbol GetTypeByReflectionName( string reflectionName )
         {
             var symbol = this._compilation.GetTypeByMetadataName( reflectionName );
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return compileTimeType.TypeSymbol;
             }
-            
+
             if ( type.IsByRef )
             {
                 throw new ArgumentException( "Ref types cannot be represented as Caravela types." );
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( type.IsArray )
             {
                 var elementType = this.GetTypeSymbol( type.GetElementType()! );
-                
+
                 return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
             }
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Diagnostics
@@ -16,11 +17,11 @@ namespace Caravela.Framework.Diagnostics
         /// Reports a diagnostic by specifying its location.
         /// </summary>
         /// <param name="severity"></param>
-        /// <param name="location">Location. If null, the location of the current target is used. </param>
+        /// <param name="location">The code location to which the diagnostic should be written.</param>
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
-        void ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args );
+        void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args );
 
         /// <summary>
         /// Reports a diagnostic and uses the location of the current target.
@@ -32,10 +33,16 @@ namespace Caravela.Framework.Diagnostics
         void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args );
 
         /// <summary>
-        /// Suppresses a diagnostic by specifying its location.
+        /// Suppresses a diagnostic by the element of code in which the suppression must be effective.
         /// </summary>
         /// <param name="id">The id of the identifier to suppress.</param>
-        /// <param name="location">The scope in which the diagnostic must be suppressed.</param>
-        void SuppressDiagnostic( string id, IDiagnosticLocation? location = null );
+        /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
+        void SuppressDiagnostic( string id, ICodeElement scope );
+
+        /// <summary>
+        /// Reports a diagnostic in the current target element of code.
+        /// </summary>
+        /// <param name="id"></param>
+        void SuppressDiagnostic( string id );
     }
 }

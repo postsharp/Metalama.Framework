@@ -24,6 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         IBuildOptions BuildOptions { get; }
 
+        // TODO: When called from a diagnostic suppressor, we don't have a way to report diagnostics.
         void ReportDiagnostic( Diagnostic diagnostic );
 
         bool HandleExceptions { get; }
