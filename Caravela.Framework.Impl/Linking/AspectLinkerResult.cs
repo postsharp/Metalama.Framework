@@ -7,10 +7,19 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Result of the aspect linker.
+    /// </summary>
     internal record AspectLinkerResult 
     {
+        /// <summary>
+        /// Gets the final compilation.
+        /// </summary>
         public CSharpCompilation Compilation { get; }
 
+        /// <summary>
+        /// Gets diagnostics produced when linking.
+        /// </summary>
         public IReadOnlyCollection<Diagnostic> Diagnostics { get; }
 
         public AspectLinkerResult(CSharpCompilation compilation, IReadOnlyCollection<Diagnostic> diagnostics)

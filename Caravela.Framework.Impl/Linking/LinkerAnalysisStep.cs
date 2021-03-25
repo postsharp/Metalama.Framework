@@ -9,29 +9,20 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerIntroductionStepOutput, LinkerAnalysisStepOutput>
     {
-        private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
-        private readonly Compilation _intermediateCompilation;
-        private readonly LinkerTransformationRegistry _transformationRegistry;
+        public static LinkerAnalysisStep Instance { get; } = new LinkerAnalysisStep();
 
-        public LinkerAnalysisStep( CSharpCompilation intermediateCompilation, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry )
+        private LinkerAnalysisStep()
         {
-            this._intermediateCompilation = intermediateCompilation;
-            this._orderedAspectLayers = orderedAspectLayers;
-            this._transformationRegistry = transformationRegistry;
         }
 
-        public static LinkerAnalysisStep Create( CSharpCompilation intermediateCompilation, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers, LinkerTransformationRegistry transformationRegistry )
+        public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
         {
-            return new LinkerAnalysisStep( intermediateCompilation, orderedAspectLayers, transformationRegistry );
-        }
+            var referenceCounters = new Dictionary<SymbolVersion, int>();
+            var methodBodyInfos = new Dictionary<ISymbol, MemberAnalysisResult>();
 
-        public LinkerAnalysisStepResult Execute()
-        {
-            var analysisRegistry = new LinkerAnalysisRegistry( this._transformationRegistry, this._orderedAspectLayers );
-
-            foreach ( var syntaxTree in this._intermediateCompilation.SyntaxTrees )
+            foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
                 foreach ( var referencingNode in syntaxTree.GetRoot().GetAnnotatedNodes( LinkerAnnotationExtensions.AnnotationKind ) )
                 {
@@ -54,42 +45,45 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     // Increment the usage count.
-                    var symbolInfo = this._intermediateCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
+                    var symbolInfo = input.IntermediateCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
 
                     if ( symbolInfo.Symbol == null )
                     {
                         continue;
                     }
 
-                    var symbol = symbolInfo.Symbol.AssertNotNull();
-
-                    analysisRegistry.AddReferenceCount( symbol, targetLayer );
+                    var symbolVersion = new SymbolVersion(symbolInfo.Symbol.AssertNotNull(), targetLayer);
+                    
+                    referenceCounters.TryGetValue( symbolVersion, out var counter );
+                    referenceCounters[symbolVersion] = counter + 1;
                 }
             }
 
-            // TODO: Do thbis on demand in analysis registry.
+            // TODO: Do this on demand in analysis registry.
             // Analyze introduced method bodies.
-            foreach ( var introducedMember in this._transformationRegistry.GetIntroducedMembers() )
+            foreach ( var introducedMember in input.IntroductionRegistry.GetIntroducedMembers() )
             {
-                var symbol = (IMethodSymbol) this._transformationRegistry.GetSymbolForIntroducedMember( introducedMember );
+                var symbol = (IMethodSymbol) input.IntroductionRegistry.GetSymbolForIntroducedMember( introducedMember );
 
                 // TODO: partial methods.
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( introducedMember.Syntax );
-                analysisRegistry.SetBodyAnalysisResults( symbol, symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                methodBodyInfos[symbol] = new MemberAnalysisResult(symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
 
                 // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
                 // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
             }
 
-            foreach (var symbol in this._transformationRegistry.GetOverriddenMethods())
+            foreach (var symbol in input.IntroductionRegistry.GetOverriddenMethods())
             {
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );
-                analysisRegistry.SetBodyAnalysisResults( symbol, symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                methodBodyInfos[symbol] = new MemberAnalysisResult(symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
             }
 
-            return new LinkerAnalysisStepResult( analysisRegistry );
+            var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, input.OrderedAspectLayers, referenceCounters, methodBodyInfos );
+
+            return new LinkerAnalysisStepOutput( input.DiagnosticSink, input.IntermediateCompilation, analysisRegistry );
         }
     }
 }

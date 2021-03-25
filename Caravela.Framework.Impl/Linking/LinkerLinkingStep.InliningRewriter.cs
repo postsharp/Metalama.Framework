@@ -257,7 +257,7 @@ namespace Caravela.Framework.Impl.Linking
                 var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
                 rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturn( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null ) )
+                if ( this._analysisRegistry.HasSimpleReturns( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null ) )
                 {
                     return rewrittenBlock;
                 }
@@ -316,7 +316,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( this._returnVariableName != null )
                         {
-                            if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                            if ( this._analysisRegistry.HasSimpleReturns( this._contextSymbol ) )
                             {
                                 return
                                     ExpressionStatement(
@@ -349,7 +349,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         if ( this._returnVariableName == null )
                         {
-                            if ( this._analysisRegistry.HasSimpleReturn( this._contextSymbol ) )
+                            if ( this._analysisRegistry.HasSimpleReturns( this._contextSymbol ) )
                             {
                                 return null;
                             }

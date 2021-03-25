@@ -16,19 +16,13 @@ namespace Caravela.Framework.Impl.Linking
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
             private readonly CSharpCompilation _intermediateCompilation;
-            private readonly LinkerTransformationRegistry _transformationRegistry;
             private readonly LinkerAnalysisRegistry _referenceRegistry;
-            private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
 
             public LinkingRewriter(
-                IReadOnlyList<AspectLayer> orderedAspectLayers,
-                LinkerTransformationRegistry transformationRegistry,
                 CSharpCompilation intermediateCompilation,
                 LinkerAnalysisRegistry referenceRegistry )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._orderedAspectLayers = orderedAspectLayers;
-                this._transformationRegistry = transformationRegistry;
                 this._referenceRegistry = referenceRegistry;
             }
 

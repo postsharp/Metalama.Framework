@@ -6,16 +6,16 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class LinkerLinkingStepResult
+    internal class LinkerLinkingStepOutput
     {
-        public LinkerLinkingStepResult( CSharpCompilation finalCompilation, DiagnosticList diagnostics )
+        public LinkerLinkingStepOutput( CSharpCompilation finalCompilation, DiagnosticList diagnosticSink )
         {
             this.FinalCompilation = finalCompilation;
-            this.Diagnostics = diagnostics;
+            this.DiagnosticSink = diagnosticSink;
         }
 
         public CSharpCompilation FinalCompilation { get; }
 
-        public DiagnosticList Diagnostics { get; }
+        public DiagnosticList DiagnosticSink { get; }
     }
 }

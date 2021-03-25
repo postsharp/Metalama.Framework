@@ -11,51 +11,41 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Contains information collected during analysis step of the linker and provides helper methods that operate on it.
+    /// </summary>
     internal class LinkerAnalysisRegistry
     {
-        private readonly LinkerTransformationRegistry _transformationRegistry;
-        private readonly Dictionary<(ISymbol Symbol, AspectLayerId? Layer), int> _symbolReferenceCounters;
-        private readonly Dictionary<IMethodSymbol, (bool HasSimpleReturn, object? Dummy)> _bodyAnalysisResults;
+        private readonly LinkerIntroductionRegistry _introductionRegistry;
+        private readonly IReadOnlyDictionary<SymbolVersion, int> _symbolVersionReferenceCounts;
+        private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
 
         private bool _frozen;
 
-        public LinkerAnalysisRegistry( LinkerTransformationRegistry transformationRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+        public LinkerAnalysisRegistry(
+            LinkerIntroductionRegistry introductionRegistry,
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
+            IReadOnlyDictionary<SymbolVersion, int> symbolVersionReferenceCounts,
+            IReadOnlyDictionary<ISymbol, MemberAnalysisResult> methodBodyInfos)
         {
             this._orderedAspectLayers = orderedAspectLayers;
-            this._transformationRegistry = transformationRegistry;
-            this._symbolReferenceCounters = new Dictionary<(ISymbol Symbol, AspectLayerId? Layer), int>();
-            this._bodyAnalysisResults = new Dictionary<IMethodSymbol, (bool, object?)>( SymbolEqualityComparer.Default );
+            this._introductionRegistry = introductionRegistry;
+            this._symbolVersionReferenceCounts = symbolVersionReferenceCounts;
+            this._methodBodyInfos = methodBodyInfos;
         }
 
+        /// <summary>
+        /// Freezes the analysis registry, after which it is not allowed to do any changes to underlying data (with exception of caches).
+        /// </summary>
         public void Freeze()
         {
             this._frozen = true;
         }
 
-        public void AddReferenceCount( ISymbol symbol, AspectLayerId? referencedLayer )
-        {
-            if ( !this._symbolReferenceCounters.TryGetValue( (symbol, referencedLayer), out var count ) )
-            {
-                count = 0;
-            }
-
-            this._symbolReferenceCounters[(symbol, referencedLayer)] = count + 1;
-        }
-
-        public void SetBodyAnalysisResults( IMethodSymbol symbol, bool hasSimpleReturn )
-        {
-            if ( this._frozen )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this._bodyAnalysisResults.Add( symbol, (hasSimpleReturn, null) );
-        }
-
         public bool IsOverrideTarget( IMethodSymbol symbol )
         {
-            return this._transformationRegistry.GetMethodOverridesForSymbol( symbol ).Count > 0;
+            return this._introductionRegistry.GetMethodOverridesForSymbol( symbol ).Count > 0;
         }
 
         public bool IsBodyInlineable( IMethodSymbol symbol )
@@ -71,7 +61,7 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, null), out var counter ) )
+                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion(symbol, null), out var counter ) )
                 {
                     return true;
                 }
@@ -80,7 +70,7 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol( symbol );
+                var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
                 if ( introducedMember == null )
                 {
@@ -93,7 +83,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 var overrideTarget = introducedMember;
-                if ( !this._symbolReferenceCounters.TryGetValue( (symbol, introducedMember.AspectLayerId), out var counter ) )
+                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, introducedMember.AspectLayerId), out var counter ) )
                 {
                     // This is the last override.
                     return true;
@@ -105,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public bool IsOverrideMethod( IMethodSymbol symbol )
         {
-            var introducedMember = this._transformationRegistry.GetIntroducedMemberForSymbol( symbol );
+            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
             if ( introducedMember == null )
             {
@@ -115,9 +105,14 @@ namespace Caravela.Framework.Impl.Linking
             return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride;
         }
 
-        internal ISymbol GetLastOverride( IMethodSymbol symbol )
+        /// <summary>
+        /// Gets the last (outermost) override of the method.
+        /// </summary>
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns>Symbol </returns>
+        public ISymbol GetLastOverride( IMethodSymbol symbol )
         {
-            var overrides = this._transformationRegistry.GetMethodOverridesForSymbol( symbol );
+            var overrides = this._introductionRegistry.GetMethodOverridesForSymbol( symbol );
             var lastOverride = overrides.LastOrDefault();
 
             if ( lastOverride == null )
@@ -125,7 +120,7 @@ namespace Caravela.Framework.Impl.Linking
                 return symbol;
             }
 
-            return this._transformationRegistry.GetSymbolForIntroducedMember( lastOverride );
+            return this._introductionRegistry.GetSymbolForIntroducedMember( lastOverride );
         }
 
         /// <summary>
@@ -138,7 +133,7 @@ namespace Caravela.Framework.Impl.Linking
         public ISymbol ResolveSymbolReference( IMethodSymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
         {
             // TODO: Other things than methods.
-            var overrides = this._transformationRegistry.GetMethodOverridesForSymbol( (IMethodSymbol) referencedSymbol );
+            var overrides = this._introductionRegistry.GetMethodOverridesForSymbol( (IMethodSymbol) referencedSymbol );
 
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) );
             var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
@@ -158,17 +153,17 @@ namespace Caravela.Framework.Impl.Linking
                 return referencedSymbol;
             }
 
-            return this._transformationRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
+            return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        public bool HasSimpleReturn( IMethodSymbol methodSymbol )
+        public bool HasSimpleReturns( IMethodSymbol methodSymbol )
         {
-            if ( !this._bodyAnalysisResults.TryGetValue( methodSymbol, out var result ) )
+            if ( !this._methodBodyInfos.TryGetValue( methodSymbol, out var result ) )
             {
                 return false;
             }
 
-            return result.HasSimpleReturn;
+            return result.HasSimpleReturns;
         }
     }
 }
