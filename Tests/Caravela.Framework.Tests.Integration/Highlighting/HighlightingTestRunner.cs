@@ -43,24 +43,30 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             {
                 textWriter.WriteLine( "<html>" );
                 textWriter.WriteLine( "<head>" );
-
-                void WriteStyleSheetPaths( [CallerFilePath] string? callingSourceFilePath = null )
-                {
-#pragma warning disable CS8604 // Possible null reference argument.
-                    var styleSheetPath = Path.Combine( Path.GetDirectoryName( callingSourceFilePath ), "highlighting.css" );
-#pragma warning restore CS8604 // Possible null reference argument.
-                    var styleSheetPathRelativeToActualHtmlFile = Path.GetRelativePath( highlightedTemplateDirectory, styleSheetPath );
-
-                    var testSourceAbsolutePath = Path.Combine( testInput.ProjectDirectory, testInput.TestSourcePath );
-                    var styleSheetPathRelativeToExpectedHtmlFile = Path.GetRelativePath( testSourceAbsolutePath, styleSheetPath );
-
-                    textWriter.WriteLine( $"<!-- Just one of these paths is supposed to work. -->" );
-                    textWriter.WriteLine( $"<link rel='stylesheet' href='{styleSheetPathRelativeToActualHtmlFile}' />" );
-                    textWriter.WriteLine( $"<link rel='stylesheet' href='{styleSheetPathRelativeToExpectedHtmlFile}' />" );
-                }
-
-                WriteStyleSheetPaths();
-
+                textWriter.WriteLine("<style>");
+                textWriter.WriteLine(@"
+.CompileTime {
+    background-color: #E8F2FF;
+}
+.CompileTimeVariable {
+    background-color: #C6D1DD;
+}
+.RunTime {
+    background-color: antiquewhite;
+}
+.TemplateKeyword {
+    background-color: #FFFF22;
+}
+.Dynamic {
+    background-color: #FFFFBB;
+}
+.Conflict {
+    background-color: red;
+}
+.Default {
+    background-color: lightcoral;
+}");
+                textWriter.WriteLine("</style>");
                 textWriter.WriteLine( "</head>" );
                 textWriter.WriteLine( "<body><pre>" );
 
