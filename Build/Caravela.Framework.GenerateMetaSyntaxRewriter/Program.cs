@@ -181,6 +181,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
                                 writer.Write( genericArgument.Name );
                             }
+
                             writer.Write( ">" );
                         }
 
