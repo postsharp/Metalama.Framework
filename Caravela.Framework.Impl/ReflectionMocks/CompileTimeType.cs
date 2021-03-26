@@ -28,9 +28,9 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         public override string Namespace => ReflectionNameHelper.GetReflectionName( this.TypeSymbol.ContainingNamespace );
 
         public override string Name => this.TypeSymbol.Name;
-        
+
         public override string FullName => ReflectionNameHelper.GetReflectionName( this.TypeSymbol );
-        
+
         ISymbol IReflectionMockCodeElement.Symbol => this.TypeSymbol;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();

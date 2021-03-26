@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
     {
         public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
-            var testSource = CommonSnippets.CaravelaUsings + testInput.TestSource;
+            var testSource = testInput.TestSource;
 
             // Source.
             var project = this.CreateProject();

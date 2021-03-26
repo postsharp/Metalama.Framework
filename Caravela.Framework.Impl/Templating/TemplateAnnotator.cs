@@ -368,10 +368,13 @@ namespace Caravela.Framework.Impl.Templating
                 var scope = this.GetSymbolScope( symbol, node );
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
-                if ( (symbol is ILocalSymbol localSymbol &&
-                      scope == SymbolDeclarationScope.CompileTimeOnly) ||
-                     symbol.GetAttributes().Any( a =>
-                         a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
+                if ( symbol is ILocalSymbol &&
+                     scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
+                }
+                else if ( symbol.GetAttributes().Any( 
+                    a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -431,7 +434,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.CompileTimeOnly )
             {
-                // If the expression on the left meta is compile-time (because of rules on the symbol),
+                // If the expression on the left side is compile-time (because of rules on the symbol),
                 // then arguments MUST be compile-time, unless they are dynamic.
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
@@ -722,11 +725,11 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
                 }
             }
-            else
+            
+            if ( localScope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                transformedNode =
-                    transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
+                transformedNode = transformedNode.WithIdentifier( 
+                    transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

@@ -1,12 +1,12 @@
 {
     var PI_1 = 3.14;
-    Console.WriteLine(PI_1);
+    global::System.Console.WriteLine(PI_1);
     var r_1 = 42;
-    Console.WriteLine(r_1);
+    global::System.Console.WriteLine(r_1);
     var area_1 = r_1 * r_1;
-    Console.WriteLine(area_1);
+    global::System.Console.WriteLine(area_1);
     var StringBuilder_1 = new object();
-    Console.WriteLine(StringBuilder_1.ToString());
+    global::System.Console.WriteLine(StringBuilder_1.ToString());
     {
         double area = PI * r * r;
         return area;

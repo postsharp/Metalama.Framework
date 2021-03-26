@@ -9,7 +9,7 @@ using Xunit;
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     // ReSharper disable UnusedTypeParameter
-// ReSharper disable ClassNeverInstantiated.Global
+    // ReSharper disable ClassNeverInstantiated.Global
 
     public class TypeNameUtilityTests
     {

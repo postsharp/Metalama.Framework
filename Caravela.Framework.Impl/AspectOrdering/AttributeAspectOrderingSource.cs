@@ -30,12 +30,12 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 roslynCompilation.Assembly.Modules
                     .SelectMany( m => m.ReferencedAssemblySymbols )
                     .Concat( new[] { roslynCompilation.Assembly } )
-                    .SelectMany( assembly => assembly.GetAttributes().Select( attribute => ( attribute, assembly ) ) )
+                    .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
                     .Where( a => SymbolEqualityComparer.Default.Equals( a.attribute.AttributeClass, attributeType ) );
 
             return attributes.Select( attribute =>
             {
-                var attributeInstance = AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<AspectOrderAttribute>( 
+                var attributeInstance = AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<AspectOrderAttribute>(
                     new Attribute( attribute.attribute, this._compilation, this._compilation.Factory.GetAssembly( attribute.assembly ) ) );
                 return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() );
             } );

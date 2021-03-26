@@ -249,9 +249,9 @@ class C
             var compilation = CreateCompilation( code );
 
             var parameterTypes = from type in compilation.DeclaredTypes
-                from method in type.Methods
-                from parameter in method.Parameters
-                select parameter.ParameterType;
+                                 from method in type.Methods
+                                 from parameter in method.Parameters
+                                 select parameter.ParameterType;
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
@@ -542,7 +542,7 @@ interface J : I {}
 interface K : I {}
 interface L : J, K {}
 ";
-            
+
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();

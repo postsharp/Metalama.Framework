@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -67,13 +70,17 @@ namespace Caravela.Framework.Tests.Integration.Templating
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
             var expectedTransformedPath = Path.Combine( Path.GetDirectoryName( sourceAbsolutePath )!, Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
-            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
+
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
                 "obj",
                 "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
+
+            Assert.True( File.Exists( expectedTransformedPath ), $"File {expectedTransformedPath} does not exist." );
+
+            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
             var targetTextSpan = TestSyntaxHelper.FindRegionSpan( testResult.TransformedTargetSyntax, "Target" );
             testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );

@@ -1,16 +1,22 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
-    internal class HighlightingTestRunner : HighlightingTestRunnerBase
+    internal class HighlightingTestRunner : TemplatingTestRunnerBase
     {
         public override async Task<TestResult> RunAsync( TestInput testInput )
         {
@@ -20,8 +26,25 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             {
                 return result;
             }
-
+            
             result.Success = false;
+
+            var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
+            var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
+
+            var templateCompiler = new TemplateCompiler();
+            List<Diagnostic> diagnostics = new();
+            var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
+
+            this.ReportDiagnostics( result, diagnostics );
+
+            if ( !templateCompilerSuccess )
+            {
+                result.ErrorMessage = "Template compiler failed.";
+                return result;
+            }
+
+            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
 
             var highlightedTemplateDirectory = Path.Combine(
                 testInput.ProjectDirectory,
@@ -43,24 +66,30 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             {
                 textWriter.WriteLine( "<html>" );
                 textWriter.WriteLine( "<head>" );
-
-                void WriteStyleSheetPaths( [CallerFilePath] string? callingSourceFilePath = null )
-                {
-#pragma warning disable CS8604 // Possible null reference argument.
-                    var styleSheetPath = Path.Combine( Path.GetDirectoryName( callingSourceFilePath ), "highlighting.css" );
-#pragma warning restore CS8604 // Possible null reference argument.
-                    var styleSheetPathRelativeToActualHtmlFile = Path.GetRelativePath( highlightedTemplateDirectory, styleSheetPath );
-
-                    var testSourceAbsolutePath = Path.Combine( testInput.ProjectDirectory, testInput.TestSourcePath );
-                    var styleSheetPathRelativeToExpectedHtmlFile = Path.GetRelativePath( testSourceAbsolutePath, styleSheetPath );
-
-                    textWriter.WriteLine( $"<!-- Just one of these paths is supposed to work. -->" );
-                    textWriter.WriteLine( $"<link rel='stylesheet' href='{styleSheetPathRelativeToActualHtmlFile}' />" );
-                    textWriter.WriteLine( $"<link rel='stylesheet' href='{styleSheetPathRelativeToExpectedHtmlFile}' />" );
-                }
-
-                WriteStyleSheetPaths();
-
+                textWriter.WriteLine("<style>");
+                textWriter.WriteLine(@"
+.CompileTime {
+    background-color: #E8F2FF;
+}
+.CompileTimeVariable {
+    background-color: #C6D1DD;
+}
+.RunTime {
+    background-color: antiquewhite;
+}
+.TemplateKeyword {
+    background-color: #FFFF22;
+}
+.Dynamic {
+    background-color: #FFFFBB;
+}
+.Conflict {
+    background-color: red;
+}
+.Default {
+    background-color: lightcoral;
+}");
+                textWriter.WriteLine("</style>");
                 textWriter.WriteLine( "</head>" );
                 textWriter.WriteLine( "<body><pre>" );
 
@@ -73,7 +102,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                         textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
                     }
 
-                    textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + sourceText.GetSubText( classifiedSpan.Span ) + "</span>" );
+                    textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() ) + "</span>" );
 
                     i = classifiedSpan.Span.End;
                 }

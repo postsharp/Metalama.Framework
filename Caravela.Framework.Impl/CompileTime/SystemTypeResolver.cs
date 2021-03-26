@@ -17,9 +17,9 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             Type? ReturnNullOrMock()
             {
-                if (fallbackToMock)
+                if ( fallbackToMock )
                 {
-                    return new CompileTimeType(typeSymbol);
+                    return new CompileTimeType( typeSymbol );
                 }
                 else
                 {
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( typeSymbol.ContainingAssembly != null )
             {
                 var assemblyName = typeSymbol.ContainingAssembly.Name;
-                
+
                 // We don't allow loading new assemblies to the AppDomain.
                 if ( AppDomain.CurrentDomain.GetAssemblies().All( a => a.GetName().Name != assemblyName ) )
                 {

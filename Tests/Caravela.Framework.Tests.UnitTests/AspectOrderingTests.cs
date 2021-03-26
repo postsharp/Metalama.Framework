@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateCompilation( code );
 
             var aspectTypeFactory = new AspectTypeFactory( compilation, new AspectDriverFactory( compilation, ImmutableArray<object>.Empty ) );
-            
+
             var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() );
             var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
