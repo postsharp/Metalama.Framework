@@ -2,7 +2,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.SkipWithoutError
+namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutError
 {
     public class SkippedAttribute : OverrideMethodAspect
     {

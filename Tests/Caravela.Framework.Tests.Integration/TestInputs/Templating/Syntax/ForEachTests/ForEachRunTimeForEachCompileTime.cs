@@ -4,7 +4,7 @@ using System.Linq;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.ForEachRunTimeForEachCompileTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachRunTimeForEachCompileTime
 {
     class Aspect
     {

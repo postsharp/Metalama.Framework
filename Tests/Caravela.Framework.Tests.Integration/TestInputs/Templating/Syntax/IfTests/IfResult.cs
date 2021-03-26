@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.IfTests.IfResult
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfResult
 {
     class Aspect
     {

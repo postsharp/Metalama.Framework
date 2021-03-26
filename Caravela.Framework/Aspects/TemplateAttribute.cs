@@ -11,8 +11,7 @@ namespace Caravela.Framework.Aspects
     [AttributeUsage( AttributeTargets.All, Inherited = true )]
     public abstract class TemplateAttribute : Attribute
     {
-        // Prevents instantiation by users.
-        internal TemplateAttribute()
+        protected TemplateAttribute()
         {
         }
     }

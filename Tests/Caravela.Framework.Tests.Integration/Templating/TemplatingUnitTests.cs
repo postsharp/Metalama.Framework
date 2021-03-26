@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
-    public class TemplatingUnitTests : TemplateUnitTestBase
+    public class TemplatingUnitTests : TemplatingUnitTestBase
     {
         public TemplatingUnitTests( ITestOutputHelper logger ) : base( logger )
         {
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         [FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
         public async Task UnsupportedSyntax( string testName )
         {
-            var testResult = await this.RunTestAsync( testName );
+            var testResult = await this.RunTemplateTestAsync( testName );
             Assert.False( testResult.Success );
             testResult.AssertContainsDiagnosticId( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id );
         }

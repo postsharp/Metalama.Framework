@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 using Xunit.Abstractions;
-using TestResult = Caravela.TestFramework.TestResult;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
@@ -25,28 +24,14 @@ namespace Caravela.Framework.Tests.Integration.Templating
     /// This is useful to write only one test method per category of tests.
     /// </para>
     /// </remarks>
-    public abstract class TemplateUnitTestBase
+    public abstract class TemplatingUnitTestBase : UnitTestBase
     {
-        private readonly ITestOutputHelper _logger;
-
         /// <summary>
-        /// Gets the root directory path of the current test project.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The value of this property is read from <c>AssemblyMetadataAttribute</c> with <c>Key = "ProjectDirectory"</c>.
-        /// </para>
-        /// </remarks>
-        protected string ProjectDirectory { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TemplateUnitTestBase"/> class.
+        /// Initializes a new instance of the <see cref="TemplatingUnitTestBase"/> class.
         /// </summary>
         /// <param name="logger">The Xunit logger.</param>
-        public TemplateUnitTestBase( ITestOutputHelper logger )
+        public TemplatingUnitTestBase( ITestOutputHelper logger ) : base( logger )
         {
-            this._logger = logger;
-            this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
         }
 
         /// <summary>
@@ -54,22 +39,16 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// </summary>
         /// <param name="relativeTestPath">The path of the test source file relative to the project directory.</param>
         /// <returns>The result of the test execution.</returns>
-        protected async Task<TestResult> RunTestAsync( string relativeTestPath )
+        protected async Task<TestResult> RunTemplateTestAsync( string relativeTestPath )
         {
-            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
 
             var usedSyntaxKindsCollector = new UsedSyntaxKindsCollector();
-            var testRunner = new TemplateTestRunner( new[] { usedSyntaxKindsCollector } );
-            var testSource = await File.ReadAllTextAsync( sourceAbsolutePath );
-            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, testSource, null ) );
+            var testRunner = new TemplatingTestRunner( new[] { usedSyntaxKindsCollector } );
+            var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
 
-            foreach ( var diagnostic in testResult.Diagnostics )
-            {
-                if ( diagnostic.Severity == DiagnosticSeverity.Error )
-                {
-                    this._logger.WriteLine( diagnostic.ToString() );
-                }
-            }
+            this.WriteDiagnostics( testResult.Diagnostics );
 
             await this.WriteSyntaxCoverageAsync( relativeTestPath, testResult, usedSyntaxKindsCollector );
 
@@ -83,7 +62,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <returns>The async task.</returns>
         protected async Task AssertTransformedSourceEqualAsync( string relativeTestPath )
         {
-            var testResult = await this.RunTestAsync( relativeTestPath );
+            var testResult = await this.RunTemplateTestAsync( relativeTestPath );
 
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
@@ -94,7 +73,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
-                @"obj\transformed",
+                "obj",
+                "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
 
@@ -136,7 +116,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             var filePath = Path.Combine(
                 this.ProjectDirectory,
-                @"obj\SyntaxCover",
+                "obj",
+                "SyntaxCover",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 relativeTestPath + ".txt" );
 

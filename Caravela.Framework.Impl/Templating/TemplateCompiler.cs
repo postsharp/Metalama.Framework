@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -88,7 +89,7 @@ namespace Caravela.Framework.Impl.Templating
             => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
         public bool TryCompile(
-            SyntaxNode sourceSyntaxRoot,
+            MethodDeclarationSyntax sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,

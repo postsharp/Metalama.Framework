@@ -29,7 +29,6 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
         {
             class ChildClass
             {
-                
             }
         }
     }

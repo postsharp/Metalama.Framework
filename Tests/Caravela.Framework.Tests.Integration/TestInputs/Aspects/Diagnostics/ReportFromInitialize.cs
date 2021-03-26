@@ -2,7 +2,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInitialize
+namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
 {
     public class ErrorAttribute : OverrideMethodAspect
     {

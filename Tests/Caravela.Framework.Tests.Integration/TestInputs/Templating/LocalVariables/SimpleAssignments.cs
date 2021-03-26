@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.LocalVariables.SimpleAssignments
+namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.SimpleAssignments
 {
     class Aspect
     {
