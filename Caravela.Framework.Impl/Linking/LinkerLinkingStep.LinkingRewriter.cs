@@ -12,6 +12,9 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerLinkingStep
     {
+        /// <summary>
+        /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
+        /// </summary>
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
             private readonly CSharpCompilation _intermediateCompilation;
@@ -45,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( method )!;
 
-                    if ( this._referenceRegistry.IsOverrideMethod( symbol ) )
+                    if ( this._referenceRegistry.IsOverride( symbol ) )
                     {
                         // Override method.
                         if ( this._referenceRegistry.IsBodyInlineable( symbol ) )
@@ -96,9 +99,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 return node.WithMembers( List( newMembers ) );
             }
-
             private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
+                // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
                 var invocation =
                     InvocationExpression(
                         GetInvocationTarget(),
@@ -128,6 +131,7 @@ namespace Caravela.Framework.Impl.Linking
 
             private BlockSyntax? GetRewrittenMethodBody( SemanticModel semanticModel, MethodDeclarationSyntax method, IMethodSymbol symbol )
             {
+                // Create inlining rewriter and inline calls into this method's body.
                 var inliningRewriter = new InliningRewriter( this._referenceRegistry, semanticModel, symbol );
 
                 return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();

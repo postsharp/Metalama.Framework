@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Aspects;
@@ -20,8 +21,6 @@ namespace Caravela.Framework.Impl.Linking
         private readonly IReadOnlyDictionary<ISymbol, MemberAnalysisResult> _methodBodyInfos;
         private readonly IReadOnlyList<OrderedAspectLayer> _orderedAspectLayers;
 
-        private bool _frozen;
-
         public LinkerAnalysisRegistry(
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
@@ -35,18 +34,20 @@ namespace Caravela.Framework.Impl.Linking
         }
 
         /// <summary>
-        /// Freezes the analysis registry, after which it is not allowed to do any changes to underlying data (with exception of caches).
+        /// Determines whether the method symbol represents override target.
         /// </summary>
-        public void Freeze()
-        {
-            this._frozen = true;
-        }
-
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
         public bool IsOverrideTarget( IMethodSymbol symbol )
         {
-            return this._introductionRegistry.GetMethodOverridesForSymbol( symbol ).Count > 0;
+            return this._introductionRegistry.GetOverridesForSymbol( symbol ).Count > 0;
         }
 
+        /// <summary>
+        /// Determines whether the method body is inlineable.
+        /// </summary>
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns><c>True</c> if the method body can be inlined, otherwise <c>false</c>.</returns>
         public bool IsBodyInlineable( IMethodSymbol symbol )
         {
             if ( this.IsOverrideTarget( symbol ) )
@@ -57,18 +58,20 @@ namespace Caravela.Framework.Impl.Linking
                         && x.NamedArguments
                             .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) ) )
                 {
+                    // Inlining is explicitly disabled for the method.
                     return false;
                 }
 
                 if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion(symbol, null), out var counter ) )
                 {
+                    // Method is not referenced in multiple places.
                     return true;
                 }
 
                 return counter <= 1;
             }
-            else
-            {
+            else if (this.IsOverride(symbol))
+            {               
                 var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
                 if ( introducedMember == null )
@@ -90,9 +93,18 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
-        public bool IsOverrideMethod( IMethodSymbol symbol )
+        /// <summary>
+        /// Determines whether the symbol represents an override method.
+        /// </summary>
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns></returns>
+        public bool IsOverride( IMethodSymbol symbol )
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
@@ -111,7 +123,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns>Symbol.</returns>
         public ISymbol GetLastOverride( IMethodSymbol symbol )
         {
-            var overrides = this._introductionRegistry.GetMethodOverridesForSymbol( symbol );
+            var overrides = this._introductionRegistry.GetOverridesForSymbol( symbol );
             var lastOverride = overrides.LastOrDefault();
 
             if ( lastOverride == null )
@@ -132,10 +144,10 @@ namespace Caravela.Framework.Impl.Linking
         public ISymbol ResolveSymbolReference( IMethodSymbol contextSymbol, ISymbol referencedSymbol, LinkerAnnotation referenceAnnotation )
         {
             // TODO: Other things than methods.
-            var overrides = this._introductionRegistry.GetMethodOverridesForSymbol( (IMethodSymbol) referencedSymbol );
+            var overrides = this._introductionRegistry.GetOverridesForSymbol( (IMethodSymbol) referencedSymbol );
 
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) );
-            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayerId ).Index;
+            var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
 
             // TODO: Optimize.
             var previousLayerOverride = (
@@ -155,14 +167,19 @@ namespace Caravela.Framework.Impl.Linking
             return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        public bool HasSimpleReturns( IMethodSymbol methodSymbol )
+        /// <summary>
+        /// Determines whether the method has a simple return control flow (i.e. if return is replaced by assignment, the control flow graph does not change).
+        /// </summary>
+        /// <param name="methodSymbol">Symbol.</param>
+        /// <returns><c>True</c> if the body has </returns>
+        public bool HasSimpleReturnControlFlow( IMethodSymbol methodSymbol )
         {
             if ( !this._methodBodyInfos.TryGetValue( methodSymbol, out var result ) )
             {
                 return false;
             }
 
-            return result.HasSimpleReturns;
+            return result.HasSimpleReturnControlFlow;
         }
     }
 }

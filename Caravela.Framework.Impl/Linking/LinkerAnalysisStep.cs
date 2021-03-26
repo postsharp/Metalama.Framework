@@ -8,6 +8,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Analysis step of the linker, main goal of which is to produce LinkerAnalysisRegistry.
+    /// </summary>
     internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerIntroductionStepOutput, LinkerAnalysisStepOutput>
     {
         public static LinkerAnalysisStep Instance { get; } = new LinkerAnalysisStep();
@@ -36,7 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                             break;
 
                         case LinkerAnnotationOrder.Default: // Next one.
-                            targetLayer = linkerAnnotation.AspectLayerId;
+                            targetLayer = linkerAnnotation.AspectLayer;
                             break;
 
                         default:
@@ -58,7 +61,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            // TODO: Do this on demand in analysis registry.
+            // TODO: Do this on demand in analysis registry (provide the implementating class to the registry, let the registry manage the cache).
             // Analyze introduced method bodies.
             foreach ( var introducedMember in input.IntroductionRegistry.GetIntroducedMembers() )
             {
@@ -73,7 +76,7 @@ namespace Caravela.Framework.Impl.Linking
                 // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
             }
 
-            foreach (var symbol in input.IntroductionRegistry.GetOverriddenMethods())
+            foreach (var symbol in input.IntroductionRegistry.GetOverriddenMembers())
             {
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );

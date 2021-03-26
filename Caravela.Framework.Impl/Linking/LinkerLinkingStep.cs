@@ -24,6 +24,9 @@ namespace Caravela.Framework.Impl.Linking
     //
     // Ideal inlining result is a single method A, which will contain logic from all aspects and the original method.
 
+    /// <summary>
+    /// Linker linking step, which rewrites the intermediate compilation and 
+    /// </summary>
     internal partial class LinkerLinkingStep
     {
         public static LinkerLinkingStep Instance { get; } = new LinkerLinkingStep();
@@ -39,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var syntaxTree in finalCompilation.SyntaxTrees )
             {
-                // Run the linking rewriter.
+                // Run the linking rewriter for this tree.
                 var newRoot = rewriter.Visit( syntaxTree.GetRoot() );
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( newRoot, syntaxTree.Options );

@@ -13,6 +13,9 @@ namespace Caravela.Framework.Impl.Linking
 
     internal partial class LinkerIntroductionStep
     {
+        /// <summary>
+        /// Collection of introduced members for given transformations. Id is added to the nodes to allow tracking.
+        /// </summary>
         private class IntroducedMemberCollection
         {
             private readonly List<LinkerIntroducedMember> _introducedMembers;
@@ -34,6 +37,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var id = Interlocked.Increment( ref this._nextId ).ToString();
                     var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
+                    // TODO: Roslyn adds Id annotation to nodes that are tracked, which we may use instead of our own annotation.
                     var annotatedIntroducedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( idAnnotation );
 
                     // Any transformations of the introduced syntax node need to be done before this.

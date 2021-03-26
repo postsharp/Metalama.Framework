@@ -54,7 +54,12 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        public IReadOnlyList<LinkerIntroducedMember> GetMethodOverridesForSymbol( IMethodSymbol symbol )
+        /// <summary>
+        /// Gets introduced members representing overrides of a symbol.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns>List of introduced members.</returns>
+        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( IMethodSymbol symbol )
         {
             // TODO: Optimize.
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
@@ -94,7 +99,12 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        internal LinkerIntroducedMember? GetIntroducedMemberForSymbol( IMethodSymbol symbol )
+        /// <summary>
+        /// Gets an introduced member represented the declaration that resulted in the specified symbol in the intermediate compilation.
+        /// </summary>
+        /// <param name="symbol">Symbol.</param>
+        /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
+        public LinkerIntroducedMember? GetIntroducedMemberForSymbol( IMethodSymbol symbol )
         {
             var declaringSyntax = symbol.DeclaringSyntaxReferences.Single().GetSyntax();
             var annotation = declaringSyntax.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
@@ -107,7 +117,12 @@ namespace Caravela.Framework.Impl.Linking
             return this._introducedMemberLookup[annotation.Data.AssertNotNull()];
         }
 
-        internal ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
+        /// <summary>
+        /// Gets a symbol in intermediate compilation that represents a declaration introduced by the introduced member.
+        /// </summary>
+        /// <param name="introducedMember"></param>
+        /// <returns></returns>
+        public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
             var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introductor.TargetSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax);
@@ -115,12 +130,20 @@ namespace Caravela.Framework.Impl.Linking
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();
         }
 
+        /// <summary>
+        /// Gets introduced members for all transformations.
+        /// </summary>
+        /// <returns>Enumeration of introduced members.</returns>
         public IEnumerable<LinkerIntroducedMember> GetIntroducedMembers()
         {
             return this._introducedMemberLookup.Values;
         }
 
-        public IEnumerable<IMethodSymbol> GetOverriddenMethods()
+        /// <summary>
+        /// Gets all symbols for overridden members.
+        /// </summary>
+        /// <returns>Enumeration of symbols.</returns>
+        public IEnumerable<IMethodSymbol> GetOverriddenMembers()
         {           
             // TODO: This is not efficient.
             var overriddenMethods = new List<IMethodSymbol>();

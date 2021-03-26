@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Represents a version of the symbol, i.e. a pair of ISymbol and AspectLayerId?.
+    /// </summary>
     internal struct SymbolVersion : IEquatable<SymbolVersion>
     {
         public ISymbol Symbol { get; }

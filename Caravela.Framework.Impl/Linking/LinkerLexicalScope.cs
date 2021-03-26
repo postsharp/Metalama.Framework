@@ -8,6 +8,9 @@ using Caravela.Framework.Impl.Templating;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Lexical scopes used by the linker for template expansion.
+    /// </summary>
     internal class LinkerLexicalScope : ITemplateExpansionLexicalScope
     {
         private readonly Dictionary<string, string> _identifierMap = new Dictionary<string, string>();

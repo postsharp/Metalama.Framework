@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Provides extension methods for handling of linker annotations.
+    /// </summary>
     internal static class LinkerAnnotationExtensions
     {
         public const string AnnotationKind = "CaravelaAspectLinker";

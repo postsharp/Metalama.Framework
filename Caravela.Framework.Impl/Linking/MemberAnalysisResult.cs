@@ -3,13 +3,16 @@
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Result of member analysis.
+    /// </summary>
     internal class MemberAnalysisResult
     {
-        public bool HasSimpleReturns { get; }
+        public bool HasSimpleReturnControlFlow { get; }
 
-        public MemberAnalysisResult( bool hasSimpleBody )
+        public MemberAnalysisResult( bool hasSimpleReturnControlFlow )
         {
-            this.HasSimpleReturns = hasSimpleBody;
+            this.HasSimpleReturnControlFlow = hasSimpleReturnControlFlow;
         }
     }
 }

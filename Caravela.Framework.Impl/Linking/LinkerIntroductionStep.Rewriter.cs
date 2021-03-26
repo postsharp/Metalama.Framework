@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     foreach ( var introducedMember in this._introducedMemberCollection.GetIntroducedMembersOnPosition( position ) )
                     {
-                        // This allows for tracking the nodes later.
+                        // Allow for tracking of the node inserted.
                         members.Add( introducedMember.Syntax.TrackNodes( introducedMember.Syntax ) );
                     }
                 }

@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Output of the linker's analysis.
+    /// </summary>
     internal class LinkerAnalysisStepOutput
     {
         public LinkerAnalysisStepOutput( DiagnosticList diagnosticSink, CSharpCompilation intermediateCompilation, LinkerAnalysisRegistry analysisRegistry )
@@ -15,10 +18,19 @@ namespace Caravela.Framework.Impl.Linking
             this.AnalysisRegistry = analysisRegistry;
         }
 
+        /// <summary>
+        /// Gets diagnostic sink.
+        /// </summary>
         public DiagnosticList DiagnosticSink { get; }
 
+        /// <summary>
+        /// Gets the intermediate compilation (produced in introduction step).
+        /// </summary>
         public CSharpCompilation IntermediateCompilation { get; }
 
+        /// <summary>
+        /// Gets the analysis registry.
+        /// </summary>
         public LinkerAnalysisRegistry AnalysisRegistry { get; }
     }
 }

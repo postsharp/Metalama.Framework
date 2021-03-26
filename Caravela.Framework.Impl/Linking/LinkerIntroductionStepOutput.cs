@@ -18,12 +18,24 @@ namespace Caravela.Framework.Impl.Linking
             this.OrderedAspectLayers = orderedAspectLayers;
         }
 
+        /// <summary>
+        /// Gets the diagnostic sink.
+        /// </summary>
         public DiagnosticList DiagnosticSink { get; }
 
+        /// <summary>
+        /// Gets the intermediate compilation.
+        /// </summary>
         public CSharpCompilation IntermediateCompilation { get; }
 
+        /// <summary>
+        /// Gets the introduction registry.
+        /// </summary>
         public LinkerIntroductionRegistry IntroductionRegistry { get; }
 
+        /// <summary>
+        /// Gets a list of ordered aspect layers.
+        /// </summary>
         public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
     }
 }
