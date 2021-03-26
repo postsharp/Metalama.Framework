@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
