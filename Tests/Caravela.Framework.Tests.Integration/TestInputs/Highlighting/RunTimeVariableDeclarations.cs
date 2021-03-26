@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Project;
+﻿#pragma warning disable CS0219
+
+using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
 using System;
 using static Caravela.Framework.Aspects.TemplateContext;

@@ -1,6 +1,6 @@
-﻿using Caravela.Framework.Project;
+﻿using System;
+using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
-using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations

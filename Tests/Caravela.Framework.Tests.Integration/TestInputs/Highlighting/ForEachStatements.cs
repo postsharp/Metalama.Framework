@@ -1,4 +1,6 @@
-﻿using Caravela.Framework.Project;
+﻿#pragma warning disable CS0649, CS8618
+
+using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
 using System.Collections.Generic;
 using static Caravela.Framework.Aspects.TemplateContext;
