@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
-    internal abstract class TemplatingTestRunnerBase
+    public abstract class TemplatingTestRunnerBase
     {
         public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        protected virtual Microsoft.CodeAnalysis.Project CreateProject()
+        public virtual Microsoft.CodeAnalysis.Project CreateProject()
         {
             var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
 

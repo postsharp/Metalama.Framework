@@ -5,8 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Tests.Integration.Templating;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 
@@ -14,9 +14,9 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-        private readonly WorkbenchTestRunner _testRunner;
+        private readonly TemplatingTestRunner _testRunner;
 
-        public SyntaxColorizer( WorkbenchTestRunner testRunner )
+        public SyntaxColorizer( TemplatingTestRunner testRunner )
         {
             this._testRunner = testRunner;
         }

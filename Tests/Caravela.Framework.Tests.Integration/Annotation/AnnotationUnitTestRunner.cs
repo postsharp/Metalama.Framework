@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
             var testSourceRootWithAddedTrivias = triviaAdder.Visit( tree.GetRoot() );
             var testSourceWithAddedTrivias = testSourceRootWithAddedTrivias!.ToFullString();
 
-            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testInput.ProjectDirectory, testSourceWithAddedTrivias, testInput.TestSourcePath, testInput.TargetSource );
+            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testInput.ProjectDirectory, testSourceWithAddedTrivias, testInput.TestSourcePath );
 
             return base.RunAsync( testInputWithAddedTrivias );
         }

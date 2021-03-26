@@ -37,7 +37,6 @@ namespace Caravela.AspectWorkbench.Views
             var workingDirectory = Directory.GetCurrentDirectory();
 
             this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
-            this.targetSourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
         }
 
         private void ViewModel_PropertyChanged( object sender, PropertyChangedEventArgs e )
@@ -45,14 +44,8 @@ namespace Caravela.AspectWorkbench.Views
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
-                case nameof( MainViewModel.TemplateText ):
-                    this.sourceTextBox.Text = this._viewModel.TemplateText;
-                    break;
-                case nameof( MainViewModel.TargetText ):
-                    this.targetSourceTextBox.Text = this._viewModel.TargetText;
-                    break;
-                case nameof( MainViewModel.ColoredTemplateDocument ):
-                    this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
+                case nameof( MainViewModel.TestText ):
+                    this.sourceTextBox.Text = this._viewModel.TestText;
                     break;
                 case nameof( MainViewModel.CompiledTemplateDocument ):
                     this.compiledTemplateRichBox.Document = this._viewModel.CompiledTemplateDocument ?? new FlowDocument();
@@ -65,8 +58,7 @@ namespace Caravela.AspectWorkbench.Views
 
         private void UpdateViewModel()
         {
-            this._viewModel.TemplateText = this.sourceTextBox.Text;
-            this._viewModel.TargetText = this.targetSourceTextBox.Text;
+            this._viewModel.TestText = this.sourceTextBox.Text;
 
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();

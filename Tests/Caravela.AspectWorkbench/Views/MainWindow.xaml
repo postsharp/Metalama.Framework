@@ -33,36 +33,20 @@
                 <ColumnDefinition Width="400*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="400*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="400*" />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="500"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-
-                <DockPanel Grid.Row="0">
-                    <TextBox DockPanel.Dock="Top">Template Source</TextBox>
+            <DockPanel Grid.Column="0">
+                <TextBox DockPanel.Dock="Top">Test Source Code with Compile-Time Code Highlighting</TextBox>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
                     <editor:RoslynCodeEditor Name="sourceTextBox" FontSize="12" FontFamily="Consolas"
                                              ShowLineNumbers="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                                              WordWrap="False" 
                                              />
-                </DockPanel>
-
-                <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
-
-                <DockPanel Grid.Row="2">
-                    <TextBox DockPanel.Dock="Top">Expected Output</TextBox>
-                    <TextBox Name="expectedOutputTextBox" Text="{Binding ExpectedOutputText, Mode=TwoWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" 
-                         AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
-                </DockPanel>
-            </Grid>
+                </ScrollViewer>
+            </DockPanel>
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-
+            
             <Grid Grid.Column="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="500"/>
@@ -71,11 +55,9 @@
                 </Grid.RowDefinitions>
 
                 <DockPanel Grid.Row="0">
-                    <TextBox DockPanel.Dock="Top">Target Source</TextBox>
-                    <editor:RoslynCodeEditor Name="targetSourceTextBox" FontSize="12" FontFamily="Consolas"
-                                             ShowLineNumbers="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                                             WordWrap="False" 
-                                             />
+                    <TextBox DockPanel.Dock="Top">Expected Output</TextBox>
+                    <TextBox Name="expectedOutputTextBox" Text="{Binding ExpectedOutputText, Mode=TwoWay}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" 
+                         AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" />
                 </DockPanel>
 
                 <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
@@ -92,16 +74,6 @@
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
             <DockPanel Grid.Column="4">
-                <TextBox DockPanel.Dock="Top">Source Code with Compile-Time Code Highlighting</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
-                    <RichTextBox Name="highlightedSourceRichBox" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                           FontFamily="Consolas" />
-                </ScrollViewer>
-            </DockPanel>
-
-            <GridSplitter Grid.Column="5" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-
-            <DockPanel Grid.Column="6">
                 <TextBox DockPanel.Dock="Top">Compiled Template</TextBox>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
                     <RichTextBox IsReadOnly="True" Name="compiledTemplateRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
