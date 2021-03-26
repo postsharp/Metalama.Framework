@@ -7,5 +7,5 @@
   <PropertyGroup>
     <CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>
   </PropertyGroup>
-  <Import Project="Caravela.CompilerVisibleProperties.targets" />
+  <Import Project="Caravela.CompilerVisibleProperties.targets" Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
 </Project>

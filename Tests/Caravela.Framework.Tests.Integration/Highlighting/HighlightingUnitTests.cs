@@ -42,6 +42,10 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         [FromDirectory( @"TestInputs\Formatting\ForStatements" )]
         public Task ForStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\Regressions" )]
+        public Task Regression( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
         [Theory( Skip = "Not supported yet." )]
         [FromDirectory( @"TestInputs\Formatting\WhileStatements" )]
         public Task WhileStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
