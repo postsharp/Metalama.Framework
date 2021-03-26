@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         private object? TranslateAttributeArgument( TypedConstant typedConstant, Type targetType ) => this.TranslateAttributeArgument( typedConstant.Value, typedConstant.Type, targetType );
-        
+
         private object? TranslateAttributeArgument( object? value, IType sourceType, Type targetType )
         {
             if ( value == null )
@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 case TypedConstant typedConstant:
                     return this.TranslateAttributeArgument( typedConstant, targetType );
-                
+
                 case IType type:
                     if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
                     {
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                     return this._compileTimeTypeResolver.GetCompileTimeType( type.GetSymbol(), true );
-                
+
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
                     if ( !targetType.IsAssignableFrom( typeof( string ) ) )
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case IEnumerable list:
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
-                    var elementType = targetType.GetElementType() ?? typeof(object);
+                    var elementType = targetType.GetElementType() ?? typeof( object );
 
                     var count = 0;
                     foreach ( var unused in list )

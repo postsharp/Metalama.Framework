@@ -123,7 +123,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="pipelineStageResult"></param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecuteCore( [NotNullWhen(true)] out PipelineStageResult? pipelineStageResult )
+        private protected bool TryExecuteCore( [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             var roslynCompilation = this.Context.Compilation;
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );

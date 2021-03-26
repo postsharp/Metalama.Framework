@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
             this.AspectName = aspectName;
             this.LayerName = layerName;
         }
-        
+
         public static AspectLayerId FromString( string s )
         {
             var parts = s.Split( _separators );

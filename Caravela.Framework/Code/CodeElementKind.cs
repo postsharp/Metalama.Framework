@@ -70,7 +70,7 @@ namespace Caravela.Framework.Code
         /// <see cref="IConstructor"/>.
         /// </summary>
         Constructor,
-        
+
         /// <summary>
         /// A reference assembly, implementing <see cref="IAssembly"/>. Note
         /// that the current assembly is represented by <see cref="ICompilation"/> that inherits <see cref="IAssembly"/>, but the

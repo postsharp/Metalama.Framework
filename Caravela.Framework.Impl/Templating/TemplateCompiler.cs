@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( symbolAnnotationMap );
+            var templateCompilerRewriter = new TemplateCompilerRewriter( semanticModel.Compilation, symbolAnnotationMap );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             // TODO: add diagnostics.

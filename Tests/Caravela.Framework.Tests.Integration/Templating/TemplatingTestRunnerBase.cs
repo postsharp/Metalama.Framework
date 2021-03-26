@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
     {
         public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
-            var testSource = CommonSnippets.CaravelaUsings + testInput.TestSource;
+            var testSource = testInput.TestSource;
 
             // Source.
             var project = this.CreateProject();

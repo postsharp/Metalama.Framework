@@ -60,14 +60,14 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( this._calls > 0 )
                 {
-                    this.Diagnostics.Add( 
-                        Diagnostic.Create( 
-                            "CA07", 
+                    this.Diagnostics.Add(
+                        Diagnostic.Create(
+                            "CA07",
                             "Annotation",
                             $"The {node} method cannot be called twice in a template method.",
                             DiagnosticSeverity.Error,
-                            DiagnosticSeverity.Error, 
-                            true, 
+                            DiagnosticSeverity.Error,
+                            true,
                             0,
                             location: Location.Create( node.SyntaxTree, node.Span ) ) );
                 }

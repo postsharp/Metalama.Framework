@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             return false;
         }
-        
+
         private SimpleLinkedListNode()
         {
         }

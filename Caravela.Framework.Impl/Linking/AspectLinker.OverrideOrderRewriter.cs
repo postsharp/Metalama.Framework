@@ -66,17 +66,17 @@ namespace Caravela.Framework.Impl.Linking
                                 ? MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     ThisExpression(),
-                                    IdentifierName( lastOverrideName ))
+                                    IdentifierName( lastOverrideName ) )
                                 : IdentifierName( lastOverrideName ),
                             ArgumentList(
                                 SeparatedList(
-                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ))));
+                                    originalSymbol.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithBody(
                             Block(
                                 originalSymbol.ReturnsVoid
                                     ? ExpressionStatement( invocation )
-                                    : ReturnStatement( invocation )) ) );
+                                    : ReturnStatement( invocation ) ) ) );
 
                         newMembers.Add( originalMethodDeclaration.WithIdentifier( Identifier( originalBodyMethodName ) ) );
                     }
@@ -131,8 +131,8 @@ namespace Caravela.Framework.Impl.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) )),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
+                                    IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) ) ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
                     }
                     else
                     {
@@ -143,8 +143,8 @@ namespace Caravela.Framework.Impl.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     (ExpressionSyntax) this.Visit( memberAccess.Expression ),
-                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier )),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
+                                    IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier ) ),
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
                     }
                 }
                 else if ( node.Expression is IdentifierNameSyntax identifier )
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.Linking
                         return
                             InvocationExpression(
                                 IdentifierName( GetOriginalBodyMethodName( declarationSyntax.Identifier.ValueText ) ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
                     }
                     else
                     {
@@ -164,7 +164,7 @@ namespace Caravela.Framework.Impl.Linking
                         return
                             InvocationExpression(
                                 IdentifierName( ((MethodDeclarationSyntax) overrideImmediatelyBefore.Syntax).Identifier ),
-                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )!);
+                                (ArgumentListSyntax) this.VisitArgumentList( node.ArgumentList )! );
                     }
                 }
                 else

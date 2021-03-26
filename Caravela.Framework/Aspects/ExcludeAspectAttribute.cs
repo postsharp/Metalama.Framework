@@ -5,14 +5,14 @@ using System;
 
 namespace Caravela.Framework.Aspects
 {
-    
+
     /// <summary>
     /// Custom attribute attribute that, when applied to an element of code, specifies that this element of code must not be
     /// the target of aspects of given types.
     /// (Not implemented.)
     /// </summary>
-    [Obsolete("Not implemented.")]
-    [AttributeUsage(AttributeTargets.All)]
+    [Obsolete( "Not implemented." )]
+    [AttributeUsage( AttributeTargets.All )]
     public class ExcludeAspectAttribute : Attribute
     {
         /// <summary>

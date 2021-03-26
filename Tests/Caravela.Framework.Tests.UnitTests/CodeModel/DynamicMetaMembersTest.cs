@@ -199,7 +199,7 @@ class TargetCode
     {
     }
 }";
-            
+
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes.Single();
             var method = type.Methods.OfName( "A" ).Single();

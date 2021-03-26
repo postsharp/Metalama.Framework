@@ -1,10 +1,10 @@
 {
     var x = new { A = a, B = b, Count = 2 };
     var y = new { Count = 2 };
-    Console.WriteLine(x);
-    Console.WriteLine(x.A);
-    Console.WriteLine(x.Count);
-    Console.WriteLine(y.Count);
+    global::System.Console.WriteLine(x);
+    global::System.Console.WriteLine(x.A);
+    global::System.Console.WriteLine(x.Count);
+    global::System.Console.WriteLine(y.Count);
     int result;
     result = a + b;
     return (int)result;

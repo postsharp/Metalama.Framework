@@ -23,20 +23,20 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._compilation = compilation;
         }
-        
+
         public ObjectSerializers Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
 
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
-            var symbol = this._compilation.ReflectionMapper.GetTypeByReflectionName( reflectionName );
+            var symbol = this._compilation.ReflectionMapper.GetTypeSymbolByReflectionName( reflectionName );
             return this.GetNamedType( symbol );
         }
 
         public IType GetTypeByReflectionType( Type type )
             => this.GetIType( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
-        
+
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
                 assemblySymbol.ToLink(),
@@ -71,15 +71,15 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToLink(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
 
-        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default) =>
+        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default ) =>
             symbol switch
             {
                 INamespaceSymbol => this._compilation,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
                 IMethodSymbol method =>
-                    kind == CodeElementSpecialKind.ReturnParameter 
+                    kind == CodeElementSpecialKind.ReturnParameter
                         ? this.GetReturnParameter( method )
-                        : method.GetCodeElementKind() == CodeElementKind.Method 
+                        : method.GetCodeElementKind() == CodeElementKind.Method
                             ? this.GetMethod( method )
                             : this.GetConstructor( method ),
                 IPropertySymbol property => this.GetProperty( property ),

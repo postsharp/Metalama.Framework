@@ -32,6 +32,6 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation.HasImplicitConversion( ((ITypeInternal) left).TypeSymbol, ((ITypeInternal) right).TypeSymbol );
 
         public bool Is( IType left, Type right ) =>
-            this._compilation.HasImplicitConversion( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ));
+            this._compilation.HasImplicitConversion( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ) );
     }
 }

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
         }
 
-        public NamedArgumentsList() 
+        public NamedArgumentsList()
         {
         }
 

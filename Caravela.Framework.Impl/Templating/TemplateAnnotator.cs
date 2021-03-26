@@ -434,7 +434,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.CompileTimeOnly )
             {
-                // If the expression on the left meta is compile-time (because of rules on the symbol),
+                // If the expression on the left side is compile-time (because of rules on the symbol),
                 // then arguments MUST be compile-time, unless they are dynamic.
 
                 var transformedArguments = new List<ArgumentSyntax>( node.ArgumentList.Arguments.Count );
