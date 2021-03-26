@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Linking
     // Ideal inlining result is a single method A, which will contain logic from all aspects and the original method.
 
     /// <summary>
-    /// Linker linking step, which rewrites the intermediate compilation and 
+    /// Linker linking step, which rewrites the intermediate compilation and produces the final compilation. 
     /// </summary>
     internal partial class LinkerLinkingStep
     {

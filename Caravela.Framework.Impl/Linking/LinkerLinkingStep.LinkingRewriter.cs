@@ -99,6 +99,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return node.WithMembers( List( newMembers ) );
             }
+
             private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.

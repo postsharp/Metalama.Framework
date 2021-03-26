@@ -171,7 +171,7 @@ namespace Caravela.Framework.Impl.Linking
         /// Determines whether the method has a simple return control flow (i.e. if return is replaced by assignment, the control flow graph does not change).
         /// </summary>
         /// <param name="methodSymbol">Symbol.</param>
-        /// <returns><c>True</c> if the body has </returns>
+        /// <returns><c>True</c> if the body has simple control flow, otherwise <c>false</c>.</returns>
         public bool HasSimpleReturnControlFlow( IMethodSymbol methodSymbol )
         {
             if ( !this._methodBodyInfos.TryGetValue( methodSymbol, out var result ) )

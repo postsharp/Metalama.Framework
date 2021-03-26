@@ -152,7 +152,6 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }*/
 
-
             public override SyntaxNode? VisitBlock( BlockSyntax node )
             {
                 var newSyntax = base.VisitBlock( node );

@@ -37,6 +37,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     var id = Interlocked.Increment( ref this._nextId ).ToString();
                     var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
+
                     // TODO: Roslyn adds Id annotation to nodes that are tracked, which we may use instead of our own annotation.
                     var annotatedIntroducedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( idAnnotation );
 
