@@ -19,9 +19,11 @@ namespace Caravela.TestFramework
         /// Initializes a new instance of the <see cref="TestResult"/> class.
         /// </summary>
         /// <param name="templateDocument">The source code document of the template.</param>
-        internal TestResult( Document templateDocument )
+        internal TestResult( Project project, Document templateDocument, Compilation initialCompilation )
         {
+            this.Project = project;
             this.TemplateDocument = templateDocument;
+            this.InitialCompilation = initialCompilation;
         }
 
         internal void AddDiagnostic( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
@@ -45,9 +47,24 @@ namespace Caravela.TestFramework
         public Exception? Exception { get; internal set; }
 
         /// <summary>
+        /// Gets the test project.
+        /// </summary>
+        public Project Project { get; }
+
+        /// <summary>
         /// Gets the source code document of the template.
         /// </summary>
         public Document TemplateDocument { get; }
+
+        /// <summary>
+        /// Gets the initial compilation of the test project.
+        /// </summary>
+        public Compilation InitialCompilation { get; }
+
+        /// <summary>
+        /// Gets or sets the result compilation of the test project.
+        /// </summary>
+        public Compilation? ResultCompilation { get; set; }
 
         /// <summary>
         /// Gets or sets the root <see cref="SyntaxNode"/> of the template annotated with template annotations from <see cref="AnnotationExtensions"/>.

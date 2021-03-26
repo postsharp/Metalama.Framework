@@ -5,7 +5,7 @@ using System.Linq;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.LocalFuncNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.LocalFuncNotSupported
 {
     class Aspect
     {

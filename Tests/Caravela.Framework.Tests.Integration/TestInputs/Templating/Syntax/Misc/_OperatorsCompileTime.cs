@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.OperatorsCompileTime
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.OperatorsCompileTime
 {
     class Aspect
     {

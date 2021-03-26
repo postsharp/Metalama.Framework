@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.PatternMatching
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.PatternMatching
 {
     class Aspect
     {

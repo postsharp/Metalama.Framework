@@ -39,13 +39,13 @@ namespace Caravela.TestFramework
             var project = this.CreateProject();
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testSource, encoding: Encoding.UTF8 ) );
 
-            var result = new TestResult( testDocument );
-
             var initialCompilation = CSharpCompilation.Create(
                 "assemblyName",
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
+
+            var result = new TestResult( project, testDocument, initialCompilation );
 
             var diagnostics = initialCompilation.GetDiagnostics();
 
@@ -63,6 +63,7 @@ namespace Caravela.TestFramework
                 var pipeline = new CompileTimeAspectPipeline( context );
                 if ( pipeline.TryExecute( out var resultCompilation ) )
                 {
+                    result.ResultCompilation = resultCompilation;
                     result.TransformedTargetSyntax = Formatter.Format( resultCompilation.SyntaxTrees.Single().GetRoot(), project.Solution.Workspace );
                     result.TransformedTargetSource = result.TransformedTargetSyntax.GetText();
                     result.Success = true;

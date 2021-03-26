@@ -230,19 +230,25 @@ namespace Caravela.Framework.Impl.Templating
 
                 var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
                 var triviaStart = trivia.Span.Start;
-
+                var triviaEnd = trivia.Span.End;
+                
                 // If we have an indenting trivia, trim the start of the span.
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for ( /* nothing */; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
+                    for (; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
                     {
                     }
                 }
-
-                if ( triviaStart != trivia.Span.End )
+                
+                // If we end with an endline or space, trim it.
+                for (; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- )
                 {
-                    this._classifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, trivia.Span.End ), classification );
+                }
+
+                if ( triviaStart != triviaEnd )
+                {
+                    this._classifiedTextSpans.Add( TextSpan.FromBounds( triviaStart, triviaEnd ), classification );
                 }
             }
         }
