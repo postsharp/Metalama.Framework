@@ -20,7 +20,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForTests.SimpleF
                 catch
                 {
                 }
-
             }
 
             throw new Exception();

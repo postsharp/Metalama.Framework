@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IAttributeList Attributes =>
-            new AttributeList( 
+            new AttributeList(
                 this.Builder.Attributes
                     .Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ),
                 this.Compilation );

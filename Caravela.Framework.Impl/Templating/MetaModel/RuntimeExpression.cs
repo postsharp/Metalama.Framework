@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public RuntimeExpression( ExpressionSyntax syntax, bool isNull )
         {
             this.Syntax = syntax;
-            _ = isNull; 
+            _ = isNull;
         }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )

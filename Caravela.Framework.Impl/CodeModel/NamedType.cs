@@ -19,7 +19,7 @@ using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class NamedType : Member,  ITypeInternal, ISdkNamedType
+    internal sealed class NamedType : Member, ITypeInternal, ISdkNamedType
     {
         internal INamedTypeSymbol TypeSymbol { get; }
 

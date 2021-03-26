@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ReferencedAssembly : CodeElement, IAssembly
     {
-        public ReferencedAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base(compilation)
+        public ReferencedAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
         {
             this.AssemblySymbol = assemblySymbol;
         }

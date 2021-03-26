@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,8 +20,15 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
         private static void Main()
         {
-            using var writer = File.CreateText( "MetaSyntaxRewriter.g.cs" );
 
+            var targetFile = Path.GetFullPath( "MetaSyntaxRewriter.g.cs" );
+            Console.WriteLine( "Creating " + targetFile );
+
+            using var writer = File.CreateText( targetFile );
+
+            writer.WriteLine( "using System;" );
+            writer.WriteLine( "using System.Linq;" );
+            writer.WriteLine( "using System.Collections.Generic;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp;" );
             writer.WriteLine( "using Microsoft.CodeAnalysis.CSharp.Syntax;" );
@@ -77,31 +85,19 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                         return "node.Kind()";
                     }
 
-                    /*
-                    else if (nodeType == typeof(IdentifierNameSyntax) && parameter.Name == "name")
-                    {
-                        return "node.Identifier.Text";
-                    }
-                    else if (nodeType == typeof(XmlTextSyntax) && parameter.Name == "value")
-                    {
-                        XmlTextSyntax x;
-                    }
-                    */
-
                     if ( !properties.TryGetValue( parameter.Name, out var property ) )
                     {
                         Console.WriteLine( $"Cannot find property {parameter.Name} in type {nodeTypeName}. Expected type is {parameter.ParameterType}." );
                         return "default";
                     }
-                    else
-                    {
-                        if ( property.PropertyType != parameter.ParameterType )
-                        {
-                            Console.WriteLine( $"Parameter {factoryMethodName}.{parameter.Name} is of type {parameter.ParameterType}, but the property is of type {property.PropertyType}." );
-                        }
 
-                        return $"node.{property.Name}";
+                    if ( property.PropertyType != parameter.ParameterType )
+                    {
+                        Console.WriteLine(
+                            $"Parameter {factoryMethodName}.{parameter.Name} is of type {parameter.ParameterType}, but the property is of type {property.PropertyType}." );
                     }
+
+                    return $"node.{property.Name}";
                 }
 
                 // Generate the Visit method.
@@ -109,10 +105,13 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( "\t\t{" );
                 writer.WriteLine( "\t\t\tswitch ( this.GetTransformationKind( node ) ) " );
                 writer.WriteLine( "\t\t\t{" );
-                writer.WriteLine( "\t\t\t\tcase TransformationKind.Clone: " );
-                writer.WriteLine( $"\t\t\t\t\treturn {factoryMethod.Name}( {string.Join( ", ", parameters.Select( FindProperty ) )});" );
+
+                // Generating Clone is interesting to validate the current code generation, but it is not used.
+                // writer.WriteLine( "\t\t\t\tcase TransformationKind.Clone: " );
+                // writer.WriteLine( $"\t\t\t\t\treturn {factoryMethod.Name}( {string.Join( ", ", parameters.Select( FindProperty ) )});" );
                 writer.WriteLine( "\t\t\t\tcase TransformationKind.Transform: " );
                 writer.WriteLine( $"\t\t\t\t\treturn this.Transform{factoryMethodName}( node );" );
+
                 writer.WriteLine( "\t\t\t\tdefault: " );
                 writer.WriteLine( $"\t\t\t\t\treturn base.{method.Name}( node );" );
                 writer.WriteLine( "\t\t\t}" );
@@ -122,7 +121,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( $"\t\tprotected virtual ExpressionSyntax Transform{factoryMethodName}( {nodeTypeName} node)" );
                 writer.WriteLine( "\t\t{" );
                 writer.WriteLine( "\t\t\tthis.Indent();" );
-                writer.Write( $"\t\t\tvar result = InvocationExpression(IdentifierName(nameof({factoryMethodName})))" );
+                writer.Write( $"\t\t\tvar result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof({factoryMethodName})))" );
                 if ( parameters.Length == 0 )
                 {
                     writer.WriteLine( ";" );
@@ -149,8 +148,156 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( "\t\t}" );
             }
 
+            writer.WriteLine( "\tpartial class MetaSyntaxFactoryImpl" );
+            writer.WriteLine( "\t{" );
+
+            foreach ( var methodGroup in typeof( SyntaxFactory ).GetMethods( BindingFlags.Public | BindingFlags.Static ).OrderBy( m => m.Name ).GroupBy( m => m.Name ) )
+            {
+                MethodInfo SelectBestMethod( IEnumerable<MethodInfo> methods ) => methods
+                    .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof( ParamArrayAttribute ) ) ?? false ? 0 : 1 ).First();
+
+                foreach ( var methodsWithSameParameterCount in methodGroup
+                    .Select( m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
+                    .GroupBy( m => m.Parameters, m => m.Method )
+                    .Select( SelectBestMethod )
+                    .GroupBy( m => m.GetParameters().Length ) )
+                {
+
+                    void WriteSyntaxFactoryMethod( MethodInfo method, string? suffix = null )
+                    {
+                        ParameterInfo? paramsParameter = null;
+
+                        writer.Write( $"\t\tpublic InvocationExpressionSyntax {method.Name}{suffix}" );
+
+                        if ( method.IsGenericMethodDefinition )
+                        {
+                            writer.Write( "<" );
+                            foreach ( var genericArgument in method.GetGenericArguments() )
+                            {
+                                if ( genericArgument.GenericParameterPosition > 0 )
+                                {
+                                    writer.Write( ", " );
+                                }
+
+                                writer.Write( genericArgument.Name );
+                            }
+                            writer.Write( ">" );
+                        }
+
+                        writer.Write( "(" );
+
+                        foreach ( var parameter in method.GetParameters() )
+                        {
+                            if ( parameter.Position > 0 )
+                            {
+                                writer.Write( ", " );
+                            }
+
+                            if ( parameter.IsDefined( typeof( ParamArrayAttribute ) ) )
+                            {
+                                writer.Write( "params " );
+                            }
+
+                            if ( IsEnumerable( parameter ) )
+                            {
+                                writer.Write( "IEnumerable<ExpressionSyntax>" );
+                            }
+                            else
+                            {
+                                writer.Write( "ExpressionSyntax" );
+                            }
+
+                            if ( parameter.IsDefined( typeof( ParamArrayAttribute ) ) )
+                            {
+                                paramsParameter = parameter;
+                                writer.Write( "[]" );
+                            }
+
+                            writer.Write( " @" + parameter.Name );
+                        }
+
+                        writer.WriteLine( ")" );
+
+                        string factoryMethod;
+
+                        if ( method.IsGenericMethod )
+                        {
+                            var genericArguments = string.Join( ", ", method.GetGenericArguments().Select( t => $"this.TypeName(typeof({t.Name}))" ) );
+                            factoryMethod = $"this.GenericSyntaxFactoryMethod( \"{method.Name}\", {genericArguments} )";
+                        }
+                        else
+                        {
+                            factoryMethod = $"this.SyntaxFactoryMethod( \"{method.Name}\" )";
+                        }
+
+                        writer.Write( $"\t\t\t=> SyntaxFactory.InvocationExpression( {factoryMethod}, SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{{" );
+                        foreach ( var parameter in method.GetParameters() )
+                        {
+                            if ( parameter == paramsParameter )
+                            {
+                                continue;
+                            }
+
+                            if ( parameter.Position > 0 )
+                            {
+                                writer.WriteLine( ", " );
+                            }
+                            else
+                            {
+                                writer.WriteLine();
+                            }
+
+                            if ( IsEnumerable( parameter ) )
+                            {
+                                var itemType = parameter.ParameterType.GenericTypeArguments[0];
+                                var typeOfItemType = itemType.IsGenericParameter ? $"typeof({itemType.Name})" : $"typeof({itemType.Name})";
+                                writer.Write(
+                                    $"\t\t\t\tSyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( \n" +
+                                    $"\t\t\t\t\tSyntaxFactory.ArrayType( this.TypeName({typeOfItemType}) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), \n" +
+                                    $"\t\t\t\t\tSyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @{parameter.Name} ))\n" +
+                                    $"\t\t\t\t))" );
+                            }
+                            else
+                            {
+                                writer.Write( $"\t\t\t\tSyntaxFactory.Argument( @{parameter.Name} )" );
+                            }
+                        }
+
+                        writer.Write( "}))" );
+
+                        if ( paramsParameter != null )
+                        {
+                            writer.WriteLine( $"\t\t\t\t.AddArguments( @{paramsParameter.Name}.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )" );
+                        }
+
+                        writer.WriteLine( ");" );
+                        writer.WriteLine();
+                    }
+
+                    if ( methodsWithSameParameterCount.Count() == 1 )
+                    {
+                        var method = methodsWithSameParameterCount.Single();
+                        WriteSyntaxFactoryMethod( method );
+                    }
+                    else
+                    {
+                        var i = 1;
+                        foreach ( var method in methodsWithSameParameterCount.OrderBy( m => m.ToString() ) )
+                        {
+                            WriteSyntaxFactoryMethod( method, i++.ToString() );
+                        }
+                    }
+                }
+            }
+
             writer.WriteLine( "}" );
             writer.WriteLine( "}" );
+            writer.WriteLine( "}" );
+        }
+
+        private static bool IsEnumerable( ParameterInfo parameter )
+        {
+            return parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof( IEnumerable<> );
         }
     }
 }

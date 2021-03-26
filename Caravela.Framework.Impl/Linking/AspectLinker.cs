@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( oldSyntaxTree, newSyntaxTree );
                 intermediateIntroducedSyntax = intermediateIntroducedSyntax.Merge(
                     addIntroducedElementsRewriter.IntroducedSyntax.SelectMany( x => x.Select( id => (x.Key, Tree: newSyntaxTree, NodeAnnotationId: id) ) )
-                    .ToMultiValueDictionary( x => x.Key, x => (x.Tree, x.NodeAnnotationId) ));
+                    .ToMultiValueDictionary( x => x.Key, x => (x.Tree, x.NodeAnnotationId) ) );
             }
 
             // Second pass. Count references to modified methods.
@@ -127,7 +127,7 @@ namespace Caravela.Framework.Impl.Linking
                 .SelectMany( st =>
                      st.GetRoot()
                      .GetAnnotatedNodes( _introducedSyntaxAnnotationId )
-                     .Select( sn => (Node: sn, Id: sn.GetAnnotations( _introducedSyntaxAnnotationId ).Select( a => int.Parse( a.Data ) ).Single()) ))
+                     .Select( sn => (Node: sn, Id: sn.GetAnnotations( _introducedSyntaxAnnotationId ).Select( a => int.Parse( a.Data ) ).Single()) ) )
                 .ToDictionary( x => x.Id, x => x.Node );
 
             var symbolOverrides =
@@ -138,10 +138,10 @@ namespace Caravela.Framework.Impl.Linking
                     .SelectMany( mi => mi.GetIntroducedMembers( new MemberIntroductionContext( diagnostics ) ) )
                     .Select( x => ((IOverriddenElement) x.Introductor).OverriddenElement switch
                      {
-                        Method method => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
-                        MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder ), IntroducedMember: x),
-                        _ => throw new AssertionFailedException()
-                    } ));
+                         Method method => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: method.Symbol, IntroducedMember: x),
+                         MethodBuilder builder => (Element: ((IOverriddenElement) x.Introductor).OverriddenElement, Symbol: FindInIntermediateCompilation( builder ), IntroducedMember: x),
+                         _ => throw new AssertionFailedException()
+                     } ) );
 
             var symbolOverridesLookup =
                 symbolOverrides.ToMultiValueDictionary( x => x.Symbol.AssertNotNull(), x => x.IntroducedMember, StructuralSymbolComparer.Instance );

@@ -41,9 +41,9 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// <typeparam name="TCodeElement"></typeparam>
         /// <typeparam name="TBuilder"></typeparam>
         /// <returns></returns>
-        public static CodeElementLink<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder ) 
+        public static CodeElementLink<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
             where TCodeElement : class, ICodeElement
-            where TBuilder : CodeElementBuilder 
+            where TBuilder : CodeElementBuilder
         {
             return new CodeElementLink<TCodeElement>( builder );
         }
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// <param name="symbol"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static CodeElementLink<T> FromSymbol<T>( ISymbol symbol ) 
+        public static CodeElementLink<T> FromSymbol<T>( ISymbol symbol )
             where T : class, ICodeElement
         {
             return new CodeElementLink<T>( symbol );
@@ -113,8 +113,8 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             this.Target = builder;
             this._kind = CodeElementSpecialKind.Default;
         }
-        
-        private CodeElementLink(object? target, CodeElementSpecialKind kind)
+
+        private CodeElementLink( object? target, CodeElementSpecialKind kind )
         {
             this.Target = target;
             this._kind = kind;
@@ -139,8 +139,8 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
-        public CodeElementLink<TOut> Cast<TOut>() 
-            where TOut : class, ICodeElement 
+        public CodeElementLink<TOut> Cast<TOut>()
+            where TOut : class, ICodeElement
             => new CodeElementLink<TOut>( this.Target, this._kind );
     }
 }

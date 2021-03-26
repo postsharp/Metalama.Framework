@@ -27,11 +27,14 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Stack<string> _indentTriviaStack = new Stack<string>();
         private readonly IndentRewriter _indentRewriter;
 
-        public MetaSyntaxRewriter()
+        public MetaSyntaxRewriter( Compilation compilation )
         {
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
+            this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( compilation );
         }
+
+        protected MetaSyntaxFactoryImpl MetaSyntaxFactory { get; }
 
         /// <summary>
         /// Determines how a given <see cref="SyntaxNode"/> must be transformed.
@@ -77,22 +80,6 @@ namespace Caravela.Framework.Impl.Templating
             return node;
         }
 
-        protected LiteralExpressionSyntax CreateLiteralExpression( string s )
-        {
-            return LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( s ) );
-        }
-
-        protected ArrayTypeSyntax CreateArrayType<T>()
-        {
-            return ArrayType(
-                    IdentifierName( typeof( T ).Name ) )
-                .WithRankSpecifiers(
-                    SingletonList(
-                        ArrayRankSpecifier(
-                            SingletonSeparatedList<ExpressionSyntax>(
-                                OmittedArraySizeExpression() ) ) ) );
-        }
-
         protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
 
         protected ExpressionSyntax Transform<T>( T? node )
@@ -117,55 +104,26 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        protected ExpressionSyntax Transform( SyntaxKind kind )
-        {
-            return MemberAccessExpression(
+        protected ExpressionSyntax Transform( SyntaxKind kind ) =>
+            MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                IdentifierName( "SyntaxKind" ),
+                this.MetaSyntaxFactory.Type( typeof( SyntaxKind ) ),
                 IdentifierName( kind.ToString() ) );
-        }
 
         protected ExpressionSyntax Transform<T>( SeparatedSyntaxList<T> list )
             where T : SyntaxNode
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression(
-                    GenericName(
-                            Identifier( "SeparatedSyntaxList" ) )
-                        .WithTypeArgumentList(
-                            TypeArgumentList(
-                                SingletonSeparatedList<TypeSyntax>(
-                                    IdentifierName( typeof( T ).Name ) ) ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.GenericType( typeof( SeparatedSyntaxList<> ), this.MetaSyntaxFactory.Type( typeof( T ) ) ) );
             }
             else if ( list.Count == 1 )
             {
-                return InvocationExpression(
-                        GenericName(
-                                Identifier( "SingletonSeparatedList" ) )
-                            .WithTypeArgumentList(
-                                TypeArgumentList(
-                                    SingletonSeparatedList<TypeSyntax>(
-                                        IdentifierName( typeof( T ).Name ) ) ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SingletonSeparatedList(
-                                Argument( this.Transform( list[0] ) ) ) ) );
+                return this.MetaSyntaxFactory.SingletonSeparatedList<T>( this.Transform( list[0] ) );
             }
             else
             {
-
-                return InvocationExpression(
-                        GenericName(
-                                Identifier( "SeparatedList" ) )
-                            .WithTypeArgumentList(
-                                TypeArgumentList(
-                                    SingletonSeparatedList<TypeSyntax>(
-                                        IdentifierName( typeof( T ).Name ) ) ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SeparatedList(
-                                list.Select( i => Argument( this.Transform( i ) ) ) ) ) );
+                return this.MetaSyntaxFactory.SeparatedList2<T>( list.Select( this.Transform ) );
             }
         }
 
@@ -173,56 +131,21 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list == null )
             {
-                return DefaultExpression( IdentifierName( "BracketedArgumentListSyntax" ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( BracketedArgumentListSyntax ) ) );
             }
 
-            return InvocationExpression(
-                    IdentifierName( nameof( BracketedArgumentList ) ) )
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument( this.Transform( list.Arguments ) ) ) ) );
+            return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
         }
 
-        protected ExpressionSyntax Transform( ArgumentListSyntax list )
-        {
-            if ( list.Arguments.Count == 0 )
-            {
-                return InvocationExpression(
-                    IdentifierName( nameof( ArgumentList ) ) );
-            }
-            else
-            {
-                return InvocationExpression(
-                        IdentifierName( nameof( ArgumentList ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SingletonSeparatedList(
-                                Argument( this.Transform( list.Arguments ) ) ) ) );
-            }
-        }
+        protected ExpressionSyntax Transform( ArgumentListSyntax list ) => this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
 
-        protected ExpressionSyntax Transform( ParameterListSyntax list )
-        {
-            if ( list.Parameters.Count == 0 )
-            {
-                return InvocationExpression(
-                    IdentifierName( nameof( ParameterList ) ) );
-            }
-
-            return InvocationExpression(
-                    IdentifierName( nameof( ParameterList ) ) )
-                .WithArgumentList(
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument( this.Transform( list.Parameters ) ) ) ) );
-        }
+        protected ExpressionSyntax Transform( ParameterListSyntax list ) => this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
 
         protected ExpressionSyntax Transform( SyntaxTokenList list )
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( IdentifierName( "SyntaxTokenList" ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) );
             }
 
             // TODO: Using default.AddRange is not the right pattern.
@@ -231,14 +154,14 @@ namespace Caravela.Framework.Impl.Templating
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         DefaultExpression(
-                            IdentifierName( "SyntaxTokenList" ) ),
+                            this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
-                                    this.CreateArrayType<SyntaxToken>(),
+                                    this.MetaSyntaxFactory.ArrayType<SyntaxToken>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
                                         SeparatedList(
@@ -250,32 +173,20 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression(
-                    GenericName(
-                            Identifier( "SyntaxList" ) )
-                        .WithTypeArgumentList(
-                            TypeArgumentList(
-                                SingletonSeparatedList<TypeSyntax>(
-                                    IdentifierName( typeof( T ).Name ) ) ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) );
             }
 
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        DefaultExpression(
-                            GenericName(
-                                    Identifier( "SyntaxList" ) )
-                                .WithTypeArgumentList(
-                                    TypeArgumentList(
-                                        SingletonSeparatedList<TypeSyntax>(
-                                            IdentifierName( typeof( T ).Name ) ) ) ) ),
+                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
                         SingletonSeparatedList(
                             Argument(
                                 ArrayCreationExpression(
-                                    this.CreateArrayType<T>(),
+                                    this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
                                         SeparatedList(
@@ -286,18 +197,11 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( token.Kind() == SyntaxKind.None )
             {
-                return DefaultExpression( IdentifierName( "SyntaxToken" ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) );
             }
             else if ( token.Kind() == SyntaxKind.IdentifierToken )
             {
-                return InvocationExpression(
-                        IdentifierName( nameof( Identifier ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
-                            {
-                                Argument(this.CreateLiteralExpression(token.Text))
-                            } ) ) );
+                return this.MetaSyntaxFactory.Identifier( this.MetaSyntaxFactory.LiteralExpression( token.Text ) );
             }
 
             var defaultToken = Token( token.Kind() );
@@ -305,12 +209,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( defaultToken.Value == token.Value )
             {
                 // No argument needed.
-                return InvocationExpression(
-                        IdentifierName( nameof( Token ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SingletonSeparatedList(
-                                Argument( this.Transform( token.Kind() ) ) ) ) );
+                return this.MetaSyntaxFactory.Token( this.Transform( token.Kind() ) );
             }
             else
             {
@@ -325,26 +224,13 @@ namespace Caravela.Framework.Impl.Templating
                  * Microsoft.CodeAnalysis.SyntaxTriviaList trailing);
                  */
 
-                return InvocationExpression(
-                        IdentifierName( nameof( Token ) ) )
-                    .WithArgumentList(
-                        ArgumentList(
-                            SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
-                            {
-                                Argument(LiteralExpression(
-                                    SyntaxKind.DefaultLiteralExpression,
-                                    Token(SyntaxKind.DefaultKeyword))),
-                                Token(SyntaxKind.CommaToken),
-                                Argument(this.Transform(token.Kind())),
-                                Token(SyntaxKind.CommaToken),
-                                Argument(this.CreateLiteralExpression(token.Text)),
-                                Token(SyntaxKind.CommaToken),
-                                Argument(this.CreateLiteralExpression(token.ValueText)),
-                                Token(SyntaxKind.CommaToken),
-                                Argument(LiteralExpression(
-                                    SyntaxKind.DefaultLiteralExpression,
-                                    Token(SyntaxKind.DefaultKeyword))),
-                            } ) ) );
+                return this.MetaSyntaxFactory.Token(
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                    this.Transform( token.Kind() ),
+                    this.MetaSyntaxFactory.LiteralExpression( token.Text ),
+                    this.MetaSyntaxFactory.LiteralExpression( token.ValueText ),
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) )
+                );
             }
         }
 
