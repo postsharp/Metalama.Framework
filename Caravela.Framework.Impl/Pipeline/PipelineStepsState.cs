@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
                     this._diagnostics.Add(
-                        Diagnostic.Create( 
+                        Diagnostic.Create(
                             GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
                             this._currentStep.AspectLayer.AspectType.Type.GetLocation(),
                             this._currentStep.AspectLayer.AspectType.Type,

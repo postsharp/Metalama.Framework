@@ -16,12 +16,12 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly List<Advice> _advices = new List<Advice>();
 
-        public AdvicePipelineStep(PipelineStepId id, OrderedAspectLayer aspectLayer) : base(id, aspectLayer)
+        public AdvicePipelineStep( PipelineStepId id, OrderedAspectLayer aspectLayer ) : base( id, aspectLayer )
         {
         }
 
         public void AddAdvice( Advice advice ) => this._advices.Add( advice );
-        
+
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {
             var adviceResults = this._advices

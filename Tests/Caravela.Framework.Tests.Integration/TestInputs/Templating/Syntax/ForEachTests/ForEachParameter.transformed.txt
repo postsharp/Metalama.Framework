@@ -1,6 +1,5 @@
-
 {
-    Console.WriteLine(2);
+    global::System.Console.WriteLine(2);
     int result;
     result = a + b;
     return (int)result;

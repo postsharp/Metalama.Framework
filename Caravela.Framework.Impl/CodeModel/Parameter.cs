@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override ISymbol Symbol => this.ParameterSymbol;
 
-        public TypedConstant DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue 
+        public TypedConstant DefaultValue => this.ParameterSymbol.HasExplicitDefaultValue
             ? new TypedConstant( this.Compilation.Factory.GetIType( this.ParameterType ), this.ParameterSymbol.ExplicitDefaultValue ) : default;
     }
 }

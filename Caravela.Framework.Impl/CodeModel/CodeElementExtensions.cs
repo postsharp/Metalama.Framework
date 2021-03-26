@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .GetAttributes()
                     .ToAttributeLinks( method )
                     .Concat( method.GetReturnTypeAttributes()
-                        .Select( a => new AttributeLink( a,  CodeElementLink.ReturnParameter( method ) ) ) ),
+                        .Select( a => new AttributeLink( a, CodeElementLink.ReturnParameter( method ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 

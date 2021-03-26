@@ -106,7 +106,7 @@ namespace Caravela.Framework.Code
         /// <param name="genericArguments"></param>
         /// <returns></returns>
         INamedType WithGenericArguments( params IType[] genericArguments );
-        
+
         /// <summary>
         /// Gets the assembly that declared this type.
         /// </summary>

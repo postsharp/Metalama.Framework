@@ -6,20 +6,23 @@ using System.Collections.Concurrent;
 using System.Linq;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ReflectionMapper
     {
         private readonly Compilation _compilation;
-        private readonly ConcurrentDictionary<Type, ITypeSymbol> _cache = new ConcurrentDictionary<Type, ITypeSymbol>();
+        private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new ConcurrentDictionary<Type, ITypeSymbol>();
+        private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new ConcurrentDictionary<Type, NameSyntax>();
 
         public ReflectionMapper( Compilation compilation )
         {
             this._compilation = compilation;
         }
-        
-        public INamedTypeSymbol GetTypeByReflectionName( string reflectionName )
+
+        public INamedTypeSymbol GetTypeSymbolByReflectionName( string reflectionName )
         {
             var symbol = this._compilation.GetTypeByMetadataName( reflectionName );
 
@@ -37,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return compileTimeType.TypeSymbol;
             }
-            
+
             if ( type.IsByRef )
             {
                 throw new ArgumentException( "Ref types cannot be represented as Caravela types." );
@@ -46,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
             if ( type.IsArray )
             {
                 var elementType = this.GetTypeSymbol( type.GetElementType()! );
-                
+
                 return this._compilation.CreateArrayTypeSymbol( elementType, type.GetArrayRank() );
             }
 
@@ -59,16 +62,18 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type.IsConstructedGenericType )
             {
-                var genericDefinition = this.GetTypeByReflectionName( type.GetGenericTypeDefinition().FullName );
+                var genericDefinition = this.GetTypeSymbolByReflectionName( type.GetGenericTypeDefinition().FullName );
                 var genericArguments = type.GenericTypeArguments.Select( this.GetTypeSymbol ).ToArray();
 
                 return genericDefinition.Construct( genericArguments! );
             }
 
-            return this.GetTypeByReflectionName( type.FullName.AssertNotNull() );
+            return this.GetTypeSymbolByReflectionName( type.FullName.AssertNotNull() );
         }
 
-        public ITypeSymbol GetTypeSymbol( Type type ) =>
-            this._cache.GetOrAdd( type, this.GetTypeSymbolCore );
+        public ITypeSymbol GetTypeSymbol( Type type ) => this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
+
+        public NameSyntax GetTypeNameSyntax( Type type ) =>
+            this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
     }
 }
