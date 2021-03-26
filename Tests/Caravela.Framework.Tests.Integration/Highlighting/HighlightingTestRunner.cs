@@ -7,6 +7,7 @@ using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis.Text;
+using System.Net;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
@@ -79,7 +80,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                         textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
                     }
 
-                    textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + sourceText.GetSubText( classifiedSpan.Span ) + "</span>" );
+                    textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() ) + "</span>" );
 
                     i = classifiedSpan.Span.End;
                 }

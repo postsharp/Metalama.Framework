@@ -368,10 +368,13 @@ namespace Caravela.Framework.Impl.Templating
                 var scope = this.GetSymbolScope( symbol, node );
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
-                if ( (symbol is ILocalSymbol localSymbol &&
-                      scope == SymbolDeclarationScope.CompileTimeOnly) ||
-                     symbol.GetAttributes().Any( a =>
-                         a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
+                if ( symbol is ILocalSymbol &&
+                     scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
+                }
+                else if ( symbol.GetAttributes().Any( 
+                    a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -722,11 +725,11 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
                 }
             }
-            else
+            
+            if ( localScope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                transformedNode =
-                    transformedNode.WithIdentifier(
-                        transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
+                transformedNode = transformedNode.WithIdentifier( 
+                    transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
             }
 
             return transformedNode.AddScopeAnnotation( localScope );

@@ -40,20 +40,37 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
+using System;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Identifiers.CompileTimeIdentifier
+namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
 {
+    class RuntimeClass
+    {
+        public void RunTimeMethod()
+        {
+        }
+    }
+
     [CompileTime]
-    <span class='CompileTime'>class Aspect
-</span>    <span class='CompileTime'>{
-</span>        [TestTemplate]
-        <span class='CompileTime'>dynamic Template()
-</span>        <span class='CompileTime'>{
-</span>            <span class='TemplateKeyword'>compileTime</span><span class='CompileTime'>(0);
-</span>            <span class='RunTime'>return </span><span class='TemplateKeyword'>proceed</span><span class='CompileTime'>()</span><span class='RunTime'>;
-</span>        <span class='CompileTime'>}
-</span>    <span class='CompileTime'>}
+    <span class='CompileTime'>class Aspect</span>
+    <span class='CompileTime'>{</span>
+        [TestTemplate]
+        <span class='CompileTime'>dynamic Template()</span>
+        <span class='CompileTime'>{</span>
+            <span class='RunTime'>var runTimeClassInstance = new RuntimeClass();</span>
+
+            <span class='RunTime'>int scalar = 0;</span>
+            <span class='RunTime'>int[] array = new int[10];</span>
+            <span class='RunTime'>object @object = &quot;&quot;;</span>
+            <span class='RunTime'>string @string = &quot;&quot;;</span>
+            <span class='RunTime'>Action action = runTimeClassInstance.RunTimeMethod;</span>
+            <span class='RunTime'>(int, byte) tuple = (0, 1);</span>
+            <span class='RunTime'>Tuple&lt;int, byte&gt; generic = new Tuple&lt;int, byte&gt;(2, 3);</span>
+
+            <span class='RunTime'>return </span><span class='TemplateKeyword'>proceed</span><span class='CompileTime'>()</span><span class='RunTime'>;</span>
+        <span class='CompileTime'>}</span>
+    <span class='CompileTime'>}
 </span>}
 
 
