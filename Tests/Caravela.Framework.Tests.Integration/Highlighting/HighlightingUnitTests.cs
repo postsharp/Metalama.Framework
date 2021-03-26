@@ -15,7 +15,39 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Highlighting" )]
-        public Task All( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+        [FromDirectory( @"TestInputs\Formatting\Declarations" )]
+        public Task Declarations( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\Identifiers" )]
+        public Task Identifiers( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\MemberAccess" )]
+        public Task MemberAccess( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\InvocationExpressions" )]
+        public Task InvocationExpressions( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\IfStatements" )]
+        public Task IfStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\ForEachStatements" )]
+        public Task ForEachStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"TestInputs\Formatting\ForStatements" )]
+        public Task ForStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory( Skip = "Not supported yet." )]
+        [FromDirectory( @"TestInputs\Formatting\WhileStatements" )]
+        public Task WhileStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
+
+        [Theory( Skip = "Not supported yet." )]
+        [FromDirectory( @"TestInputs\Formatting\DoWhileStatements" )]
+        public Task DoWhileStatements( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
     }
 }

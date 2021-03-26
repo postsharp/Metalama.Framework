@@ -1,11 +1,9 @@
-﻿#pragma warning disable CS0649, CS8618
-
-using Caravela.Framework.Project;
+﻿using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
 using System.Collections.Generic;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
+namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatementsCallingProceedWithBreak
 {
     class RunTimeClass
     {
@@ -30,11 +28,15 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
             foreach (var x in compileTimeObject.compileTimeEnumerable)
             {
                 x.ToString();
+                proceed();
+                break;
             }
 
             foreach (var x in runTimeObject.runTimeEnumerable)
             {
                 x.ToString();
+                proceed();
+                break;
             }
 
             return proceed();
