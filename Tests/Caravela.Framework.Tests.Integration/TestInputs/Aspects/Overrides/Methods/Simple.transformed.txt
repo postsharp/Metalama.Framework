@@ -3,7 +3,7 @@
         [Override]
         public void TargetMethod_Void()
         {
-            Console.WriteLine("This is the overriding method.");
+            global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine("This is the original method.");
             return;
         }
@@ -11,7 +11,7 @@
         [Override]
         public void TargetMethod_Void(int x, int y)
         {
-            Console.WriteLine("This is the overriding method.");
+            global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine($"This is the original method {x} {y}.");
             return;
         }
@@ -19,7 +19,7 @@
         [Override]
         public int TargetMethod_Int()
         {
-            Console.WriteLine("This is the overriding method.");
+            global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine("This is the original method.");
             return 42;
         }
@@ -27,7 +27,7 @@
         [Override]
         public int TargetMethod_Int(int x, int y)
         {
-            Console.WriteLine("This is the overriding method.");
+            global::System.Console.WriteLine("This is the overriding method.");
             Console.WriteLine($"This is the original method {x} {y}.");
             return x + y;
         }

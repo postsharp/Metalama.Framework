@@ -8,6 +8,7 @@ namespace Caravela.Framework.Impl.Collections
 {
     public static class EnumerableExtensions
     {
+
         public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T> collection, Func<T, IEnumerable<T>?> getChildren )
             where T : class
         {

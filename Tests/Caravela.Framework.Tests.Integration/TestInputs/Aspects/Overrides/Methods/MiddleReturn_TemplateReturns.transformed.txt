@@ -3,7 +3,7 @@
         [Override]
         public void TargetMethod_Void(int x)
         {
-            Console.WriteLine("Override.");
+            global::System.Console.WriteLine("Override.");
             Console.WriteLine("Begin target.");
             if (x == 0)
             {
@@ -19,7 +19,7 @@
         [Override]
         public int TargetMethod_Int(int x)
         {
-            Console.WriteLine("Override.");
+            global::System.Console.WriteLine("Override.");
             Console.WriteLine("Begin target.");
             if (x == 0)
             {

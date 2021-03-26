@@ -3,7 +3,7 @@
         [Override]
         public void TargetMethod_Void_TwoReturns(int x)
         {
-            Console.WriteLine("Override.");
+            global::System.Console.WriteLine("Override.");
             while (x > 0)
             {
                 if (x == 42)
@@ -24,7 +24,7 @@
         [Override]
         public int TargetMethod_Int_TwoReturns(int x)
         {
-            Console.WriteLine("Override.");
+            global::System.Console.WriteLine("Override.");
             while (x > 0)
             {
                 if (x == 42)

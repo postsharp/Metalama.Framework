@@ -4,12 +4,12 @@
     {
         public void IntroducedMethod_Void()
         {
-            Console.WriteLine("This is introduced method.");
+            global::System.Console.WriteLine("This is introduced method.");
         }
 
         public global::System.Int32 IntroducedMethod_Int()
         {
-            Console.WriteLine("This is introduced method.");
+            global::System.Console.WriteLine("This is introduced method.");
             return default;
         }
     }

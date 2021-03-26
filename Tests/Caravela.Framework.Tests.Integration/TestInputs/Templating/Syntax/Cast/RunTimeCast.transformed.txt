@@ -4,7 +4,7 @@
     if (arg0 is string)
     {
         string s = (string)arg0;
-        Console.WriteLine(s);
+        global::System.Console.WriteLine(s);
     }
 
     string result;

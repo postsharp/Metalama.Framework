@@ -16,7 +16,7 @@ namespace Caravela.Obfuscator
 {
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable UnusedAutoPropertyAccessor.Global
-    
+
     /// <summary>
     /// A PostSharp SDK task that obfuscates the input assembly.
     /// </summary>
@@ -50,7 +50,7 @@ namespace Caravela.Obfuscator
         /// Gets or sets the project path.
         /// </summary>
         [ConfigurableProperty]
-        
+
         public string? RootPath { get; set; }
 
         /// <summary>

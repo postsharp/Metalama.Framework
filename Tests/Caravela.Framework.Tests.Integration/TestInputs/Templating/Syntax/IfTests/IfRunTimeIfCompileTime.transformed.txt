@@ -1,6 +1,6 @@
 {
     if (a == null)
     {
-        throw new ArgumentNullException();
+        throw new global::System.ArgumentNullException();
     }
 }

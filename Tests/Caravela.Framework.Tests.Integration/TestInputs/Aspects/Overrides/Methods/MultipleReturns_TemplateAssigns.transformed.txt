@@ -4,7 +4,7 @@
         [Override]
         public void TargetMethod_Void_TwoReturns(int x)
         {
-            Console.WriteLine("Begin override.");
+            global::System.Console.WriteLine("Begin override.");
             __Void result;
             while (x > 0)
             {
@@ -20,14 +20,14 @@
                 goto __aspect_return_1;
         __aspect_return_1:
             ;
-            Console.WriteLine("End override.");
+            global::System.Console.WriteLine("End override.");
             return;
         }
 
         [Override]
         public int TargetMethod_Int_TwoReturns(int x)
         {
-            Console.WriteLine("Begin override.");
+            global::System.Console.WriteLine("Begin override.");
             global::System.Int32 result;
             while (x > 0)
             {
@@ -50,7 +50,7 @@
             goto __aspect_return_1;
         __aspect_return_1:
             ;
-            Console.WriteLine("End override.");
+            global::System.Console.WriteLine("End override.");
             return (int)result;
         }
     }

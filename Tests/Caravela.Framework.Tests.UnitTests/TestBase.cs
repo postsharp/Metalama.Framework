@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.UnitTests
                         MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ));
+                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
             }
 
             var mainRoslynCompilation = CreateEmptyCompilation();
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.UnitTests
             if ( dependentCode != null )
             {
                 var dependentCompilation = CreateEmptyCompilation().AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
-                mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference( ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
 
             if ( !ignoreErrors )

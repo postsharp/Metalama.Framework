@@ -235,7 +235,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for (; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
+                    for ( /* nothing */; triviaStart < trivia.Span.End && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
                     {
                     }
                 }
