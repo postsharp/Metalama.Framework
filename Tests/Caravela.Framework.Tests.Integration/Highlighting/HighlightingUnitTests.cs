@@ -17,6 +17,5 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         [Theory]
         [FromDirectory( @"TestInputs\Formatting" )]
         public Task All( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
-       
     }
 }

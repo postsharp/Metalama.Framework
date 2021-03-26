@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -12,7 +13,6 @@ using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
@@ -45,8 +45,6 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             }
 
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-
-          
 
             var highlightedTemplateDirectory = Path.Combine(
                 testInput.ProjectDirectory,
