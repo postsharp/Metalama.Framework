@@ -1,17 +1,18 @@
 using System;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
-
+using static System.Math;
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
-    namespace PartiallyQualified
+    namespace UsingStatic
     {
         class Aspect
         {
             [TestTemplate]
             dynamic Template()
             {
-                var c = new ChildNs.ChildClass();
+                Console.Write(PI);
+                Console.Write(Max(0,1));
                 
                 return proceed();
             }
@@ -22,14 +23,6 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             int Method(int a)
             {
                 return a;
-            }
-        }
-
-        namespace ChildNs
-        {
-            class ChildClass
-            {
-                
             }
         }
     }

@@ -1,8 +1,9 @@
 using System;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
-using static System.Math;
-namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
+using MyMath = System.Math;
+
+namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
 {
     namespace UsingStatic
     {
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             [TestTemplate]
             dynamic Template()
             {
-                Console.Write(PI);
+                Console.Write(MyMath.PI);
                 
                 return proceed();
             }

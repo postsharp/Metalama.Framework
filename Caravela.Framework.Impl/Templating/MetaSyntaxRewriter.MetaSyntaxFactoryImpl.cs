@@ -25,6 +25,8 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeNameSyntax( type );
 
             public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
+            
+            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => (ExpressionSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
             {
@@ -50,6 +52,9 @@ namespace Caravela.Framework.Impl.Templating
                 return SyntaxFactory.ArrayType( this.Type( typeof( T ) ) ).WithRankSpecifiers(
                     SyntaxFactory.SingletonList( SyntaxFactory.ArrayRankSpecifier( SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
             }
+
+            public ExpressionSyntax Kind( SyntaxKind kind ) =>
+                SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxKind ) ), SyntaxFactory.IdentifierName( kind.ToString() ) );
         }
     }
 }

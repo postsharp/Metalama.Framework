@@ -105,10 +105,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         protected ExpressionSyntax Transform( SyntaxKind kind ) =>
-            MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                this.MetaSyntaxFactory.Type( typeof( SyntaxKind ) ),
-                IdentifierName( kind.ToString() ) );
+            this.MetaSyntaxFactory.Kind( kind );
 
         protected ExpressionSyntax Transform<T>( SeparatedSyntaxList<T> list )
             where T : SyntaxNode

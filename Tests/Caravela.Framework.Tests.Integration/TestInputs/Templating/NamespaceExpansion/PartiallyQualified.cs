@@ -1,28 +1,18 @@
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
-    namespace ExtensionMethod
+    namespace PartiallyQualified
     {
         class Aspect
         {
             [TestTemplate]
             dynamic Template()
             {
-                var list = new List<int>();
-
-                // No argument.
-                var max = list.Max();
-
-                // Constant argument.
-                var take = list.Take(1);
-
-                // Dynamic argument.
-                var take2 = list.Take((int)target.Parameters[0].Value);
-
+                var c = new ChildNs.ChildClass();
+                
                 return proceed();
             }
         }
@@ -32,6 +22,14 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             int Method(int a)
             {
                 return a;
+            }
+        }
+
+        namespace ChildNs
+        {
+            class ChildClass
+            {
+                
             }
         }
     }

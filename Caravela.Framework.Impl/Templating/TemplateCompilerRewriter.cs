@@ -707,16 +707,30 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
         {
-            if ( !node.IsVar && this.GetTransformationKind( node ) == TransformationKind.Transform )
+            if ( node.Identifier.Kind() == SyntaxKind.IdentifierToken && !node.IsVar && this.GetTransformationKind( node ) == TransformationKind.Transform )
             {
                 // Fully qualifies simple identifiers.
 
                 var symbol = this._semanticAnnotationMap.GetSymbol( node );
 
-                switch ( symbol )
+                if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    case INamespaceOrTypeSymbol namespaceOrType:
-                        return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
+                    return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
+                }
+                else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax )
+                {
+                    switch ( symbol.Kind )
+                    {
+                        case SymbolKind.Field:
+                        case SymbolKind.Property:
+                        case SymbolKind.Event:
+                        case SymbolKind.Method:
+                            // We have an access to a field or method with a "using static", or a non-qualified static member access.
+                            return this.MetaSyntaxFactory.MemberAccessExpression( 
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
+                                (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!, 
+                                this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) ) );
+                    }
                 }
             }
 
