@@ -72,7 +72,6 @@ namespace Caravela.AspectWorkbench.ViewModels
             var highlightingResult = await this._highlightingTestRunner.RunAsync( testInput );
             highlightingStopwatch.Stop();
             
-            // TODO: Fix highlighting
             if ( highlightingResult.AnnotatedTemplateSyntax != null )
             {
                 // Display the annotated syntax tree.
