@@ -53,6 +53,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="500"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
@@ -64,7 +65,9 @@
 
                 <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Center" />
 
-                <DockPanel Grid.Row="2">
+                <Button Grid.Row="2" Click="MakeExpectedButton_Click">⬆ Make expected ⬆</Button>
+                
+                <DockPanel Grid.Row="3">
                     <TextBox DockPanel.Dock="Top">Transformed Code</TextBox>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
                         <RichTextBox IsReadOnly="True" Name="transformedCodeRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

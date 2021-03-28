@@ -8,6 +8,7 @@ using Caravela.AspectWorkbench.ViewModels;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
+using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
 {
@@ -118,6 +119,18 @@ namespace Caravela.AspectWorkbench.Views
         {
             this.UpdateViewModel();
             await this._viewModel.RunTestAsync();
+        }
+
+        private void MakeExpectedButton_Click( object sender, RoutedEventArgs e )
+        {
+            if ( this._viewModel.TransformedTargetDocument == null )
+            {
+                this._viewModel.ExpectedOutputText = "";
+            }
+
+            this._viewModel.ExpectedOutputText = new TextRange( 
+                this._viewModel.TransformedTargetDocument.ContentStart, 
+                this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
         }
     }
 }
