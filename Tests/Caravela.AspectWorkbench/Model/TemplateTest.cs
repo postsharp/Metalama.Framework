@@ -1,4 +1,5 @@
-﻿using Caravela.Framework.Tests.Integration.Templating;
+﻿using Caravela.Framework.Tests.Integration.Highlighting;
+using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 
 namespace Caravela.AspectWorkbench.Model

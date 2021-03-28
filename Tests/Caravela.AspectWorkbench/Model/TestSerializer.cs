@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Caravela.Framework.Tests.Integration.Highlighting;
 using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;

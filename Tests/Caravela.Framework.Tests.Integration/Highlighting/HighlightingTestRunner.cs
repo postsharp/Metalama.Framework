@@ -2,21 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
-    internal class HighlightingTestRunner : TemplatingTestRunnerBase
+    internal class HighlightingTestRunner : HighlightingTestRunnerBase
     {
         public override async Task<TestResult> RunAsync( TestInput testInput )
         {
@@ -28,23 +25,6 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             }
             
             result.Success = false;
-
-            var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
-            var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
-
-            var templateCompiler = new TemplateCompiler();
-            List<Diagnostic> diagnostics = new();
-            var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
-
-            this.ReportDiagnostics( result, diagnostics );
-
-            if ( !templateCompilerSuccess )
-            {
-                result.ErrorMessage = "Template compiler failed.";
-                return result;
-            }
-
-            result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
 
             var highlightedTemplateDirectory = Path.Combine(
                 testInput.ProjectDirectory,

@@ -47,6 +47,9 @@ namespace Caravela.AspectWorkbench.Views
                 case nameof( MainViewModel.TestText ):
                     this.sourceTextBox.Text = this._viewModel.TestText;
                     break;
+                case nameof( MainViewModel.ColoredTemplateDocument ):
+                    this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
+                    break;
                 case nameof( MainViewModel.CompiledTemplateDocument ):
                     this.compiledTemplateRichBox.Document = this._viewModel.CompiledTemplateDocument ?? new FlowDocument();
                     break;

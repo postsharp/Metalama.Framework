@@ -17,11 +17,16 @@ namespace Caravela.AspectWorkbench.ViewModels
     public class MainViewModel
     {
         private readonly TestSerializer _testSerializer;
+        private readonly WorkbenchHighlightingTestRunner _highlightingTestRunner;
+        private readonly SyntaxColorizer _syntaxColorizer;
+
         private TemplateTest? _currentTest;
 
         public MainViewModel()
         {
             this._testSerializer = new TestSerializer();
+            this._highlightingTestRunner = new WorkbenchHighlightingTestRunner();
+            this._syntaxColorizer = new SyntaxColorizer( this._highlightingTestRunner );
         }
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -29,6 +34,8 @@ namespace Caravela.AspectWorkbench.ViewModels
         public string? TestText { get; set; }
 
         public string? ExpectedOutputText { get; set; }
+
+        public FlowDocument? ColoredTemplateDocument { get; set; }
 
         public FlowDocument? CompiledTemplateDocument { get; set; }
 
@@ -55,25 +62,27 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ErrorsText = string.Empty;
             this.TransformedTargetDocument = null;
 
-            var stopwatch = Stopwatch.StartNew();
-            var testResult = await this._currentTest.TestRunner.RunAsync( new TestInput( "interactive", null, this.TestText, null ) );
-            stopwatch.Stop();
+            var testInput = new TestInput( "interactive", null, this.TestText, null );
 
-            //TODO
-            //if ( testResult.AnnotatedTemplateSyntax != null )
-            //{
-            //    // Display the annotated syntax tree.
-            //    var document2 = testResult.TemplateDocument.WithSyntaxRoot( testResult.AnnotatedTemplateSyntax );
-            //    var text2 = await document2.GetTextAsync();
+            var compilationStopwatch = Stopwatch.StartNew();
+            var testResult = await this._currentTest.TestRunner.RunAsync( testInput );
+            compilationStopwatch.Stop();
 
-            //    var marker = new TextSpanClassifier( text2, true );
-            //    marker.Visit( await document2.GetSyntaxRootAsync() );
-            //    var metaSpans = marker.ClassifiedTextSpans;
+            var highlightingStopwatch = Stopwatch.StartNew();
+            var highlightingResult = await this._highlightingTestRunner.RunAsync( testInput );
+            highlightingStopwatch.Stop();
+            
+            // TODO: Fix highlighting
+            if ( highlightingResult.AnnotatedTemplateSyntax != null )
+            {
+                // Display the annotated syntax tree.
+                var sourceText = await highlightingResult.TemplateDocument.GetTextAsync();
+                var classifier = new TextSpanClassifier( sourceText );
+                classifier.Visit( highlightingResult.AnnotatedTemplateSyntax );
+                var metaSpans = classifier.ClassifiedTextSpans;
 
-            //    // this.ColoredTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text2, metaSpans );
-            //}
-
-            var syntaxColorizer = new SyntaxColorizer( this._currentTest.TestRunner );
+                this.ColoredTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+            }
 
             if ( testResult.TransformedTemplateSyntax != null )
             {
@@ -86,13 +95,13 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
                 var spanMarker = new TextSpanClassifier( text4, true );
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
-                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                this.CompiledTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }
 
             if ( testResult.TransformedTargetSource != null )
             {
                 // Display the transformed code.
-                this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSource, null );
+                this.TransformedTargetDocument = await this._syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSource, null );
             }
 
             var errorsTextBuilder = new StringBuilder();
@@ -108,7 +117,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 errorsTextBuilder.AppendLine( testResult.ErrorMessage );
             }
 
-            errorsTextBuilder.AppendLine( $"It took {stopwatch.Elapsed.TotalSeconds:f1} s." );
+            errorsTextBuilder.AppendLine( $"It took {compilationStopwatch.Elapsed.TotalSeconds:f1} s to compile and {highlightingStopwatch.Elapsed.TotalSeconds:f1} s to highlight." );
 
             this.ErrorsText = errorsTextBuilder.ToString();
         }

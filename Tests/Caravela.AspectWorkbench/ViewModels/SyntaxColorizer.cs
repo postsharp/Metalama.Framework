@@ -5,8 +5,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Tests.Integration.Highlighting;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 
@@ -14,13 +15,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-        private readonly TemplatingTestRunner _testRunner;
-
-        public SyntaxColorizer( TemplatingTestRunner testRunner )
-        {
-            this._testRunner = testRunner;
-        }
-
         private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             { ClassificationTypeNames.Comment, Colors.Green },
@@ -90,6 +84,13 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo },
         };
 
+        private readonly WorkbenchHighlightingTestRunner _testRunner;
+
+        public SyntaxColorizer( WorkbenchHighlightingTestRunner testRunner )
+        {
+            this._testRunner = testRunner;
+        }
+
         public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
         {
             static Color WithAlpha( Color brush, double alpha )
@@ -97,7 +98,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var project = this._testRunner.CreateProject();
+            var project = _testRunner.CreateProject();
             var document = project.AddDocument( "name.cs", text.ToString() );
 
             var roslynClassifiedSpans =
