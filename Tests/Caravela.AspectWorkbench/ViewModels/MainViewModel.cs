@@ -146,42 +146,34 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task SaveTestAsync( string? filePath )
         {
-            //TODO
-            throw new NotImplementedException();
+            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof( filePath ) );
 
-            //filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof( filePath ) );
+            if ( string.IsNullOrEmpty( filePath ) )
+            {
+                throw new ArgumentException( "The path cannot be null or empty." );
+            }
 
-            //if ( string.IsNullOrEmpty( filePath ) )
-            //{
-            //    throw new ArgumentException( "The path cannot be null or empty." );
-            //}
+            if ( string.IsNullOrEmpty( this.TestText ) )
+            {
+                throw new InvalidOperationException( $"The {nameof( this.TestText )} property cannot be null." );
+            }
 
-            //if ( string.IsNullOrEmpty( this.TemplateText ) )
-            //{
-            //    throw new InvalidOperationException( $"The {nameof( this.TargetText )} property cannot be null." );
-            //}
+            if ( string.IsNullOrEmpty( this.ExpectedOutputText ) )
+            {
+                throw new InvalidOperationException( $"The {nameof( this.ExpectedOutputText )} property cannot be null." );
+            }
 
-            //if ( string.IsNullOrEmpty( this.TargetText ) )
-            //{
-            //    throw new InvalidOperationException( $"The {nameof( this.TargetText )} property cannot be null." );
-            //}
+            if ( this._currentTest == null )
+            {
+                this._currentTest = new TemplateTest();
+            }
 
-            //if ( this._currentTest == null )
-            //{
-            //    this._currentTest = new TemplateTest();
-            //}
+            this._currentTest.Input = new TestInput( "interactive", null, this.TestText, null );
+            this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
-            //this._currentTest.Input = new TestInput( "interactive", null, this.TemplateText, null, this.TargetText );
-            //this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
+            this.CurrentPath = filePath;
 
-            //if ( !string.Equals( filePath, this.CurrentPath, StringComparison.Ordinal ) )
-            //{
-            //    this._currentTest.OriginalSyntaxRoot = null;
-            //}
-
-            //this.CurrentPath = filePath;
-
-            //await this._testSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
+            await this._testSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
         }
     }
 }

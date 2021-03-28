@@ -16,12 +16,14 @@ namespace Caravela.AspectWorkbench.Model
 {
     internal class TestSerializer
     {
+        private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, ".transformed.txt" );
+
         public async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {
             var testName = Path.GetFileNameWithoutExtension( filePath );
             var testSource = await File.ReadAllTextAsync( filePath );
-            
-            var expectedOutputFilePath = Path.ChangeExtension( filePath, ".transformed.txt" );
+
+            var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             string? expectedOutput = null;
 
             if ( File.Exists( expectedOutputFilePath ) )
@@ -33,57 +35,17 @@ namespace Caravela.AspectWorkbench.Model
             {
                 Input = new TestInput( testName, null, testSource, null ),
                 ExpectedOutput = expectedOutput,
-                //TODO: AspectTestRunner - needs abstraction.
+                // TODO: AspectTestRunner - needs abstraction.
                 TestRunner = new TemplatingTestRunner()
             };
         }
 
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
-            //TODO
-            throw new NotImplementedException();
-            //var testName = Path.GetFileNameWithoutExtension( filePath );
-            //var testCategoryName = Path.GetFileName( Path.GetDirectoryName( filePath ) );
+            await File.WriteAllTextAsync( filePath, test.Input.TestSource.ToString() );
 
-            //if ( test.OriginalSyntaxRoot == null )
-            //{
-            //    // This is a new test without a source file.
-            //    var testSource = string.Format( NewTestDefaults.EmptyUnitTest, testCategoryName, testName );
-            //    test.OriginalSyntaxRoot = await CSharpSyntaxTree.ParseText( testSource, encoding: Encoding.UTF8 ).GetRootAsync();
-            //}
-
-            //// Make sure that the main source file of the test category exists.
-            //// The main category file path is 'Caravela.Templating.UnitTests\{CATEGORY}Tests.cs'.
-            //// The file path of each test within the category is 'Caravela.Templating.UnitTests\{CATEGORY}\{TEST}.cs'.
-            //var parentDirectory1 = Path.GetDirectoryName( filePath );
-            //if ( parentDirectory1 == null )
-            //{
-            //    throw new ArgumentOutOfRangeException( nameof( filePath ) );
-            //}
-
-            //var parentDirectory2 = Path.GetDirectoryName( parentDirectory1 );
-            //if ( parentDirectory2 == null )
-            //{
-            //    throw new ArgumentOutOfRangeException( nameof( filePath ) );
-            //}
-
-            //var testCategorySourcePath = Path.Combine( parentDirectory2, $"{testCategoryName}Tests.cs" );
-            //if ( !File.Exists( testCategorySourcePath ) )
-            //{
-            //    var testCategorySource = string.Format( NewTestDefaults.TestCategoryMainSource, testCategoryName );
-            //    File.WriteAllText( testCategorySourcePath, testCategorySource );
-            //}
-
-            //var templateFieldName = $"{testName}_Template";
-            //var expectedOutputFieldName = $"{testName}_ExpectedOutput";
-            //var targetFieldName = $"{testName}_Target";
-
-            //var newRoot = test.OriginalSyntaxRoot;
-            //newRoot = SetFieldValue( newRoot, templateFieldName, test.Input?.TestSource );
-            //newRoot = SetFieldValue( newRoot, expectedOutputFieldName, test.ExpectedOutput );
-            //newRoot = SetFieldValue( newRoot, targetFieldName, test.Input?.TargetSource );
-
-            //await File.WriteAllTextAsync( filePath, newRoot.GetText().ToString() );
+            var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
+            await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );
         }
 
         private static SyntaxNode[] GetFields( SyntaxNode syntaxRoot )
