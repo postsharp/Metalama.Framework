@@ -907,10 +907,33 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            var annotatedCondition = (ExpressionSyntax) this.Visit( node.Condition )!;
+            var conditionScope = this.GetNodeScope( annotatedCondition );
 
-            return base.VisitWhileStatement( node );
+            if ( conditionScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                // We have an while statement where the condition is a compile-time expression. Add annotations
+                // to the while but not to the blocks themselves.
+
+                var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+
+                return node.Update( node.AttributeLists, node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+            }
+            else
+            {
+                // We have an while statement where the condition is a runtime expression. Any variable assignment
+                // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
+
+                using ( this.EnterRuntimeConditionalBlock() )
+                {
+                    var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+
+                    var result = node.Update( node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement );
+
+                    return result;
+                }
+            }
         }
 
         public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
