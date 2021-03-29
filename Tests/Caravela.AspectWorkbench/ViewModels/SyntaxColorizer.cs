@@ -8,8 +8,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 
@@ -17,6 +17,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
+      
         private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             { ClassificationTypeNames.Comment, Colors.Green },
@@ -86,11 +87,11 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo },
         };
 
-        private readonly WorkbenchHighlightingTestRunner _testRunner;
+        private readonly Project _project;
 
-        public SyntaxColorizer( WorkbenchHighlightingTestRunner testRunner )
+        public SyntaxColorizer( Project project )
         {
-            this._testRunner = testRunner;
+            this._project = project;
         }
 
         public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
@@ -100,8 +101,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var project = this._testRunner.CreateProject();
-            var document = project.AddDocument( "name.cs", text.ToString() );
+            var document = this._project.AddDocument( "name.cs", text.ToString() );
 
             var roslynClassifiedSpans =
                 await Classifier.GetClassifiedSpansAsync( document, TextSpan.FromBounds( 0, text.Length ) );

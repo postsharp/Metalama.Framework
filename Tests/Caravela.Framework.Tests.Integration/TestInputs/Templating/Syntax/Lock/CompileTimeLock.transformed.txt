@@ -1,2 +1,4 @@
-// Error CR0104 on "target.Compilation"
+// Compilation error. Code not generated.
+// Error CR0104 on `target.Compilation`
 
+;

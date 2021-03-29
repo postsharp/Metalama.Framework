@@ -15,7 +15,6 @@ using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Formatting;
 using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Templating
@@ -23,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
     /// </summary>
-    internal class TemplatingTestRunner : TemplatingTestRunnerBase
+    internal class TemplatingTestRunner : TestRunnerBase
     {
         private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
 
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner() : this( Array.Empty<CSharpSyntaxVisitor>() )
+        public TemplatingTestRunner( string? projectDirectory = null ) : this( projectDirectory, Array.Empty<CSharpSyntaxVisitor>() )
         {
         }
 
@@ -40,7 +39,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
-        public TemplatingTestRunner( IEnumerable<CSharpSyntaxVisitor> testAnalyzers )
+        public TemplatingTestRunner( string? projectDirectory, IEnumerable<CSharpSyntaxVisitor> testAnalyzers ) : base( projectDirectory )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -50,16 +49,14 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <returns>The result of the test execution.</returns>
-        public override async Task<TestResult> RunAsync( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var result = await base.RunAsync( testInput );
+            var result = await base.RunTestAsync( testInput );
 
             if ( !result.Success )
             {
                 return result;
             }
-
-            result.Success = false;
 
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
@@ -72,11 +69,11 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
             var templateCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
 
-            this.ReportDiagnostics( result, templateCompiler.Diagnostics );
+            result.AddDiagnostics( templateCompiler.Diagnostics );
 
             if ( !templateCompilerSuccess )
             {
-                result.ErrorMessage = "Template compiler failed.";
+                result.SetFailed( "Template compiler failed." );
                 return result;
             }
 
@@ -124,9 +121,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                this.ReportDiagnostics( result, emitResult.Diagnostics );
+                result.AddDiagnostics( emitResult.Diagnostics );
 
-                result.ErrorMessage = "Final compilation failed.";
+                result.SetFailed( "Final compilation failed." );
                 return result;
             }
 
@@ -147,21 +144,12 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
 
                 var output = driver.ExpandDeclaration( expansionContext );
-                var formattedOutput = Formatter.Format( output, result.Project.Solution.Workspace );
-
-                result.TransformedTargetSource = formattedOutput.GetText();
-            }
-            catch ( Exception exception )
-            {
-                result.ErrorMessage = exception.ToString();
-                return result;
+                result.SetTransformedTarget( output );
             }
             finally
             {
                 assemblyLoadContext.Unload();
             }
-
-            result.Success = true;
 
             return result;
         }

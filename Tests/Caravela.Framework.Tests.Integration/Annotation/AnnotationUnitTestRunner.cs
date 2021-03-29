@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,26 +11,27 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Annotation
 {
-    internal class AnnotationUnitTestRunner : TemplatingTestRunnerBase
+    internal class AnnotationUnitTestRunner : TestRunnerBase
     {
+        public AnnotationUnitTestRunner(string projectDirectory) : base(projectDirectory)
+        {
+        }
 
-        public override async Task<TestResult> RunAsync( TestInput testInput )
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var tree = CSharpSyntaxTree.ParseText( testInput.TestSource );
             TriviaAdder triviaAdder = new();
             var testSourceRootWithAddedTrivias = triviaAdder.Visit( tree.GetRoot() );
             var testSourceWithAddedTrivias = testSourceRootWithAddedTrivias!.ToFullString();
 
-            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testInput.ProjectDirectory, testSourceWithAddedTrivias, testInput.TestSourcePath );
+            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testSourceWithAddedTrivias );
 
-            var result = await base.RunAsync( testInputWithAddedTrivias );
+            var result = await base.RunTestAsync( testInputWithAddedTrivias );
 
             if ( !result.Success )
             {
                 return result;
             }
-
-            result.Success = false;
 
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
@@ -40,11 +40,11 @@ namespace Caravela.Framework.Tests.Integration.Annotation
             List<Diagnostic> diagnostics = new();
             var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
 
-            this.ReportDiagnostics( result, diagnostics );
+            result.AddDiagnostics( diagnostics );
 
             if ( !templateCompilerSuccess )
             {
-                result.ErrorMessage = "Template compiler failed.";
+                result.SetFailed( "Template compiler failed." );
                 return result;
             }
 
@@ -52,8 +52,6 @@ namespace Caravela.Framework.Tests.Integration.Annotation
             // Otherwise, highlighted spans don't match the actual code.
             Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax!.ToString() );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
-
-            result.Success = true;
 
             return result;
         }
