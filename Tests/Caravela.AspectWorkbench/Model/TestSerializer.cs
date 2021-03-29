@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
-using Caravela.Framework.Tests.Integration.Highlighting;
-using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.AspectWorkbench.Model
 {
@@ -44,37 +34,6 @@ namespace Caravela.AspectWorkbench.Model
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );
-        }
-
-        private static SyntaxNode[] GetFields( SyntaxNode syntaxRoot )
-        {
-            return syntaxRoot.DescendantNodes().Where( n => n.IsKind( SyntaxKind.FieldDeclaration ) ).ToArray();
-        }
-
-        private static SyntaxNode GetField( IEnumerable<SyntaxNode> fields, string fieldName )
-        {
-            return fields.FirstOrDefault(
-                f => f.DescendantNodes().OfType<VariableDeclaratorSyntax>().Any( n => n.Identifier.Text.Equals( fieldName, StringComparison.Ordinal ) ) );
-        }
-
-        private static string? GetFieldValue( SyntaxNode fieldNode )
-        {
-            if ( fieldNode == null )
-            {
-                return null;
-            }
-
-            return fieldNode.DescendantNodes().OfType<LiteralExpressionSyntax>().FirstOrDefault()?.Token.ValueText;
-        }
-
-        private static SyntaxNode SetFieldValue( SyntaxNode root, string fieldName, string? value )
-        {
-            return root.ReplaceNode(
-                GetField( GetFields( root ), fieldName ).DescendantNodes().OfType<LiteralExpressionSyntax>().First(),
-                value != null ?
-                    LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "@\"" + value.Replace( "\"", "\"\"" ) + "\"", value ) )
-                    :
-                    LiteralExpression( SyntaxKind.NullLiteralExpression ) );
         }
     }
 }
