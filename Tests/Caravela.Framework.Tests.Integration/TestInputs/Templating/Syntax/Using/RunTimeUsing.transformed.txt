@@ -1,0 +1,6 @@
+{
+    using (this)
+    {
+        return a;
+    }
+}

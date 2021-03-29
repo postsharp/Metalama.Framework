@@ -1,0 +1,1 @@
+// Error CR0104 on "new DisposableClass()"
