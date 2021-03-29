@@ -89,7 +89,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
                 var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
                 var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                var spanMarker = new TextSpanClassifier( text4, true );
+                var spanMarker = new TextSpanClassifier( text4 );
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
                 this.CompiledTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }

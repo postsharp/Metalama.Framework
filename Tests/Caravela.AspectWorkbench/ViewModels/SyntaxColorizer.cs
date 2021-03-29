@@ -7,7 +7,6 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Tests.Integration.Highlighting;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 

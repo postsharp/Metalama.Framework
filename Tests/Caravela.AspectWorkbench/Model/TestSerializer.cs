@@ -23,14 +23,14 @@ namespace Caravela.AspectWorkbench.Model
 
             return new TemplateTest
             {
-                Input = new TestInput( testName, null, testSource, null ),
+                Input = new TestInput( testName, null, testSource, filePath ),
                 ExpectedOutput = expectedOutput
             };
         }
 
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
-            await File.WriteAllTextAsync( filePath, test.Input.TestSource.ToString() );
+            await File.WriteAllTextAsync( filePath, test.Input.TestSource );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );
