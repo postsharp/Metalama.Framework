@@ -977,12 +977,32 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitQueryExpression( node );
         }
 
+        private void RequireScope( SyntaxNode node, SymbolDeclarationScope requiredScope, string reason )
+        {
+            var existingScope = node.GetScopeFromAnnotation();
+
+            if ( existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( node) )
+            {
+                existingScope = SymbolDeclarationScope.RunTimeOnly;
+            }
+
+            if ( existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope )
+            {
+                this.Diagnostics.Add(
+                    Diagnostic.Create( TemplatingDiagnosticDescriptors.ScopeMismatch, node.GetLocation(), node.ToString(),
+                    existingScope.ToDisplayString(), requiredScope.ToDisplayString(), reason ) );
+            }
+
+        }
+
         public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression );
 
-            return base.VisitLockStatement( node );
+            this.RequireScope( annotatedExpression, SymbolDeclarationScope.RunTimeOnly, "a lock" );
+
+
+            return node.WithExpression( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
 
         public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
