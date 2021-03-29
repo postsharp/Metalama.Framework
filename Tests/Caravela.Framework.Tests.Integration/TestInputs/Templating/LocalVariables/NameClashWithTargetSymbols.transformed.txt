@@ -8,6 +8,7 @@
     var StringBuilder_1 = new object();
     global::System.Console.WriteLine(StringBuilder_1.ToString());
     {
+        StringBuilder stringBuilder = new();
         double area = PI * r * r;
         return area;
     }
