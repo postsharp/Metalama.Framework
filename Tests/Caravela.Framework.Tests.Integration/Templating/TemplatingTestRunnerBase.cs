@@ -16,7 +16,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
-    public abstract class TemplatingTestRunnerBase
+    internal abstract class TemplatingTestRunnerBase
     {
         public virtual async Task<TestResult> RunAsync( TestInput testInput )
         {
