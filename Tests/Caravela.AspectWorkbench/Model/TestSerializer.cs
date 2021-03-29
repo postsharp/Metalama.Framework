@@ -1,4 +1,8 @@
-﻿using System.IO;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Caravela.TestFramework;
 
@@ -30,6 +34,11 @@ namespace Caravela.AspectWorkbench.Model
 
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
+            if ( test.Input == null )
+            {
+                throw new InvalidOperationException( "Test input not set." );
+            }
+
             await File.WriteAllTextAsync( filePath, test.Input.TestSource );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );

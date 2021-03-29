@@ -26,6 +26,11 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             
             result.Success = false;
 
+            if ( testInput.ProjectDirectory == null )
+            {
+                throw new InvalidOperationException( "Test project directory not set." );
+            }
+
             var highlightedTemplateDirectory = Path.Combine(
                 testInput.ProjectDirectory,
                 "obj",

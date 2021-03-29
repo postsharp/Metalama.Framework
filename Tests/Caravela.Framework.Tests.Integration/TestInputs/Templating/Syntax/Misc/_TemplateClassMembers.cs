@@ -1,5 +1,5 @@
-using Caravela.Framework.Project;
 using System;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateClassMembers
