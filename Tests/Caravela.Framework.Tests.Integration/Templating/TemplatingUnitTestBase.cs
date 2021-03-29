@@ -64,8 +64,6 @@ namespace Caravela.Framework.Tests.Integration.Templating
         {
             var testResult = await this.RunTemplateTestAsync( relativeTestPath );
 
-            Assert.True( testResult.Success, testResult.ErrorMessage );
-
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
@@ -83,8 +81,20 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
 
             var targetTextSpan = TestSyntaxHelper.FindRegionSpan( testResult.TransformedTargetSyntax, "Target" );
-            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, targetTextSpan, actualTransformedPath );
+            var targetText = targetTextSpan != null
+                ? testResult.TransformedTargetSource?.GetSubText( targetTextSpan.Value ).ToString()
+                : testResult.TransformedTargetSource?.ToString();
+
+            // Prepend diagnostics.
+            var diagnosticTexts = string.Join( "", testResult.Diagnostics.Where( d => d.Id.StartsWith("CR") ).Select( d => $"// {d.Severity} {d.Id} on \"{GetTextUnderDiagnostic( d )}\"\n" ));
+
+            var comparableText = string.Join( Environment.NewLine, diagnosticTexts, targetText );
+
+            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, comparableText, actualTransformedPath );
         }
+
+        private static string GetTextUnderDiagnostic( Diagnostic diagnostic )
+         => diagnostic.Location!.SourceTree!.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
 
         private async Task WriteSyntaxCoverageAsync( string relativeTestPath, TestResult testResult, UsedSyntaxKindsCollector usedSyntaxKindsCollector )
         {

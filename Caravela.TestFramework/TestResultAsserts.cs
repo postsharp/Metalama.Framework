@@ -25,20 +25,17 @@ namespace Caravela.TestFramework
             }
         }
 
-        public static void AssertTransformedSourceEqual( this TestResult testResult, string expectedTransformedSource, string? actualOutputPath = null )
-        {
-            testResult.AssertTransformedSourceSpanEqual( expectedTransformedSource, null, actualOutputPath );
-        }
-
         public static void AssertTransformedSourceSpanEqual( this TestResult testResult, string expectedTransformedSource, TextSpan? textSpan, string? actualOutputPath = null )
         {
-            // Don't test output if we have an error.
-            testResult.AssertNoErrors();
-
             var regionText = textSpan != null
                 ? testResult.TransformedTargetSource?.GetSubText( textSpan.Value ).ToString()
                 : testResult.TransformedTargetSource?.ToString();
             AssertSourceEqual( expectedTransformedSource.Trim(), regionText, actualOutputPath );
+        }
+
+        public static void AssertTransformedSourceSpanEqual( this TestResult testResult, string expectedTransformedSource, string actualTransformedSource, string? actualOutputPath = null )
+        {
+            AssertSourceEqual( expectedTransformedSource.Trim(), actualTransformedSource, actualOutputPath );
         }
 
         private static void AssertSourceEqual( string expected, string? actual, string? actualOutputPath = null )

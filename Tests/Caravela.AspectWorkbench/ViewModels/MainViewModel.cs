@@ -157,11 +157,6 @@ namespace Caravela.AspectWorkbench.ViewModels
                 throw new InvalidOperationException( $"The {nameof( this.TestText )} property cannot be null." );
             }
 
-            if ( string.IsNullOrEmpty( this.ExpectedOutputText ) )
-            {
-                throw new InvalidOperationException( $"The {nameof( this.ExpectedOutputText )} property cannot be null." );
-            }
-
             if ( this._currentTest == null )
             {
                 this._currentTest = new TemplateTest();
