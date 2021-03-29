@@ -17,6 +17,7 @@ namespace Caravela.AspectWorkbench.ViewModels
     public class MainViewModel
     {
         private readonly TestSerializer _testSerializer;
+        private readonly WorkbenchTemplatingTestRunner _templatingTestRunner; // TODO: WorkbenchAspectTestRunner
         private readonly WorkbenchHighlightingTestRunner _highlightingTestRunner;
         private readonly SyntaxColorizer _syntaxColorizer;
 
@@ -24,9 +25,10 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public MainViewModel()
         {
-            this._testSerializer = new TestSerializer();
-            this._highlightingTestRunner = new WorkbenchHighlightingTestRunner();
-            this._syntaxColorizer = new SyntaxColorizer( this._highlightingTestRunner );
+            this._testSerializer = new();
+            this._templatingTestRunner = new();
+            this._highlightingTestRunner = new();
+            this._syntaxColorizer = new( this._highlightingTestRunner );
         }
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -49,11 +51,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task RunTestAsync()
         {
-            if ( this._currentTest?.TestRunner == null )
-            {
-                throw new InvalidOperationException( $"Test is not set up properly." );
-            }
-
             if ( this.TestText == null )
             {
                 throw new InvalidOperationException( $"Property {nameof( this.TestText )} not set." );
@@ -65,7 +62,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             var testInput = new TestInput( "interactive", null, this.TestText, null );
 
             var compilationStopwatch = Stopwatch.StartNew();
-            var testResult = await this._currentTest.TestRunner.RunAsync( testInput );
+            var testResult = await this._templatingTestRunner.RunAsync( testInput );
             compilationStopwatch.Stop();
 
             var highlightingStopwatch = Stopwatch.StartNew();
@@ -86,7 +83,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             if ( testResult.TransformedTemplateSyntax != null )
             {
                 // Render the transformed tree.
-                var project3 = this._currentTest.TestRunner.CreateProject();
+                var project3 = this._templatingTestRunner.CreateProject();
                 var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
                 var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 

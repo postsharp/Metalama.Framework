@@ -1,6 +1,4 @@
-﻿using Caravela.Framework.Tests.Integration.Highlighting;
-using Caravela.Framework.Tests.Integration.Templating;
-using Caravela.TestFramework;
+﻿using Caravela.TestFramework;
 
 namespace Caravela.AspectWorkbench.Model
 {
@@ -9,7 +7,5 @@ namespace Caravela.AspectWorkbench.Model
         public TestInput? Input { get; set; }
 
         public string? ExpectedOutput { get; set; }
-
-        public TemplatingTestRunner? TestRunner { get; set; }
     }
 }

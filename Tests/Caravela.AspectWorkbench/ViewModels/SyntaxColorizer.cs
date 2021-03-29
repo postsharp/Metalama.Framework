@@ -98,7 +98,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var project = _testRunner.CreateProject();
+            var project = this._testRunner.CreateProject();
             var document = project.AddDocument( "name.cs", text.ToString() );
 
             var roslynClassifiedSpans =

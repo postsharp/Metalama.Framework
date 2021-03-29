@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Caravela.TestFramework
 {
-    public static class TestEnvironment
+    internal static class TestEnvironment
     {
         public static string GetProjectDirectory( Assembly assembly )
         {

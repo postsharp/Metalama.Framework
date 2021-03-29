@@ -52,7 +52,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// Creates a new project that is used to compile the test source.
         /// </summary>
         /// <returns>A new project instance.</returns>
-        public virtual Microsoft.CodeAnalysis.Project CreateProject()
+        protected virtual Microsoft.CodeAnalysis.Project CreateProject()
         {
             var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
 

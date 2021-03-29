@@ -34,9 +34,7 @@ namespace Caravela.AspectWorkbench.Model
             return new TemplateTest
             {
                 Input = new TestInput( testName, null, testSource, null ),
-                ExpectedOutput = expectedOutput,
-                // TODO: AspectTestRunner - needs abstraction.
-                TestRunner = new TemplatingTestRunner()
+                ExpectedOutput = expectedOutput
             };
         }
 
