@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -126,6 +129,7 @@ namespace Caravela.AspectWorkbench.Views
             if ( this._viewModel.TransformedTargetDocument == null )
             {
                 this._viewModel.ExpectedOutputText = "";
+                return;
             }
 
             this._viewModel.ExpectedOutputText = new TextRange( 

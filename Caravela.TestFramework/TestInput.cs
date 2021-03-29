@@ -8,7 +8,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestInput
     {
-        public TestInput( string testName, string projectDirectory, string testSource, string testSourcePath )
+        public TestInput( string testName, string? projectDirectory, string testSource, string? testSourcePath )
         {
             this.TestName = testName;
             this.ProjectDirectory = projectDirectory;
@@ -24,7 +24,7 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the project directory.
         /// </summary>
-        public string ProjectDirectory { get; }
+        public string? ProjectDirectory { get; }
 
         /// <summary>
         /// Gets the content of the test source file.
@@ -34,6 +34,6 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the path of the test source file.
         /// </summary>
-        public string TestSourcePath { get; }
+        public string? TestSourcePath { get; }
     }
 }

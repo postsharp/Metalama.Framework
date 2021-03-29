@@ -21,18 +21,11 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new ClassifiedTextSpanCollection();
         private readonly SourceText _sourceText;
-        private readonly bool _visitUnmarkedTypes;
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
         private bool _isInTemplate;
 
 #pragma warning disable 618
-
-        // ReSharper disable once IntroduceOptionalParameters.Global
-        public TextSpanClassifier( SourceText sourceText ) : this( sourceText, false )
-#pragma warning restore 618
-        {
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
@@ -40,11 +33,9 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="sourceText"></param>
         /// <param name="visitUnmarkedTypes">This is for backward compatibility with AspectWorkbench because
         /// test aspect classes are not marked at compile time.</param>
-        [Obsolete( "Mark test classes as compile time and call the other constructor." )]
-        public TextSpanClassifier( SourceText sourceText, bool visitUnmarkedTypes )
+        public TextSpanClassifier( SourceText sourceText )
         {
             this._sourceText = sourceText;
-            this._visitUnmarkedTypes = visitUnmarkedTypes;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
         }
@@ -70,10 +61,6 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node.ConstraintClauses, TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTime );
                 this.Mark( node.BaseList, TextSpanClassification.CompileTime );
-                base.VisitClassDeclaration( node );
-            }
-            else if ( this._visitUnmarkedTypes )
-            {
                 base.VisitClassDeclaration( node );
             }
             else
@@ -106,7 +93,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 this._isInTemplate = false;
             }
-            else if ( !this._visitUnmarkedTypes )
+            else
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
             }

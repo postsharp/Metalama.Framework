@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.Tests.Integration.Highlighting;
-using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.AspectWorkbench.Model
 {
@@ -33,48 +27,22 @@ namespace Caravela.AspectWorkbench.Model
 
             return new TemplateTest
             {
-                Input = new TestInput( testName, null, testSource, null ),
+                Input = new TestInput( testName, null, testSource, filePath ),
                 ExpectedOutput = expectedOutput
             };
         }
 
         public async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
-            await File.WriteAllTextAsync( filePath, test.Input.TestSource.ToString() );
+            if ( test.Input == null )
+            {
+                throw new InvalidOperationException( "Test input not set." );
+            }
+
+            await File.WriteAllTextAsync( filePath, test.Input.TestSource );
 
             var expectedOutputFilePath = GetExpectedOutputFilePath( filePath );
             await File.WriteAllTextAsync( expectedOutputFilePath, test.ExpectedOutput );
-        }
-
-        private static SyntaxNode[] GetFields( SyntaxNode syntaxRoot )
-        {
-            return syntaxRoot.DescendantNodes().Where( n => n.IsKind( SyntaxKind.FieldDeclaration ) ).ToArray();
-        }
-
-        private static SyntaxNode GetField( IEnumerable<SyntaxNode> fields, string fieldName )
-        {
-            return fields.FirstOrDefault(
-                f => f.DescendantNodes().OfType<VariableDeclaratorSyntax>().Any( n => n.Identifier.Text.Equals( fieldName, StringComparison.Ordinal ) ) );
-        }
-
-        private static string? GetFieldValue( SyntaxNode fieldNode )
-        {
-            if ( fieldNode == null )
-            {
-                return null;
-            }
-
-            return fieldNode.DescendantNodes().OfType<LiteralExpressionSyntax>().FirstOrDefault()?.Token.ValueText;
-        }
-
-        private static SyntaxNode SetFieldValue( SyntaxNode root, string fieldName, string? value )
-        {
-            return root.ReplaceNode(
-                GetField( GetFields( root ), fieldName ).DescendantNodes().OfType<LiteralExpressionSyntax>().First(),
-                value != null ?
-                    LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "@\"" + value.Replace( "\"", "\"\"" ) + "\"", value ) )
-                    :
-                    LiteralExpression( SyntaxKind.NullLiteralExpression ) );
         }
     }
 }

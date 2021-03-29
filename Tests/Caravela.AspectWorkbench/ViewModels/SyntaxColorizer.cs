@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -7,7 +10,6 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Tests.Integration.Highlighting;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 

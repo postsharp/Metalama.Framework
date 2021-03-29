@@ -1,8 +1,12 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Caravela.Framework.Tests.Integration.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using RoslynPad.Roslyn;
@@ -29,12 +33,8 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(System.Runtime.CompilerServices.DynamicAttribute).Assembly,
                             typeof(SyntaxFactory).Assembly,
                             typeof(Framework.Aspects.TemplateContext).Assembly,
-                            typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly
-                        },
-                        imports: new[]
-                        {
-                            "Caravela.Framework.Aspects",
-                            "Caravela.Framework.Aspects.TemplateContext",
+                            typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly,
+                            typeof(TestTemplateAttribute).Assembly,
                         } ) );
 
             return host;
@@ -43,7 +43,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
         public CustomRoslynHost(
             ImmutableArray<string>? disabledDiagnostics = default,
             IEnumerable<Assembly>? additionalAssemblies = null,
-            RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics: disabledDiagnostics )
+            RoslynHostReferences? references = null ) : base( additionalAssemblies, references, disabledDiagnostics )
         {
         }
 
@@ -52,7 +52,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
             var name = args.Name ?? "Template";
             var id = ProjectId.CreateNewId( name );
 
-            var parseOptions = new CSharpParseOptions( kind: SourceCodeKind.Script, languageVersion: LanguageVersion.Latest );
+            var parseOptions = new CSharpParseOptions( kind: SourceCodeKind.Regular, languageVersion: LanguageVersion.Latest );
 
             solution = solution.AddProject( ProjectInfo.Create(
                 id,
@@ -60,7 +60,6 @@ namespace Caravela.AspectWorkbench.CodeEditor
                 name,
                 name,
                 LanguageNames.CSharp,
-                isSubmission: true,
                 parseOptions: parseOptions,
                 compilationOptions: compilationOptions,
                 metadataReferences: previousProject != null ? ImmutableArray<MetadataReference>.Empty : this.DefaultReferences,
