@@ -28,16 +28,4 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         Template
     }
-
-    internal static class SymbolDeclarationScopeExtensions
-    {
-        public static string ToDisplayString( this SymbolDeclarationScope scope )
-         => scope switch
-         {
-             SymbolDeclarationScope.RunTimeOnly => "run-time",
-             SymbolDeclarationScope.CompileTimeOnly => "compile-time",
-             SymbolDeclarationScope.Template => "template",
-             SymbolDeclarationScope.Default => "default"
-         };
-    }
 }

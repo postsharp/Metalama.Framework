@@ -989,18 +989,21 @@ namespace Caravela.Framework.Impl.Templating
             if ( existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope )
             {
                 this.Diagnostics.Add(
-                    Diagnostic.Create( TemplatingDiagnosticDescriptors.ScopeMismatch, node.GetLocation(), node.ToString(),
-                    existingScope.ToDisplayString(), requiredScope.ToDisplayString(), reason ) );
+                    Diagnostic.Create( 
+                        TemplatingDiagnosticDescriptors.ScopeMismatch, 
+                        node.GetLocation(), 
+                        node.ToString(),
+                        existingScope.ToDisplayString(), 
+                        requiredScope.ToDisplayString(), 
+                        reason ) );
             }
-
         }
 
         public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
         {
-            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression );
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
             this.RequireScope( annotatedExpression, SymbolDeclarationScope.RunTimeOnly, "a lock" );
-
 
             return node.WithExpression( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
