@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
             var testRunner = new HighlightingTestRunner();
             var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
-            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath ) );
 
             this.WriteDiagnostics( testResult.Diagnostics );
 

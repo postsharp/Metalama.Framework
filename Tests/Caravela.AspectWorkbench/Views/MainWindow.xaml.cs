@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,6 +11,7 @@ using Caravela.AspectWorkbench.ViewModels;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
+using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
 {
@@ -37,7 +41,6 @@ namespace Caravela.AspectWorkbench.Views
             var workingDirectory = Directory.GetCurrentDirectory();
 
             this.sourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
-            this.targetSourceTextBox.Initialize( roslynHost, highlightColors, workingDirectory, "" );
         }
 
         private void ViewModel_PropertyChanged( object sender, PropertyChangedEventArgs e )
@@ -45,11 +48,8 @@ namespace Caravela.AspectWorkbench.Views
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
-                case nameof( MainViewModel.TemplateText ):
-                    this.sourceTextBox.Text = this._viewModel.TemplateText;
-                    break;
-                case nameof( MainViewModel.TargetText ):
-                    this.targetSourceTextBox.Text = this._viewModel.TargetText;
+                case nameof( MainViewModel.TestText ):
+                    this.sourceTextBox.Text = this._viewModel.TestText;
                     break;
                 case nameof( MainViewModel.ColoredTemplateDocument ):
                     this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
@@ -65,8 +65,7 @@ namespace Caravela.AspectWorkbench.Views
 
         private void UpdateViewModel()
         {
-            this._viewModel.TemplateText = this.sourceTextBox.Text;
-            this._viewModel.TargetText = this.targetSourceTextBox.Text;
+            this._viewModel.TestText = this.sourceTextBox.Text;
 
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
             this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
@@ -123,6 +122,19 @@ namespace Caravela.AspectWorkbench.Views
         {
             this.UpdateViewModel();
             await this._viewModel.RunTestAsync();
+        }
+
+        private void MakeExpectedButton_Click( object sender, RoutedEventArgs e )
+        {
+            if ( this._viewModel.TransformedTargetDocument == null )
+            {
+                this._viewModel.ExpectedOutputText = "";
+                return;
+            }
+
+            this._viewModel.ExpectedOutputText = new TextRange( 
+                this._viewModel.TransformedTargetDocument.ContentStart, 
+                this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
         }
     }
 }

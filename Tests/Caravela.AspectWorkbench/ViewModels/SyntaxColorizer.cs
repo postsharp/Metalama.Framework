@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,13 +17,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-        private readonly WorkbenchTestRunner _testRunner;
-
-        public SyntaxColorizer( WorkbenchTestRunner testRunner )
-        {
-            this._testRunner = testRunner;
-        }
-
         private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             { ClassificationTypeNames.Comment, Colors.Green },
@@ -89,6 +85,13 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexSelfEscapedCharacter, Colors.Indigo },
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo },
         };
+
+        private readonly WorkbenchHighlightingTestRunner _testRunner;
+
+        public SyntaxColorizer( WorkbenchHighlightingTestRunner testRunner )
+        {
+            this._testRunner = testRunner;
+        }
 
         public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
         {

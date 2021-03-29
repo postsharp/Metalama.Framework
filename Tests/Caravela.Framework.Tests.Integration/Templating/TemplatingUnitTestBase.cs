@@ -46,7 +46,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var usedSyntaxKindsCollector = new UsedSyntaxKindsCollector();
             var testRunner = new TemplatingTestRunner( new[] { usedSyntaxKindsCollector } );
             var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
-            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath, null ) );
+            var testResult = await testRunner.RunAsync( new TestInput( relativeTestPath, this.ProjectDirectory, testSource, relativeTestPath ) );
 
             this.WriteDiagnostics( testResult.Diagnostics );
 

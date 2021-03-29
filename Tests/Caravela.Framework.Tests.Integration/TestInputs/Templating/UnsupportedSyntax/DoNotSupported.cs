@@ -1,12 +1,10 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.DoNotSupported
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

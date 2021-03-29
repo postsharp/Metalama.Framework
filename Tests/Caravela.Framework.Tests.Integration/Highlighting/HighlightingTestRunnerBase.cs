@@ -7,24 +7,14 @@ using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Xunit;
 
-namespace Caravela.Framework.Tests.Integration.Annotation
+namespace Caravela.Framework.Tests.Integration.Highlighting
 {
-    internal class AnnotationUnitTestRunner : TemplatingTestRunnerBase
+    internal class HighlightingTestRunnerBase : TemplatingTestRunnerBase
     {
-
         public override async Task<TestResult> RunAsync( TestInput testInput )
         {
-            var tree = CSharpSyntaxTree.ParseText( testInput.TestSource );
-            TriviaAdder triviaAdder = new();
-            var testSourceRootWithAddedTrivias = triviaAdder.Visit( tree.GetRoot() );
-            var testSourceWithAddedTrivias = testSourceRootWithAddedTrivias!.ToFullString();
-
-            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testInput.ProjectDirectory, testSourceWithAddedTrivias, testInput.TestSourcePath );
-
-            var result = await base.RunAsync( testInputWithAddedTrivias );
+            var result = await base.RunAsync( testInput );
 
             if ( !result.Success )
             {
@@ -48,9 +38,6 @@ namespace Caravela.Framework.Tests.Integration.Annotation
                 return result;
             }
 
-            // Annotation shouldn't do any code transformations.
-            // Otherwise, highlighted spans don't match the actual code.
-            Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax!.ToString() );
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
 
             result.Success = true;

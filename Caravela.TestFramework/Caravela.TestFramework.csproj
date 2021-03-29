@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
+    <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
   </ItemGroup>
 
 </Project>

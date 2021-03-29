@@ -21,6 +21,10 @@
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Caravela.AspectWorkbench" />
+  </ItemGroup>
+
   <Target Name="AddCustomAssemblyMetadaAttributes" BeforeTargets="CoreGenerateAssemblyInfo">
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
