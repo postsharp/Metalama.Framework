@@ -1,12 +1,9 @@
-  
 using System;
 using System.Collections.Generic;
 using System.IO;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-
-// TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUsing
 {
     class Aspect
