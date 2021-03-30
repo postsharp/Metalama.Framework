@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Documents;
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
@@ -20,18 +21,12 @@ namespace Caravela.AspectWorkbench.ViewModels
     public class MainViewModel
     {
         private readonly TestSerializer _testSerializer;
-        private readonly WorkbenchTemplatingTestRunner _templatingTestRunner; // TODO: WorkbenchAspectTestRunner
-        private readonly WorkbenchHighlightingTestRunner _highlightingTestRunner;
-        private readonly SyntaxColorizer _syntaxColorizer;
 
         private TemplateTest? _currentTest;
 
         public MainViewModel()
         {
             this._testSerializer = new();
-            this._templatingTestRunner = new();
-            this._highlightingTestRunner = new();
-            this._syntaxColorizer = new( this._highlightingTestRunner );
         }
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -62,31 +57,35 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.ErrorsText = string.Empty;
             this.TransformedTargetDocument = null;
 
-            var testInput = new TestInput( "interactive", null, this.TestText, null );
+            TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" ) ? new TemplatingTestRunner() : new AspectTestRunner();
+            var syntaxColorizer = new SyntaxColorizer(testRunner.CreateProject());
+
+            var testInput = new TestInput( "interactive", this.TestText );
 
             var compilationStopwatch = Stopwatch.StartNew();
-            var testResult = await this._templatingTestRunner.RunAsync( testInput );
+            
+            var testResult = await testRunner.RunTestAsync( testInput );
             compilationStopwatch.Stop();
 
             var highlightingStopwatch = Stopwatch.StartNew();
-            var highlightingResult = await this._highlightingTestRunner.RunAsync( testInput );
+            var highlightingResult = await testRunner.RunTestAsync( testInput );
             highlightingStopwatch.Stop();
             
             if ( highlightingResult.AnnotatedTemplateSyntax != null )
             {
                 // Display the annotated syntax tree.
                 var sourceText = await highlightingResult.TemplateDocument.GetTextAsync();
-                var classifier = new TextSpanClassifier( sourceText );
+                var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
                 classifier.Visit( highlightingResult.AnnotatedTemplateSyntax );
                 var metaSpans = classifier.ClassifiedTextSpans;
 
-                this.ColoredTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+                this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
             }
 
             if ( testResult.TransformedTemplateSyntax != null )
             {
                 // Render the transformed tree.
-                var project3 = this._templatingTestRunner.CreateProject();
+                var project3 = testRunner.CreateProject();
                 var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
                 var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
 
@@ -94,13 +93,13 @@ namespace Caravela.AspectWorkbench.ViewModels
                 var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
                 var spanMarker = new TextSpanClassifier( text4 );
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
-                this.CompiledTemplateDocument = await this._syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }
-
-            if ( testResult.TransformedTargetSource != null )
+            
+            if ( testResult.TransformedTargetSourceText != null )
             {
                 // Display the transformed code.
-                this.TransformedTargetDocument = await this._syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSource, null );
+                this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
             }
 
             var errorsTextBuilder = new StringBuilder();
@@ -162,7 +161,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 this._currentTest = new TemplateTest();
             }
 
-            this._currentTest.Input = new TestInput( "interactive", null, this.TestText, null );
+            this._currentTest.Input = new TestInput( "interactive", this.TestText );
             this._currentTest.ExpectedOutput = this.ExpectedOutputText ?? string.Empty;
 
             this.CurrentPath = filePath;

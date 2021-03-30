@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Aspects
 {
-    public class AspectUnitTests : AspectUnitTestBase
+    public class AspectUnitTests : UnitTestBase
     {
         public AspectUnitTests( ITestOutputHelper logger ) : base( logger )
         {
@@ -17,5 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Theory]
         [FromDirectory( @"TestInputs\Aspects\Samples" )]
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );
     }
 }

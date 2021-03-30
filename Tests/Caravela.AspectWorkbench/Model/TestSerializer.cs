@@ -27,7 +27,7 @@ namespace Caravela.AspectWorkbench.Model
 
             return new TemplateTest
             {
-                Input = new TestInput( testName, null, testSource, filePath ),
+                Input = new TestInput( testName, testSource ),
                 ExpectedOutput = expectedOutput
             };
         }
