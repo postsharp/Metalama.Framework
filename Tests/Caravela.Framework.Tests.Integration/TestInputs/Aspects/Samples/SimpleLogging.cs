@@ -1,5 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Log]
@@ -36,5 +37,4 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
             return a + b;
         }
     }
-    #endregion
 }

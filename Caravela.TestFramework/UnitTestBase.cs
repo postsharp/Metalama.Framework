@@ -101,24 +101,29 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
 
+            Assert.NotNull( testResult.TransformedTargetSourceText );
+
+            var actualTransformedSourceText = testResult.TransformedTargetSourceText!.ToString().Trim();
+
+            // Update the file in obj\transformed if it is different.
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
                 "obj",
                 "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
+            
+            if ( !File.Exists( actualTransformedPath ) || File.ReadAllText( actualTransformedPath ) != actualTransformedSourceText )
+            {
+                Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+                File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
+            }
 
+            // Compare with expectations.
             Assert.True( File.Exists( expectedTransformedPath ), $"File {expectedTransformedPath} does not exist." );
+            var expectedTransformedSourceText = await File.ReadAllTextAsync( expectedTransformedPath );
 
-            var expectedTransformedSource = await File.ReadAllTextAsync( expectedTransformedPath );
-
-            testResult.AssertTransformedTargetCodeEqual(
-                expectedTransformedSource,
-                s =>
-                {
-                    Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
-                    File.WriteAllText( actualTransformedPath, s );
-                } );
+            Assert.Equal( expectedTransformedSourceText.Trim(), actualTransformedSourceText );
         }
     }
 }

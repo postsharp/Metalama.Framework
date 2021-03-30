@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
@@ -99,6 +100,20 @@ namespace Caravela.TestFramework
             static string GetTextUnderDiagnostic( Diagnostic diagnostic )
                 => diagnostic.Location!.SourceTree!.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
 
+            // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
+            // passed to this method.
+            var outputNodes =
+                syntaxNode
+                    .DescendantNodesAndSelf( _ => true )
+                    .OfType<MemberDeclarationSyntax>()
+                    .Where( m => m.AttributeLists
+                        .SelectMany( list => list.Attributes )
+                        .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
+                    .ToList();
+
+            var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
+        
+            // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
                     .Where( d => !d.Id.StartsWith( "CS" ) )
@@ -111,10 +126,11 @@ namespace Caravela.TestFramework
                 comments = comments.Append( SyntaxFactory.LineFeed );
             }
 
-            var syntaxNodeWithComments = syntaxNode.WithLeadingTrivia( syntaxNode.GetLeadingTrivia().AddRange( comments ) );
-            var formattedOutput = Formatter.Format( syntaxNodeWithComments, this.Project.Solution.Workspace );
+            // Format the output code.
+            var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
+            var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
 
-            this.TransformedTargetSyntax = syntaxNodeWithComments;
+            this.TransformedTargetSyntax = outputNodeWithComments;
             this.TransformedTargetSourceText = formattedOutput.GetText();
         }
 
@@ -137,7 +153,7 @@ namespace Caravela.TestFramework
         /// </summary>
         /// <param name="expected">The expected source code.</param>
         /// <param name="onTextDifferent">The action to execute if the text different.</param>
-        public void AssertTransformedTargetCodeEqual( string expected, Action<string> onTextDifferent )
+        public void AssertTransformedTargetCodeEqual( string expected, Action<string> onTextDifferent, Action onTextEqual )
         {
             Assert.NotNull( this.TransformedTargetSourceText );
 
@@ -145,8 +161,8 @@ namespace Caravela.TestFramework
             
             try
             {
-               
                 Assert.Equal( expected.Trim(), actual );
+                onTextEqual?.Invoke();
             }
             catch ( EqualException )
             {
