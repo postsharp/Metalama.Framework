@@ -71,18 +71,18 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             result.AddDiagnostics( templateCompiler.Diagnostics );
 
-            if ( !templateCompilerSuccess )
-            {
-                result.SetFailed( "Template compiler failed." );
-                return result;
-            }
-
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
             Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
 
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
+
+            if ( !templateCompilerSuccess )
+            {
+                result.SetFailed( "Template compiler failed." );
+                return result;
+            }
 
             // Write the transformed code to disk.
             var transformedTemplateText = result.TransformedTemplateSyntax!.SyntaxTree.GetText();

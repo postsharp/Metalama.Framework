@@ -75,7 +75,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 // Display the annotated syntax tree.
                 var sourceText = await highlightingResult.TemplateDocument.GetTextAsync();
-                var classifier = new TextSpanClassifier( sourceText );
+                var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
                 classifier.Visit( highlightingResult.AnnotatedTemplateSyntax );
                 var metaSpans = classifier.ClassifiedTextSpans;
 
