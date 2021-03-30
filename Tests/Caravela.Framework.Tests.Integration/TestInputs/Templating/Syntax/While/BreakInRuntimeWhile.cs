@@ -1,10 +1,13 @@
+  
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using System.Collections.Generic;
 using Caravela.Framework.Project;
+using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.WhileNotSupported
+
+// TODO: Change the namespace
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInRunTimeWhile
 {
-    [CompileTime]
     class Aspect
     {
         [TestTemplate]
@@ -14,6 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Whil
             while (i < target.Parameters.Count)
             {
                 i++;
+                break;
             }
 
             Console.WriteLine("Test result = " + i);
@@ -25,9 +29,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Whil
 
     class TargetCode
     {
-        int Method(int a, int b)
+        int Method(int a)
         {
-            return a + b;
+            return a;
         }
     }
 }

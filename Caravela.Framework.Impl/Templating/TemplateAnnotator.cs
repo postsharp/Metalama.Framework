@@ -571,11 +571,11 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
             // compile-time.
 
-            var isBuildTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
+            var isCompileTimeTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
 
             ExpressionSyntax? annotatedExpression;
 
-            if ( isBuildTimeLocalVariable )
+            if ( isCompileTimeTimeLocalVariable )
             {
                 using ( this.EnterForceCompileTimeExpression() )
                 {
@@ -589,11 +589,11 @@ namespace Caravela.Framework.Impl.Templating
 
             var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
 
-            if ( (isBuildTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
+            if ( (isCompileTimeTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
             {
                 // This is a build-time loop.
 
-                if ( !isBuildTimeLocalVariable )
+                if ( !isCompileTimeTimeLocalVariable )
                 {
                     this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
                 }
@@ -915,7 +915,11 @@ namespace Caravela.Framework.Impl.Templating
                 // We have an while statement where the condition is a compile-time expression. Add annotations
                 // to the while but not to the blocks themselves.
 
-                var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                StatementSyntax annotatedStatement;
+                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                {
+                    annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                }
 
                 return node.Update( node.AttributeLists, node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement )
                     .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
@@ -927,7 +931,11 @@ namespace Caravela.Framework.Impl.Templating
 
                 using ( this.EnterRuntimeConditionalBlock() )
                 {
-                    var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                    StatementSyntax annotatedStatement;
+                    using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
+                    {
+                        annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                    }
 
                     var result = node.Update( node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement );
 

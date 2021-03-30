@@ -1,0 +1,14 @@
+{
+    int i = 0;
+    while (i < 1)
+    {
+        i++;
+        i++;
+        i++;
+    }
+
+    global::System.Console.WriteLine("Test result = " + i);
+    int result;
+    result = a;
+    return (int)result;
+}

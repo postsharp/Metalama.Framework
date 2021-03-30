@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
-                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax
+                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -563,6 +563,23 @@ namespace Caravela.Framework.Impl.Templating
                     node.Condition,
                     transformedStatement,
                     transformedElseStatement != null ? ElseClause( transformedElseStatement ) : null );
+            }
+        }
+
+        public override SyntaxNode VisitWhileStatement( WhileStatementSyntax node )
+        {
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time if. Just serialize to syntax.
+                return this.TransformWhileStatement( node );
+            }
+            else
+            {
+                var transformedStatement = this.ToMetaStatement( node.Statement );
+                return WhileStatement(
+                    node.AttributeLists,
+                    node.Condition,
+                    transformedStatement );
             }
         }
 

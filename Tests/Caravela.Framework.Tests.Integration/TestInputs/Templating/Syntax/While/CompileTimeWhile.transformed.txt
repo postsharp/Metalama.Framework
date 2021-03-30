@@ -1,0 +1,6 @@
+{
+    global::System.Console.WriteLine("Test result = 6");
+    int result;
+    result = a;
+    return (int)result;
+}
