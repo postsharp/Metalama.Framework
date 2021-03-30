@@ -14,9 +14,8 @@ namespace Caravela.Framework.Impl.Templating
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)
     /// so that the <see cref="SemanticModel"/> does not need to re-evaluated everything the syntax tree
     /// has changes that don't affect symbols. A syntax tree can be annotated using <see cref="AnnotateTree"/>
-    /// and the symbols can then be retrieved using <see cref="GetAssignments"/>, <see cref="GetSymbol"/>,
-    /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>. Additionally, this class indexes assignments
-    /// of local variables. This is accessible from the <see cref="GetAssignments"/> method.
+    /// and the symbols can then be retrieved using <see cref="GetSymbol"/>,
+    /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>.
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
