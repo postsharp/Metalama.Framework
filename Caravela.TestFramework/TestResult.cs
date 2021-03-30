@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -9,8 +8,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
-using Xunit;
-using Xunit.Sdk;
 
 namespace Caravela.TestFramework
 {
@@ -145,40 +142,6 @@ namespace Caravela.TestFramework
             this.ErrorMessage = reason;
             
             this.SetTransformedTarget( SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ));
-        }
-
-        /// <summary>
-        /// Asserts that the transformed target source (i.e. the code to which the aspect is applied) is equal to an expected
-        /// string. If it is different, optionally, calls a delegate.
-        /// </summary>
-        /// <param name="expected">The expected source code.</param>
-        /// <param name="onTextDifferent">The action to execute if the text different.</param>
-        public void AssertTransformedTargetCodeEqual( string expected, Action<string> onTextDifferent, Action onTextEqual )
-        {
-            Assert.NotNull( this.TransformedTargetSourceText );
-
-            var actual = this.TransformedTargetSourceText!.ToString().Trim();
-            
-            try
-            {
-                Assert.Equal( expected.Trim(), actual );
-                onTextEqual?.Invoke();
-            }
-            catch ( EqualException )
-            {
-                onTextDifferent?.Invoke( actual );
-
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Asserts that the <see cref="Diagnostics"/> collection contains a diagnostic of a given id.
-        /// </summary>
-        /// <param name="expectedId"></param>
-        public void AssertContainsDiagnosticId( string expectedId )
-        {
-            Assert.Contains( this.Diagnostics, d => d.Id.Equals( expectedId, StringComparison.Ordinal ) );
         }
     }
 }
