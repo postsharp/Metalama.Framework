@@ -113,10 +113,10 @@ namespace Caravela.TestFramework
             // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
-                    .Where( d => !d.Id.StartsWith( "CS" ) )
+                    .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Error )
                     .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`\n" )
                     .OrderByDescending( s => s )
-                    .Select( s => SyntaxFactory.Comment( s ) );
+                    .Select( SyntaxFactory.Comment );
 
             if ( comments.Any() )
             {

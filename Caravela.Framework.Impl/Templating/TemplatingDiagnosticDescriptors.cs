@@ -56,5 +56,16 @@ namespace Caravela.Framework.Impl.Templating
                 _templateCategory,
                 DiagnosticSeverity.Error,
                 true );
+        
+        internal static readonly DiagnosticDescriptor SplitVariables
+            = new DiagnosticDescriptor(
+                "CR0105",
+                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                _templateCategory,
+                DiagnosticSeverity.Error,
+                true );
+
+
     }
 }
