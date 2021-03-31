@@ -6,10 +6,10 @@ using System;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Specifies behavior of the aspect linker on the declaration.
+    /// Specifies behavior of the aspect linker on the declaration (for testing only).
     /// </summary>
     [AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
-    public class AspectLinkerOptionsAttribute : Attribute
+    internal sealed class AspectLinkerOptionsAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets a value indicating whether the linker inlining of this member is forcefully disabled, even if it would be otherwise possible.
