@@ -1,6 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutError
 {
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutEr
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Skipped]
@@ -33,5 +34,4 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.SkipWithoutEr
             return a + b;
         }
     }
-    #endregion
 }

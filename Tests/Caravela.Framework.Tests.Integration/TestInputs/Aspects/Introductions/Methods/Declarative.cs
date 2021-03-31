@@ -2,6 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.DeclarativeNonVoid
@@ -27,10 +28,9 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         }
     }
 
-    #region Target
+    [TestOutput]
     [Introduction]
     internal class TargetClass
     {
     }
-    #endregion
 }

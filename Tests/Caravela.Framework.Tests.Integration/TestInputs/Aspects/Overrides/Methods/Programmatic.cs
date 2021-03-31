@@ -3,6 +3,7 @@ using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programmatic
@@ -22,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
         }
     }
 
-    #region Target
+    [TestOutput]
     [Override]
     internal class TargetClass
     {
@@ -31,5 +32,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
             Console.WriteLine( "This is the original method." );
         }
     }
-    #endregion
 }

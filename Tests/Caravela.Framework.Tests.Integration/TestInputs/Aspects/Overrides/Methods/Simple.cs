@@ -2,6 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
@@ -17,7 +18,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Override]
@@ -46,5 +47,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
             return x + y;
         }
     }
-    #endregion
 }

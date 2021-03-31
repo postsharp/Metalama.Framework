@@ -3,6 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
@@ -29,7 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [InnerOverride]
@@ -62,5 +63,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
             return x + y;
         }
     }
-    #endregion
 }
