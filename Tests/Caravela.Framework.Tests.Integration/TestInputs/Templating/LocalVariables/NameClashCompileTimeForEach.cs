@@ -1,9 +1,11 @@
 using System;
 using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameClashCompileTimeForEach
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

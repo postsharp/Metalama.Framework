@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.DesignTime.Contracts;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
 
@@ -14,13 +17,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-        private readonly WorkbenchTestRunner _testRunner;
-
-        public SyntaxColorizer( WorkbenchTestRunner testRunner )
-        {
-            this._testRunner = testRunner;
-        }
-
+      
         private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             { ClassificationTypeNames.Comment, Colors.Green },
@@ -90,6 +87,13 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo },
         };
 
+        private readonly Project _project;
+
+        public SyntaxColorizer( Project project )
+        {
+            this._project = project;
+        }
+
         public async Task<FlowDocument> WriteSyntaxColoring( SourceText text, IReadOnlyClassifiedTextSpanCollection? compileTimeSpans )
         {
             static Color WithAlpha( Color brush, double alpha )
@@ -97,8 +101,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 return Color.FromArgb( (byte) (255 * alpha), brush.R, brush.G, brush.B );
             }
 
-            var project = this._testRunner.CreateProject();
-            var document = project.AddDocument( "name.cs", text.ToString() );
+            var document = this._project.AddDocument( "name.cs", text.ToString() );
 
             var roslynClassifiedSpans =
                 await Classifier.GetClassifiedSpansAsync( document, TextSpan.FromBounds( 0, text.Length ) );

@@ -9,25 +9,26 @@ using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Tests.Integration.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
-    internal class HighlightingTestRunner : TemplatingTestRunnerBase
+    internal class HighlightingTestRunner : TestRunnerBase
     {
-        public override async Task<TestResult> RunAsync( TestInput testInput )
+        public HighlightingTestRunner(string projectDirectory) : base(projectDirectory)
         {
-            var result = await base.RunAsync( testInput );
+        }
 
+        public override async Task<TestResult> RunTestAsync( TestInput testInput )
+        {
+            var result = await base.RunTestAsync( testInput );
+            
             if ( !result.Success )
             {
                 return result;
             }
-            
-            result.Success = false;
 
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
@@ -36,38 +37,40 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             List<Diagnostic> diagnostics = new();
             var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
 
-            this.ReportDiagnostics( result, diagnostics );
+            result.AddDiagnostics( diagnostics );
 
             if ( !templateCompilerSuccess )
             {
-                result.ErrorMessage = "Template compiler failed.";
+                result.SetFailed( "Template compiler failed." );
                 return result;
             }
 
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
 
-            var highlightedTemplateDirectory = Path.Combine(
-                testInput.ProjectDirectory,
-                "obj",
-                "highlighted",
-                Path.GetDirectoryName( testInput.TestSourcePath ) ?? "" );
-
-            var highlightedTemplatePath = Path.Combine(
-                highlightedTemplateDirectory,
-                Path.GetFileNameWithoutExtension( testInput.TestSourcePath ) + ".highlighted.html" );
-
-            Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
-
-            var sourceText = await result.TemplateDocument.GetTextAsync();
-            var classifier = new TextSpanClassifier( sourceText );
-            classifier.Visit( result.AnnotatedTemplateSyntax );
-
-            using ( var textWriter = new StreamWriter( highlightedTemplatePath, false, Encoding.UTF8 ) )
+            if ( this.ProjectDirectory != null )
             {
-                textWriter.WriteLine( "<html>" );
-                textWriter.WriteLine( "<head>" );
-                textWriter.WriteLine("<style>");
-                textWriter.WriteLine(@"
+                var highlightedTemplateDirectory = Path.Combine(
+                    this.ProjectDirectory,
+                    "obj",
+                    "highlighted",
+                    Path.GetDirectoryName( testInput.TestName ) ?? "" );
+
+                var highlightedTemplatePath = Path.Combine(
+                    highlightedTemplateDirectory,
+                    Path.GetFileNameWithoutExtension( testInput.TestName ) + ".highlighted.html" );
+
+                Directory.CreateDirectory( Path.GetDirectoryName( highlightedTemplatePath ) );
+
+                var sourceText = await result.TemplateDocument.GetTextAsync();
+                var classifier = new TextSpanClassifier( sourceText );
+                classifier.Visit( result.AnnotatedTemplateSyntax );
+
+                using ( var textWriter = new StreamWriter( highlightedTemplatePath, false, Encoding.UTF8 ) )
+                {
+                    textWriter.WriteLine( "<html>" );
+                    textWriter.WriteLine( "<head>" );
+                    textWriter.WriteLine( "<style>" );
+                    textWriter.WriteLine( @"
 .CompileTime {
     background-color: #E8F2FF;
 }
@@ -88,44 +91,43 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 }
 .Default {
     background-color: lightcoral;
-}");
-                textWriter.WriteLine("</style>");
-                textWriter.WriteLine( "</head>" );
-                textWriter.WriteLine( "<body><pre>" );
+}" );
+                    textWriter.WriteLine( "</style>" );
+                    textWriter.WriteLine( "</head>" );
+                    textWriter.WriteLine( "<body><pre>" );
 
-                var i = 0;
+                    var i = 0;
 
-                foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
-                {
-                    if ( i < classifiedSpan.Span.Start )
+                    foreach ( var classifiedSpan in classifier.ClassifiedTextSpans )
                     {
-                        textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
+                        if ( i < classifiedSpan.Span.Start )
+                        {
+                            textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
+                        }
+
+                        textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() ) + "</span>" );
+
+                        i = classifiedSpan.Span.End;
                     }
 
-                    textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() ) + "</span>" );
+                    if ( i < sourceText.Length )
+                    {
+                        textWriter.Write( sourceText.GetSubText( i ) );
+                    }
 
-                    i = classifiedSpan.Span.End;
+                    textWriter.WriteLine();
+                    textWriter.WriteLine();
+                    textWriter.WriteLine( "Legend:" );
+
+                    foreach ( var classification in Enum.GetValues( typeof( TextSpanClassification ) ) )
+                    {
+                        textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
+                    }
+
+                    textWriter.WriteLine( "</pre></body>" );
+                    textWriter.WriteLine( "</html>" );
                 }
-
-                if ( i < sourceText.Length )
-                {
-                    textWriter.Write( sourceText.GetSubText( i ) );
-                }
-
-                textWriter.WriteLine();
-                textWriter.WriteLine();
-                textWriter.WriteLine( "Legend:" );
-
-                foreach ( var classification in Enum.GetValues( typeof( TextSpanClassification ) ) )
-                {
-                    textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
-                }
-
-                textWriter.WriteLine( "</pre></body>" );
-                textWriter.WriteLine( "</html>" );
             }
-
-            result.Success = true;
 
             return result;
         }

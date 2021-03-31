@@ -2,11 +2,11 @@
 using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.TypeOf
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
