@@ -1,6 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
 {
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Error]
@@ -34,5 +35,4 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
             return a + b;
         }
     }
-    #endregion
 }

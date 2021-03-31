@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using Caravela.Framework.Advices;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
@@ -16,21 +17,27 @@ namespace Caravela.Framework.Impl.Advices
     {
         private readonly MethodBuilder _methodBuilder;
 
-        public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
-
         public IMethod TemplateMethod { get; }
 
-        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod ) : base( aspect, targetDeclaration )
+        public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
+
+        public AspectLinkerOptions? LinkerOptions { get; }
+
+        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
+            this.LinkerOptions = linkerOptions;
 
             // TODO: Set name and all properties from the template.
-            this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name );
+            this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
+
+            this._methodBuilder.Accessibility = templateMethod.Accessibility;
+            this._methodBuilder.IsStatic = templateMethod.IsStatic;
         }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod );
+            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
 
             return new AdviceResult(
                 ImmutableArray<Diagnostic>.Empty,
