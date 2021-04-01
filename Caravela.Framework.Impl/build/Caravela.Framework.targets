@@ -7,7 +7,7 @@
 
 	<Import Project="Caravela.CompilerVisibleProperties.targets" Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
 
-	<Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="Bild">
+	<Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
 		<Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''"/>
 		<PropertyGroup>
 			<CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>

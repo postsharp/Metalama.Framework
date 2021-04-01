@@ -125,10 +125,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                result.AddDiagnostics( emitResult.Diagnostics );
-
-                result.SetFailed( "Final compilation failed." );
-                return result;
+                // We throw an exception because compilation here are not user errors, our errors.                
+                throw new AssertionFailedException( "The final template compilation failed.", emitResult.Diagnostics );
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );

@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable RedundantUsingDirective
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -273,6 +274,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
+            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
+            {
+                return transformedNode;
+            }
+            
             var transformationKind = this.GetTransformationKind( node.Expression );
 
             // Cast to dynamic expressions.
@@ -280,14 +286,13 @@ namespace Caravela.Framework.Impl.Templating
                  this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            ParenthesizedExpression(
-                                CastFromDynamic(
-                                    this.MetaSyntaxFactory.Type( typeof( IDynamicMember ) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
-                            IdentifierName( nameof( DynamicMetaMemberExtensions.CreateMemberAccessExpression ) ) ) )
-                    .AddArgumentListArguments( Argument( LiteralExpression(
-                        SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) ) );
+                    this.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.CreateDynamicMemberAccessExpression) ),
+                    ArgumentList( SeparatedList( new[]
+                    {
+                        Argument( CastFromDynamic(
+                            this.MetaSyntaxFactory.Type( typeof(IDynamicMember) ), (ExpressionSyntax) this.Visit( node.Expression )! ) ),
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) )
+                    } ) ) );
             }
 
             return base.VisitMemberAccessExpression( node );
@@ -355,10 +360,11 @@ namespace Caravela.Framework.Impl.Templating
             var result = MethodDeclaration(
                     this.MetaSyntaxFactory.Type( typeof( SyntaxNode ) ),
                     Identifier( node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix ) )
-                .WithModifiers(
-                    TokenList(
-                        Token( SyntaxKind.PublicKeyword ) ) )
-                .WithBody( body );
+                .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                .NormalizeWhitespace()
+                .WithBody( body )
+                .WithLeadingTrivia( node.GetLeadingTrivia() )
+                .WithTrailingTrivia( LineFeed, LineFeed );
 
             this.Unindent( 3 );
 
@@ -396,6 +402,7 @@ namespace Caravela.Framework.Impl.Templating
                                             .WithInitializer(
                                                 EqualsValueClause(
                                                     ObjectCreationExpression( listType, ArgumentList(), default ) ) ) ) ) )
+                        .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
 
                     var metaStatements = this.ToMetaStatements( node.Statements );
@@ -717,7 +724,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
                 }
-                else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax )
+                else if ( symbol != null && symbol.IsStatic && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                 {
                     switch ( symbol.Kind )
                     {
@@ -737,38 +744,70 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
+        private bool TryVisitNamespaceOrTypeName( SyntaxNode node, [NotNullWhen(true)] out SyntaxNode? transformedNode )
+        {
+            // Fully qualifies composed names.
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+            switch ( symbol )
+            {
+                case INamespaceOrTypeSymbol namespaceOrType:
+                    var nameExpression = CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType );
+                    if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+                    {
+                        transformedNode = this.Transform( nameExpression );
+                    }
+                    else
+                    {
+                        transformedNode = nameExpression;
+                    }
+
+                    return true;
+                
+                default:
+                    transformedNode = null;
+                    return false;
+            }
+        }
+
         public override SyntaxNode VisitQualifiedName( QualifiedNameSyntax node )
         {
-            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
             {
-                // Fully qualifies composed names.
-                var symbol = this._semanticAnnotationMap.GetSymbol( node );
-
-                switch ( symbol )
-                {
-                    case INamespaceOrTypeSymbol namespaceOrType:
-                        return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
-                }
+                return transformedNode;
             }
-
-            return base.VisitQualifiedName( node );
+            else
+            {
+                return base.VisitQualifiedName( node );
+            }
+        
         }
+
+
+        public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )
+        {
+            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
+            {
+                return transformedNode;
+            }
+            else
+            {
+                return base.VisitAliasQualifiedName( node );
+            }
+        }
+
+
 
         public override SyntaxNode VisitGenericName( GenericNameSyntax node )
         {
-            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
             {
-                // Fully qualifies composed names.
-                var symbol = this._semanticAnnotationMap.GetSymbol( node );
-
-                switch ( symbol )
-                {
-                    case INamespaceOrTypeSymbol namespaceOrType:
-                        return this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType ) )!;
-                }
+                return transformedNode;
             }
-
-            return base.VisitGenericName( node );
+            else
+            {
+                return base.VisitGenericName( node );
+            }
         }
 
         public override bool VisitIntoStructuredTrivia => false;
