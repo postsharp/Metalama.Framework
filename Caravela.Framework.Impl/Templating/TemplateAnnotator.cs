@@ -913,7 +913,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( conditionScope == SymbolDeclarationScope.CompileTimeOnly )
             {
                 // We have an while statement where the condition is a compile-time expression. Add annotations
-                // to the while but not to the blocks themselves.
+                // to the while but not to the statement or block itself.
 
                 StatementSyntax annotatedStatement;
                 using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )

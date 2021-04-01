@@ -570,7 +570,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
             {
-                // Run-time if. Just serialize to syntax.
+                // Run-time while. Just serialize to syntax.
                 return this.TransformWhileStatement( node );
             }
             else

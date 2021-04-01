@@ -2,7 +2,6 @@ using System;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;  
 
-// TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInCompileTimeWhile
 {
     class Aspect
