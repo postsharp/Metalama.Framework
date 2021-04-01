@@ -151,23 +151,20 @@ namespace Caravela.Framework.Impl.CompileTime
             var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
             var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
-            var result = this.TryEmit(compilation, compileTimeProjectDirectory, out MemoryStream stream);
-
+            var result = this.TryEmit(compilation, compileTimeProjectDirectory, out var stream);
 
             if ( !result.Success )
             {
                 throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
             }
 
-        
             return stream;
         }
 
-        private EmitResult TryEmit(Compilation compilation, string compileTimeProjectDirectory, out MemoryStream stream)
+        private EmitResult TryEmit(Compilation compilation, string? compileTimeProjectDirectory, out MemoryStream stream)
         {
             EmitResult? result;
             stream = new MemoryStream();
-
 
             // Write the generated files to disk if we should.
             if (!string.IsNullOrWhiteSpace(compileTimeProjectDirectory))

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -11,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable RedundantUsingDirective
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -83,12 +83,20 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
         {
-            if ( node.Identifier.Text == "var" )
+            switch ( node.Identifier.Kind() )
             {
-                // The simplified form does not work.
-                return base.TransformIdentifierName( node );
+                case SyntaxKind.GlobalKeyword:
+                case SyntaxKind.VarKeyword:
+                    return base.TransformIdentifierName( node );
+
+                case SyntaxKind.IdentifierToken:
+                    break;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected identifier kind: {node.Identifier.Kind()}." );
             }
-            else if ( node.Identifier.Text == "dynamic" )
+
+            if ( node.Identifier.Text == "dynamic" )
             {
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
@@ -783,7 +791,6 @@ namespace Caravela.Framework.Impl.Templating
         
         }
 
-
         public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )
         {
             if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
@@ -795,8 +802,6 @@ namespace Caravela.Framework.Impl.Templating
                 return base.VisitAliasQualifiedName( node );
             }
         }
-
-
 
         public override SyntaxNode VisitGenericName( GenericNameSyntax node )
         {
