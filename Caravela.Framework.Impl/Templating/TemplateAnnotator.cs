@@ -1063,9 +1063,11 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitUsingStatement( UsingStatementSyntax node )
         {
-            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
-            return base.VisitUsingStatement( node );
+            this.RequireScope( annotatedExpression, SymbolDeclarationScope.RunTimeOnly, "a using" );
+
+            return node.WithExpression( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
     }
 }
