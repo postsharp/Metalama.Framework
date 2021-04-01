@@ -104,7 +104,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 Array.Empty<SyntaxTree>(),
                 compileTimeReferences,
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) );
-            
+
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation );
             var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
 
@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
                     runTimeCompilation.SyntaxTrees.First().Options ) );
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( modifiedRunTimeCompilation.SyntaxTrees );
-         
+
             compileTimeCompilation = new RemoveInvalidUsingsRewriter( compileTimeCompilation ).VisitAllTrees( compileTimeCompilation );
 
             return compileTimeCompilation;
@@ -147,11 +147,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private MemoryStream Emit( Compilation compilation )
         {
-            
+
             var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
             var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
-            var result = this.TryEmit(compilation, compileTimeProjectDirectory, out var stream);
+            var result = this.TryEmit( compilation, compileTimeProjectDirectory, out var stream );
 
             if ( !result.Success )
             {
@@ -161,57 +161,57 @@ namespace Caravela.Framework.Impl.CompileTime
             return stream;
         }
 
-        private EmitResult TryEmit(Compilation compilation, string? compileTimeProjectDirectory, out MemoryStream stream)
+        private EmitResult TryEmit( Compilation compilation, string? compileTimeProjectDirectory, out MemoryStream stream )
         {
             EmitResult? result;
             stream = new MemoryStream();
 
             // Write the generated files to disk if we should.
-            if (!string.IsNullOrWhiteSpace(compileTimeProjectDirectory))
+            if ( !string.IsNullOrWhiteSpace( compileTimeProjectDirectory ) )
             {
-                if (!Directory.Exists(compileTimeProjectDirectory))
+                if ( !Directory.Exists( compileTimeProjectDirectory ) )
                 {
-                    Directory.CreateDirectory(compileTimeProjectDirectory);
+                    Directory.CreateDirectory( compileTimeProjectDirectory );
                 }
 
-                compilation = compilation.WithOptions(compilation.Options.WithOptimizationLevel(OptimizationLevel.Debug));
-                var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var tree in compilation.SyntaxTrees)
+                compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
+                var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+                foreach ( var tree in compilation.SyntaxTrees )
                 {
                     // Find a decent and unique name.
-                    var treeName = !string.IsNullOrWhiteSpace(tree.FilePath) ? Path.GetFileNameWithoutExtension(tree.FilePath) : "Anonymous";
+                    var treeName = !string.IsNullOrWhiteSpace( tree.FilePath ) ? Path.GetFileNameWithoutExtension( tree.FilePath ) : "Anonymous";
 
-                    if (names.Contains(treeName))
+                    if ( names.Contains( treeName ) )
                     {
                         var treeNameSuffix = treeName;
-                        for (var i = 1; names.Contains(treeName = treeNameSuffix + "_" + i); i++)
+                        for ( var i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
                         {
                             // Intentionally empty.
                         }
 
-                        _ = names.Add(treeName);
+                        _ = names.Add( treeName );
                     }
 
-                    var path = Path.Combine(compileTimeProjectDirectory, treeName + ".cs");
+                    var path = Path.Combine( compileTimeProjectDirectory, treeName + ".cs" );
                     var text = tree.GetText();
 
-                    using (var textWriter = new StreamWriter(path, false, Encoding.UTF8))
+                    using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
                     {
-                        text.Write(textWriter);
+                        text.Write( textWriter );
                     }
 
                     // Update the link to the file path.
-                    var newTree = CSharpSyntaxTree.Create((CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8);
-                    compilation = compilation.ReplaceSyntaxTree(tree, newTree);
+                    var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8 );
+                    compilation = compilation.ReplaceSyntaxTree( tree, newTree );
                 }
 
-                var options = new EmitOptions(debugInformationFormat: DebugInformationFormat.Embedded);
+                var options = new EmitOptions( debugInformationFormat: DebugInformationFormat.Embedded );
 
-                result = compilation.Emit(stream, manifestResources: this._resources, options: options);
+                result = compilation.Emit( stream, manifestResources: this._resources, options: options );
             }
             else
             {
-                result = compilation.Emit(stream, manifestResources: this._resources);
+                result = compilation.Emit( stream, manifestResources: this._resources );
             }
 
             stream.Position = 0;
