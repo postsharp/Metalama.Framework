@@ -1,15 +1,38 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
     /// <summary>
     /// Represents a lexical scope which allows the template method to define new unique identifiers within the target code element.
     /// </summary>
-    internal interface ITemplateExpansionLexicalScope : IDisposable
+    internal interface ITemplateExpansionLexicalScope
     {
+        /// <summary>
+        /// Gets parent scope.
+        /// </summary>
+        ITemplateExpansionLexicalScope? Parent { get; }
+
+        /// <summary>
+        /// Gets a map of identifiers defined directly in this scope (excluding parent scope and nested scopes).
+        /// </summary>
+        IReadOnlyCollection<string> DefinedIdentifiers { get; }
+
+        /// <summary>
+        /// Gets a list of nested scopes defined by this lexical scope.
+        /// </summary>
+        IReadOnlyList<ITemplateExpansionLexicalScope> NestedScopes { get; }
+
+        /// <summary>
+        /// Determines whether a given name is defined in this scope.
+        /// </summary>
+        /// <param name="name">Name.</param>
+        /// <param name="includeAncestorScopes">True if lookup should include ancestor scopes.</param>
+        /// <returns></returns>
+        bool IsDefined( string name, bool includeAncestorScopes = true );
+
         /// <summary>
         /// Creates a new unique identifier name based on the given name.
         /// Calling repeatedly with the same <paramref name="name"/> value will create a new unique identifier each time.
@@ -38,5 +61,40 @@ namespace Caravela.Framework.Impl.Templating
         /// A new lexical scope instance which is nested within the current one.
         /// </returns>
         ITemplateExpansionLexicalScope OpenNestedScope();
+    }
+
+    /// <summary>
+    /// Common algorithms on lexical scopes.
+    /// </summary>
+    internal static class TemplateExpansionLexicalScopeExtensions
+    {
+        /// <summary>
+        /// Determines whether a name can be defined in the scope. The name should not collide with any name in ancestors and nested scopes.
+        /// </summary>
+        /// <param name="scope">Scope.</param>
+        /// <param name="name">Name.</param>
+        /// <returns>True.</returns>
+        public static bool IsDefineable( this ITemplateExpansionLexicalScope scope, string name )
+        {
+            return scope.IsDefined( name, true ) || IsDefinedInNestedScope( scope, name );
+
+            static bool IsDefinedInNestedScope( ITemplateExpansionLexicalScope scope, string name )
+            {
+                foreach ( var nestedScope in scope.NestedScopes )
+                {
+                    if ( nestedScope.IsDefined( name, false ) )
+                    {
+                        return true;
+                    }
+
+                    if ( IsDefinedInNestedScope( nestedScope, name ) )
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
     }
 }

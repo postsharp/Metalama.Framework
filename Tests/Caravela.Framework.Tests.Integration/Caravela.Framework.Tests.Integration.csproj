@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <Folder Include="TestInputs\Templating\Syntax\Lock\" />
+    <Folder Include="TestInputs\Templating\Syntax\While\" />
+    <Folder Include="TestInputs\Templating\Syntax\Switch\" />
   </ItemGroup>
 
   <Target Name="AddCustomAssemblyMetadaAttributes" BeforeTargets="CoreGenerateAssemblyInfo">

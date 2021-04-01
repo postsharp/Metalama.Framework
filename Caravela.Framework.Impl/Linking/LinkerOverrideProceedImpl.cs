@@ -5,24 +5,24 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Templating.MetaModel
+namespace Caravela.Framework.Impl.Linking
 {
-    internal class ProceedInvokeMethod : IProceedImpl
+    internal class LinkerOverrideProceedImpl : IProceedImpl
     {
         private readonly IMethod _originalDeclaration;
         private readonly AspectLayerId _aspectLayerId;
 
-        public ProceedInvokeMethod( IMethod originalDeclaration, AspectLayerId aspectLayerId )
+        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration )
         {
-            this._originalDeclaration = originalDeclaration;
             this._aspectLayerId = aspectLayerId;
+            this._originalDeclaration = overridenDeclaration;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
@@ -77,16 +77,19 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             var invocation =
                 InvocationExpression(
                     !this._originalDeclaration.IsStatic
-                        ? MemberAccessExpression(
+                    ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this._originalDeclaration.Name ) )
-                        : IdentifierName( this._originalDeclaration.Name ),
+                    : IdentifierName( this._originalDeclaration.Name ),
                     ArgumentList(
                         SeparatedList(
                             this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
-            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
+            if ( this._aspectLayerId != null )
+            {
+                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
+            }
 
             return invocation;
         }

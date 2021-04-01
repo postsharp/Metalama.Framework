@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Utilities
                 if ( newTree != null )
                 {
                     compilation = (TCompilation) compilation.ReplaceSyntaxTree( tree, newTree );
-                }
+            }
                 else
                 {
                     compilation = (TCompilation) compilation.RemoveSyntaxTrees( tree );
