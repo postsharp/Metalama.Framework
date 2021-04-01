@@ -30,6 +30,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.ObjectIni
     record Entity1
     {
         public int Property1 { get; set; }
+
         public IList<Entity2> Property2 { get; set; } = new List<Entity2>();
     }
 

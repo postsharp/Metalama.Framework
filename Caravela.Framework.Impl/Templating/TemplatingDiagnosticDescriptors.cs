@@ -56,6 +56,5 @@ namespace Caravela.Framework.Impl.Templating
                 _templateCategory,
                 DiagnosticSeverity.Error,
                 true );
-
     }
 }

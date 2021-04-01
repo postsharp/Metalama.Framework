@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static IDisposable OpenTemplateLexicalScope() => ExpansionContext.CurrentLexicalScope.OpenNestedScope();
+        public static IDisposable OpenTemplateLexicalScope() => ExpansionContext.OpenNestedScope();
 
         public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
             SyntaxFactory.Identifier( ExpansionContext.CurrentLexicalScope.DefineIdentifier( text ) );

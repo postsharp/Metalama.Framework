@@ -26,20 +26,20 @@ namespace Caravela.Framework.Impl
             this._aspect = aspect;
         }
 
-        public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate )
+        public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
         {
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
-            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod );
+            var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, aspectLinkerOptions );
             this._advices.Add( advice );
 
             return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope )
+        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope, AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
-            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod );
+            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, aspectLinkerOptions );
             this._advices.Add( advice );
 
             return advice;
