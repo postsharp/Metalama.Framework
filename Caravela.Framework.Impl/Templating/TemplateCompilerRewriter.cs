@@ -562,6 +562,32 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
+        {
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time. Just serialize to syntax.
+                return this.TransformSwitchStatement( node );
+            }
+            else
+            {
+                return base.VisitSwitchStatement( node );
+            }
+        }
+
+        public override SyntaxNode VisitSwitchSection( SwitchSectionSyntax node )
+        {
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time. Just serialize to syntax.
+                return this.TransformSwitchSection( node );
+            }
+            else
+            {
+                return base.VisitSwitchSection( node );
+            }
+        }
+
         public override SyntaxNode VisitIfStatement( IfStatementSyntax node )
         {
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
