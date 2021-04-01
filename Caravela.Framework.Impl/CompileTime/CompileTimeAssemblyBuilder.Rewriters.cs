@@ -14,13 +14,13 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly ISymbolClassifier _symbolClassifier;
 
-            protected Rewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
+            protected Rewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
             {
                 this._symbolClassifier = symbolClassifier;
-                this.Compilation = compilation;
+                this.RunTimeCompilation = runTimeCompilation;
             }
 
-            protected Compilation Compilation { get; }
+            protected Compilation RunTimeCompilation { get; }
 
             protected static MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
             {
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
             {
-                var symbol = this.Compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
                 return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
             }
         }

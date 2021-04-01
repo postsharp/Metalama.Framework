@@ -89,6 +89,7 @@ namespace Caravela.Framework.Impl.Templating
             => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
         public bool TryCompile(
+            Compilation compileTimeCompilation,
             MethodDeclarationSyntax sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
@@ -103,7 +104,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( semanticModel.Compilation, symbolAnnotationMap );
+            var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, symbolAnnotationMap );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             // TODO: add diagnostics.

@@ -33,11 +33,11 @@ namespace Caravela.Framework.Impl.CompileTime
             var hash = ComputeHash( _project );
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );
 
-            var referenceAssemlyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
-            if ( File.Exists( referenceAssemlyListFile ) )
+            if ( File.Exists( referenceAssemblyListFile ) )
             {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemlyListFile );
+                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
 
                 if ( referenceAssemblies.All( File.Exists ) )
                 {
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new InvalidOperationException( "Error while building temporary project to locate reference assemblies:" + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
             }
 
-            return File.ReadAllLines( referenceAssemlyListFile );
+            return File.ReadAllLines( referenceAssemblyListFile );
         }
 
         private static string ComputeHash( string input )

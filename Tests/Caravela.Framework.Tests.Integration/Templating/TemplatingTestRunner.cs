@@ -13,6 +13,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Xunit;
@@ -66,8 +67,15 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
+            // Create an empty compilation (just with references) for the compile-time project.
+            var compileTimeCompilation = CSharpCompilation.Create(
+                "assemblyName",
+                Array.Empty<SyntaxTree>(),
+                result.Project.MetadataReferences,
+                (CSharpCompilationOptions) result.Project.CompilationOptions! );
+
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var templateCompilerSuccess = templateCompiler.TryCompile( templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+            var templateCompilerSuccess = templateCompiler.TryCompile( compileTimeCompilation, templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
 
             result.AddDiagnostics( templateCompiler.Diagnostics );
 
@@ -103,16 +111,12 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 Encoding.UTF8 );
 
             // Compile the template. This would eventually need to be done by Caravela itself and not this test program.
-            var finalCompilation = CSharpCompilation.Create(
-                "assemblyName",
-                new[] { newTransformedTemplateSyntaxTree },
-                result.Project.MetadataReferences,
-                (CSharpCompilationOptions) result.Project.CompilationOptions! );
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( newTransformedTemplateSyntaxTree );
 
             var buildTimeAssemblyStream = new MemoryStream();
             var buildTimeDebugStream = new MemoryStream();
 
-            var emitResult = finalCompilation.Emit(
+            var emitResult = compileTimeCompilation.Emit(
                 buildTimeAssemblyStream,
                 buildTimeDebugStream,
                 options: new EmitOptions(

@@ -1,11 +1,16 @@
 ﻿<Project>
-  <!-- TODO: somehow also set PrivateAssets for aspect libraries -->
-  <ItemGroup>
-    <PackageReference Update="Caravela.Framework" PrivateAssets="none" />
-    <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
-  </ItemGroup>
-  <PropertyGroup>
-    <CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>
-  </PropertyGroup>
-  <Import Project="Caravela.CompilerVisibleProperties.targets" Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
+	<!-- TODO: somehow also set PrivateAssets for aspect libraries -->
+	<ItemGroup>
+		<PackageReference Update="Caravela.Framework" PrivateAssets="none" />
+		<PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
+	</ItemGroup>
+
+	<Import Project="Caravela.CompilerVisibleProperties.targets" Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
+
+	<Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="Bild">
+		<Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''"/>
+		<PropertyGroup>
+			<CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>
+		</PropertyGroup>
+	</Target>
 </Project>

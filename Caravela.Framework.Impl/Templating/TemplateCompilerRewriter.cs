@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
 
-        public TemplateCompilerRewriter( Compilation compilation, SemanticAnnotationMap semanticAnnotationMap ) : base( compilation )
+        public TemplateCompilerRewriter( Compilation compileTimeCompilation, SemanticAnnotationMap semanticAnnotationMap ) : base( compileTimeCompilation )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
