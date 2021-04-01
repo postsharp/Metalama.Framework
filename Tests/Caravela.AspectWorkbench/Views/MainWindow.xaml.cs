@@ -105,10 +105,7 @@ namespace Caravela.AspectWorkbench.Views
         {
             this.UpdateViewModel();
 
-            var dlg = new SaveFileDialog();
-            dlg.DefaultExt = _fileDialogueExt;
-            dlg.Filter = _fileDialogueFilter;
-            dlg.InitialDirectory = _testsProjectPath;
+            var dlg = new SaveFileDialog { DefaultExt = _fileDialogueExt, Filter = _fileDialogueFilter, InitialDirectory = _testsProjectPath };
 
             if ( dlg.ShowDialog() == false )
             {

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLock

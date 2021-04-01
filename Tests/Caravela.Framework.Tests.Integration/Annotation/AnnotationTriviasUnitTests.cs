@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Caravela.Framework.Tests.Integration.Annotation
 {
-    public class AnnotationTriviasUnitTests : AnnotationUnitTestsBase
+    public class AnnotationTriviasUnitTests : UnitTestBase
     {
         public AnnotationTriviasUnitTests( ITestOutputHelper logger ) : base( logger )
         {
@@ -16,6 +16,8 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 
         [Theory]
         [FromDirectory( @"TestInputs\Formatting" )]
-        public Task All( string testName ) => this.AssertTriviasPreservedByAnnotator( testName );
+        public Task All( string testName ) => this.GetTestResultAsync( testName );
+
+        protected override TestRunnerBase CreateTestRunner() => new AnnotationUnitTestRunner( this.ProjectDirectory );
     }
 }

@@ -17,10 +17,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
-    internal class TestTemplateExpansionContext : ITemplateExpansionContext
+    internal class TestTemplateExpansionContext : ITemplateExpansionContext, IDisposable
     {
         private readonly IMethod _targetMethod;
         private readonly DiagnosticList _diagnostics;
+        private TestLexicalScope _currentScope;
 
         public TestTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
@@ -54,7 +55,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             this._targetMethod = compilation.Factory.GetMethod( roslynTargetMethodSymbol );
 
             this.ProceedImplementation = new TestProceedImpl( roslynTargetMethod );
-            this.CurrentLexicalScope = new TestLexicalScope( this, semanticModel, roslynTargetMethod );
+            this._currentScope = new TestLexicalScope( this, semanticModel, roslynTargetMethod );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -65,7 +66,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
         public ICompilation Compilation { get; }
 
-        public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
+        public ITemplateExpansionLexicalScope CurrentLexicalScope => this._currentScope;
 
         DiagnosticSink ITemplateExpansionContext.DiagnosticSink => this._diagnostics;
 
@@ -90,13 +91,28 @@ namespace Caravela.Framework.Tests.Integration.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        private class TestLexicalScope : ITemplateExpansionLexicalScope
+        public void Dispose()
+        {
+        }
+
+        public IDisposable OpenNestedScope()
+        {
+            return (IDisposable) this._currentScope.OpenNestedScope();
+        }
+
+        private class TestLexicalScope : ITemplateExpansionLexicalScope, IDisposable
         {
             private readonly Dictionary<string, string> _templateToTargetIdentifiersMap = new Dictionary<string, string>();
             private readonly HashSet<string> _definedIdentifiers = new HashSet<string>();
             private readonly TestLexicalScope? _parentScope;
             private readonly List<TestLexicalScope> _nestedScopes = new List<TestLexicalScope>();
             private readonly TestTemplateExpansionContext _expansionContext;
+
+            public ITemplateExpansionLexicalScope? Parent => this._parentScope;
+
+            public IReadOnlyCollection<string> DefinedIdentifiers => this._definedIdentifiers;
+
+            public IReadOnlyList<ITemplateExpansionLexicalScope> NestedScopes => this._nestedScopes;
 
             public TestLexicalScope( TestTemplateExpansionContext expansionContext, SemanticModel semanticModel, BaseMethodDeclarationSyntax targetMethodSyntax )
             {
@@ -122,7 +138,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 if ( this._parentScope != null )
                 {
-                    this._expansionContext.CurrentLexicalScope = this._parentScope;
+                    this._expansionContext._currentScope = this._parentScope;
                 }
             }
 
@@ -130,7 +146,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 var targetName = name;
                 var i = 0;
-                while ( this.IsDefined( targetName ) )
+                while ( this.IsDefineable( targetName ) )
                 {
                     i++;
                     targetName = $"{name}_{i}";
@@ -161,13 +177,20 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 var nestedScope = new TestLexicalScope( this );
                 this._nestedScopes.Add( nestedScope );
-                this._expansionContext.CurrentLexicalScope = nestedScope;
+                this._expansionContext._currentScope = nestedScope;
                 return nestedScope;
             }
 
-            private bool IsDefined( string name )
+            public bool IsDefined( string name, bool includeAncestorScopes = true )
             {
-                return this._definedIdentifiers.Contains( name ) || this.IsDefinedInParent( name ) || this.IsDefinedInNested( name );
+                if ( includeAncestorScopes )
+                {
+                    return this._definedIdentifiers.Contains( name ) || this.IsDefinedInParent( name );
+                }
+                else
+                {
+                    return this._definedIdentifiers.Contains( name );
+                }
             }
 
             private bool IsDefinedInParent( string name )
@@ -178,19 +201,6 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 }
 
                 return this._parentScope._definedIdentifiers.Contains( name ) || this._parentScope.IsDefinedInParent( name );
-            }
-
-            private bool IsDefinedInNested( string name )
-            {
-                foreach ( var nestedScope in this._nestedScopes )
-                {
-                    if ( nestedScope._definedIdentifiers.Contains( name ) || nestedScope.IsDefinedInNested( name ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
         }
     }

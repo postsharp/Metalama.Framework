@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-
 using System.Text;
 using static System.Math;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.Project;
 
@@ -32,6 +29,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
     {
         double Method(double r)
         {
+            StringBuilder stringBuilder = new();
             double area = PI * r * r;
             return area;
         }
