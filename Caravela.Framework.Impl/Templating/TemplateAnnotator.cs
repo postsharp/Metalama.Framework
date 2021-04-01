@@ -55,8 +55,6 @@ namespace Caravela.Framework.Impl.Templating
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
 
-        public int ChangeId => this._localScopes.Count;
-
         private bool TrySetLocalVariableScope( ILocalSymbol local, SymbolDeclarationScope scope )
         {
             if ( this._localScopes.TryGetValue( local, out var oldScope ) )
@@ -104,16 +102,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
-                    // TODO: remove this coercion
-                    if ( this._forceCompileTimeOnlyExpression )
-                    {
-                        this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
-                        return SymbolDeclarationScope.CompileTimeOnly;
-                    }
-                    else
-                    {
-                        return SymbolDeclarationScope.Default;
-                    }
+                    return SymbolDeclarationScope.Default;
                 }
             }
 
@@ -128,16 +117,8 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.RunTimeOnly:
                     if ( this._forceCompileTimeOnlyExpression )
                     {
-                        // If the current expression must be compile-time by inference, emit a diagnostic.
-                        this.Diagnostics.Add( Diagnostic.Create(
-                            "CA01",
-                            "Annotation",
-                            "A compile-time expression is required.",
-                            DiagnosticSeverity.Error,
-                            DiagnosticSeverity.Error,
-                            true,
-                            0,
-                            location: nodeForDiagnostic.GetLocation() ) );
+                        this.RequireScope( nodeForDiagnostic, scopeFromClassifier, SymbolDeclarationScope.CompileTimeOnly, "a compile-time expression" );
+                    
                         return SymbolDeclarationScope.CompileTimeOnly;
                     }
 
@@ -303,16 +284,8 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
-                    this.Diagnostics.Add( Diagnostic.Create(
-                        "CA02",
-                        "Annotation",
-                        $"The expression {node} cannot be used in a build-time expression.",
-                        DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error,
-                        true,
-                        0,
-                        location: Location.Create( node.SyntaxTree, node.Span ) ) );
-
+                    this.RequireScope( node, SymbolDeclarationScope.CompileTimeOnly, SymbolDeclarationScope.RunTimeOnly, "in a run-time expression" );
+                    
                     return transformedNode;
                 }
 
@@ -498,7 +471,7 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 // TODO: We're not processing ref/out arguments properly. These are possibly
-                // local variable assignments.
+                // local variable declarations and assignments.
                 return argument;
             }
         }
@@ -528,12 +501,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // We have an if statement where the condition is a runtime expression. Any variable assignment
                 // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-
-                // TODO: It's not clear here whether we have a run-time expression or an expression that
-                // has not been classified yet as compile-time. We may find a counter-example to this algorithm that
-                // would counter-proof this code here. However, it may need that our whole algorithm is flawed,
-                // so we may want to live with that behavior anyway. Perhaps the same remark is true for `foreach`.
-
                 using ( this.EnterRuntimeConditionalBlock() )
                 {
                     var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
@@ -558,46 +525,21 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
         {
-            var callsProceed = node.HasCallsProceedAnnotation();
-
+            
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
-            if ( callsProceed )
-            {
-                // If the loop calls proceed, we force it to be run-time.
-                this.TrySetLocalVariableScope( local, SymbolDeclarationScope.RunTimeOnly );
-            }
-
-            // TODO: Verify the logic here. At least, we should validate that the foreach expression is
-            // compile-time.
-
-            var isCompileTimeTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
-
-            ExpressionSyntax? annotatedExpression;
-
-            if ( isCompileTimeTimeLocalVariable )
-            {
-                using ( this.EnterForceCompileTimeExpression() )
-                {
-                    annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
-                }
-            }
-            else
-            {
-                annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
-            }
+            ExpressionSyntax annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
             var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
 
-            if ( (isCompileTimeTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
+            if ( isBuildTimeExpression )
             {
                 // This is a build-time loop.
-
-                if ( !isCompileTimeTimeLocalVariable )
+                if ( !this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly ) )
                 {
-                    this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
+                    throw new AssertionFailedException();
                 }
-
+                
                 StatementSyntax annotatedStatement;
                 using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
                 {
@@ -615,14 +557,14 @@ namespace Caravela.Framework.Impl.Templating
                             annotatedExpression,
                             node.CloseParenToken,
                             annotatedStatement )
-                        .AddScopeAnnotation( localScope )
+                        .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly )
                         .WithSymbolAnnotationsFrom( node );
 
                 return transformedNode;
             }
             else
             {
-                // Run-time or default loop, we don't know.
+                // Run-time loop.
 
                 using ( this.EnterRuntimeConditionalBlock() )
                 {
@@ -642,8 +584,7 @@ namespace Caravela.Framework.Impl.Templating
                             annotatedExpression,
                             node.CloseParenToken,
                             annotatedStatement )
-                        .WithSymbolAnnotationsFrom( node )
-                        .WithCallsProceedAnnotationFrom( node );
+                        .WithSymbolAnnotationsFrom( node );
                 }
             }
         }
@@ -751,7 +692,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
 
-                // TODO: We are no longer relying on other assignments than initialization, so this code should be removed.
                 var variableScopes = transformedVariableDeclaration.Variables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
                 if ( variableScopes.Count() == 1 )
@@ -760,16 +700,11 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
-                    // TODO: We may have to write this diagnostic in the last iteration only.
-                    this.Diagnostics.Add( Diagnostic.Create(
-                        "CA01",
-                        "Annotation",
-                        "Split build-time and run-time variables into several declarations.",
-                        DiagnosticSeverity.Error,
-                        DiagnosticSeverity.Error,
-                        true,
-                        0,
-                        location: node.GetLocation() ) );
+                    this.Diagnostics.Add( 
+                        Diagnostic.Create(
+                        TemplatingDiagnosticDescriptors.SplitVariables,
+                        node.GetLocation(),  
+                        string.Join( ",", node.Variables.Select( v => v.Identifier.Text ) ) ) );
                     return transformedVariableDeclaration;
                 }
             }
@@ -1012,21 +947,26 @@ namespace Caravela.Framework.Impl.Templating
         {
             var existingScope = node.GetScopeFromAnnotation();
 
-            if ( existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( node) )
+            this.RequireScope(node, existingScope, requiredScope, reason);
+        }
+
+        private void RequireScope(SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason)
+        {
+            if (existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic(node))
             {
                 existingScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
-            if ( existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope )
+            if (existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope)
             {
                 this.Diagnostics.Add(
-                    Diagnostic.Create( 
-                        TemplatingDiagnosticDescriptors.ScopeMismatch, 
-                        node.GetLocation(), 
+                    Diagnostic.Create(
+                        TemplatingDiagnosticDescriptors.ScopeMismatch,
+                        node.GetLocation(),
                         node.ToString(),
-                        existingScope.ToDisplayString(), 
-                        requiredScope.ToDisplayString(), 
-                        reason ) );
+                        existingScope.ToDisplayString(),
+                        requiredScope.ToDisplayString(),
+                        reason));
             }
         }
 

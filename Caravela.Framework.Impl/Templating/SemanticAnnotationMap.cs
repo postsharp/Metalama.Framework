@@ -14,9 +14,8 @@ namespace Caravela.Framework.Impl.Templating
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)
     /// so that the <see cref="SemanticModel"/> does not need to re-evaluated everything the syntax tree
     /// has changes that don't affect symbols. A syntax tree can be annotated using <see cref="AnnotateTree"/>
-    /// and the symbols can then be retrieved using <see cref="GetAssignments"/>, <see cref="GetSymbol"/>,
-    /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>. Additionally, this class indexes assignments
-    /// of local variables. This is accessible from the <see cref="GetAssignments"/> method.
+    /// and the symbols can then be retrieved using <see cref="GetSymbol"/>,
+    /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>.
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
@@ -26,8 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
-        private readonly Dictionary<ILocalSymbol, SyntaxAnnotation> _localToAssignmentMap = new();
-
+        
         private int _nextId;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create( "local", "symbol", "declared", "type" );
@@ -43,8 +41,6 @@ namespace Caravela.Framework.Impl.Templating
             var rewriter = new AnnotatingRewriter( semanticModel, this );
             return rewriter.Visit( root )!;
         }
-
-        private SyntaxAnnotation GetLocalAssignmentAllocation( ILocalSymbol local ) => this._localToAssignmentMap[local];
 
         /// <summary>
         /// Get the annotated node for an original node.
@@ -94,13 +90,6 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
-
-                if ( declaredSymbol is ILocalSymbol local )
-                {
-                    this._nextId++;
-                    annotation = new SyntaxAnnotation( "local", this._nextId.ToString() );
-                    this._localToAssignmentMap[local] = annotation;
-                }
             }
 
             // Cache semanticModel.GetTypeInfo.
@@ -228,17 +217,6 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         /// <summary>
-        /// Gets all syntax nodes (under a given root) that assign a local variable.
-        /// </summary>
-        /// <param name="local">A local variable.</param>
-        /// <param name="root">The root of the syntax tree under which assignments have to be retrieved.</param>
-        /// <returns></returns>
-        public IEnumerable<SyntaxNode> GetAssignments( ILocalSymbol local, SyntaxNode root )
-        {
-            return root.GetAnnotatedNodes( this.GetLocalAssignmentAllocation( local ) );
-        }
-
-        /// <summary>
         /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.
         /// </summary>
         private class AnnotatingRewriter : CSharpSyntaxRewriter
@@ -260,40 +238,6 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 return this._map.GetAnnotatedNode( node, base.Visit( node ), this._semanticModel );
-            }
-
-            public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
-            {
-                // We need annotations.
-                var annotated =
-                    (VariableDeclaratorSyntax) this._map.GetAnnotatedNode( node, base.VisitVariableDeclarator( node )!, this._semanticModel );
-
-                if ( node.Initializer != null && this._map.GetDeclaredSymbol( annotated ) is ILocalSymbol local )
-                {
-                    return this.AddAssignmentAnnotation( local, annotated );
-                }
-                else
-                {
-                    return annotated;
-                }
-            }
-
-            public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
-            {
-                var annotated = (AssignmentExpressionSyntax) base.VisitAssignmentExpression( node )!;
-                if ( this._map.GetSymbol( annotated.Left ) is ILocalSymbol local )
-                {
-                    return this.AddAssignmentAnnotation( local, annotated );
-                }
-                else
-                {
-                    return annotated;
-                }
-            }
-
-            private SyntaxNode AddAssignmentAnnotation( ILocalSymbol local, SyntaxNode node )
-            {
-                return node.WithAdditionalAnnotations( this._map.GetLocalAssignmentAllocation( local ) );
             }
         }
     }

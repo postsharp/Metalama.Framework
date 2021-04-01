@@ -38,47 +38,21 @@ namespace Caravela.Framework.Impl.Templating
             currentSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();
-
-            // Find calls to Proceed.
-            var proceedAnnotator = new ProceedCallAnnotator( symbolAnnotationMap );
-            currentSyntaxRoot = proceedAnnotator.Visit( currentSyntaxRoot )!;
-            diagnostics.AddRange( proceedAnnotator.Diagnostics );
-
-            FixupTreeForDiagnostics();
-
+            
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,
             var annotatorRewriter = new TemplateAnnotator( (CSharpCompilation) semanticModel.Compilation, symbolAnnotationMap );
+            annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
+            diagnostics.AddRange( annotatorRewriter.Diagnostics );
 
-            // TODO: #28266 the algorithm should now work with a single iteration. However, just removing the code breaks it.
-            var changeIdBefore = -1;
-            var iterations = 0;
-
-            while ( true )
+            // Stop if we have any error.
+            if ( annotatorRewriter.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
-                iterations++;
-
-                Invariant.Assert( iterations < 32 );
-
-                annotatedSyntaxRoot = annotatorRewriter.Visit( annotatedSyntaxRoot )!;
-
-                diagnostics.AddRange( annotatorRewriter.Diagnostics );
-
-                // Stop if we have any error.
-                if ( annotatorRewriter.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
-                {
-                    return false;
-                }
-
-                // Stop if no change was detected.
-                if ( changeIdBefore == annotatorRewriter.ChangeId )
-                {
-                    return true;
-                }
-
-                changeIdBefore = annotatorRewriter.ChangeId;
+                return false;
             }
+
+            return true;
         }
 
         public bool TryAnnotate(
