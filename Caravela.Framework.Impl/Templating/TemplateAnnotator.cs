@@ -571,11 +571,11 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: Verify the logic here. At least, we should validate that the foreach expression is
             // compile-time.
 
-            var isBuildTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
+            var isCompileTimeTimeLocalVariable = this._localScopes.TryGetValue( local, out var localScope ) && localScope == SymbolDeclarationScope.CompileTimeOnly;
 
             ExpressionSyntax? annotatedExpression;
 
-            if ( isBuildTimeLocalVariable )
+            if ( isCompileTimeTimeLocalVariable )
             {
                 using ( this.EnterForceCompileTimeExpression() )
                 {
@@ -589,11 +589,11 @@ namespace Caravela.Framework.Impl.Templating
 
             var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
 
-            if ( (isBuildTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
+            if ( (isCompileTimeTimeLocalVariable || isBuildTimeExpression) && !callsProceed )
             {
                 // This is a build-time loop.
 
-                if ( !isBuildTimeLocalVariable )
+                if ( !isCompileTimeTimeLocalVariable )
                 {
                     this.TrySetLocalVariableScope( local, SymbolDeclarationScope.CompileTimeOnly );
                 }
@@ -907,10 +907,41 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            var annotatedCondition = (ExpressionSyntax) this.Visit( node.Condition )!;
+            var conditionScope = this.GetNodeScope( annotatedCondition );
 
-            return base.VisitWhileStatement( node );
+            if ( conditionScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                // We have an while statement where the condition is a compile-time expression. Add annotations
+                // to the while but not to the statement or block itself.
+
+                StatementSyntax annotatedStatement;
+                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                {
+                    annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                }
+
+                return node.Update( node.AttributeLists, node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+            }
+            else
+            {
+                // We have an while statement where the condition is a runtime expression. Any variable assignment
+                // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
+
+                using ( this.EnterRuntimeConditionalBlock() )
+                {
+                    StatementSyntax annotatedStatement;
+                    using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
+                    {
+                        annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
+                    }
+
+                    var result = node.Update( node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement );
+
+                    return result;
+                }
+            }
         }
 
         public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )

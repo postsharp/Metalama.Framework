@@ -1,10 +1,10 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using System.Collections.Generic;
 using Caravela.Framework.Project;
+using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.WhileNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTimeWhileInRunTimeWhile
 {
-    [CompileTime]
     class Aspect
     {
         [TestTemplate]
@@ -14,6 +14,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Whil
             while (i < target.Parameters.Count)
             {
                 i++;
+                int j = compileTime(0);
+                while (j < 2)
+                {
+                    i++;
+                    j++;
+                }
             }
 
             Console.WriteLine("Test result = " + i);
@@ -25,9 +31,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Whil
 
     class TargetCode
     {
-        int Method(int a, int b)
+        int Method(int a)
         {
-            return a + b;
+            return a;
         }
     }
 }
