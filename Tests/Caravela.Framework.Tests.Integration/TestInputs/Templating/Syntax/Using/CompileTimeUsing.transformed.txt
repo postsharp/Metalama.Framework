@@ -1,1 +1,4 @@
-// Error CR0104 on "new DisposableClass()"
+// Compilation error. Code not generated.
+// Error CR0104 on `new DisposableClass()`
+
+;
