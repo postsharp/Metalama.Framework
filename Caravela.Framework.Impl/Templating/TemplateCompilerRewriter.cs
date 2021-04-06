@@ -36,6 +36,9 @@ namespace Caravela.Framework.Impl.Templating
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
 
+
+        public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
+
         private MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
             => MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
@@ -233,9 +236,8 @@ namespace Caravela.Framework.Impl.Templating
                 case "dynamic":
                     if ( this.IsProceed( expression ) )
                     {
-                        // TODO: Emit a diagnostic. proceed() cannot be used as a general expression but only in
-                        // specifically supported statements, i.e. variable assignments and return.
-                        throw new AssertionFailedException();
+                        this.Diagnostics.Add( Diagnostic.Create( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed, expression.GetLocation() ) );
+                        return LiteralExpression( SyntaxKind.NullLiteralExpression );
                     }
 
                     return InvocationExpression(
@@ -319,6 +321,12 @@ namespace Caravela.Framework.Impl.Templating
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( node.ArgumentList.Arguments.Select(
                         a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
+            }
+
+            if ( this.IsProceed(node.Expression))
+            {
+                this.Diagnostics.Add( Diagnostic.Create( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed, node.Expression.GetLocation() ) );
+                return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
             // Expand extension methods.
