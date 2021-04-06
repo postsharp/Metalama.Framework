@@ -62,7 +62,7 @@ namespace Caravela.Framework.Tests.UnitTests
             Assert.Equal( 2, skipList.Count );
         }
 
-        [Theory( Skip = "Buggy, so we try not to remove." )]
+        [Theory( Skip = "Buggy, so we try not to use the Remove method." )]
         [Repeat( _repeat )]
         public void TestRemove( int attempt )
         {

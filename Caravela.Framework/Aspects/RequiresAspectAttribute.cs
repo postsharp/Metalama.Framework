@@ -11,7 +11,7 @@ namespace Caravela.Framework.Aspects
     /// require an instance of each aspect type from a given list. These aspect types must have a public default constructor.
     /// (Not implemented.)
     /// </summary>
-    [Obsolete("Not implemented.")]
+    [Obsolete( "Not implemented." )]
     public sealed class RequiresAspectAttribute : Attribute
     {
         /// <summary>

@@ -42,10 +42,29 @@ namespace Caravela.Framework.Impl.Templating
         internal static readonly DiagnosticDescriptor LocalVariableAmbiguousCoercion
             = new DiagnosticDescriptor(
                 "CR0103",
-                "The local variable '{local.Name}' is both coerced to be run-time and build-time",
-                "The local variable '{0}' is both coerced to be run-time and build-time.",
+                "The local variable is both coerced to be run-time and compile-time",
+                "The local variable '{0}' is both coerced to be run-time and compile-time.",
                 _templateCategory,
                 DiagnosticSeverity.Error,
                 true );
+
+        internal static readonly DiagnosticDescriptor ScopeMismatch
+            = new DiagnosticDescriptor(
+                "CR0104",
+                "The expression is expected to be of a different scope (run-time or compile-time)",
+                "The expression '{0}' is {1} but it is expected to be {2} because the expression appears in {3}.",
+                _templateCategory,
+                DiagnosticSeverity.Error,
+                true );
+        
+        internal static readonly DiagnosticDescriptor SplitVariables
+            = new DiagnosticDescriptor(
+                "CR0105",
+                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                _templateCategory,
+                DiagnosticSeverity.Error,
+                true );
+
     }
 }

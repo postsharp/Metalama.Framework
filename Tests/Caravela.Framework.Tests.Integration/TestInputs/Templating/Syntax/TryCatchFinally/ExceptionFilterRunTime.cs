@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.TryCatchFinally.ExceptionFilterRunTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterRunTime
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

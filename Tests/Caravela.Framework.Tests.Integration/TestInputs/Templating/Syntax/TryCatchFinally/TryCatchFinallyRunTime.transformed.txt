@@ -1,19 +1,19 @@
 {
     try
     {
-        Console.WriteLine("try");
+        global::System.Console.WriteLine("try");
         int result;
         result = a;
-        Console.WriteLine("success");
+        global::System.Console.WriteLine("success");
         return (int)result;
     }
     catch
     {
-        Console.WriteLine("exception");
+        global::System.Console.WriteLine("exception");
         throw;
     }
     finally
     {
-        Console.WriteLine("finally");
+        global::System.Console.WriteLine("finally");
     }
 }

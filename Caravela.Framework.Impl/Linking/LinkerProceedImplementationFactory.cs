@@ -7,6 +7,9 @@ using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Creates LinkerOverrideProceedImpl objects.
+    /// </summary>
     internal class LinkerProceedImplementationFactory : ProceedImplementationFactory
     {
         public override IProceedImpl Get( AspectLayerId aspectLayerId, IMethod overriddenDeclaration )

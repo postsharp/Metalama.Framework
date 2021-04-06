@@ -18,16 +18,25 @@ namespace Caravela.Framework.Impl.Linking
         Original,
     }
 
-    internal record LinkerAnnotation(
-
-        AspectLayerId AspectLayerId,
-
-        // Determines which version of the semantic must be invoked.
-        LinkerAnnotationOrder Order )
+    /// <summary>
+    /// Wrapper of the linker annotation on nodes.
+    /// </summary>
+    internal struct LinkerAnnotation
     {
-        public override string ToString()
+        /// <summary>
+        /// Gets the aspect layer.
+        /// </summary>
+        public AspectLayerId AspectLayer { get; }
+
+        /// <summary>
+        /// Gets a value indicating which version of the semantic must be invoked.
+        /// </summary>
+        public LinkerAnnotationOrder Order { get; }
+
+        public LinkerAnnotation(AspectLayerId aspectLayer, LinkerAnnotationOrder order)
         {
-            return $"{this.AspectLayerId.FullName}${this.Order}";
+            this.AspectLayer = aspectLayer;
+            this.Order = order;
         }
 
         public static LinkerAnnotation FromString( string str )
@@ -39,6 +48,11 @@ namespace Caravela.Framework.Impl.Linking
             Invariant.Assert( parseSuccess );
 
             return new LinkerAnnotation( AspectLayerId.FromString( parts[0] ), order );
+        }
+
+        public override string ToString()
+        {
+            return $"{this.AspectLayer.FullName}${this.Order}";
         }
     }
 }

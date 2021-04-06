@@ -1,8 +1,9 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromTemplate
+namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTemplate
 {
     public class LogAttribute : OverrideMethodAspect
     {
@@ -14,7 +15,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromTemp
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Log]
@@ -25,5 +26,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromTemp
             return a + b;
         }
     }
-    #endregion
 }

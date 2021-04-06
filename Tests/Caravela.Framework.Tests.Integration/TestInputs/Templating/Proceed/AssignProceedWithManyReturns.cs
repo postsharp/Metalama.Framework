@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Proceed.AssignProceedWithManyReturns
+namespace Caravela.Framework.Tests.Integration.Templating.Proceed.AssignProceedWithManyReturns
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

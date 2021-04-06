@@ -36,6 +36,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return parameter;
         }
 
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        {
+            var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
+            var typeConstant = defaultValue != null ? new TypedConstant( itype, defaultValue ) : default;
+            return this.AddParameter( name, itype, refKind, typeConstant );
+        }
+
         public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotImplementedException();
 
         IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
@@ -108,7 +115,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                                     SyntaxKind.DefaultLiteralExpression,
                                     Token (SyntaxKind.DefaultKeyword)))
                         }
-                        : null);
+                        : null );
 
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions ) };
         }

@@ -54,13 +54,13 @@ namespace Caravela.Framework.Impl.CodeModel
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {
             var type = this._compilation.Factory.GetIType( constant.Type.AssertNotNull() );
-            
+
             var value = constant.Kind switch
             {
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
                 TypedConstantKind.Type => constant.Value == null ? null : this._compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
-                _ => throw new ArgumentException( nameof(constant) )
+                _ => throw new ArgumentException( nameof( constant ) )
             };
 
             return new TypedConstant( type, value );

@@ -8,10 +8,12 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    // Lexical scopes and template expansion:
+    // ----------------------------------------
     // When call graph of overrides of a single method is simple enough, we can inline calls to produce nicer code.
     // Names in these methods can, however, collide if we don't take care.
     //
@@ -52,96 +54,75 @@ namespace Caravela.Framework.Impl.Linking
     //
     // Therefore:
     //   * Names(Subtree(R3')) = Names(Subtree(R1)) ⋃ Names(Subtree(R2)) ⋃ Names(Subtree(R3))
-    //   * Names(Subtree(R1)), Names(Subtree(R2)), Names(Subtree(R3)) are disjoint
+    //   * Names(Subtree(R1)), Names(Subtree(R2)), Names(Subtree(R3)) are mutually disjoint
 
-    internal partial class LinkerIntroductionStep
+    /// <summary>
+    /// Aspect linker's introduction steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
+    /// This results in the transformation registry and intermediate compilation, and also produces diagnostics.
+    /// </summary>
+    internal partial class LinkerIntroductionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerIntroductionStepOutput>
     {
-        // Transformations grouped by target syntax trees, preserved order.
-        private readonly CSharpCompilation _initialCompilation;
-        private readonly CompilationModel _finalCompilationModel;
-        private readonly IReadOnlyList<ISyntaxTreeTransformation> _transformations;
+        public static LinkerIntroductionStep Instance { get; } = new LinkerIntroductionStep();
 
-        private LinkerIntroductionStep( CSharpCompilation initialCompilation, CompilationModel finalCompilationModel, IReadOnlyList<ISyntaxTreeTransformation> transformations )
+        private LinkerIntroductionStep()
         {
-            this._initialCompilation = initialCompilation;
-            this._transformations = transformations;
-            this._finalCompilationModel = finalCompilationModel;
         }
 
-        public static LinkerIntroductionStep Create( AspectLinkerInput input )
+        public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
+            var diagnostics = new DiagnosticList( null );
+            var nameProvider = new LinkerIntroductionNameProvider();
+            var proceedImplFactory = new LinkerProceedImplementationFactory();
+            var lexicalScopeHelper = new LexicalScopeHelper();
+            var introducedMemberCollection = new IntroducedMemberCollection();
+            var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
+
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
             var allTransformations =
-                input.CompilationModel.GetAllObservableTransformations()
+                input.FinalCompilationModel.GetAllObservableTransformations()
                 .SelectMany( x => x.Transformations )
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
                 .ToList();
 
-            return new LinkerIntroductionStep( input.Compilation, input.CompilationModel, allTransformations );
-        }
-
-        public LinkerIntroductionStepOutput Execute()
-        {
-            var context = new Context( this._initialCompilation, this._finalCompilationModel );
-            var diagnostics = new DiagnosticList( null );
-            var nameProvider = new LinkerIntroductionNameProvider();
-            var proceedImplFactory = new LinkerProceedImplementationFactory();
-
             // Visit all introductions, respect aspect part ordering.
-            foreach ( var memberIntroduction in this._transformations.OfType<IMemberIntroduction>() )
+            foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, context.GetLexicalScope( memberIntroduction ), proceedImplFactory );
+                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), proceedImplFactory );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
-                context.TransformationRegistry.SetIntroducedMembers( memberIntroduction, introducedMembers );
+                introducedMemberCollection.Add( memberIntroduction, introducedMembers );
             }
 
-            context.IntermediateCompilation = this._initialCompilation;
+            var intermediateCompilation = input.InitialCompilation;
 
             // Process syntax trees one by one.
-            Rewriter addIntroducedElementsRewriter = new( context.TransformationRegistry, diagnostics );
+            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics );
 
-            foreach ( var initialSyntaxTree in this._initialCompilation.SyntaxTrees )
+            foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
 
 #if DEBUG
                 // Improve readibility of intermediate compilation in debug builds.
-                newRoot = Microsoft.CodeAnalysis.SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
+                newRoot = SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
 #endif
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                context.TransformationRegistry.SetIntermediateSyntaxTreeMapping( initialSyntaxTree, intermediateSyntaxTree );
-                context.IntermediateCompilation = context.IntermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
+                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
-            // Push the intermediate compilation.
-            context.TransformationRegistry.SetIntermediateCompilation( context.IntermediateCompilation );
+            var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
-            // Freeze the introduction registry, it should not be changed after this point.
-            context.TransformationRegistry.Freeze();
-
-            return new LinkerIntroductionStepOutput( diagnostics, context.IntermediateCompilation, context.TransformationRegistry );
+            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
 
-        private class Context
+        private class LexicalScopeHelper
         {
-            private readonly Dictionary<ICodeElement, LinkerLexicalScope> _lexicalScopeRegistry = new Dictionary<ICodeElement, LinkerLexicalScope>();
-
-            public Dictionary<ICodeElement, LinkerLexicalScope> LexicalScopesByOverriddenElement { get; } = new Dictionary<ICodeElement, LinkerLexicalScope>();
-
-            public LinkerTransformationRegistry TransformationRegistry { get; }
-
-            public CSharpCompilation IntermediateCompilation { get; set; }
-
-            public Context( CSharpCompilation initialCompilation, CompilationModel finalCompilationModel )
-            {
-                this.IntermediateCompilation = initialCompilation;
-                this.TransformationRegistry = new LinkerTransformationRegistry( finalCompilationModel );
-            }
+            private readonly Dictionary<ICodeElement, LinkerLexicalScope> _scopes = new Dictionary<ICodeElement, LinkerLexicalScope>();
 
             public ITemplateExpansionLexicalScope GetLexicalScope( IMemberIntroduction introduction )
             {
@@ -149,15 +130,15 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( introduction is IOverriddenElement overriddenElement )
                 {
-                    if ( !this._lexicalScopeRegistry.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
+                    if ( !this._scopes.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
                     {
-                        this._lexicalScopeRegistry[overriddenElement.OverriddenElement] = lexicalScope =
+                        this._scopes[overriddenElement.OverriddenElement] = lexicalScope =
                             LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromMethod( (IMethodInternal) overriddenElement.OverriddenElement ) );
 
                         return lexicalScope;
                     }
 
-                    this._lexicalScopeRegistry[overriddenElement.OverriddenElement] = lexicalScope = LinkerLexicalScope.CreateEmpty( lexicalScope.GetTransitiveClosure() );
+                    this._scopes[overriddenElement.OverriddenElement] = lexicalScope = LinkerLexicalScope.CreateEmpty( lexicalScope.GetTransitiveClosure() );
                     return lexicalScope;
                 }
                 else

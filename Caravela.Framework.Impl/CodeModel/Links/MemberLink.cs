@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
             this.Target = symbol;
         }
-        
+
         public MemberLink( MemberBuilder builder )
         {
             this.Target = builder;

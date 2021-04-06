@@ -8,11 +8,16 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestInput
     {
-        public TestInput( string testName, string templateSource, string? targetSource )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TestInput"/> class.
+        /// </summary>
+        /// <param name="testName">Short name of the test. Typically a relative path.</param>
+        /// <param name="testSource">Full source of the input code.</param>
+        /// <param name="testSourceFullPath">Full path to the file containing the source code.</param>
+        public TestInput( string testName, string testSource )
         {
             this.TestName = testName;
-            this.TemplateSource = templateSource;
-            this.TargetSource = targetSource;
+            this.TestSource = testSource;
         }
 
         /// <summary>
@@ -23,11 +28,6 @@ namespace Caravela.TestFramework
         /// <summary>
         /// Gets the content of the test source file.
         /// </summary>
-        public string TemplateSource { get; }
-
-        /// <summary>
-        /// Gets the content of the second test source file. Currently unused.
-        /// </summary>
-        public string? TargetSource { get; }
+        public string TestSource { get; }
     }
 }

@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateClassMembers
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateClassMembers
 {
     class Aspect : BaseAspect
     {
@@ -31,6 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.TemplateCl
         }
     }
 
+    [CompileTime]
     abstract class BaseAspect
     {
         protected BaseAspect(string formatString)

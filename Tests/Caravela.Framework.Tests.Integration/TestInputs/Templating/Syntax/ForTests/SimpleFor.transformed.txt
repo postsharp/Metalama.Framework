@@ -10,5 +10,5 @@
         }
     }
 
-    throw new Exception();
+    throw new global::System.Exception();
 }

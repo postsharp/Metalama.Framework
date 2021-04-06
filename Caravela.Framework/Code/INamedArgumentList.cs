@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-  
+
     /// <summary>
     /// A list of named arguments exposed by <see cref="IAttribute.NamedArguments"/>.
     /// </summary>

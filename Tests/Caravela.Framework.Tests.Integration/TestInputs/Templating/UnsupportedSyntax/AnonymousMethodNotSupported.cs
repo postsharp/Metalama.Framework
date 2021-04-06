@@ -1,12 +1,10 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Project;
 
-namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.AnonymousMethodNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.AnonymousMethodNotSupported
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

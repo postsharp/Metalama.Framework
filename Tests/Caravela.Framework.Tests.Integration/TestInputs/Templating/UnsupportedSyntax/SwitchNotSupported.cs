@@ -1,13 +1,10 @@
 #pragma warning disable CS8600, CS8603
-using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Project;
 
-namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.SwitchNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.SwitchNotSupported
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

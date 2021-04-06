@@ -1,11 +1,10 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.Misc.Generics
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

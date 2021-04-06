@@ -8,6 +8,11 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerAnalysisStep
     {
+        // TODO: Change this to counting return statements that change the control flow.
+
+        /// <summary>
+        /// Walks method bodies, counting return statements.
+        /// </summary>
         private class MethodBodyWalker : CSharpSyntaxWalker
         {
             public int ReturnStatementCount { get; private set; }

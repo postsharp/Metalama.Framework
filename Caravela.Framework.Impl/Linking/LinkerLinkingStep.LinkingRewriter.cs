@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Impl.AspectOrdering;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,22 +12,19 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal partial class LinkerLinkingStep
     {
+        /// <summary>
+        /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
+        /// </summary>
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
             private readonly CSharpCompilation _intermediateCompilation;
-            private readonly LinkerTransformationRegistry _transformationRegistry;
             private readonly LinkerAnalysisRegistry _referenceRegistry;
-            private readonly IReadOnlyList<AspectLayer> _orderedAspectLayers;
 
             public LinkingRewriter(
-                IReadOnlyList<AspectLayer> orderedAspectLayers,
-                LinkerTransformationRegistry transformationRegistry,
                 CSharpCompilation intermediateCompilation,
                 LinkerAnalysisRegistry referenceRegistry )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._orderedAspectLayers = orderedAspectLayers;
-                this._transformationRegistry = transformationRegistry;
                 this._referenceRegistry = referenceRegistry;
             }
 
@@ -52,7 +48,7 @@ namespace Caravela.Framework.Impl.Linking
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( method )!;
 
-                    if ( this._referenceRegistry.IsOverrideMethod( symbol ) )
+                    if ( this._referenceRegistry.IsOverride( symbol ) )
                     {
                         // Override method.
                         if ( this._referenceRegistry.IsBodyInlineable( symbol ) )
@@ -106,6 +102,7 @@ namespace Caravela.Framework.Impl.Linking
 
             private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
+                // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
                 var invocation =
                     InvocationExpression(
                         GetInvocationTarget(),
@@ -135,6 +132,7 @@ namespace Caravela.Framework.Impl.Linking
 
             private BlockSyntax? GetRewrittenMethodBody( SemanticModel semanticModel, MethodDeclarationSyntax method, IMethodSymbol symbol )
             {
+                // Create inlining rewriter and inline calls into this method's body.
                 var inliningRewriter = new InliningRewriter( this._referenceRegistry, semanticModel, symbol );
 
                 return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();

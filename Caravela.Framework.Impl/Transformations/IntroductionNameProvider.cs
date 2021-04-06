@@ -5,8 +5,11 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl
 {
+    /// <summary>
+    /// Provides names for overriden declarations.
+    /// </summary>
     internal abstract class IntroductionNameProvider
     {
-        internal abstract string GetOverrideName( AspectLayerId advice, IMethod overriddenDeclaration );
+        internal abstract string GetOverrideName( AspectLayerId aspectLayer, IMethod overriddenDeclaration );
     }
 }

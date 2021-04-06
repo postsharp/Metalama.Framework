@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.Combined.ForEachParamIfValue
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEachParamIfValue
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

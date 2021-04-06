@@ -2,11 +2,12 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Project;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForEachTests.ForEachRunTimeContainsProceed
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachRunTimeContainsProceed
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

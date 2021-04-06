@@ -6,6 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    /// <summary>
+    /// Compares symbols, possibly from different compilations.
+    /// </summary>
     internal class StructuralSymbolComparer : IEqualityComparer<ISymbol>
     {
         // TODO: At this point the default display string seems to be enough for comparison.

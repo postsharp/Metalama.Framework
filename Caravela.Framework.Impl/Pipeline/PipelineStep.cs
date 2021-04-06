@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal abstract class PipelineStep
     {
-      
+
         public PipelineStepId Id { get; }
 
         public OrderedAspectLayer AspectLayer { get; }

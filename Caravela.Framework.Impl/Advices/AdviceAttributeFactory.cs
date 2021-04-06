@@ -49,8 +49,6 @@ namespace Caravela.Framework.Impl.Advices
 
             switch ( attribute.Type.Name )
             {
-                case nameof( OverrideMethodAttribute ):
-                    return new OverrideMethodAdvice( aspect, (IMethod) declaration, (IMethod) templateMethod, aspectLinkerOptions );
                 case nameof( IntroduceMethodAttribute ):
                 {
                     var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod, aspectLinkerOptions );

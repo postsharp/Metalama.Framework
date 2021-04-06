@@ -1,10 +1,10 @@
 {
-    IEnumerable<int> array = Enumerable.Range(1, 2);
+    global::System.Collections.Generic.IEnumerable<global::System.Int32> array = global::System.Linq.Enumerable.Range(1, 2);
     foreach (int n in array)
     {
         if (a <= n)
         {
-            Console.WriteLine("Oops a <= " + n);
+            global::System.Console.WriteLine("Oops a <= " + n);
         }
     }
 
@@ -12,7 +12,7 @@
     {
         if (b <= n)
         {
-            Console.WriteLine("Oops b <= " + n);
+            global::System.Console.WriteLine("Oops b <= " + n);
         }
     }
 

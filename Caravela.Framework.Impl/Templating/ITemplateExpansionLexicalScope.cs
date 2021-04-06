@@ -63,6 +63,9 @@ namespace Caravela.Framework.Impl.Templating
         ITemplateExpansionLexicalScope OpenNestedScope();
     }
 
+    /// <summary>
+    /// Common algorithms on lexical scopes.
+    /// </summary>
     internal static class TemplateExpansionLexicalScopeExtensions
     {
         /// <summary>

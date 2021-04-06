@@ -18,19 +18,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         RuntimeExpression CreateMemberAccessExpression( string member );
     }
 
-    public static class DynamicMetaMemberExtensions
-    {
-        public static RuntimeExpression CreateMemberAccessExpression( this IDynamicMember dynamicMember, string member )
-        {
-            if ( dynamicMember is IDynamicMemberDifferentiated metaMemberDifferentiated )
-            {
-                return metaMemberDifferentiated.CreateMemberAccessExpression( member );
-            }
-
-            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
-        }
-    }
-
     public interface IProceedImpl
     {
         TypeSyntax CreateTypeSyntax();

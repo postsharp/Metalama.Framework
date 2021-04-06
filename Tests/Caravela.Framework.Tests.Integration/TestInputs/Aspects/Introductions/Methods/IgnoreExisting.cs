@@ -2,9 +2,12 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.IgnoreExisting
 {
+    // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
+
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
         public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
@@ -19,7 +22,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Igno
         }
     }
 
-    #region Target
+    [TestOutput]
     [Introduction]
     internal class TargetClass
     {
@@ -28,5 +31,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Igno
             return 13;
         }
     }
-    #endregion
 }
