@@ -13,23 +13,14 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeAssemblyBuilder
     {
+        public static SyntaxAnnotation HasCompileTimeCodeAnnotation = new SyntaxAnnotation( "hasCompileTimeCode" );
+
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
-            private static readonly SyntaxList<UsingDirectiveSyntax> _templateUsings = ParseCompilationUnit( @"
-using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Templating.MetaModel;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
-" ).Usings;
 
             private readonly TemplateCompiler _templateCompiler;
+            private readonly Compilation _compileTimeCompilation;
             private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
-            private bool _addTemplateUsings;
 
             public bool Success { get; private set; } = true;
 
@@ -37,30 +28,15 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public ProduceCompileTimeCodeRewriter( ISymbolClassifier symbolClassifier, TemplateCompiler templateCompiler, Compilation compilation )
-                : base( symbolClassifier, compilation )
+            public ProduceCompileTimeCodeRewriter( 
+                ISymbolClassifier symbolClassifier,
+                TemplateCompiler templateCompiler,
+                Compilation runTimeCompilation,
+                Compilation compileTimeCompilation )
+                : base( symbolClassifier, runTimeCompilation )
             {
                 this._templateCompiler = templateCompiler;
-            }
-
-            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
-            {
-                node = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
-
-                // TODO: handle namespaces properly
-                if ( this._addTemplateUsings )
-                {
-                    // add all template usings, unless such using is already in the list
-                    var usingsToAdd = _templateUsings.Where( tu => !node.Usings.Any( u => u.IsEquivalentTo( tu ) ) );
-
-                    node = node.AddUsings( usingsToAdd.ToArray() );
-                }
-
-#if DEBUG
-                node = node.NormalizeWhitespace();
-#endif
-
-                return node;
+                this._compileTimeCompilation = compileTimeCompilation;
             }
 
             // TODO: assembly and module-level attributes?
@@ -103,7 +79,7 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                             }
                         }
 
-                        return (T) node.WithMembers( List( members ) );
+                        return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
 
                     default:
                         throw new NotImplementedException();
@@ -115,12 +91,10 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                 if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
                 {
                     var success =
-                        this._templateCompiler.TryCompile( node, this.Compilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
+                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
 
                     if ( success )
                     {
-                        this._addTemplateUsings = true;
-
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                         yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
                     }
@@ -132,6 +106,34 @@ using static Caravela.Framework.Impl.Templating.TemplateSyntaxFactory;
                 else
                 {
                     yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
+                }
+            }
+
+            public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+            {
+                var transformedNode = (NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!;
+
+                if ( transformedNode.Members.Any( m => m.HasAnnotation( HasCompileTimeCodeAnnotation ) ) )
+                {
+                    return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                var transformedNode = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
+
+                if ( transformedNode.Members.Any( m => m.HasAnnotation( HasCompileTimeCodeAnnotation ) ) )
+                {
+                    return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
+                }
+                else
+                {
+                    return null;
                 }
             }
 

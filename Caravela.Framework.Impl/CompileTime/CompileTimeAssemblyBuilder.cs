@@ -78,11 +78,35 @@ namespace Caravela.Framework.Impl.CompileTime
             this._resources = resources;
         }
 
-        // TODO: creating the compile-time assembly like this means it cannot use aspects itself; should it?
-        private Compilation? CreateCompileTimeAssembly( Compilation compilation )
+        private Compilation? CreateCompileTimeAssembly( Compilation runTimeCompilation )
         {
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, compilation );
-            compilation = produceCompileTimeCodeRewriter.VisitAllTrees( compilation );
+            var compileTimeReferences =
+                runTimeCompilation.References
+                    .Select( reference =>
+                    {
+                        if ( reference is PortableExecutableReference { FilePath: string path } )
+                        {
+                            var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
+
+                            if ( assemblyBytes != null )
+                            {
+                                return MetadataReference.CreateFromImage( assemblyBytes );
+                            }
+                        }
+
+                        return null!;
+                    } )
+                    .Where( r => r != null )
+                    .Concat( _fixedReferences );
+
+            var compileTimeCompilation = CSharpCompilation.Create(
+                runTimeCompilation.AssemblyName,
+                Array.Empty<SyntaxTree>(),
+                compileTimeReferences,
+                new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) );
+
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation );
+            var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
 
             if ( !produceCompileTimeCodeRewriter.Success )
             {
@@ -97,37 +121,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 return null;
             }
 
-            compilation = compilation.AddSyntaxTrees(
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees(
                 SyntaxFactory.ParseSyntaxTree(
                     $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
-                    compilation.SyntaxTrees.First().Options ) );
+                    runTimeCompilation.SyntaxTrees.First().Options ) );
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( modifiedRunTimeCompilation.SyntaxTrees );
 
-            compilation = compilation.WithOptions( compilation.Options.WithDeterministic( true ).WithOutputKind( OutputKind.DynamicallyLinkedLibrary ) );
+            compileTimeCompilation = new RemoveInvalidUsingsRewriter( compileTimeCompilation ).VisitAllTrees( compileTimeCompilation );
 
-            var compileTimeReferences = compilation.References
-                .Select( reference =>
-                {
-                    if ( reference is PortableExecutableReference { FilePath: string path } )
-                    {
-                        var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
-
-                        if ( assemblyBytes != null )
-                        {
-                            return MetadataReference.CreateFromImage( assemblyBytes );
-                        }
-                    }
-
-                    return null!;
-                } )
-                .Where( r => r != null );
-
-            compilation = compilation.WithReferences( _fixedReferences.Concat( compileTimeReferences ) );
-
-            compilation = new RemoveInvalidUsingsRewriter( compilation ).VisitAllTrees( compilation );
-
-            // TODO: produce better errors when there's an incorrect reference from compile-time code to non-compile-time symbol
-
-            return compilation;
+            return compileTimeCompilation;
         }
 
         // this is not nearly as good as a GUID, but should be good enough for the purpose of preventing collisions within the same process
@@ -145,12 +147,24 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private MemoryStream Emit( Compilation compilation )
         {
-            var stream = new MemoryStream();
 
             var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
             var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
+            var result = this.TryEmit( compilation, compileTimeProjectDirectory, out var stream );
+
+            if ( !result.Success )
+            {
+                throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
+            }
+
+            return stream;
+        }
+
+        private EmitResult TryEmit( Compilation compilation, string? compileTimeProjectDirectory, out MemoryStream stream )
+        {
             EmitResult? result;
+            stream = new MemoryStream();
 
             // Write the generated files to disk if we should.
             if ( !string.IsNullOrWhiteSpace( compileTimeProjectDirectory ) )
@@ -200,14 +214,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 result = compilation.Emit( stream, manifestResources: this._resources );
             }
 
-            if ( !result.Success )
-            {
-                throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
-            }
-
             stream.Position = 0;
-
-            return stream;
+            return result;
         }
 
         public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )

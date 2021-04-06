@@ -25,9 +25,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
         public List<Diagnostic> Diagnostics { get; } = new();
 
-        public bool TryCompile( SyntaxNode rootNode, out SyntaxNode annotatedNode, out SyntaxNode transformedNode )
+        public bool TryCompile( CSharpCompilation compileTimeCompilation, SyntaxNode rootNode, out SyntaxNode annotatedNode, out SyntaxNode transformedNode )
         {
-            var visitor = new Visitor( this );
+            var visitor = new Visitor( this, compileTimeCompilation );
             visitor.Visit( rootNode );
 
             annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
@@ -57,22 +57,24 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private class Visitor : CSharpSyntaxWalker
         {
             private readonly TestTemplateCompiler _parent;
+            private readonly Compilation _compileTimeCompilation;
 
-            public Visitor( TestTemplateCompiler parent )
+            public Visitor( TestTemplateCompiler parent, Compilation compileTimeCompilation )
             {
                 this._parent = parent;
+                this._compileTimeCompilation = compileTimeCompilation;
             }
 
             public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this._parent.IsTemplate( node ) )
                 {
-                    if ( !this._parent._compiler.TryCompile( node, this._parent._semanticModel, this._parent.Diagnostics, out var annotatedNode, out var transformedNode ) )
+                    if ( !this._parent._compiler.TryCompile( this._compileTimeCompilation, node, this._parent._semanticModel, this._parent.Diagnostics, out var annotatedNode, out var transformedNode ) )
                     {
                         this._parent.HasError = true;
                     }
 
-                    this._parent._transformedNodes.Add( node, new[] { annotatedNode!, transformedNode! } );
+                    this._parent._transformedNodes.Add( node, new SyntaxNode[] { annotatedNode!, transformedNode! } );
                 }
             }
         }

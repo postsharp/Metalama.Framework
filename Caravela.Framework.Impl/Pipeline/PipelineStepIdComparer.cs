@@ -29,26 +29,42 @@ namespace Caravela.Framework.Impl.Pipeline
             var xOrderedPart = this._orderedAspectLayers[x.AspectLayerId];
             var yOrderedPart = this._orderedAspectLayers[y.AspectLayerId];
 
+            // First order by topological distance.
             if ( xOrderedPart.Order < yOrderedPart.Order )
             {
                 return -1;
             }
-            else if ( xOrderedPart.Order > yOrderedPart.Order )
+            
+            if ( xOrderedPart.Order > yOrderedPart.Order )
             {
                 return 1;
             }
-            else if ( x.Depth < y.Depth )
+
+            // If topological distance is identical, order by name.
+            var nameOrder = xOrderedPart.AspectName.CompareTo( yOrderedPart.AspectName );
+            if ( nameOrder != 0 )
+            {
+                return nameOrder;
+            }
+
+            // Finally, order by depth in the code mode.
+            if ( x.Depth < y.Depth )
             {
                 return -1;
             }
-            else if ( x.Depth > y.Depth )
+            
+            if ( x.Depth > y.Depth )
             {
                 return -1;
             }
-            else
+
+            if ( !x.Equals(y) )
             {
-                return 0;
+                // The steps must be different here, otherwise there would be a duplicate key in the skip list of PipelineStepsState.
+                throw new AssertionFailedException();
             }
+            
+            return 0;
         }
     }
 }

@@ -27,11 +27,16 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Stack<string> _indentTriviaStack = new Stack<string>();
         private readonly IndentRewriter _indentRewriter;
 
-        public MetaSyntaxRewriter( Compilation compilation )
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MetaSyntaxRewriter"/> class.
+        /// </summary>
+        /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
+        /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
+        protected MetaSyntaxRewriter( Compilation compileTimeCompilation )
         {
             this._indentTriviaStack.Push( "" );
             this._indentRewriter = new IndentRewriter( this );
-            this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( compilation );
+            this.MetaSyntaxFactory = new MetaSyntaxFactoryImpl( compileTimeCompilation );
         }
 
         protected MetaSyntaxFactoryImpl MetaSyntaxFactory { get; }
