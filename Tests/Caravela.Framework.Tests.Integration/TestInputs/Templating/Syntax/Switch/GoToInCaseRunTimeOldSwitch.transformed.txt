@@ -5,13 +5,6 @@
         case 0:
             global::System.Console.WriteLine("0");
             break;
-        case 1:
-            {
-                int x;
-                x = a;
-            }
-
-            break;
     }
 
     return a;

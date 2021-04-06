@@ -102,15 +102,19 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
                     // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
-                    switch ( transformedNode )
-                    {
-                        case ExpressionSyntax expression:
-                            return this.TransformExpression( expression );
-                        case ExpressionStatementSyntax expressionStatement:
-                            return this.TransformExpressionStatement( expressionStatement );
-                        default:
-                            throw new AssertionFailedException();
-                    }
+                    return this.Transform( transformedNode );
+
+                    //switch ( transformedNode )
+                    //{
+                    //    case ExpressionSyntax expression:
+                    //        return this.TransformExpression( expression );
+                    //    case ExpressionStatementSyntax expressionStatement:
+                    //        return this.TransformExpressionStatement( expressionStatement );
+                    //    case SwitchSectionSyntax switchSectionSyntax:
+                    //        return this.TransformSwitchSection( switchSectionSyntax );
+                    //    default:
+                    //        throw new AssertionFailedException();
+                    //}
                 }
                 else
                 {

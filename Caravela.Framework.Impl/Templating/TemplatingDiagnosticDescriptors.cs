@@ -67,12 +67,12 @@ namespace Caravela.Framework.Impl.Templating
                 true );
 
         internal static readonly DiagnosticDescriptor UnsupportedContextForProceed
-    		= new DiagnosticDescriptor(
-        	"CR0106",
-        	"The proceed() method can only be invoked from a local variable assignment or a return statement.",
-        	"The proceed() method can only be invoked from a local variable assignment or a return statement.",
-        	_templateCategory,
-        	DiagnosticSeverity.Error,
-        	true );
+            = new DiagnosticDescriptor(
+                "CR0106",
+                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
+                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
+                _templateCategory,
+                DiagnosticSeverity.Error,
+                true );
     }
 }

@@ -1,0 +1,18 @@
+{
+    var result;
+    object obj = 1;
+    switch (obj)
+    {
+        case int i when i > 0:
+            result = i;
+            break;
+        case string s when s.Length < 1:
+            result = s.Length;
+            break;
+        default:
+            result = null;
+            break;
+    }
+
+    return (int)result;
+}

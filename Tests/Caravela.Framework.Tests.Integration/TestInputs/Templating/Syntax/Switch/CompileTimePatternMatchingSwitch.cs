@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.PatternMatchingWithWhenSwitchRunTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.PatternMatchingWithWhenSwitchCompileTime
 {
     class Aspect
     {
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.PatternM
         dynamic Template()
         {
             dynamic result;
-            object obj = 1;
+            object obj = compileTime(1);
             switch (obj)
             {
                 case int i when i > 0: 
