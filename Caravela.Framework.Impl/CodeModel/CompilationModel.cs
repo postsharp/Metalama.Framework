@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IAttributeList ICodeElement.Attributes => throw new NotImplementedException();
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => throw new NotImplementedException();
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
     }
