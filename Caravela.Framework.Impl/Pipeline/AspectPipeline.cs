@@ -102,11 +102,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         Console.WriteLine( exception.ToString() );
 
-                        this.Context.ReportDiagnostic( Diagnostic.Create(
-                            GeneralDiagnosticDescriptors.UncaughtException,
-                            null,
-                            exception.ToDiagnosticString(),
-                            path ) );
+                        this.Context.ReportDiagnostic( GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
                     }
                     else
                     {

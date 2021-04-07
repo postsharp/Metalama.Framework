@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl
             this.Diagnostics = diagnostics;
         }
 
-        private InvalidUserCodeException( Diagnostic diagnostic )
+        public InvalidUserCodeException( Diagnostic diagnostic )
             : base( diagnostic.ToString() )
         {
             this.Diagnostics = ImmutableArray.Create( diagnostic );

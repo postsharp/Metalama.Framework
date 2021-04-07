@@ -10,7 +10,7 @@ namespace Caravela.Framework.Impl.Linking
     /// <summary>
     /// Result of the aspect linker.
     /// </summary>
-    internal record AspectLinkerResult 
+    internal record AspectLinkerResult
     {
         /// <summary>
         /// Gets the final compilation.
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public IReadOnlyCollection<Diagnostic> Diagnostics { get; }
 
-        public AspectLinkerResult(CSharpCompilation compilation, IReadOnlyCollection<Diagnostic> diagnostics)
+        public AspectLinkerResult( CSharpCompilation compilation, IReadOnlyCollection<Diagnostic> diagnostics )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics;

@@ -35,8 +35,8 @@ namespace Caravela.Framework.Impl.Linking
         public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
 
         public AspectLinkerInput(
-            CSharpCompilation initialCompilation, 
-            CompilationModel finalCompilationModel, 
+            CSharpCompilation initialCompilation,
+            CompilationModel finalCompilationModel,
             IReadOnlyList<INonObservableTransformation> nonObservableTransformations,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {

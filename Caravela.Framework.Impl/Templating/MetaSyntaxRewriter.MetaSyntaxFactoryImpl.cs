@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeNameSyntax( type );
 
             public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
-            
+
             public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => (ExpressionSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
@@ -41,8 +41,11 @@ namespace Caravela.Framework.Impl.Templating
                 => SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxFactory ) ), SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericSyntaxFactoryMethod( string name, params TypeSyntax[] typeArguments )
-                => SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxFactory ) ),
-                    SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ),
+                => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this.Type( typeof( SyntaxFactory ) ),
+                    SyntaxFactory.GenericName(
+                        SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList<TypeSyntax>( typeArguments ) ) ) );
 
             public LiteralExpressionSyntax LiteralExpression( string s ) => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );

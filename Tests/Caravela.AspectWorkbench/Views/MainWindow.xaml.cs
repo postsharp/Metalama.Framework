@@ -129,8 +129,8 @@ namespace Caravela.AspectWorkbench.Views
                 return;
             }
 
-            this._viewModel.ExpectedOutputText = new TextRange( 
-                this._viewModel.TransformedTargetDocument.ContentStart, 
+            this._viewModel.ExpectedOutputText = new TextRange(
+                this._viewModel.TransformedTargetDocument.ContentStart,
                 this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
         }
     }

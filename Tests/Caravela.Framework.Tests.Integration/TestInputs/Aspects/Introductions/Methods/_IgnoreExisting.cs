@@ -10,14 +10,14 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Igno
 
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
+        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
         }
 
         [IntroduceMethod]
         public int ExistingMethod()
         {
-            Console.WriteLine( "This is introduced method." );
+            Console.WriteLine("This is introduced method.");
             return 42;
         }
     }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         internal CompilationModel Compilation { get; }
 
-        ICompilation ICodeElement.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromSymbol( this.Symbol );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
-            this.Symbol.ToDisplayString();
+            this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 

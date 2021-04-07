@@ -15,8 +15,8 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             dynamic Template()
             {
                 Console.Write(PI);
-                Console.Write(Max(0,1));
-                
+                Console.Write(Max(0, 1));
+
                 return proceed();
             }
         }

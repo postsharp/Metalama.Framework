@@ -125,7 +125,7 @@ namespace Caravela.Framework.Impl.Linking
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
             var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introductor.TargetSyntaxTree];
-            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax);
+            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax );
 
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();
         }
@@ -144,7 +144,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         /// <returns>Enumeration of symbols.</returns>
         public IEnumerable<IMethodSymbol> GetOverriddenMembers()
-        {           
+        {
             // TODO: This is not efficient.
             var overriddenMethods = new List<IMethodSymbol>();
             foreach ( var intermediateSyntaxTree in this._intermediateCompilation.SyntaxTrees )

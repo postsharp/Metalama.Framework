@@ -76,10 +76,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 {
                     var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
 
-                    if (!isPseudoMember)
+                    if ( !isPseudoMember )
                     {
                         newNode = AssignNodeId( newNode.AssertNotNull() );
-                        this._currentInsertPosition = (MemberDeclarationSyntax)newNode.AssertNotNull();
+                        this._currentInsertPosition = (MemberDeclarationSyntax) newNode.AssertNotNull();
                     }
 
                     return newNode;

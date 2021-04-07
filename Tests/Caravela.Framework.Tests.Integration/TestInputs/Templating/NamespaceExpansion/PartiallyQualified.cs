@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             dynamic Template()
             {
                 var c = new ChildNs.ChildClass();
-                
+
                 return proceed();
             }
         }

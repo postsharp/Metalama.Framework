@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 
-        ICompilation IType.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public string Name => this.GenericParameterBuilder.Name;
 

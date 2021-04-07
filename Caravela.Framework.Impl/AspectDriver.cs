@@ -10,8 +10,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -52,8 +52,14 @@ namespace Caravela.Framework.Impl
             if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
-                var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement, codeElement.GetLocation(), this.AspectType, codeElement, codeElement.ElementKind );
+
+                // Get the code model type for the reflection type so we have better formatting of the diagnostic.
+                var interfaceType = this.AspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( IAspect<T> ) );
+
+                var diagnostic =
+                    GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
+                        codeElement.GetLocation(),
+                        (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
 
                 return new(
                     false,
@@ -67,7 +73,10 @@ namespace Caravela.Framework.Impl
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
-            aspectOfT.Initialize( aspectBuilder );
+            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultLocation ) )
+            {
+                aspectOfT.Initialize( aspectBuilder );
+            }
 
             return aspectBuilder.ToResult();
         }

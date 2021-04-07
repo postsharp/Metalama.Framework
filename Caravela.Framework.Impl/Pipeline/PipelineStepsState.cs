@@ -95,11 +95,9 @@ namespace Caravela.Framework.Impl.Pipeline
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
                             this._diagnostics.Add(
-                                Diagnostic.Create(
-                                    GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep,
+                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
                                     this._currentStep!.AspectLayer.AspectType.Type.GetLocation(),
-                                    this._currentStep.AspectLayer.AspectType.Type,
-                                    aspectType ) );
+                                    (this._currentStep.AspectLayer.AspectType.Type, aspectType) ) );
                             success = false;
                             continue;
                         }
@@ -161,11 +159,9 @@ namespace Caravela.Framework.Impl.Pipeline
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
                     this._diagnostics.Add(
-                        Diagnostic.Create(
-                            GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
+                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
                             this._currentStep.AspectLayer.AspectType.Type.GetLocation(),
-                            this._currentStep.AspectLayer.AspectType.Type,
-                            advice.TargetDeclaration ) );
+                            (this._currentStep.AspectLayer.AspectType.Type, advice.TargetDeclaration) ) );
                     success = false;
                     continue;
                 }

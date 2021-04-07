@@ -8,7 +8,7 @@ namespace Caravela.Framework.Aspects
 {
     /// <exclude />
     [AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
-    [EditorBrowsable(EditorBrowsableState.Never)]
+    [EditorBrowsable( EditorBrowsableState.Never )]
     public sealed class AspectLinkerOptionsAttribute : Attribute
     {
         /// <summary>

@@ -3,6 +3,7 @@
 
 using System;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Xunit;
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests
             Assert.Equal( expected, actual );
         }
 
-        public static void ThrowsWithDiagnostic( DiagnosticDescriptor diagnosticDescriptor, Action testCode )
+        internal static void ThrowsWithDiagnostic( IStrongDiagnosticDescriptor diagnosticDescriptor, Action testCode )
         {
             try
             {
