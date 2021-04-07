@@ -18,13 +18,4 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
     }
-
-    public interface ICompilationElement
-    {
-        /// <summary>
-        /// Gets the <see cref="ICompilation"/> to which this type belongs (which does not mean that the type is declared
-        /// by the main project of the compilation).
-        /// </summary>
-        ICompilation Compilation { get; }
-    }
 }

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         private static readonly Dictionary<CodeDisplayFormat, SymbolDisplayFormat> _map = new()
         {
-            { CodeDisplayFormat.FulllyQualified, SymbolDisplayFormat.FullyQualifiedFormat },
+            { CodeDisplayFormat.FullyQualified, SymbolDisplayFormat.FullyQualifiedFormat },
             { CodeDisplayFormat.MinimallyQualified, SymbolDisplayFormat.MinimallyQualifiedFormat },
             { CodeDisplayFormat.DiagnosticMessage, SymbolDisplayFormat.CSharpErrorMessageFormat },
             { CodeDisplayFormat.ShortDiagnosticMessage, SymbolDisplayFormat.CSharpShortErrorMessageFormat },

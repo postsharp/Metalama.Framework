@@ -18,7 +18,7 @@ namespace Caravela.Framework.Code
         {
         }
 
-        public static CodeDisplayFormat FulllyQualified { get; } = new CodeDisplayFormat();
+        public static CodeDisplayFormat FullyQualified { get; } = new CodeDisplayFormat();
 
         public static CodeDisplayFormat DiagnosticMessage { get; } = new CodeDisplayFormat();
 
