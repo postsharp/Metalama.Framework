@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 if ( this._method.IsOpenGeneric )
                 {
-                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember, this._method );
+                    throw GeneralDiagnosticDescriptors.CannotAccessOpenGenericMember.CreateException( this._method );
                 }
 
                 var name = this._method.GenericArguments.Any()
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                     if ( instanceExpression != null )
                     {
-                        throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction, this._method );
+                        throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                     }
 
                     return new DynamicMember(

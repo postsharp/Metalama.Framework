@@ -758,9 +758,9 @@ namespace Caravela.Framework.Impl.Templating
                         case SymbolKind.Event:
                         case SymbolKind.Method:
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
-                            return this.MetaSyntaxFactory.MemberAccessExpression( 
+                            return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!, 
+                                (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!,
                                 this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
@@ -805,7 +805,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.VisitQualifiedName( node );
             }
-        
         }
 
         public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )

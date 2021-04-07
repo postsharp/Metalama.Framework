@@ -6,10 +6,24 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Reserved for future use. Contains the formatting options of <see cref="IDisplayable.ToDisplayString"/>.
+    /// Defines the formatting options of <see cref="IDisplayable.ToDisplayString"/>. Only well-known instances of this classes,
+    /// exposed as properties, are currently supported.
     /// </summary>
     [CompileTime]
     public sealed class CodeDisplayFormat
     {
+
+        // Prevents creation of custom instances.
+        private CodeDisplayFormat()
+        {
+        }
+
+        public static CodeDisplayFormat FulllyQualified { get; } = new CodeDisplayFormat();
+
+        public static CodeDisplayFormat DiagnosticMessage { get; } = new CodeDisplayFormat();
+
+        public static CodeDisplayFormat MinimallyQualified { get; } = new CodeDisplayFormat();
+
+        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new CodeDisplayFormat();
     }
 }

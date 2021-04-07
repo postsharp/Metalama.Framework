@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
             }
             catch
             {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CycleInSerialization, obj );
+                throw SerializationDiagnosticDescriptors.CycleInSerialization.CreateException( obj.GetType() );
             }
         }
     }

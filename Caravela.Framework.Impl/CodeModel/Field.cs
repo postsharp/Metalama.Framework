@@ -52,9 +52,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object SetValue( object? instance, object value ) => new PropertyInvocation<Field>( this ).SetValue( instance, value );
 
-        public object GetIndexerValue( object? instance, params object[] args ) => throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+        public object GetIndexerValue( object? instance, params object[] args )
+            => throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this, 0) );
 
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, this, 0 );
+        public object SetIndexerValue( object? instance, object value, params object[] args )
+            => throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this, 0) );
 
         public bool HasBase => true;
 

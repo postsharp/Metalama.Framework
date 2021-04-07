@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.CompileTim
         [TestTemplate]
         dynamic Template()
         {
-            lock ( target.Compilation )
+            lock (target.Compilation)
             {
                 return proceed();
             }

@@ -61,8 +61,8 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( oldScope != scope )
                 {
-                    this.Diagnostics.Add( Diagnostic.Create(
-                        TemplatingDiagnosticDescriptors.LocalVariableAmbiguousCoercion,
+                    this.Diagnostics.Add(
+                        TemplatingDiagnosticDescriptors.LocalVariableAmbiguousCoercion.CreateDiagnostic(
                         local.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation(),
                         local.Name ) );
 
@@ -528,7 +528,7 @@ namespace Caravela.Framework.Impl.Templating
             
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
-            ExpressionSyntax annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
             var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
 
@@ -666,10 +666,10 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
                 }
             }
-            
+
             if ( localScope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                transformedNode = transformedNode.WithIdentifier( 
+                transformedNode = transformedNode.WithIdentifier(
                     transformedNode.Identifier.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable ) );
             }
 
@@ -701,8 +701,7 @@ namespace Caravela.Framework.Impl.Templating
                 else
                 {
                     this.Diagnostics.Add( 
-                        Diagnostic.Create(
-                        TemplatingDiagnosticDescriptors.SplitVariables,
+                        TemplatingDiagnosticDescriptors.SplitVariables.CreateDiagnostic( 
                         node.GetLocation(),  
                         string.Join( ",", node.Variables.Select( v => v.Identifier.Text ) ) ) );
                     return transformedVariableDeclaration;
@@ -881,7 +880,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitDoStatement( DoStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitDoStatement( node );
@@ -889,7 +888,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitGotoStatement( GotoStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitGotoStatement( node );
@@ -897,7 +896,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitLocalFunctionStatement( node );
@@ -905,7 +904,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitAnonymousMethodExpression( node );
@@ -913,7 +912,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitParenthesizedLambdaExpression( node );
@@ -921,7 +920,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitSimpleLambdaExpression( node );
@@ -929,7 +928,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitSwitchStatement( node );
@@ -937,7 +936,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitQueryExpression( node );
@@ -960,13 +959,13 @@ namespace Caravela.Framework.Impl.Templating
             if (existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope)
             {
                 this.Diagnostics.Add(
-                    Diagnostic.Create(
-                        TemplatingDiagnosticDescriptors.ScopeMismatch,
+                        TemplatingDiagnosticDescriptors.ScopeMismatch.CreateDiagnostic(
                         node.GetLocation(),
+                        (
                         node.ToString(),
                         existingScope.ToDisplayString(),
                         requiredScope.ToDisplayString(),
-                        reason));
+                        reason) ) );
             }
         }
 
@@ -981,7 +980,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node );
+            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
             this.Diagnostics.Add( diagnostic );
 
             return base.VisitAwaitExpression( node );
@@ -989,14 +988,14 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
         {
-            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+            this.Diagnostics.Add( TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node ) );
 
             return base.VisitInitializerExpression( node );
         }
 
         public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
         {
-            this.Diagnostics.Add( TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( node ) );
+            this.Diagnostics.Add( TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node ) );
 
             return base.VisitYieldStatement( node );
         }

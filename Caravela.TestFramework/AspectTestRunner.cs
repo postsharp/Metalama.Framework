@@ -31,7 +31,7 @@ namespace Caravela.TestFramework
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
-                
+
                 testResult.SetTransformedTarget( syntaxRoot );
             }
             else

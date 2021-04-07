@@ -20,7 +20,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestRunnerBase
     {
-          
+
         public TestRunnerBase( string? projectDirectory )
         {
             this.ProjectDirectory = projectDirectory;

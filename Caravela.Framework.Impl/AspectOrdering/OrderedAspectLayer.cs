@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         }
 
         // For testing only.
-        internal OrderedAspectLayer( int order, string aspectName, string? layerName) : base(aspectName, layerName)
+        internal OrderedAspectLayer( int order, string aspectName, string? layerName ) : base( aspectName, layerName )
         {
             this.Order = order;
         }

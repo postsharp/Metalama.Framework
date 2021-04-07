@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
-        ICompilation IType.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public override ICodeElement? ContainingElement { get; }
 

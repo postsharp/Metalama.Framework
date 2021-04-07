@@ -155,5 +155,5 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             return result;
         }
-        }
+    }
 }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         public Task All( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
         protected override TestRunnerBase CreateTestRunner() => new HighlightingTestRunner( this.ProjectDirectory );
-        
+
         protected async Task AssertHighlightedSourceEqualAsync( string relativeTestPath )
         {
             var testResult = await this.GetTestResultAsync( relativeTestPath );

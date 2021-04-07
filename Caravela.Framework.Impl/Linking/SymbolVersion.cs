@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public AspectLayerId? AspectLayer { get; }
 
-        public SymbolVersion(ISymbol symbol, AspectLayerId? aspectLayer)
+        public SymbolVersion( ISymbol symbol, AspectLayerId? aspectLayer )
         {
             this.Symbol = symbol;
             this.AspectLayer = aspectLayer;
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override int GetHashCode()
         {
-            return StructuralSymbolComparer.Instance.GetHashCode(this.Symbol) ^ (this.AspectLayer?.GetHashCode() ?? 0);
+            return StructuralSymbolComparer.Instance.GetHashCode( this.Symbol ) ^ (this.AspectLayer?.GetHashCode() ?? 0);
         }
 
         public static bool operator ==( SymbolVersion left, SymbolVersion right )

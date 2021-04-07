@@ -17,7 +17,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-      
+
         private static readonly Dictionary<string, Color> _classificationToColor = new Dictionary<string, Color>
         {
             { ClassificationTypeNames.Comment, Colors.Green },
