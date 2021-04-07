@@ -37,7 +37,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var caravelaAssemblies = new[]
             {
-                "Caravela.Reactive.dll",
                 "Caravela.Framework.dll",
                 "Caravela.Framework.Sdk.dll",
                 "Caravela.Framework.Impl.dll"
