@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         }
 
         /// <inheritdoc/>
-        protected override void ReportDiagnostic( Diagnostic diagnostic )
+        public override void ReportDiagnostic( Diagnostic diagnostic )
         {
             this._diagnostics ??= new List<Diagnostic>();
             this._diagnostics.Add( diagnostic );
