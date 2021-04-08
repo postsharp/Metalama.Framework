@@ -18,14 +18,27 @@ namespace Caravela.Framework.Impl.Advices
     {
         private readonly MethodBuilder _methodBuilder;
 
+        public IntroductionScope Scope { get; }
+
+        public ConflictBehavior ConflictBehavior { get; }
+
         public IMethod TemplateMethod { get; }
 
         public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public IntroduceMethodAdvice( AspectInstance aspect, INamedType targetDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
+        public IntroduceMethodAdvice( 
+            AspectInstance aspect, 
+            INamedType targetDeclaration, 
+            IMethod templateMethod, 
+            IntroductionScope scope, 
+            ConflictBehavior conflictBehavior,
+            AspectLinkerOptions? linkerOptions )
+            : base( aspect, targetDeclaration )
         {
+            this.Scope = scope;
+            this.ConflictBehavior = conflictBehavior;
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;
 
@@ -89,11 +102,9 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-
             var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
-
             if ( existingDeclaration == null )
             {
                 var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
@@ -104,6 +115,10 @@ namespace Caravela.Framework.Impl.Advices
             }
             else
             {
+                if (this.ConflictBehavior == ConflictBehavior. )
+                {
+                }
+
                 var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
                 return new AdviceResult(
                     ImmutableArray<Diagnostic>.Empty,

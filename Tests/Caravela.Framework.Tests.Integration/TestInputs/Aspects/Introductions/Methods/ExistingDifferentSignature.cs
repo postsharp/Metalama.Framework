@@ -2,6 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingDifferentSignature
 {
@@ -19,7 +20,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         }
     }
 
-    #region Target
+    [TestOutput]
     [Introduction]
     internal class TargetClass
     {
@@ -28,5 +29,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return x;
         }
     }
-    #endregion
 }

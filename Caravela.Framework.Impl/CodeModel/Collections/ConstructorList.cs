@@ -11,32 +11,52 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class ConstructorList : MemberList<IConstructor, MemberLink<IConstructor>>, IConstructorList
     {
-        public ConstructorList( IEnumerable<MemberLink<IConstructor>> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation )
+        public ConstructorList( CodeElement? containingElement, IEnumerable<MemberLink<IConstructor>> sourceItems ) : base( containingElement, sourceItems )
         {
         }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?> parameterTypes )
         {
-            return
-                this.SourceItems
-                .Select( c => c.GetForCompilation( this.Compilation.AssertNotNull() ) )
-                .Where( c => c.Parameters.Count == parameterTypes.Count )
-                .Where( c =>
-                    c.Parameters
-                    .Select( ( p, i ) => (p, i) )
-                    .All( x => parameterTypes[x.i] == null || this.Compilation.AssertNotNull().InvariantComparer.Is( x.p.ParameterType, parameterTypes[x.i].AssertNotNull() ) ) );
+            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            return this.OfSignature( ( i, t ) => parameterTypes[i] == null || compilation.InvariantComparer.Is( t, parameterTypes[i].AssertNotNull() ) );
         }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType> parameterTypes )
         {
-            return
-                this.SourceItems
-                .Select( c => c.GetForCompilation( this.Compilation.AssertNotNull() ) )
-                .Where( c => c.Parameters.Count == parameterTypes.Count )
-                .Where( c =>
-                    c.Parameters
-                    .Select( ( p, i ) => (p, i) )
-                    .All( x => this.Compilation.AssertNotNull().InvariantComparer.Is( x.p.ParameterType, parameterTypes[x.i] ) ) );
+            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            return this.OfSignature( ( i, t ) => parameterTypes[i] == null || compilation.InvariantComparer.Is( t, parameterTypes[i] ) );
+        }
+
+        public IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes )
+        {
+            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            return 
+                this.OfSignature( ( i, t ) => parameterTypes[i] == null || compilation.InvariantComparer.Equals( t, parameterTypes[i] ) )
+                .SingleOrDefault();
+        }
+
+        private IEnumerable<IConstructor> OfSignature( Func<int, IType, bool> parameterTypePredicate )
+        {
+            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            foreach (var sourceItem in this.SourceItems)
+            {
+                var projectedItem = sourceItem.GetForCompilation( compilation );
+                var match = true;
+
+                for (var i = 0; i < projectedItem.Parameters.Count; i++ )
+                {
+                    if (!parameterTypePredicate(i, projectedItem.Parameters[i].ParameterType))
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+
+                if (match)
+                {
+                    yield return projectedItem;
+                }
+            }
         }
     }
 }

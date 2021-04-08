@@ -26,9 +26,15 @@ namespace Caravela.Framework.Aspects
         /// <param name="type">The type into which the method is to be introduced.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
         /// <param name="scope">Introduction scope.</param>
+        /// <param name="conflictBehavior">Conflict behavior.</param>
         /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns></returns>
-        IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default, AspectLinkerOptions? aspectLinkerOptions = null );
+        IIntroduceMethodAdvice IntroduceMethod( 
+            INamedType type, 
+            string defaultTemplate, 
+            IntroductionScope scope = IntroductionScope.Default, 
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default, 
+            AspectLinkerOptions? aspectLinkerOptions = null );
 
         /// <summary>
         /// Gets a factory objects that allows to add advices to other layers than the default one.

@@ -14,5 +14,7 @@ namespace Caravela.Framework.Code
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?> parameterTypes );
 
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType> parameterTypes );
+
+        IEnumerable<IConstructor> OfExactSignature( IReadOnlyList<IType> parameterTypes );
     }
 }

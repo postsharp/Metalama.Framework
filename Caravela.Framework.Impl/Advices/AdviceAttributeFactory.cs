@@ -50,43 +50,39 @@ namespace Caravela.Framework.Impl.Advices
             switch ( attribute.Type.Name )
             {
                 case nameof( IntroduceMethodAttribute ):
-                {
-                    var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod, aspectLinkerOptions );
-
-                    if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
                     {
-                        advice.Builder.Name = name;
+                        TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof( IntroduceMethodAttribute.ConflictBehavior ), out var conflictBehavior );
+
+                        var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod, scope, conflictBehavior, aspectLinkerOptions );
+
+                        if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
+                        {
+                            advice.Builder.Name = name;
+                        }
+
+                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsStatic ), out var isStatic ) )
+                        {
+                            advice.Builder.IsStatic = isStatic;
+                        }
+
+                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
+                        {
+                            advice.Builder.IsVirtual = isVirtual;
+                        }
+
+                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsSealed ), out var isSealed ) )
+                        {
+                            advice.Builder.IsSealed = isSealed;
+                        }
+
+                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Visibility ), out var visibility ) )
+                        {
+                            advice.Builder.Accessibility = visibility;
+                        }
+
+                        return advice;
                     }
-
-                    if ( TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out _ ) )
-                    {
-                        // TODO: handle scope.
-                    }
-
-                    if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsStatic ), out var isStatic ) )
-                    {
-                        advice.Builder.IsStatic = isStatic;
-                    }
-
-                    if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
-                    {
-                        advice.Builder.IsVirtual = isVirtual;
-                    }
-
-                    if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsSealed ), out var isSealed ) )
-                    {
-                        advice.Builder.IsSealed = isSealed;
-                    }
-
-                    if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Visibility ), out var visibility ) )
-                    {
-                        advice.Builder.Accessibility = visibility;
-                    }
-
-                    advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;
-
-                    return advice;
-                }
             }
 
             throw new NotImplementedException( $"No implementation for advice attribute {attribute.Constructor.DeclaringType}." );

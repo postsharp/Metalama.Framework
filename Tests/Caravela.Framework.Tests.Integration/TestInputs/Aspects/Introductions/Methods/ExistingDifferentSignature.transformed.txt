@@ -1,16 +1,15 @@
-
-    [Introduction]
-    internal class TargetClass
+[TestOutput]
+[Introduction]
+internal class TargetClass
+{
+    public int ExistingMethod(int x)
     {
-        public int ExistingMethod(int x)
-        {
-            return x;
-        }
-
-        public global::System.Int32 ExistingMethod()
-        {
-            Console.WriteLine("This is introduced method.");
-            return (int)42;
-        }
+        return x;
     }
-    
+
+    public global::System.Int32 ExistingMethod()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return (int)42;
+    }
+}

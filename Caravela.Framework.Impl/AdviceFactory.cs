@@ -35,10 +35,15 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IIntroduceMethodAdvice IntroduceMethod( 
+            INamedType targetType, 
+            string defaultTemplate, 
+            IntroductionScope scope = IntroductionScope.Default, 
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default, 
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
-            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, aspectLinkerOptions );
+            var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, scope, conflictBehavior, aspectLinkerOptions );
             this._advices.Add( advice );
 
             return advice;
