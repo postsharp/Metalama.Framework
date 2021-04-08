@@ -4,7 +4,7 @@
     
     
     <!-- TeamCity defines the environment variable VersionSuffix -->
-    <MainVersion>0.1.3</MainVersion>
+    <MainVersion>0.1.4</MainVersion>
     <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
     <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
     <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
