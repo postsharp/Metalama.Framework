@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( symbol == null )
             {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotFindType, reflectionName );
+                throw GeneralDiagnosticDescriptors.CannotFindType.CreateException( reflectionName );
             }
 
             return symbol;

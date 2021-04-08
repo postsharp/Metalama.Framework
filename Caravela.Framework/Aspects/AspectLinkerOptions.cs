@@ -18,7 +18,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         public bool ForceNotInlineable { get; }
 
-        private AspectLinkerOptions(bool forceNotInlineable = false)
+        private AspectLinkerOptions( bool forceNotInlineable = false )
         {
             this.ForceNotInlineable = forceNotInlineable;
         }

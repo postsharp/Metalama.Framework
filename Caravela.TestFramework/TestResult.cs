@@ -114,7 +114,7 @@ namespace Caravela.TestFramework
             var comments =
                 this.Diagnostics
                     .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Error )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`\n" )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment );
 

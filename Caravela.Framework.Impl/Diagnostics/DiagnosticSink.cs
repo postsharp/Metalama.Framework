@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections.Generic;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
@@ -26,7 +27,15 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// Reports a <see cref="Diagnostic"/>.
         /// </summary>
         /// <param name="diagnostic"></param>
-        protected abstract void ReportDiagnostic( Diagnostic diagnostic );
+        public abstract void ReportDiagnostic( Diagnostic diagnostic );
+
+        public void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
+        {
+            foreach ( var diagnostic in diagnostics )
+            {
+                this.ReportDiagnostic( diagnostic );
+            }
+        }
 
         private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
         {

@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         CodeElementKind ICodeElement.ElementKind => CodeElementKind.GenericParameter;
 
-        ICompilation IType.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 

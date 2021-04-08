@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
         {
         }
 
-        public AspectLinkerResult Execute(LinkerAnalysisStepOutput input)
+        public AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
             var finalCompilation = input.IntermediateCompilation;
             var rewriter = new LinkingRewriter( input.IntermediateCompilation, input.AnalysisRegistry );

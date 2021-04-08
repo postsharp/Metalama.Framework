@@ -9,7 +9,7 @@ namespace Caravela.TestFramework
     /// This attribute marks the declaration that should be included in the output
     /// and compared with the expected output. 
     /// </summary>
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage( AttributeTargets.All )]
     public sealed class TestOutputAttribute : Attribute
     {
     }

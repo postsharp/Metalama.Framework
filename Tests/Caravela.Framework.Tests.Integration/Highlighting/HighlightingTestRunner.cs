@@ -17,14 +17,14 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 {
     internal class HighlightingTestRunner : TestRunnerBase
     {
-        public HighlightingTestRunner(string projectDirectory) : base(projectDirectory)
+        public HighlightingTestRunner( string projectDirectory ) : base( projectDirectory )
         {
         }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var result = await base.RunTestAsync( testInput );
-            
+
             if ( !result.Success )
             {
                 return result;

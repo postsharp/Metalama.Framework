@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract CodeElementKind ElementKind { get; }
 
-        ICompilation ICodeElement.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
 

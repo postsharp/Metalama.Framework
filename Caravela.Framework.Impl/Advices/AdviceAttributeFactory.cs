@@ -34,12 +34,12 @@ namespace Caravela.Framework.Impl.Advices
 
             var aspectLinkerOptionsAttribute = templateMethod.Attributes.FirstOrDefault( x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof( AspectLinkerOptionsAttribute ) ) );
             AspectLinkerOptions? aspectLinkerOptions = null;
-            if (aspectLinkerOptionsAttribute != null)
+            if ( aspectLinkerOptionsAttribute != null )
             {
                 var linkerOptionsArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
 
                 var forceNotInlineable = false;
-                if (linkerOptionsArguments.TryGetValue(nameof(AspectLinkerOptionsAttribute.ForceNotInlineable), out var forceNotInlineableValue))
+                if ( linkerOptionsArguments.TryGetValue( nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ), out var forceNotInlineableValue ) )
                 {
                     forceNotInlineable = (bool) forceNotInlineableValue.Value.AssertNotNull();
                 }
@@ -81,6 +81,7 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.Accessibility = visibility;
                         }
 
+                        advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;
                         return advice;
                     }
             }
