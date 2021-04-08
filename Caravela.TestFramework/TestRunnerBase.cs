@@ -39,7 +39,7 @@ namespace Caravela.TestFramework
         public virtual async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             // Source.
-            var project = this.CreateProject();
+            var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, encoding: Encoding.UTF8 ) );
 
             var initialCompilation = CSharpCompilation.Create(

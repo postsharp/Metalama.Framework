@@ -37,7 +37,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var caravelaAssemblies = new[]
             {
-                "Caravela.Reactive.dll",
                 "Caravela.Framework.dll",
                 "Caravela.Framework.Sdk.dll",
                 "Caravela.Framework.Impl.dll"
@@ -105,8 +104,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeReferences,
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) );
 
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation );
-            var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation ); var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
 
             if ( !produceCompileTimeCodeRewriter.Success )
             {
@@ -225,6 +223,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 var lastStream = this._previousCompilation.Value.CompileTimeAssembly;
                 lastStream.Position = 0;
                 return lastStream;
+            }
+
+            var sourceCodeDiagnostics = compilation.GetDiagnostics();
+            if ( sourceCodeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            {
+                // We don't continue with errors in the source code. This ensures that errors discovered later
+                // can be attributed to the template compiler instead of to the user.
+                throw new InvalidUserCodeException( "The compile-time part of user code is invalid.", sourceCodeDiagnostics );
             }
 
             var compileTimeCompilation = this.CreateCompileTimeAssembly( compilation );
