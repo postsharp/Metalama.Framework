@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Xunit;
 
@@ -64,6 +65,12 @@ class C<T> : object
             var actualText = location!.SourceTree!.GetText().GetSubText( location.SourceSpan ).ToString();
 
             Assert.Equal( expectedText, actualText );
+        }
+
+        [Fact]
+        public void TestValueTupleAdapter()
+        {
+            Assert.Equal( new object[] { 1, "2" }, ValueTupleAdapter.ToArray( (1, "2") ) );
         }
     }
 }

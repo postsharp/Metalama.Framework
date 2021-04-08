@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        ICompilation ICodeElement.Compilation => this;
+        ICompilation ICompilationElement.Compilation => this;
 
         public IDiagnosticLocation? DiagnosticLocation => null;
 
@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IAttributeList ICodeElement.Attributes => throw new NotImplementedException();
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => throw new NotImplementedException();
+        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
     }

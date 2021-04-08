@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
             dynamic Template()
             {
                 Console.Write(MyMath.PI);
-                
+
                 return proceed();
             }
         }

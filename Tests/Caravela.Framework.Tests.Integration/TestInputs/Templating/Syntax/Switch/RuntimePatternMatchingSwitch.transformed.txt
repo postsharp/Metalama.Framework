@@ -1,5 +1,0 @@
-// Compilation error. Code not generated.
-// Error CR0104 on `case string s when s.Length < target.Parameters.Count:`
-// Error CR0104 on `case int i when i > 0:`
-
-;

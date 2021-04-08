@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 {
     internal class AnnotationUnitTestRunner : TestRunnerBase
     {
-        public AnnotationUnitTestRunner(string projectDirectory) : base(projectDirectory)
+        public AnnotationUnitTestRunner( string projectDirectory ) : base( projectDirectory )
         {
         }
 

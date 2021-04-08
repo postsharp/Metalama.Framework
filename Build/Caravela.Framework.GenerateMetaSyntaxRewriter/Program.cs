@@ -280,7 +280,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                             if ( IsEnumerable( parameter ) )
                             {
                                 var itemType = parameter.ParameterType.GenericTypeArguments[0];
-                                var typeOfItemType = itemType.IsGenericParameter ? $"typeof({itemType.Name})" : $"typeof({itemType.Name})";
+                                var typeOfItemType = $"typeof({itemType.Name})";
                                 writer.Write(
                                     $"\t\t\t\tSyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( \n" +
                                     $"\t\t\t\t\tSyntaxFactory.ArrayType( this.Type({typeOfItemType}) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), \n" +

@@ -58,19 +58,19 @@ namespace Caravela.AspectWorkbench.ViewModels
             this.TransformedTargetDocument = null;
 
             TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" ) ? new TemplatingTestRunner() : new AspectTestRunner();
-            var syntaxColorizer = new SyntaxColorizer(testRunner.CreateProject());
+            var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
 
             var testInput = new TestInput( "interactive", this.TestText );
 
             var compilationStopwatch = Stopwatch.StartNew();
-            
+
             var testResult = await testRunner.RunTestAsync( testInput );
             compilationStopwatch.Stop();
 
             var highlightingStopwatch = Stopwatch.StartNew();
             var highlightingResult = await testRunner.RunTestAsync( testInput );
             highlightingStopwatch.Stop();
-            
+
             if ( highlightingResult.AnnotatedTemplateSyntax != null )
             {
                 // Display the annotated syntax tree.
@@ -95,7 +95,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                 spanMarker.Visit( formattedTransformedSyntaxRoot );
                 this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
             }
-            
+
             if ( testResult.TransformedTargetSourceText != null )
             {
                 // Display the transformed code.

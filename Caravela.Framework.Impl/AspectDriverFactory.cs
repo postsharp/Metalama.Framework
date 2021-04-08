@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl
 
             if ( weavers.Count > 1 )
             {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver, type, string.Join( ", ", weavers ) );
+                throw GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver.CreateException( (type, string.Join( ", ", weavers )) );
             }
 
             if ( weavers.Count == 1 )

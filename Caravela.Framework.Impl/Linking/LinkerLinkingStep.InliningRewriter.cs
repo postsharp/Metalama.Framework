@@ -183,7 +183,7 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="block">Block.</param>
             /// <param name="statementList"></param>
             /// <returns></returns>
-            private static bool FlattenBlock(BlockSyntax block, List<StatementSyntax> statementList )
+            private static bool FlattenBlock( BlockSyntax block, List<StatementSyntax> statementList )
             {
                 // TODO: recursion may not be needed but is more efficient.
                 var anyFlattened = false;
@@ -287,7 +287,7 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Replace with unified annotation for prettification rewriter.
                 rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null ) )
+                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
                 {
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;

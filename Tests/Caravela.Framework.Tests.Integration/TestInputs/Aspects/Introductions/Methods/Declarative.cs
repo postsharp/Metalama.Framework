@@ -9,7 +9,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
+        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
         }
 
@@ -23,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         [IntroduceMethod]
         public int IntroducedMethod_Int()
         {
-            Console.WriteLine( "This is introduced method." );
+            Console.WriteLine("This is introduced method.");
             return proceed();
         }
     }

@@ -10,15 +10,15 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
 {
     public class OverrideAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
+        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
-            var advice = aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof( Template ) );
+            var advice = aspectBuilder.AdviceFactory.OverrideMethod(aspectBuilder.TargetDeclaration.Methods.OfName("TargetMethod").Single(), nameof(Template));
         }
 
         [OverrideMethodTemplate]
         public dynamic Template()
         {
-            Console.WriteLine( "This is the overriding method." );
+            Console.WriteLine("This is the overriding method.");
             return proceed();
         }
     }
@@ -29,7 +29,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Programm
     {
         public void TargetMethod()
         {
-            Console.WriteLine( "This is the original method." );
+            Console.WriteLine("This is the original method.");
         }
     }
 }

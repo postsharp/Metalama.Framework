@@ -16,8 +16,8 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public string LinkerNodeId { get; }
 
-        public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original ) 
-            : base(original.Introductor, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.LinkerOptions)
+        public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original )
+            : base( original.Introductor, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.LinkerOptions )
         {
             this.LinkerNodeId = linkerNodeId;
         }

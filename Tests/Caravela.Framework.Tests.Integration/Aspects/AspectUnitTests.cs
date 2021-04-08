@@ -26,6 +26,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [FromDirectory( @"TestInputs\Aspects\Samples" )]
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
+        [Theory]
+        [FromDirectory( @"TestInputs\Aspects\Applying" )]
+        public Task Applying( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
         protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );
     }
 }

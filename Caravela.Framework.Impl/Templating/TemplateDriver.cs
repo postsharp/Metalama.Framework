@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,14 +40,17 @@ namespace Caravela.Framework.Impl.Templating
             TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
             SyntaxNode output;
-            try
+            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultLocation ) )
             {
-                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
-            }
-            catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
-            {
-                ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
-                throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
+                try
+                {
+                    output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
+                }
+                catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
+                {
+                    ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                    throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
+                }
             }
 
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
