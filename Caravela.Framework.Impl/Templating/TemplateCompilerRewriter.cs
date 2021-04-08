@@ -36,7 +36,6 @@ namespace Caravela.Framework.Impl.Templating
             this._semanticAnnotationMap = semanticAnnotationMap;
         }
 
-
         public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
         private MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
@@ -155,7 +154,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
-                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
+                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax || parent is SwitchSectionSyntax
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -579,20 +578,15 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return base.VisitSwitchStatement( node );
-            }
-        }
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
+                {
+                    var section = node.Sections[i];
+                    var transformedStatements = this.ToMetaStatements( section.Statements );
+                    transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
+                }
 
-        public override SyntaxNode VisitSwitchSection( SwitchSectionSyntax node )
-        {
-            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
-            {
-                // Run-time. Just serialize to syntax.
-                return this.TransformSwitchSection( node );
-            }
-            else
-            {
-                return base.VisitSwitchSection( node );
+                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken );
             }
         }
 
@@ -839,7 +833,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.VisitQualifiedName( node );
             }
-        
         }
 
         public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchRunTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.DefaultInOldSwitchRunTime
 {
     class Aspect
     {
@@ -17,8 +17,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
                 case 0:
                     Console.WriteLine("0");
                     break;
+                default:
+                    Console.WriteLine("Default");
+                    break;
             }
-            
+
             return proceed();
         }
     }

@@ -528,7 +528,7 @@ namespace Caravela.Framework.Impl.Templating
             
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
-            ExpressionSyntax annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
             var isBuildTimeExpression = this.GetNodeScope( annotatedExpression ) == SymbolDeclarationScope.CompileTimeOnly;
 
@@ -927,56 +927,46 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitSimpleLambdaExpression( node );
         }
 
-        private void RequireScope(SwitchStatementSyntax node, SymbolDeclarationScope requiredScope )
+        private void RequireScope( SwitchSectionSyntax section, SymbolDeclarationScope requiredScope )
         {
-            foreach ( var section in node.Sections )
+            if ( section.Labels.Any() )
             {
-                if ( section.Labels.Any() )
+
+                switch ( section.Labels[0] )
                 {
+                    case CasePatternSwitchLabelSyntax:
+                        var diagnostic = TemplatingDiagnostic.CreateLanguageFeatureIsNotSupported( section );
+                        this.Diagnostics.Add( diagnostic );
 
-                    switch ( section.Labels[0] )
-                    {
-                        case CasePatternSwitchLabelSyntax patternLabel:
-
-                            if ( patternLabel.WhenClause != null )
+                        break;
+                    case CaseSwitchLabelSyntax oldLabel:
+                        if ( oldLabel.Value != null )
+                        {
+                            SymbolDeclarationScope existingScope;
+                            if ( oldLabel.Value is LiteralExpressionSyntax )
                             {
-                                var annotatedWhenClause = (WhenClauseSyntax) this.Visit( patternLabel.WhenClause )!;
-                                var existingScope = annotatedWhenClause.GetScopeFromAnnotation();
-                                if ( existingScope != requiredScope )
-                                {
-                                    this.Diagnostics.Add(
-                                         Diagnostic.Create(
-                                            TemplatingDiagnosticDescriptors.ScopeMismatch,
-                                            patternLabel.GetLocation(),
-                                            patternLabel.ToString(),
-                                            existingScope.ToDisplayString(),
-                                            requiredScope.ToDisplayString(),
-                                            "a case" ) );
-                                }
+                                existingScope = requiredScope;
                             }
-
-                            break;
-                        case CaseSwitchLabelSyntax oldLabel:
-                            if ( oldLabel.Value != null )
+                            else
                             {
                                 var annotatedCaseValue = (ExpressionSyntax) this.Visit( oldLabel.Value )!;
-                                var existingScope = annotatedCaseValue.GetScopeFromAnnotation();
-                                if (existingScope != requiredScope)
-                                {
-                                    this.Diagnostics.Add(
-                                        Diagnostic.Create(
-                                            TemplatingDiagnosticDescriptors.ScopeMismatch,
-                                            oldLabel.GetLocation(),
-                                            oldLabel.ToString(),
-                                            existingScope.ToDisplayString(),
-                                            requiredScope.ToDisplayString(),
-                                            "a case" ) );
-                                }
+                                existingScope = annotatedCaseValue.GetScopeFromAnnotation();
                             }
 
-                            break;
+                            if ( existingScope != requiredScope )
+                            {
+                                this.Diagnostics.Add(
+                                    Diagnostic.Create(
+                                        TemplatingDiagnosticDescriptors.ScopeMismatch,
+                                        oldLabel.GetLocation(),
+                                        oldLabel.ToString(),
+                                        existingScope.ToDisplayString(),
+                                        requiredScope.ToDisplayString(),
+                                        "a case" ) );
+                            }
+                        }
 
-                    }
+                        break;
                 }
             }
         }
@@ -990,19 +980,16 @@ namespace Caravela.Framework.Impl.Templating
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
-            this.RequireScope( node, expressionScope );
-
             var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
             for ( var i = 0; i < node.Sections.Count; i++ )
             {
                 var section = node.Sections[i];
                 using ( this.EnterBreakOrContinueScope( expressionScope ) )
                 {
+                    this.RequireScope( section, expressionScope );
                     transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
                 }
             }
-
-
 
             if ( expressionScope == SymbolDeclarationScope.RunTimeOnly )
             {
@@ -1013,7 +1000,8 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken );
+                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
         }
 

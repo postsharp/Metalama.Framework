@@ -1,0 +1,5 @@
+// Compilation error. Code not generated.
+// Error CR0104 on `case SwitchEnum.two:`
+// Error CR0104 on `case SwitchEnum.one:`
+
+;

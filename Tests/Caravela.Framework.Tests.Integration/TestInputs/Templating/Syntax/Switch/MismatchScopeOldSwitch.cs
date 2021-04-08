@@ -3,29 +3,34 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.PatternMatchingWithWhenSwitchRunTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
+    enum SwitchEnum
+    {
+        one = 1,
+        two = 2,
+    }
+
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            dynamic result;
-            object obj = 1;
-            switch (obj)
+            var i = compileTime(SwitchEnum.one);
+
+            switch (i)
             {
-                case int i when i > 0: 
-                    result = i;
+                case SwitchEnum.one:
+                    Console.WriteLine("1");
                     break;
-                case string s when s.Length < target.Parameters.Count:
-                    result = s.Length;
+                case SwitchEnum.two:
+                    Console.WriteLine("2");
                     break;
                 default:
-                    result = null;
                     break;
             }
             
-            return result;
+            return proceed();
         }
     }
 

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -156,26 +155,26 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             }
 
             // Generate Transform method (big switch).
-            writer.WriteLine( "\t\tprotected virtual ExpressionSyntax Transform(SyntaxNode node)" );
-            writer.WriteLine( "\t\t{" );
-            writer.WriteLine( "\t\t\tswitch ( node.Kind() )" );
-            writer.WriteLine( "\t\t\t{" );
+            // writer.WriteLine( "\t\tprotected virtual ExpressionSyntax Transform(SyntaxNode node)" );
+            // writer.WriteLine( "\t\t{" );
+            // writer.WriteLine( "\t\t\tswitch ( node.Kind() )" );
+            // writer.WriteLine( "\t\t\t{" );
             
-            var syntaxDocument = XElement.Load( "https://raw.githubusercontent.com/dotnet/roslyn/main/src/Compilers/CSharp/Portable/Syntax/Syntax.xml" );
-            foreach ( var node in syntaxDocument.Elements("Node"))
-            {
-                foreach ( var kind in node.Elements("Kind") )
-                {
-                    writer.WriteLine( $"\t\t\t\tcase SyntaxKind.{kind.Attribute( "Name" ).Value}: " );
-                }
+            // var syntaxDocument = XElement.Load( "https://raw.githubusercontent.com/dotnet/roslyn/main/src/Compilers/CSharp/Portable/Syntax/Syntax.xml" );
+            // foreach ( var node in syntaxDocument.Elements("Node"))
+            // {
+            //    foreach ( var kind in node.Elements("Kind") )
+            //    {
+            //        writer.WriteLine( $"\t\t\t\tcase SyntaxKind.{kind.Attribute( "Name" ).Value}: " );
+            //    }
 
-                writer.WriteLine( $"\t\t\t\t\treturn this.Transform{node.Attribute("Name").Value.Replace("Syntax", "")}( ({node.Attribute("Name").Value}) node ) ;" );
-            }
+            // writer.WriteLine( $"\t\t\t\t\treturn this.Transform{node.Attribute("Name").Value.Replace("Syntax", "")}( ({node.Attribute("Name").Value}) node ) ;" );
+            // }
 
-            writer.WriteLine( $"\t\t\t\tdefault: " );
-            writer.WriteLine( $"\t\t\t\t\tthrow new AssertionFailedException();" );
-            writer.WriteLine( "\t\t\t}" );
-            writer.WriteLine( "\t\t}" );
+            // writer.WriteLine( $"\t\t\t\tdefault: " );
+            // writer.WriteLine( $"\t\t\t\t\tthrow new AssertionFailedException();" );
+            // writer.WriteLine( "\t\t\t}" );
+            // writer.WriteLine( "\t\t}" );
 
             // Generate MetaSyntaxFactoryImpl.
             writer.WriteLine( "\tpartial class MetaSyntaxFactoryImpl" );
