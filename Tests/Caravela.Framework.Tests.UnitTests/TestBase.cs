@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             static CSharpCompilation CreateEmptyCompilation()
             {
-                return CSharpCompilation.Create( null! )
+                return CSharpCompilation.Create( "test_" + Guid.NewGuid() )
                     .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }

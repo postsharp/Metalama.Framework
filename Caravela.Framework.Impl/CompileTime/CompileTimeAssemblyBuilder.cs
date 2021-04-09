@@ -106,7 +106,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeReferences,
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) );
 
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation ); var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation );
+            var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
 
             if ( !produceCompileTimeCodeRewriter.Success )
             {

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Reflection;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,16 +14,17 @@ namespace Caravela.Framework.Impl.Templating
     /// This class is used at *run-time* by the generated template code. Do not remove or refactor
     /// without analysing impact on generated code.
     /// </summary>
+    [Obfuscation(Exclude = true)]
     public static class TemplateSyntaxFactory
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new SyntaxAnnotation( "flatten" );
 
         [ThreadStatic]
-        private static ITemplateExpansionContext? _expansionContext;
+        private static TemplateExpansionContext? _expansionContext;
 
-        internal static ITemplateExpansionContext ExpansionContext => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
+        internal static TemplateExpansionContext ExpansionContext => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
-        internal static void Initialize( ITemplateExpansionContext expansionContext )
+        internal static void Initialize( TemplateExpansionContext expansionContext )
         {
             _expansionContext = expansionContext;
         }
@@ -45,14 +47,6 @@ namespace Caravela.Framework.Impl.Templating
 
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static IDisposable OpenTemplateLexicalScope() => ExpansionContext.OpenNestedScope();
-
-        public static SyntaxToken TemplateDeclaratorIdentifier( string text ) =>
-            SyntaxFactory.Identifier( ExpansionContext.CurrentLexicalScope.DefineIdentifier( text ) );
-
-        public static IdentifierNameSyntax TemplateIdentifierName( string name ) =>
-            SyntaxFactory.IdentifierName( ExpansionContext.CurrentLexicalScope.LookupIdentifier( name ) );
-
         public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicMember dynamicMember, string member )
         {
             if ( dynamicMember is IDynamicMemberDifferentiated metaMemberDifferentiated )
@@ -62,5 +56,8 @@ namespace Caravela.Framework.Impl.Templating
 
             return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
         }
+
+        public static SyntaxToken GetUniqueIdentifier( string hint ) =>
+            SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
     }
 }

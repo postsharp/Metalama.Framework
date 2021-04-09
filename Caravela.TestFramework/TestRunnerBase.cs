@@ -50,18 +50,23 @@ namespace Caravela.TestFramework
 
             var result = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
 
-            var diagnostics = initialCompilation.GetDiagnostics();
-
-            result.AddDiagnostics( diagnostics );
-
-            if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            if ( this.ReportInvalidInputCompilation )
             {
-                result.SetFailed( "The initial compilation failed." );
-                return result;
+                var diagnostics = initialCompilation.GetDiagnostics();
+
+                result.AddDiagnostics( diagnostics );
+
+                if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                {
+                    result.SetFailed( "The initial compilation failed." );
+                    return result;
+                }
             }
 
             return result;
         }
+
+        protected virtual bool ReportInvalidInputCompilation => true;
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.

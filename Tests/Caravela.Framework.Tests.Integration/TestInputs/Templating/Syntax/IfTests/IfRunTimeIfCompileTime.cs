@@ -21,6 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTi
                     throw new ArgumentNullException();
                 }
             }
+
             return proceed();
         }
     }

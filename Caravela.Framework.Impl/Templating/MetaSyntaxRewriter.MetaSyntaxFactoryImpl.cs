@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.Type( typeof( SyntaxFactory ) ),
                     SyntaxFactory.GenericName(
                         SyntaxFactory.Identifier( name ),
-                        SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList<TypeSyntax>( typeArguments ) ) ) );
+                        SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
             public LiteralExpressionSyntax LiteralExpression( string s ) => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 

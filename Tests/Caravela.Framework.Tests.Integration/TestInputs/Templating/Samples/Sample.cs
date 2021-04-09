@@ -33,6 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Samples.Sample
 
                 i++;
             }
+
             stringBuilder.Append(')');
 
             Console.WriteLine(stringBuilder.ToString(), parameters);

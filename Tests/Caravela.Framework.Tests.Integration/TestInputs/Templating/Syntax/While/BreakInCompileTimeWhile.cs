@@ -1,6 +1,5 @@
 using System;
-using Caravela.Framework.Project;
-using static Caravela.Framework.Aspects.TemplateContext;  
+using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInCompileTimeWhile
 {
@@ -19,12 +18,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.BreakInCo
                 {
                     break;
                 }
-      
             }
 
             Console.WriteLine("Test result = " + i);
-           
-            
+
             dynamic result = proceed();
             return result;
         }

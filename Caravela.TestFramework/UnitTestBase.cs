@@ -84,6 +84,8 @@ namespace Caravela.TestFramework
             var result = await this.GetTestResultAsync( relativePathTest );
             Assert.True( result.Success, result.ErrorMessage );
         }
+        
+        public static string? NormalizeString( string? s ) => s?.Trim()?.Replace( "\r", "" );
 
         /// <summary>
         /// Runs the template test with the given path of the source file and asserts that the result of the code transformation matches the expected result.
@@ -102,8 +104,6 @@ namespace Caravela.TestFramework
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
 
             Assert.NotNull( testResult.TransformedTargetSourceText );
-
-            static string NormalizeString( string s ) => s.Trim().Replace( "\r", "" );
 
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
 

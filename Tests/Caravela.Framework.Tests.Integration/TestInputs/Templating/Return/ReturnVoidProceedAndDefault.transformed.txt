@@ -1,7 +1,8 @@
 {
     try
     {
-        Console.WriteLine(a / b);
+        this.Method(a, b);
+        return;
     }
     catch
     {

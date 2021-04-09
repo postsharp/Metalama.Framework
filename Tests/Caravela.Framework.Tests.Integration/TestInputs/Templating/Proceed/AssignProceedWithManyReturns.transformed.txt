@@ -1,17 +1,5 @@
 {
-    bool result;
-    if (a % 2 == 0)
-    {
-        result = true;
-        goto __continue;
-    }
-    else
-    {
-        result = false;
-        goto __continue;
-    }
-
-__continue:
-    ;
+    global::System.Boolean result;
+    result = this.Method(a);
     return (bool)result;
 }

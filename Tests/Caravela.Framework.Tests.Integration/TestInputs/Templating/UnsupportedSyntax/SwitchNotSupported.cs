@@ -27,6 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Swit
                     result = proceed();
                     break;
             }
+
             return result;
         }
     }

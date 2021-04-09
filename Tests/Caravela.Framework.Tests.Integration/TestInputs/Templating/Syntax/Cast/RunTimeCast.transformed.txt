@@ -7,8 +7,8 @@
         global::System.Console.WriteLine(s);
     }
 
-    string result;
-    result = a;
+    global::System.String result;
+    result = this.Method(a);
     object obj = result;
     string text = obj as string;
     if (text != null)

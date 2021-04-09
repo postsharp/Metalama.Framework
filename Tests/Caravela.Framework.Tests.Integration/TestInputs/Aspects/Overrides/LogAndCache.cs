@@ -1,10 +1,10 @@
 using System;
-using Caravela.Framework.Aspects;
 using System.Text;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
 using Caravela.TestFramework;
+using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrderAttribute(typeof(LogAttribute), typeof(CacheAttribute))]
 
@@ -23,7 +23,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
             return a + b;
         }
     }
-
 
     public class LogAttribute : OverrideMethodAspect
     {
@@ -46,7 +45,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
             }
         }
     }
-
 
     public class CacheAttribute : OverrideMethodAspect
     {
@@ -74,12 +72,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
 
                 i++;
             }
+
             stringBuilder.Append(')');
 
             string cacheKey = string.Format(stringBuilder.ToString(), target.Parameters.Values.ToArray());
 
             // Cache lookup.
-            if (SampleCache.Cache.TryGetValue(cacheKey, out object value))
+            if (SampleCache.Cache.TryGetValue(cacheKey, out object? value))
             {
                 Console.WriteLine("Cache hit.");
                 return value;
@@ -102,5 +101,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
         public static readonly System.Collections.Concurrent.ConcurrentDictionary<string, object> Cache =
             new System.Collections.Concurrent.ConcurrentDictionary<string, object>();
     }
-
 }

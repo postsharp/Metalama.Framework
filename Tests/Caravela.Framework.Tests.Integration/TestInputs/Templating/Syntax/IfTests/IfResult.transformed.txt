@@ -1,6 +1,6 @@
 {
-    string result;
-    result = a?.ToString();
+    global::System.String result;
+    result = this.Method(a);
     if (result == null)
     {
         return (string)"";

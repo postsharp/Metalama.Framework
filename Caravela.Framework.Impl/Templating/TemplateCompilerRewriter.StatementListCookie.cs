@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -12,17 +10,12 @@ namespace Caravela.Framework.Impl.Templating
         private readonly struct StatementListCookie : IDisposable
         {
             private readonly TemplateCompilerRewriter _parent;
-            private readonly string _initialVariableName;
-            private readonly List<StatementSyntax> _initialList;
+            private readonly MetaContext? _previousMetaContext;
 
-            public StatementListCookie(
-                TemplateCompilerRewriter parent,
-                string initialVariableName,
-                List<StatementSyntax> initialList )
+            public StatementListCookie( TemplateCompilerRewriter parent, MetaContext? previousMetaContext )
             {
                 this._parent = parent;
-                this._initialVariableName = initialVariableName;
-                this._initialList = initialList;
+                this._previousMetaContext = previousMetaContext;
             }
 
             public void Dispose()
@@ -32,8 +25,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( this._parent != null )
                 {
-                    this._parent._currentStatementListVariableName = this._initialVariableName;
-                    this._parent._currentMetaStatementList = this._initialList;
+                    this._parent._currentMetaContext = this._previousMetaContext;
                 }
             }
         }

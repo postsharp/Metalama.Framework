@@ -42,6 +42,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateC
 
         public abstract string Format(object o);
     }
+
     class TargetCode
     {
         int Method(int a)
