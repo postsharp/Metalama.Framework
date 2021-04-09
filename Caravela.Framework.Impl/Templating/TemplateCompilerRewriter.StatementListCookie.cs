@@ -7,12 +7,15 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-        private readonly struct StatementListCookie : IDisposable
+        /// <summary>
+        /// The return value of <see cref="TemplateCompilerRewriter.WithMetaContext"/>.
+        /// </summary>
+        private readonly struct MetaContextCookie : IDisposable
         {
             private readonly TemplateCompilerRewriter _parent;
             private readonly MetaContext? _previousMetaContext;
 
-            public StatementListCookie( TemplateCompilerRewriter parent, MetaContext? previousMetaContext )
+            public MetaContextCookie( TemplateCompilerRewriter parent, MetaContext? previousMetaContext )
             {
                 this._parent = parent;
                 this._previousMetaContext = previousMetaContext;

@@ -871,9 +871,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public override bool VisitIntoStructuredTrivia => false;
 
-        private StatementListCookie WithMetaContext( MetaContext newMetaContext )
+        private MetaContextCookie WithMetaContext( MetaContext newMetaContext )
         {
-            var cookie = new StatementListCookie(
+            var cookie = new MetaContextCookie(
                 this,
                 this._currentMetaContext );
 
