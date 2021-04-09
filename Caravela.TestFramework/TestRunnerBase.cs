@@ -43,7 +43,7 @@ namespace Caravela.TestFramework
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, encoding: Encoding.UTF8 ) );
 
             var initialCompilation = CSharpCompilation.Create(
-                "assemblyName",
+                "test",
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );

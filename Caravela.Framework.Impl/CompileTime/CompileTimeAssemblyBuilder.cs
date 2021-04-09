@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly TemplateCompiler _templateCompiler;
         private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly Random _random = new();
-        private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
+        private readonly Dictionary<string, MemoryStream> _builtAssemblies = new Dictionary<string, MemoryStream>();
 
         static CompileTimeAssemblyBuilder()
         {
@@ -76,6 +76,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._templateCompiler = templateCompiler;
             this._resources = resources;
         }
+
+        public IReadOnlyDictionary<string, MemoryStream> BuiltAssemblies => this._builtAssemblies;
 
         private Compilation? CreateCompileTimeAssembly( Compilation runTimeCompilation )
         {
@@ -156,6 +158,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
             }
 
+            this._builtAssemblies.Add( compilation.AssemblyName!, stream );
+
             return stream;
         }
 
@@ -218,13 +222,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )
         {
-            if ( compilation == this._previousCompilation?.Compilation )
-            {
-                var lastStream = this._previousCompilation.Value.CompileTimeAssembly;
-                lastStream.Position = 0;
-                return lastStream;
-            }
-
             var sourceCodeDiagnostics = compilation.GetDiagnostics();
             if ( sourceCodeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
@@ -243,8 +240,6 @@ namespace Caravela.Framework.Impl.CompileTime
             var stream = this.Emit( compileTimeCompilation );
 
             stream = Callbacks.AssemblyRewriter?.Invoke( stream ) ?? stream;
-
-            this._previousCompilation = (compilation, stream);
 
             return stream;
         }
