@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Templating
     [Obfuscation(Exclude = true)]
     public static class TemplateSyntaxFactory
     {
-        private static readonly SyntaxAnnotation _flattenBlockAnnotation = new SyntaxAnnotation( "flatten" );
+        private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "flatten" );
 
         [ThreadStatic]
         private static TemplateExpansionContext? _expansionContext;

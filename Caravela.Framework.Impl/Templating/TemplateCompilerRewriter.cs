@@ -36,6 +36,26 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
         }
 
+        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
+            CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
+
+        private static string NormalizeSpace( string statementComment )
+        {
+            // TODO: Replace this with something more GC-friendly.
+
+            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
+
+            while ( true )
+            {
+                var old = statementComment;
+                statementComment = statementComment.Replace( "  ", " " );
+                if ( old == statementComment )
+                {
+                    return statementComment;
+                }
+            }
+        }
+
         public override bool VisitIntoStructuredTrivia => false;
 
         /// <summary>
@@ -57,7 +77,7 @@ namespace Caravela.Framework.Impl.Templating
         /// the compiled template that contains the run-time symbol name.
         /// </summary>
         /// <param name="buildTimeIdentifier">The name of the identifier in the source template, used as a hint to generate a run-time identifier.</param>
-        /// <returns>The identifier of the compiled template that contains the run-time symbol name</returns>
+        /// <returns>The identifier of the compiled template that contains the run-time symbol name.</returns>
         private IdentifierNameSyntax ReserveRunTimeSymbolName(SyntaxToken buildTimeIdentifier)
         {
             if ( buildTimeIdentifier.IsMissing )
@@ -131,26 +151,6 @@ namespace Caravela.Framework.Impl.Templating
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
         }
 
-        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
-            CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
-
-        private static string NormalizeSpace( string statementComment )
-        {
-            // TODO: Replace this with something more GC-friendly.
-
-            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
-
-            while ( true )
-            {
-                var old = statementComment;
-                statementComment = statementComment.Replace( "  ", " " );
-                if ( old == statementComment )
-                {
-                    return statementComment;
-                }
-            }
-        }
-
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
             // Captures the root symbol.
@@ -219,7 +219,6 @@ namespace Caravela.Framework.Impl.Templating
                 default:
                     throw new AssertionFailedException( $"Unexpected identifier kind: {node.Identifier.Kind()}." );
             }
-
         }
 
         private ExpressionSyntax TransformIdentifierToken(IdentifierNameSyntax node)
@@ -369,7 +368,6 @@ namespace Caravela.Framework.Impl.Templating
                     // TODO: pluggable syntax serializers must be called here.
                     throw new InvalidUserCodeException(
                         TemplatingDiagnosticDescriptors.CannotConvertBuildTime.CreateDiagnostic( expression.GetLocation(), (expression.ToString(), type) ) );
-                    
             }
         }
 
@@ -749,7 +747,7 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Indent();
 
-            StatementSyntax statement =this.ToMetaStatement( node.Statement );
+            var statement = this.ToMetaStatement( node.Statement );
 
             this.Unindent();
 
@@ -937,6 +935,5 @@ namespace Caravela.Framework.Impl.Templating
                 return base.VisitGenericName( node );
             }
         }
-
     }
 }

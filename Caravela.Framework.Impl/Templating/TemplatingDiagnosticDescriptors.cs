@@ -62,7 +62,6 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 DiagnosticSeverity.Error );
 
-
         public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
         {
             return LanguageFeatureIsNotSupported.CreateDiagnostic( node.GetLocation(), node.Kind().ToString() );
