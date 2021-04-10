@@ -599,28 +599,40 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns>A list of statements for the compiled template.</returns>
         private List<StatementSyntax> ToMetaStatements( StatementSyntax statement )
         {
-            MetaContext newContext = MetaContext.CreateHelperContext( this._currentMetaContext! );
+            MetaContext newContext;
             
-            using ( this.WithMetaContext( newContext ) )
+            if ( statement is BlockSyntax block )
             {
-                if ( statement is BlockSyntax block )
+                // Push the build-time template block.
+                newContext = MetaContext.CreateForBuildTimeBlock( this._currentMetaContext! );
+                
+                using ( this.WithMetaContext( newContext ) )
                 {
+                    // Process all statements in this block.
                     foreach ( var childStatement in block.Statements )
                     {
                         ProcessStatement( childStatement );
                     }
                 }
-                else
+            }
+            else
+            {
+                // Push a new MetaContext so statements got added to a new list of statements, but
+                // this MetaContext is neither a run-time nor a compile-time lexical scope. 
+                newContext = MetaContext.CreateHelperContext( this._currentMetaContext! );
+                
+                using ( this.WithMetaContext( newContext ) )
                 {
                     ProcessStatement( statement );
                 }
             }
-
+        
+            // Returns the statements collected during this call.
             return newContext.Statements;
 
-            void ProcessStatement( StatementSyntax node )
+            void ProcessStatement( StatementSyntax singleStatement )
             {
-                var transformedNode = this.Visit( node );
+                var transformedNode = this.Visit( singleStatement );
 
                 if ( transformedNode is StatementSyntax statementSyntax )
                 {
@@ -634,7 +646,7 @@ namespace Caravela.Framework.Impl.Templating
                     // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
 
                     // Generate a comment with the template source code.
-                    var statementComment = NormalizeSpace( node.ToString() );
+                    var statementComment = NormalizeSpace( singleStatement.ToString() );
 
                     if ( statementComment.Length > 120 )
                     {
