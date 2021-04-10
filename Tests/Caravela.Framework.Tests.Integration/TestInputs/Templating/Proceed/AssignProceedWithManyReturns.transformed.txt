@@ -1,5 +1,0 @@
-{
-    global::System.Boolean result;
-    result = this.Method(a);
-    return (bool)result;
-}
