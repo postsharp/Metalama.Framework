@@ -36,129 +36,52 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
         }
 
-        public override SyntaxNode? Visit( SyntaxNode? node )
+        public override bool VisitIntoStructuredTrivia => false;
+
+        /// <summary>
+        /// Sets the current <see cref="MetaContext"/> for the current execution context. To be used in a <c>using</c> statement.
+        /// </summary>
+        /// <param name="newMetaContext"></param>
+        /// <returns></returns>
+        private MetaContextCookie WithMetaContext( MetaContext newMetaContext )
         {
-            if ( this._rootTemplateSymbol == null )
-            {
-                if ( node == null )
-                {
-                    throw new ArgumentNullException( nameof( node ) );
-                }
+            var cookie = new MetaContextCookie( this, this._currentMetaContext );
 
-                this._rootTemplateSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
-                if ( this._rootTemplateSymbol == null )
-                {
-                    throw new AssertionFailedException( "Didn't find a symbol for a template method node." );
-                }
-            }
-
-            return base.Visit( node );
+            this._currentMetaContext = newMetaContext;
+            return cookie;
         }
-
-        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
-            CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
-
-        private static string NormalizeSpace( string statementComment )
+        
+        /// <summary>
+        /// Generates the code to generate a run-time symbol name (i.e. a call to <see cref="TemplateSyntaxFactory.GetUniqueIdentifier"/>),
+        /// adds this code to the list of statements of the current <see cref="MetaContext"/>, and returns the identifier of
+        /// the compiled template that contains the run-time symbol name.
+        /// </summary>
+        /// <param name="buildTimeIdentifier">The name of the identifier in the source template, used as a hint to generate a run-time identifier.</param>
+        /// <returns>The identifier of the compiled template that contains the run-time symbol name</returns>
+        private IdentifierNameSyntax ReserveRunTimeSymbolName(SyntaxToken buildTimeIdentifier)
         {
-            // TODO: Replace this with something more GC-friendly.
-
-            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
-
-            while ( true )
+            if ( buildTimeIdentifier.IsMissing )
             {
-                var old = statementComment;
-                statementComment = statementComment.Replace( "  ", " " );
-                if ( old == statementComment )
-                {
-                    return statementComment;
-                }
+                throw new AssertionFailedException();
             }
-        }
+            
+            var metaVariableName = "__" + buildTimeIdentifier.Text;
 
-        protected override ExpressionSyntax Transform( SyntaxToken token )
-        {
-            if ( token.Kind() == SyntaxKind.IdentifierToken )
-            {
-                var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
-                var isDeclaredWithinTemplate = identifierSymbol != null && SymbolEqualityComparer.Default.Equals( identifierSymbol.ContainingSymbol, this._rootTemplateSymbol );
+            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier(buildTimeIdentifier.Text);
 
-                if ( isDeclaredWithinTemplate )
-                {
-                    if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
-                    {
-                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( token ).Identifier;
-                        this._currentMetaContext.AddGeneratedSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
-                        return IdentifierName( declaredSymbolNameLocal.Text );
-                    }
-                    else
-                    {
-                        // That should not happen because all identifier references are wrapped in an IdentifierName, which we process separately.
-                        // Therefore, we get to this method only for identifier declarations.
-                        throw new AssertionFailedException();
-                    }
+            var localDeclaration =
+                LocalDeclarationStatement(
+                        VariableDeclaration(
+                                this.MetaSyntaxFactory.Type(typeof(SyntaxToken)))
+                            .WithVariables(
+                                SingletonSeparatedList(
+                                    VariableDeclarator(Identifier(metaVariableName))
+                                        .WithInitializer(EqualsValueClause(callGetUniqueIdentifier)))))
+                    .NormalizeWhitespace();
 
-                }
-            }
+            this._currentMetaContext!.Statements.Add(localDeclaration);
 
-            return base.Transform( token );
-        }
-
-        protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
-        {
-            switch ( node.Identifier.Kind() )
-            {
-                case SyntaxKind.GlobalKeyword:
-                case SyntaxKind.VarKeyword:
-                    return base.TransformIdentifierName( node );
-
-                case SyntaxKind.IdentifierToken:
-                    break;
-
-                default:
-                    throw new AssertionFailedException( $"Unexpected identifier kind: {node.Identifier.Kind()}." );
-            }
-
-            if ( node.Identifier.Text == "dynamic" )
-            {
-                // We change all dynamic into var in the template.
-                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
-            }
-
-            // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
-            // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
-            // and initialized in the VisitVariableDeclarator.
-            // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
-            var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
-            var isDeclaredWithinTemplate = identifierSymbol != null && SymbolEqualityComparer.Default.Equals( identifierSymbol.ContainingSymbol, this._rootTemplateSymbol );
-
-            if ( isDeclaredWithinTemplate )
-            {
-                if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
-                {
-                    // That should not happen because IdentifierName is used only for an identifier reference, not an identifier defitinition.
-                    // Identifier definitions should be processed by Transform(SyntaxToken).
-                    throw new AssertionFailedException();
-                }
-
-                return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
-            }
-            else
-            {
-                return this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) );
-            }
-        }
-
-        protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
-        {
-            // The base implementation is very verbose, so we use this one:
-            if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
-            {
-                return this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) ).WithTemplateAnnotationsFrom( node );
-            }
-            else
-            {
-                return base.TransformArgument( node );
-            }
+            return IdentifierName(metaVariableName);
         }
 
         /// <summary>
@@ -206,6 +129,143 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
+        }
+
+        private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
+            CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
+
+        private static string NormalizeSpace( string statementComment )
+        {
+            // TODO: Replace this with something more GC-friendly.
+
+            statementComment = statementComment.Replace( '\n', ' ' ).Replace( '\r', ' ' );
+
+            while ( true )
+            {
+                var old = statementComment;
+                statementComment = statementComment.Replace( "  ", " " );
+                if ( old == statementComment )
+                {
+                    return statementComment;
+                }
+            }
+        }
+
+        public override SyntaxNode? Visit( SyntaxNode? node )
+        {
+            // Captures the root symbol.
+            if ( this._rootTemplateSymbol == null )
+            {
+                if ( node == null )
+                {
+                    throw new ArgumentNullException( nameof( node ) );
+                }
+
+                this._rootTemplateSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
+                if ( this._rootTemplateSymbol == null )
+                {
+                    throw new AssertionFailedException( "Didn't find a symbol for a template method node." );
+                }
+            }
+
+            return base.Visit( node );
+        }
+
+        protected override ExpressionSyntax Transform( SyntaxToken token )
+        {
+            if ( token.Kind() == SyntaxKind.IdentifierToken )
+            {
+                // Transforms identifier declarations (local variables and local functions). Local identifiers must have
+                // a unique name in the target code, which is unkownn when the template is compiled, therefore local identifiers
+                // get their name dynamically at expansion time. The ReserveRunTimeSymbolName method generates code that
+                // reserves the name at expansion time. The result is stored in a local variable of the expanded template.
+                // Then, each template reference uses this local variable.
+                
+                var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
+
+                if ( identifierSymbol != null )
+                {
+                    if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
+                    {
+                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( token ).Identifier;
+                        this._currentMetaContext.AddGeneratedSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
+                        return IdentifierName( declaredSymbolNameLocal.Text );
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException();
+                    }
+                }
+                else
+                {
+                    // This is not a symbol declaration but a symbol reference.
+                }
+            }
+
+            return base.Transform( token );
+        }
+
+        protected override ExpressionSyntax TransformIdentifierName( IdentifierNameSyntax node )
+        {
+            switch ( node.Identifier.Kind() )
+            {
+                case SyntaxKind.GlobalKeyword:
+                case SyntaxKind.VarKeyword:
+                    return base.TransformIdentifierName( node );
+
+                case SyntaxKind.IdentifierToken:
+                    return this.TransformIdentifierToken(node);
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected identifier kind: {node.Identifier.Kind()}." );
+            }
+
+        }
+
+        private ExpressionSyntax TransformIdentifierToken(IdentifierNameSyntax node)
+        {
+            if (node.Identifier.Text == "dynamic")
+            {
+                // We change all dynamic into var in the template.
+                return base.TransformIdentifierName(IdentifierName(Identifier("var")));
+            }
+
+            // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
+            // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
+            // and initialized in the VisitVariableDeclarator.
+            // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
+            var identifierSymbol = this._semanticAnnotationMap.GetSymbol(node);
+            var isDeclaredWithinTemplate =
+                identifierSymbol != null && SymbolEqualityComparer.Default.Equals(identifierSymbol.ContainingSymbol, this._rootTemplateSymbol);
+
+            if (isDeclaredWithinTemplate)
+            {
+                if (!this._currentMetaContext!.TryGetGeneratedSymbolLocal(identifierSymbol!, out var declaredSymbolNameLocal))
+                {
+                    // That should not happen because IdentifierName is used only for an identifier reference, not an identifier defitinition.
+                    // Identifier definitions should be processed by Transform(SyntaxToken).
+                    throw new AssertionFailedException();
+                }
+
+                return this.MetaSyntaxFactory.IdentifierName1(IdentifierName(declaredSymbolNameLocal.Text));
+            }
+            else
+            {
+                return this.MetaSyntaxFactory.IdentifierName2(this.MetaSyntaxFactory.LiteralExpression(node.Identifier.Text));
+            }
+        }
+
+        protected override ExpressionSyntax TransformArgument( ArgumentSyntax node )
+        {
+            // The base implementation is very verbose, so we use this one:
+            if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
+            {
+                return this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) ).WithTemplateAnnotationsFrom( node );
+            }
+            else
+            {
+                return base.TransformArgument( node );
+            }
         }
 
         /// <summary>
@@ -305,9 +365,11 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 default:
-                    // TODO: emit an error. We don't know how to serialize this into syntax.
+                    // TODO: don't throw an exception, but add a diagnostic and continue (return the expression). This requires Radka's PR to be merged.
                     // TODO: pluggable syntax serializers must be called here.
-                    return expression;
+                    throw new InvalidUserCodeException(
+                        TemplatingDiagnosticDescriptors.CannotConvertBuildTime.CreateDiagnostic( expression.GetLocation(), (expression.ToString(), type) ) );
+                    
             }
         }
 
@@ -507,9 +569,22 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        /// <summary>
+        /// Transforms a list of <see cref="StatementSyntax"/> of the source template into a list of <see cref="StatementSyntax"/> for the compiled
+        /// template.
+        /// </summary>
+        /// <param name="statements"></param>
+        /// <returns></returns>
         private IEnumerable<StatementSyntax> ToMetaStatements( in SyntaxList<StatementSyntax> statements )
-            => statements.SelectMany( i => this.ToMetaStatements(i) );
+            => statements.SelectMany( this.ToMetaStatements );
 
+        /// <summary>
+        /// Transforms a <see cref="StatementSyntax"/> of the source template into a single <see cref="StatementSyntax"/> for the compiled template.
+        /// This method is guaranteed to return a single <see cref="StatementSyntax"/>. If the source statement results in several compiled statements,
+        /// they will be wrapped into a block.
+        /// </summary>
+        /// <param name="statement"></param>
+        /// <returns></returns>
         private StatementSyntax ToMetaStatement( StatementSyntax statement )
         {
             var statements = this.ToMetaStatements( statement );
@@ -517,24 +592,48 @@ namespace Caravela.Framework.Impl.Templating
             return statements.Count == 1 ? statements[0] : Block( statements );
         }
 
+        /// <summary>
+        /// Transforms a <see cref="StatementSyntax"/> of the source template into a list of <see cref="StatementSyntax"/> for the compiled template.
+        /// </summary>
+        /// <param name="statement">A statement of the source template.</param>
+        /// <returns>A list of statements for the compiled template.</returns>
         private List<StatementSyntax> ToMetaStatements( StatementSyntax statement )
         {
             MetaContext newContext = MetaContext.CreateHelperContext( this._currentMetaContext! );
-
-            void ProcessNode( SyntaxNode node )
+            
+            using ( this.WithMetaContext( newContext ) )
             {
-                var visitedNode = this.Visit( node );
+                if ( statement is BlockSyntax block )
+                {
+                    foreach ( var childStatement in block.Statements )
+                    {
+                        ProcessStatement( childStatement );
+                    }
+                }
+                else
+                {
+                    ProcessStatement( statement );
+                }
+            }
 
-                if ( visitedNode is StatementSyntax statementSyntax )
+            return newContext.Statements;
+
+            void ProcessStatement( StatementSyntax node )
+            {
+                var transformedNode = this.Visit( node );
+
+                if ( transformedNode is StatementSyntax statementSyntax )
                 {
                     // The statement is already build-time code so there is nothing to transform.
+                    
                     newContext.Statements.Add( statementSyntax.WithLeadingTrivia( this.GetIndentation() ) );
                 }
-                else if ( visitedNode is ExpressionSyntax expressionSyntax )
+                else if ( transformedNode is ExpressionSyntax expressionSyntax )
                 {
-                    // The statement is run-time code and has been transformed into an expression
-                    // creating the StatementSyntax.
+                    // The statement is run-time code and has been transformed into an expression creating the StatementSyntax.
+                    // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
 
+                    // Generate a comment with the template source code.
                     var statementComment = NormalizeSpace( node.ToString() );
 
                     if ( statementComment.Length > 120 )
@@ -568,24 +667,6 @@ namespace Caravela.Framework.Impl.Templating
                     throw new AssertionFailedException();
                 }
             }
-
-            using ( this.WithMetaContext( newContext ) )
-            {
-
-                if ( statement is BlockSyntax block )
-                {
-                    foreach ( var childStatement in block.Statements )
-                    {
-                        ProcessNode( childStatement );
-                    }
-                }
-                else
-                {
-                    ProcessNode( statement );
-                }
-        }
-
-        return newContext.Statements;
         }
 
         public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
@@ -661,32 +742,6 @@ namespace Caravela.Framework.Impl.Templating
             this.Unindent();
 
             return ForEachStatement( node.Type, node.Identifier, node.Expression, statement );
-        }
-
-        private IdentifierNameSyntax ReserveRunTimeSymbolName(SyntaxToken buildTimeIdentifier)
-        {
-            if ( buildTimeIdentifier.IsMissing )
-            {
-                throw new AssertionFailedException();
-            }
-            
-            var metaVariableName = "__" + buildTimeIdentifier.Text;
-
-            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier(buildTimeIdentifier.Text);
-
-            var localDeclaration =
-                LocalDeclarationStatement(
-                        VariableDeclaration(
-                                this.MetaSyntaxFactory.Type(typeof(SyntaxToken)))
-                            .WithVariables(
-                                SingletonSeparatedList(
-                                    VariableDeclarator(Identifier(metaVariableName))
-                                        .WithInitializer(EqualsValueClause(callGetUniqueIdentifier)))))
-                    .NormalizeWhitespace();
-
-            this._currentMetaContext!.Statements.Add(localDeclaration);
-
-            return IdentifierName(metaVariableName);
         }
 
         public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
@@ -807,23 +862,25 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitIdentifierName( node );
         }
 
+        /// <summary>
+        /// Transforms a type or namespace so that it is fully qualified, but return <c>false</c> if the input <paramref name="node"/>
+        /// is not a type or namespace.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="transformedNode"></param>
+        /// <returns></returns>
         private bool TryVisitNamespaceOrTypeName( SyntaxNode node, [NotNullWhen(true)] out SyntaxNode? transformedNode )
         {
-            // Fully qualifies composed names.
             var symbol = this._semanticAnnotationMap.GetSymbol( node );
 
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
                     var nameExpression = CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType );
-                    if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
-                    {
-                        transformedNode = this.Transform( nameExpression );
-                    }
-                    else
-                    {
-                        transformedNode = nameExpression;
-                    }
+                    
+                    transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform 
+                        ? this.Transform( nameExpression ) 
+                        : nameExpression;
 
                     return true;
                 
@@ -869,16 +926,5 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override bool VisitIntoStructuredTrivia => false;
-
-        private MetaContextCookie WithMetaContext( MetaContext newMetaContext )
-        {
-            var cookie = new MetaContextCookie(
-                this,
-                this._currentMetaContext );
-
-            this._currentMetaContext = newMetaContext;
-            return cookie;
-        }
     }
 }
