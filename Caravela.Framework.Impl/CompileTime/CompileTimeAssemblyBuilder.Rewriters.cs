@@ -12,11 +12,11 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private abstract class Rewriter : CSharpSyntaxRewriter
         {
-            private readonly ISymbolClassifier _symbolClassifier;
+            public ISymbolClassifier SymbolClassifier { get; }
 
             protected Rewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
             {
-                this._symbolClassifier = symbolClassifier;
+                this.SymbolClassifier = symbolClassifier;
                 this.RunTimeCompilation = runTimeCompilation;
             }
 
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime
             protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
             {
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-                return this._symbolClassifier.GetSymbolDeclarationScope( symbol );
+                return this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
             }
         }
     }

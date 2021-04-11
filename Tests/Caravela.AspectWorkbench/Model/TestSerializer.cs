@@ -12,7 +12,7 @@ namespace Caravela.AspectWorkbench.Model
     {
         private static string GetExpectedOutputFilePath( string testFilePath ) => Path.ChangeExtension( testFilePath, ".transformed.txt" );
 
-        public async Task<TemplateTest> LoadFromFileAsync( string filePath )
+        public static async Task<TemplateTest> LoadFromFileAsync( string filePath )
         {
             var testName = Path.GetFileNameWithoutExtension( filePath );
             var testSource = await File.ReadAllTextAsync( filePath );
@@ -32,7 +32,7 @@ namespace Caravela.AspectWorkbench.Model
             };
         }
 
-        public async Task SaveToFileAsync( TemplateTest test, string filePath )
+        public static async Task SaveToFileAsync( TemplateTest test, string filePath )
         {
             if ( test.Input == null )
             {

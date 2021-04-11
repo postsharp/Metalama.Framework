@@ -5,7 +5,7 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Code
 {
-    [CompileTime]
+    [CompileTimeOnly]
     public enum MethodKind
     {
         Default,

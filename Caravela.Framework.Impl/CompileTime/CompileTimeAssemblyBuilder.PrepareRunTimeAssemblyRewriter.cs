@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly or SymbolDeclarationScope.Template )
+                if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return WithThrowNotSupportedExceptionBody( node, "Compile-time only code cannot be called at run-time." );
                 }

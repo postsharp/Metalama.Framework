@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// Defines a method <see cref="ToDisplayString"/> that renders the current code element into a human-readable
     /// string.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public interface IDisplayable
     {
         /// <summary>
