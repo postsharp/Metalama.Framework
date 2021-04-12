@@ -51,15 +51,4 @@ class A : Attribute
             Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
         }
     }
-
-    internal class Options : IBuildOptions
-    {
-        public bool AttachDebugger => throw new System.NotImplementedException();
-
-        public bool MapPdbToTransformedCode => throw new System.NotImplementedException();
-
-        public string? CompileTimeProjectDirectory => null;
-
-        public string? CrashReportDirectory => null;
-    }
 }

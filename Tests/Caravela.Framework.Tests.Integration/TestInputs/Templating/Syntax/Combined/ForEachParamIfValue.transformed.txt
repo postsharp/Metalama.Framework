@@ -9,7 +9,7 @@
         throw new global::System.ArgumentNullException("b");
     }
 
-    string result;
-    result = a.ToString() + b.ToString();
+    global::System.String result;
+    result = this.Method(a, b);
     return (string)result;
 }

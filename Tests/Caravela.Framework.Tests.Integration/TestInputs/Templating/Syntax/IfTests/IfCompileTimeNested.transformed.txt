@@ -1,5 +1,6 @@
 {
     global::System.Console.WriteLine(42);
     __Void result;
+    result = this.Method(aBc);
     return;
 }

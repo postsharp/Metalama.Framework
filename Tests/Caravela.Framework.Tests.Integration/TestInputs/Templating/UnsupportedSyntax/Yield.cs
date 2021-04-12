@@ -16,6 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Yield
             {
                 yield break;
             }
+
             proceed();
         }
     }

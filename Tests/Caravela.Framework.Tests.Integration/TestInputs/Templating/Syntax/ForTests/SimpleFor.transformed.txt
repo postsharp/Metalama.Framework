@@ -3,7 +3,7 @@
     {
         try
         {
-            return a;
+            return this.Method(a);
         }
         catch
         {

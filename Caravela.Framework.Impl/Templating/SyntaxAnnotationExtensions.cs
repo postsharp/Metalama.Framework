@@ -167,6 +167,5 @@ namespace Caravela.Framework.Impl.Templating
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
-
     }
 }
