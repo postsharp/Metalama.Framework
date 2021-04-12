@@ -19,6 +19,9 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._symbol = symbol;
         }
+        
+        [Memo]
+        private FieldOrPropertyInvocation Invocation => new FieldOrPropertyInvocation( this );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
@@ -32,17 +35,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public dynamic Value
         {
-            get => new FieldOrPropertyInvocation( this ).Value;
+            get => this.Invocation.Value;
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => new FieldOrPropertyInvocation( this ).GetValue( instance );
+        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => new FieldOrPropertyInvocation( this ).SetValue( instance, value );
+        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
 
         public bool HasBase => true;
 
-        public IFieldOrPropertyInvocation Base => new FieldOrPropertyInvocation( this ).Base;
+        public IFieldOrPropertyInvocation Base => this.Invocation.Base;
 
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 

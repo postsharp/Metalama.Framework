@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.Transformations
         ICodeElement ContainingElement { get; }
     }
 
-    internal interface IRemoveMemberTransformation
+    internal interface IReplaceMemberTransformation : IObservableTransformation
     {
-        MemberLink<IMember> RemovedMember { get; }
+        MemberLink<IMember> ReplacedMember { get; }
 
     }
 }

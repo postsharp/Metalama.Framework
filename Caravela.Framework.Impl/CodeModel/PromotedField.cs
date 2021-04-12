@@ -4,6 +4,8 @@
 using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
+using Caravela.Framework.Impl.CodeModel.Links;
+using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using RefKind = Caravela.Framework.Code.RefKind;
 
@@ -13,10 +15,13 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Represent a source-code field promoted to a property by an aspect.
     /// </summary>
-    internal sealed class PromotedField : Member, IProperty
+    internal sealed class PromotedField : Member, IProperty, IReplaceMemberTransformation
     {
         private readonly IFieldSymbol _symbol;
         
+        [Memo]
+        private PropertyInvocation Invocation => new PropertyInvocation( this );
+
         public override CodeElementKind ElementKind => CodeElementKind.Field;
 
         public override ISymbol Symbol => this._symbol;
@@ -42,9 +47,9 @@ namespace Caravela.Framework.Impl.CodeModel
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => new PropertyInvocation( this ).GetValue( instance );
+        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => new PropertyInvocation( this ).SetValue( instance, value );
+        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
 
         public bool HasBase => true;
 
@@ -66,8 +71,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool IsAsync => false;
 
-        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
+        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args )
+            => this.Invocation.GetIndexerValue( instance, args );
 
-        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args ) => throw new NotImplementedException();
+        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args ) 
+            => this.Invocation.SetIndexerValue( instance, value, args );
+
+        MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => new MemberLink<IMember>( this._symbol );
+        
+        ICodeElement IObservableTransformation.ContainingElement => this.ContainingElement.AssertNotNull();
     }
 }

@@ -15,12 +15,15 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly IPropertySymbol _symbol;
 
-        public override ISymbol Symbol => this._symbol;
-
         public Property( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
         {
             this._symbol = symbol;
         }
+
+        [Memo]
+        private PropertyInvocation Invocation => new PropertyInvocation( this ); 
+
+        public override ISymbol Symbol => this._symbol;
 
         public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
 
@@ -55,19 +58,19 @@ namespace Caravela.Framework.Impl.CodeModel
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => new PropertyInvocation( this ).GetValue( instance );
+        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => new PropertyInvocation( this ).SetValue( instance, value );
+        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
 
-        public object GetIndexerValue( object? instance, params object[] args ) => new PropertyInvocation( this ).GetIndexerValue( instance, args );
+        public object GetIndexerValue( object? instance, params object[] args ) => this.Invocation.GetIndexerValue( instance, args );
 
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => new PropertyInvocation( this ).SetIndexerValue( instance, value, args );
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => this.Invocation.SetIndexerValue( instance, value, args );
 
         public bool HasBase => true;
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
 
-        public IPropertyInvocation Base => new PropertyInvocation( this ).Base;
+        public IPropertyInvocation Base => this.Invocation.Base;
 
         public override string ToString() => this._symbol.ToString();
 
