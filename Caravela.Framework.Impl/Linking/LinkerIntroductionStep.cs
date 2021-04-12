@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new DiagnosticList( null );
+            var diagnostics = new DiagnosticListBuilder();
             var nameProvider = new LinkerIntroductionNameProvider();
             var lexicalScopeHelper = new LexicalScopeFactory(input.FinalCompilationModel);
             var introducedMemberCollection = new IntroducedMemberCollection();
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
+            return new LinkerIntroductionStepOutput( diagnostics.ToDiagnosticList(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
     }
 }

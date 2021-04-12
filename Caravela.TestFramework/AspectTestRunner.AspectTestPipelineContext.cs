@@ -47,13 +47,6 @@ namespace Caravela.TestFramework
 
             public bool HandleExceptions => false;
 
-            bool IBuildOptions.AttachDebugger => false;
-
-            bool IBuildOptions.MapPdbToTransformedCode => true;
-
-            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testResult.TestName );
-
-            public string? CrashReportDirectory => null;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.Linking
                 finalCompilation = finalCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AspectLinkerResult( finalCompilation, input.DiagnosticSink.Diagnostics );
+            return new AspectLinkerResult( finalCompilation, input.Diagnostics );
         }
     }
 }

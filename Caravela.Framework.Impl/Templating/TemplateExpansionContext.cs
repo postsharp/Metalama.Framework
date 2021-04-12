@@ -32,9 +32,8 @@ namespace Caravela.Framework.Impl.Templating
             this.ProceedImplementation = proceedImpl;
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScope = lexicalScope;
-            Invariant.Assert( diagnosticSink.DefaultLocation != null );
-            Invariant.Assert(
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ) );
+            Invariant.Assert( diagnosticSink.DefaultScope != null );
+            Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
