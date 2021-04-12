@@ -1,0 +1,9 @@
+[TestOutput]
+[Introduction]
+internal class TargetClass
+{
+    public int ExistingMethod()
+    {
+        return 13;
+    }
+}

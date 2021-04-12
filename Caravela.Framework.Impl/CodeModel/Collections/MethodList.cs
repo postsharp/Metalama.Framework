@@ -22,13 +22,13 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
         }
 
-        public IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount = null, IReadOnlyList<Type?>? argumentTypes = null, bool declaredOnly = true )
+        public IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount, IReadOnlyList<Type?>? argumentTypes, bool declaredOnly = true )
         {
             return this.OfCompatibleSignature( (argumentTypes, this.ContainingElement.AssertNotNull().Compilation), name, genericParameterCount, argumentTypes?.Count, GetParameter, declaredOnly );
 
-            static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ParameterTypes, CompilationModel Compilation) context, int index )
-                => context.ParameterTypes != null && context.ParameterTypes[index] != null
-                   ? (context.Compilation.Factory.GetTypeByReflectionType( context.ParameterTypes[index].AssertNotNull() ), null)
+            static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
+                => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
+                   ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
                    : (null, null);
         }
 
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private IEnumerable<IMethod> OfCompatibleSignature<TContext>( TContext context, string name, int? genericParameterCount, int? argumentCount, Func<TContext, int, (IType? Type, RefKind? RefKind)> argumentGetter, bool declaredOnly )
         {
-            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            var compilation = this.Compilation;
 
             if ( declaredOnly || this.ContainingElement is not NamedType namedType || namedType.BaseType == null )
             {
@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 }
 
                 return
-                    (parameterInfo.Value.Type == null || context.Compilation.InvariantComparer.Equals( expectedType, parameterInfo.Value.Type ))
+                    (parameterInfo.Value.Type == null || context.Compilation.InvariantComparer.Is( parameterInfo.Value.Type, expectedType ))
                     && (parameterInfo.Value.RefKind == null || expectedRefKind == parameterInfo.Value.RefKind);
             }
         }
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private IMethod? OfExactSignature<TContext>( TContext context, string name, int genericParameterCount, int parameterCount, Func<TContext, int, (IType Type, RefKind RefKind)> parameterGetter, bool declaredOnly )
         {
-            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            var compilation = this.Compilation;
             if ( declaredOnly || this.ContainingElement is not NamedType namedType || namedType.BaseType == null )
             {
                 return Get( this, context, name, genericParameterCount, parameterCount, parameterGetter, compilation );
@@ -121,7 +121,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 INamedType? currentType = namedType;
                 while ( currentType != null )
                 {
-                    var candidate = Get( this, context, name, genericParameterCount, parameterCount, parameterGetter, compilation );
+                    var candidate = Get( (MethodList)currentType.Methods, context, name, genericParameterCount, parameterCount, parameterGetter, compilation );
 
                     if ( candidate != null )
                     {
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private IEnumerable<IMethod> OfSignature<TContext>( TContext context, string name, int? genericParameterCount, int? parameterCount, Func<TContext, int, IType, RefKind, bool> parameterPredicate, bool expandParams = false )
         {            
-            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            var compilation = this.Compilation;
             foreach ( var sourceItem in this.SourceItems )
             {
                 var projectedItem = sourceItem.GetForCompilation( compilation );
@@ -170,26 +170,52 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     continue;
                 }
 
+                if ( parameterCount == null )
+                {
+                    yield return projectedItem;
+                    continue;
+                }
+
                 var match = true;
                 var tryMatchParams = false;
 
-                for ( var i = 0; i < projectedItem.Parameters.Count; i++ )
+                if ( projectedItem.Parameters.Count > 0 )
                 {
-                    if (projectedItem.Parameters[i].IsParams && expandParams && match)
+                    for ( var i = 0; i < projectedItem.Parameters.Count; i++ )
                     {
-                        if ( i != projectedItem.Parameters.Count - 1 || projectedItem.Parameters[i].ParameterType.TypeKind != TypeKind.Array )
+                        if ( projectedItem.Parameters[i].IsParams && expandParams && match )
                         {
-                            throw new AssertionFailedException();
+                            if ( i != projectedItem.Parameters.Count - 1 || projectedItem.Parameters[i].ParameterType.TypeKind != TypeKind.Array )
+                            {
+                                throw new AssertionFailedException();
+                            }
+
+                            if ( expandParams )
+                            {
+                                tryMatchParams = true;
+                            }
+
+                            break;
                         }
 
-                        tryMatchParams = true;
-                    }
+                        if ( i >= parameterCount )
+                        {
+                            match = false;
+                            break;
+                        }
 
-                    if ( !parameterPredicate( context, i, projectedItem.Parameters[i].ParameterType, projectedItem.Parameters[i].RefKind ) )
-                    {
-                        match = false;
-                        break;
+                        if ( !parameterPredicate( context, i, projectedItem.Parameters[i].ParameterType, projectedItem.Parameters[i].RefKind ) )
+                        {
+                            match = false;
+                            break;
+                        }
                     }
+                }
+
+                if (match && !tryMatchParams && parameterCount != projectedItem.Parameters.Count)
+                {
+                    // Not be matching params and parameter counts don't match.
+                    continue;
                 }
 
                 if ( match )

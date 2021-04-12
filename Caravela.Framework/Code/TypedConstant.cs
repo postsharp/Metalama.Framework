@@ -13,6 +13,8 @@ namespace Caravela.Framework.Code
     /// </summary>
     public readonly struct TypedConstant
     {
+        public static readonly TypedConstant Null;
+
         private readonly object? _value;
         private readonly IType? _type;
 

@@ -107,10 +107,10 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public INamedTypeList DeclaredTypes =>
             new NamedTypeList(
+                this,
                 this.RoslynCompilation.Assembly
                     .GetTypes()
-                    .Select( t => new MemberLink<INamedType>( t ) ),
-                this );
+                    .Select( t => new MemberLink<INamedType>( t ) ) );
 
         [Memo]
         public IReadOnlyList<INamedType> DeclaredAndReferencedTypes =>
@@ -119,12 +119,12 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IAttributeList Attributes =>
             new AttributeList(
+                this,
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                     .Select(
-                        a => new AttributeLink( a, this.RoslynCompilation.Assembly.ToLink() ) ),
-                this );
+                        a => new AttributeLink( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 

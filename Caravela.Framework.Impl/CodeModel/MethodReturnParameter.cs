@@ -34,8 +34,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public override IAttributeList Attributes
             => new AttributeList(
+                this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeLink( a, this.ToLink() ) ),
-                (CompilationModel) this.Compilation );
+                    .Select( a => new AttributeLink( a, this.ToLink() ) ) );
     }
 }

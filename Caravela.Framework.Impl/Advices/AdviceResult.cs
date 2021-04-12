@@ -7,8 +7,70 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal record AdviceResult(
-        ImmutableArray<Diagnostic> Diagnostics,
-        ImmutableArray<IObservableTransformation> ObservableTransformations,
-        ImmutableArray<INonObservableTransformation> NonObservableTransformations );
+    internal class AdviceResult 
+    {
+        public ImmutableArray<Diagnostic> Diagnostics { get; }
+
+        public ImmutableArray<IObservableTransformation> ObservableTransformations { get; }
+
+        public ImmutableArray<INonObservableTransformation> NonObservableTransformations { get; }
+
+        private AdviceResult(
+            ImmutableArray<Diagnostic> diagnostic,
+            ImmutableArray<IObservableTransformation> observableTransformations,
+            ImmutableArray<INonObservableTransformation> nonObservableTransformations )
+        {
+            this.Diagnostics = diagnostic;
+            this.ObservableTransformations = observableTransformations;
+            this.NonObservableTransformations = nonObservableTransformations;
+        }
+
+        public static AdviceResult Create()
+        {
+            return new AdviceResult( ImmutableArray<Diagnostic>.Empty, ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+        }
+
+        public static AdviceResult Create(params ITransformation[] transformations )
+        {
+            ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
+            ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
+
+            foreach (var transformation in transformations)
+            {
+                if (transformation is IObservableTransformation observableTransformation)
+                {
+                    if ( observableTransformations == null )
+                    {
+                        observableTransformations = ImmutableArray.CreateBuilder<IObservableTransformation>();
+                    }
+
+                    observableTransformations.Add( observableTransformation );
+                }
+                else if (transformation is INonObservableTransformation nonObservableTransformation)
+                {
+                    if ( nonObservableTransformations == null )
+                    {
+                        nonObservableTransformations = ImmutableArray.CreateBuilder<INonObservableTransformation>();
+                    }
+
+                    nonObservableTransformations.Add( nonObservableTransformation );
+                }
+            }
+
+            return new AdviceResult(
+                ImmutableArray<Diagnostic>.Empty,
+                observableTransformations != null ? observableTransformations.ToImmutable() : ImmutableArray<IObservableTransformation>.Empty,
+                nonObservableTransformations != null ? nonObservableTransformations.ToImmutable() : ImmutableArray<INonObservableTransformation>.Empty );
+        }
+
+        public static AdviceResult Create( params Diagnostic[] diagnostics )
+        {
+            return new AdviceResult( ImmutableArray.Create( diagnostics ), ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+        }
+
+        public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )
+        {
+            return new AdviceResult( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
+        }
+    }
 }

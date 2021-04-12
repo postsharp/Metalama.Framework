@@ -32,8 +32,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
-
-        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
+        
+        // TODO: How to implement this?
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            return "CodeElementBuilder";
+        }
 
         public bool IsReadOnly { get; private set; }
 

@@ -12,20 +12,20 @@ namespace Caravela.Framework.Advices
         Default = Fail,
 
         // Fails with a compile error.
-        Fail = 1,
+        Fail = 0,
 
         // Ignores the advice if the member already exists.
-        Ignore = 2,
+        Ignore = 1,
 
         // Tries to override, or fails if this is not possible 
         // (i.e. sealed class in parent class)
-        Override = 3,
+        Override = 2,
 
         // Tries to define the member as `new`, or fails if this is not possible
         // (i.e. sealed class in parent class)
-        New = 4,
+        New = 3,
 
         // Only for types. Continues introducing the members. Members are processed with the Ignore behavior.
-        Merge = 5
+        Merge = 4
     }
 }

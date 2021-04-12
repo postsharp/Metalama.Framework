@@ -29,8 +29,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations );
             var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );
+            var addedDiagnostics = adviceResults.SelectMany( ar => ar.Diagnostics );
 
             pipelineStepsState.AddNonObservableTransformations( addedNonObservableTransformations );
+            pipelineStepsState.AddDiagnostics( addedDiagnostics );
 
             return CompilationModel.CreateRevisedInstance( compilation, addedObservableIntroductions );
         }

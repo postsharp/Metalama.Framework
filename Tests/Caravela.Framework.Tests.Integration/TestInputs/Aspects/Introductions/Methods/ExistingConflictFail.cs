@@ -4,7 +4,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.IgnoreExisting
+namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictFail
 {
     // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
 
@@ -14,7 +14,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Igno
         {
         }
 
-        [IntroduceMethod]
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Fail)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");

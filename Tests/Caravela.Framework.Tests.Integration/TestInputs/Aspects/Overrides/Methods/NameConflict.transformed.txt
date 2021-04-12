@@ -1,0 +1,27 @@
+[TestOutput]
+internal class TargetClass
+{
+    [InnerOverride]
+    [OuterOverride]
+    public void TargetMethod_ConflictBetweenOverrides()
+    {
+        int i = 42;
+        int i = 27;
+    }
+
+    [InnerOverride]
+    public void TargetMethod_ConflictWithTarget()
+    {
+        int i = 0;
+        int i = 27;
+    }
+
+    [InnerOverride]
+    [OuterOverride]
+    public int TargetMethod_MultipleConflicts()
+    {
+        int i = 0;
+        int i = 42;
+        int i = 27;
+    }
+}

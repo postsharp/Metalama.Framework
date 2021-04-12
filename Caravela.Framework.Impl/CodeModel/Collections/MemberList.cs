@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TCodeElement : class, IMember
         where TSource : IMemberLink<TCodeElement>
     {
-        protected MemberList( CodeElement? containingElement, IEnumerable<TSource> sourceItems ) : base( containingElement, sourceItems )
+        protected MemberList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems ) : base( containingElement, sourceItems )
         {
         }
 

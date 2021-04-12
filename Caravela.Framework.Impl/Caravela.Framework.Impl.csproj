@@ -35,6 +35,7 @@
 
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" PrivateAssets="all" GeneratePathProperty="true" />
     <None Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />

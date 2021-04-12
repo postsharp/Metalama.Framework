@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IParameterList Parameters =>
             new ParameterList(
-                this._symbol.Parameters.Select( p => new CodeElementLink<IParameter>( p ) ),
-                this.Compilation );
+                this,
+                this._symbol.Parameters.Select( p => new CodeElementLink<IParameter>( p ) ) );
 
         [Memo]
         public IMethod? Getter => this._symbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.GetMethod );

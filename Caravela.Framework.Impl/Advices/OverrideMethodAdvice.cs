@@ -27,11 +27,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return new AdviceResult(
-                ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray<IObservableTransformation>.Empty,
-                ImmutableArray.Create<INonObservableTransformation>(
-                    new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) );
         }
     }
 }

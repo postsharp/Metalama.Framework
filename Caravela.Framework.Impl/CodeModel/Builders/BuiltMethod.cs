@@ -28,8 +28,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IParameterList Parameters =>
             new ParameterList(
-                this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ),
-                this.Compilation );
+                this,
+                this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
@@ -44,8 +44,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         [Memo]
         public IGenericParameterList GenericParameters =>
             new GenericParameterList(
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ),
-                this.Compilation );
+                this,
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
 
         public IReadOnlyList<IType> GenericArguments => throw new NotImplementedException();
 

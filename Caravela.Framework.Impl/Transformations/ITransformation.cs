@@ -4,10 +4,9 @@
 namespace Caravela.Framework.Impl.Transformations
 {
     /// <summary>
-    /// Represent a transformation that is not observable by the aspects running after the aspect
-    /// that provided the transformation..
+    /// Represents any transformation.
     /// </summary>
-    internal interface INonObservableTransformation : ITransformation
+    internal interface ITransformation
     {
     }
 }

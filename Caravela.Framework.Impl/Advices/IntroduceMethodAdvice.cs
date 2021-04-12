@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
@@ -102,28 +104,69 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder );
+            var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder, false );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
             {
+                // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
-                return new AdviceResult(
-                    ImmutableArray<Diagnostic>.Empty,
-                    ImmutableArray.Create<IObservableTransformation>( this._methodBuilder ),
-                    ImmutableArray.Create<INonObservableTransformation>( overriddenMethod ) );
+                return AdviceResult.Create( this._methodBuilder, overriddenMethod );
             }
             else
             {
-                if (this.ConflictBehavior == ConflictBehavior. )
+                switch ( this.ConflictBehavior )
                 {
-                }
+                    case ConflictBehavior.Fail:
+                        // Produce fail diagnostic.
+                        return 
+                            AdviceResult.Create(
+                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
+                                    this.TargetDeclaration.GetLocation(),
+                                    (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
-                var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
-                return new AdviceResult(
-                    ImmutableArray<Diagnostic>.Empty,
-                    ImmutableArray<IObservableTransformation>.Empty,
-                    ImmutableArray.Create<INonObservableTransformation>( overriddenMethod ) );
+                    case ConflictBehavior.Merge:
+                    case ConflictBehavior.Ignore:
+                        // Do nothing.
+                        return AdviceResult.Create();
+
+                    case ConflictBehavior.New:
+                        // If the existing declaration is in the current type, we fail, otherwise, declare a newslot method and override.
+                        if ( ((IEqualityComparer<IType>)compilation.InvariantComparer).Equals(this.TargetDeclaration, existingDeclaration.DeclaringType) )
+                        {
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
+                            return AdviceResult.Create( overriddenMethod );
+                        }
+                        else
+                        {
+                            this._methodBuilder.IsNew = true;
+                            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
+                            return AdviceResult.Create( this._methodBuilder, overriddenMethod );
+                        }
+
+                    case ConflictBehavior.Override:
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        {
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
+                            return AdviceResult.Create( overriddenMethod );
+                        }
+                        else if ( existingDeclaration.IsSealed)
+                        {
+                            return
+                                AdviceResult.Create(
+                                    AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
+                                        this.TargetDeclaration.GetLocation(),
+                                        (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                        }
+                        else
+                        {
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
+                            return AdviceResult.Create( overriddenMethod );
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
 

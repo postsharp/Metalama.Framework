@@ -1,0 +1,79 @@
+[TestOutput]
+[Introduction]
+internal class TargetClass : DerivedClass
+{
+    public int ExistingMethod()
+    {
+        return (int)21;
+    }
+
+    public virtual int ExistingVirtualMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 HiddenBaseClassMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 HiddenBaseClassVirtualMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 HiddenVirtualBaseClassVirtualMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassVirtualMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassVirtualSealedMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassVirtualOverridenMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassAbstractMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 BaseClassAbstractSealedMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 DerivedClassMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 DerivedClassVirtualMethod()
+    {
+        return (int)21;
+    }
+
+    public new global::System.Int32 DerivedClassVirtualSealedMethod()
+    {
+        return (int)21;
+    }
+
+    public global::System.Int32 NonExistingMethod()
+    {
+        return (int)21;
+    }
+}

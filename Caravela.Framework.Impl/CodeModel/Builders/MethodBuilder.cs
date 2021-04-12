@@ -93,7 +93,11 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     RefKind.None );
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        // TODO: How to implement this?
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            return this.Name;
+        }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

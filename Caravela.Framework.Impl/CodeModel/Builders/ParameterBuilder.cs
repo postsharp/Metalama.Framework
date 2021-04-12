@@ -38,9 +38,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.RefKind = refKind;
         }
 
+        // TODO: How to implement this?
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
-            throw new NotImplementedException();
+            return this.Name;
         }
 
         internal ParameterSyntax ToDeclarationSyntax()

@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         private IEnumerable<IConstructor> OfSignature( Func<int, IType, bool> parameterTypePredicate )
         {
-            var compilation = this.ContainingElement.AssertNotNull().Compilation;
+            var compilation = this.Compilation;
             foreach (var sourceItem in this.SourceItems)
             {
                 var projectedItem = sourceItem.GetForCompilation( compilation );

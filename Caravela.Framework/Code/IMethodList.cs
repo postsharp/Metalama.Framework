@@ -11,11 +11,11 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IMethodList : IMemberList<IMethod>
     {
-        IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount = null, IReadOnlyList<Type?>? argumentTypes = null, bool declaredOnly = true );
+        IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount, IReadOnlyList<Type?>? argumentTypes, bool declaredOnly = true );
 
         IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount = null, IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null, bool declaredOnly = true );
 
-        IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, bool declaredOnly = true );
+        IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool declaredOnly = true );
 
         IMethod? OfExactSignature( IMethod signatureTemplate, bool declaredOnly = true );
     }

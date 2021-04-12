@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public static AttributeList Empty { get; } = new AttributeList();
 
-        public AttributeList( IEnumerable<AttributeLink> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation )
+        public AttributeList( ICodeElement containingElement, IEnumerable<AttributeLink> sourceItems ) : base( containingElement, sourceItems )
         {
         }
 
