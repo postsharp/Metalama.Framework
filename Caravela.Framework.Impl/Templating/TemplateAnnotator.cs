@@ -928,6 +928,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private void RequireScope( SwitchSectionSyntax section, SymbolDeclarationScope requiredScope )
         {
+            // check label scope
             if ( section.Labels.Any() )
             {
 
@@ -961,12 +962,19 @@ namespace Caravela.Framework.Impl.Templating
                                         oldLabel.ToString(),
                                         existingScope.ToDisplayString(),
                                         requiredScope.ToDisplayString(),
-                                        "a case" ) ) );
+                                        "a case") ) );
                             }
                         }
 
                         break;
                 }
+            }
+
+            // check statement scope
+            foreach ( ExpressionStatementSyntax expressionStatement in section.Statements.Where( s => s is ExpressionStatementSyntax ) )
+            {
+                var annotatedExpression = (ExpressionSyntax) this.Visit( expressionStatement?.Expression )!;
+                this.RequireScope( annotatedExpression, requiredScope, "a case statement" );
             }
         }
 
@@ -985,9 +993,9 @@ namespace Caravela.Framework.Impl.Templating
                 for ( var i = 0; i < node.Sections.Count; i++ )
                 {
                     var section = node.Sections[i];
+                    this.RequireScope( section, SymbolDeclarationScope.CompileTimeOnly );
                     using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
                     {
-                        this.RequireScope( section, SymbolDeclarationScope.CompileTimeOnly );
                         transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
                     }
                 }
@@ -1000,12 +1008,12 @@ namespace Caravela.Framework.Impl.Templating
                 var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
                 for ( var i = 0; i < node.Sections.Count; i++ )
                 {
+                    var section = node.Sections[i];
+                    this.RequireScope( section, expressionScope );
                     using ( this.EnterRuntimeConditionalBlock() )
                     {
-                        var section = node.Sections[i];
                         using ( this.EnterBreakOrContinueScope( expressionScope ) )
                         {
-                            this.RequireScope( section, expressionScope );
                             transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
                         }
                     }
