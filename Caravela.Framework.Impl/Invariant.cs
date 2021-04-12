@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl
             }
 #endif
 
-            return obj.Value;
+            return obj!.Value;
         }
 
 #if !DEBUG

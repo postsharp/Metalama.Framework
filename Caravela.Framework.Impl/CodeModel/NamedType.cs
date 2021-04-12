@@ -163,7 +163,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        public bool Equals( IType other ) => this.TypeSymbol.Equals( ((ITypeInternal) other).TypeSymbol );
+        // TODO: This is probably not a correct comparison of symbols if they are from different compilations.
+        public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals(this.TypeSymbol, ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

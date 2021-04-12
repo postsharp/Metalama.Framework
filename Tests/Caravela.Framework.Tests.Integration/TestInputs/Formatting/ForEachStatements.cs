@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
         public IEnumerable<int> runTimeEnumerable;
     }
 
-    [CompileTime]
+    [CompileTimeOnly]
     class CompileTimeClass
     {
         public IEnumerable<int> compileTimeEnumerable;

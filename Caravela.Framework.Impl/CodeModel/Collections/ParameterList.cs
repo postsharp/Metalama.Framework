@@ -12,6 +12,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         public ParameterList( IMethodBase containingElement, IEnumerable<CodeElementLink<IParameter>> sourceItems ) : base( containingElement, sourceItems )
         {
         }
+
         public ParameterList( IProperty containingElement, IEnumerable<CodeElementLink<IParameter>> sourceItems ) : base( containingElement, sourceItems )
         {
         }

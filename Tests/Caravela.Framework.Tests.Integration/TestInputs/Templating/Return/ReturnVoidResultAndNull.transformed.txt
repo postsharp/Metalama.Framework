@@ -2,7 +2,7 @@
     try
     {
         __Void result;
-        Console.WriteLine(a / b);
+        result = this.Method(a, b);
         return;
     }
     catch

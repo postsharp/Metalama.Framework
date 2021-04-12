@@ -16,6 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
             {
                 return null;
             }
+
             dynamic result = proceed();
             return result;
         }

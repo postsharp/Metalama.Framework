@@ -80,14 +80,9 @@ namespace Caravela.Framework.Impl.Templating
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, symbolAnnotationMap );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
+            diagnostics.AddRange( templateCompilerRewriter.Diagnostics );
 
-            // TODO: add diagnostics.
-            if ( transformedSyntaxRoot == null )
-            {
-                return false;
-            }
-
-            return true;
+            return transformedSyntaxRoot != null && !templateCompilerRewriter.Diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error );
         }
     }
 }

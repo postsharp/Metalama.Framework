@@ -17,7 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         public void IntroducedMethod_Void()
         {
             Console.WriteLine("This is introduced method.");
-            proceed();
+            var nic = proceed();
         }
 
         [IntroduceMethod]

@@ -1,4 +1,4 @@
 {
     var c = new global::Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion.PartiallyQualified.ChildNs.ChildClass();
-    return a;
+    return this.Method(a);
 }

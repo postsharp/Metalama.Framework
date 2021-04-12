@@ -1,4 +1,4 @@
 {
     global::System.Console.Write(global::System.Math.PI);
-    return a;
+    return this.Method(a);
 }

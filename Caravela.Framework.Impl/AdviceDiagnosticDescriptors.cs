@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
 
         private const string _category = "Caravela.Advices";
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceMemberAlreadyExists = new (
+        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceMemberAlreadyExists = new(
             "CRA0001",
             "Cannot introduce member into a type because it already exists.",
             "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3}.",

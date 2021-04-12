@@ -1,6 +1,6 @@
 {
     lock (this)
     {
-        return a;
+        return this.Method(a);
     }
 }

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {

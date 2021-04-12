@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
 {
@@ -23,6 +24,7 @@ namespace Caravela.Framework.Aspects
         IAdviceParameterValueList Values { get; }
     }
 
+    [CompileTimeOnly]
     public interface IAdviceParameterValueList
     {
         dynamic ToArray();

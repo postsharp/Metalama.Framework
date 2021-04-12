@@ -278,8 +278,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 {
                     hashCode = HashCode.Combine(
                         x.Compilation.InvariantComparer.GetHashCode( x.Parameters[i].ParameterType ),
-                        x.Parameters[i].RefKind
-                        );
+                        x.Parameters[i].RefKind );
                 }
 
                 return hashCode;

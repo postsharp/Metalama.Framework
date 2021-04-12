@@ -7,6 +7,7 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
@@ -72,7 +73,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
 
-                if ( this.HasPseudoAttribute( node ) )
+                if ( HasPseudoAttribute( node ) )
                 {
                     var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
 
@@ -92,7 +93,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return node;
             }
 
-            private bool HasPseudoAttribute( MethodDeclarationSyntax node )
+            private static bool HasPseudoAttribute( MethodDeclarationSyntax node )
             {
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
             }
@@ -210,8 +211,12 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
 
                 // Create transformation fake.
-                var transformation = (IMemberIntroduction) A.Fake<object>(
-                    o => o.Implements<IObservableTransformation>().Implements<IMemberIntroduction>().Implements<IMethod>().Implements<ITestTransformation>() );
+                var transformation = (IMemberIntroduction) A.Fake<object>( o => o
+                        .Implements<IObservableTransformation>()
+                        .Implements<IMemberIntroduction>()
+                        .Implements<IMethod>()
+                        .Implements<ICodeElementInternal>()
+                        .Implements<ITestTransformation>() );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
@@ -254,8 +259,11 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 this._owner.AddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IMemberIntroduction) A.Fake<object>(
-                    o => o.Implements<INonObservableTransformation>().Implements<IMemberIntroduction>().Implements<IOverriddenElement>().Implements<ITestTransformation>() );
+                var transformation = (IMemberIntroduction) A.Fake<object>( o => o
+                    .Implements<INonObservableTransformation>()
+                    .Implements<IMemberIntroduction>()
+                    .Implements<IOverriddenElement>()
+                    .Implements<ITestTransformation>() );
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( this._owner, node, aspectName, layerName );
                 var rewrittenMethodBody = methodBodyRewriter.VisitBlock( node.Body.AssertNotNull() );

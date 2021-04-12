@@ -1,6 +1,6 @@
 {
     global::System.Console.WriteLine(2);
-    int result;
-    result = a + b;
+    global::System.Int32 result;
+    result = this.Method(a, b);
     return (int)result;
 }

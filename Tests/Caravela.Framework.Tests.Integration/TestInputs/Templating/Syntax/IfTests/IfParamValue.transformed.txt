@@ -9,5 +9,5 @@
         throw new global::System.ArgumentNullException("b");
     }
 
-    return a.ToString() + b.ToString();
+    return this.Method(a, b);
 }

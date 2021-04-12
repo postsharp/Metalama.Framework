@@ -69,10 +69,9 @@
                 
                 <DockPanel Grid.Row="3">
                     <TextBox DockPanel.Dock="Top">Transformed Code</TextBox>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
                         <RichTextBox IsReadOnly="True" Name="transformedCodeRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                     HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                                FontFamily="Consolas" />
-                    </ScrollViewer>
                 </DockPanel>
             </Grid>
 
@@ -80,20 +79,16 @@
 
             <DockPanel Grid.Column="4">
                 <TextBox DockPanel.Dock="Top">Text Source Code with Compile-Time Code Highlighting</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Stretch">
                     <RichTextBox Name="highlightedSourceRichBox" IsReadOnly="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                 HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                            FontFamily="Consolas" />
-                </ScrollViewer>
             </DockPanel>
 
             <GridSplitter Grid.Column="5" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
             <DockPanel Grid.Column="6">
                 <TextBox DockPanel.Dock="Top">Compiled Template</TextBox>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"  HorizontalAlignment="Stretch">
-                    <RichTextBox IsReadOnly="True" Name="compiledTemplateRichBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                               FontFamily="Consolas" />
-                </ScrollViewer>
+                    <RichTextBox Name="compiledTemplateRichBox" IsReadOnly="True"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </DockPanel>
         </Grid>
 
@@ -101,7 +96,7 @@
 
         <DockPanel Grid.Row="3" HorizontalAlignment="Stretch">
             <ScrollViewer Margin="5" HorizontalAlignment="Stretch">
-                <TextBlock Name="errorsTextBlock" Text="{Binding ErrorsText}" HorizontalAlignment="Stretch" />
+                <RichTextBox Name="errorsTextBlock"  IsReadOnly="True"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
             </ScrollViewer>
         </DockPanel>
 

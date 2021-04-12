@@ -35,6 +35,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 
+            LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
+
             foreach ( var transformationGroup in transformations )
             {
                 if ( !(transformationGroup.DeclaringElement is INamedType declaringType) )
@@ -68,8 +70,7 @@ namespace Caravela.Framework.Impl.Pipeline
                             var introductionContext = new MemberIntroductionContext(
                                 diagnostics,
                                 new LinkerIntroductionNameProvider(),
-                                LinkerLexicalScope.CreateEmpty(),
-                                new LinkerProceedImplementationFactory() );
+                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ) );
 
                             classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
                             break;

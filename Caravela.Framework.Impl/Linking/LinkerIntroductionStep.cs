@@ -69,8 +69,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var diagnostics = new DiagnosticList( null );
             var nameProvider = new LinkerIntroductionNameProvider();
-            var proceedImplFactory = new LinkerProceedImplementationFactory();
-            var lexicalScopeHelper = new LexicalScopeHelper();
+            var lexicalScopeHelper = new LexicalScopeFactory(input.FinalCompilationModel);
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -86,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), proceedImplFactory );
+                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ) );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );
@@ -101,10 +100,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
 
-#if DEBUG
-                // Improve readibility of intermediate compilation in debug builds.
+                // Improve readability of intermediate compilation in debug builds.
                 newRoot = SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
-#endif
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 

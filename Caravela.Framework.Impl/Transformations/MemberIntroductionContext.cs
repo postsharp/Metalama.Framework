@@ -12,16 +12,13 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
-        public ITemplateExpansionLexicalScope LexicalScope { get; }
+        public TemplateExpansionLexicalScope LexicalScope { get; }
 
-        public ProceedImplementationFactory ProceedImplementationFactory { get; }
-
-        public MemberIntroductionContext( DiagnosticSink diagnosticSink, IntroductionNameProvider introductionNameProvider, ITemplateExpansionLexicalScope lexicalScope, ProceedImplementationFactory proceedImplementationFactory )
+        public MemberIntroductionContext( DiagnosticSink diagnosticSink, IntroductionNameProvider introductionNameProvider, TemplateExpansionLexicalScope lexicalScope )
         {
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScope = lexicalScope;
             this.IntroductionNameProvider = introductionNameProvider;
-            this.ProceedImplementationFactory = proceedImplementationFactory;
         }
     }
 }
