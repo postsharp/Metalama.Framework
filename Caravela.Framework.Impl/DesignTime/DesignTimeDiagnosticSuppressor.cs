@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeAspectPipelineCache.Add( compilation, pipelineResult );
             }
 
-            if ( pipelineResult.Diagnostics != null && !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
+            if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
             {
                 var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
                     s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );

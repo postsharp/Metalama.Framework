@@ -31,12 +31,9 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeAspectPipelineCache.Add( context.Compilation, pipelineResult );
             }
 
-            if ( pipelineResult.Diagnostics != null )
+            foreach ( var diagnostic in pipelineResult.Diagnostics.ReportedDiagnostics )
             {
-                foreach ( var diagnostic in pipelineResult.Diagnostics.ReportedDiagnostics )
-                {
-                    context.ReportDiagnostic( diagnostic );
-                }
+                context.ReportDiagnostic( diagnostic );
             }
 
             if ( pipelineResult.AdditionalSyntaxTrees != null )

@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics.ToDiagnosticList(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
+            return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
     }
 }

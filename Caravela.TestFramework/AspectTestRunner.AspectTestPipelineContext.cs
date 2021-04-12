@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Threading;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -46,7 +45,6 @@ namespace Caravela.TestFramework
             }
 
             public bool HandleExceptions => false;
-
         }
     }
 }

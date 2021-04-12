@@ -9,6 +9,6 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal record DesignTimeAspectPipelineResult(
         IImmutableDictionary<string, SyntaxTree>? AdditionalSyntaxTrees,
-        ImmutableDiagnosticList? Diagnostics
+        ImmutableDiagnosticList Diagnostics
     );
 }

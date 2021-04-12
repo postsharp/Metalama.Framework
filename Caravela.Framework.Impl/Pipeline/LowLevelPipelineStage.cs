@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
             return new PipelineStageResult(
                 newCompilation,
                 input.AspectLayers,
-                input.Diagnostics.Concat( diagnostics.ToDiagnosticList() ),
+                input.Diagnostics.Concat( diagnostics.ToImmutable() ),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
         }

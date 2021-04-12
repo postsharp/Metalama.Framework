@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToDiagnosticList();
+        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 

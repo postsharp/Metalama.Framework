@@ -41,12 +41,12 @@ namespace Caravela.Framework.Impl
             return success && !this._skipped
                 ? new AspectInstanceResult(
                     success,
-                    this.ToDiagnosticList(),
+                    this.ToImmutable(),
                     this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
                     Array.Empty<IAspectSource>() )
                 : new AspectInstanceResult(
                     success,
-                    this.ToDiagnosticList(),
+                    this.ToImmutable(),
                     Array.Empty<IAdvice>(),
                     Array.Empty<IAspectSource>() );
         }

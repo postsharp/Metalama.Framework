@@ -62,6 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return semanticModel.LookupSymbols( lookupPosition );
         }
+
         IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => this.LocationForDiagnosticReport?.ToDiagnosticLocation();
     }
 }

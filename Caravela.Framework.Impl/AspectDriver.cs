@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl
 
                 return new(
                     false,
-                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), null ),
+                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
                     ImmutableArray<IAspectSource>.Empty );
             }

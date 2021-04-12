@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
@@ -42,13 +40,24 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public abstract void SuppressDiagnostic( string id, ICodeElement scope );
-        
+        public abstract void SuppressDiagnostic( ScopedSuppression suppression );
+
+        public void SuppressDiagnostic( string id, ICodeElement scope )
+         => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+
+        public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
+        {
+            foreach ( var suppression in suppressions )
+            {
+                this.SuppressDiagnostic( suppression );
+            }
+        }
+
         public void SuppressDiagnostic( string id )
         {
             if ( this.DefaultScope != null )
             {
-                this.SuppressDiagnostic( id, this.DefaultScope );
+                this.SuppressDiagnostic( new ScopedSuppression( id, this.DefaultScope ) );
             }
         }
 
