@@ -36,6 +36,8 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
         }
 
+        public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
+
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
             CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
 
@@ -126,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
-                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
+                    return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax || parent is SwitchSectionSyntax
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -323,9 +325,8 @@ namespace Caravela.Framework.Impl.Templating
                 case "dynamic":
                     if ( this.IsProceed( expression ) )
                     {
-                        // TODO: Emit a diagnostic. proceed() cannot be used as a general expression but only in
-                        // specifically supported statements, i.e. variable assignments and return.
-                        throw new AssertionFailedException();
+                        this.Diagnostics.Add( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( expression.GetLocation(), "" ) );
+                        return LiteralExpression( SyntaxKind.NullLiteralExpression );
                     }
 
                     return InvocationExpression(
@@ -410,6 +411,12 @@ namespace Caravela.Framework.Impl.Templating
                     (ExpressionSyntax) this.Visit( node.Expression )!,
                     ArgumentList( SeparatedList( node.ArgumentList.Arguments.Select(
                         a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
+            }
+
+            if ( this.IsProceed(node.Expression))
+            {
+                this.Diagnostics.Add( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
+                return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
             // Expand extension methods.
@@ -698,6 +705,27 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedInterpolation = base.VisitInterpolation( node );
                 return transformedInterpolation;
+            }
+        }
+
+        public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
+        {
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
+            {
+                // Run-time. Just serialize to syntax.
+                return this.TransformSwitchStatement( node );
+            }
+            else
+            {
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
+                {
+                    var section = node.Sections[i];
+                    var transformedStatements = this.ToMetaStatements( section.Statements );
+                    transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
+                }
+
+                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken );
             }
         }
 

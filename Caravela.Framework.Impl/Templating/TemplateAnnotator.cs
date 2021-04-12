@@ -926,12 +926,101 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitSimpleLambdaExpression( node );
         }
 
+        private void RequireScope( SwitchSectionSyntax section, SymbolDeclarationScope requiredScope )
+        {
+            // check label scope
+            if ( section.Labels.Any() )
+            {
+
+                switch ( section.Labels[0] )
+                {
+                    case CasePatternSwitchLabelSyntax:
+                        var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( section );
+                        this.Diagnostics.Add( diagnostic );
+
+                        break;
+                    case CaseSwitchLabelSyntax oldLabel:
+                        if ( oldLabel.Value != null )
+                        {
+                            SymbolDeclarationScope existingScope;
+                            if ( oldLabel.Value is LiteralExpressionSyntax )
+                            {
+                                existingScope = requiredScope;
+                            }
+                            else
+                            {
+                                var annotatedCaseValue = (ExpressionSyntax) this.Visit( oldLabel.Value )!;
+                                existingScope = annotatedCaseValue.GetScopeFromAnnotation();
+                            }
+
+                            if ( existingScope != requiredScope )
+                            {
+                                this.Diagnostics.Add(
+                                        TemplatingDiagnosticDescriptors.ScopeMismatch.CreateDiagnostic(
+                                        oldLabel.GetLocation(),
+                                        (
+                                        oldLabel.ToString(),
+                                        existingScope.ToDisplayString(),
+                                        requiredScope.ToDisplayString(),
+                                        "a case") ) );
+                            }
+                        }
+
+                        break;
+                }
+            }
+
+            // check statement scope
+            foreach ( ExpressionStatementSyntax expressionStatement in section.Statements.Where( s => s is ExpressionStatementSyntax ) )
+            {
+                var annotatedExpression = (ExpressionSyntax) this.Visit( expressionStatement?.Expression )!;
+                this.RequireScope( annotatedExpression, requiredScope, "a case statement" );
+            }
+        }
+
         public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
         {
-            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
+            var expressionScope = annotatedExpression.GetScopeFromAnnotation();
+            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( annotatedExpression ) )
+            {
+                expressionScope = SymbolDeclarationScope.RunTimeOnly;
+            }
 
-            return base.VisitSwitchStatement( node );
+            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
+                {
+                    var section = node.Sections[i];
+                    this.RequireScope( section, SymbolDeclarationScope.CompileTimeOnly );
+                    using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                    {
+                        transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                    }
+                }
+
+                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+            }
+            else
+            {
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
+                {
+                    var section = node.Sections[i];
+                    this.RequireScope( section, expressionScope );
+                    using ( this.EnterRuntimeConditionalBlock() )
+                    {
+                        using ( this.EnterBreakOrContinueScope( expressionScope ) )
+                        {
+                            transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
+                        }
+                    }
+                }
+
+                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken );
+            }
         }
 
         public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
