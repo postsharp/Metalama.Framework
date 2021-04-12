@@ -7,12 +7,12 @@
             break;
         case 1:
             {
-                int x;
-                x = a;
+                global::System.Int32 x;
+                x = this.Method(a);
             }
 
             break;
     }
 
-    return a;
+    return this.Method(a);
 }

@@ -10,5 +10,5 @@
             break;
     }
 
-    return a;
+    return this.Method(a);
 }

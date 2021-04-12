@@ -34,9 +34,9 @@ namespace Caravela.Framework.Impl.Templating
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
-        public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
-
         }
+
+        public List<Diagnostic> Diagnostics { get; } = new List<Diagnostic>();
 
         private static ExpressionSyntax CastFromDynamic( TypeSyntax targetType, ExpressionSyntax expression ) =>
             CastExpression( targetType, CastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), expression ) );
