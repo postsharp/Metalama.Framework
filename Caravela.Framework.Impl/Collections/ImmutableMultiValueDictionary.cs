@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Collections
         }
 
         public static Builder CreateBuilder( IEqualityComparer<TKey>? comparer = null )
-            => new Builder( ImmutableDictionary.CreateBuilder<TKey, Group>( comparer ) );
+            => new( ImmutableDictionary.CreateBuilder<TKey, Group>( comparer ) );
 
         public ImmutableMultiValueDictionary<TKey, TValue> AddRange( IEnumerable<TValue> source, Func<TValue, TKey> getKey )
             =>
@@ -91,7 +91,7 @@ namespace Caravela.Framework.Impl.Collections
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public Builder ToBuilder() => new Builder( this._dictionary.ToBuilder() );
+        public Builder ToBuilder() => new( this._dictionary.ToBuilder() );
 
         public ImmutableMultiValueDictionary<TKey, TValue> WithKeyComparer( IEqualityComparer<TKey> keyComparer )
         {

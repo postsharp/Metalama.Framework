@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     internal class CodeElementLinkEqualityComparer<T> : IEqualityComparer<T>
         where T : ICodeElementLink
     {
-        public static readonly CodeElementLinkEqualityComparer<T> Instance = new CodeElementLinkEqualityComparer<T>();
+        public static readonly CodeElementLinkEqualityComparer<T> Instance = new();
 
         private static ISymbol? GetSymbol( T link ) => link.Target as ISymbol;
 

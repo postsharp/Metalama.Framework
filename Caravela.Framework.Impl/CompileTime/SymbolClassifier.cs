@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
-        private readonly Dictionary<ISymbol, SymbolDeclarationScope> _cache = new Dictionary<ISymbol, SymbolDeclarationScope>( SymbolEqualityComparer.Default );
+        private readonly Dictionary<ISymbol, SymbolDeclarationScope> _cache = new( SymbolEqualityComparer.Default );
 
         public SymbolClassifier( Compilation compilation )
         {

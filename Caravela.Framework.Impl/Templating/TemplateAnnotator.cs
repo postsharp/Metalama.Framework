@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Scope of local variables.
         /// </summary>
-        private readonly Dictionary<ILocalSymbol, SymbolDeclarationScope> _localScopes = new Dictionary<ILocalSymbol, SymbolDeclarationScope>();
+        private readonly Dictionary<ILocalSymbol, SymbolDeclarationScope> _localScopes = new();
 
         private readonly SymbolClassifier _symbolScopeClassifier;
 

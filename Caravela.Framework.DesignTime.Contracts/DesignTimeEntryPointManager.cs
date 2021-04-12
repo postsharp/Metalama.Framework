@@ -22,7 +22,7 @@ namespace Caravela.Framework.DesignTime.Contracts
         private const string _appDomainDataName = "Caravela.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 
         private static readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks =
-            new ConcurrentDictionary<Version, Task<ICompilerServiceProvider>>();
+            new();
 
         public static Version MatchAllVersion { get; } = new Version( 9999, 99 );
 
@@ -58,8 +58,8 @@ namespace Caravela.Framework.DesignTime.Contracts
         {
         }
 
-        private readonly object _sync = new object();
-        private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
+        private readonly object _sync = new();
+        private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();
         private ImmutableHashSet<ICompilerServiceProvider> _entryPoints = ImmutableHashSet<ICompilerServiceProvider>.Empty;
 
         async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )

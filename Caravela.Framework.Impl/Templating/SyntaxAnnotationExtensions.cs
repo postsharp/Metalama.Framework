@@ -17,10 +17,10 @@ namespace Caravela.Framework.Impl.Templating
         private const string _noindentAnnotationKind = "noindent";
         private const string _colorAnnotationKind = "color";
 
-        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
-        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
-        private static readonly SyntaxAnnotation _templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
-        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildtime" );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runtime" );
+        private static readonly SyntaxAnnotation _templateAnnotation = new( _scopeAnnotationKind, "template" );
+        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noindentAnnotationKind );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 

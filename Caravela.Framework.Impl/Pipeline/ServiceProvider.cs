@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Pipeline
 {
     public class ServiceProvider : IServiceProvider
     {
-        private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, object> _services = new();
 
         public void AddService<T>( T service )
             where T : notnull

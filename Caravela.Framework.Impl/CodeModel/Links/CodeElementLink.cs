@@ -81,10 +81,10 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         }
 
         public static CodeElementLink<ICodeElement> ReturnParameter( IMethodSymbol methodSymbol )
-            => new CodeElementLink<ICodeElement>( methodSymbol, CodeElementSpecialKind.ReturnParameter );
+            => new( methodSymbol, CodeElementSpecialKind.ReturnParameter );
 
         internal static CodeElementLink<ICodeElement> Compilation()
-            => new CodeElementLink<ICodeElement>( null, CodeElementSpecialKind.Compilation );
+            => new( null, CodeElementSpecialKind.Compilation );
     }
 
     /// <summary>
@@ -141,6 +141,6 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public CodeElementLink<TOut> Cast<TOut>()
             where TOut : class, ICodeElement
-            => new CodeElementLink<TOut>( this.Target, this._kind );
+            => new( this.Target, this._kind );
     }
 }

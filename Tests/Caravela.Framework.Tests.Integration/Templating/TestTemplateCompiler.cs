@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 {
     internal class TestTemplateCompiler
     {
-        private readonly TemplateCompiler _compiler = new TemplateCompiler();
+        private readonly TemplateCompiler _compiler = new();
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
 

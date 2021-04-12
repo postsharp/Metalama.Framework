@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static MemberLink<T> ToMemberLink<T>( this T member )
             where T : class, IMember
-            => new MemberLink<T>( ((ICodeElementInternal) member).ToLink() );
+            => new( ((ICodeElementInternal) member).ToLink() );
 
         public static Location? GetLocation( this ICodeElement codeElement )
             => codeElement switch

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Aspects
 
         // TODO: update the exception message.
         private static InvalidOperationException NewInvalidOperationException() =>
-            new InvalidOperationException( "Code accessing this member has to be compiled using Caravela." );
+            new( "Code accessing this member has to be compiled using Caravela." );
 
         /// <summary>
         /// Gets information about the element of code to which the template has been applied.
