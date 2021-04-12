@@ -1,15 +1,15 @@
 {
     if (a == null)
     {
-        throw new ArgumentNullException("a");
+        throw new global::System.ArgumentNullException("a");
     }
 
     if (b == null)
     {
-        throw new ArgumentNullException("b");
+        throw new global::System.ArgumentNullException("b");
     }
 
-    string result;
-    result = a.ToString() + b.ToString();
+    global::System.String result;
+    result = this.Method(a, b);
     return (string)result;
 }

@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.Framework.Tests.Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.TestFramework", "Caravela.TestFramework\Caravela.TestFramework.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caravela.AspectWorkbench", "Tests\Caravela.AspectWorkbench\Caravela.AspectWorkbench.csproj", "{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F06E390-058E-4102-8674-9CC112D1A8BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +109,7 @@ Global
 		{B9D33CDD-3D37-40A5-B5D5-F42118342D5B} = {19660464-978E-4457-846E-B399BB6A3884}
 		{69EB8F34-975E-46AD-8EA1-A592A629CCD6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{7D8C16EE-B822-4AE3-B9C1-810C010573D6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

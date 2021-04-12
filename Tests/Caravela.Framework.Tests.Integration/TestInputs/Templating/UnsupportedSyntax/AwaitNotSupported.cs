@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.UnsupportedSyntax.AwaitNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.AwaitNotSupported
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

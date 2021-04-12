@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             static CSharpCompilation CreateEmptyCompilation()
             {
-                return CSharpCompilation.Create( null! )
+                return CSharpCompilation.Create( "test_" + Guid.NewGuid() )
                     .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.UnitTests
                         MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
                         MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ));
+                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
             }
 
             var mainRoslynCompilation = CreateEmptyCompilation();
@@ -48,21 +48,26 @@ namespace Caravela.Framework.Tests.UnitTests
             if ( dependentCode != null )
             {
                 var dependentCompilation = CreateEmptyCompilation().AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
-                mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference( ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
 
             if ( !ignoreErrors )
             {
-                var diagnostics = mainRoslynCompilation.GetDiagnostics();
-                if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
-                {
-                    var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
-
-                    throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
-                }
+                CheckRoslynDiagnostics( mainRoslynCompilation );
             }
 
             return mainRoslynCompilation;
+        }
+
+        public static void CheckRoslynDiagnostics( CSharpCompilation mainRoslynCompilation )
+        {
+            var diagnostics = mainRoslynCompilation.GetDiagnostics();
+            if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
+            {
+                var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );
+
+                throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
+            }
         }
 
         internal static CompilationModel CreateCompilation( string? code, string? dependentCode = null )

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Serialization
             var elementType = array.GetType().GetElementType()!;
             if ( array.Rank > 1 )
             {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MultidimensionalArray, array );
+                throw SerializationDiagnosticDescriptors.MultidimensionalArray.CreateException( array.GetType() );
             }
 
             var lt = new List<ExpressionSyntax>();

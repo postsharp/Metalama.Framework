@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnostics.ReportDiagnostic( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
+                diagnostics.Add( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects

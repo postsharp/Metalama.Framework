@@ -1,34 +1,23 @@
-
-    internal class TargetClass
+[TestOutput]
+internal class TargetClass
+{
+    [Log]
+    public static int Add(int a, int b)
     {
-        [Log]
-        public static int Add(int a, int b)
+        global::System.Console.WriteLine("Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
+        try
         {
-            return __Add__LogAttribute(a, b);
-        }
-
-        [Log]
-        public static int __Add__OriginalBody(int a, int b)
-        {
+            global::System.Int32 result;
             if (a == 0)
                 throw new ArgumentOutOfRangeException(nameof(a));
-            return a + b;
+            result = a + b;
+            global::System.Console.WriteLine("Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
+            return (int)result;
         }
-        public static global::System.Int32 __Add__LogAttribute(int a, int b)
+        catch (global::System.Exception e)
         {
-            Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) started.");
-            try
-            {
-                global::System.Int32 result;
-                result = __Add__OriginalBody(a, b);
-                Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) succeeded.");
-                return (int)result;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Caravela.Framework.IntegrationTests.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
-                throw;
-            }
+            global::System.Console.WriteLine("Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging.TargetClass.Add(int, int) failed: " + e.Message);
+            throw;
         }
     }
-    
+}

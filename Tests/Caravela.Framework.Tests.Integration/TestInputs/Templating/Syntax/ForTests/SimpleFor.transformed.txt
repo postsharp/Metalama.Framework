@@ -3,12 +3,12 @@
     {
         try
         {
-            return a;
+            return this.Method(a);
         }
         catch
         {
         }
     }
 
-    throw new Exception();
+    throw new global::System.Exception();
 }

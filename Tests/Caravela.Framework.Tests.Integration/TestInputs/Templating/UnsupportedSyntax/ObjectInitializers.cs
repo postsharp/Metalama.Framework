@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.ObjectInitializers
+namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.ObjectInitializers
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
@@ -30,6 +30,7 @@ namespace Caravela.Framework.IntegrationTests.Templating.CSharpSyntax.ObjectInit
     record Entity1
     {
         public int Property1 { get; set; }
+
         public IList<Entity2> Property2 { get; set; } = new List<Entity2>();
     }
 

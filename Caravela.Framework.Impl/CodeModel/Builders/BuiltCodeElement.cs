@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public CodeElementKind ElementKind => this.Builder.ElementKind;
 
-        ICompilation ICodeElement.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         protected ICodeElement GetForCompilation( CompilationModel compilation )
             => this.Compilation == compilation ? this : compilation.Factory.GetCodeElement( this.Builder );

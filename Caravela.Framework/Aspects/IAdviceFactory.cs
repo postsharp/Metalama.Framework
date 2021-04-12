@@ -16,16 +16,19 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="method">The method to override.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
+        /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns>An advice.</returns>
-        IOverrideMethodAdvice OverrideMethod( IMethod method, string defaultTemplate );
+        IOverrideMethodAdvice OverrideMethod( IMethod method, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null );
 
         /// <summary>
         /// Creates an advice that introduces a new method or overrides the implementation of the existing one.
         /// </summary>
         /// <param name="type">The type into which the method is to be introduced.</param>
         /// <param name="defaultTemplate">Name of the template method to by used by default.</param>
+        /// <param name="scope">Introduction scope.</param>
+        /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns></returns>
-        IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default );
+        IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default, AspectLinkerOptions? aspectLinkerOptions = null );
 
         /// <summary>
         /// Gets a factory objects that allows to add advices to other layers than the default one.

@@ -1,7 +1,7 @@
 {
     var x = 0;
-    Console.WriteLine(x);
+    global::System.Console.WriteLine(x);
     var y = 0;
-    Console.WriteLine(y);
-    return a;
+    global::System.Console.WriteLine(y);
+    return this.Method(a);
 }

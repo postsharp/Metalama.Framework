@@ -161,11 +161,11 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
                 var cycleNodesString = string.Join( ", ", cycleNodes );
 
-                var diagnostic = Diagnostic.Create(
-                    GeneralDiagnosticDescriptors.CycleInAspectOrdering,
-                    mainLocation,
-                    additionalLocations,
-                    cycleNodesString );
+                var diagnostic =
+                    GeneralDiagnosticDescriptors.CycleInAspectOrdering.CreateDiagnostic(
+                        mainLocation,
+                        cycleNodesString,
+                        additionalLocations );
                 reportDiagnostic( diagnostic );
 
                 return false;

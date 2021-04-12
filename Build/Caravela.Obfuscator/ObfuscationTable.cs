@@ -31,7 +31,7 @@ namespace Caravela.Obfuscator
             return hashString;
         }
 
-        public string CreateHash( string input )
+        public string CreateHash( string input, bool isTypeName )
         {
             input = input.Normalize();
 
@@ -60,7 +60,12 @@ namespace Caravela.Obfuscator
             do
             {
                 var hash = this._sha1.ComputeHash( inputBytes );
-                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen );
+                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen ).TrimEnd('=').Replace('+', '_').Replace('/', '_');
+
+                if ( isTypeName )
+                {
+                    hashString = "Obfuscated." + hashString;
+                }
 
                 if ( this._hashToName.TryGetValue( hashString, out var existingName ) && existingName != input )
                 {

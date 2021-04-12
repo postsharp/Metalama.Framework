@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
@@ -32,6 +33,14 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="diagnostic"></param>
         public abstract void ReportDiagnostic( Diagnostic diagnostic );
+
+        public void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
+        {
+            foreach ( var diagnostic in diagnostics )
+            {
+                this.ReportDiagnostic( diagnostic );
+            }
+        }
 
         public abstract void SuppressDiagnostic( string id, ICodeElement scope );
         

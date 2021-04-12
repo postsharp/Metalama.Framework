@@ -1,0 +1,1 @@
+These tests are used both to test highlighting and trivia preservation.

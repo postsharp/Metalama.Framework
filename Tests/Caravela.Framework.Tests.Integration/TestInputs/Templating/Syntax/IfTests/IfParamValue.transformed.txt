@@ -1,13 +1,13 @@
 {
     if (a == null)
     {
-        throw new ArgumentNullException("a");
+        throw new global::System.ArgumentNullException("a");
     }
 
     if (b == null)
     {
-        throw new ArgumentNullException("b");
+        throw new global::System.ArgumentNullException("b");
     }
 
-    return a.ToString() + b.ToString();
+    return this.Method(a, b);
 }

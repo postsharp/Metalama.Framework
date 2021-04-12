@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PostSharp.Patterns.Model" Version="6.9.3" />
+    <PackageReference Include="RoslynPad.Editor.Windows" Version="1.3.0" />
+    <PackageReference Include="RoslynPad.Roslyn" Version="3.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
+    <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
+    <ProjectReference Include="..\Caravela.Framework.Tests.Integration\Caravela.Framework.Tests.Integration.csproj" />
+  </ItemGroup>
+
+</Project>

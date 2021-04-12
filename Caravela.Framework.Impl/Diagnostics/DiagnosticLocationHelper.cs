@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,6 +14,9 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     internal static class DiagnosticLocationHelper
     {
+
+        public static Location? GetLocation( this IDiagnosticLocation location )
+            => ((DiagnosticLocation) location).Location;
 
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on

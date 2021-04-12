@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#pragma warning disable SA1642, SA1028, IDE0021, SA1649, SA1623
+#pragma warning disable SA1642, SA1028, IDE0021, SA1649, SA1623, SA1402
 
 namespace System.Diagnostics.CodeAnalysis
 {

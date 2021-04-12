@@ -1,0 +1,6 @@
+{
+    using (new global::System.IO.MemoryStream())
+    {
+        return this.Method(a);
+    }
+}

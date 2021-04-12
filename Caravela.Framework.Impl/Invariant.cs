@@ -76,6 +76,28 @@ namespace Caravela.Framework.Impl
             return obj!;
         }
 
+        /// <summary>
+        /// Checks that a nullable value is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+#if !DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static T AssertNotNull<T>( this T? obj )
+            where T : struct
+        {
+#if DEBUG            
+            if ( obj == null )
+            {
+                throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
+            }
+#endif
+
+            return obj!.Value;
+        }
+
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif         

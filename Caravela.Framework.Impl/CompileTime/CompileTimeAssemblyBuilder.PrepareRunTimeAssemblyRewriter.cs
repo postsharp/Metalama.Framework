@@ -15,15 +15,15 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
-            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation compilation )
-                : base( symbolClassifier, compilation )
+            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
+                : base( symbolClassifier, runTimeCompilation )
             {
-                this._aspectDriverSymbol = compilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
+                this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                var symbol = this.Compilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
                 // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
                 // This only happens if regular Caravela.Framework is referenced from the weaver project, which generally shouldn't happen.

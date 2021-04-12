@@ -1,10 +1,11 @@
 #pragma warning disable CS8600, CS8603
 using System;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnVoidProceedAndDefault
+namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.ReturnVoidProceedAndDefault
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]

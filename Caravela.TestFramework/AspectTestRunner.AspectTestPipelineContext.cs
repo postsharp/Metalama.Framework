@@ -16,13 +16,16 @@ namespace Caravela.TestFramework
     {
         private class AspectTestPipelineContext : IAspectPipelineContext
         {
-            private readonly string _testName;
             private readonly TestResult _testResult;
 
-            public AspectTestPipelineContext( string testName, CSharpCompilation compilation, TestResult testResult )
+            public AspectTestPipelineContext( TestResult testResult )
             {
-                this.Compilation = compilation;
-                this._testName = testName;
+                if ( testResult.InitialCompilation == null )
+                {
+                    throw new ArgumentOutOfRangeException( nameof( testResult ), $"{nameof( TestResult.InitialCompilation )} should not be null." );
+                }
+
+                this.Compilation = (CSharpCompilation) testResult.InitialCompilation!;
                 this._testResult = testResult;
                 this.ManifestResources = new List<ResourceDescription>();
             }
@@ -44,7 +47,11 @@ namespace Caravela.TestFramework
 
             public bool HandleExceptions => false;
 
-            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testName );
+            bool IBuildOptions.AttachDebugger => false;
+
+            bool IBuildOptions.MapPdbToTransformedCode => true;
+
+            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testResult.TestName );
 
             public string? CrashReportDirectory => null;
         }

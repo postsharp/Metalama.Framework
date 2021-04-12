@@ -1,11 +1,10 @@
 #pragma warning disable CS8600, CS8603
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnNull
+namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.ReturnNull
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
@@ -17,6 +16,7 @@ namespace Caravela.Framework.IntegrationTests.Templating.ReturnStatement.ReturnN
             {
                 return null;
             }
+
             dynamic result = proceed();
             return result;
         }

@@ -21,8 +21,7 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
         private static readonly SyntaxAnnotation _templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
-        private static readonly SyntaxAnnotation _proceedAnnotation = new SyntaxAnnotation( _proceedAnnotationKind );
-
+        
         private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
@@ -163,30 +162,10 @@ namespace Caravela.Framework.Impl.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( source.GetAnnotations( _templateAnnotationKinds ) );
 
-        public static T WithCallsProceedAnnotationFrom<T>( this T node, SyntaxNode source )
-            where T : SyntaxNode
-            => source.HasCallsProceedAnnotation() ? node.AddCallsProceedAnnotation() : node;
-
         public static T AddNoDeepIndentAnnotation<T>( this T node )
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
-
-        public static bool HasCallsProceedAnnotation( this SyntaxNode node )
-            => node.HasAnnotation( _proceedAnnotation );
-
-        public static T AddCallsProceedAnnotation<T>( this T node )
-            where T : SyntaxNode
-        {
-            if ( node.HasCallsProceedAnnotation() )
-            {
-                return node;
-            }
-            else
-            {
-                return node.WithAdditionalAnnotations( _proceedAnnotation );
-            }
-        }
     }
 }

@@ -9,19 +9,18 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeAssemblyBuilder
     {
-        // PERF: explicitly skip over all other nodes?
         internal class RemoveInvalidUsingsRewriter : CSharpSyntaxRewriter
         {
-            private readonly Compilation _compilation;
+            private readonly Compilation _compileTimeCompilation;
 
-            public RemoveInvalidUsingsRewriter( Compilation compilation )
+            public RemoveInvalidUsingsRewriter( Compilation compileTimeCompilation )
             {
-                this._compilation = compilation;
+                this._compileTimeCompilation = compileTimeCompilation;
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                var symbolInfo = this._compilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
+                var symbolInfo = this._compileTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
 
                 if ( symbolInfo.Symbol == null )
                 {

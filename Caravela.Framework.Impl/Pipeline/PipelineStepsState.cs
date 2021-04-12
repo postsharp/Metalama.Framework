@@ -95,12 +95,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
-                            this._diagnostics.ReportDiagnostic(
-                                Diagnostic.Create(
-                                    GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep,
-                                    this._currentStep!.AspectLayer.AspectType.Type.GetLocationForDiagnosticReport(),
-                                    this._currentStep.AspectLayer.AspectType.Type,
-                                    aspectType ) );
+                            this._diagnostics.Add(
+                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
+                                    this._currentStep!.AspectLayer.AspectType.Type.GetLocation(),
+                                    (this._currentStep.AspectLayer.AspectType.Type, aspectType) ) );
                             success = false;
                             continue;
                         }
@@ -161,12 +159,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
-                    this._diagnostics.ReportDiagnostic(
-                        Diagnostic.Create(
-                            GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep,
-                            this._currentStep.AspectLayer.AspectType.Type.GetLocationForDiagnosticReport(),
-                            this._currentStep.AspectLayer.AspectType.Type,
-                            advice.TargetDeclaration ) );
+                    this._diagnostics.Add(
+                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
+                            this._currentStep.AspectLayer.AspectType.Type.GetLocation(),
+                            (this._currentStep.AspectLayer.AspectType.Type, advice.TargetDeclaration) ) );
                     success = false;
                     continue;
                 }

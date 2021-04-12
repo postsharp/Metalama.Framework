@@ -1,4 +1,4 @@
 {
-    Console.WriteLine("a = " + a);
-    return a;
+    global::System.Console.WriteLine("a = " + a);
+    return this.Method(a);
 }

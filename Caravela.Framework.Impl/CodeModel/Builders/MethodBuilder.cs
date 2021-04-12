@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -19,11 +19,13 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
     {
         public ParameterBuilderList Parameters { get; } = new();
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
+
+        public AspectLinkerOptions? LinkerOptions { get; }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
@@ -31,6 +33,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
             return parameter;
+        }
+
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        {
+            var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
+            var typeConstant = defaultValue != null ? new TypedConstant( itype, defaultValue ) : default;
+            return this.AddParameter( name, itype, refKind, typeConstant );
         }
 
         public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotImplementedException();
@@ -70,9 +79,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {
+            this.LinkerOptions = linkerOptions;
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
@@ -106,18 +116,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         }
                         : null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction ) };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions ) };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.SelectMany( x => ((TypeDeclarationSyntax) x.GetSyntax()).Members ).First();
+        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
-        public IReadOnlyList<ISymbol> LookupSymbols()
-        {
-            // TODO: implement.
-            return Array.Empty<ISymbol>();
-        }
     }
 }

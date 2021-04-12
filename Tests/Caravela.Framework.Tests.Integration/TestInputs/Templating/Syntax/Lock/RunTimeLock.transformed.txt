@@ -1,0 +1,6 @@
+{
+    lock (this)
+    {
+        return this.Method(a);
+    }
+}

@@ -1,8 +1,9 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInitialize
+namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromInitialize
 {
     public class ErrorAttribute : OverrideMethodAspect
     {
@@ -20,7 +21,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInit
         }
     }
 
-    #region Target
+    [TestOutput]
     internal class TargetClass
     {
         [Error]
@@ -34,5 +35,4 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Diagnostics.ReportFromInit
             return a + b;
         }
     }
-    #endregion
 }

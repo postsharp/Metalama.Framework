@@ -16,7 +16,7 @@ namespace Caravela.Obfuscator
 {
     // ReSharper disable MemberCanBePrivate.Global
     // ReSharper disable UnusedAutoPropertyAccessor.Global
-    
+
     /// <summary>
     /// A PostSharp SDK task that obfuscates the input assembly.
     /// </summary>
@@ -50,7 +50,7 @@ namespace Caravela.Obfuscator
         /// Gets or sets the project path.
         /// </summary>
         [ConfigurableProperty]
-        
+
         public string? RootPath { get; set; }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Caravela.Obfuscator
                             hashablePath = mutableSourceDocument.FileName;
                         }
 
-                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath );
+                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath, false );
                     }
                 }
             }
@@ -276,7 +276,7 @@ namespace Caravela.Obfuscator
                  (type.Attributes & TypeAttributes.Serializable) == 0 &&
                  !this.IsObfuscationExcluded( type ) )
             {
-                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name ) );
+                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, true ) );
             }
 
             // Obfuscate generic parameter names.
@@ -430,7 +430,7 @@ namespace Caravela.Obfuscator
                 else
                 {
                     // Obfuscate the name of the current method.
-                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name ) );
+                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name, false ) );
                 }
 
                 if ( !method.IsPublic() )
@@ -476,7 +476,7 @@ namespace Caravela.Obfuscator
                     continue;
                 }
 
-                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name ) );
+                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name, false ) );
             }
         }
 

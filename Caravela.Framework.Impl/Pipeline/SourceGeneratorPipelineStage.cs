@@ -9,6 +9,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -33,6 +34,8 @@ namespace Caravela.Framework.Impl.Pipeline
             DiagnosticListBuilder diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
+
+            LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
 
             foreach ( var transformationGroup in transformations )
             {
@@ -63,7 +66,13 @@ namespace Caravela.Framework.Impl.Pipeline
                     switch ( transformation )
                     {
                         case IMemberIntroduction memberIntroduction:
-                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( new MemberIntroductionContext( diagnostics ) ).Select( m => m.Syntax ).ToArray() );
+                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything .
+                            var introductionContext = new MemberIntroductionContext(
+                                diagnostics,
+                                new LinkerIntroductionNameProvider(),
+                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ) );
+
+                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
                             break;
 
                         default:

@@ -1,4 +1,7 @@
 <Project>
+	<PropertyGroup>
+		<CaravelaCompilerVisiblePropertiesTargetsImported>True</CaravelaCompilerVisiblePropertiesTargetsImported>
+	</PropertyGroup>
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
         <CompilerVisibleProperty Include="DebugCaravela" />

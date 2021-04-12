@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForTests.SimpleFor
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.SimpleFor
 {
+    [CompileTime]
     class Aspect
     {
         [TestTemplate]
@@ -20,7 +20,6 @@ namespace Caravela.Framework.IntegrationTests.Templating.Syntax.ForTests.SimpleF
                 catch
                 {
                 }
-
             }
 
             throw new Exception();

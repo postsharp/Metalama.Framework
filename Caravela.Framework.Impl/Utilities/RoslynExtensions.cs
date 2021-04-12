@@ -31,6 +31,10 @@ namespace Caravela.Framework.Impl.Utilities
 
         public static TCompilation VisitAllTrees<TCompilation>( this CSharpSyntaxRewriter rewriter, TCompilation compilation )
             where TCompilation : Compilation =>
-            compilation.ReplaceAllTrees( tree => tree.WithRootAndOptions( rewriter.Visit( tree.GetRoot() ), tree.Options ) );
+            compilation.ReplaceAllTrees( tree =>
+            {
+                var newRoot = rewriter.Visit( tree.GetRoot() );
+                return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
+            } );
     }
 }
