@@ -5,7 +5,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
-    enum SwitchEnum
+    enum SwitchEnum 
     {
         one = 1,
         two = 2,
@@ -16,14 +16,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
         [TestTemplate]
         dynamic Template()
         {
-            var i = compileTime(SwitchEnum.one);
+            var i = compileTime(0);
 
             switch (i)
             {
-                case SwitchEnum.one:
+                case (int)SwitchEnum.one:
                     Console.WriteLine("1");
                     break;
-                case SwitchEnum.two:
+                case (int)SwitchEnum.two:
                     Console.WriteLine("2");
                     break;
                 default:

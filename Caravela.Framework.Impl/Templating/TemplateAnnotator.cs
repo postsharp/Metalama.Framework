@@ -979,28 +979,39 @@ namespace Caravela.Framework.Impl.Templating
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
-            var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
-            for ( var i = 0; i < node.Sections.Count; i++ )
+            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                var section = node.Sections[i];
-                using ( this.EnterBreakOrContinueScope( expressionScope ) )
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
                 {
-                    this.RequireScope( section, expressionScope );
-                    transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
+                    var section = node.Sections[i];
+                    using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                    {
+                        this.RequireScope( section, SymbolDeclarationScope.CompileTimeOnly );
+                        transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                    }
                 }
-            }
 
-            if ( expressionScope == SymbolDeclarationScope.RunTimeOnly )
-            {
-                using ( this.EnterRuntimeConditionalBlock() )
-                {
-                    return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken );
-                }
+                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {
-                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken )
-                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+                for ( var i = 0; i < node.Sections.Count; i++ )
+                {
+                    using ( this.EnterRuntimeConditionalBlock() )
+                    {
+                        var section = node.Sections[i];
+                        using ( this.EnterBreakOrContinueScope( expressionScope ) )
+                        {
+                            this.RequireScope( section, expressionScope );
+                            transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
+                        }
+                    }
+                }
+
+                return node.Update( node.SwitchKeyword, node.OpenParenToken, annotatedExpression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken );
             }
         }
 
