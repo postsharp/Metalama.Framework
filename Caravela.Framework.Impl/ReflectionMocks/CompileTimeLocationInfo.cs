@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -23,16 +24,12 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             this.Field = field;
         }
 
-        public static CompileTimeLocationInfo Create( IProperty property )
-        {
-            if ( property is Property trueProperty )
+        public static CompileTimeLocationInfo Create( IFieldOrPropertyInvocation fieldOrProperty ) =>
+            fieldOrProperty switch
             {
-                return new CompileTimeLocationInfo( trueProperty );
-            }
-            else
-            {
-                return new CompileTimeLocationInfo( (property as Field)! );
-            }
-        }
+                Property property => new CompileTimeLocationInfo( property ),
+                Field field => new CompileTimeLocationInfo( field ),
+                _ => throw new ArgumentOutOfRangeException( nameof( fieldOrProperty ) )
+            };
     }
 }

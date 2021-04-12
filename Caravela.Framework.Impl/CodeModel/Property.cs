@@ -51,21 +51,23 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object Value
         {
-            get => new PropertyInvocation<Property>( this ).Value;
+            get => new PropertyInvocation( this ).Value;
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => new PropertyInvocation<Property>( this ).GetValue( instance );
+        public object GetValue( object? instance ) => new PropertyInvocation( this ).GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => new PropertyInvocation<Property>( this ).SetValue( instance, value );
+        public object SetValue( object? instance, object value ) => new PropertyInvocation( this ).SetValue( instance, value );
 
-        public object GetIndexerValue( object? instance, params object[] args ) => new PropertyInvocation<Property>( this ).GetIndexerValue( instance, args );
+        public object GetIndexerValue( object? instance, params object[] args ) => new PropertyInvocation( this ).GetIndexerValue( instance, args );
 
-        public object SetIndexerValue( object? instance, object value, params object[] args ) => new PropertyInvocation<Property>( this ).SetIndexerValue( instance, value, args );
+        public object SetIndexerValue( object? instance, object value, params object[] args ) => new PropertyInvocation( this ).SetIndexerValue( instance, value, args );
 
         public bool HasBase => true;
 
-        public IPropertyInvocation Base => new PropertyInvocation<Property>( this ).Base;
+        IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
+
+        public IPropertyInvocation Base => new PropertyInvocation( this ).Base;
 
         public override string ToString() => this._symbol.ToString();
 

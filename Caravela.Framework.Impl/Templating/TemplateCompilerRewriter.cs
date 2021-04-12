@@ -70,7 +70,7 @@ namespace Caravela.Framework.Impl.Templating
             this._currentMetaContext = newMetaContext;
             return cookie;
         }
-        
+
         /// <summary>
         /// Generates the code to generate a run-time symbol name (i.e. a call to <see cref="TemplateSyntaxFactory.GetUniqueIdentifier"/>),
         /// adds this code to the list of statements of the current <see cref="MetaContext"/>, and returns the identifier of
@@ -78,30 +78,30 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="buildTimeIdentifier">The name of the identifier in the source template, used as a hint to generate a run-time identifier.</param>
         /// <returns>The identifier of the compiled template that contains the run-time symbol name.</returns>
-        private IdentifierNameSyntax ReserveRunTimeSymbolName(SyntaxToken buildTimeIdentifier)
+        private IdentifierNameSyntax ReserveRunTimeSymbolName( SyntaxToken buildTimeIdentifier )
         {
             if ( buildTimeIdentifier.IsMissing )
             {
                 throw new AssertionFailedException();
             }
-            
+
             var metaVariableName = "__" + buildTimeIdentifier.Text;
 
-            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier(buildTimeIdentifier.Text);
+            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( buildTimeIdentifier.Text );
 
             var localDeclaration =
                 LocalDeclarationStatement(
                         VariableDeclaration(
-                                this.MetaSyntaxFactory.Type(typeof(SyntaxToken)))
+                                this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) )
                             .WithVariables(
                                 SingletonSeparatedList(
-                                    VariableDeclarator(Identifier(metaVariableName))
-                                        .WithInitializer(EqualsValueClause(callGetUniqueIdentifier)))))
+                                    VariableDeclarator( Identifier( metaVariableName ) )
+                                        .WithInitializer( EqualsValueClause( callGetUniqueIdentifier ) ) ) ) )
                     .NormalizeWhitespace();
 
-            this._currentMetaContext!.Statements.Add(localDeclaration);
+            this._currentMetaContext!.Statements.Add( localDeclaration );
 
-            return IdentifierName(metaVariableName);
+            return IdentifierName( metaVariableName );
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Caravela.Framework.Impl.Templating
                 // get their name dynamically at expansion time. The ReserveRunTimeSymbolName method generates code that
                 // reserves the name at expansion time. The result is stored in a local variable of the expanded template.
                 // Then, each template reference uses this local variable.
-                
+
                 var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
                 if ( identifierSymbol != null )
@@ -214,43 +214,43 @@ namespace Caravela.Framework.Impl.Templating
                     return base.TransformIdentifierName( node );
 
                 case SyntaxKind.IdentifierToken:
-                    return this.TransformIdentifierToken(node);
+                    return this.TransformIdentifierToken( node );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected identifier kind: {node.Identifier.Kind()}." );
             }
         }
 
-        private ExpressionSyntax TransformIdentifierToken(IdentifierNameSyntax node)
+        private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
         {
-            if (node.Identifier.Text == "dynamic")
+            if ( node.Identifier.Text == "dynamic" )
             {
                 // We change all dynamic into var in the template.
-                return base.TransformIdentifierName(IdentifierName(Identifier("var")));
+                return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
 
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
             // and initialized in the VisitVariableDeclarator.
             // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
-            var identifierSymbol = this._semanticAnnotationMap.GetSymbol(node);
+            var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
             var isDeclaredWithinTemplate =
-                identifierSymbol != null && SymbolEqualityComparer.Default.Equals(identifierSymbol.ContainingSymbol, this._rootTemplateSymbol);
+                identifierSymbol != null && SymbolEqualityComparer.Default.Equals( identifierSymbol.ContainingSymbol, this._rootTemplateSymbol );
 
-            if (isDeclaredWithinTemplate)
+            if ( isDeclaredWithinTemplate )
             {
-                if (!this._currentMetaContext!.TryGetGeneratedSymbolLocal(identifierSymbol!, out var declaredSymbolNameLocal))
+                if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     // That should not happen because IdentifierName is used only for an identifier reference, not an identifier defitinition.
                     // Identifier definitions should be processed by Transform(SyntaxToken).
                     throw new AssertionFailedException();
                 }
 
-                return this.MetaSyntaxFactory.IdentifierName1(IdentifierName(declaredSymbolNameLocal.Text));
+                return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
             }
             else
             {
-                return this.MetaSyntaxFactory.IdentifierName2(this.MetaSyntaxFactory.LiteralExpression(node.Identifier.Text));
+                return this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) );
             }
         }
 
@@ -377,7 +377,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return transformedNode;
             }
-            
+
             var transformationKind = this.GetTransformationKind( node.Expression );
 
             // Cast to dynamic expressions.
@@ -385,7 +385,7 @@ namespace Caravela.Framework.Impl.Templating
                  this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.CreateDynamicMemberAccessExpression) ),
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.CreateDynamicMemberAccessExpression ) ),
                     ArgumentList( SeparatedList( new[]
                     {
                         Argument( CastFromDynamic(
@@ -500,30 +500,30 @@ namespace Caravela.Framework.Impl.Templating
         /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
         /// (in this case, a return statement is returned).</param>
         /// <returns></returns>
-        private SyntaxNode BuildRunTimeBlock(BlockSyntax node, bool generateExpression)
+        private SyntaxNode BuildRunTimeBlock( BlockSyntax node, bool generateExpression )
         {
-            using (this.WithMetaContext(
-                MetaContext.CreateForRunTimeBlock(this._currentMetaContext, $"__s{++this._nextStatementListId}")))
+            using ( this.WithMetaContext(
+                MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
             {
                 // List<StatementSyntax> statements = new List<StatementSyntax>();
-                var listType = this.MetaSyntaxFactory.Type(typeof(List<StatementSyntax>));
+                var listType = this.MetaSyntaxFactory.Type( typeof( List<StatementSyntax> ) );
                 this._currentMetaContext!.Statements.Add( LocalDeclarationStatement(
-                        VariableDeclaration(listType)
+                        VariableDeclaration( listType )
                             .WithVariables(
                                 SingletonSeparatedList(
                                     VariableDeclarator(
-                                            Identifier(this._currentMetaContext.StatementListVariableName))
+                                            Identifier( this._currentMetaContext.StatementListVariableName ) )
                                         .WithInitializer(
                                             EqualsValueClause(
-                                                ObjectCreationExpression(listType, ArgumentList(), default))))))
+                                                ObjectCreationExpression( listType, ArgumentList(), default ) ) ) ) ) )
                     .NormalizeWhitespace()
-                    .WithLeadingTrivia(this.GetIndentation()));
+                    .WithLeadingTrivia( this.GetIndentation() ) );
 
                 // It is important to call ToList to ensure proper ordering of nodes.
-                var metaStatements = this.ToMetaStatements(node.Statements).ToList();
-                this._currentMetaContext.Statements.AddRange(metaStatements);
+                var metaStatements = this.ToMetaStatements( node.Statements ).ToList();
+                this._currentMetaContext.Statements.AddRange( metaStatements );
 
-                if (generateExpression)
+                if ( generateExpression )
                 {
                     // return statements.ToArray();
                     this._currentMetaContext.Statements.Add(
@@ -531,28 +531,28 @@ namespace Caravela.Framework.Impl.Templating
                                 InvocationExpression(
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName(this._currentMetaContext.StatementListVariableName),
-                                        IdentifierName("ToArray"))))
-                            .WithLeadingTrivia(this.GetIndentation()));
+                                        IdentifierName( this._currentMetaContext.StatementListVariableName ),
+                                        IdentifierName( "ToArray" ) ) ) )
+                            .WithLeadingTrivia( this.GetIndentation() ) );
 
                     // Block( Func<StatementSyntax[]>( delegate { ... } )
-                    return this.DeepIndent(this.MetaSyntaxFactory.Block(
+                    return this.DeepIndent( this.MetaSyntaxFactory.Block(
                         InvocationExpression(
                             ObjectCreationExpression(
-                                    this.MetaSyntaxFactory.GenericType(typeof(Func<>), ArrayType(
-                                            this.MetaSyntaxFactory.Type(typeof(StatementSyntax)))
+                                    this.MetaSyntaxFactory.GenericType( typeof( Func<> ), ArrayType(
+                                            this.MetaSyntaxFactory.Type( typeof( StatementSyntax ) ) )
                                         .WithRankSpecifiers(
                                             SingletonList(
                                                 ArrayRankSpecifier(
                                                     SingletonSeparatedList<ExpressionSyntax>(
-                                                        OmittedArraySizeExpression()))))))
+                                                        OmittedArraySizeExpression() ) ) ) ) ) )
                                 .WithArgumentList(
                                     ArgumentList(
                                         SingletonSeparatedList(
                                             Argument(
                                                 AnonymousMethodExpression()
-                                                    .WithBody(Block(this._currentMetaContext.Statements)
-                                                        .AddNoDeepIndentAnnotation()))))))));
+                                                    .WithBody( Block( this._currentMetaContext.Statements )
+                                                        .AddNoDeepIndentAnnotation() ) ) ) ) ) ) ) );
                 }
                 else
                 {
@@ -560,9 +560,9 @@ namespace Caravela.Framework.Impl.Templating
                     this._currentMetaContext.Statements.Add(
                         ReturnStatement(
                             this.MetaSyntaxFactory.Block(
-                                IdentifierName(this._currentMetaContext.StatementListVariableName)).WithLeadingTrivia(this.GetIndentation())));
+                                IdentifierName( this._currentMetaContext.StatementListVariableName ) ).WithLeadingTrivia( this.GetIndentation() ) ) );
 
-                    return Block(this._currentMetaContext.Statements);
+                    return Block( this._currentMetaContext.Statements );
                 }
             }
         }
@@ -598,12 +598,12 @@ namespace Caravela.Framework.Impl.Templating
         private List<StatementSyntax> ToMetaStatements( StatementSyntax statement )
         {
             MetaContext newContext;
-            
+
             if ( statement is BlockSyntax block )
             {
                 // Push the build-time template block.
                 newContext = MetaContext.CreateForBuildTimeBlock( this._currentMetaContext! );
-                
+
                 using ( this.WithMetaContext( newContext ) )
                 {
                     // Process all statements in this block.
@@ -618,13 +618,13 @@ namespace Caravela.Framework.Impl.Templating
                 // Push a new MetaContext so statements got added to a new list of statements, but
                 // this MetaContext is neither a run-time nor a compile-time lexical scope. 
                 newContext = MetaContext.CreateHelperContext( this._currentMetaContext! );
-                
+
                 using ( this.WithMetaContext( newContext ) )
                 {
                     ProcessStatement( statement );
                 }
             }
-        
+
             // Returns the statements collected during this call.
             return newContext.Statements;
 
@@ -635,7 +635,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( transformedNode is StatementSyntax statementSyntax )
                 {
                     // The statement is already build-time code so there is nothing to transform.
-                    
+
                     newContext.Statements.Add( statementSyntax.WithLeadingTrivia( this.GetIndentation() ) );
                 }
                 else if ( transformedNode is ExpressionSyntax expressionSyntax )
@@ -772,10 +772,10 @@ namespace Caravela.Framework.Impl.Templating
             else
             {
                 // Special processing of the `var result = proceed()` statement.
-                
+
                 // Transform the variable identifier.
                 var returnVariableIdentifier = this.Transform( proceedAssignments[0].Identifier )!;
-                
+
                 var callCreateSyntaxType = InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -879,7 +879,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="node"></param>
         /// <param name="transformedNode"></param>
         /// <returns></returns>
-        private bool TryVisitNamespaceOrTypeName( SyntaxNode node, [NotNullWhen(true)] out SyntaxNode? transformedNode )
+        private bool TryVisitNamespaceOrTypeName( SyntaxNode node, [NotNullWhen( true )] out SyntaxNode? transformedNode )
         {
             var symbol = this._semanticAnnotationMap.GetSymbol( node );
 
@@ -887,13 +887,13 @@ namespace Caravela.Framework.Impl.Templating
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
                     var nameExpression = CSharpSyntaxGenerator.Instance.NameExpression( namespaceOrType );
-                    
-                    transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform 
-                        ? this.Transform( nameExpression ) 
+
+                    transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
+                        ? this.Transform( nameExpression )
                         : nameExpression;
 
                     return true;
-                
+
                 default:
                     transformedNode = null;
                     return false;

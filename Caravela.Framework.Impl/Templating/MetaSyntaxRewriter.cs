@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
-        
+
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true ) =>
             lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
@@ -233,8 +233,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.Transform( token.Kind() ),
                     this.MetaSyntaxFactory.LiteralExpression( token.Text ),
                     this.MetaSyntaxFactory.LiteralExpression( token.ValueText ),
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) )
-                );
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
             }
         }
 

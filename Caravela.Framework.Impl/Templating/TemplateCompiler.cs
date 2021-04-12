@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Templating
             currentSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();
-            
+
             annotatedSyntaxRoot = currentSyntaxRoot;
 
             // Annotate the syntax tree with info about build- and run-time nodes,

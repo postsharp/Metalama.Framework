@@ -3,13 +3,11 @@
 
 using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Collections;
 using Microsoft.CodeAnalysis;
-using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal sealed class Field : Member, IProperty
+    internal sealed class Field : Member, IField
     {
         private readonly IFieldSymbol _symbol;
 
@@ -22,18 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this._symbol = symbol;
         }
 
-        public RefKind RefKind => RefKind.None;
-
-        public bool IsByRef => false;
-
-        public bool IsRef => false;
-
-        public bool IsRefReadonly => false;
-
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
-
-        IParameterList IProperty.Parameters => ParameterList.Empty;
 
         // TODO: pseudo-accessors
         [Memo]
@@ -44,23 +32,17 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public dynamic Value
         {
-            get => new PropertyInvocation<Field>( this ).Value;
+            get => new FieldOrPropertyInvocation( this ).Value;
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => new PropertyInvocation<Field>( this ).GetValue( instance );
+        public object GetValue( object? instance ) => new FieldOrPropertyInvocation( this ).GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => new PropertyInvocation<Field>( this ).SetValue( instance, value );
-
-        public object GetIndexerValue( object? instance, params object[] args )
-            => throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this, 0) );
-
-        public object SetIndexerValue( object? instance, object value, params object[] args )
-            => throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this, 0) );
+        public object SetValue( object? instance, object value ) => new FieldOrPropertyInvocation( this ).SetValue( instance, value );
 
         public bool HasBase => true;
 
-        public IPropertyInvocation Base => new PropertyInvocation<Field>( this ).Base;
+        public IFieldOrPropertyInvocation Base => new FieldOrPropertyInvocation( this ).Base;
 
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 

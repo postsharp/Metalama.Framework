@@ -97,29 +97,29 @@ namespace Caravela.AspectWorkbench.ViewModels
                 }
 
                 var errorsDocument = new FlowDocument();
-                
+
                 if ( testResult.TransformedTargetSourceText != null )
                 {
                     // Display the transformed code.
                     this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
-                    
+
                     // Compare the output and shows the result.
                     if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
                          UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
                     {
-                        errorsDocument.Blocks.Add( new Paragraph(new Run("The transformed target code is equal to expectations.") { Foreground = Brushes.Green }) );
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
                     }
                     else
                     {
-                        errorsDocument.Blocks.Add( new Paragraph(new Run("The transformed target code is different than expectations.") { Foreground = Brushes.Red }) );
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
                     }
                 }
 
                 var errors = testResult.Diagnostics;
 
-                errorsDocument.Blocks.AddRange( 
+                errorsDocument.Blocks.AddRange(
                     errors.Select( e => new Paragraph(
-                        inline: new Run(e.ToString() ) 
+                        inline: new Run( e.ToString() )
                         {
                             Foreground = e.Severity switch
                             {
@@ -127,7 +127,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                                 DiagnosticSeverity.Warning => Brushes.Chocolate,
                                 _ => Brushes.Black
                             }
-                        }) ) );
+                        } ) ) );
 
                 if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
                 {

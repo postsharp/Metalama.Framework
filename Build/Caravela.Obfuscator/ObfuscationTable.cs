@@ -60,7 +60,7 @@ namespace Caravela.Obfuscator
             do
             {
                 var hash = this._sha1.ComputeHash( inputBytes );
-                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen ).TrimEnd('=').Replace('+', '_').Replace('/', '_');
+                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen ).TrimEnd( '=' ).Replace( '+', '_' ).Replace( '/', '_' );
 
                 if ( isTypeName )
                 {

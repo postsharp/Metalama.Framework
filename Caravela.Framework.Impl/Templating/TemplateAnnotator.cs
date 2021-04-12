@@ -118,7 +118,7 @@ namespace Caravela.Framework.Impl.Templating
                     if ( this._forceCompileTimeOnlyExpression )
                     {
                         this.RequireScope( nodeForDiagnostic, scopeFromClassifier, SymbolDeclarationScope.CompileTimeOnly, "a compile-time expression" );
-                    
+
                         return SymbolDeclarationScope.CompileTimeOnly;
                     }
 
@@ -285,7 +285,7 @@ namespace Caravela.Framework.Impl.Templating
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
                     this.RequireScope( node, SymbolDeclarationScope.CompileTimeOnly, SymbolDeclarationScope.RunTimeOnly, "in a run-time expression" );
-                    
+
                     return transformedNode;
                 }
 
@@ -346,7 +346,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
                 }
-                else if ( symbol.GetAttributes().Any( 
+                else if ( symbol.GetAttributes().Any(
                     a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
@@ -525,7 +525,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
         {
-            
+
             var local = (ILocalSymbol) this._semanticAnnotationMap.GetDeclaredSymbol( node )!;
 
             var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
@@ -539,7 +539,7 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     throw new AssertionFailedException();
                 }
-                
+
                 StatementSyntax annotatedStatement;
                 using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
                 {
@@ -700,9 +700,9 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else
                 {
-                    this.Diagnostics.Add( 
-                        TemplatingDiagnosticDescriptors.SplitVariables.CreateDiagnostic( 
-                        node.GetLocation(),  
+                    this.Diagnostics.Add(
+                        TemplatingDiagnosticDescriptors.SplitVariables.CreateDiagnostic(
+                        node.GetLocation(),
                         string.Join( ",", node.Variables.Select( v => v.Identifier.Text ) ) ) );
                     return transformedVariableDeclaration;
                 }
@@ -946,17 +946,17 @@ namespace Caravela.Framework.Impl.Templating
         {
             var existingScope = node.GetScopeFromAnnotation();
 
-            this.RequireScope(node, existingScope, requiredScope, reason);
+            this.RequireScope( node, existingScope, requiredScope, reason );
         }
 
-        private void RequireScope(SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason)
+        private void RequireScope( SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason )
         {
-            if (existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic(node))
+            if ( existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( node ) )
             {
                 existingScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
-            if (existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope)
+            if ( existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope )
             {
                 this.Diagnostics.Add(
                         TemplatingDiagnosticDescriptors.ScopeMismatch.CreateDiagnostic(

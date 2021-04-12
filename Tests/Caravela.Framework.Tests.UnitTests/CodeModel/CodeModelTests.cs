@@ -285,7 +285,26 @@ class C
 
             var propertyNames = type.Properties.Select( p => p.Name );
 
-            Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly", "field" }, propertyNames );
+            Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly" }, propertyNames );
+        }
+
+        [Fact]
+        public void Fields()
+        {
+            var code = @"
+class C
+{
+    int a = 0, b;
+    int c;    
+}";
+
+            var compilation = CreateCompilation( code );
+
+            var type = Assert.Single( compilation.DeclaredTypes )!;
+
+            var propertyNames = type.Fields.Select( p => p.Name );
+
+            Assert.Equal( new[] { "a", "b", "c" }, propertyNames );
         }
 
         [Fact]
@@ -307,7 +326,7 @@ class C
 
             var refKinds = type.Properties.Select( p => p.RefKind );
 
-            Assert.Equal( new[] { None, None, Ref, RefReadOnly }, refKinds );
+            Assert.Equal( new[] { None, Ref, RefReadOnly }, refKinds );
         }
 
         [Fact]
@@ -379,7 +398,7 @@ class C<T>
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
 
-            Assert.Equal( typeKinds, type.Properties.Select( p => p.Type.TypeKind ) );
+            Assert.Equal( typeKinds, type.Fields.Select( p => p.Type.TypeKind ) );
         }
 
         [Fact]
@@ -469,7 +488,7 @@ class C<T>
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var fieldTypes = type.Properties.Select( p => (INamedType) p.Type );
+            var fieldTypes = type.Fields.Select( p => (INamedType) p.Type );
 
             Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
             Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
