@@ -11,7 +11,7 @@ namespace Caravela.Framework.Aspects
     /// Exposes information about the element of code to which a template was applied.
     /// This interface is exposed by the <see cref="TemplateContext.target"/> member.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public interface ITemplateContext : IDiagnosticSink
     {
         /// <summary>

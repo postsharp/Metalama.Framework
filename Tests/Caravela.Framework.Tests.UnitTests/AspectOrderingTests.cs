@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
-        private string GetOrderedAspectLayers( string code, params string[] aspectNames )
+        private static string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
             var compilation = CreateCompilation( code );
 
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Tests.UnitTests
 class Aspect1 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1" );
             Assert.Equal( "Aspect1 => 0", ordered );
         }
 
@@ -58,7 +58,7 @@ using Caravela.Framework.Aspects;
 class Aspect1 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1", ordered );
         }
 
@@ -74,7 +74,7 @@ class Aspect1 {}
 class Aspect2 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
         }
 
@@ -93,7 +93,7 @@ class Aspect1 {}
 class Aspect2 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2", "Aspect3" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2", "Aspect3" );
             Assert.Equal( "Aspect3 => 0, Aspect1 => 1, Aspect2 => 2", ordered );
         }
 
@@ -112,7 +112,7 @@ class Aspect1 {}
 class Aspect2 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 2, Aspect2:Layer1 => 3", ordered );
         }
 
@@ -131,7 +131,7 @@ class Aspect1 {}
 class Aspect2 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
         }
 
@@ -147,7 +147,7 @@ class Aspect1 {}
 class Aspect2 : Aspect1 {}
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
+            var ordered = GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
         }
     }

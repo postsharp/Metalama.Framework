@@ -154,7 +154,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task LoadTestAsync( string filePath )
         {
-            this._currentTest = await this._testSerializer.LoadFromFileAsync( filePath );
+            this._currentTest = await TestSerializer.LoadFromFileAsync( filePath );
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." );
 
@@ -189,7 +189,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             this.CurrentPath = filePath;
 
-            await this._testSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
+            await TestSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
         }
     }
 }

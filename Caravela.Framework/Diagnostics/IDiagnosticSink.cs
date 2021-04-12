@@ -8,7 +8,7 @@ namespace Caravela.Framework.Diagnostics
     /// <summary>
     /// A sink that reports diagnostics reported from user code.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public interface IDiagnosticSink
     {
 
