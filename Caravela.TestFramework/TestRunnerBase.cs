@@ -43,25 +43,30 @@ namespace Caravela.TestFramework
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, encoding: Encoding.UTF8 ) );
 
             var initialCompilation = CSharpCompilation.Create(
-                "assemblyName",
+                "test",
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
 
             var result = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
 
-            var diagnostics = initialCompilation.GetDiagnostics();
-
-            result.AddDiagnostics( diagnostics );
-
-            if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            if ( this.ReportInvalidInputCompilation )
             {
-                result.SetFailed( "The initial compilation failed." );
-                return result;
+                var diagnostics = initialCompilation.GetDiagnostics();
+
+                result.AddDiagnostics( diagnostics );
+
+                if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                {
+                    result.SetFailed( "The initial compilation failed." );
+                    return result;
+                }
             }
 
             return result;
         }
+
+        protected virtual bool ReportInvalidInputCompilation => true;
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.

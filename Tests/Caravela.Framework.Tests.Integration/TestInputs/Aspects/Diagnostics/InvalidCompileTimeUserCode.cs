@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;

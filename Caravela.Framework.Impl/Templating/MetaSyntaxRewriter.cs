@@ -65,10 +65,12 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
+        
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true ) =>
             lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
-                : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
+                : new[] { Whitespace( this.GetIndentationWhitespace() ) };
 
         protected SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();
 

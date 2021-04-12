@@ -3,5 +3,5 @@
     global::System.Console.WriteLine(x);
     var y = 0;
     global::System.Console.WriteLine(y);
-    return a;
+    return this.Method(a);
 }

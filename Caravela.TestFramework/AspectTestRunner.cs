@@ -12,7 +12,6 @@ namespace Caravela.TestFramework
     /// </summary>
     public partial class AspectTestRunner : TestRunnerBase
     {
-
         public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory )
         {
         }
@@ -41,5 +40,8 @@ namespace Caravela.TestFramework
 
             return testResult;
         }
+
+        // We don't want the base class to report errors in the input compilation because the pipeline does.
+        protected override bool ReportInvalidInputCompilation => false;
     }
 }

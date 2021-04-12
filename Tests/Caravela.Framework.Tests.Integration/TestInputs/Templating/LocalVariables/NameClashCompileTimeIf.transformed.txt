@@ -12,9 +12,9 @@
     global::System.Console.WriteLine(x_2);
     if (y == null)
     {
-        var x_1 = 3;
-        global::System.Console.WriteLine(x_1);
+        var x_3 = 3;
+        global::System.Console.WriteLine(x_3);
     }
 
-    return a;
+    return this.Method(a);
 }

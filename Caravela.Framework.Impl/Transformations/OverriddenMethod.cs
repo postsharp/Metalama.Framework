@@ -7,7 +7,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     this.OverriddenDeclaration,
                     this.OverriddenDeclaration.Compilation,
-                    context.ProceedImplementationFactory.Get( this.Advice.AspectLayerId, this.OverriddenDeclaration ),
+                    new LinkerOverrideProceedImpl( this.Advice.AspectLayerId, this.OverriddenDeclaration ),
                     context.LexicalScope,
                     context.DiagnosticSink );
 

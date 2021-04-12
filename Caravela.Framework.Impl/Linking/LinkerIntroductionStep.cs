@@ -3,10 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 
@@ -72,8 +69,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var diagnostics = new DiagnosticList( null );
             var nameProvider = new LinkerIntroductionNameProvider();
-            var proceedImplFactory = new LinkerProceedImplementationFactory();
-            var lexicalScopeHelper = new LexicalScopeHelper();
+            var lexicalScopeHelper = new LexicalScopeFactory(input.FinalCompilationModel);
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -89,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), proceedImplFactory );
+                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ) );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );
@@ -104,10 +100,8 @@ namespace Caravela.Framework.Impl.Linking
             {
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
 
-#if DEBUG
-                // Improve readibility of intermediate compilation in debug builds.
+                // Improve readability of intermediate compilation in debug builds.
                 newRoot = SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
-#endif
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
@@ -118,35 +112,6 @@ namespace Caravela.Framework.Impl.Linking
             var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
-        }
-
-        private class LexicalScopeHelper
-        {
-            private readonly Dictionary<ICodeElement, LinkerLexicalScope> _scopes = new Dictionary<ICodeElement, LinkerLexicalScope>();
-
-            public ITemplateExpansionLexicalScope GetLexicalScope( IMemberIntroduction introduction )
-            {
-                // TODO: This will need to be changed for other transformations than methods.
-
-                if ( introduction is IOverriddenElement overriddenElement )
-                {
-                    if ( !this._scopes.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
-                    {
-                        this._scopes[overriddenElement.OverriddenElement] = lexicalScope =
-                            LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromMethod( (IMethodInternal) overriddenElement.OverriddenElement ) );
-
-                        return lexicalScope;
-                    }
-
-                    this._scopes[overriddenElement.OverriddenElement] = lexicalScope = LinkerLexicalScope.CreateEmpty( lexicalScope.GetTransitiveClosure() );
-                    return lexicalScope;
-                }
-                else
-                {
-                    // For other member types we need to create empty lexical scope.
-                    return LinkerLexicalScope.CreateEmpty();
-                }
-            }
         }
     }
 }

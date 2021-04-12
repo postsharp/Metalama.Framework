@@ -3,7 +3,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Xunit;
@@ -45,7 +44,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Fact]
         public async Task InvalidCompileTimeUserCode()
         {
-            await Assert.ThrowsAsync<InvalidUserCodeException>( async () => await this.GetTestResultAsync( @"TestInputs\Aspects\Diagnostics\InvalidCompileTimeUserCode.cs" ) );
+            await this.AssertTransformedSourceEqualAsync( @"TestInputs\Aspects\Diagnostics\InvalidCompileTimeUserCode.cs" );
         }
 
         protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );

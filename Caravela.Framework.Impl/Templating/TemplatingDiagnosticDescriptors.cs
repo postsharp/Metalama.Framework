@@ -62,6 +62,14 @@ namespace Caravela.Framework.Impl.Templating
                 _category,
                 DiagnosticSeverity.Error );
 
+        internal static readonly StrongDiagnosticDescriptor<(string Expression, ITypeSymbol ExpressionType)> CannotConvertBuildTime
+            = new(
+                "CR0107",
+                "Cannot convert an expression into compile-time code because the expression is of an unsupported type",
+                "The expression {0} of type {1} cannot be compiled into compile-time code because it is of an unsupported type.",
+                _category,
+                DiagnosticSeverity.Error );
+                
         public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
         {
             return LanguageFeatureIsNotSupported.CreateDiagnostic( node.GetLocation(), node.Kind().ToString() );

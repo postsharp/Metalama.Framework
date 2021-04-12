@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
 
-        public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
+        public BlockSyntax ExpandDeclaration( TemplateExpansionContext templateExpansionContext )
         {
             Invariant.Assert(
                 templateExpansionContext.DiagnosticSink.DefaultLocation != null );
