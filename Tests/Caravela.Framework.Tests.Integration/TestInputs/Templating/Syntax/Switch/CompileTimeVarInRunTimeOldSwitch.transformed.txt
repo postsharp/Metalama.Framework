@@ -1,0 +1,4 @@
+// Compilation error. Code not generated.
+// Error CR0104 on `compileTimeVar += 1`: `The expression 'compileTimeVar += 1' is compile-time but it is expected to be run-time because the expression appears in a case statement.`
+
+;
