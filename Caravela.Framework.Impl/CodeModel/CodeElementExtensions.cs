@@ -106,10 +106,10 @@ namespace Caravela.Framework.Impl.CodeModel
             where T : class, IMember
             => new MemberLink<T>( ((ICodeElementInternal) member).ToLink() );
 
-        public static Location? GetLocationForDiagnosticReport( this ICodeElement codeElement )
+        public static Location? GetDiagnosticLocation( this ICodeElement codeElement )
             => codeElement switch
             {
-                IHasDiagnosticLocation hasLocation => hasLocation.LocationForDiagnosticReport,
+                IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 

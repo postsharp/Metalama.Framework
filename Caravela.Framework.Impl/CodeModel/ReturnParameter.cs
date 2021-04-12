@@ -44,9 +44,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract bool Equals( ICodeElement other );
 
-        public IDiagnosticLocation? LocationForDiagnosticReport => this.DeclaringMember.LocationForDiagnosticReport;
+        public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
 
-        Location? IHasDiagnosticLocation.LocationForDiagnosticReport => this.DeclaringMember.GetLocationForDiagnosticReport();
+        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public abstract ISymbol? Symbol { get; }
 

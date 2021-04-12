@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IAttributeList ICodeElement.Attributes => throw new NotSupportedException();
 
-        IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => null;
+        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
     }

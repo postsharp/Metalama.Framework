@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
         {
-            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetLocationForDiagnosticReport();
+            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetDiagnosticLocation();
             var roslynSeverity = MapSeverity( severity );
             var warningLevel = severity == Severity.Error ? 0 : 1;
 

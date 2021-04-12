@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Builder.ToDisplayString( format, context );
 
-        public IDiagnosticLocation? LocationForDiagnosticReport => this.Builder.LocationForDiagnosticReport;
+        public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
 

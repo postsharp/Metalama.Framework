@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
-                        codeElement.GetLocationForDiagnosticReport(),
+                        codeElement.GetDiagnosticLocation(),
                         (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
 
                 return new(
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
-            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.LocationForDiagnosticReport ) )
+            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {
                 aspectOfT.Initialize( aspectBuilder );
             }

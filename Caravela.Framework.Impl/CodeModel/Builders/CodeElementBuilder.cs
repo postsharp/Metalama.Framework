@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.IsReadOnly = true;
         }
 
-        public IDiagnosticLocation? LocationForDiagnosticReport => this.ContainingElement?.LocationForDiagnosticReport;
+        public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
 
         // TODO: We may want to suppress diagnostics on introduced code elements, but the current design does not allow for that.
         // A possible solution would have to return an IDiagnosticLocation that does not map to source code, but would be somehow

@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
             this.Symbol.ToDisplayString( format.ToRoslyn() );
 
-        public Location? LocationForDiagnosticReport => DiagnosticLocationHelper.GetLocationForDiagnosticReport( this.Symbol );
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
@@ -63,6 +63,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return semanticModel.LookupSymbols( lookupPosition );
         }
 
-        IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => this.LocationForDiagnosticReport?.ToDiagnosticLocation();
+        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
     }
 }

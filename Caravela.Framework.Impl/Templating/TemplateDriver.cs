@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
             SyntaxNode output;
-            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.LocationForDiagnosticReport ) )
+            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
             {
                 try
                 {

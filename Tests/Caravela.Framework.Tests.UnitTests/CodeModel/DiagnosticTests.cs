@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
     public class DiagnosticTests : TestBase
     {
         [Fact]
-        public void TestLocationForDiagnosticReport()
+        public void TestDiagnosticLocation()
         {
             var code = @"
 using System;
@@ -34,30 +34,30 @@ class C<T> : object
             var method = type.Methods.OfName( "Method" ).Single();
 
             // Type
-            AssertLocation( "C", type.GetLocationForDiagnosticReport() );
-            AssertLocation( "T", type.GenericParameters.Single().GetLocationForDiagnosticReport() );
+            AssertLocation( "C", type.GetDiagnosticLocation() );
+            AssertLocation( "T", type.GenericParameters.Single().GetDiagnosticLocation() );
 
             // Constructors
-            AssertLocation( "C", type.Constructors.Single().GetLocationForDiagnosticReport() );
-            AssertLocation( "C", type.StaticConstructor!.GetLocationForDiagnosticReport() );
+            AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
+            AssertLocation( "C", type.StaticConstructor!.GetDiagnosticLocation() );
 
             // Methods
-            AssertLocation( "Method", method.GetLocationForDiagnosticReport() );
-            AssertLocation( "M", method.GenericParameters.Single().GetLocationForDiagnosticReport() );
-            AssertLocation( "parameter", method.Parameters.Single().GetLocationForDiagnosticReport() );
-            AssertLocation( "Method", method.ReturnParameter.GetLocationForDiagnosticReport() );
+            AssertLocation( "Method", method.GetDiagnosticLocation() );
+            AssertLocation( "M", method.GenericParameters.Single().GetDiagnosticLocation() );
+            AssertLocation( "parameter", method.Parameters.Single().GetDiagnosticLocation() );
+            AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
 
             // Properties
-            AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetLocationForDiagnosticReport() );
+            AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetDiagnosticLocation() );
             var property = type.Properties.OfName( "Property" ).Single();
-            AssertLocation( "get", property.Getter!.GetLocationForDiagnosticReport() );
-            AssertLocation( "set", property.Setter!.GetLocationForDiagnosticReport() );
+            AssertLocation( "get", property.Getter!.GetDiagnosticLocation() );
+            AssertLocation( "set", property.Setter!.GetDiagnosticLocation() );
 
             // Fields
-            AssertLocation( "field1", type.Properties.OfName( "field1" ).Single().GetLocationForDiagnosticReport() );
+            AssertLocation( "field1", type.Properties.OfName( "field1" ).Single().GetDiagnosticLocation() );
             
             // Attributes
-            AssertLocation( "NonSerialized", type.Properties.OfName( "field1" ).Single().Attributes.Single().GetLocationForDiagnosticReport() );
+            AssertLocation( "NonSerialized", type.Properties.OfName( "field1" ).Single().Attributes.Single().GetDiagnosticLocation() );
         }
         
         private static void AssertLocation( string? expectedText, Location? location )

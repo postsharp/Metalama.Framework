@@ -7,7 +7,7 @@ namespace Caravela.Framework.Diagnostics
 {
 
     /// <summary>
-    /// Exposes a <see cref="LocationForDiagnosticReport"/> property that determines the location of a user-code diagnostic.
+    /// Exposes a <see cref="DiagnosticLocation"/> property that determines the location of a user-code diagnostic.
     /// This interface is implemented by <see cref="ICodeElement"/>.
     /// </summary>
     public interface IDiagnosticScope
@@ -15,6 +15,6 @@ namespace Caravela.Framework.Diagnostics
         /// <summary>
         /// Gets the location of the current element to which diagnostics can be reported (typically the declaration name).
         /// </summary>
-        IDiagnosticLocation? LocationForDiagnosticReport { get; }
+        IDiagnosticLocation? DiagnosticLocation { get; }
     }
 }

@@ -14,6 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Gets the Roslyn <see cref="Location"/> of the code element, to emit diagnostics.
         /// </summary>
-        Location? LocationForDiagnosticReport { get; }
+        Location? DiagnosticLocation { get; }
     }
 }

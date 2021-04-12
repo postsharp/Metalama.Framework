@@ -74,8 +74,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICodeElement? ICodeElement.ContainingElement => this.ContainingElement;
 
-        IDiagnosticLocation? IDiagnosticScope.LocationForDiagnosticReport => this.LocationForDiagnosticReport.ToDiagnosticLocation();
+        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 
-        public Location? LocationForDiagnosticReport => DiagnosticLocationHelper.GetLocationForDiagnosticReport( this._data );
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this._data );
     }
 }

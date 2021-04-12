@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.Pipeline
                         {
                             this._diagnostics.ReportDiagnostic(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
-                                    this._currentStep!.AspectLayer.AspectType.Type.GetLocationForDiagnosticReport(),
+                                    this._currentStep!.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                                     (this._currentStep.AspectLayer.AspectType.Type, aspectType) ) );
                             success = false;
                             continue;
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     this._diagnostics.ReportDiagnostic(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
-                            this._currentStep.AspectLayer.AspectType.Type.GetLocationForDiagnosticReport(),
+                            this._currentStep.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                             (this._currentStep.AspectLayer.AspectType.Type, advice.TargetDeclaration) ) );
                     success = false;
                     continue;

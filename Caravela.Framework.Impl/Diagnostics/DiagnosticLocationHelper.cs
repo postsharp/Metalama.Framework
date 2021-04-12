@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetLocationForDiagnosticReport( ISymbol? symbol )
+        public static Location? GetDiagnosticLocation( ISymbol? symbol )
         {
             if ( symbol == null )
             {
@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        public static Location? GetLocationForDiagnosticReport( AttributeData? attribute )
+        public static Location? GetDiagnosticLocation( AttributeData? attribute )
         {
             if ( attribute == null )
             {

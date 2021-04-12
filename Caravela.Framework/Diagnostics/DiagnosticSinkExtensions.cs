@@ -24,9 +24,9 @@ namespace Caravela.Framework.Diagnostics
             string formatMessage,
             params object[] args )
         {
-            if ( scope.LocationForDiagnosticReport != null )
+            if ( scope.DiagnosticLocation != null )
             {
-                diagnosticSink.ReportDiagnostic( severity, scope.LocationForDiagnosticReport, id, formatMessage, args );
+                diagnosticSink.ReportDiagnostic( severity, scope.DiagnosticLocation, id, formatMessage, args );
             }
         }
     }

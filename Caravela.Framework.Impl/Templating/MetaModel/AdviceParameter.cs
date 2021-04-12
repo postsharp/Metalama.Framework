@@ -52,6 +52,6 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public IDiagnosticLocation? LocationForDiagnosticReport => this._parameter.LocationForDiagnosticReport;
+        public IDiagnosticLocation? DiagnosticLocation => this._parameter.DiagnosticLocation;
     }
 }
