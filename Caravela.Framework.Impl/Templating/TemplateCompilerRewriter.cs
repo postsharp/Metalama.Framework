@@ -203,6 +203,32 @@ namespace Caravela.Framework.Impl.Templating
             return base.Visit( node );
         }
 
+        protected override ExpressionSyntax TransformTupleExpression( TupleExpressionSyntax node )
+        {
+            var symbol = (INamedTypeSymbol) this._semanticAnnotationMap.GetType( node )!;
+            var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
+            for ( var i = 0; i < symbol.TupleElements.Length; i++ )
+            {
+                var tupleElement = symbol.TupleElements[i];
+                ArgumentSyntax arg; 
+                if ( !tupleElement.Name.Equals(tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal) )
+                {
+                    var name = symbol.TupleElements[i].Name;
+                    arg = node.Arguments[i].WithNameColon( NameColon( name ) );
+                }
+                else
+                {
+                    arg = node.Arguments[i];
+                }
+
+                transformedArguments[i] = arg;
+            }
+
+            var transformedNode = TupleExpression( node.OpenParenToken, default( SeparatedSyntaxList<ArgumentSyntax> ).AddRange(transformedArguments), node.CloseParenToken );
+
+            return base.TransformTupleExpression( transformedNode );
+        }
+
         protected override ExpressionSyntax Transform( SyntaxToken token )
         {
             if ( token.Kind() == SyntaxKind.IdentifierToken )
