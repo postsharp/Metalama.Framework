@@ -466,7 +466,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var argument = (ArgumentSyntax) base.VisitArgument( node )!;
 
-            if ( argument.RefKindKeyword.IsMissing )
+            if ( argument.RefKindKeyword.Kind() == SyntaxKind.None )
             {
                 return argument.AddScopeAnnotation( this.GetNodeScope( argument.Expression ) );
             }
@@ -474,7 +474,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // TODO: We're not processing ref/out arguments properly. These are possibly
                 // local variable declarations and assignments.
-                return argument;
+                throw new AssertionFailedException();
             }
         }
 

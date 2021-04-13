@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTimeNew
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNew
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            var o = compileTime(new object());
+            var o = new object();
             Console.WriteLine(o.GetType().ToString());
             
             return proceed();
