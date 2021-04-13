@@ -68,8 +68,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// Initializes a new instance of the <see cref="CompilationModel"/> class that is based on a prototype instance but appends transformations.
         /// </summary>
         /// <param name="prototype"></param>
-        /// <param name="introducedElements"></param>
-        private CompilationModel( CompilationModel prototype, IEnumerable<IObservableTransformation> introducedElements )
+        /// <param name="observableTransformations"></param>
+        private CompilationModel( CompilationModel prototype, IEnumerable<IObservableTransformation> observableTransformations )
         {
             this.Revision = prototype.Revision + 1;
             this.RoslynCompilation = prototype.RoslynCompilation;
@@ -77,22 +77,24 @@ namespace Caravela.Framework.Impl.CodeModel
             this.InvariantComparer = prototype.InvariantComparer;
 
             this._transformations = prototype._transformations.AddRange(
-                introducedElements,
+                observableTransformations,
                 t => t.ContainingElement.ToLink(),
                 t => t );
 
             this.Factory = new CodeElementFactory( this );
 
             var allNewCodeElements =
-                introducedElements
+                observableTransformations
                     .OfType<ICodeElement>()
                     .SelectDescendants( codeElement => codeElement.GetContainedElements() );
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
-                    .Concat( introducedElements.OfType<AttributeBuilder>() )
+                    .Concat( observableTransformations.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeLink( a ) );
+
+            // TODO: Process IRemoveMember.
 
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
             this._depthsCache = prototype._depthsCache;

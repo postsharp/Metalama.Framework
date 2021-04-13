@@ -59,8 +59,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IProperty GetProperty( IPropertySymbol propertySymbol )
             => (IProperty) this._cache.GetOrAdd( propertySymbol.ToLink(), ms => new Property( (IPropertySymbol) ms.Symbol!, this._compilation ) );
 
-        public IProperty GetProperty( IFieldSymbol propertySymbol )
-            => (IProperty) this._cache.GetOrAdd( propertySymbol.ToLink(), ms => new Field( (IFieldSymbol) ms.Symbol!, this._compilation ) );
+        public IField GetField( IFieldSymbol fieldSymbol )
+            => (IField) this._cache.GetOrAdd( fieldSymbol.ToLink(), ms => new Field( (IFieldSymbol) ms.Symbol!, this._compilation ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
             => (IConstructor) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Constructor( (IMethodSymbol) ms.Symbol!, this._compilation ) );
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl.CodeModel
                             ? this.GetMethod( method )
                             : this.GetConstructor( method ),
                 IPropertySymbol property => this.GetProperty( property ),
-                IFieldSymbol field => this.GetProperty( field ),
+                IFieldSymbol field => this.GetField( field ),
                 ITypeParameterSymbol typeParameter => this.GetGenericParameter( typeParameter ),
                 IParameterSymbol parameter => this.GetParameter( parameter ),
                 IEventSymbol @event => this.GetEvent( @event ),

@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating
                 "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
                 _category,
                 DiagnosticSeverity.Error );
-       
+        
         internal static readonly StrongDiagnosticDescriptor<string> UnsupportedContextForProceed
             = new(
                 "CR0106",

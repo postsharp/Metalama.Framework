@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating
     internal sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
 
-        private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new SkipListIndexedDictionary<int, MarkedTextSpan>();
+        private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new();
 
         public ClassifiedTextSpanCollection()
         {

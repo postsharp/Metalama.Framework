@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
     {
-        private readonly List<AspectInstance> _aspectInstances = new List<AspectInstance>();
+        private readonly List<AspectInstance> _aspectInstances = new();
 
         public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer )
         {

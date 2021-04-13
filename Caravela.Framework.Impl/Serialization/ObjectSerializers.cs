@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
     /// </summary>
     internal class ObjectSerializers
     {
-        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new ConcurrentDictionary<Type, ObjectSerializer>();
+        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new();
         private readonly EnumSerializer _enumSerializer;
         private readonly ArraySerializer _arraySerializer;
 

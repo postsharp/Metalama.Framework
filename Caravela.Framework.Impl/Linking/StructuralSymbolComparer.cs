@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         // TODO: At this point the default display string seems to be enough for comparison.
 
-        public static readonly StructuralSymbolComparer Instance = new StructuralSymbolComparer();
+        public static readonly StructuralSymbolComparer Instance = new();
 
         public bool Equals( ISymbol x, ISymbol y )
         {

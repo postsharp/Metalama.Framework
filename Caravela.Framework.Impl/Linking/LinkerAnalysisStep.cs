@@ -54,8 +54,8 @@ namespace Caravela.Framework.Impl.Linking
                         continue;
                     }
 
-                    var symbolVersion = new SymbolVersion(symbolInfo.Symbol.AssertNotNull(), targetLayer);
-                    
+                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayer );
+
                     referenceCounters.TryGetValue( symbolVersion, out var counter );
                     referenceCounters[symbolVersion] = counter + 1;
                 }
@@ -70,17 +70,17 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: partial methods.
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( introducedMember.Syntax );
-                methodBodyInfos[symbol] = new MemberAnalysisResult(symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                methodBodyInfos[symbol] = new MemberAnalysisResult( symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
 
                 // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
                 // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
             }
 
-            foreach (var symbol in input.IntroductionRegistry.GetOverriddenMembers())
+            foreach ( var symbol in input.IntroductionRegistry.GetOverriddenMembers() )
             {
                 var methodBodyVisitor = new MethodBodyWalker();
                 methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );
-                methodBodyInfos[symbol] = new MemberAnalysisResult(symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                methodBodyInfos[symbol] = new MemberAnalysisResult( symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
             }
 
             var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, input.OrderedAspectLayers, referenceCounters, methodBodyInfos );
