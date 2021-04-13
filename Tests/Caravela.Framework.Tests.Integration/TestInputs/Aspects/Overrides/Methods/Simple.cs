@@ -44,5 +44,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
             Console.WriteLine($"This is the original method {x} {y}.");
             return x + y;
         }
+
+        [Override]
+        public static void TargetMethod_Static()
+        {
+            Console.WriteLine("This is the original static method.");
+        }
     }
 }

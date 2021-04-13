@@ -13,4 +13,28 @@ internal class TargetClass
         global::System.Console.WriteLine("This is introduced method.");
         return default;
     }
+
+    public global::System.Int32 IntroducedMethod_Param(global::System.Int32 x)
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return default;
+    }
+
+    public static global::System.Int32 IntroducedMethod_StaticSignature()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return default;
+    }
+
+    public static global::System.Int32 IntroducedMethod_StaticExplicit()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return default;
+    }
+
+    public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return default;
+    }
 }

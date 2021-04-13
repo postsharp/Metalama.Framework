@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.Advices
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder, false );
+            var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder, false, false );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
@@ -113,6 +113,15 @@ namespace Caravela.Framework.Impl.Advices
             }
             else
             {
+                if (existingDeclaration.IsStatic != this._methodBuilder.IsStatic)
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
+                                this.TargetDeclaration.GetLocation(),
+                                (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                }
+
                 switch ( this.ConflictBehavior )
                 {
                     case ConflictBehavior.Fail:

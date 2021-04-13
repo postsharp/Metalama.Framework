@@ -4,25 +4,23 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictFail
+namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingDifferentStaticity
 {
-    // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
-
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
+        public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
         {
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Fail)]
-        public int ExistingMethod()
+        [IntroduceMethod]
+        public static int ExistingMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
             return 42;
         }
 
-        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Fail)]
-        public static int ExistingMethod_Static()
+        [IntroduceMethod]
+        public int ExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
@@ -35,12 +33,12 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
     {
         public int ExistingMethod()
         {
-            return 13;
+            return 0;
         }
 
         public static int ExistingMethod_Static()
         {
-            return 13;
+            return 0;
         }
     }
 }

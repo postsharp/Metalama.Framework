@@ -275,10 +275,14 @@ class C
             Assert.Same( type.Methods[0], matchedMethod1 );
             var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<Code.IType>(), isStatic: true );
             Assert.Null( matchedMethod2 );
-            var matchedMethod3 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: false );
-            Assert.Null( matchedMethod3 );
-            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: true );
-            Assert.Same( type.Methods[1], matchedMethod4 );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<Code.IType>(), isStatic: null );
+            Assert.Same( type.Methods[0], matchedMethod3 );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: false );
+            Assert.Null( matchedMethod4 );
+            var matchedMethod5 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: true );
+            Assert.Same( type.Methods[1], matchedMethod5 );
+            var matchedMethod6 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: null );
+            Assert.Same( type.Methods[1], matchedMethod6 );
         }
     }
 }

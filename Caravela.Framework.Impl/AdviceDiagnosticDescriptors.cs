@@ -27,5 +27,12 @@ namespace Caravela.Framework.Impl
             "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3} and is sealed.",
             _category,
             Error );
+
+        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceWithDifferentStaticity = new(
+            "CRA0003",
+            "Cannot introduce member into a type because it is sealed in a base class.",
+            "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3} and it's IsStatic flag is opposite of the introduced member.",
+            _category,
+            Error );
     }
 }

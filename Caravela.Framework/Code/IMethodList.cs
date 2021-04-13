@@ -17,8 +17,8 @@ namespace Caravela.Framework.Code
 
         IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount = null, IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null, bool? isStatic = false, bool declaredOnly = true );
 
-        IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool isStatic = false, bool declaredOnly = true );
+        IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool? isStatic = null, bool declaredOnly = true );
 
-        IMethod? OfExactSignature( IMethod signatureTemplate, bool declaredOnly = true );
+        IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true );
     }
 }
