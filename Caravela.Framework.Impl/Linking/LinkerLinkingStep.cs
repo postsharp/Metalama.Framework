@@ -35,7 +35,9 @@ namespace Caravela.Framework.Impl.Linking
         {
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
+#pragma warning restore CA1822 // Mark members as static
         {
             var finalCompilation = input.IntermediateCompilation;
             var rewriter = new LinkingRewriter( input.IntermediateCompilation, input.AnalysisRegistry );

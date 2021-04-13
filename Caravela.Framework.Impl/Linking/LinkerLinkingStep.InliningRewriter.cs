@@ -234,7 +234,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
+                    return node.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
                 }
             }
 
@@ -264,12 +264,12 @@ namespace Caravela.Framework.Impl.Linking
                     //       This is satisfied for all proceed().
 
                     // Inline the method body.
-                    return this.GetInlinedMethodBody( resolvedSymbol, this.GetAssignmentVariableName( node.Left ) );
+                    return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
                 else
                 {
                     // Replace with invocation of the correct override.
-                    return node.Update( node.Left, node.OperatorToken, invocation.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update( node.Left, node.OperatorToken, invocation.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
                 }
             }
 
@@ -299,7 +299,7 @@ namespace Caravela.Framework.Impl.Linking
                     return
                         Block(
                             rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ) )
+                            LabeledStatement( GetReturnLabelName( labelId ), EmptyStatement() ) )
                         .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                 }
             }
@@ -311,7 +311,7 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="expression">Call expression.</param>
             /// <param name="methodSymbol"></param>
             /// <returns></returns>
-            private ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
+            private static ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
@@ -376,7 +376,7 @@ namespace Caravela.Framework.Impl.Linking
                                                 node.Expression ) ),
                                         GotoStatement(
                                             SyntaxKind.GotoStatement,
-                                            IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) )
+                                            IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) ) )
                                     .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                             }
                         }
@@ -398,7 +398,7 @@ namespace Caravela.Framework.Impl.Linking
                                 return
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                                        IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
                             }
                         }
                         else
@@ -407,7 +407,7 @@ namespace Caravela.Framework.Impl.Linking
                             return
                                 GotoStatement(
                                     SyntaxKind.GotoStatement,
-                                    IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                                    IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
                         }
                     }
                 }
@@ -424,7 +424,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private string GetAssignmentVariableName( ExpressionSyntax left )
+            private static string GetAssignmentVariableName( ExpressionSyntax left )
             {
                 switch ( left.Kind() )
                 {
@@ -439,7 +439,7 @@ namespace Caravela.Framework.Impl.Linking
             private int GetNextReturnLabelId() => (this._returnLabelId ?? 0) + 1;
 
             // TODO: Create more contextual return label names.
-            private string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
+            private static string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
         }
     }
 }

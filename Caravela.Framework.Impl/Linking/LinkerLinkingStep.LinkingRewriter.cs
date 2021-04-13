@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            newMembers.Add( method.WithBody( this.GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
+                            newMembers.Add( method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
                         }
                         else
                         {
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // TODO: This should be inserted after all other overrides.
                             // This is target method that is not inlineable, we need to a separate declaration.
-                            newMembers.Add( this.GetOriginalBodyMethod( method ) );
+                            newMembers.Add( GetOriginalBodyMethod( method ) );
                         }
                     }
                     else
@@ -100,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+            private static BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
                 var invocation =
@@ -138,7 +138,7 @@ namespace Caravela.Framework.Impl.Linking
                 return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();
             }
 
-            private MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
+            private static MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
             {
                 return method.WithIdentifier( Identifier( GetOriginalBodyMethodName( method.Identifier.ValueText ) ) );
             }
