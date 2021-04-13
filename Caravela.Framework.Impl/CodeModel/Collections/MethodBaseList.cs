@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
@@ -46,12 +47,14 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
             else
             {
+                // TODO: There should be a generic context, which changes when descending to the base type.
+
                 INamedType? currentType = namedType;
                 var collectedMethods = new HashSet<T>( SignatureEqualityComparer.Instance );
 
                 while ( currentType != null )
                 {
-                    foreach ( var candidate in GetCandidates( this, context, name, genericParameterCount, argumentCount, argumentGetter, isStatic, compilation ) )
+                    foreach ( var candidate in GetCandidates( this.GetMemberListForBaseClass( currentType ), context, name, genericParameterCount, argumentCount, argumentGetter, isStatic, compilation ) )
                     {
                         if ( collectedMethods.Add( candidate ) )
                         {
@@ -110,10 +113,12 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
             else
             {
+                // TODO: There should be a generic context, which changes when descending to the base type.
+
                 INamedType? currentType = namedType;
                 while ( currentType != null )
                 {
-                    var candidate = Get( this.GetMemberListForBaseClass(currentType), context, name, genericParameterCount, parameterCount, parameterGetter, isStatic, compilation );
+                    var candidate = Get( this.GetMemberListForBaseClass( currentType ), context, name, genericParameterCount, parameterCount, parameterGetter, isStatic, compilation );
 
                     if ( candidate != null )
                     {
@@ -170,35 +175,50 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             bool expandParams = false )
         {
             var compilation = this.Compilation;
-            foreach ( var sourceItem in this.SourceItems )
+            IEnumerable<T> candidates;
+            if (name != null )
             {
-                var projectedItem = sourceItem.GetForCompilation( compilation );
+                candidates = this.OfName(name);
+            }
+            else
+            {
+                candidates = ForCompilation( this.SourceItems, compilation );
 
-                if ( (name != null && projectedItem.Name != name)
-                    || (isStatic != null && isStatic != projectedItem.IsStatic)
-                    || (genericParameterCount != null && this.GetGenericParameterCount( projectedItem ) != genericParameterCount)
-                    || (parameterCount != null && !expandParams && projectedItem.Parameters.Count != parameterCount)
-                    || (parameterCount != null && expandParams && projectedItem.Parameters.Count > parameterCount + 1) )
+                static IEnumerable<T> ForCompilation( ImmutableArray<MemberLink<T>> sourceItems, CompilationModel compilation)
+                {
+                    for (var i = 0; i < sourceItems.Length; i++ )
+                    {
+                        yield return sourceItems[i].GetForCompilation( compilation );
+                    }
+                }
+            }
+
+            foreach ( var sourceItem in candidates )
+            {
+                if ( (isStatic != null && isStatic != sourceItem.IsStatic)
+                    || (genericParameterCount != null && this.GetGenericParameterCount( sourceItem ) != genericParameterCount)
+                    || (parameterCount != null && !expandParams && sourceItem.Parameters.Count != parameterCount)
+                    || (parameterCount != null && expandParams && sourceItem.Parameters.Count > parameterCount + 1) )
                 {
                     continue;
                 }
 
                 if ( parameterCount == null )
                 {
-                    yield return projectedItem;
+                    yield return sourceItem;
                     continue;
                 }
 
                 var match = true; // Determines whether the item matched all it's parameters, with exception of params.
                 var tryMatchParams = false; // Determines whether the last parameter was params and whether we want to match rest of the arguments to it.
 
-                if ( projectedItem.Parameters.Count > 0 )
+                if ( sourceItem.Parameters.Count > 0 )
                 {
-                    for ( var i = 0; i < projectedItem.Parameters.Count; i++ )
+                    for ( var i = 0; i < sourceItem.Parameters.Count; i++ )
                     {
-                        if ( projectedItem.Parameters[i].IsParams && expandParams && match )
+                        if ( sourceItem.Parameters[i].IsParams && expandParams && match )
                         {
-                            if ( i != projectedItem.Parameters.Count - 1 || projectedItem.Parameters[i].ParameterType.TypeKind != TypeKind.Array )
+                            if ( i != sourceItem.Parameters.Count - 1 || sourceItem.Parameters[i].ParameterType.TypeKind != TypeKind.Array )
                             {
                                 throw new AssertionFailedException();
                             }
@@ -207,8 +227,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                             {
                                 tryMatchParams = true;
                             }
-
-                            break;
                         }
 
                         if ( i >= parameterCount )
@@ -217,7 +235,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                             break;
                         }
 
-                        if ( !parameterPredicate( context, i, projectedItem.Parameters[i].ParameterType, projectedItem.Parameters[i].RefKind ) )
+                        if ( !parameterPredicate( context, i, sourceItem.Parameters[i].ParameterType, sourceItem.Parameters[i].RefKind ) )
                         {
                             match = false;
                             break;
@@ -225,7 +243,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                     }
                 }
 
-                if ( match && !tryMatchParams && parameterCount != projectedItem.Parameters.Count )
+                if ( match && !tryMatchParams && parameterCount != sourceItem.Parameters.Count )
                 {
                     // Will not be matching params and parameter counts don't match.
                     continue;
@@ -233,15 +251,15 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( match )
                 {
-                    yield return projectedItem;
+                    yield return sourceItem;
                 }
                 else if ( tryMatchParams )
                 {
                     // Attempt to match C# params - all remaining parameter types should be assignable to the array element type.
-                    var elementType = ((IArrayType) projectedItem.Parameters[projectedItem.Parameters.Count - 1].ParameterType).ElementType.AssertNotNull();
+                    var elementType = ((IArrayType) sourceItem.Parameters[sourceItem.Parameters.Count - 1].ParameterType).ElementType.AssertNotNull();
                     var paramsMatch = true;
 
-                    for ( var i = projectedItem.Parameters.Count - 1; i < parameterCount; i++ )
+                    for ( var i = sourceItem.Parameters.Count - 1; i < parameterCount; i++ )
                     {
                         if ( !parameterPredicate( context, i, elementType, RefKind.None ) )
                         {
@@ -252,7 +270,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                     if ( paramsMatch )
                     {
-                        yield return projectedItem;
+                        yield return sourceItem;
                     }
                 }
             }

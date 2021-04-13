@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes )
         {
-            return this.OfCompatibleSignature( (argumentTypes, this.ContainingElement.AssertNotNull().Compilation), null, 0, argumentTypes?.Count, GetParameter, false, false );
+            return this.OfCompatibleSignature( (argumentTypes, this.ContainingElement.AssertNotNull().Compilation), null, 0, argumentTypes?.Count, GetParameter, false, true );
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
                 => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null )
         {
-            return this.OfCompatibleSignature( (argumentTypes, refKinds), null, 0, argumentTypes?.Count, GetParameter, false, false );
+            return this.OfCompatibleSignature( (argumentTypes, refKinds), null, 0, argumentTypes?.Count, GetParameter, false, true );
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<IType?>? ArgumentTypes, IReadOnlyList<RefKind?>? RefKinds) context, int index )
                 => (context.ArgumentTypes?[index], context.RefKinds?[index]);
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IConstructor? OfExactSignature( IConstructor signatureTemplate )
         {
-            return this.OfExactSignature( signatureTemplate, null, 0, signatureTemplate.Parameters.Count, GetParameter, false, false );
+            return this.OfExactSignature( signatureTemplate, null, 0, signatureTemplate.Parameters.Count, GetParameter, false, true );
 
             static (IType Type, RefKind RefKind) GetParameter( IConstructor context, int index )
                 => (context.Parameters[index].ParameterType, context.Parameters[index].RefKind);
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null )
         {
-            return this.OfExactSignature( (parameterTypes, refKinds), null, 0, parameterTypes.Count, GetParameter, false, false );
+            return this.OfExactSignature( (parameterTypes, refKinds), null, 0, parameterTypes.Count, GetParameter, false, true );
 
             static (IType Type, RefKind RefKind) GetParameter( (IReadOnlyList<IType> ParameterTypes, IReadOnlyList<RefKind>? RefKinds) context, int index )
                 => (context.ParameterTypes[index], context.RefKinds?[index] ?? RefKind.None);
@@ -50,7 +50,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         protected override int GetGenericParameterCount( IConstructor x )
         {
-            // Contrustructors don't have generic parameters.
+            // Constructors don't have generic parameters.
             return 0;
         }
 

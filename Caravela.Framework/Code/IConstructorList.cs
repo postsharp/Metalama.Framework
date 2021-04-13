@@ -11,15 +11,36 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IConstructorList : IMemberList<IConstructor>
     {
-        // TODO: Document.
-
+        /// <summary>
+        /// Gets an enumeration of constructors with signatures compatible with specified constraints.
+        /// </summary>
+        /// <param name="argumentTypes">Constraint on reflection types of arguments. <c>Null</c>items in the list signify any type.</param>
+        /// <returns>Enumeration of constructors matching specified constraints.</returns>
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes );
 
+        /// <summary>
+        /// Gets an enumeration of constructors with signatures compatible with specified constraints.
+        /// </summary>
+        /// <param name="argumentTypes">Constraint on types of arguments. <c>Null</c>items in the list signify any type.</param>
+        /// <param name="refKinds">Constraint on reference kinds of arguments. <c>Null</c>items in the list signify any reference kind.</param>
+        /// <returns>Enumeration of constructors matching specified constraints.</returns>
         IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null );
 
-        IConstructor? OfExactSignature( IConstructor signatureTemplate );
-
+        /// <summary>
+        /// Gets a constructor that exactly matches the specified signature.
+        /// </summary>
+        /// <param name="parameterTypes">List of parameter types.</param>
+        /// <param name="refKinds">List of parameter reference kinds, or <c>null</c> if all parameters should be by-value.</param>
+        /// <returns>A <see cref="IConstructor"/> that matches the given signature.</returns>
         IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null );
+
+
+        /// <summary>
+        /// Gets a constructor that exactly matches the signature of the specified method.
+        /// </summary>
+        /// <param name="signatureTemplate">Constructor signature of which to should be considered.</param>
+        /// <returns>A <see cref="IConstructor"/> that matches the given signature.</returns>
+        IConstructor? OfExactSignature( IConstructor signatureTemplate );
 
         // TODO: IMethod? OfBestSignature( ... )
     }
