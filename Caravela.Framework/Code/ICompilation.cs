@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a set of types compiled together. Commonly known as a "project", but this is not exactly it.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public interface ICompilation : IAssembly
     {
         /// <summary>

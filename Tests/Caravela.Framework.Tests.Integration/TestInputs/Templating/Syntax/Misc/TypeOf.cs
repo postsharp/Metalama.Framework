@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Type
         }
     }
 
-    [CompileTime]
+    [CompileTimeOnly]
     public class MyClass1 { }
 
     class TargetCode

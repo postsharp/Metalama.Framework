@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( node.GetScopeFromAnnotation() != SymbolDeclarationScope.RunTimeOnly )
             {
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
                 this.Mark( node.Keyword, TextSpanClassification.CompileTime );
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
+            if ( node.IsTemplateFromAnnotation() )
             {
                 this._isInTemplate = true;
 

@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Templating
         private const string _proceedAnnotationKind = "proceed";
         private const string _noindentAnnotationKind = "noindent";
         private const string _colorAnnotationKind = "color";
+        private const string _templateAnnotationKind = "template";
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildtime" );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runtime" );
@@ -45,9 +46,6 @@ namespace Caravela.Framework.Impl.Templating
 
                     case "runtime":
                         return SymbolDeclarationScope.RunTimeOnly;
-
-                    case "template":
-                        return SymbolDeclarationScope.Template;
 
                     default:
                         throw new AssertionFailedException();
@@ -142,14 +140,18 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
-                case SymbolDeclarationScope.Template:
-                    return node.WithAdditionalAnnotations( _templateAnnotation );
-
                 default:
                     return node;
             }
         }
 
+        public static T AddIsTemplateAnnotation<T>( this T node )
+            where T : SyntaxNode
+            => node.WithAdditionalAnnotations( _templateAnnotation );
+
+        public static bool IsTemplateFromAnnotation( this SyntaxNode node )
+            => node.HasAnnotation( _templateAnnotation );
+        
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
             => node.AddScopeAnnotation( source.GetScopeFromAnnotation() );

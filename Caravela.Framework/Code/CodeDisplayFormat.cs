@@ -9,7 +9,7 @@ namespace Caravela.Framework.Code
     /// Defines the formatting options of <see cref="IDisplayable.ToDisplayString"/>. Only well-known instances of this classes,
     /// exposed as properties, are currently supported.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public sealed class CodeDisplayFormat
     {
 

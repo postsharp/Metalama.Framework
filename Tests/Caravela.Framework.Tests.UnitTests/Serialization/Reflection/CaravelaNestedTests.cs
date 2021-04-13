@@ -17,13 +17,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestType()
         {
             var code = "class Target { class Sub { }  }";
-            var serialized = this.SerializeType( code );
+            var serialized = SerializeType( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target.Sub""))", serialized );
 
             TestExpression<Type>( code, serialized, ( info ) => Assert.Equal( "Sub", info.Name ) );
         }
 
-        private string SerializeType( string code )
+        private static string SerializeType( string code )
         {
             var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );

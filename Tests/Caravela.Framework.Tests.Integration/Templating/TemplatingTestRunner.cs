@@ -84,7 +84,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
-            Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
+            if ( templateSyntaxRoot != null && annotatedTemplateSyntax != null )
+            {
+                Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
+            }
 
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;

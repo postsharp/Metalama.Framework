@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestConstructor()
         {
             var code = "class Target { public Target(int hello) { } }";
-            var serialized = this.SerializeConstructor( code );
+            var serialized = SerializeConstructor( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)""))", serialized );
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestGenericConstructor()
         {
             var code = "class Target<T> where T: struct { public Target(T hello) { } }";
-            var serialized = this.SerializeConstructor( code );
+            var serialized = SerializeConstructor( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)", serialized );
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestDefaultConstructor()
         {
             var code = "class Target {  }";
-            var serialized = this.SerializeConstructor( code );
+            var serialized = SerializeConstructor( code );
             this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))", serialized );
 
             TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
@@ -58,7 +58,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         }
 
         // If there is no constructor, there is no constructor to serialize. We are at C#, not IL level.
-        private string SerializeConstructor( string code )
+        private static string SerializeConstructor( string code )
         {
             var compilation = CreateCompilation( code );
             var namedTypes = compilation.DeclaredTypes;

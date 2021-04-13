@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
     /// Exposes the meta-model and the meta-functions to a template method.
     /// It is recommended to import this type using <c>using static</c>.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public static class TemplateContext
     {
         [ThreadStatic]

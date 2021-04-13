@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,15 +26,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
         public List<Diagnostic> Diagnostics { get; } = new();
 
-        public bool TryCompile( CSharpCompilation compileTimeCompilation, SyntaxNode rootNode, out SyntaxNode annotatedNode, out SyntaxNode transformedNode )
+        private static bool IsTemplate( ISymbol symbol )
         {
-            var visitor = new Visitor( this, compileTimeCompilation );
-            visitor.Visit( rootNode );
-
-            annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
-            transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!.NormalizeWhitespace();
-
-            return !this.HasError;
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
         }
 
         private bool IsTemplate( SyntaxNode node )
@@ -41,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
             if ( symbol != null )
             {
-                return this.IsTemplate( symbol );
+                return IsTemplate( symbol );
             }
             else
             {
@@ -49,9 +44,25 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
         }
 
-        private bool IsTemplate( ISymbol symbol )
+        public bool TryCompile( CSharpCompilation compileTimeCompilation, SyntaxNode rootNode, out SyntaxNode? annotatedNode, out SyntaxNode? transformedNode )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
+            try
+            {
+                var visitor = new Visitor( this, compileTimeCompilation );
+                visitor.Visit( rootNode );
+
+                annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
+                transformedNode = new Rewriter( this, 1 ).Visit( rootNode )!.NormalizeWhitespace();
+
+                return !this.HasError;
+            }
+            catch ( InvalidUserCodeException e )
+            {
+                this.Diagnostics.AddRange( e.Diagnostics );
+                annotatedNode = null;
+                transformedNode = null;
+                return false;
+            }
         }
 
         private class Visitor : CSharpSyntaxWalker

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestSerializationOfMethod()
         {
             var code = "class Target { public static int Method() => 42; }";
-            var serialized = this.SerializeTargetDotMethod( code );
+            var serialized = SerializeTargetDotMethod( code );
             Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\"))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestGenericMethod()
         {
             var code = "class Target { public static T Method<T>(T a) => (T)(object)(2*(int)(object)a); }";
-            var serialized = this.SerializeTargetDotMethod( code );
+            var serialized = SerializeTargetDotMethod( code );
             Assert.Equal( "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))", serialized );
 
             TestExpression<MethodInfo>( code, serialized, ( info ) =>
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             } );
         }
 
-        private string SerializeTargetDotMethod( string code )
+        private static string SerializeTargetDotMethod( string code )
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );

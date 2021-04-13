@@ -80,7 +80,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                if ( this.HasLayerOrderAttribute( node ) )
+                if ( HasLayerOrderAttribute( node ) )
                 {
                     node = (ClassDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
                 }
@@ -97,7 +97,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                if ( this.HasLayerOrderAttribute( node ) )
+                if ( HasLayerOrderAttribute( node ) )
                 {
                     node = (RecordDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
                 }
@@ -114,7 +114,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
             {
-                if ( this.HasLayerOrderAttribute( node ) )
+                if ( HasLayerOrderAttribute( node ) )
                 {
                     node = (StructDeclarationSyntax) this.ProcessLayerOrderAttributeNode( node ).AssertNotNull();
                 }
@@ -129,7 +129,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return ret;
             }
 
-            private bool HasLayerOrderAttribute( TypeDeclarationSyntax node )
+            private static bool HasLayerOrderAttribute( TypeDeclarationSyntax node )
             {
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString() == "LayerOrder" );
             }
