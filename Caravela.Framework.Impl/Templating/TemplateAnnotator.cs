@@ -197,7 +197,6 @@ namespace Caravela.Framework.Impl.Templating
         {
             var scopeCount = 0;
 
-
             // We always try to have a compile-time expression if needed.
             var combinedScope = SymbolDeclarationScope.CompileTimeOnly;
 
