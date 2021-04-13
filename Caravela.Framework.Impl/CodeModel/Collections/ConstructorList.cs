@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             return 0;
         }
 
-        protected override MethodBaseList<IConstructor>? GetMemberListForBaseClass( INamedType declaringType )
+        protected override MethodBaseList<IConstructor> GetMemberListForBaseClass( INamedType declaringType )
         {
             throw new NotSupportedException();
         }

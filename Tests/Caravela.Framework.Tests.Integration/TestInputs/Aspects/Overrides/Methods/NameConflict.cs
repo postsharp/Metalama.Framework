@@ -7,6 +7,7 @@ using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
+#pragma warning disable CS0219
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict
 {

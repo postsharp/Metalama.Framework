@@ -168,7 +168,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return assemblyBytes;
             }
 
-            assemblyBytes = this.GetResourceBytes( path, this._compileTimeAssemblyBuilder.GetResourceName() );
+            assemblyBytes = this.GetResourceBytes( path, CompileTimeAssemblyBuilder.GetResourceName() );
 
             this._assemblyBytesMap.Add( path, assemblyBytes );
             return assemblyBytes;

@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
         }
 
-        protected abstract MethodBaseList<T>? GetMemberListForBaseClass( INamedType declaringType);
+        protected abstract MethodBaseList<T> GetMemberListForBaseClass( INamedType declaringType);
 
         protected abstract int GetGenericParameterCount( T x );
 

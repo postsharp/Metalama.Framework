@@ -245,7 +245,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return stream;
         }
 
-        public string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
+        public static string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
 
         /// <summary>
         /// Prepares run-time assembly by making compile-time only methods throw <see cref="NotSupportedException"/>.

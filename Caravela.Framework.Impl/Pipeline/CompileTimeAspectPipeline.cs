@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     if ( compileTimeAssembly != null )
                     {
                         this.Context.ManifestResources.Add( new ResourceDescription(
-                            compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
+                            CompileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 

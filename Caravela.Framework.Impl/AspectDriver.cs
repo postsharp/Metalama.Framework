@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl
                     ImmutableList.Create<IAspectSource>() );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
+            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
@@ -83,7 +83,7 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
             where T : ICodeElement
         {
             return AdviceAttributeFactory.CreateAdvice( attribute, aspect, codeElement, templateMethod );

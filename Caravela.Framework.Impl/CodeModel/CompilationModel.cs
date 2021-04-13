@@ -144,8 +144,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this;
 
-        public IDiagnosticLocation? DiagnosticLocation => null;
-
         public IEnumerable<INamedType> GetAllAttributeTypes()
             => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
 

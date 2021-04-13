@@ -20,5 +20,7 @@ namespace Caravela.Framework.Code
         IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool? isStatic = null, bool declaredOnly = true );
 
         IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true );
+
+        // TODO: IMethod? OfBestSignature( ... )
     }
 }

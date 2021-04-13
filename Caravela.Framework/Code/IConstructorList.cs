@@ -20,5 +20,7 @@ namespace Caravela.Framework.Code
         IConstructor? OfExactSignature( IConstructor signatureTemplate );
 
         IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null );
+
+        // TODO: IMethod? OfBestSignature( ... )
     }
 }
