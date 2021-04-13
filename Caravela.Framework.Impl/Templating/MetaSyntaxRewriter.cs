@@ -110,6 +110,9 @@ namespace Caravela.Framework.Impl.Templating
                         case ExpressionSyntax expression:
                             return this.TransformExpression( expression );
 
+                        case ArgumentSyntax argument:
+                            return this.TransformArgument( argument );
+
                         default:
                             throw new AssertionFailedException();
                     }
