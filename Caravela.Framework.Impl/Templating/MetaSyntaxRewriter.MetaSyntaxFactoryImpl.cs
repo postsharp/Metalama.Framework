@@ -10,8 +10,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
+
     internal abstract partial class MetaSyntaxRewriter
     {
+
         protected partial class MetaSyntaxFactoryImpl
         {
 
@@ -24,9 +26,11 @@ namespace Caravela.Framework.Impl.Templating
 
             public TypeSyntax Type( Type type ) => this._reflectionMapper.GetTypeNameSyntax( type );
 
+#pragma warning disable CA1822 // Mark members as static
             public TypeSyntax Type( ITypeSymbol type ) => (TypeSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
 
             public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => (ExpressionSyntax) CSharpSyntaxGenerator.Instance.NameExpression( type );
+#pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
             {
@@ -48,7 +52,27 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
-            public LiteralExpressionSyntax LiteralExpression( string s ) => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+            public ExpressionSyntax Literal( string s ) => this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
+
+            public ExpressionSyntax Literal( char c ) => this.Literal( SyntaxFactoryEx.LiteralExpression( c ) );
+
+            public ExpressionSyntax Literal( int i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( uint i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( long i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( ulong i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( short i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( ushort i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( double i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( float i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
+
+            public ExpressionSyntax Literal( decimal i ) => this.Literal( SyntaxFactoryEx.LiteralExpression( i ) );
 
             public ArrayTypeSyntax ArrayType<T>()
             {
@@ -58,6 +82,23 @@ namespace Caravela.Framework.Impl.Templating
 
             public ExpressionSyntax Kind( SyntaxKind kind ) =>
                 SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxKind ) ), SyntaxFactory.IdentifierName( kind.ToString() ) );
+
+            public ExpressionSyntax Literal( SyntaxToken literal )
+                => literal.Value switch
+                {
+                    string s => this.Literal( s ),
+                    char s => this.Literal( s ),
+                    int s => this.Literal( s ),
+                    uint s => this.Literal( s ),
+                    long s => this.Literal( s ),
+                    ulong s => this.Literal( s ),
+                    short s => this.Literal( s ),
+                    ushort s => this.Literal( s ),
+                    double s => this.Literal( s ),
+                    float s => this.Literal( s ),
+                    decimal s => this.Literal( s ),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
         }
     }
 }

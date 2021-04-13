@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Templating
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
         private static readonly SyntaxAnnotation _templateAnnotation = new SyntaxAnnotation( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
-        
+
         private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static bool IsTemplateFromAnnotation( this SyntaxNode node )
             => node.HasAnnotation( _templateAnnotation );
-        
+
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
             => node.AddScopeAnnotation( source.GetScopeFromAnnotation() );
