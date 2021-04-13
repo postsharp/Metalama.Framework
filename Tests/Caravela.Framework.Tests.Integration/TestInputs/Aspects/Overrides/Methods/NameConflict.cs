@@ -33,14 +33,16 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         [InnerOverride]
         [OuterOverride]
-        public void TargetMethod_ConflictBetweenOverrides()
+        public int TargetMethod_ConflictBetweenOverrides()
         {
+            return 42;
         }
 
         [InnerOverride]
-        public void TargetMethod_ConflictWithTarget()
+        public int TargetMethod_ConflictWithTarget()
         {
             int i = 0;
+            return 42;
         }
 
         [InnerOverride]
