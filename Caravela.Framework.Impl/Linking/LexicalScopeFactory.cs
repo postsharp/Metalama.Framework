@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Linking
 {
-   
+
     internal class LexicalScopeFactory
     {
         private readonly CompilationModel _compilation;
@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.Linking
                     case CodeElement sourceCodeElement:
                         this._scopes[sourceCodeElement] = lexicalScope = new TemplateExpansionLexicalScope( sourceCodeElement.LookupSymbols() );
                         break;
-                    
+
                     default:
                         // GetLexicalScope must be called first with the ICodeElementBuilder. In this flow,
                         // we don't have the target SyntaxTree, so we cannot compute the lexical scope.
@@ -46,45 +46,45 @@ namespace Caravela.Framework.Impl.Linking
         {
             // TODO: This will need to be changed for other transformations than methods.
 
-            switch (introduction)
+            switch ( introduction )
             {
                 case IOverriddenElement overriddenElement:
-                {
-                    // When we have an IOverriddenElement, we know which symbol will be overwritten, so we take its lexical scope.
-                    // All overrides of these same symbol will share the same scope.
-                    return this.GetLexicalScope( overriddenElement.OverriddenElement );
-                }
-
-                case ICodeElement codeElement:
-                {
-                    // We have a member introduction.
-                    if ( !this._scopes.TryGetValue( codeElement, out var lexicalScope ) )
                     {
-                        // The lexical scope should be taken from the insertion point.
-
-                        var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( introduction.TargetSyntaxTree );
-
-                        int lookupPosition;
-                        switch ( introduction.InsertPositionNode )
-                        {
-                            case TypeDeclarationSyntax type:
-                                // The lookup position is inside the type.
-                                lookupPosition = type.CloseBraceToken.SpanStart - 1;
-                                break;
-                                
-                            default:
-                                // The lookup position is after the member.
-                                lookupPosition = introduction.InsertPositionNode.Span.End + 1;
-                                break;
-                        }
-
-                        this._scopes[codeElement] = lexicalScope =
-                            new TemplateExpansionLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
+                        // When we have an IOverriddenElement, we know which symbol will be overwritten, so we take its lexical scope.
+                        // All overrides of these same symbol will share the same scope.
+                        return this.GetLexicalScope( overriddenElement.OverriddenElement );
                     }
 
-                    return lexicalScope;
-                }
-                    
+                case ICodeElement codeElement:
+                    {
+                        // We have a member introduction.
+                        if ( !this._scopes.TryGetValue( codeElement, out var lexicalScope ) )
+                        {
+                            // The lexical scope should be taken from the insertion point.
+
+                            var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( introduction.TargetSyntaxTree );
+
+                            int lookupPosition;
+                            switch ( introduction.InsertPositionNode )
+                            {
+                                case TypeDeclarationSyntax type:
+                                    // The lookup position is inside the type.
+                                    lookupPosition = type.CloseBraceToken.SpanStart - 1;
+                                    break;
+
+                                default:
+                                    // The lookup position is after the member.
+                                    lookupPosition = introduction.InsertPositionNode.Span.End + 1;
+                                    break;
+                            }
+
+                            this._scopes[codeElement] = lexicalScope =
+                                new TemplateExpansionLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
+                        }
+
+                        return lexicalScope;
+                    }
+
                 default:
                     throw new AssertionFailedException();
             }

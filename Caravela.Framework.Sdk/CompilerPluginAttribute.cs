@@ -5,7 +5,7 @@ using System;
 
 namespace Caravela.Framework.Sdk
 {
-    
+
     // IMPORTANT: If you rename this class, or move it to a different namespace, you also have to update 
     // src\Compilers\Core\Portable\DiagnosticAnalyzer\AnalyzerFileReference.cs in the Caravela.Compiler repo.
     // Plus

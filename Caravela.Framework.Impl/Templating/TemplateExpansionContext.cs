@@ -12,9 +12,10 @@ namespace Caravela.Framework.Impl.Templating
 {
     // TODO: This is a temporary implementation of TemplateExpansionContext.
 
-    internal class TemplateExpansionContext 
+    internal class TemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
+
         public TemplateExpansionLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(

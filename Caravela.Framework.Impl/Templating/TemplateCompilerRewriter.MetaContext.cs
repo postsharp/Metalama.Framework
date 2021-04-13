@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating
                 this._generatedSymbolNameLocals = generatedSymbolNameLocals;
                 this.Statements = new();
             }
-            
+
             /// <summary>
             /// Creates a child <see cref="MetaContext"/> that corresponds to a run-time block, so it has its own
             /// <see cref="StatementListVariableName"/>.
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Templating
                 var lexicalScope = parentContext?._generatedSymbolNameLocals ?? new Dictionary<ISymbol, SyntaxToken>();
                 return new MetaContext( statementListVariableName, lexicalScope );
             }
-            
+
             /// <summary>
             /// Creates a child <see cref="MetaContext"/> copies everything from the parent context but has its own
             /// list of statements.
@@ -63,9 +63,9 @@ namespace Caravela.Framework.Impl.Templating
                 // names. Two declaration of variables with the same name are still different symbols, so we don't strictly
                 // need to split the dictionaries.
                 // However, we're keeping this method for completeness and clarity.
-                
-                var lexicalScope = new Dictionary<ISymbol, SyntaxToken>(parentContext._generatedSymbolNameLocals);
-                
+
+                var lexicalScope = new Dictionary<ISymbol, SyntaxToken>( parentContext._generatedSymbolNameLocals );
+
                 return new MetaContext( parentContext.StatementListVariableName, lexicalScope );
             }
 
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Templating
             /// stored.
             /// </summary>
             public string StatementListVariableName { get; }
-            
+
             /// <summary>
             /// Gets the list of meta-statements in the current context.
             /// </summary>

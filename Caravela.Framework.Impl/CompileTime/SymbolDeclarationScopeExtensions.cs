@@ -6,8 +6,12 @@ namespace Caravela.Framework.Impl.CompileTime
     internal static class SymbolDeclarationScopeExtensions
     {
         public static bool IsRunTime( this SymbolDeclarationScope scope ) => scope is SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly;
+
         public static bool IsCompileTime( this SymbolDeclarationScope scope ) => scope is SymbolDeclarationScope.Default or SymbolDeclarationScope.CompileTimeOnly;
-        
+
+        public static SymbolDeclarationScope ReplaceDefault( this SymbolDeclarationScope scope, SymbolDeclarationScope defaultScope )
+            => scope == SymbolDeclarationScope.Default ? defaultScope : scope;
+
         public static string ToDisplayString( this SymbolDeclarationScope scope )
             => scope switch
             {

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -9,6 +10,8 @@ namespace Caravela.TestFramework
 {
     internal static class TestEnvironment
     {
+        public static string GetTestInputsDirectory( Assembly assembly ) => Path.Combine( GetProjectDirectory( assembly ), "TestInputs" );
+
         public static string GetProjectDirectory( Assembly assembly )
         {
             var projectDirectoryAttribute = assembly.GetCustomAttributes<AssemblyMetadataAttribute>().SingleOrDefault( a => a.Key == "ProjectDirectory" );

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public ProduceCompileTimeCodeRewriter( 
+            public ProduceCompileTimeCodeRewriter(
                 ISymbolClassifier symbolClassifier,
                 TemplateCompiler templateCompiler,
                 Compilation runTimeCompilation,
@@ -87,8 +87,8 @@ namespace Caravela.Framework.Impl.CompileTime
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-                
-                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate(methodSymbol) )
+
+                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
                 {
                     var success =
                         this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return null;
                 }
             }
-            
+
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 var transformedNode = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;

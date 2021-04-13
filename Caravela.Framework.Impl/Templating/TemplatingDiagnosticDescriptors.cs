@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating
                 "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
                 _category,
                 DiagnosticSeverity.Error );
-       
+
         internal static readonly StrongDiagnosticDescriptor<string> UnsupportedContextForProceed
             = new(
                 "CR0106",
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Templating
                 "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 DiagnosticSeverity.Error );
-                
+
         public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
         {
             return LanguageFeatureIsNotSupported.CreateDiagnostic( node.GetLocation(), node.Kind().ToString() );

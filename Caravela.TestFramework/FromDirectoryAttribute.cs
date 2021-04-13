@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Xunit.Sdk;
 
@@ -32,9 +33,9 @@ namespace Caravela.TestFramework
             // To debug this method, comment out the next line:
             // Debugger.Launch();
 
-            var projectDirectory = TestEnvironment.GetProjectDirectory( testMethod.DeclaringType!.Assembly );
+            var baseDirectory = TestEnvironment.GetTestInputsDirectory( testMethod.DeclaringType!.Assembly );
 
-            List<object[]> tests = new();
+            List<string> tests = new();
 
             void AddTestsInDirectory( string dirPath )
             {
@@ -55,14 +56,14 @@ namespace Caravela.TestFramework
                         continue;
                     }
 
-                    tests.Add( new object[] { Path.GetRelativePath( projectDirectory, testPath ) } );
+                    tests.Add( Path.GetRelativePath( baseDirectory, testPath ) );
                 }
             }
 
-            var absoluteDirectoryPath = Path.Combine( projectDirectory, this._subdirectory );
+            var absoluteDirectoryPath = Path.Combine( baseDirectory, this._subdirectory );
             AddTestsInDirectory( absoluteDirectoryPath );
 
-            return tests;
+            return tests.OrderBy( t => t ).Select( t => new object[] { t } ).ToArray();
         }
     }
 }

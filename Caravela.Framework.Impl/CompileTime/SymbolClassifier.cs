@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return true;
             }
-            
+
             // Look at the overriden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
@@ -68,8 +68,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // TODO: be more strict with .NET Standard.
-            if ( assembly.Name != null && 
-                ( assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase ) || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase ) ) )
+            if ( assembly.Name != null &&
+                (assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase ) || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase )) )
             {
                 return SymbolDeclarationScope.Default;
             }
@@ -84,7 +84,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Any assembly that is not compile-time is run-time only.
             // We also return RunTimeOnly for the current compilation because this method is called as a fallback to get the scope
             // of a type. All compile-time types of the current compilation must be marked as compile-time using a custom attribute. 
-            
+
             return SymbolDeclarationScope.RunTimeOnly;
         }
 
@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // From attributes.
             var scopeFromAttributes = symbol.GetAttributes().Select( this.GetAttributeScope ).FirstOrDefault( s => s != null );
-            if ( scopeFromAttributes != null)
+            if ( scopeFromAttributes != null )
             {
                 return AddToCache( scopeFromAttributes.Value );
             }
