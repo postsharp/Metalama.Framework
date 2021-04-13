@@ -17,21 +17,21 @@ namespace Caravela.Framework.Impl
         public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceMemberAlreadyExists = new(
             "CRA0001",
             "Cannot introduce member into a type because it already exists.",
-            "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3}.",
+            "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}'.",
             _category,
             Error );
 
         public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceOverrideOfSealed = new(
             "CRA0002",
             "Cannot introduce member into a type because it is sealed in a base class.",
-            "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3} and is sealed.",
+            "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and is sealed.",
             _category,
             Error );
 
         public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)> CannotIntroduceWithDifferentStaticity = new(
             "CRA0003",
             "Cannot introduce member into a type because it is sealed in a base class.",
-            "The aspect {0} cannot introduce member {1} into type {2} because it is already defined in type {3} and it's IsStatic flag is opposite of the introduced member.",
+            "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and it's IsStatic flag is opposite of the introduced member.",
             _category,
             Error );
     }
