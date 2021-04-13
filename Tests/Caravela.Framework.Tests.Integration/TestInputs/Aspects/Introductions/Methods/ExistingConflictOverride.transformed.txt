@@ -1,8 +1,20 @@
 [TestOutput]
 [Introduction]
-internal class TargetClass
+internal class TargetClass : BaseClass
 {
     public int ExistingMethod()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return (int)42;
+    }
+
+    public override global::System.Int32 BaseMethod()
+    {
+        global::System.Console.WriteLine("This is introduced method.");
+        return (int)42;
+    }
+
+    public global::System.Int32 NonExistingMethod()
     {
         global::System.Console.WriteLine("This is introduced method.");
         return (int)42;

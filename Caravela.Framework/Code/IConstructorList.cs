@@ -11,10 +11,14 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IConstructorList : IMemberList<IConstructor>
     {
-        IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?> parameterTypes );
+        // TODO: Document.
 
-        IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType> parameterTypes );
+        IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes );
 
-        IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes );
+        IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null );
+
+        IConstructor? OfExactSignature( IConstructor signatureTemplate );
+
+        IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null );
     }
 }

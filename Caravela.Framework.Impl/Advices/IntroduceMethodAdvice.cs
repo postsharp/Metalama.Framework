@@ -158,8 +158,9 @@ namespace Caravela.Framework.Impl.Advices
                         }
                         else
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
-                            return AdviceResult.Create( overriddenMethod );
+                            var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
+                            this._methodBuilder.IsOverride = true;
+                            return AdviceResult.Create( this._methodBuilder, overriddenMethod );
                         }
 
                     default:

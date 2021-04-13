@@ -251,5 +251,38 @@ class C
             var matchedMethods5 = type.Methods.OfCompatibleSignature( "Foo", 0, new[] { typeof( object ), typeof( object ) } );
             Assert.Equal( new[] { type.Methods[4] }, matchedMethods5 );
         }
+
+        [Fact]
+        public void Matches_IsStatic()
+        {
+            var code = @"
+class C
+{
+    public void Foo()
+    {
+    }
+
+    public static void Bar()
+    {
+    }
+}
+";
+
+            var compilation = CreateCompilation( code );
+            var type = compilation.DeclaredTypes[0];
+
+            var matchedMethods1 = type.Methods.OfCompatibleSignature( "Foo", isStatic: false );
+            Assert.Equal( new[] { type.Methods[0] }, matchedMethods1 );
+            var matchedMethods2 = type.Methods.OfCompatibleSignature( "Foo", isStatic: true );
+            Assert.Equal( Array.Empty<IMethod>(), matchedMethods2 );
+            var matchedMethods3 = type.Methods.OfCompatibleSignature( "Foo", isStatic: null );
+            Assert.Equal( new[] { type.Methods[0] }, matchedMethods3 );
+            var matchedMethods4 = type.Methods.OfCompatibleSignature( "Bar", isStatic: false );
+            Assert.Equal( Array.Empty<IMethod>(), matchedMethods4 );
+            var matchedMethods5 = type.Methods.OfCompatibleSignature( "Bar", isStatic: true );
+            Assert.Equal( new[] { type.Methods[1] }, matchedMethods5 );
+            var matchedMethods6 = type.Methods.OfCompatibleSignature( "Bar", isStatic: null );
+            Assert.Equal( new[] { type.Methods[1] }, matchedMethods6 );
+        }
     }
 }

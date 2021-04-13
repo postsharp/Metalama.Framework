@@ -15,20 +15,42 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
+        public int BaseMethod()
+        {
+            Console.WriteLine("This is introduced method.");
+            return 42;
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public int ExistingMethod()
+        {
+            Console.WriteLine("This is introduced method.");
+            return 42;
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
+        public int NonExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
             return 42;
         }
     }
 
+    internal class BaseClass
+    { 
+        public int BaseMethod()
+        {
+            return 13;
+        }
+    }
+
     [TestOutput]
     [Introduction]
-    internal class TargetClass
+    internal class TargetClass : BaseClass
     {
         public int ExistingMethod()
         {
-            return 13;
+            return 27;
         }
     }
 }

@@ -251,5 +251,34 @@ class C : B
             var matchedMethod3 = typeC.Methods.OfExactSignature( "Foo", 0, new[] { intType, intType }, declaredOnly: false );
             Assert.Same( typeC.Methods[0], matchedMethod3 );
         }
+
+        [Fact]
+        public void Matches_IsStatic()
+        {
+            var code = @"
+class C
+{
+    public void Foo()
+    {
+    }
+
+    public static void Bar()
+    {
+    }
+}
+";
+
+            var compilation = CreateCompilation( code );
+            var type = compilation.DeclaredTypes[0];
+
+            var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<Code.IType>(), isStatic: false );
+            Assert.Same( type.Methods[0], matchedMethod1 );
+            var matchedMethod2 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<Code.IType>(), isStatic: true );
+            Assert.Null( matchedMethod2 );
+            var matchedMethod3 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: false );
+            Assert.Null( matchedMethod3 );
+            var matchedMethod4 = type.Methods.OfExactSignature( "Bar", 0, Array.Empty<Code.IType>(), isStatic: true );
+            Assert.Same( type.Methods[1], matchedMethod4 );
+        }
     }
 }
