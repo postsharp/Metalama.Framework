@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
@@ -15,10 +17,11 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     public abstract partial class DiagnosticSink : IDiagnosticSink
     {
+        public ICodeElement? DefaultScope { get; private set; }
 
-        protected DiagnosticSink( IDiagnosticLocation? defaultLocation = null )
+        protected DiagnosticSink( ICodeElement? defaultScope )
         {
-            this.DefaultLocation = defaultLocation;
+            this.DefaultScope = defaultScope;
         }
 
         public int ErrorCount { get; private set; }
@@ -37,9 +40,29 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
+        public abstract void SuppressDiagnostic( ScopedSuppression suppression );
+
+        public void SuppressDiagnostic( string id, ICodeElement scope )
+         => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+
+        public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
         {
-            return severity switch
+            foreach ( var suppression in suppressions )
+            {
+                this.SuppressDiagnostic( suppression );
+            }
+        }
+
+        public void SuppressDiagnostic( string id )
+        {
+            if ( this.DefaultScope != null )
+            {
+                this.SuppressDiagnostic( new ScopedSuppression( id, this.DefaultScope ) );
+            }
+        }
+
+        private static RoslynDiagnosticSeverity MapSeverity( Severity severity ) =>
+            severity switch
             {
                 Severity.Error => RoslynDiagnosticSeverity.Error,
                 Severity.Hidden => RoslynDiagnosticSeverity.Hidden,
@@ -47,27 +70,24 @@ namespace Caravela.Framework.Impl.Diagnostics
                 Severity.Warning => RoslynDiagnosticSeverity.Warning,
                 _ => throw new AssertionFailedException()
             };
+
+        public IDisposable WithDefaultScope( ICodeElement scope )
+        {
+            var oldScope = this.DefaultScope;
+            this.DefaultScope = scope;
+            return new RestoreLocationCookie( this, oldScope );
         }
 
-        public IDiagnosticLocation? DefaultLocation { get; private set; }
-
-        public IDisposable WithDefaultLocation( IDiagnosticLocation? location )
+        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
         {
-            var oldLocation = this.DefaultLocation;
-            this.DefaultLocation = location;
-            return new RestoreLocationCookie( this, oldLocation );
-        }
-
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args )
-        {
-            var roslynLocation = ((DiagnosticLocation?) (location ?? this.DefaultLocation))?.Location;
+            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetDiagnosticLocation();
             var roslynSeverity = MapSeverity( severity );
             var warningLevel = severity == Severity.Error ? 0 : 1;
 
             var diagnostic = Diagnostic.Create(
                 id,
                 "Caravela.User",
-                new NonLocalizableString( formatMessage ),
+                new NonLocalizableString( formatMessage, args ),
                 roslynSeverity,
                 roslynSeverity,
                 true,
@@ -85,7 +105,12 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
         {
-            this.ReportDiagnostic( severity, this.DefaultLocation, id, formatMessage, args );
+            if ( this.DefaultScope == null )
+            {
+                throw new InvalidOperationException( "Cannot report a diagnostic when the default scope has not been defined." );
+            }
+
+            this.ReportDiagnostic( severity, this.DefaultScope, id, formatMessage, args );
         }
     }
 }

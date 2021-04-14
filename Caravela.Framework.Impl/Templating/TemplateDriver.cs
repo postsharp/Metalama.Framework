@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         public BlockSyntax ExpandDeclaration( TemplateExpansionContext templateExpansionContext )
         {
             Invariant.Assert(
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null );
+                templateExpansionContext.DiagnosticSink.DefaultScope != null );
 
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Templating
             TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
             SyntaxNode output;
-            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultLocation ) )
+            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
             {
                 try
                 {

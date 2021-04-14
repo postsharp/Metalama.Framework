@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IDiagnosticLocation? DiagnosticLocation => this.DeclaringMember.DiagnosticLocation;
 
-        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetLocation();
+        Location? IHasDiagnosticLocation.DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public abstract ISymbol? Symbol { get; }
 

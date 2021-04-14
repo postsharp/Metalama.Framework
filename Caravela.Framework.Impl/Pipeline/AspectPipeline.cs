@@ -168,7 +168,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var hasError = false;
-            foreach ( var diagnostic in pipelineStageResult.Diagnostics )
+            foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
                 this.Context.ReportDiagnostic( diagnostic );
                 hasError |= diagnostic.Severity >= DiagnosticSeverity.Error;

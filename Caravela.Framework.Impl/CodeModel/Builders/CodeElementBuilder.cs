@@ -47,6 +47,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
 
+        // TODO: We may want to suppress diagnostics on introduced code elements, but the current design does not allow for that.
+        // A possible solution would have to return an IDiagnosticLocation that does not map to source code, but would be somehow
+        // understood by the aspect linker.
+
         public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
 
         ISymbol? ISdkCodeElement.Symbol => null;

@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -23,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
-        private readonly List<Diagnostic> _diagnostics = new();
+        private readonly DiagnosticListBuilder _diagnostics = new();
         private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
 
-        public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
+        public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
@@ -94,9 +95,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
-                            this._diagnostics.Add(
+                            this._diagnostics.ReportDiagnostic(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
-                                    this._currentStep!.AspectLayer.AspectType.Type.GetLocation(),
+                                    this._currentStep!.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                                     (this._currentStep.AspectLayer.AspectType.Type, aspectType) ) );
                             success = false;
                             continue;
@@ -158,9 +159,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
-                    this._diagnostics.Add(
+                    this._diagnostics.ReportDiagnostic(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
-                            this._currentStep.AspectLayer.AspectType.Type.GetLocation(),
+                            this._currentStep.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                             (this._currentStep.AspectLayer.AspectType.Type, advice.TargetDeclaration) ) );
                     success = false;
                     continue;
@@ -187,8 +188,11 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
-        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics )
-            => this._diagnostics.AddRange( diagnostics );
+        public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
+        {
+            this._diagnostics.ReportDiagnostics( diagnostics );
+            this._diagnostics.SuppressDiagnostics( suppressions );
+        }
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations ) =>
             this._nonObservableTransformations.AddRange( transformations );

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Code
     /// are always declarations, never elements of the method body.
     /// </summary>
     [CompileTimeOnly]
-    public interface ICodeElement : IDisplayable, IDiagnosticTarget, ICompilationElement
+    public interface ICodeElement : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>

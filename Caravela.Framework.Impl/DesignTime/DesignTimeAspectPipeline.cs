@@ -6,31 +6,26 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 
-namespace Caravela.Framework.Impl.Pipeline
+namespace Caravela.Framework.Impl.DesignTime
 {
 
     /// <summary>
     /// The main entry point of Caravela when called from a Roslyn source generator.
     /// </summary>
-    internal class SourceGeneratorAspectPipeline : AspectPipeline
+    internal class DesignTimeAspectPipeline : AspectPipeline
     {
-        public SourceGeneratorAspectPipeline( IAspectPipelineContext context ) : base( context )
+        public DesignTimeAspectPipeline( IAspectPipelineContext context ) : base( context )
         {
         }
 
-        public bool TryExecute( [NotNullWhen( true )] out IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees )
+        public bool TryExecute( [NotNullWhen( true )] out DesignTimeAspectPipelineResult result )
         {
-
-            if ( !this.TryExecuteCore( out var result ) )
-            {
-                additionalSyntaxTrees = null;
-                return false;
-            }
-
-            additionalSyntaxTrees = result.AssertNotNull().AdditionalSyntaxTrees;
-            return true;
+            var success = this.TryExecuteCore( out var pipelineResult );
+            result = new DesignTimeAspectPipelineResult( pipelineResult?.AdditionalSyntaxTrees, pipelineResult != null ? pipelineResult.Diagnostics : ImmutableDiagnosticList.Empty );
+            return success;
         }
 
         public override bool CanTransformCompilation => false;

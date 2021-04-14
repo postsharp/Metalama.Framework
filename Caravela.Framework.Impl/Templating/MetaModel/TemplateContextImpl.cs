@@ -31,8 +31,16 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             this._diagnosticSink = diagnosticSink;
         }
 
-        void IDiagnosticSink.ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args ) => this._diagnosticSink.ReportDiagnostic( severity, location, id, formatMessage, args );
+        void IDiagnosticSink.ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
+            => this._diagnosticSink.ReportDiagnostic( severity, location, id, formatMessage, args );
 
-        void IDiagnosticSink.ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args ) => this._diagnosticSink.ReportDiagnostic( severity, id, formatMessage, args );
+        void IDiagnosticSink.ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
+            => this._diagnosticSink.ReportDiagnostic( severity, id, formatMessage, args );
+
+        public void SuppressDiagnostic( string id, ICodeElement scope )
+            => this._diagnosticSink.SuppressDiagnostic( id, scope );
+
+        public void SuppressDiagnostic( string id )
+            => this._diagnosticSink.SuppressDiagnostic( id );
     }
 }

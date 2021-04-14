@@ -236,11 +236,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
-        ISymbol? ISdkCodeElement.Symbol => throw new NotImplementedException();
+        ISymbol? ISdkCodeElement.Symbol => throw new NotSupportedException();
 
-        IAttributeList ICodeElement.Attributes => throw new NotImplementedException();
+        IAttributeList ICodeElement.Attributes => throw new NotSupportedException();
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => null;
+        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => null;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
     }

@@ -58,14 +58,14 @@ namespace Caravela.Framework.Impl
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
-                        codeElement.GetLocation(),
+                        codeElement.GetDiagnosticLocation(),
                         (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
 
                 return new(
                     false,
-                    ImmutableList.Create( diagnostic ),
-                    ImmutableList.Create<IAdvice>(),
-                    ImmutableList.Create<IAspectSource>() );
+                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
+                    ImmutableArray<IAdvice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty );
             }
 
             var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl
             var aspectBuilder = new AspectBuilder<T>(
                 codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
-            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultLocation ) )
+            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {
                 aspectOfT.Initialize( aspectBuilder );
             }

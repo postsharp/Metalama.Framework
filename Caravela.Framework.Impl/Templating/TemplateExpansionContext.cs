@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -31,9 +32,8 @@ namespace Caravela.Framework.Impl.Templating
             this.ProceedImplementation = proceedImpl;
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScope = lexicalScope;
-            Invariant.Assert( diagnosticSink.DefaultLocation != null );
-            Invariant.Assert(
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ) );
+            Invariant.Assert( diagnosticSink.DefaultScope != null );
+            Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
