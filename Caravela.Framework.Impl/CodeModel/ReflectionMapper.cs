@@ -14,8 +14,8 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class ReflectionMapper
     {
         private readonly Compilation _compilation;
-        private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new ConcurrentDictionary<Type, ITypeSymbol>();
-        private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new ConcurrentDictionary<Type, NameSyntax>();
+        private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
+        private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new();
 
         public ReflectionMapper( Compilation compilation )
         {

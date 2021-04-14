@@ -13,8 +13,8 @@ namespace Caravela.Obfuscator
     internal class ObfuscationTable
     {
         private readonly SHA256 _sha1 = SHA256.Create();
-        private readonly Dictionary<string, string> _hashToName = new Dictionary<string, string>( 32 * 1024 );
-        private readonly Dictionary<string, string> _nameToHash = new Dictionary<string, string>( 32 * 1024 );
+        private readonly Dictionary<string, string> _hashToName = new( 32 * 1024 );
+        private readonly Dictionary<string, string> _nameToHash = new( 32 * 1024 );
 
         public int Count => this._nameToHash.Count;
 

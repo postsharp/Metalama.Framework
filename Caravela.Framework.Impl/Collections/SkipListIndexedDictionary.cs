@@ -572,7 +572,7 @@ namespace Caravela.Framework.Impl.Collections
                 this.Value = default!;
             }
 
-            public static Node CreateHead() => new Node( new NodeList( 1 ) );
+            public static Node CreateHead() => new( new NodeList( 1 ) );
 
             public Node( TKey key, TValue value, int height )
             {

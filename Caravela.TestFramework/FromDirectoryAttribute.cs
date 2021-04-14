@@ -16,7 +16,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class FromDirectoryAttribute : DataAttribute
     {
-        private static readonly HashSet<string> _excludedDirectoryNames = new HashSet<string>( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
+        private static readonly HashSet<string> _excludedDirectoryNames = new( StringComparer.OrdinalIgnoreCase ) { "bin", "obj" };
         private readonly string _subdirectory;
 
         /// <summary>

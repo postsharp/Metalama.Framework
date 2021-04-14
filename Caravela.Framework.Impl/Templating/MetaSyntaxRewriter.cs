@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </remarks>
     internal abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
-        private readonly Stack<string> _indentTriviaStack = new Stack<string>();
+        private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
 
         /// <summary>

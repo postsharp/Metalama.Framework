@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
-        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new ClassifiedTextSpanCollection();
+        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
         private readonly SourceText _sourceText;
         private readonly bool _processAllTypes;
         private readonly string _sourceString;

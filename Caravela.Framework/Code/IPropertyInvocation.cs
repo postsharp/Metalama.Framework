@@ -6,20 +6,8 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Allows accessing the value of properties and indexers.
     /// </summary>
-    public interface IPropertyInvocation
+    public interface IPropertyInvocation : IFieldOrPropertyInvocation
     {
-        dynamic Value { get; set; }
-
-        /// <summary>
-        /// Get the value for a different instance.
-        /// </summary>
-        dynamic GetValue( dynamic? instance );
-
-        /// <summary>
-        /// Set the value for a different instance.
-        /// </summary>
-        dynamic SetValue( dynamic? instance, dynamic value );
-
         /// <summary>
         /// Get the value for an indexer.
         /// </summary>
