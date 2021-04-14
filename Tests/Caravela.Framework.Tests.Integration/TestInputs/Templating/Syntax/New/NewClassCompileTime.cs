@@ -19,6 +19,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTime
         {
             var c = compileTime(new CompileTimeClass());
             Console.WriteLine(c.String);
+
+            var c1 = new CompileTimeClass();
+            Console.WriteLine(c1.String);
             
             return proceed();
         }
