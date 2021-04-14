@@ -26,6 +26,10 @@ internal class TargetClass
 #pragma warning disable CS0219
         int x = 0;
 #pragma warning restore CS0219
+#if !TESTRUNNER // Disable the warning in the main build, not during tests. (2)
+
+#pragma warning disable CS0219, 219
+#endif
         // CS0219 expected 
         int y = 0;
     }

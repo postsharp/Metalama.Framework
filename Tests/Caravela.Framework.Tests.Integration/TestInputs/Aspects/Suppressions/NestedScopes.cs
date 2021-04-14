@@ -1,9 +1,5 @@
 // @IncludeFinalDiagnostics
 
-#if !TESTRUNNER
-// Disable the warning in the main build, not during tests.
-#pragma warning disable CS0219
-#endif
 
 
 using System;
@@ -27,6 +23,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         [OverrideMethodTemplateAttribute]
         public dynamic Override()
         {
+#if !TESTRUNNER // Disable the warning in the main build, not during tests. (1)
+#pragma warning disable CS0219
+#endif            
             int a = 0;
             return proceed();
         }
@@ -44,22 +43,32 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
         [SuppressWarning("CS0219")]
         private void M2( string m ) 
         {
-           #pragma warning disable CS0219
+#pragma warning disable CS0219
            int x = 0;
-           #pragma warning restore CS0219
-           
-           int y = 0;
+#pragma warning restore CS0219
+
+
+#if !TESTRUNNER // Disable the warning in the main build, not during tests. (1)
+#pragma warning disable CS0219
+#endif
+
+            int y = 0;
         }
         
         
         private void M1( string m ) 
         {
-           #pragma warning disable CS0219
+#pragma warning disable CS0219
            int x = 0;
-           #pragma warning restore CS0219
-        
-           // CS0219 expected 
-           int y = 0;
+#pragma warning restore CS0219
+
+#if !TESTRUNNER // Disable the warning in the main build, not during tests. (2)
+#pragma warning disable CS0219, 219
+#endif
+
+
+            // CS0219 expected 
+            int y = 0;
         }
     }
 }
