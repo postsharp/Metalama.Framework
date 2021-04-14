@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
@@ -358,6 +358,60 @@ class C
             Assert.Equal( new[] { type.Methods[4], type.Methods[6], type.Methods[7] }, matchedMethods10 );
             var matchedMethods11 = type.Methods.OfCompatibleSignature( "Foo", null, new[] { objectType, intArrayType } );
             Assert.Equal( new[] { type.Methods[4], type.Methods[6], type.Methods[8] }, matchedMethods11 );
+        }
+
+        [Fact]
+        public void Matches_InheritanceHierarchy()
+        {
+            var code = @"
+class A
+{
+    public void Foo() {}
+    public void Bar() {}
+    public virtual void Baz() {}
+    public virtual void Qux() {}
+}
+
+class B : A
+{
+    public new void Foo() {}
+    public override void Baz() {}
+    public void Quz() {}
+    public virtual void Qur() {}
+    public void Trx() {}
+    public virtual void Trw() {}
+}
+
+class C : B
+{
+    public new void Trx() {}
+    public override void Trw() {}
+}
+";
+
+            var compilation = CreateCompilation( code );
+            var typeA = compilation.DeclaredTypes[0];
+            var typeB = compilation.DeclaredTypes[1];
+            var typeC = compilation.DeclaredTypes[2];
+
+            var matchedMethods1 = typeC.Methods.OfCompatibleSignature( "Foo", declaredOnly: false );
+            Assert.Equal( new[] { typeB.Methods[0] }, matchedMethods1 );
+            var matchedMethods2 = typeC.Methods.OfCompatibleSignature( "Bar", declaredOnly: false );
+            Assert.Equal( new[] { typeA.Methods[1] }, matchedMethods2 );
+            var matchedMethods3 = typeC.Methods.OfCompatibleSignature( "Baz", declaredOnly: false );
+            Assert.Equal( new[] { typeB.Methods[1] }, matchedMethods3 );
+            var matchedMethods4 = typeC.Methods.OfCompatibleSignature( "Qux", declaredOnly: false );
+            Assert.Equal( new[] { typeA.Methods[3] }, matchedMethods4 );
+            var matchedMethods5 = typeC.Methods.OfCompatibleSignature( "Quz", declaredOnly: false );
+            Assert.Equal( new[] { typeB.Methods[2] }, matchedMethods5 );
+            var matchedMethods6 = typeC.Methods.OfCompatibleSignature( "Qur", declaredOnly: false );
+            Assert.Equal( new[] { typeB.Methods[3] }, matchedMethods6 );
+            var matchedMethods7 = typeC.Methods.OfCompatibleSignature( "Trx", declaredOnly: false );
+            Assert.Equal( new[] { typeC.Methods[0] }, matchedMethods7 );
+            var matchedMethods8 = typeC.Methods.OfCompatibleSignature( "Trw", declaredOnly: false );
+            Assert.Equal( new[] { typeC.Methods[1] }, matchedMethods8 );
+            var matchedMethods9 = typeC.Methods.OfCompatibleSignature( "Xyzzy", declaredOnly: false );
+            Assert.Equal( Array.Empty<IMethod>(), matchedMethods9 );
         }
     }
 }
