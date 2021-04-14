@@ -10,7 +10,7 @@ namespace Caravela.Framework.Code
     /// Represent an element of code. Implementations of <see cref="ICodeElement"/>
     /// are always declarations, never elements of the method body.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public interface ICodeElement : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>

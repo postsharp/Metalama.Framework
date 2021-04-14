@@ -55,10 +55,10 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 switch ( this.GetSymbolDeclarationScope( node ) )
                 {
-                    case SymbolDeclarationScope.Default or SymbolDeclarationScope.RunTimeOnly:
+                    case SymbolDeclarationScope.RunTimeOnly:
                         return null;
 
-                    case SymbolDeclarationScope.CompileTimeOnly:
+                    default:
                         this.FoundCompileTimeCode = true;
 
                         var members = new List<MemberDeclarationSyntax>();
@@ -81,14 +81,14 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
 
-                    default:
-                        throw new NotImplementedException();
                 }
             }
 
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                if ( this.GetSymbolDeclarationScope( node ) == SymbolDeclarationScope.Template )
+                var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                
+                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate(methodSymbol) )
                 {
                     var success =
                         this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );

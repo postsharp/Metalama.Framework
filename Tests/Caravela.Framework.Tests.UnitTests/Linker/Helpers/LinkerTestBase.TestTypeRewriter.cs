@@ -73,7 +73,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
 
-                if ( this.HasPseudoAttribute( node ) )
+                if ( HasPseudoAttribute( node ) )
                 {
                     var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
 
@@ -93,7 +93,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return node;
             }
 
-            private bool HasPseudoAttribute( MethodDeclarationSyntax node )
+            private static bool HasPseudoAttribute( MethodDeclarationSyntax node )
             {
                 return node.AttributeLists.SelectMany( x => x.Attributes ).Any( x => x.Name.ToString().StartsWith( "Pseudo" ) );
             }

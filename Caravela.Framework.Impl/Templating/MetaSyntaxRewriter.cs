@@ -102,7 +102,17 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
                 {
-                    return this.TransformExpression( (ExpressionSyntax) transformedNode );
+                    // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
+                    // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
+                    
+                    switch ( transformedNode )
+                    {
+                        case ExpressionSyntax expression:
+                            return this.TransformExpression( expression );
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
                 }
                 else
                 {
@@ -233,8 +243,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.Transform( token.Kind() ),
                     this.MetaSyntaxFactory.LiteralExpression( token.Text ),
                     this.MetaSyntaxFactory.LiteralExpression( token.ValueText ),
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) )
-                );
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ));
             }
         }
 

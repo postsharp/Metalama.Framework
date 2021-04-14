@@ -5,7 +5,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
 {
-    [CompileTime]
+    [CompileTimeOnly]
     class CompileTimeClass
     {
         public void CompileTimeMethod()

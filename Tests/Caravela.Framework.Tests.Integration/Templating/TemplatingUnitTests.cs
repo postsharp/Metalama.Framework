@@ -23,6 +23,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         [Theory]
         [FromDirectory( @"TestInputs\Templating\LocalVariables" )]
         public Task LocalVariables( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        
+        [Theory]
+        [FromDirectory( @"TestInputs\Templating\MagicKeywords" )]
+        public Task MagicKeywords( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"TestInputs\Templating\Return" )]
