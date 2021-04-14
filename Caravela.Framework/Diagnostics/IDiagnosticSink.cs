@@ -33,14 +33,14 @@ namespace Caravela.Framework.Diagnostics
         void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args );
 
         /// <summary>
-        /// Suppresses a diagnostic by the element of code in which the suppression must be effective.
+        /// Suppresses a diagnostic by specifying the element of code in which the suppression must be effective.
         /// </summary>
         /// <param name="id">The id of the identifier to suppress.</param>
         /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
         void SuppressDiagnostic( string id, ICodeElement scope );
 
         /// <summary>
-        /// Reports a diagnostic in the current target element of code.
+        /// Suppresses a diagnostic in the current target declaration.
         /// </summary>
         /// <param name="id"></param>
         void SuppressDiagnostic( string id );
