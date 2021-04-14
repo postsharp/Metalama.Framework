@@ -54,10 +54,10 @@ class C<T> : object
             AssertLocation( "set", property.Setter!.GetDiagnosticLocation() );
 
             // Fields
-            AssertLocation( "field1", type.Properties.OfName( "field1" ).Single().GetDiagnosticLocation() );
+            AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );
             
             // Attributes
-            AssertLocation( "NonSerialized", type.Properties.OfName( "field1" ).Single().Attributes.Single().GetDiagnosticLocation() );
+            AssertLocation( "NonSerialized", type.Fields.OfName( "field1" ).Single().Attributes.Single().GetDiagnosticLocation() );
         }
         
         private static void AssertLocation( string? expectedText, Location? location )
