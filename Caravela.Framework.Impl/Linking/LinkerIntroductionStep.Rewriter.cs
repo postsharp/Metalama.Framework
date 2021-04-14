@@ -100,8 +100,9 @@ namespace Caravela.Framework.Impl.Linking
                     transformedNode = (T) this.Visit( transformedNode )!;
                 }
 
-                if ( !suppressionsOnThisElement.Any() )
+                if ( suppressionsOnThisElement.Any() )
                 {
+                    // Add `#pragma warning` trivias around the node.
                     var errorCodes = SeparatedList<ExpressionSyntax>( 
                         suppressionsOnThisElement.Distinct().OrderBy( e=> e ).Select( IdentifierName ) );
 
