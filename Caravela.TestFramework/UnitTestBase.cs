@@ -84,7 +84,7 @@ namespace Caravela.TestFramework
             var result = await this.GetTestResultAsync( relativePathTest );
             Assert.True( result.Success, result.ErrorMessage );
         }
-        
+
         public static string? NormalizeString( string? s ) => s?.Trim()?.Replace( "\r", "" );
 
         /// <summary>

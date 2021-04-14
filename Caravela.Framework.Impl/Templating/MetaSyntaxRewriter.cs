@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </remarks>
     internal abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
-        private readonly Stack<string> _indentTriviaStack = new Stack<string>();
+        private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
-        
+
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true ) =>
             lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
@@ -243,7 +243,7 @@ namespace Caravela.Framework.Impl.Templating
                     this.Transform( token.Kind() ),
                     this.MetaSyntaxFactory.LiteralExpression( token.Text ),
                     this.MetaSyntaxFactory.LiteralExpression( token.ValueText ),
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ));
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
             }
         }
 

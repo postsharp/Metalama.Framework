@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly TemplateCompiler _templateCompiler;
         private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly Random _random = new();
-        private readonly Dictionary<string, MemoryStream> _builtAssemblies = new Dictionary<string, MemoryStream>();
+        private readonly Dictionary<string, MemoryStream> _builtAssemblies = new();
 
         static CompileTimeAssemblyBuilder()
         {

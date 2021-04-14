@@ -12,14 +12,14 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeAssemblyBuilder
     {
-        public static SyntaxAnnotation HasCompileTimeCodeAnnotation = new SyntaxAnnotation( "hasCompileTimeCode" );
+        public static readonly SyntaxAnnotation HasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
 
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
 
             private readonly TemplateCompiler _templateCompiler;
             private readonly Compilation _compileTimeCompilation;
-            private readonly List<Diagnostic> _diagnostics = new List<Diagnostic>();
+            private readonly List<Diagnostic> _diagnostics = new();
 
             public bool Success { get; private set; } = true;
 
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public bool FoundCompileTimeCode { get; private set; }
 
-            public ProduceCompileTimeCodeRewriter( 
+            public ProduceCompileTimeCodeRewriter(
                 ISymbolClassifier symbolClassifier,
                 TemplateCompiler templateCompiler,
                 Compilation runTimeCompilation,
@@ -121,7 +121,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return null;
                 }
             }
-            
+
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 var transformedNode = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;

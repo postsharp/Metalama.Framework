@@ -45,7 +45,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         private static string SerializeField( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Field" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Fields.Single( m => m.Name == "Field" );
             var actual = new CaravelaLocationInfoSerializer( new ObjectSerializers() ).Serialize( new CompileTimeLocationInfo( (Field) single ) ).ToString();
             return actual;
         }

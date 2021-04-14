@@ -64,9 +64,21 @@ namespace Caravela.Framework.Impl.CodeModel
                     m => m switch
                     {
                         IPropertySymbol p => new MemberLink<IProperty>( p ),
-                        IFieldSymbol { IsImplicitlyDeclared: false } f => new MemberLink<IProperty>( f ),
                         _ => default
                     } ) );
+
+        public IFieldList Fields =>
+            new FieldList(
+                this.TypeSymbol.GetMembers().Select(
+                    m => m switch
+                    {
+                        IFieldSymbol p => new MemberLink<IField>( p ),
+                        _ => default
+                    } ),
+                this.Compilation );
+
+        [Memo]
+        public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
 
         [Memo]
         public IEventList Events
@@ -163,8 +175,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        // TODO: This is probably not a correct comparison of symbols if they are from different compilations.
-        public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals(this.TypeSymbol, ((ITypeInternal) other).TypeSymbol );
+        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals(this.TypeSymbol, ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

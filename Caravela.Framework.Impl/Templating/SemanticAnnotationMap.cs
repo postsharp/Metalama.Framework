@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToSymbolMap = new();
         private readonly Dictionary<ITypeSymbol, SyntaxAnnotation> _typeToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
-        
+
         private int _nextId;
 
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create( "local", "symbol", "declared", "type" );

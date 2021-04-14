@@ -8,19 +8,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public static class CodeModelUtilities
     {
-        public static IMethod Method( this INamedType type, string name )
-        {
-            return type.Methods.Single( m => m.Name == name );
-        }
+        public static IMethod Method( this INamedType type, string name ) => type.Methods.Single( m => m.Name == name );
 
-        public static IProperty Property( this INamedType type, string name )
-        {
-            return type.Properties.Single( m => m.Name == name );
-        }
+        public static IProperty Property( this INamedType type, string name ) => type.Properties.OfName( name ).Single();
 
-        public static IEvent Event( this INamedType type, string name )
-        {
-            return type.Events.Single( m => m.Name == name );
-        }
+        public static IField Field( this INamedType type, string name ) => type.Fields.OfName( name ).Single();
+
+        public static IEvent Event( this INamedType type, string name ) => type.Events.OfName( name ).Single();
     }
 }

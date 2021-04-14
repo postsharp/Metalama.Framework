@@ -73,10 +73,25 @@ namespace Caravela.Framework.Code
         INamedTypeList NestedTypes { get; }
 
         /// <summary>
-        /// Gets the list of properties and fields defined by the current type, but not those inherited from the base
-        /// type.
+        /// Gets the list of properties defined by the current type, but not those inherited from the base type.
+        /// Note that fields can be promoted to properties by aspects, so a source code field can be 
+        /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>
+        /// collection.
         /// </summary>
         IPropertyList Properties { get; }
+
+        /// <summary>
+        /// Gets the list of fields defined by the current type, but not those inherited from the base  type.
+        /// Note that fields can be promoted to properties by aspects, so a source code field can be 
+        /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>
+        /// collection.
+        /// </summary>
+        IFieldList Fields { get; }
+
+        /// <summary>
+        /// Gets the union of the <see cref="Fields"/> and <see cref="Properties"/> collections.
+        /// </summary>
+        IFieldOrPropertyList FieldsAndProperties { get; }
 
         /// <summary>
         /// Gets the list of events defined by the current type, but not those inherited from the base

@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Linking
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IReadOnlyDictionary<SymbolVersion, int> symbolVersionReferenceCounts,
-            IReadOnlyDictionary<ISymbol, MemberAnalysisResult> methodBodyInfos)
+            IReadOnlyDictionary<ISymbol, MemberAnalysisResult> methodBodyInfos )
         {
             this._orderedAspectLayers = orderedAspectLayers;
             this._introductionRegistry = introductionRegistry;
@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion(symbol, null), out var counter ) )
+                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, null ), out var counter ) )
                 {
                     // Method is not referenced in multiple places.
                     return true;
@@ -70,8 +70,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
-            else if (this.IsOverride(symbol))
-            {               
+            else if ( this.IsOverride( symbol ) )
+            {
                 var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
                 if ( introducedMember == null )
@@ -85,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
 
                 var overrideTarget = introducedMember;
-                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, introducedMember.AspectLayerId), out var counter ) )
+                if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, introducedMember.AspectLayerId ), out var counter ) )
                 {
                     // This is the last override.
                     return true;

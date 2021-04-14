@@ -11,7 +11,7 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Default options.
         /// </summary>
-        public static readonly AspectLinkerOptions Default = new AspectLinkerOptions();
+        public static readonly AspectLinkerOptions Default = new();
 
         /// <summary>
         /// Gets a value indicating whether the linker inlining of this member is forcefully disabled, even if it would be otherwise possible.
@@ -23,6 +23,6 @@ namespace Caravela.Framework.Aspects
             this.ForceNotInlineable = forceNotInlineable;
         }
 
-        public static AspectLinkerOptions Create( bool forceNotInlineable ) => new AspectLinkerOptions( forceNotInlineable );
+        public static AspectLinkerOptions Create( bool forceNotInlineable ) => new( forceNotInlineable );
     }
 }

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Templating
     /// This class is used at *run-time* by the generated template code. Do not remove or refactor
     /// without analysing impact on generated code.
     /// </summary>
-    [Obfuscation(Exclude = true)]
+    [Obfuscation( Exclude = true )]
     public static class TemplateSyntaxFactory
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "flatten" );

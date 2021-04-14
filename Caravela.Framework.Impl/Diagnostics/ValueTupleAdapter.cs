@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     internal sealed class ValueTupleAdapter
     {
-        private static readonly ConcurrentDictionary<Type, Func<object, object[]>> _cache = new ConcurrentDictionary<Type, Func<object, object[]>>();
+        private static readonly ConcurrentDictionary<Type, Func<object, object[]>> _cache = new();
 
         public static object[] ToArray( object valueTuple )
             => _cache.GetOrAdd( valueTuple.GetType(), CreateAdapter ).Invoke( valueTuple );

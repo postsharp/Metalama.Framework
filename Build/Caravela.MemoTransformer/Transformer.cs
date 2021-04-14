@@ -116,7 +116,7 @@ namespace Caravela.MemoTransformer
         }
 
         private static readonly DiagnosticDescriptor _nonExpressionBodyError =
-            new DiagnosticDescriptor(
+            new(
                 "CMT001",
                 "Only expression-bodied properties are supported.",
                 "Only expression-bodied properties are supported.",
@@ -125,7 +125,7 @@ namespace Caravela.MemoTransformer
                 true );
 
         private static readonly DiagnosticDescriptor _staticPropertyError =
-            new DiagnosticDescriptor(
+            new(
                 "CMT002",
                 "Static properties are not supported.",
                 "Static properties are not supported.",
