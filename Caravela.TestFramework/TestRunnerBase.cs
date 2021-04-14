@@ -85,8 +85,10 @@ namespace Caravela.TestFramework
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( MetadataLoadContext ).Assembly.Location ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( this.GetType().Assembly.Location ) )
-                ;
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestOutputAttribute ).Assembly.Location ) );
+            
+            // Don't add the assembly containing the code to test because it would result in duplicate symbols.
+            
             return project;
         }
     }

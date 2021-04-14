@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -20,9 +21,9 @@ namespace Caravela.Framework.Impl.Linking
         public CSharpCompilation InitialCompilation { get; }
 
         /// <summary>
-        /// Gets the input compilation model.
+        /// Gets the input compilation model, modified by all aspects.
         /// </summary>
-        public CompilationModel FinalCompilationModel { get; }
+        public CompilationModel CompilationModel { get; }
 
         /// <summary>
         /// Gets a list of non-observable transformations.
@@ -34,16 +35,20 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
 
+        public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
+
         public AspectLinkerInput(
             CSharpCompilation initialCompilation,
-            CompilationModel finalCompilationModel,
+            CompilationModel compilationModel,
             IReadOnlyList<INonObservableTransformation> nonObservableTransformations,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
+            IReadOnlyList<ScopedSuppression> suppressions )
         {
             this.InitialCompilation = initialCompilation;
-            this.FinalCompilationModel = finalCompilationModel;
+            this.CompilationModel = compilationModel;
             this.NonObservableTransformations = nonObservableTransformations;
             this.OrderedAspectLayers = orderedAspectLayers;
+            this.DiagnosticSuppressions = suppressions;
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using Caravela.Framework.Tests.Integration.Templating;
+using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using RoslynPad.Roslyn;
@@ -35,6 +36,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(Framework.Aspects.TemplateContext).Assembly,
                             typeof(Framework.Impl.Templating.TemplateSyntaxFactory).Assembly,
                             typeof(TestTemplateAttribute).Assembly,
+                            typeof(TestOutputAttribute).Assembly,
                         } ) );
 
             return host;

@@ -11,7 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AspectBuilder<T> : DiagnosticListBuilder, IAspectBuilder<T>
+    internal class AspectBuilder<T> : DiagnosticSink, IAspectBuilder<T>
         where T : class, ICodeElement
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;

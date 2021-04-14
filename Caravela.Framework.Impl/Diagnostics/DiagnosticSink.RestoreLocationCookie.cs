@@ -6,7 +6,7 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public abstract partial class DiagnosticSink
+    public partial class DiagnosticSink
     {
         private class RestoreLocationCookie : IDisposable
         {

@@ -1,16 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    
+
     /// <summary>
     /// Additional methods that could belong to <see cref="SyntaxFactory"/>.
     /// </summary>

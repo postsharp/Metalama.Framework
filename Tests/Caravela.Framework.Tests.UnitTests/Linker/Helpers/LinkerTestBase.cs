@@ -8,6 +8,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
 using FakeItEasy;
@@ -77,7 +78,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 inputCompilation,
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
-                rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray() );
+                rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
+                ArraySegment<ScopedSuppression>.Empty);
 
             return linkerInput;
         }

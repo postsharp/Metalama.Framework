@@ -35,9 +35,9 @@ namespace Caravela.Framework.Impl
             }
         }
 
-        public static IMethodSymbol GetSymbol( this IMethod method )
+        public static IMethodSymbol GetSymbol( this IMethodBase method )
         {
-            if ( method is Method sourceMethod )
+            if ( method is MethodBase sourceMethod )
             {
                 return (IMethodSymbol) sourceMethod.Symbol;
             }

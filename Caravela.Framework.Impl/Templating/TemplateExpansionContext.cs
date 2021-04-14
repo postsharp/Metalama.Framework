@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,6 +15,7 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
+
         public TemplateExpansionLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(

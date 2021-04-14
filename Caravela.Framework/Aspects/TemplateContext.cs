@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Project;
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter
@@ -50,7 +51,8 @@ namespace Caravela.Framework.Aspects
         /// <typeparam name="T"></typeparam>
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         [TemplateKeyword]
-        public static T compileTime<T>( T expression ) => expression;
+        [return: NotNullIfNotNull("expression")]
+        public static T? compileTime<T>( T? expression ) => expression;
 
 #pragma warning restore IDE1006 // Naming Styles
 

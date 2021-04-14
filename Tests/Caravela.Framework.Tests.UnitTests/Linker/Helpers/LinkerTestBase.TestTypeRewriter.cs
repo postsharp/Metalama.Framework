@@ -229,7 +229,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                             introductionSyntax,
                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                             IntroducedMemberSemantic.Introduction,
-                            AspectLinkerOptions.Create( forceNotInlineable) )
+                            AspectLinkerOptions.Create( forceNotInlineable),
+                            null)
                     } );
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId ).Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
@@ -292,7 +293,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                             overrideSyntax,
                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                             IntroducedMemberSemantic.MethodOverride,
-                            AspectLinkerOptions.Create( forceNotInlineable ) )
+                            AspectLinkerOptions.Create( forceNotInlineable ),
+                            null)
                     } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );

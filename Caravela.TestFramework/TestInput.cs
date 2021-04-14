@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Text.RegularExpressions;
+
 namespace Caravela.TestFramework
 {
     /// <summary>
@@ -8,6 +10,8 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestInput
     {
+        private static readonly Regex _directivesRegex = new Regex( "^// @(\\w+)" );
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TestInput"/> class.
         /// </summary>
@@ -18,6 +22,23 @@ namespace Caravela.TestFramework
         {
             this.TestName = testName;
             this.TestSource = testSource;
+
+            foreach ( Match? directive in _directivesRegex.Matches( testSource ) )
+            {
+                if ( directive == null )
+                {
+                    continue;
+                }
+
+                var directiveName = directive.Groups[1].Value;
+
+                switch ( directiveName )
+                {
+                    case "IncludeFinalDiagnostics":
+                        this.Options.IncludeFinalDiagnostics = true;
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -29,5 +50,7 @@ namespace Caravela.TestFramework
         /// Gets the content of the test source file.
         /// </summary>
         public string TestSource { get; }
+
+        public TestOptions Options { get; } = new TestOptions();
     }
 }
