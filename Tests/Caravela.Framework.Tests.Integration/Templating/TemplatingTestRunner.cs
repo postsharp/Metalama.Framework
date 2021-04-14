@@ -163,7 +163,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             return result;
         }
 
-        private static TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation)
+        private static TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -196,7 +196,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 targetMethod,
                 compilation,
                 new LinkerOverrideProceedImpl( default, targetMethod ),
-                lexicalScope, 
+                lexicalScope,
                 diagnostics );
         }
     }

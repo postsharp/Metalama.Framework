@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-        
+
         /// <summary>
         /// Generates code that invokes members of the <see cref="TemplateSyntaxFactory"/> class.
         /// </summary>
@@ -33,13 +33,13 @@ namespace Caravela.Framework.Impl.Templating
                     SyntaxKind.SimpleMemberAccessExpression,
                     this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
                     SyntaxFactory.IdentifierName( name ) );
-            
+
             /// <summary>
             /// Generates a call to the <see cref="TemplateSyntaxFactory.GetUniqueIdentifier"/> method.
             /// </summary>
             /// <param name="hint"></param>
             /// <returns></returns>
-            public ExpressionSyntax GetUniqueIdentifier(string hint)
+            public ExpressionSyntax GetUniqueIdentifier( string hint )
                 => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.GetUniqueIdentifier ) ) )
                     .WithArgumentList( SyntaxFactory.ArgumentList( SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
                     {

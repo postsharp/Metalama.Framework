@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public LinkerAnnotationOrder Order { get; }
 
-        public LinkerAnnotation(AspectLayerId aspectLayer, LinkerAnnotationOrder order)
+        public LinkerAnnotation( AspectLayerId aspectLayer, LinkerAnnotationOrder order )
         {
             this.AspectLayer = aspectLayer;
             this.Order = order;

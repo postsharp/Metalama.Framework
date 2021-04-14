@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             var diagnostics = new DiagnosticListBuilder();
             var nameProvider = new LinkerIntroductionNameProvider();
-            var lexicalScopeHelper = new LexicalScopeFactory(input.FinalCompilationModel);
+            var lexicalScopeHelper = new LexicalScopeFactory( input.FinalCompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 

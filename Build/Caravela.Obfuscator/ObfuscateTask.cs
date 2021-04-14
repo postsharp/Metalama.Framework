@@ -22,8 +22,8 @@ namespace Caravela.Obfuscator
     /// </summary>
     public sealed class ObfuscateTask : Task
     {
-        private readonly Dictionary<NamedMetadataDeclaration, string> _obfuscatedDeclarations = new Dictionary<NamedMetadataDeclaration, string>( 4096 );
-        private readonly Set<TypeDefDeclaration> _obfuscatedTypes = new Set<TypeDefDeclaration>( 1024 );
+        private readonly Dictionary<NamedMetadataDeclaration, string> _obfuscatedDeclarations = new( 4096 );
+        private readonly Set<TypeDefDeclaration> _obfuscatedTypes = new( 1024 );
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private IType _obfuscationAttributeType;

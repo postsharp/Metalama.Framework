@@ -43,7 +43,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var allTypes = CreateCompilation( code ).DeclaredTypes;
             var nestedTypes = allTypes.Single().NestedTypes;
             var innerType = nestedTypes.Single();
-            var allProperties = innerType.Properties;
+            var allProperties = innerType.Fields;
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
                     CompileTimeType.Create(
                         allProperties.Single().Type ) )

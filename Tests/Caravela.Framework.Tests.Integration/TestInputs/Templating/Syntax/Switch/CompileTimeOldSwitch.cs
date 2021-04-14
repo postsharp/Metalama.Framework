@@ -5,7 +5,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchCompileTime
 {
-    [CompileTime]
+    [CompileTimeOnly]
     enum SwitchEnum
     {
         one = 1,

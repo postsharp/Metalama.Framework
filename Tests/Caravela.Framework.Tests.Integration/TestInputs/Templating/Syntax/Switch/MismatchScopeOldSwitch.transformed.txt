@@ -1,5 +1,5 @@
 // Compilation error. Code not generated.
-// Error CR0104 on `case (int)SwitchEnum.two:`: `The expression 'case (int)SwitchEnum.two:' is default but it is expected to be compile-time because the expression appears in a case.`
-// Error CR0104 on `case (int)SwitchEnum.one:`: `The expression 'case (int)SwitchEnum.one:' is default but it is expected to be compile-time because the expression appears in a case.`
+// Error CR0104 on `case (int)SwitchEnum.two:`: `The expression 'case (int)SwitchEnum.two:' is run-time but it is expected to be compile-time because the expression appears in a case.`
+// Error CR0104 on `case (int)SwitchEnum.one:`: `The expression 'case (int)SwitchEnum.one:' is run-time but it is expected to be compile-time because the expression appears in a case.`
 
 ;

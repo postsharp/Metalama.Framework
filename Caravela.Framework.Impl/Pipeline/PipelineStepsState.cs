@@ -25,8 +25,8 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
         private readonly DiagnosticListBuilder _diagnostics = new();
-        private readonly List<INonObservableTransformation> _nonObservableTransformations = new List<INonObservableTransformation>();
-        private readonly OverflowAspectSource _overflowAspectSource = new OverflowAspectSource();
+        private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
+        private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
 
         public CompilationModel Compilation { get; private set; }
