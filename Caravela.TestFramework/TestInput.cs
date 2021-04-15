@@ -17,7 +17,6 @@ namespace Caravela.TestFramework
         /// </summary>
         /// <param name="testName">Short name of the test. Typically a relative path.</param>
         /// <param name="testSource">Full source of the input code.</param>
-        /// <param name="testSourceFullPath">Full path to the file containing the source code.</param>
         public TestInput( string testName, string testSource )
         {
             this.TestName = testName;

@@ -18,10 +18,10 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             return s.EndsWith( suffix ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
         }
 
-        private static string RemovePrefix( string s, string prefix )
-        {
-            return s.Substring( prefix.Length );
-        }
+        // private static string RemovePrefix( string s, string prefix )
+        // {
+        //    return s.Substring( prefix.Length );
+        // }
 
         private static void Main()
         {
@@ -140,7 +140,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                     {
                         if ( i > 0 )
                         {
-                            writer.WriteLine( "\t\t\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak())," );
+                            writer.WriteLine( "\t\t\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak())," );
                         }
 
                         writer.WriteLine( $"\t\t\tArgument(this.Transform({FindProperty( parameters[i] )})).WithLeadingTrivia(this.GetIndentation())," );
@@ -159,7 +159,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             // writer.WriteLine( "\t\t{" );
             // writer.WriteLine( "\t\t\tswitch ( node.Kind() )" );
             // writer.WriteLine( "\t\t\t{" );
-            
+
             // var syntaxDocument = XElement.Load( "https://raw.githubusercontent.com/dotnet/roslyn/main/src/Compilers/CSharp/Portable/Syntax/Syntax.xml" );
             // foreach ( var node in syntaxDocument.Elements("Node"))
             // {

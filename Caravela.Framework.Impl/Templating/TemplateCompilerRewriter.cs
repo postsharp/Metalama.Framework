@@ -282,7 +282,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) );
+                return this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
             }
         }
 
@@ -465,7 +465,7 @@ namespace Caravela.Framework.Impl.Templating
                         a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
             }
 
-            if ( this.IsProceed(node.Expression))
+            if ( this.IsProceed( node.Expression ) )
             {
                 this.Diagnostics.Add( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
@@ -806,7 +806,7 @@ namespace Caravela.Framework.Impl.Templating
                     transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
                 }
 
-                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken );
+                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken );
             }
         }
 
@@ -973,7 +973,7 @@ namespace Caravela.Framework.Impl.Templating
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
                                 (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!,
-                                this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) ) );
+                                this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
             }
