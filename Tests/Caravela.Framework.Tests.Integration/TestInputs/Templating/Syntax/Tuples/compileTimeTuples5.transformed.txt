@@ -1,5 +1,4 @@
 {
-    var items = (a: 1, b: 2, 3);
-    global::System.Console.WriteLine(items.a);
+    global::System.Console.WriteLine(1);
     return this.Method(a);
 }
