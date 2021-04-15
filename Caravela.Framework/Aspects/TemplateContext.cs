@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Caravela.Framework.Project;
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter
@@ -16,11 +17,9 @@ namespace Caravela.Framework.Aspects
     [CompileTimeOnly]
     public static class TemplateContext
     {
-        [ThreadStatic]
-        private static ITemplateContext? _target;
+        private static readonly AsyncLocal<ITemplateContextTarget?> _target = new();
 
-        [ThreadStatic]
-        private static object? _proceedImplementation;
+        private static readonly AsyncLocal<object?> _proceedImplementation = new();
 
         // TODO: update the exception message.
         private static InvalidOperationException NewInvalidOperationException() =>
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
 #pragma warning disable IDE1006 // Naming Styles
         [TemplateKeyword]
-        public static ITemplateContext target => _target ?? throw NewInvalidOperationException();
+        public static ITemplateContextTarget target => _target.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
         /// Injects the logic that has been intercepted. For instance, in an <see cref="OverrideMethodAspect"/>,
@@ -40,7 +39,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [Proceed]
-        public static dynamic proceed() => _proceedImplementation ?? throw NewInvalidOperationException();
+        public static dynamic proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted at compile time. This is typically used
@@ -54,18 +53,22 @@ namespace Caravela.Framework.Aspects
         [return: NotNullIfNotNull("expression")]
         public static T? compileTime<T>( T? expression ) => expression;
 
+        // Calls to pragma are purely syntactic, they are never executed. They are interpreted by the template compiler.
+        [TemplateKeyword]
+        public static ITemplateContextPragma pragma => null!;
+
 #pragma warning restore IDE1006 // Naming Styles
 
-        internal static void Initialize( ITemplateContext templateContext, object proceedImplementation )
+        internal static void Initialize( ITemplateContextTarget target, object proceedImplementation )
         {
-            _target = templateContext;
-            _proceedImplementation = proceedImplementation;
+            _target.Value = target;
+            _proceedImplementation.Value = proceedImplementation;
         }
 
         internal static void Close()
         {
-            _target = null;
-            _proceedImplementation = null;
+            _target.Value = null;
+            _proceedImplementation.Value = null;
         }
     }
 }
