@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Misc.RunTimeTuples1
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileTimeTuples
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            Tuple<string, int> tuple = new("string", 0);
-            Console.WriteLine(tuple.Item1);
-            
+            var items = compileTime((a : 1, b: 2, 3));
+            Console.WriteLine(items.a);
+           
             return proceed();
         }
     }

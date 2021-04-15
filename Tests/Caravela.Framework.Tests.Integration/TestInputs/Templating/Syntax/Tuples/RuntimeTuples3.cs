@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Misc.RunTimeTuples4
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples3
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            var a = 1;
-            var b = 2; 
-            
-            var namedItems = (a, b);
-            Console.WriteLine(namedItems.a);
+            (int, string) anonymT = (4, "");
+            Console.WriteLine(anonymT.Item1);
             
             return proceed();
         }
