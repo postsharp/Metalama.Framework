@@ -6,7 +6,7 @@ using Caravela.Framework.Project;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Exposes methods that add trivias to the transformed. code.
+    /// Exposes methods that add trivia to the transformed. code.
     /// </summary>
     [CompileTimeOnly]
     public interface ITemplateContextPragma

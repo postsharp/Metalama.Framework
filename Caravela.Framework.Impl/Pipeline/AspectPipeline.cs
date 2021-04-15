@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             this._stages = this._aspectLayers
                                .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
-                               .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), compilation, this.CompileTimeAssemblyLoader ) )
+                               .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), this.CompileTimeAssemblyLoader ) )
                                .ToImmutableArray();
 
             pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this._aspectLayers );
@@ -209,7 +209,6 @@ namespace Caravela.Framework.Impl.Pipeline
         private PipelineStage CreateStage(
             object groupKey,
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompilationModel compilation,
             CompileTimeAssemblyLoader compileTimeAssemblyLoader )
         {
             switch ( groupKey )

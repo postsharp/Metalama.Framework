@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Linking
         public LinkerIntroductionRegistry(
             CSharpCompilation intermediateCompilation,
             Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
-            IEnumerable<LinkerIntroducedMember> introducedMembers )
+            IReadOnlyList<LinkerIntroducedMember> introducedMembers )
         {
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );

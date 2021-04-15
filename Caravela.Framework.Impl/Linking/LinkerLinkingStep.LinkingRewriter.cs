@@ -37,14 +37,13 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach ( var member in node.Members )
                 {
-                    if ( member is not MethodDeclarationSyntax )
+                    if ( member is not MethodDeclarationSyntax method )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
 
                         continue;
                     }
 
-                    var method = (MethodDeclarationSyntax) member;
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( method )!;
 
@@ -58,7 +57,7 @@ namespace Caravela.Framework.Impl.Linking
                         else
                         {
                             // Rewrite the method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
                             newMembers.Add( transformedMethod );
                         }
                     }
@@ -70,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            var transformedMethod = method.WithBody( this.GetTrampolineMethodBody( method, lastOverrideSymbol ) )
+                            var transformedMethod = method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) )
                                                           .WithLeadingTrivia( method.GetLeadingTrivia() )
                                                           .WithTrailingTrivia( method.GetTrailingTrivia() );
 
@@ -82,7 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                             var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody(
+                            var transformedMethod = method.WithBody(
                                 this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
 
                             newMembers.Add( transformedMethod );
@@ -92,7 +91,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // TODO: This should be inserted after all other overrides.
                             // This is target method that is not inlineable, we need to a separate declaration.
-                            var originalBodyMethod = this.GetOriginalBodyMethod( method );
+                            var originalBodyMethod = GetOriginalBodyMethod( method );
                             newMembers.Add( originalBodyMethod );
                         }
                     }
@@ -106,7 +105,7 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+            private static BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
                 var invocation =
@@ -144,7 +143,7 @@ namespace Caravela.Framework.Impl.Linking
                 return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();
             }
 
-            private MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
+            private static MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
             {
                 return method.WithIdentifier( Identifier( GetOriginalBodyMethodName( method.Identifier.ValueText ) ) );
             }

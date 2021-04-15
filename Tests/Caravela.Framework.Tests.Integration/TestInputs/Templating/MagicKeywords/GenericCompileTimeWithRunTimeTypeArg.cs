@@ -1,5 +1,6 @@
 using Caravela.Framework.Project;
-using Caravela.Framework.Tests.Integration.Templating;
+
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 #pragma warning disable CS8632 // Cannot convert null literal to non-nullable reference type.

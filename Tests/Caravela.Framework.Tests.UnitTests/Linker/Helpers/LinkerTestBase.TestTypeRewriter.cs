@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
+// ReSharper disable SuspiciousTypeConversion.Global
+
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
     public partial class LinkerTestBase

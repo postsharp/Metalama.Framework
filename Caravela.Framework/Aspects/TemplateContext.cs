@@ -6,6 +6,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
+// ReSharper disable InconsistentNaming
+
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 namespace Caravela.Framework.Aspects
@@ -58,10 +60,10 @@ namespace Caravela.Framework.Aspects
 
 #pragma warning restore IDE1006 // Naming Styles
 
-        internal static void Initialize( ITemplateContextTarget target, object proceedImplementation )
+        internal static void Initialize( ITemplateContextTarget targetImpl, object proceedImpl )
         {
-            _target.Value = target;
-            _proceedImplementation.Value = proceedImplementation;
+            _target.Value = targetImpl;
+            _proceedImplementation.Value = proceedImpl;
         }
 
         internal static void Close()

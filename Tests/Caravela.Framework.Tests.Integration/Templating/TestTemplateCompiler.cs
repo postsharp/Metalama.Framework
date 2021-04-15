@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

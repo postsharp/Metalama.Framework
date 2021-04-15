@@ -4,7 +4,7 @@
 using Caravela.Framework.Aspects;
 using System;
 
-namespace Caravela.Framework.Tests.Integration.Templating
+namespace Caravela.TestFramework
 {
     /// <summary>
     /// The attribute that marks a template method in the templating integration tests.

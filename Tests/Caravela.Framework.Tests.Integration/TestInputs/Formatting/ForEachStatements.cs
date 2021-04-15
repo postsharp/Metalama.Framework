@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS0649, CS8618
 
 using Caravela.Framework.Project;
-using Caravela.Framework.Tests.Integration.Templating;
 using System.Collections.Generic;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements

@@ -29,7 +29,6 @@ namespace Caravela.Framework.Impl.Linking
 
             public Rewriter(
                 IntroducedMemberCollection introducedMemberCollection,
-                DiagnosticSink diagnosticSink,
                 ImmutableMultiValueDictionary<ICodeElement, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation )
             {
@@ -80,7 +79,7 @@ namespace Caravela.Framework.Impl.Linking
             private IEnumerable<string> GetSuppressions( ICodeElement codeElement ) => this._diagnosticSuppressions[codeElement].Select( s => s.Id );
 
             /// <summary>
-            /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivias
+            /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivia
             /// around the node and by updating (or even suppressing) the <c>#pragma warning</c>
             /// inside the node.
             /// </summary>
@@ -88,7 +87,7 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="suppressionsOnThisElement"></param>
             /// <typeparam name="T"></typeparam>
             /// <returns></returns>
-            private T AddSuppression<T>( T node, IEnumerable<string> suppressionsOnThisElement )
+            private T AddSuppression<T>( T node, IReadOnlyList<string> suppressionsOnThisElement )
                 where T : SyntaxNode
             {
                 var transformedNode = node;
@@ -101,7 +100,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( suppressionsOnThisElement.Any() )
                 {
-                    // Add `#pragma warning` trivias around the node.
+                    // Add `#pragma warning` trivia around the node.
                     var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
 
                     var disable = Trivia(
@@ -188,7 +187,7 @@ namespace Caravela.Framework.Impl.Linking
                 static string GetErrorCode( ExpressionSyntax expression )
                     => expression switch
                     {
-                        IdentifierNameSyntax identier => identier.Identifier.Text,
+                        IdentifierNameSyntax identifier => identifier.Identifier.Text,
                         LiteralExpressionSyntax literal => string.Format( "CS{0:0000}", literal.Token.Value ),
                         _ => throw new AssertionFailedException()
                     };

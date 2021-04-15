@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 // ReSharper disable RedundantUsingDirective
+
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -247,7 +248,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( token.Kind() == SyntaxKind.IdentifierToken && token.Parent != null && token.Parent is not TupleElementSyntax )
             {
                 // Transforms identifier declarations (local variables and local functions). Local identifiers must have
-                // a unique name in the target code, which is unkownn when the template is compiled, therefore local identifiers
+                // a unique name in the target code, which is unknown when the template is compiled, therefore local identifiers
                 // get their name dynamically at expansion time. The ReserveRunTimeSymbolName method generates code that
                 // reserves the name at expansion time. The result is stored in a local variable of the expanded template.
                 // Then, each template reference uses this local variable.
@@ -314,7 +315,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
-                    // That should not happen because IdentifierName is used only for an identifier reference, not an identifier defitinition.
+                    // That should not happen because IdentifierName is used only for an identifier reference, not an identifier definition.
                     // Identifier definitions should be processed by Transform(SyntaxToken).
                     throw new AssertionFailedException();
                 }

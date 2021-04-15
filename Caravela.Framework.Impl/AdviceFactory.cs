@@ -35,10 +35,10 @@ namespace Caravela.Framework.Impl
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
-            var methods = this._aspectType.GetSymbol().GetMembers( methodName ).OfType<IMethodSymbol>();
+            var methods = this._aspectType.GetSymbol().GetMembers( methodName ).OfType<IMethodSymbol>().ToList();
             var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
 
-            if ( methods.Count() != 1 )
+            if ( methods.Count != 1 )
             {
                 throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, methodName) );
             }

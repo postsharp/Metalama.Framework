@@ -9,11 +9,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class EnumSerializer
+    internal static class EnumSerializer
     {
         private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
-        public ExpressionSyntax Serialize( Enum o )
+        public static ExpressionSyntax Serialize( Enum o )
         {
             var enumType = o.GetType();
             var typeName = TypeNameUtility.ToCSharpQualifiedName( enumType );

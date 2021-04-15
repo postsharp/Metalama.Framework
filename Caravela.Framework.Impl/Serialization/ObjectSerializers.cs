@@ -19,7 +19,6 @@ namespace Caravela.Framework.Impl.Serialization
     internal class ObjectSerializers
     {
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new();
-        private readonly EnumSerializer _enumSerializer;
         private readonly ArraySerializer _arraySerializer;
 
         /// <summary>
@@ -28,7 +27,6 @@ namespace Caravela.Framework.Impl.Serialization
         public ObjectSerializers()
         {
             // Arrays, enums
-            this._enumSerializer = new EnumSerializer();
             this._arraySerializer = new ArraySerializer( this );
 
             // Primitive types
@@ -103,7 +101,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( o is Enum e )
             {
-                return this._enumSerializer.Serialize( e );
+                return EnumSerializer.Serialize( e );
             }
 
             if ( o is Array a )
