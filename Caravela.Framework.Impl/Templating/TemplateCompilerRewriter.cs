@@ -203,9 +203,38 @@ namespace Caravela.Framework.Impl.Templating
             return base.Visit( node );
         }
 
+        protected override ExpressionSyntax TransformTupleExpression( TupleExpressionSyntax node )
+        {
+            // tuple can be initialize from variables and then items take names from variable name
+            // but variable name is not safe and could be renamed because of target variables 
+            // in this case we initialize tuple with explicit names
+            var symbol = (INamedTypeSymbol) this._semanticAnnotationMap.GetType( node )!;
+            var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
+            for ( var i = 0; i < symbol.TupleElements.Length; i++ )
+            {
+                var tupleElement = symbol.TupleElements[i];
+                ArgumentSyntax arg; 
+                if ( !tupleElement.Name.Equals(tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal) )
+                {
+                    var name = symbol.TupleElements[i].Name;
+                    arg = node.Arguments[i].WithNameColon( NameColon( name ) );
+                }
+                else
+                {
+                    arg = node.Arguments[i];
+                }
+
+                transformedArguments[i] = arg;
+            }
+            
+            var transformedNode = TupleExpression( node.OpenParenToken, default( SeparatedSyntaxList<ArgumentSyntax> ).AddRange(transformedArguments), node.CloseParenToken );
+
+            return base.TransformTupleExpression( transformedNode );
+        }
+
         protected override ExpressionSyntax Transform( SyntaxToken token )
         {
-            if ( token.Kind() == SyntaxKind.IdentifierToken )
+            if ( token.Kind() == SyntaxKind.IdentifierToken && token.Parent != null && token.Parent is not TupleElementSyntax )
             {
                 // Transforms identifier declarations (local variables and local functions). Local identifiers must have
                 // a unique name in the target code, which is unkownn when the template is compiled, therefore local identifiers
@@ -291,7 +320,25 @@ namespace Caravela.Framework.Impl.Templating
             // The base implementation is very verbose, so we use this one:
             if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                return this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) ).WithTemplateAnnotationsFrom( node );
+                var transformedArgument = this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) );
+
+                if ( node.NameColon != null )
+                {
+                    var transformedNameColon = this.TransformNameColon( node.NameColon );
+                    transformedArgument =
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                transformedArgument,
+                                IdentifierName( "WithNameColon" ) ) )
+                                .WithArgumentList(
+                                    ArgumentList(
+                                        SingletonSeparatedList<ArgumentSyntax>(
+                                            Argument(
+                                                transformedNameColon ) ) ) );
+                }
+
+                return transformedArgument.WithTemplateAnnotationsFrom( node );
             }
             else
             {
