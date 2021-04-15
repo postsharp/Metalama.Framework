@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public PipelineStepsState(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
-            IReadOnlyList<IAspectSource> inputAspectSources)
+            IReadOnlyList<IAspectSource> inputAspectSources )
         {
             this.Compilation = inputCompilation;
 

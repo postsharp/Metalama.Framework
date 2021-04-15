@@ -12,7 +12,6 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-
     // TODO: Consider having an abstract base for simple testing.
     internal class AspectType : IAspectType
     {
@@ -68,6 +67,6 @@ namespace Caravela.Framework.Impl
             this.Layers = partArrayBuilder.ToImmutable();
         }
 
-        public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new AspectInstance( aspect, target, this );
+        public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new( aspect, target, this );
     }
 }

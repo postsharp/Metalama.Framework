@@ -5,7 +5,6 @@ using Caravela.Framework.Project;
 
 namespace Caravela.Framework.Aspects
 {
-
     /// <summary>
     /// Exposes methods that add trivias to the transformed. code.
     /// </summary>

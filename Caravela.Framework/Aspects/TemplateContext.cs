@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Caravela.Framework.Project;
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
@@ -22,8 +22,7 @@ namespace Caravela.Framework.Aspects
         private static readonly AsyncLocal<object?> _proceedImplementation = new();
 
         // TODO: update the exception message.
-        private static InvalidOperationException NewInvalidOperationException() =>
-            new( "Code accessing this member has to be compiled using Caravela." );
+        private static InvalidOperationException NewInvalidOperationException() => new( "Code accessing this member has to be compiled using Caravela." );
 
         /// <summary>
         /// Gets information about the element of code to which the template has been applied.
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Aspects
         /// <typeparam name="T"></typeparam>
         /// <returns>Exactly <paramref name="expression"/>, but coerced as a compile-time expression.</returns>
         [TemplateKeyword]
-        [return: NotNullIfNotNull("expression")]
+        [return: NotNullIfNotNull( "expression" )]
         public static T? compileTime<T>( T? expression ) => expression;
 
         // Calls to pragma are purely syntactic, they are never executed. They are interpreted by the template compiler.

@@ -159,7 +159,7 @@ class TargetCode
 
             // ReSharper disable once IDE0058
             AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
-            
+
             // ReSharper disable once IDE0058
             AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
 

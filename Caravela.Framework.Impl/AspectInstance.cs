@@ -1,14 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Reflection;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
-
     /// <summary>
     /// Represents an instance of an aspect and its target code element.
     /// </summary>
@@ -34,10 +33,11 @@ namespace Caravela.Framework.Impl
             this.CodeElement = codeElement;
             this.AspectType = aspectType;
         }
-        
+
         public MethodInfo? GetTemplateMethod( string methodName )
         {
             var aspectType = this.Aspect.GetType();
+
             return aspectType.GetMethod( methodName );
         }
     }

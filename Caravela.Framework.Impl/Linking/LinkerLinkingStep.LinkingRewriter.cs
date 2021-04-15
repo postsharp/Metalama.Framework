@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -28,8 +28,7 @@ namespace Caravela.Framework.Impl.Linking
                 this._referenceRegistry = referenceRegistry;
             }
 
-            internal static string GetOriginalBodyMethodName( string methodName )
-                => $"__{methodName}__OriginalBody";
+            internal static string GetOriginalBodyMethodName( string methodName ) => $"__{methodName}__OriginalBody";
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
@@ -41,6 +40,7 @@ namespace Caravela.Framework.Impl.Linking
                     if ( member is not MethodDeclarationSyntax )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+
                         continue;
                     }
 
@@ -54,7 +54,6 @@ namespace Caravela.Framework.Impl.Linking
                         if ( this._referenceRegistry.IsBodyInlineable( symbol ) )
                         {
                             // Method's body is inlineable, the method itself can be removed.
-                            continue;
                         }
                         else
                         {
@@ -72,9 +71,9 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
                             var transformedMethod = method.WithBody( this.GetTrampolineMethodBody( method, lastOverrideSymbol ) )
-                                .WithLeadingTrivia( method.GetLeadingTrivia() )
-                                .WithTrailingTrivia( method.GetTrailingTrivia() );
-                            
+                                                          .WithLeadingTrivia( method.GetLeadingTrivia() )
+                                                          .WithTrailingTrivia( method.GetTrailingTrivia() );
+
                             newMembers.Add( transformedMethod );
                         }
                         else
@@ -83,7 +82,9 @@ namespace Caravela.Framework.Impl.Linking
                             var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody(
+                                this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+
                             newMembers.Add( transformedMethod );
                         }
 

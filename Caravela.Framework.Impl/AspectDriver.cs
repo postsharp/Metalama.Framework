@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl
                 IField field => this.EvaluateAspect( field, aspectInstance ),
                 IProperty property => this.EvaluateAspect( property, aspectInstance ),
                 IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance ), 
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance ),
                 _ => throw new NotImplementedException()
             };
         }
@@ -76,8 +76,7 @@ namespace Caravela.Framework.Impl
             var declarativeAdvices =
                 this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
-            var aspectBuilder = new AspectBuilder<T>(
-                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
+            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {

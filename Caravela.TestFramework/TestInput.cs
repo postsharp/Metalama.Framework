@@ -10,7 +10,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public class TestInput
     {
-        private static readonly Regex _directivesRegex = new Regex( "^// @(\\w+)" );
+        private static readonly Regex _directivesRegex = new( "^// @(\\w+)" );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestInput"/> class.
@@ -35,6 +35,7 @@ namespace Caravela.TestFramework
                 {
                     case "IncludeFinalDiagnostics":
                         this.Options.IncludeFinalDiagnostics = true;
+
                         break;
                 }
             }
@@ -50,6 +51,6 @@ namespace Caravela.TestFramework
         /// </summary>
         public string TestSource { get; }
 
-        public TestOptions Options { get; } = new TestOptions();
+        public TestOptions Options { get; } = new();
     }
 }

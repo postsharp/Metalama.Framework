@@ -77,7 +77,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
                 rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
-                ArraySegment<ScopedSuppression>.Empty);
+                ArraySegment<ScopedSuppression>.Empty );
 
             return linkerInput;
         }

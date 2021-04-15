@@ -43,12 +43,12 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         {
             await this.AssertTransformedSourceEqualAsync( @"Aspects\Diagnostics\InvalidCompileTimeUserCode.cs" );
         }
-        
+
         [Theory]
-        [FromDirectory("Aspects\\Suppressions")]
+        [FromDirectory( "Aspects\\Suppressions" )]
         public async Task Suppressions( string path )
         {
-            await this.AssertTransformedSourceEqualAsync( path);
+            await this.AssertTransformedSourceEqualAsync( path );
         }
 
         protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );
