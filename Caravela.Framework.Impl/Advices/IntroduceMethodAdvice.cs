@@ -9,7 +9,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -157,8 +156,8 @@ namespace Caravela.Framework.Impl.Advices
                     return
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
-                                this.TargetDeclaration.GetLocation(),
-                                (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                this.TargetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.ConflictBehavior )
@@ -168,8 +167,8 @@ namespace Caravela.Framework.Impl.Advices
                         return 
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
-                                    this.TargetDeclaration.GetLocation(),
-                                    (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    this.TargetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
                     case ConflictBehavior.Merge:
                     case ConflictBehavior.Ignore:
@@ -201,8 +200,8 @@ namespace Caravela.Framework.Impl.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
-                                        this.TargetDeclaration.GetLocation(),
-                                        (this.Aspect.AspectType, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                        this.TargetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                         }
                         else
                         {

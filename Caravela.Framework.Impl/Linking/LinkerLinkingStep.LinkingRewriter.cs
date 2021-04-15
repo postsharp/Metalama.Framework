@@ -71,7 +71,11 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            newMembers.Add( method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
+                            var transformedMethod = method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) )
+                                .WithLeadingTrivia( method.GetLeadingTrivia() )
+                                .WithTrailingTrivia( method.GetTrailingTrivia() );
+                            
+                            newMembers.Add( transformedMethod );
                         }
                         else
                         {
@@ -87,7 +91,8 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // TODO: This should be inserted after all other overrides.
                             // This is target method that is not inlineable, we need to a separate declaration.
-                            newMembers.Add( GetOriginalBodyMethod( method ) );
+                            var originalBodyMethod = GetOriginalBodyMethod( method );
+                            newMembers.Add( originalBodyMethod );
                         }
                     }
                     else

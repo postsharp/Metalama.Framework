@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Caravela.Framework.Code;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
@@ -19,6 +18,6 @@ namespace Caravela.Framework.Impl
         /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect
         /// type is being processed, not before.
         /// </summary>
-        IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType );
+        IEnumerable<AspectInstance> GetAspectInstances( AspectType aspectType );
     }
 }

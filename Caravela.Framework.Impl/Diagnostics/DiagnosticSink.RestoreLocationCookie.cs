@@ -2,26 +2,26 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public abstract partial class DiagnosticSink
+    public partial class DiagnosticSink
     {
         private class RestoreLocationCookie : IDisposable
         {
             private readonly DiagnosticSink _parent;
-            private readonly IDiagnosticLocation? _oldLocation;
+            private readonly ICodeElement? _scope;
 
-            public RestoreLocationCookie( DiagnosticSink parent, IDiagnosticLocation? oldLocation )
+            public RestoreLocationCookie( DiagnosticSink parent, ICodeElement? scope )
             {
                 this._parent = parent;
-                this._oldLocation = oldLocation;
+                this._scope = scope;
             }
 
             public void Dispose()
             {
-                this._parent.DefaultLocation = this._oldLocation;
+                this._parent.DefaultScope = this._scope;
             }
         }
     }

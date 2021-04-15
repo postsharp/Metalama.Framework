@@ -151,7 +151,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public static bool IsTemplateFromAnnotation( this SyntaxNode node )
             => node.HasAnnotation( _templateAnnotation );
-        
+
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
             => node.AddScopeAnnotation( source.GetScopeFromAnnotation() );

@@ -168,7 +168,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var hasError = false;
-            foreach ( var diagnostic in pipelineStageResult.Diagnostics )
+            foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
                 this.Context.ReportDiagnostic( diagnostic );
                 hasError |= diagnostic.Severity >= DiagnosticSeverity.Error;
@@ -214,7 +214,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelPipelineStage( weaver, (ISdkNamedType) compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
+                    return new LowLevelPipelineStage( weaver, partData.AspectType, this );
 
                 case nameof( AspectDriver ):
 

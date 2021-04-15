@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
                 => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.GetUniqueIdentifier ) ) )
                     .WithArgumentList( SyntaxFactory.ArgumentList( SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
                     {
-                        SyntaxFactory.Argument( this._metaSyntaxFactory.LiteralExpression( hint ) )
+                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( hint ) )
                     } ) ) );
         }
     }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Threading;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -14,7 +13,7 @@ namespace Caravela.TestFramework
 {
     public partial class AspectTestRunner
     {
-        private class AspectTestPipelineContext : IAspectPipelineContext, IBuildOptions
+        private class AspectTestPipelineContext : IAspectPipelineContext
         {
             private readonly TestResult _testResult;
 
@@ -38,7 +37,7 @@ namespace Caravela.TestFramework
 
             CancellationToken IAspectPipelineContext.CancellationToken => CancellationToken.None;
 
-            IBuildOptions IAspectPipelineContext.BuildOptions => this;
+            IBuildOptions IAspectPipelineContext.BuildOptions { get; } = new TestBuildOptions();
 
             void IAspectPipelineContext.ReportDiagnostic( Diagnostic diagnostic )
             {
@@ -46,14 +45,6 @@ namespace Caravela.TestFramework
             }
 
             public bool HandleExceptions => false;
-
-            bool IBuildOptions.AttachDebugger => false;
-
-            bool IBuildOptions.MapPdbToTransformedCode => true;
-
-            public string? CompileTimeProjectDirectory => Path.Combine( Environment.CurrentDirectory, "compileTime", this._testResult.TestName );
-
-            public string? CrashReportDirectory => null;
         }
     }
 }

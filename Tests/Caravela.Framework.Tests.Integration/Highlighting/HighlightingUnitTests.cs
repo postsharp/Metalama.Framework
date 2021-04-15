@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Formatting" )]
+        [FromDirectory( @"Formatting" )]
         public Task All( string testName ) => this.AssertHighlightedSourceEqualAsync( testName );
 
         protected override TestRunnerBase CreateTestRunner() => new HighlightingTestRunner( this.ProjectDirectory );
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
-            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var sourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
             var expectedHighlightedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".highlighted.html" );

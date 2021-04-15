@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
+            using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
                 var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
@@ -63,9 +63,14 @@ namespace Caravela.Framework.Impl.Transformations
 
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
-                var newMethodBody = new TemplateDriver(
-                        this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                    .ExpandDeclaration( expansionContext );
+                var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
+                if ( templateMethod == null )
+                {
+                    // This is caused by an error upstream;
+                    return Enumerable.Empty<IntroducedMember>();
+                }
+                
+                var newMethodBody = new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
 
                 var overrides = new[]
                 {
@@ -84,7 +89,8 @@ namespace Caravela.Framework.Impl.Transformations
                             null ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.MethodOverride,
-                        this.LinkerOptions )
+                        this.LinkerOptions,
+                        this.OverriddenDeclaration)
                 };
 
                 return overrides;

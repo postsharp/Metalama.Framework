@@ -11,7 +11,7 @@ using Caravela.Framework.Impl.Diagnostics;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AspectBuilder<T> : DiagnosticList, IAspectBuilder<T>
+    internal class AspectBuilder<T> : DiagnosticSink, IAspectBuilder<T>
         where T : class, ICodeElement
     {
         private readonly IImmutableList<IAdvice> _declarativeAdvices;
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
         public void SkipAspect() => this._skipped = true;
 
         public AspectBuilder( T targetDeclaration, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
-            : base( targetDeclaration.DiagnosticLocation )
+            : base( targetDeclaration )
         {
             this.TargetDeclaration = targetDeclaration;
             this._declarativeAdvices = declarativeAdvices.ToImmutableArray();
@@ -39,14 +39,14 @@ namespace Caravela.Framework.Impl
         {
             var success = this.ErrorCount == 0;
             return success && !this._skipped
-                ? new(
+                ? new AspectInstanceResult(
                     success,
-                    this.Diagnostics.ToImmutableArray(),
+                    this.ToImmutable(),
                     this._declarativeAdvices.AddRange( this._adviceFactory.Advices ),
                     Array.Empty<IAspectSource>() )
-                : new(
+                : new AspectInstanceResult(
                     success,
-                    this.Diagnostics.ToImmutableArray(),
+                    this.ToImmutable(),
                     Array.Empty<IAdvice>(),
                     Array.Empty<IAspectSource>() );
         }

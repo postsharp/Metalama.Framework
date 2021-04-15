@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerIntroductionStepOutput
     {
-        public LinkerIntroductionStepOutput( DiagnosticList diagnosticSink, CSharpCompilation intermediateCompilation, LinkerIntroductionRegistry introductionRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+        public LinkerIntroductionStepOutput( ImmutableDiagnosticList diagnostics, CSharpCompilation intermediateCompilation, LinkerIntroductionRegistry introductionRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
-            this.DiagnosticSink = diagnosticSink;
+            this.Diagnostics = diagnostics;
             this.IntermediateCompilation = intermediateCompilation;
             this.IntroductionRegistry = introductionRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the diagnostic sink.
         /// </summary>
-        public DiagnosticList DiagnosticSink { get; }
+        public ImmutableDiagnosticList Diagnostics { get; }
 
         /// <summary>
         /// Gets the intermediate compilation.

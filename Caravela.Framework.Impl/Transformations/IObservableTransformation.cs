@@ -17,6 +17,5 @@ namespace Caravela.Framework.Impl.Transformations
     internal interface IReplaceMemberTransformation : IObservableTransformation
     {
         MemberLink<IMember> ReplacedMember { get; }
-
     }
 }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Microsoft.CodeAnalysis;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl
@@ -57,14 +58,28 @@ namespace Caravela.Framework.Impl
         public static readonly StrongDiagnosticDescriptor<(IType ParentType, IType ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
             "CR0022",
             "Cannot add an aspect to a previous step of the compilation pipeline.",
-            "The aspect {0} cannot add a child aspect to of type {1} because this aspect type has already been processed.",
+            "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
             _category,
             Error );
 
         public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
             "CR0023",
             "Cannot add an advice to a previous step of the compilation pipeline.",
-            "The aspect {0} cannot add an advice to {1} because this declaration has already been processed.",
+            "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
+            _category,
+            Error );
+        
+        public static readonly StrongDiagnosticDescriptor<(IMethodSymbol Method, ITypeSymbol AttributeType, string AdviceMethod )> TemplateMethodMissesAttribute = new(
+            "CR0024",
+            "The template method does not have the expected custom attribute.",
+            "The method '{0}' must be annotated with the custom attribute [{1}] otherwise it cannot be used with the dynamic advice '{2}'.",
+            _category,
+            Error );
+        
+        public static readonly StrongDiagnosticDescriptor<(INamedType AspectType, string MethodName )> AspectMustHaveExactlyOneTemplateMethod = new(
+            "CR0024",
+            "The aspect type must have exactly one method of a given name otherwise it cannot be used as a dynamic advice.",
+            "The type '{0}' must have exactly one method named '{1}'.",
             _category,
             Error );
     }

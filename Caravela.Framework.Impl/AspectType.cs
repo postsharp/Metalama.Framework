@@ -12,8 +12,9 @@ using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl
 {
+
     // TODO: Consider having an abstract base for simple testing.
-    internal class AspectType
+    internal class AspectType : IAspectType
     {
         private readonly IAspectDriver? _aspectDriver;
 
@@ -64,5 +65,7 @@ namespace Caravela.Framework.Impl
 
             this.Layers = partArrayBuilder.ToImmutable();
         }
+
+        public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new AspectInstance( aspect, target, this );
     }
 }

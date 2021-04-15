@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -8,6 +9,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -16,6 +18,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
+            if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
+            {
+                throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
+            }
         }
 
         [Memo]
@@ -54,5 +60,21 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
         public override bool IsAsync => this.MethodSymbol.IsAsync;
+
+        public IMethod? OverriddenMethod
+        {
+            get
+            {
+                var overriddenMethod = this.MethodSymbol.OverriddenMethod;
+                if ( overriddenMethod != null )
+                {
+                    return this.Compilation.Factory.GetMethod( overriddenMethod );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

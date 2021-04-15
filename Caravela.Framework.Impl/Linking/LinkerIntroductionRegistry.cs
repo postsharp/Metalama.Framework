@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var introducedMember in introducedMembers )
             {
-                if ( introducedMember.Introductor is IOverriddenElement overrideTransformation )
+                if ( introducedMember.Introduction is IOverriddenElement overrideTransformation )
                 {
                     if ( !this._overrideMap.TryGetValue( overrideTransformation.OverriddenElement, out var overrideList ) )
                     {
@@ -81,7 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                 // Introduced declaration - we should get ICodeElement from introduced member.
                 var introducedMember = this._introducedMemberLookup[annotation.Data.AssertNotNull()];
 
-                if ( introducedMember.Introductor is ICodeElement introducedElement )
+                if ( introducedMember.Introduction is ICodeElement introducedElement )
                 {
                     if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
                     {
@@ -124,7 +124,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns></returns>
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introductor.TargetSyntaxTree];
+            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TargetSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax );
 
             return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( intermediateSyntax ).AssertNotNull();

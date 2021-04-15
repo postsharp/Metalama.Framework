@@ -5,7 +5,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) );
         }
     }
 }

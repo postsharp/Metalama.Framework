@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
@@ -13,22 +16,26 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public abstract partial class DiagnosticSink : IDiagnosticSink
+    public partial class DiagnosticSink : IDiagnosticSink
     {
+        private ImmutableArray<Diagnostic>.Builder? _diagnostics;
+        private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
 
-        protected DiagnosticSink( IDiagnosticLocation? defaultLocation = null )
+        public ICodeElement? DefaultScope { get; private set; }
+
+        public DiagnosticSink( ICodeElement? defaultScope = null )
         {
-            this.DefaultLocation = defaultLocation;
+            this.DefaultScope = defaultScope;
         }
 
         public int ErrorCount { get; private set; }
 
-        /// <summary>
-        /// Reports a <see cref="Diagnostic"/>.
-        /// </summary>
-        /// <param name="diagnostic"></param>
-        public abstract void ReportDiagnostic( Diagnostic diagnostic );
-
+        public void ReportDiagnostic( Diagnostic diagnostic )
+        {
+            this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
+            this._diagnostics.Add( diagnostic );
+        }
+     
         public void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
             foreach ( var diagnostic in diagnostics )
@@ -37,9 +44,33 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
+        public void SuppressDiagnostic( ScopedSuppression suppression )
         {
-            return severity switch
+            this._suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
+            this._suppressions.Add( suppression );
+        }
+
+        public void SuppressDiagnostic( string id, ICodeElement scope )
+         => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+
+        public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
+        {
+            foreach ( var suppression in suppressions )
+            {
+                this.SuppressDiagnostic( suppression );
+            }
+        }
+
+        public void SuppressDiagnostic( string id )
+        {
+            if ( this.DefaultScope != null )
+            {
+                this.SuppressDiagnostic( new ScopedSuppression( id, this.DefaultScope ) );
+            }
+        }
+
+        private static RoslynDiagnosticSeverity MapSeverity( Severity severity ) =>
+            severity switch
             {
                 Severity.Error => RoslynDiagnosticSeverity.Error,
                 Severity.Hidden => RoslynDiagnosticSeverity.Hidden,
@@ -47,27 +78,24 @@ namespace Caravela.Framework.Impl.Diagnostics
                 Severity.Warning => RoslynDiagnosticSeverity.Warning,
                 _ => throw new AssertionFailedException()
             };
+
+        public IDisposable WithDefaultScope( ICodeElement scope )
+        {
+            var oldScope = this.DefaultScope;
+            this.DefaultScope = scope;
+            return new RestoreLocationCookie( this, oldScope );
         }
 
-        public IDiagnosticLocation? DefaultLocation { get; private set; }
-
-        public IDisposable WithDefaultLocation( IDiagnosticLocation? location )
+        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
         {
-            var oldLocation = this.DefaultLocation;
-            this.DefaultLocation = location;
-            return new RestoreLocationCookie( this, oldLocation );
-        }
-
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation? location, string id, string formatMessage, params object[] args )
-        {
-            var roslynLocation = ((DiagnosticLocation?) (location ?? this.DefaultLocation))?.Location;
+            var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetDiagnosticLocation();
             var roslynSeverity = MapSeverity( severity );
             var warningLevel = severity == Severity.Error ? 0 : 1;
 
             var diagnostic = Diagnostic.Create(
                 id,
                 "Caravela.User",
-                new NonLocalizableString( formatMessage ),
+                new NonLocalizableString( formatMessage, args ),
                 roslynSeverity,
                 roslynSeverity,
                 true,
@@ -85,7 +113,17 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
         {
-            this.ReportDiagnostic( severity, this.DefaultLocation, id, formatMessage, args );
+            if ( this.DefaultScope == null )
+            {
+                throw new InvalidOperationException( "Cannot report a diagnostic when the default scope has not been defined." );
+            }
+
+            this.ReportDiagnostic( severity, this.DefaultScope, id, formatMessage, args );
         }
+    
+        public ImmutableDiagnosticList ToImmutable()
+            => new ImmutableDiagnosticList( 
+                this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
+                this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
     }
 }

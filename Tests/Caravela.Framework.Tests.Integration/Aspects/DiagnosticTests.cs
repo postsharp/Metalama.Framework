@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Fact]
         public async Task ReportFromInitialize()
         {
-            var testResult = await this.GetTestResultAsync( @"TestInputs\Aspects\Diagnostics\ReportFromInitialize.cs" );
+            var testResult = await this.GetTestResultAsync( @"Aspects\Diagnostics\ReportFromInitialize.cs" );
             Assert.False( testResult.Success );
             Assert.Contains( testResult.Diagnostics.Where( d => d.Severity != DiagnosticSeverity.Hidden ), d => d.Id == "MY001" );
         }
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Fact]
         public async Task SkipWithoutError()
         {
-            var testResult = await this.GetTestResultAsync( @"TestInputs\Aspects\Diagnostics\SkipWithoutError.cs" );
+            var testResult = await this.GetTestResultAsync( @"Aspects\Diagnostics\SkipWithoutError.cs" );
             Assert.True( testResult.Success );
             Assert.DoesNotContain( "This code should not be emitted.", testResult.TransformedTargetSourceText?.ToString() );
         }
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Fact]
         public async Task ReportFromTemplate()
         {
-            var testResult = await this.GetTestResultAsync( @"TestInputs\Aspects\Diagnostics\ReportFromTemplate.cs" );
+            var testResult = await this.GetTestResultAsync( @"Aspects\Diagnostics\ReportFromTemplate.cs" );
             Assert.False( testResult.Success );
             Assert.Contains( testResult.Diagnostics.Where( d => d.Severity != DiagnosticSeverity.Hidden ), d => d.Id == "MY001" );
         }
@@ -44,7 +44,14 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         [Fact]
         public async Task InvalidCompileTimeUserCode()
         {
-            await this.AssertTransformedSourceEqualAsync( @"TestInputs\Aspects\Diagnostics\InvalidCompileTimeUserCode.cs" );
+            await this.AssertTransformedSourceEqualAsync( @"Aspects\Diagnostics\InvalidCompileTimeUserCode.cs" );
+        }
+        
+        [Theory]
+        [FromDirectory("Aspects\\Suppressions")]
+        public async Task Suppressions( string path )
+        {
+            await this.AssertTransformedSourceEqualAsync( path);
         }
 
         protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );

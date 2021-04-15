@@ -25,17 +25,17 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AccessorDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -56,9 +56,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AccessorList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Accessors)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -79,9 +79,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AliasQualifiedName))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Alias)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -102,13 +102,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AnonymousMethodExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DelegateKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -129,11 +129,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AnonymousObjectCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -154,7 +154,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AnonymousObjectMemberDeclarator))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NameEquals)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -175,9 +175,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Argument))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NameColon)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.RefKindKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -198,9 +198,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ArgumentList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arguments)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -221,9 +221,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ArrayCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -244,9 +244,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ArrayRankSpecifier))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Sizes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -267,7 +267,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ArrayType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ElementType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.RankSpecifiers)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -288,7 +288,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ArrowExpressionClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ArrowToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -309,11 +309,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AssignmentExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Left)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Right)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -334,7 +334,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Attribute))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -355,9 +355,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AttributeArgument))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NameEquals)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.NameColon)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -378,9 +378,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AttributeArgumentList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arguments)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -401,11 +401,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AttributeList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Target)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Attributes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -426,7 +426,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AttributeTargetSpecifier))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -447,7 +447,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(AwaitExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AwaitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -468,11 +468,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BadDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -512,7 +512,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BaseList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Types)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -533,11 +533,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BinaryExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Left)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Right)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -558,11 +558,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BinaryPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Left)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Right)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -583,11 +583,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Block))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statements)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -608,9 +608,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BracketedArgumentList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arguments)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -631,9 +631,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BracketedParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -654,9 +654,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(BreakStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BreakKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -677,11 +677,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CasePatternSwitchLabel))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhenClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -702,9 +702,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CaseSwitchLabel))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Value)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -725,11 +725,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CastExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -750,11 +750,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CatchClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.CatchKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Filter)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -775,11 +775,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CatchDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -800,11 +800,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CatchFilterClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.WhenKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.FilterExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -825,13 +825,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -852,11 +852,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CheckedStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -877,25 +877,25 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ClassDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BaseList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -916,9 +916,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ClassOrStructConstraint))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ClassOrStructKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.QuestionToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -939,13 +939,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CompilationUnit))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Externs)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Usings)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfFileToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -966,9 +966,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConditionalAccessExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhenNotNull)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -989,13 +989,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConditionalExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.QuestionToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhenTrue)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhenFalse)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1035,9 +1035,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConstructorConstraint))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1058,19 +1058,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConstructorDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1091,11 +1091,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConstructorInitializer))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ThisOrBaseKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1116,9 +1116,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ContinueStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ContinueKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1139,21 +1139,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConversionOperatorDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ImplicitOrExplicitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1174,11 +1174,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ConversionOperatorMemberCref))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ImplicitOrExplicitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1199,9 +1199,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CrefBracketedParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1222,7 +1222,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CrefParameter))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.RefKindKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1243,9 +1243,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(CrefParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1266,7 +1266,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DeclarationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Designation)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1287,7 +1287,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DeclarationPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Designation)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1327,11 +1327,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DefaultExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1352,7 +1352,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DefaultSwitchLabel))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1373,13 +1373,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DefineDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DefineKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1400,21 +1400,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DelegateDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DelegateKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1435,19 +1435,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DestructorDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TildeToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1506,9 +1506,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DocumentationCommentTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Content)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfComment)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1529,19 +1529,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(DoStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DoKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhileKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1562,7 +1562,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ElementAccessExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1602,17 +1602,17 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ElifDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ElifKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BranchTaken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConditionValue)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1633,7 +1633,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ElseClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ElseKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1654,13 +1654,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ElseDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ElseKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BranchTaken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1681,7 +1681,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EmptyStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1702,11 +1702,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EndIfDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndIfKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1727,11 +1727,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EndRegionDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndRegionKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1752,21 +1752,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EnumDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EnumKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BaseList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1787,11 +1787,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EnumMemberDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsValue)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1812,7 +1812,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EqualsValueClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Value)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1833,11 +1833,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ErrorDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ErrorKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1858,19 +1858,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EventDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EventKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AccessorList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1891,13 +1891,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(EventFieldDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EventKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1918,7 +1918,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ExplicitInterfaceSpecifier))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DotToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1939,9 +1939,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ExpressionStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1962,11 +1962,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ExternAliasDirective))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ExternKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AliasKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -1987,11 +1987,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FieldDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2012,7 +2012,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FinallyClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.FinallyKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2033,15 +2033,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FixedStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.FixedKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2062,23 +2062,23 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ForEachStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AwaitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ForEachKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.InKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2099,21 +2099,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ForEachVariableStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AwaitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ForEachKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Variable)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.InKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2134,25 +2134,25 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ForStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ForKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.FirstSemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SecondSemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Incrementors)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2173,13 +2173,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FromClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.FromKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.InKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2200,7 +2200,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FunctionPointerCallingConvention))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ManagedOrUnmanagedKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UnmanagedCallingConventionList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2221,9 +2221,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FunctionPointerParameter))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2244,9 +2244,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FunctionPointerParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2267,11 +2267,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FunctionPointerType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.DelegateKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AsteriskToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CallingConvention)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2311,9 +2311,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(FunctionPointerUnmanagedCallingConventionList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CallingConventions)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2334,7 +2334,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(GenericName))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2355,9 +2355,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(GlobalStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2378,15 +2378,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(GotoStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GotoKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CaseOrDefaultKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2407,11 +2407,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(GroupClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.GroupKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GroupExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ByKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ByExpression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2451,17 +2451,17 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IfDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IfKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BranchTaken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConditionValue)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2482,17 +2482,17 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IfStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IfKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Else)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2513,13 +2513,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ImplicitArrayCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Commas)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2559,9 +2559,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ImplicitObjectCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2582,11 +2582,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ImplicitStackAllocArrayCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StackAllocKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBracketToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2607,9 +2607,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IncompleteMember))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2630,21 +2630,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IndexerDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ThisKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AccessorList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2665,7 +2665,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IndexerMemberCref))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ThisKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2686,11 +2686,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InitializerExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expressions)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2711,25 +2711,25 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterfaceDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BaseList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2750,9 +2750,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterpolatedStringExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StringStartToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Contents)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StringEndToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2792,13 +2792,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Interpolation))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AlignmentClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.FormatClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2819,7 +2819,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterpolationAlignmentClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.CommaToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Value)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2840,7 +2840,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterpolationFormatClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.FormatStringToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2861,7 +2861,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InvocationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2882,9 +2882,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(IsPatternExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2905,23 +2905,23 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(JoinClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.JoinKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.InKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.InExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OnKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.LeftExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.RightExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Into)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2942,7 +2942,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(JoinIntoClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.IntoKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2963,11 +2963,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LabeledStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -2988,11 +2988,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LetClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LetKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3013,15 +3013,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LineDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.LineKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Line)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3042,7 +3042,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LiteralExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Token)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3063,13 +3063,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LoadDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.LoadKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3090,15 +3090,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LocalDeclarationStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AwaitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UsingKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3119,23 +3119,23 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LocalFunctionStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3156,15 +3156,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(LockStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.LockKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3185,11 +3185,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(MakeRefExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3210,11 +3210,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(MemberAccessExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3235,7 +3235,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(MemberBindingExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3256,25 +3256,25 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(MethodDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3295,7 +3295,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NameColon))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3316,7 +3316,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NameEquals))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3337,7 +3337,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NameMemberCref))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3358,23 +3358,23 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NamespaceDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.NamespaceKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Externs)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Usings)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3395,15 +3395,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NullableDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.NullableKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SettingToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TargetToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3424,7 +3424,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(NullableType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ElementType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.QuestionToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3445,11 +3445,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ObjectCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NewKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3508,21 +3508,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(OperatorDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3543,9 +3543,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(OperatorMemberCref))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OperatorKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3566,7 +3566,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(OrderByClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OrderByKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Orderings)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3587,9 +3587,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Ordering))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AscendingOrDescendingKeyword)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3610,13 +3610,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Parameter))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Default)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3637,9 +3637,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3660,9 +3660,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParenthesizedExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3683,13 +3683,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParenthesizedLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArrowToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3710,9 +3710,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParenthesizedPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3733,9 +3733,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ParenthesizedVariableDesignation))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Variables)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3756,7 +3756,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PointerType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ElementType)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AsteriskToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3777,9 +3777,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PositionalPatternClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Subpatterns)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3800,9 +3800,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PostfixUnaryExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Operand)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3823,19 +3823,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PragmaChecksumDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.PragmaKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ChecksumKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Guid)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Bytes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3856,17 +3856,17 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PragmaWarningDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.PragmaKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WarningKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DisableOrRestoreKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ErrorCodes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3906,9 +3906,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PrefixUnaryExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Operand)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3929,7 +3929,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PrimaryConstructorBaseType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3950,21 +3950,21 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PropertyDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExplicitInterfaceSpecifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AccessorList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -3985,9 +3985,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(PropertyPatternClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Subpatterns)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4008,9 +4008,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(QualifiedCref))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Container)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DotToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Member)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4031,9 +4031,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(QualifiedName))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Left)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.DotToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Right)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4054,9 +4054,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(QueryBody))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Clauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SelectOrGroup)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Continuation)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4077,9 +4077,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(QueryContinuation))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.IntoKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4100,7 +4100,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(QueryExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.FromClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Body)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4121,9 +4121,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RangeExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LeftOperand)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.RightOperand)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4144,27 +4144,27 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RecordDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BaseList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4185,11 +4185,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RecursivePattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.PositionalPatternClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.PropertyPatternClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Designation)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4210,13 +4210,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ReferenceDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReferenceKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.File)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4237,7 +4237,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RefExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.RefKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4258,9 +4258,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RefType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.RefKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReadOnlyKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4281,11 +4281,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RefTypeExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4306,15 +4306,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RefValueExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Comma)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4335,11 +4335,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RegionDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.RegionKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4360,7 +4360,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(RelationalPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4381,11 +4381,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ReturnStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4406,7 +4406,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SelectClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.SelectKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4427,11 +4427,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ShebangDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExclamationToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4471,13 +4471,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SimpleLambdaExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AsyncKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameter)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArrowToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ExpressionBody)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4517,11 +4517,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SizeOfExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4561,9 +4561,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(StackAllocArrayCreationExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StackAllocKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4584,25 +4584,25 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(StructDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Modifiers)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TypeParameterList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.BaseList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ConstraintClauses)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Members)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4623,7 +4623,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(Subpattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.NameColon)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4644,13 +4644,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SwitchExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.GoverningExpression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SwitchKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arms)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4671,11 +4671,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SwitchExpressionArm))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhenClause)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsGreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4696,7 +4696,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SwitchSection))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Labels)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statements)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4717,19 +4717,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(SwitchStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SwitchKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenBraceToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Sections)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseBraceToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4769,7 +4769,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ThrowExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.ThrowKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4790,11 +4790,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(ThrowStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ThrowKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4815,13 +4815,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TryStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TryKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Catches)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Finally)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4842,7 +4842,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TupleElement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4863,9 +4863,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TupleExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arguments)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4886,9 +4886,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TupleType))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Elements)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4909,9 +4909,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TypeArgumentList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Arguments)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4970,11 +4970,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TypeOfExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Keyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -4995,9 +4995,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TypeParameter))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.VarianceKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5018,11 +5018,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TypeParameterConstraintClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.WhereKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Constraints)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5043,9 +5043,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(TypeParameterList))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Parameters)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5085,7 +5085,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UnaryPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.OperatorToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Pattern)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5106,13 +5106,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UndefDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UndefKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5133,9 +5133,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UnsafeStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UnsafeKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Block)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5156,13 +5156,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UsingDirective))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.UsingKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StaticKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Alias)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5183,19 +5183,19 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(UsingStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AwaitKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.UsingKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Declaration)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5216,7 +5216,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(VariableDeclaration))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Type)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Variables)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5237,9 +5237,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(VariableDeclarator))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ArgumentList)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5260,7 +5260,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(VarPattern))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.VarKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Designation)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5281,11 +5281,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(WarningDirectiveTrivia))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.HashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WarningKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndOfDirectiveToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.IsActive)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5306,7 +5306,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(WhenClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.WhenKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5327,7 +5327,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(WhereClause))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.WhereKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5348,15 +5348,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(WhileStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WhileKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.OpenParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Condition)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.CloseParenToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Statement)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5377,9 +5377,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(WithExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.WithKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Initializer)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5400,9 +5400,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlCDataSection))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StartCDataToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TextTokens)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndCDataToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5423,9 +5423,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlComment))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanExclamationMinusMinusToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TextTokens)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.MinusMinusGreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5446,13 +5446,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlCrefAttribute))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StartQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Cref)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5473,9 +5473,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlElement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StartTag)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Content)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndTag)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5496,9 +5496,9 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlElementEndTag))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanSlashToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5519,11 +5519,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlElementStartTag))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Attributes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.GreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5544,11 +5544,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlEmptyElement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.LessThanToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Attributes)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SlashGreaterThanToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5569,7 +5569,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlName))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Prefix)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.LocalName)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5590,13 +5590,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlNameAttribute))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StartQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Identifier)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5617,7 +5617,7 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlPrefix))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Prefix)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ColonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5638,11 +5638,11 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlProcessingInstruction))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.StartProcessingInstructionToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TextTokens)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndProcessingInstructionToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5682,13 +5682,13 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(XmlTextAttribute))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Name)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EqualsToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.StartQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.TextTokens)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.EndQuoteToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();
@@ -5709,15 +5709,15 @@ namespace Caravela.Framework.Impl.Templating
 			this.Indent();
 			var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(YieldStatement))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
 			Argument(this.Transform(node.Kind())).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.AttributeLists)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.YieldKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.ReturnOrBreakKeyword)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.Expression)).WithLeadingTrivia(this.GetIndentation()),
-			Token(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak()),
+			Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
 			Argument(this.Transform(node.SemicolonToken)).WithLeadingTrivia(this.GetIndentation()),
 			})));
 			this.Unindent();

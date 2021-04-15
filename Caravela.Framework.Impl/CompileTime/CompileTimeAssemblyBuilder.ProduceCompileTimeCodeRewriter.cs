@@ -79,15 +79,14 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
 
                         return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
-
                 }
             }
 
             private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-                
-                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate(methodSymbol) )
+
+                if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
                 {
                     var success =
                         this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );

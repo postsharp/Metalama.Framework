@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
@@ -152,6 +153,35 @@ namespace Caravela.Framework.Impl.Templating
 
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
         }
+        
+        /// <summary>
+        /// Determines if the node is a pragma and returns the kind of pragma, if any.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="kind"></param>
+        /// <returns></returns>
+        private bool TryGetPragma( SyntaxNode node, out PragmaKind kind )
+        {
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+            
+            if ( symbol == null || !symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( PragmaAttribute ) ))
+            {
+                kind = PragmaKind.None;
+                return false;
+            }
+            else
+            {
+                switch ( symbol.Name )
+                {
+                    case nameof(ITemplateContextPragma.Comment):
+                        kind = PragmaKind.Comment;
+                        return true;
+                    
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+        }
 
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
@@ -252,7 +282,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                return this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) );
+                return this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) );
             }
         }
 
@@ -398,7 +428,29 @@ namespace Caravela.Framework.Impl.Templating
             return base.VisitMemberAccessExpression( node );
         }
 
-        public override SyntaxNode VisitInvocationExpression( InvocationExpressionSyntax node )
+        public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+        {
+            // The default implementation has to be overridden because VisitInvocationExpression can
+            // return null in case of pragma. In this case, the ExpressionStatement must return null too.
+            // In the default implementation, such case would result in an exception.
+
+            switch ( this.GetTransformationKind( node ) ) 
+            {
+                case TransformationKind.Transform: 
+                    return this.TransformExpressionStatement( node );
+
+                default:
+                    var transformedExpression = this.Visit(node.Expression);
+                    if ( transformedExpression == null )
+                    {
+                        return null;
+                    }
+                    
+                    return node.Update(this.VisitList(node.AttributeLists), (ExpressionSyntax)transformedExpression!, this.VisitToken(node.SemicolonToken));
+            }
+        }
+
+        public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
             bool ArgumentIsDynamic( ArgumentSyntax argument ) =>
                 this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
@@ -413,10 +465,31 @@ namespace Caravela.Framework.Impl.Templating
                         a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
             }
 
-            if ( this.IsProceed(node.Expression))
+            if ( this.IsProceed( node.Expression ) )
             {
                 this.Diagnostics.Add( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
+            }
+            else if ( this.TryGetPragma( node.Expression, out var pragmaKind ) )
+            {
+                switch ( pragmaKind )
+                {
+                    case PragmaKind.Comment:
+                        var arguments = node.ArgumentList.Arguments.Insert( 0, Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
+
+                        // TemplateSyntaxFactory.AddComments( __s, comments );
+                        var add = 
+                            this.DeepIndent(
+                                ExpressionStatement(
+                                    InvocationExpression(
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
+                                        ArgumentList( arguments ) ) ) );
+                        this._currentMetaContext.Statements.Add( add );
+                        return null;
+                    
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
             // Expand extension methods.
@@ -512,8 +585,8 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithMetaContext(
                 MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
             {
-                // List<StatementSyntax> statements = new List<StatementSyntax>();
-                var listType = this.MetaSyntaxFactory.Type( typeof( List<StatementSyntax> ) );
+                // List<StatementOrTrivia> statements = new List<StatementOrTrivia>();
+                var listType = this.MetaSyntaxFactory.Type( typeof( List<StatementOrTrivia> ) );
                 this._currentMetaContext!.Statements.Add( LocalDeclarationStatement(
                         VariableDeclaration( listType )
                             .WithVariables(
@@ -530,17 +603,20 @@ namespace Caravela.Framework.Impl.Templating
                 var metaStatements = this.ToMetaStatements( node.Statements ).ToList();
                 this._currentMetaContext.Statements.AddRange( metaStatements );
 
+                // TemplateSyntaxFactory.ToStatementArray( __s1 )
+                var toArrayStatementExpression = InvocationExpression(
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementArray) ),
+                        ArgumentList( 
+                            SingletonSeparatedList( 
+                                Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ))));
+                
                 if ( generateExpression )
                 {
-                    // return statements.ToArray();
+                    // return TemplateSyntaxFactory.ToStatementArray( __s1 );
+
+                    var returnStatementSyntax = ReturnStatement( toArrayStatementExpression).WithLeadingTrivia( this.GetIndentation() );
                     this._currentMetaContext.Statements.Add(
-                        ReturnStatement(
-                                InvocationExpression(
-                                    MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        IdentifierName( this._currentMetaContext.StatementListVariableName ),
-                                        IdentifierName( "ToArray" ) ) ) )
-                            .WithLeadingTrivia( this.GetIndentation() ) );
+                        returnStatementSyntax );
 
                     // Block( Func<StatementSyntax[]>( delegate { ... } )
                     return this.DeepIndent( this.MetaSyntaxFactory.Block(
@@ -567,7 +643,7 @@ namespace Caravela.Framework.Impl.Templating
                     this._currentMetaContext.Statements.Add(
                         ReturnStatement(
                             this.MetaSyntaxFactory.Block(
-                                IdentifierName( this._currentMetaContext.StatementListVariableName ) ).WithLeadingTrivia( this.GetIndentation() ) ) );
+                                toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
 
                     return Block( this._currentMetaContext.Statements );
                 }
@@ -639,49 +715,54 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedNode = this.Visit( singleStatement );
 
-                if ( transformedNode is StatementSyntax statementSyntax )
+                switch (transformedNode)
                 {
-                    // The statement is already build-time code so there is nothing to transform.
+                    case null:
+                        break;
+                    
+                    case StatementSyntax statementSyntax:
+                        // The statement is already build-time code so there is nothing to transform.
 
-                    newContext.Statements.Add( statementSyntax.WithLeadingTrivia( this.GetIndentation() ) );
-                }
-                else if ( transformedNode is ExpressionSyntax expressionSyntax )
-                {
-                    // The statement is run-time code and has been transformed into an expression creating the StatementSyntax.
-                    // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
+                        newContext.Statements.Add( statementSyntax.WithLeadingTrivia( this.GetIndentation() ) );
+                        break;
+                    
+                    case ExpressionSyntax expressionSyntax:
+                        {
+                            // The statement is run-time code and has been transformed into an expression creating the StatementSyntax.
+                            // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
 
-                    // Generate a comment with the template source code.
-                    var statementComment = NormalizeSpace( singleStatement.ToString() );
+                            // Generate a comment with the template source code.
+                            var statementComment = NormalizeSpace( singleStatement.ToString() );
 
-                    if ( statementComment.Length > 120 )
-                    {
-                        // TODO: handle surrogate pairs correctly
-                        statementComment = statementComment.Substring( 0, 117 ) + "...";
-                    }
+                            if ( statementComment.Length > 120 )
+                            {
+                                // TODO: handle surrogate pairs correctly
+                                statementComment = statementComment.Substring( 0, 117 ) + "...";
+                            }
 
-                    var leadingTrivia = TriviaList( CarriageReturnLineFeed ).AddRange( this.GetIndentation() )
-                        .Add( Comment( "// " + statementComment ) ).Add( CarriageReturnLineFeed ).AddRange( this.GetIndentation() );
-                    var trailingTrivia = TriviaList( CarriageReturnLineFeed, CarriageReturnLineFeed );
+                            var leadingTrivia = TriviaList( CarriageReturnLineFeed ).AddRange( this.GetIndentation() )
+                                .Add( Comment( "// " + statementComment ) ).Add( CarriageReturnLineFeed ).AddRange( this.GetIndentation() );
+                            var trailingTrivia = TriviaList( CarriageReturnLineFeed, CarriageReturnLineFeed );
 
-                    // statements.Add( expression )
-                    var add =
-                        this.DeepIndent(
-                            ExpressionStatement(
-                                InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            IdentifierName( this._currentMetaContext!.StatementListVariableName ),
-                                            IdentifierName( "Add" ) ) )
-                                    .WithArgumentList(
-                                        ArgumentList(
-                                            SingletonSeparatedList(
-                                                Argument( expressionSyntax ) ) ) ) ) );
+                            // TemplateSyntaxFactory.Add( __s, expression )
+                            var add =
+                                this.DeepIndent(
+                                    ExpressionStatement(
+                                        InvocationExpression(
+                                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
+                                            ArgumentList( SeparatedList<ArgumentSyntax>(
+                                                new[]
+                                                {
+                                                    Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ),
+                                                    Argument( expressionSyntax )
+                                                } ) ) ) ) );
 
-                    newContext.Statements.Add( add.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia ) );
-                }
-                else
-                {
-                    throw new AssertionFailedException();
+                            newContext.Statements.Add( add.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia ) );
+                            break;
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
                 }
             }
         }
@@ -725,7 +806,7 @@ namespace Caravela.Framework.Impl.Templating
                     transformedSections[i] = SwitchSection( section.Labels, List( transformedStatements ) );
                 }
 
-                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List(transformedSections), node.CloseBraceToken );
+                return SwitchStatement( node.SwitchKeyword, node.OpenParenToken, node.Expression, node.CloseParenToken, node.OpenBraceToken, List( transformedSections ), node.CloseBraceToken );
             }
         }
 
@@ -892,7 +973,7 @@ namespace Caravela.Framework.Impl.Templating
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
                                 (ExpressionSyntax) this.Visit( CSharpSyntaxGenerator.Instance.NameExpression( symbol.ContainingType ) )!,
-                                this.MetaSyntaxFactory.IdentifierName2( this.MetaSyntaxFactory.LiteralExpression( node.Identifier.Text ) ) );
+                                this.MetaSyntaxFactory.IdentifierName2( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
             }

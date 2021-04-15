@@ -48,8 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 
-        IDiagnosticLocation? IDiagnosticTarget.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
-
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
             if ( this.Symbol.DeclaringSyntaxReferences.Length == 0 )
@@ -64,5 +62,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return semanticModel.LookupSymbols( lookupPosition );
         }
+
+        IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
     }
 }

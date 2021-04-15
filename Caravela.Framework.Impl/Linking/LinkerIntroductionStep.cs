@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
@@ -67,16 +68,16 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new DiagnosticList( null );
+            var diagnostics = new DiagnosticSink();
             var nameProvider = new LinkerIntroductionNameProvider();
-            var lexicalScopeHelper = new LexicalScopeFactory( input.FinalCompilationModel );
+            var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
             var allTransformations =
-                input.FinalCompilationModel.GetAllObservableTransformations()
+                input.CompilationModel.GetAllObservableTransformations()
                 .SelectMany( x => x.Transformations )
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
@@ -91,17 +92,21 @@ namespace Caravela.Framework.Impl.Linking
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );
             }
 
-            var intermediateCompilation = input.InitialCompilation;
+            // Group diagnostic suppressions by target.
+            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary( 
+                s => s.CodeElement,
+                input.CompilationModel.InvariantComparer);
 
             // Process syntax trees one by one.
-            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics );
+            var intermediateCompilation = input.InitialCompilation;
+            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics, suppressionsByTarget, input.CompilationModel );
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
 
                 // Improve readability of intermediate compilation in debug builds.
-                newRoot = SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
+                newRoot = newRoot.NormalizeWhitespace();
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
@@ -111,7 +116,7 @@ namespace Caravela.Framework.Impl.Linking
 
             var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
+            return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
     }
 }
