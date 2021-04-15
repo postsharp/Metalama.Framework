@@ -266,7 +266,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     .Implements<IOverriddenElement>()
                     .Implements<ITestTransformation>() );
 
-                var methodBodyRewriter = new TestMethodBodyRewriter( this._owner, node, aspectName, layerName );
+                var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
                 var rewrittenMethodBody = methodBodyRewriter.VisitBlock( node.Body.AssertNotNull() );
 
                 var overrideSyntax = node.WithAttributeLists( List( newAttributeLists ) ).WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );

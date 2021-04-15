@@ -157,8 +157,11 @@ class TargetCode
 
             AdviceParameterList adviceParameterList = new( method );
 
-            _ = AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
-            _ = AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
+            // ReSharper disable once IDE0058
+            AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
+            
+            // ReSharper disable once IDE0058
+            AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
 
             Assert.Equal( adviceParameterList[0], adviceParameterList["i"] );
             Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );

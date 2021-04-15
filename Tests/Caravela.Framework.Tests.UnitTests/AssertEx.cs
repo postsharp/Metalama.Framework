@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests
 {
     public static class AssertEx
     {
-        public static void DynamicEquals( dynamic expression, string expected )
+        public static void DynamicEquals( object expression, string expected )
         {
             _ = expression;
             var meta = (IDynamicMember) expression;

@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool HasBase => true;
 
-        public IMethodInvocation Base => new MethodInvocation( this ).Base;
+        public IMethodInvocation Base => throw new NotImplementedException();
 
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {

@@ -17,7 +17,6 @@ namespace Caravela.Framework.Impl.CompileTime
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
 
-            private readonly TemplateCompiler _templateCompiler;
             private readonly Compilation _compileTimeCompilation;
             private readonly List<Diagnostic> _diagnostics = new();
 
@@ -29,12 +28,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public ProduceCompileTimeCodeRewriter(
                 ISymbolClassifier symbolClassifier,
-                TemplateCompiler templateCompiler,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation )
                 : base( symbolClassifier, runTimeCompilation )
             {
-                this._templateCompiler = templateCompiler;
                 this._compileTimeCompilation = compileTimeCompilation;
             }
 
@@ -89,7 +86,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
                 {
                     var success =
-                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
+                        TemplateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
 
                     if ( success )
                     {
