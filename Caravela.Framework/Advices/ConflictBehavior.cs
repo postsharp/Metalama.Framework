@@ -3,26 +3,39 @@
 
 namespace Caravela.Framework.Advices
 {
-    // TODO: Document.
+    /// <summary>
+    /// Conflict behavior of introduction advices.
+    /// </summary>
     public enum ConflictBehavior
     {
+        /// <summary>
+        /// Advice fails with a compilation error if the member already exists in the target declaration. Same as <see cref="Fail"/>.
+        /// </summary>
         Default = Fail,
 
-        // Fails with a compile error.
+        /// <summary>
+        /// Advice fails with a compilation error if the member exists in the target declaration.
+        /// </summary>
         Fail = 0,
 
-        // Ignores the advice if the member already exists.
+        /// <summary>
+        /// Advice is ignored if the member already exists in the target declaration.
+        /// </summary>
         Ignore = 1,
 
-        // Tries to override, or fails if this is not possible 
-        // (i.e. sealed class in parent class)
+        /// <summary>
+        /// Advice attempts to override the existing member or fails with a compilation error if that is not possible.
+        /// </summary>
         Override = 2,
 
-        // Tries to define the member as `new`, or fails if this is not possible
-        // (i.e. sealed class in parent class)
+        /// <summary>
+        /// If the member already exists, the advice attempts to redefine it using <c>new</c> or fails with a compilation error if that is not possible.
+        /// </summary>
         New = 3,
 
-        // Only for types. Continues introducing the members. Members are processed with the Ignore behavior.
+        /// <summary>
+        /// Advice introduces attempts to introduce template's members into the target type. For non-type members the behavior is the same as <see cref="Merge"/>.
+        /// </summary>
         Merge = 4
     }
 }

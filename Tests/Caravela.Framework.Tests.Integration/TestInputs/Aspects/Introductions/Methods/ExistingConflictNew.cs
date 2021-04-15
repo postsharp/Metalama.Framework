@@ -6,8 +6,6 @@ using Caravela.TestFramework;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew
 {
-    // TODO: Will be fixed as part of #28322 Handle conflicts and overrides.
-
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)

@@ -7,7 +7,7 @@ using Caravela.Framework.Aspects;
 namespace Caravela.Framework.Advices
 {
     /// <summary>
-    /// Custom attributes that marks the target method as a template for <see cref="IOverrideMethodAdvice"/>.
+    /// Custom attribute that marks the target method as a template for <see cref="IOverrideMethodAdvice"/>.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
     public class OverrideMethodTemplateAttribute : TemplateAttribute

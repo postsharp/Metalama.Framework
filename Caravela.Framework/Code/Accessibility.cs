@@ -8,6 +8,7 @@ namespace Caravela.Framework.Code
     /// </summary>
     public enum Accessibility
     {
+        // TODO: This uses IL values, shouldn't it correspond to C#?
         Private,
         ProtectedOrInternal,
         Protected,

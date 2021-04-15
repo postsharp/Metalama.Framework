@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 => (context.Parameters[index].ParameterType, context.Parameters[index].RefKind);
         }
 
-        protected override MethodBaseList<IMethod> GetMemberListForBaseClass( INamedType declaringType )
+        protected override MethodBaseList<IMethod> GetMemberListForType( INamedType declaringType )
         {
             return (MethodBaseList<IMethod>) declaringType.Methods;
         }

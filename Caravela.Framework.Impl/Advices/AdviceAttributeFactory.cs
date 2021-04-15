@@ -61,11 +61,6 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.Name = name;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsStatic ), out var isStatic ) )
-                        {
-                            advice.Builder.IsStatic = isStatic;
-                        }
-
                         if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
                         {
                             advice.Builder.IsVirtual = isVirtual;
@@ -76,9 +71,9 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Visibility ), out var visibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Accessibility ), out var accessibility ) )
                         {
-                            advice.Builder.Accessibility = visibility;
+                            advice.Builder.Accessibility = accessibility;
                         }
 
                         advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;

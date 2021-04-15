@@ -26,12 +26,6 @@ internal class TargetClass
         return default;
     }
 
-    public static global::System.Int32 IntroducedMethod_StaticExplicit()
-    {
-        global::System.Console.WriteLine("This is introduced method.");
-        return default;
-    }
-
     public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
     {
         global::System.Console.WriteLine("This is introduced method.");

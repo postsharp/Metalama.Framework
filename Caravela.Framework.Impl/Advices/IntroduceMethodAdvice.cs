@@ -46,7 +46,36 @@ namespace Caravela.Framework.Impl.Advices
 
             this._methodBuilder.Accessibility = templateMethod.Accessibility;
 
-            this._methodBuilder.IsStatic = templateMethod.IsStatic;
+            // Handle the introduction scope.
+            switch ( this.Scope )
+            {
+                case IntroductionScope.Default:
+                    if ( this.TemplateMethod.IsStatic )
+                    {
+                        goto case IntroductionScope.Static;
+                    }
+                    else
+                    {
+                        goto case IntroductionScope.Target;
+                    }
+
+                case IntroductionScope.Instance:
+                    // TODO: Static classes are not compatible with this, produce diagnostics.
+                    this._methodBuilder.IsStatic = false;
+                    break;
+
+                case IntroductionScope.Static:
+                    this._methodBuilder.IsStatic = true;
+                    break;
+
+                case IntroductionScope.Target:
+                    this._methodBuilder.IsStatic = this.TargetDeclaration.IsStatic;
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
             this._methodBuilder.IsNew = templateMethod.IsNew;
             this._methodBuilder.IsAbstract = templateMethod.IsAbstract;
             this._methodBuilder.IsOverride = templateMethod.IsOverride;
@@ -54,8 +83,17 @@ namespace Caravela.Framework.Impl.Advices
             this._methodBuilder.IsSealed = templateMethod.IsSealed;
             this._methodBuilder.IsAsync = templateMethod.IsAsync;
 
-            this._methodBuilder.ReturnParameter.ParameterType = templateMethod.ReturnParameter.ParameterType;
-            this._methodBuilder.ReturnParameter.RefKind = templateMethod.ReturnParameter.RefKind;
+            // Handle return type.
+            if ( templateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
+            {
+                // Templates with dynamic return value result in object return type of the introduced member.
+                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof( object ) );
+            }
+            else
+            {
+                this._methodBuilder.ReturnParameter.ParameterType = templateMethod.ReturnParameter.ParameterType;
+                this._methodBuilder.ReturnParameter.RefKind = templateMethod.ReturnParameter.RefKind;
+            }
 
             CopyAttributes( templateMethod.ReturnParameter, this._methodBuilder.ReturnParameter );
 
@@ -101,6 +139,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
+
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder, false, false );
 

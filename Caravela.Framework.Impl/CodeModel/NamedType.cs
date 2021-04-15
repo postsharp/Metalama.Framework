@@ -69,13 +69,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IFieldList Fields =>
             new FieldList(
+                this,
                 this.TypeSymbol.GetMembers().Select(
                     m => m switch
                     {
                         IFieldSymbol p => new MemberLink<IField>( p ),
                         _ => default
-                    } ),
-                this.Compilation );
+                    } ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType WithGenericArguments( params IType[] genericArguments ) =>
             this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals(this.TypeSymbol, ((ITypeInternal) other).TypeSymbol );
+        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }

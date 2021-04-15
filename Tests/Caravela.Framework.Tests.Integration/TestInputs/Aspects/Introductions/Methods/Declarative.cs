@@ -41,13 +41,6 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
             return proceed();
         }
 
-        [IntroduceMethod(IsStatic = true)]
-        public int IntroducedMethod_StaticExplicit()
-        {
-            Console.WriteLine("This is introduced method.");
-            return proceed();
-        }
-
         [IntroduceMethod(IsVirtual = true)]
         public int IntroducedMethod_VirtualExplicit()
         {

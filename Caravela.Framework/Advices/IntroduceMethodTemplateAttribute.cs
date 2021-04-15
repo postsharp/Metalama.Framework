@@ -7,21 +7,53 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices
 {
+    /// <summary>
+    /// Custom attribute that marks the target method as a template for <see cref="IIntroduceMethodAdvice"/>.
+    /// </summary>
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
     public class IntroduceMethodTemplateAttribute : TemplateAttribute
     {
+        private Accessibility? _accessibility;
+        private bool? _isVirtual;
+        private bool? _isSealed;
+
         public string? Name { get; set; }
 
-        public Accessibility? Visibility { get; set; }
+        public Accessibility Accessibility
+        {
+            get => this._accessibility ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            set => this._accessibility = value;
+        }
 
-        public IntroductionScope? Scope { get; set; }
+        public bool IsVirtual
+        {
+            get => this._isVirtual ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            set => this._isVirtual = value;
+        }
 
-        public bool IsStatic { get; set; }
+        public bool IsSealed
+        {
+            get => this._isSealed ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            set => this._isSealed = value;
+        }
 
-        public bool IsVirtual { get; set; }
-
-        public bool IsSealed { get; set; }
+        public IntroductionScope Scope { get; set; }
 
         public ConflictBehavior ConflictBehavior { get; set; }
+
+        public Accessibility? GetAccessibility()
+        {
+            return this._accessibility;
+        }
+
+        public bool? GetIsVirtual()
+        {
+            return this._isVirtual;
+        }
+
+        public bool? GetIsSealed()
+        {
+            return this._isSealed;
+        }
     }
 }
