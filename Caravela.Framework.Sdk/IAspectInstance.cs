@@ -7,27 +7,23 @@ using Caravela.Framework.Code;
 namespace Caravela.Framework.Sdk
 {
     /// <summary>
-    /// Represents an instance of an aspect and its target code element.
+    /// Represents an instance of an aspect (the CLR instance itself is in the <see cref="Aspect"/> property.
     /// </summary>
-    public sealed class AspectInstance
+    public interface IAspectInstance
     {
         /// <summary>
         /// Gets the aspect instance.
         /// </summary>
-        public IAspect Aspect { get; }
+        IAspect Aspect { get; }
 
         /// <summary>
         /// Gets the element of code to which the aspect is applied.
         /// </summary>
-        public ISdkCodeElement CodeElement { get; }
+        ICodeElement CodeElement { get; }
 
-        internal INamedType AspectType { get; }
-
-        internal AspectInstance( IAspect aspect, ISdkCodeElement codeElement, INamedType aspectType )
-        {
-            this.Aspect = aspect;
-            this.CodeElement = codeElement;
-            this.AspectType = aspectType;
-        }
+        /// <summary>
+        /// Gets the aspect type.
+        /// </summary>
+        IAspectType AspectType { get; }
     }
 }

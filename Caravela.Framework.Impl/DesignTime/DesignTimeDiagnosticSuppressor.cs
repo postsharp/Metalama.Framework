@@ -103,6 +103,5 @@ namespace Caravela.Framework.Impl.DesignTime
         }
 
         public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions => _supportedSuppressionsDictionary.Values.ToImmutableArray();
-
     }
 }

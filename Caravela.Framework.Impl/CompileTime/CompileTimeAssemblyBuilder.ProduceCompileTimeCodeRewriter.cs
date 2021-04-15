@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Impl.Templating;
@@ -80,7 +79,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         }
 
                         return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
-
                 }
             }
 

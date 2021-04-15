@@ -7,7 +7,6 @@ using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Pipeline
 {

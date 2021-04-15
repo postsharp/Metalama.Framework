@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType Type => this._compilation.Factory.GetNamedType( this._data.AttributeClass! );
 
         [Memo]
-        public IMethod Constructor => this._compilation.Factory.GetMethod( this._data.AttributeConstructor! );
+        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this._data.AttributeConstructor! );
 
         [Memo]
         public IReadOnlyList<TypedConstant> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();

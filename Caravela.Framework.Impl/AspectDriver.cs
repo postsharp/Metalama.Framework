@@ -17,12 +17,14 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriver : IAspectDriver
     {
+        private readonly CompilationModel _compilation;
         private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
 
         public INamedType AspectType { get; }
 
         public AspectDriver( INamedType aspectType, CompilationModel compilation )
         {
+            this._compilation = compilation;
             this.AspectType = aspectType;
 
             var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
@@ -42,6 +44,10 @@ namespace Caravela.Framework.Impl
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance ),
                 INamedType type => this.EvaluateAspect( type, aspectInstance ),
                 IMethod method => this.EvaluateAspect( method, aspectInstance ),
+                IField field => this.EvaluateAspect( field, aspectInstance ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance ),
+                IConstructor constructor => this.EvaluateAspect( constructor, aspectInstance ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance ), 
                 _ => throw new NotImplementedException()
             };
         }
@@ -71,7 +77,7 @@ namespace Caravela.Framework.Impl
             var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
             var aspectBuilder = new AspectBuilder<T>(
-                codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
+                codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
 
             using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {

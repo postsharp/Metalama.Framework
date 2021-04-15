@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly ISdkNamedType _aspectType;
+        private readonly AspectType _aspectType;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, ISdkNamedType aspectType, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectType aspectType, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
@@ -29,8 +29,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
-            var diagnostics = new DiagnosticListBuilder();
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray<IAspectInstance>();
+            var diagnostics = new DiagnosticSink();
 
             if ( !aspectInstances.Any() )
             {
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnostics.ReportDiagnostic( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType, ex.ToDiagnosticString()) ) );
+                diagnostics.ReportDiagnostic( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects
