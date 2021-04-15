@@ -59,7 +59,12 @@ namespace Caravela.Framework.Impl.Advices
                     }
 
                 case IntroductionScope.Instance:
-                    // TODO: Static classes are not compatible with this, produce diagnostics.
+                    if (this.TargetDeclaration.IsStatic && this.TargetDeclaration is IType)
+                    {
+                        // TODO: This should not be an exception.
+                        throw AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateException( (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) );
+                    }
+
                     this._methodBuilder.IsStatic = false;
                     break;
 
@@ -123,7 +128,7 @@ namespace Caravela.Framework.Impl.Advices
 
             static void CopyAttributes( ICodeElement codeElement, ICodeElementBuilder builder )
             {
-                // TODO: We don't want to copy all attributes.
+                // TODO: Don't copy all attributes, but how to decide which ones to keep?
                 foreach ( var codeElementAttribute in codeElement.Attributes )
                 {
                     var builderAttribute = builder.AddAttribute( codeElementAttribute.Type, codeElementAttribute.ConstructorArguments.Select( x => x.Value ).ToArray() );
@@ -138,7 +143,6 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var existingDeclaration = this.TargetDeclaration.Methods.OfExactSignature( this._methodBuilder, false, false );
 
