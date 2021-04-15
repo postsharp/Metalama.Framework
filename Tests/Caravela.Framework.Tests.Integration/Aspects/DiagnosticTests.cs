@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         }
         
         [Theory]
-        [FromDirectory("TestInputs\\Aspects\\Suppressions")]
+        [FromDirectory("Aspects\\Suppressions")]
         public async Task Suppressions( string path )
         {
             await this.AssertTransformedSourceEqualAsync( path);
