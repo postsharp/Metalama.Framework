@@ -16,6 +16,7 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
+
         public TemplateExpansionLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(
