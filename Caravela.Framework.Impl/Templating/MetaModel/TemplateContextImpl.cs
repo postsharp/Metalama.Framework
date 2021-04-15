@@ -42,6 +42,5 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public void SuppressDiagnostic( string id )
             => this._diagnosticSink.SuppressDiagnostic( id );
-
     }
 }
