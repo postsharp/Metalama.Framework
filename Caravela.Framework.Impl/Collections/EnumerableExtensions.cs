@@ -15,6 +15,22 @@ namespace Caravela.Framework.Impl.Collections
         public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
             => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
 
+        public static IEnumerable<T> SelectSelfAndAncestors<T>( this T item, Func<T, T?> getParent )
+            where T : class
+        {
+            HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
+
+            for ( var i = item; i != null; i = getParent( i ) )
+            {
+                if ( !list.Add( i ) )
+                {
+                    throw new AssertionFailedException( $"The item {i} of type {i.GetType().Name} has been visited twice." );
+                }
+            }
+
+            return list;
+        }
+
         public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T> collection, Func<T, IEnumerable<T>?> getChildren )
             where T : class
         {
@@ -72,5 +88,12 @@ namespace Caravela.Framework.Impl.Collections
             IEqualityComparer<TKey>? keyComparer = null )
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
+
+        public static ImmutableMultiValueDictionary<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
+            this IEnumerable<TItem> enumerable,
+            Func<TItem, TKey> getKey,
+            IEqualityComparer<TKey>? keyComparer = null )
+            where TKey : notnull
+            => enumerable.ToMultiValueDictionary( getKey, i => i, keyComparer );
     }
 }

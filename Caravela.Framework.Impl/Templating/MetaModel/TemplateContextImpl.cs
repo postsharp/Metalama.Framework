@@ -7,7 +7,7 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    internal class TemplateContextImpl : ITemplateContext
+    internal class TemplateContextImpl : ITemplateContextTarget
     {
         private readonly IDiagnosticSink _diagnosticSink;
 

@@ -37,9 +37,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    var compileTimeAssembly = compileTimeAssemblyBuilder.BuiltAssemblies[this.Context.Compilation.AssemblyName!];
-
-                    if ( compileTimeAssembly != null )
+                    if ( compileTimeAssemblyBuilder.BuiltAssemblies.TryGetValue( this.Context.Compilation.AssemblyName!, out var compileTimeAssembly ) )
                     {
                         this.Context.ManifestResources.Add(
                             new ResourceDescription( compileTimeAssemblyBuilder.ResourceName, () => compileTimeAssembly, true ) );

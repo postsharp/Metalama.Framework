@@ -116,7 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         }
                         : null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions ) };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this ) };
         }
 
         // TODO: Temporary
@@ -124,5 +124,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
+        
+        public IMethod? OverriddenMethod => throw new NotImplementedException();
     }
 }

@@ -31,9 +31,9 @@ namespace Caravela.Framework.Impl
             throw new ArgumentOutOfRangeException( nameof(type), "This is not a source symbol." );
         }
 
-        public static IMethodSymbol GetSymbol( this IMethod method )
+        public static IMethodSymbol GetSymbol( this IMethodBase method )
         {
-            if ( method is Method sourceMethod )
+            if ( method is MethodBase sourceMethod )
             {
                 return (IMethodSymbol) sourceMethod.Symbol;
             }

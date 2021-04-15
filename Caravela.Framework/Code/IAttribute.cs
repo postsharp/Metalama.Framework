@@ -29,7 +29,7 @@ namespace Caravela.Framework.Code
         /// <summary>
         /// Gets the constructor to be used to instantiate the custom attribute.
         /// </summary>
-        IMethod Constructor { get; }
+        IConstructor Constructor { get; }
 
         /// <summary>
         /// Gets the parameters passed to the <see cref="Constructor"/>.

@@ -180,7 +180,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
             var targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
 
-            var diagnostics = new DiagnosticListBuilder( targetMethod );
+            var diagnostics = new DiagnosticSink( targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 

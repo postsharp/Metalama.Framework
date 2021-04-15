@@ -36,14 +36,11 @@ namespace Caravela.Framework.Impl.CodeModel
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType )
-            => this._compilation.GetAllAttributesOfType( aspectType )
-                   .Select(
-                       attribute =>
+        public IEnumerable<AspectInstance> GetAspectInstances( AspectType aspectType ) =>
+            this._compilation.GetAllAttributesOfType( aspectType.Type ).Select( attribute =>
                        {
                            var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
-
-                           return new AspectInstance( aspect, (ISdkCodeElement) attribute.ContainingElement!, attribute.Type );
+                return aspectType.CreateAspectInstance( aspect, attribute.ContainingElement.AssertNotNull() );
                        } );
     }
 }

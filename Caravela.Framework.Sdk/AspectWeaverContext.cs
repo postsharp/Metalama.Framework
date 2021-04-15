@@ -16,12 +16,12 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
-        public ISdkNamedType AspectType { get; }
+        public IAspectType AspectType { get; }
 
         /// <summary>
         /// Gets the set of aspect instances that must be weaved.
         /// </summary>
-        public IReadOnlyList<AspectInstance> AspectInstances { get; }
+        public IReadOnlyList<IAspectInstance> AspectInstances { get; }
 
         /// <summary>
         /// Gets the input <see cref="CSharpCompilation"/>.
@@ -40,8 +40,8 @@ namespace Caravela.Framework.Sdk
         public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
 
         internal AspectWeaverContext(
-            ISdkNamedType aspectType,
-            IReadOnlyList<AspectInstance> aspectInstances,
+            IAspectType aspectType,
+            IReadOnlyList<IAspectInstance> aspectInstances,
             CSharpCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             => this.Target switch
             {
                 AttributeData attributeData => CodeElementLink.FromSymbol<INamedType>( attributeData.AttributeClass.AssertNotNull() ),
-                AttributeBuilder link => ((INamedType) link.Constructor.ReturnType).ToLink(),
+                AttributeBuilder link => link.Constructor.DeclaringType.ToLink(),
                 _ => throw new AssertionFailedException()
             };
 

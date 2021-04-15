@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Pipeline
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
-            DiagnosticListBuilder diagnostics = new();
+            DiagnosticSink diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
 

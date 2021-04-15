@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -18,9 +18,9 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly ISdkNamedType _aspectType;
+        private readonly AspectType _aspectType;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, ISdkNamedType aspectType, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectType aspectType, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
@@ -29,8 +29,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray();
-            var diagnostics = new DiagnosticListBuilder();
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray<IAspectInstance>();
+            var diagnostics = new DiagnosticSink();
 
             if ( !aspectInstances.Any() )
             {
@@ -42,7 +42,6 @@ namespace Caravela.Framework.Impl.Pipeline
             var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
 
             CSharpCompilation newCompilation;
-
             try
             {
                 newCompilation = this._aspectWeaver.Transform( context );
@@ -50,9 +49,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-
-                diagnostics.ReportDiagnostic(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType, ex.ToDiagnosticString()) ) );
+                diagnostics.ReportDiagnostic( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects

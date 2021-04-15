@@ -57,6 +57,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodInvocation Base => throw new NotImplementedException();
 
+        public IMethod? OverriddenMethod => throw new NotImplementedException();
+
         IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
     }
 }

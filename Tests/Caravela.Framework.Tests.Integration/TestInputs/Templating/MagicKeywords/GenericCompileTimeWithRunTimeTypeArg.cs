@@ -1,9 +1,8 @@
-using System;
 using Caravela.Framework.Project;
 using Caravela.Framework.Tests.Integration.Templating;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+#pragma warning disable CS8632 // Cannot convert null literal to non-nullable reference type.
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericCompileTimeWithRunTimeTypeArg
 {

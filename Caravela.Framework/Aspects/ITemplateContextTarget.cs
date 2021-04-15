@@ -12,7 +12,7 @@ namespace Caravela.Framework.Aspects
     /// This interface is exposed by the <see cref="TemplateContext.target"/> member.
     /// </summary>
     [CompileTimeOnly]
-    public interface ITemplateContext : IDiagnosticSink
+    public interface ITemplateContextTarget : IDiagnosticSink
     {
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
