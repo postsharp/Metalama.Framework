@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Impl.Serialization;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             var serializer = new TimeSpanSerializer();
             var ts = TimeSpan.FromMinutes( 38 );
             var ticks = 38 * TimeSpan.TicksPerMinute;
-            Assert.Equal( "new System.TimeSpan(" + ticks.ToString() + "L)", serializer.Serialize( ts ).ToString() );
+            Assert.Equal( "new System.TimeSpan(" + ticks + "L)", serializer.Serialize( ts ).ToString() );
         }
 
         [Fact]

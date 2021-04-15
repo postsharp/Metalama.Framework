@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
-            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof( this.OverrideMethod ) );
+            aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(this.OverrideMethod) );
         }
 
         /// <summary>

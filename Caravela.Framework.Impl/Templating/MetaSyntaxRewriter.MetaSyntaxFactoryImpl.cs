@@ -1,22 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
-
     internal abstract partial class MetaSyntaxRewriter
     {
-
         protected partial class MetaSyntaxFactoryImpl
         {
-
             private readonly ReflectionMapper _reflectionMapper;
 
             public MetaSyntaxFactoryImpl( Compilation compilation )
@@ -35,6 +32,7 @@ namespace Caravela.Framework.Impl.Templating
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
             {
                 var qualifiedName = (QualifiedNameSyntax) this.Type( type );
+
                 return SyntaxFactory.QualifiedName(
                     qualifiedName.Left,
                     ((GenericNameSyntax) qualifiedName.Right).WithTypeArgumentList(
@@ -42,12 +40,15 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             public MemberAccessExpressionSyntax SyntaxFactoryMethod( string name )
-                => SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxFactory ) ), SyntaxFactory.IdentifierName( name ) );
+                => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this.Type( typeof(SyntaxFactory) ),
+                    SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericSyntaxFactoryMethod( string name, params TypeSyntax[] typeArguments )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this.Type( typeof( SyntaxFactory ) ),
+                    this.Type( typeof(SyntaxFactory) ),
                     SyntaxFactory.GenericName(
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
@@ -76,12 +77,18 @@ namespace Caravela.Framework.Impl.Templating
 
             public ArrayTypeSyntax ArrayType<T>()
             {
-                return SyntaxFactory.ArrayType( this.Type( typeof( T ) ) ).WithRankSpecifiers(
-                    SyntaxFactory.SingletonList( SyntaxFactory.ArrayRankSpecifier( SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
+                return SyntaxFactory.ArrayType( this.Type( typeof(T) ) )
+                                    .WithRankSpecifiers(
+                                        SyntaxFactory.SingletonList(
+                                            SyntaxFactory.ArrayRankSpecifier(
+                                                SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
             }
 
-            public ExpressionSyntax Kind( SyntaxKind kind ) =>
-                SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( typeof( SyntaxKind ) ), SyntaxFactory.IdentifierName( kind.ToString() ) );
+            public ExpressionSyntax Kind( SyntaxKind kind )
+                => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this.Type( typeof(SyntaxKind) ),
+                    SyntaxFactory.IdentifierName( kind.ToString() ) );
 
             public ExpressionSyntax Literal( SyntaxToken literal )
                 => literal.Value switch

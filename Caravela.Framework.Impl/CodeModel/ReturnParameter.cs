@@ -1,22 +1,21 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
-using RefKind = Caravela.Framework.Code.RefKind;
+using System;
+using RefKind = Microsoft.CodeAnalysis.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal abstract class ReturnParameter : IParameter, IHasDiagnosticLocation, ICodeElementInternal
     {
+        protected abstract RefKind SymbolRefKind { get; }
 
-        protected abstract Microsoft.CodeAnalysis.RefKind SymbolRefKind { get; }
-
-        public RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
+        public Code.RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
 
         public abstract IType ParameterType { get; }
 

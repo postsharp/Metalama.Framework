@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel.Links;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         {
             ImmutableArray<TSource>.Builder? builder;
             bool canMoveToImmutable;
+
             if ( sourceItems is IReadOnlyCollection<TSource> collection )
             {
                 builder = ImmutableArray.CreateBuilder<TSource>( collection.Count );
@@ -67,11 +68,12 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this.SourceItems.Length;
 
-        public TCodeElement this[int index]
+        public TCodeElement this[ int index ]
         {
             get
             {
                 var targetItems = this._targetItems;
+
                 if ( targetItems == null )
                 {
                     _ = Interlocked.CompareExchange( ref this._targetItems, new TCodeElement?[this.SourceItems.Length], null );
@@ -79,6 +81,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 }
 
                 var targetItem = targetItems[index];
+
                 if ( targetItem == null )
                 {
                     targetItem = this.SourceItems[index].GetForCompilation( this._compilation! );

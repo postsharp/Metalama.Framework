@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -19,9 +19,9 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             this._symbol = symbol;
         }
-        
+
         [Memo]
-        private FieldOrPropertyInvocation Invocation => new FieldOrPropertyInvocation( this );
+        private FieldOrPropertyInvocation Invocation => new( this );
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );

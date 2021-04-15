@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl.Diagnostics
@@ -42,8 +42,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public abstract void SuppressDiagnostic( ScopedSuppression suppression );
 
-        public void SuppressDiagnostic( string id, ICodeElement scope )
-         => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+        public void SuppressDiagnostic( string id, ICodeElement scope ) => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
 
         public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
         {
@@ -61,8 +60,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        private static RoslynDiagnosticSeverity MapSeverity( Severity severity ) =>
-            severity switch
+        private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
+            => severity switch
             {
                 Severity.Error => RoslynDiagnosticSeverity.Error,
                 Severity.Hidden => RoslynDiagnosticSeverity.Hidden,
@@ -75,6 +74,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             var oldScope = this.DefaultScope;
             this.DefaultScope = scope;
+
             return new RestoreLocationCookie( this, oldScope );
         }
 

@@ -1,15 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
+using Caravela.Compiler;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaTypeSerializer : TypedObjectSerializer<CompileTimeType>
     {
@@ -23,16 +24,20 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
             if ( symbol.TypeKind == TypeKind.Array )
             {
                 var arraySymbol = (IArrayTypeSymbol) symbol;
+
                 var makeArrayTypeArguments = arraySymbol.IsSZArray
                     ? new ArgumentSyntax[0]
                     : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
+
                 var innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
+
                 return InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            innerTypeCreation,
-                            IdentifierName( "MakeArrayType" ) ) ).AddArgumentListArguments( makeArrayTypeArguments )
-                    .NormalizeWhitespace();
+                           MemberAccessExpression(
+                               SyntaxKind.SimpleMemberAccessExpression,
+                               innerTypeCreation,
+                               IdentifierName( "MakeArrayType" ) ) )
+                       .AddArgumentListArguments( makeArrayTypeArguments )
+                       .NormalizeWhitespace();
             }
 
             if ( symbol is ITypeParameterSymbol typeParameterSymbol )
@@ -41,7 +46,10 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
 
                 if ( typeParameterSymbol.DeclaringMethod is { } method )
                 {
-                    declaringExpression = CaravelaMethodInfoSerializer.CreateMethodBase( this, method.OriginalDefinition, method.ContainingType.TypeParameters.Any() ? method.ContainingType : null );
+                    declaringExpression = CaravelaMethodInfoSerializer.CreateMethodBase(
+                        this,
+                        method.OriginalDefinition,
+                        method.ContainingType.TypeParameters.Any() ? method.ContainingType : null );
                 }
                 else
                 {
@@ -56,8 +64,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 declaringExpression,
                                 IdentifierName( "GetGenericArguments" ) ) ) )
-                    .AddArgumentListArguments(
-                        Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
+                    .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( typeParameterSymbol.Ordinal ) ) ) );
             }
 
             if ( symbol is INamedTypeSymbol { IsGenericType: true, IsUnboundGenericType: false } namedSymbol &&
@@ -67,6 +74,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                 var arguments = new List<ExpressionSyntax>();
                 var self = namedSymbol;
                 var chain = new List<INamedTypeSymbol>();
+
                 while ( self != null )
                 {
                     chain.Add( self );
@@ -74,6 +82,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                 }
 
                 chain.Reverse();
+
                 foreach ( var layer in chain )
                 {
                     foreach ( var typeSymbol in layer.TypeArguments )
@@ -83,12 +92,12 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                 }
 
                 return InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            CreateTypeCreationExpressionFromSymbolLeaf( basicType ),
-                            IdentifierName( "MakeGenericType" ) ) )
-                    .AddArgumentListArguments( arguments.Select( arg => Argument( arg ) ).ToArray() )
-                    .NormalizeWhitespace();
+                           MemberAccessExpression(
+                               SyntaxKind.SimpleMemberAccessExpression,
+                               CreateTypeCreationExpressionFromSymbolLeaf( basicType ),
+                               IdentifierName( "MakeGenericType" ) ) )
+                       .AddArgumentListArguments( arguments.Select( arg => Argument( arg ) ).ToArray() )
+                       .NormalizeWhitespace();
             }
 
             return CreateTypeCreationExpressionFromSymbolLeaf( symbol );
@@ -97,17 +106,18 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
         private static ExpressionSyntax CreateTypeCreationExpressionFromSymbolLeaf( ITypeSymbol typeSymbol )
         {
             var documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
-            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof( Compiler.Intrinsics.GetRuntimeTypeHandle ), documentationId );
+            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), documentationId );
+
             return InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName( "System" ),
-                            IdentifierName( "Type" ) ),
-                        IdentifierName( "GetTypeFromHandle" ) ) )
-                .AddArgumentListArguments( Argument( token ) )
-                .NormalizeWhitespace();
+                       MemberAccessExpression(
+                           SyntaxKind.SimpleMemberAccessExpression,
+                           MemberAccessExpression(
+                               SyntaxKind.SimpleMemberAccessExpression,
+                               IdentifierName( "System" ),
+                               IdentifierName( "Type" ) ),
+                           IdentifierName( "GetTypeFromHandle" ) ) )
+                   .AddArgumentListArguments( Argument( token ) )
+                   .NormalizeWhitespace();
         }
     }
 }

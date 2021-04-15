@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -11,9 +12,9 @@ namespace Caravela.Framework.Impl
     {
         public static IEnumerable<DiagnosticDescriptor> GetDiagnosticDescriptors( Type type )
         {
-            foreach ( var field in type.GetFields( System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static ) )
+            foreach ( var field in type.GetFields( BindingFlags.Public | BindingFlags.Static ) )
             {
-                if ( field.FieldType == typeof( DiagnosticDescriptor ) )
+                if ( field.FieldType == typeof(DiagnosticDescriptor) )
                 {
                     yield return (DiagnosticDescriptor) field.GetValue( null );
                 }

@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using System;
 using System.Globalization;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         public static readonly DiagnosticFormatter Instance = new();
 
-        object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof( ICustomFormatter ) ? this : null;
+        object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : null;
 
         string ICustomFormatter.Format( string format, object? arg, IFormatProvider formatProvider )
         {
@@ -42,8 +42,10 @@ namespace Caravela.Framework.Impl.Diagnostics
                     {
                         case CodeElementKind.GenericParameter:
                             return "generic parameter";
+
                         case CodeElementKind.ManagedResource:
                             return "managed resource";
+
                         case CodeElementKind.ReferencedAssembly:
                             return "reference assembly";
 
@@ -60,10 +62,8 @@ namespace Caravela.Framework.Impl.Diagnostics
                         {
                             return arg.ToString();
                         }
-                        else
-                        {
-                            return string.Empty;
-                        }
+
+                        return string.Empty;
                     }
             }
         }

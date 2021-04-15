@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -102,6 +102,7 @@ namespace Caravela.TestFramework
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
             var sourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
+
             var expectedTransformedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
@@ -110,7 +111,7 @@ namespace Caravela.TestFramework
 
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
 
-            // Update the file in obj\transformed if it is different.
+            // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
                 "obj",

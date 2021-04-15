@@ -1,16 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.ComponentModel;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using Caravela.AspectWorkbench.CodeEditor;
 using Caravela.AspectWorkbench.ViewModels;
 using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using TextRange = System.Windows.Documents.TextRange;
 
 namespace Caravela.AspectWorkbench.Views
@@ -48,20 +48,29 @@ namespace Caravela.AspectWorkbench.Views
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
-                case nameof( MainViewModel.TestText ):
+                case nameof(MainViewModel.TestText):
                     this.sourceTextBox.Text = this._viewModel.TestText;
+
                     break;
-                case nameof( MainViewModel.ColoredTemplateDocument ):
+
+                case nameof(MainViewModel.ColoredTemplateDocument):
                     this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
+
                     break;
-                case nameof( MainViewModel.CompiledTemplateDocument ):
+
+                case nameof(MainViewModel.CompiledTemplateDocument):
                     this.compiledTemplateRichBox.Document = this._viewModel.CompiledTemplateDocument ?? new FlowDocument();
+
                     break;
-                case nameof( MainViewModel.TransformedTargetDocument ):
+
+                case nameof(MainViewModel.TransformedTargetDocument):
                     this.transformedCodeRichBox.Document = this._viewModel.TransformedTargetDocument ?? new FlowDocument();
+
                     break;
-                case nameof( MainViewModel.ErrorsDocument ):
+
+                case nameof(MainViewModel.ErrorsDocument):
                     this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
+
                     break;
             }
         }
@@ -97,6 +106,7 @@ namespace Caravela.AspectWorkbench.Views
             if ( this._viewModel.IsNewTest )
             {
                 this.SaveAsButton_Click( sender, e );
+
                 return;
             }
 
@@ -129,6 +139,7 @@ namespace Caravela.AspectWorkbench.Views
             if ( this._viewModel.TransformedTargetDocument == null )
             {
                 this._viewModel.ExpectedOutputText = "";
+
                 return;
             }
 

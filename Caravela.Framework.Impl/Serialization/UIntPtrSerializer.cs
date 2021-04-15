@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Serialization
 {
@@ -12,14 +12,14 @@ namespace Caravela.Framework.Impl.Serialization
         public override ExpressionSyntax Serialize( UIntPtr o )
         {
             return SyntaxFactory.ObjectCreationExpression(
-                    SyntaxFactory.QualifiedName(
-                        SyntaxFactory.IdentifierName( "System" ),
-                        SyntaxFactory.IdentifierName( "UIntPtr" ) ) )
-                .AddArgumentListArguments(
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.LiteralExpression(
-                            SyntaxKind.NumericLiteralExpression,
-                            SyntaxFactory.Literal( o.ToUInt64() ) ) ) );
+                                    SyntaxFactory.QualifiedName(
+                                        SyntaxFactory.IdentifierName( "System" ),
+                                        SyntaxFactory.IdentifierName( "UIntPtr" ) ) )
+                                .AddArgumentListArguments(
+                                    SyntaxFactory.Argument(
+                                        SyntaxFactory.LiteralExpression(
+                                            SyntaxKind.NumericLiteralExpression,
+                                            SyntaxFactory.Literal( o.ToUInt64() ) ) ) );
         }
     }
 }

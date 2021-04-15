@@ -1,14 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
-using System.Text;
-using System.Threading.Tasks;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
@@ -19,6 +11,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
+using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Templating
@@ -35,9 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
-        public TemplatingTestRunner( string? projectDirectory = null ) : this( projectDirectory, Array.Empty<CSharpSyntaxVisitor>() )
-        {
-        }
+        public TemplatingTestRunner( string? projectDirectory = null ) : this( projectDirectory, Array.Empty<CSharpSyntaxVisitor>() ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -78,7 +76,12 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 (CSharpCompilationOptions) result.Project.CompilationOptions! );
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
-            var templateCompilerSuccess = templateCompiler.TryCompile( compileTimeCompilation, templateSyntaxRoot, out var annotatedTemplateSyntax, out var transformedTemplateSyntax );
+
+            var templateCompilerSuccess = templateCompiler.TryCompile(
+                compileTimeCompilation,
+                templateSyntaxRoot,
+                out var annotatedTemplateSyntax,
+                out var transformedTemplateSyntax );
 
             result.AddDiagnostics( templateCompiler.Diagnostics );
 
@@ -95,6 +98,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             if ( !templateCompilerSuccess )
             {
                 result.SetFailed( "Template compiler failed." );
+
                 return result;
             }
 
@@ -103,13 +107,14 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
-            using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
+            await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )
             {
                 transformedTemplateText.Write( textWriter );
             }
 
             // Create a SyntaxTree that maps to the file we have just written.
             var oldTransformedTemplateSyntaxTree = result.TransformedTemplateSyntax.SyntaxTree;
+
             var newTransformedTemplateSyntaxTree = CSharpSyntaxTree.Create(
                 (CSharpSyntaxNode) oldTransformedTemplateSyntaxTree.GetRoot(),
                 (CSharpParseOptions?) oldTransformedTemplateSyntaxTree.Options,
@@ -133,6 +138,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 result.AddDiagnostics( emitResult.Diagnostics );
                 result.SetFailed( "The final template compilation failed." );
+
                 return result;
             }
 
@@ -177,20 +183,23 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var diagnostics = new DiagnosticListBuilder( targetMethod );
 
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
+
             var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
-                .Single( m => m.Name == "Method" )
-                .DeclaringSyntaxReferences
-                .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
-                .Single();
+                                                                                   .Single( m => m.Name == "Method" )
+                                                                                   .DeclaringSyntaxReferences
+                                                                                   .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
+                                                                                   .Single();
 
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
             var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );
+
             if ( roslynTargetMethodSymbol == null )
             {
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
             var lexicalScope = new TemplateExpansionLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+
             return new TemplateExpansionContext(
                 templateInstance,
                 targetMethod,

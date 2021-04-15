@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Project;
+using System;
+
+// ReSharper disable InconsistentNaming
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
@@ -22,8 +24,7 @@ namespace Caravela.Framework.Aspects
         private static object? _proceedImplementation;
 
         // TODO: update the exception message.
-        private static InvalidOperationException NewInvalidOperationException() =>
-            new( "Code accessing this member has to be compiled using Caravela." );
+        private static InvalidOperationException NewInvalidOperationException() => new( "Code accessing this member has to be compiled using Caravela." );
 
         /// <summary>
         /// Gets information about the element of code to which the template has been applied.

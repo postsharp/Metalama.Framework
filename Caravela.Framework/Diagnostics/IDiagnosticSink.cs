@@ -12,7 +12,6 @@ namespace Caravela.Framework.Diagnostics
     [CompileTimeOnly]
     public interface IDiagnosticSink
     {
-
         /// <summary>
         /// Reports a diagnostic by specifying its location.
         /// </summary>

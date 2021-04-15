@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections;
-using System.Collections.Generic;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using System.Collections;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -29,13 +29,15 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestBasicList()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Single>{1F, 2F, 3F}", new List<float>() { 1, 2, 3 } );
+            this.AssertSerialization( "new System.Collections.Generic.List<System.Single>{1F, 2F, 3F}", new List<float> { 1, 2, 3 } );
         }
 
         [Fact]
         public void TestListInList()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Collections.Generic.List<System.Int32>>{new System.Collections.Generic.List<System.Int32>{1}}", new List<List<int>>() { new List<int> { 1 } } );
+            this.AssertSerialization(
+                "new System.Collections.Generic.List<System.Collections.Generic.List<System.Int32>>{new System.Collections.Generic.List<System.Int32>{1}}",
+                new List<List<int>> { new() { 1 } } );
         }
 
         [Fact]

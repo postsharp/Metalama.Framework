@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
-
     public class CustomComparer<T> : IEqualityComparer<T>
     {
         public bool Equals( T? x, T? y ) => true;

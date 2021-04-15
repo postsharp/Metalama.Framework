@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -16,9 +16,9 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         private readonly List<IAspectSource> _aspectSources = new();
 
-        public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base( new PipelineStepId( aspectLayer.AspectLayerId, -1 ), aspectLayer )
-        {
-        }
+        public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base(
+            new PipelineStepId( aspectLayer.AspectLayerId, -1 ),
+            aspectLayer ) { }
 
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {

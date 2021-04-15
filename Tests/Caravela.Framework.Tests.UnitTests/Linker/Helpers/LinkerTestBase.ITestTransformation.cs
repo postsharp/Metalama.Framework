@@ -3,7 +3,6 @@
 
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
-
     public partial class LinkerTestBase
     {
         /// <summary>

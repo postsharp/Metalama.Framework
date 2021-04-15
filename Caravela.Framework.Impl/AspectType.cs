@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl
             partArrayBuilder.Add( new AspectLayer( this, null ) );
 
             // Add the parts defined in [ProvidesAspectLayers]. If it is not defined in the current type, look up in the base classes.
-            var aspectLayersAttributeType = ((ICodeElement) aspectType).Compilation.TypeFactory.GetTypeByReflectionType( typeof( ProvidesAspectLayersAttribute ) );
+            var aspectLayersAttributeType = aspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ProvidesAspectLayersAttribute) );
 
             for ( var type = this; type != null; type = type.BaseAspectType )
             {
@@ -57,7 +57,9 @@ namespace Caravela.Framework.Impl
                     // TODO: Using global state makes it impossible to test.
                     var aspectLayersAttribute =
                         AttributeDeserializer.SystemTypesDeserializer.CreateAttribute<ProvidesAspectLayersAttribute>( aspectLayersAttributeData );
+
                     partArrayBuilder.AddRange( aspectLayersAttribute.Layers.Select( partName => new AspectLayer( this, partName ) ) );
+
                     break;
                 }
             }

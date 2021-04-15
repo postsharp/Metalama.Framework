@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -14,9 +14,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// </summary>
     internal static class DiagnosticLocationHelper
     {
-
-        public static Location? GetLocation( this IDiagnosticLocation location )
-            => ((DiagnosticLocation) location).Location;
+        public static Location? GetLocation( this IDiagnosticLocation location ) => ((DiagnosticLocation) location).Location;
 
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
@@ -32,13 +30,13 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
 
             var bestDeclaration = symbol.DeclaringSyntaxReferences
-                .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
-                .FirstOrDefault();
+                                        .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
+                                        .FirstOrDefault();
 
             var syntax = bestDeclaration?.GetSyntax();
+
             switch ( syntax )
             {
-
                 case null:
                     return null;
 

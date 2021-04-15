@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -53,10 +54,13 @@ namespace Caravela.Framework.Impl.Linking
             if ( this.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.GetAttributes()
-                    .Any( x =>
-                        x.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName
-                        && x.NamedArguments
-                            .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) ) )
+                           .Any(
+                               attributeData =>
+                                   attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
+                                   && attributeData.NamedArguments
+                                                   .Any(
+                                                       pair => pair.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable)
+                                                               && (bool?) pair.Value.Value == true ) ) )
                 {
                     // Inlining is explicitly disabled for the method.
                     return false;
@@ -70,7 +74,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
-            else if ( this.IsOverride( symbol ) )
+
+            if ( this.IsOverride( symbol ) )
             {
                 var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
@@ -84,7 +89,6 @@ namespace Caravela.Framework.Impl.Linking
                     return false;
                 }
 
-                var overrideTarget = introducedMember;
                 if ( !this._symbolVersionReferenceCounts.TryGetValue( new SymbolVersion( symbol, introducedMember.AspectLayerId ), out var counter ) )
                 {
                     // This is the last override.
@@ -93,10 +97,8 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -146,7 +148,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( (IMethodSymbol) referencedSymbol );
 
-            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (AspectLayerId: o.AspectLayerId, Index: i) );
+            var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
             var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
 
             // TODO: Optimize.
@@ -157,7 +159,7 @@ namespace Caravela.Framework.Impl.Linking
                 where oal.Index < annotationLayerIndex
                 orderby oal.Index
                 select o
-                ).LastOrDefault();
+            ).LastOrDefault();
 
             if ( previousLayerOverride == null )
             {

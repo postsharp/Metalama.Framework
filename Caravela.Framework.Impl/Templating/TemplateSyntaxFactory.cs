@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Reflection;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -22,7 +22,8 @@ namespace Caravela.Framework.Impl.Templating
         [ThreadStatic]
         private static TemplateExpansionContext? _expansionContext;
 
-        internal static TemplateExpansionContext ExpansionContext => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
+        internal static TemplateExpansionContext ExpansionContext
+            => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
         internal static void Initialize( TemplateExpansionContext expansionContext )
         {
@@ -45,7 +46,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public static SyntaxKind BooleanKeyword( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
-        public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
+        public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
+            => ExpansionContext.CreateReturnStatement( returnExpression );
 
         public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicMember dynamicMember, string member )
         {
@@ -54,10 +56,13 @@ namespace Caravela.Framework.Impl.Templating
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
             }
 
-            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
+            return new RuntimeExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    dynamicMember.CreateExpression().Syntax,
+                    SyntaxFactory.IdentifierName( member ) ) );
         }
 
-        public static SyntaxToken GetUniqueIdentifier( string hint ) =>
-            SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
+        public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
     }
 }

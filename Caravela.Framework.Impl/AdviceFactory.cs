@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Sdk;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -35,7 +36,11 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IIntroduceMethodAdvice IntroduceMethod( INamedType targetType, string defaultTemplate, IntroductionScope scope, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IIntroduceMethodAdvice IntroduceMethod(
+            INamedType targetType,
+            string defaultTemplate,
+            IntroductionScope scope,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // TODO: signature matching.
             var templateMethod = this._aspectType.Methods.Single( m => m.Name == defaultTemplate );
@@ -45,6 +50,6 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IAdviceFactory ForLayer( string layerName ) => throw new System.NotImplementedException();
+        public IAdviceFactory ForLayer( string layerName ) => throw new NotImplementedException();
     }
 }

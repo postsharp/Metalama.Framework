@@ -3,14 +3,13 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
+using System;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class BuiltMember : BuiltCodeElement, IMember, IMemberLink<IMember>
     {
-        protected BuiltMember( CompilationModel compilation ) : base( compilation )
-        {
-        }
+        protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
 
         public abstract MemberBuilder MemberBuilder { get; }
 
@@ -26,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsSealed => this.MemberBuilder.IsSealed;
 
-        public bool IsReadOnly => this.MemberBuilder.IsReadOnly;
+        public bool IsReadOnly => this.MemberBuilder.IsFrozen;
 
         public bool IsOverride => this.MemberBuilder.IsOverride;
 
@@ -38,6 +37,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
 
-        public object? Target => throw new System.NotImplementedException();
+        public object? Target => throw new NotImplementedException();
     }
 }

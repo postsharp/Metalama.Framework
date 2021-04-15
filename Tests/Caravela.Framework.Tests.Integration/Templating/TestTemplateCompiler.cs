@@ -1,19 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Tests.Integration.Templating
 {
     internal class TestTemplateCompiler
     {
-        private readonly TemplateCompiler _compiler = new();
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
 
@@ -28,20 +27,19 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
         private static bool IsTemplate( ISymbol symbol )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TestTemplateAttribute) );
         }
 
         private bool IsTemplate( SyntaxNode node )
         {
             var symbol = this._semanticModel.GetDeclaredSymbol( node );
+
             if ( symbol != null )
             {
                 return IsTemplate( symbol );
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         public bool TryCompile( CSharpCompilation compileTimeCompilation, SyntaxNode rootNode, out SyntaxNode? annotatedNode, out SyntaxNode? transformedNode )
@@ -61,6 +59,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 this.Diagnostics.AddRange( e.Diagnostics );
                 annotatedNode = null;
                 transformedNode = null;
+
                 return false;
             }
         }
@@ -80,12 +79,18 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 if ( this._parent.IsTemplate( node ) )
                 {
-                    if ( !this._parent._compiler.TryCompile( this._compileTimeCompilation, node, this._parent._semanticModel, this._parent.Diagnostics, out var annotatedNode, out var transformedNode ) )
+                    if ( !TemplateCompiler.TryCompile(
+                        this._compileTimeCompilation,
+                        node,
+                        this._parent._semanticModel,
+                        this._parent.Diagnostics,
+                        out var annotatedNode,
+                        out var transformedNode ) )
                     {
                         this._parent.HasError = true;
                     }
 
-                    this._parent._transformedNodes.Add( node, new SyntaxNode[] { annotatedNode!, transformedNode! } );
+                    this._parent._transformedNodes.Add( node, new[] { annotatedNode!, transformedNode! } );
                 }
             }
         }

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.TestFramework;
 using System.IO;
 using System.Threading.Tasks;
-using Caravela.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,9 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 {
     public class HighlightingUnitTests : UnitTestBase
     {
-        public HighlightingUnitTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public HighlightingUnitTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [FromDirectory( @"Formatting" )]
@@ -28,9 +26,11 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             Assert.True( testResult.Success, testResult.ErrorMessage );
 
             var sourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
+
             var expectedHighlightedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".highlighted.html" );
+
             var expectedHighlightedSource = await File.ReadAllTextAsync( expectedHighlightedPath );
 
             var actualHighlightedPath = Path.Combine(
@@ -39,6 +39,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                 "highlighted",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".highlighted.html" );
+
             var actualHighlightedSource = await File.ReadAllTextAsync( actualHighlightedPath );
 
             Assert.Equal( expectedHighlightedSource, actualHighlightedSource );

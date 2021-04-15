@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
             this._compilation = compilation;
 
             this._weaverTypes = plugins.OfType<IAspectWeaver>()
-                .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
+                                       .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
         }
 
         public IAspectDriver GetAspectDriver( INamedType type )

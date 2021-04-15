@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
     {
         public MemberLink( ISymbol symbol )
         {
-            CodeElementLink.AssertValidType<T>( symbol );
+            symbol.AssertValidType<T>();
 
             this.Target = symbol;
         }
@@ -35,8 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public T GetForCompilation( CompilationModel compilation ) => CodeElementLink<T>.GetForCompilation( this.Target, compilation );
 
-        public string Name =>
-            this.Target switch
+        public string Name
+            => this.Target switch
             {
                 ISymbol symbol => symbol.Name,
                 IMemberBuilder builder => builder.Name,

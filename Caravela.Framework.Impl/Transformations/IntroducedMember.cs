@@ -38,7 +38,12 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public IntroducedMember( IMemberIntroduction introductor, MemberDeclarationSyntax syntax, AspectLayerId aspectLayerId, IntroducedMemberSemantic semantic, AspectLinkerOptions? linkerOptions )
+        public IntroducedMember(
+            IMemberIntroduction introductor,
+            MemberDeclarationSyntax syntax,
+            AspectLayerId aspectLayerId,
+            IntroducedMemberSemantic semantic,
+            AspectLinkerOptions? linkerOptions )
         {
             this.Introductor = introductor;
             this.Syntax = syntax;
@@ -54,7 +59,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <returns>A new instance with specified syntax.</returns>
         public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
         {
-            return new IntroducedMember( this.Introductor, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions );
+            return new( this.Introductor, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions );
         }
     }
 

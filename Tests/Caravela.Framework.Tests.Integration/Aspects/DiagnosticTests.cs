@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
-using System.Threading.Tasks;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,10 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects
 {
     public class DiagnosticTests : UnitTestBase
     {
-
-        public DiagnosticTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public DiagnosticTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Fact]
         public async Task ReportFromInitialize()

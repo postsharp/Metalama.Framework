@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Pipeline;
 using System.Linq;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl.Pipeline;
 
 namespace Caravela.TestFramework
 {
@@ -12,9 +12,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public partial class AspectTestRunner : TestRunnerBase
     {
-        public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory )
-        {
-        }
+        public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory ) { }
 
         /// <summary>
         /// Runs the aspect test with the given name and source.
@@ -26,6 +24,7 @@ namespace Caravela.TestFramework
 
             var context = new AspectTestPipelineContext( testResult );
             var pipeline = new CompileTimeAspectPipeline( context );
+
             if ( pipeline.TryExecute( out var resultCompilation ) )
             {
                 testResult.ResultCompilation = resultCompilation;

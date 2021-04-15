@@ -11,7 +11,5 @@ namespace Caravela.Framework.Project
     /// that cannot be called from run-time code.
     /// </summary>
     [AttributeUsage( AttributeTargets.All )]
-    public class CompileTimeAttribute : Attribute
-    {
-    }
+    public class CompileTimeAttribute : Attribute { }
 }

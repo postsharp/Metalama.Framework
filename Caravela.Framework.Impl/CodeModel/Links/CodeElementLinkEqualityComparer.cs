@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
@@ -22,14 +22,13 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         public bool Equals( T x, T y )
         {
             var xSymbol = GetSymbol( x );
+
             if ( xSymbol != null )
             {
                 return SymbolEqualityComparer.Default.Equals( xSymbol, GetSymbol( y ) );
             }
-            else
-            {
-                return ReferenceEquals( x.Target, y.Target );
-            }
+
+            return ReferenceEquals( x.Target, y.Target );
         }
 
         public int GetHashCode( T? obj )
@@ -38,18 +37,15 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             {
                 return 0;
             }
-            else
+
+            var xSymbol = GetSymbol( obj );
+
+            if ( xSymbol != null )
             {
-                var xSymbol = GetSymbol( obj );
-                if ( xSymbol != null )
-                {
-                    return SymbolEqualityComparer.Default.GetHashCode( xSymbol );
-                }
-                else
-                {
-                    return RuntimeHelpers.GetHashCode( obj.Target );
-                }
+                return SymbolEqualityComparer.Default.GetHashCode( xSymbol );
             }
+
+            return RuntimeHelpers.GetHashCode( obj.Target );
         }
     }
 }

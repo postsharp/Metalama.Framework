@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -28,8 +28,7 @@ namespace Caravela.Framework.Impl.Linking
                 this._referenceRegistry = referenceRegistry;
             }
 
-            internal static string GetOriginalBodyMethodName( string methodName )
-                => $"__{methodName}__OriginalBody";
+            internal static string GetOriginalBodyMethodName( string methodName ) => $"__{methodName}__OriginalBody";
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
@@ -38,13 +37,13 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach ( var member in node.Members )
                 {
-                    if ( member is not MethodDeclarationSyntax )
+                    if ( member is not MethodDeclarationSyntax method )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+
                         continue;
                     }
 
-                    var method = (MethodDeclarationSyntax) member;
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( method )!;
 
@@ -54,12 +53,11 @@ namespace Caravela.Framework.Impl.Linking
                         if ( this._referenceRegistry.IsBodyInlineable( symbol ) )
                         {
                             // Method's body is inlineable, the method itself can be removed.
-                            continue;
                         }
                         else
                         {
                             // Rewrite the method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
                             newMembers.Add( transformedMethod );
                         }
                     }
@@ -71,7 +69,7 @@ namespace Caravela.Framework.Impl.Linking
                         if ( !this._referenceRegistry.IsBodyInlineable( lastOverrideSymbol ) )
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
-                            newMembers.Add( method.WithBody( this.GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
+                            newMembers.Add( method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) ) );
                         }
                         else
                         {
@@ -79,7 +77,7 @@ namespace Caravela.Framework.Impl.Linking
                             var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
                             newMembers.Add( transformedMethod );
                         }
 
@@ -87,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // TODO: This should be inserted after all other overrides.
                             // This is target method that is not inlineable, we need to a separate declaration.
-                            newMembers.Add( this.GetOriginalBodyMethod( method ) );
+                            newMembers.Add( GetOriginalBodyMethod( method ) );
                         }
                     }
                     else
@@ -100,7 +98,7 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+            private static BlockSyntax? GetTrampolineMethodBody( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
             {
                 // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
                 var invocation =
@@ -112,10 +110,8 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return Block( ReturnStatement( invocation ) );
                 }
-                else
-                {
-                    return Block( ExpressionStatement( invocation ) );
-                }
+
+                return Block( ExpressionStatement( invocation ) );
 
                 ExpressionSyntax GetInvocationTarget()
                 {
@@ -123,10 +119,8 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         return IdentifierName( targetSymbol.Name );
                     }
-                    else
-                    {
-                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
-                    }
+
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
                 }
             }
 
@@ -138,7 +132,7 @@ namespace Caravela.Framework.Impl.Linking
                 return (BlockSyntax) inliningRewriter.VisitBlock( method.Body.AssertNotNull() ).AssertNotNull();
             }
 
-            private MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
+            private static MemberDeclarationSyntax GetOriginalBodyMethod( MethodDeclarationSyntax method )
             {
                 return method.WithIdentifier( Identifier( GetOriginalBodyMethodName( method.Identifier.ValueText ) ) );
             }

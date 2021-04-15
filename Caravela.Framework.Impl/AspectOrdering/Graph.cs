@@ -67,16 +67,18 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 {
                     var successor = successorNode.Value;
                     var successorDistance = distances[successor];
-                    var newSucccessorDistance = currentDistance + 1;
+                    var newSuccessorDistance = currentDistance + 1;
 
                     // Check that the new node is not already in the path.
                     var hasCycle = false;
                     var nodeInPathCursor = nodeInfo.NodesInPath;
+
                     while ( nodeInPathCursor != null )
                     {
                         if ( nodeInPathCursor.Value == successor )
                         {
                             hasCycle = true;
+
                             break;
                         }
 
@@ -88,12 +90,13 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         // We just discovered that the successor is part of a cycle.
                         distances[successor] = Cycle;
                         directPredecessors[successor] = current;
+
                         return successor;
                     }
 
-                    if ( successorDistance == NotDiscovered || successorDistance < newSucccessorDistance )
+                    if ( successorDistance == NotDiscovered || successorDistance < newSuccessorDistance )
                     {
-                        distances[successor] = newSucccessorDistance;
+                        distances[successor] = newSuccessorDistance;
                         directPredecessors[successor] = current;
 
                         queue.Enqueue( new NodeInfo { Node = successor, NodesInPath = new SimpleLinkedListNode<int>( successor, nodeInfo.NodesInPath ) } );

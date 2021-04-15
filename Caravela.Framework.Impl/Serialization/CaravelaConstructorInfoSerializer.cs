@@ -4,7 +4,7 @@
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaConstructorInfoSerializer : TypedObjectSerializer<CompileTimeConstructorInfo>
     {

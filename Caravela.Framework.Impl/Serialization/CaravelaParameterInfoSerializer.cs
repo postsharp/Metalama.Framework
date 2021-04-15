@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CompileTimeParameterInfo>
     {
@@ -36,19 +36,19 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
             var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CompileTimeMethodInfo( method! ) );
 
             return ElementAccessExpression(
-                    InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            retrieveMethodBase,
-                            IdentifierName( "GetParameters" ) ) ) )
-                .WithArgumentList(
-                    BracketedArgumentList(
-                        SingletonSeparatedList(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal( ordinal ) ) ) ) ) )
-                .NormalizeWhitespace();
+                       InvocationExpression(
+                           MemberAccessExpression(
+                               SyntaxKind.SimpleMemberAccessExpression,
+                               retrieveMethodBase,
+                               IdentifierName( "GetParameters" ) ) ) )
+                   .WithArgumentList(
+                       BracketedArgumentList(
+                           SingletonSeparatedList(
+                               Argument(
+                                   LiteralExpression(
+                                       SyntaxKind.NumericLiteralExpression,
+                                       Literal( ordinal ) ) ) ) ) )
+                   .NormalizeWhitespace();
         }
     }
 }

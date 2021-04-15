@@ -1,23 +1,21 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Collections;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
-
     /// <summary>
     /// A set of <see cref="TextSpan"/>.
     /// </summary>
     internal sealed class ClassifiedTextSpanCollection : IReadOnlyClassifiedTextSpanCollection
     {
-
         private readonly SkipListIndexedDictionary<int, MarkedTextSpan> _spans = new();
 
         public ClassifiedTextSpanCollection()
@@ -32,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <param name="span"></param>
         internal void Add( in TextSpan span, TextSpanClassification classification )
         {
-            for ( var i = 0; ; i++ )
+            for ( var i = 0; /* nothing */; i++ )
             {
                 if ( i > 4 )
                 {
@@ -66,7 +64,8 @@ namespace Caravela.Framework.Impl.Templating
                     if ( span.Start == previousStartSpan.Span.Start )
                     {
                         // We have hit an existing span start. Check if we need to partition the end.
-                        if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.End != span.End && previousEndSpan.Span.Start != span.End )
+                        if ( this._spans.TryGetClosestValue( span.End, out var previousEndSpan ) && previousEndSpan.Span.End != span.End
+                                                                                                 && previousEndSpan.Span.Start != span.End )
                         {
                             // We have to split the existing span that conflicts with the end of the new span.
                             var (a, b) = Split( previousEndSpan, span.End );
@@ -135,13 +134,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
             {
-                throw new ArgumentException( nameof( splitPosition ) );
+                throw new ArgumentException( nameof(splitPosition) );
             }
 
             return (new MarkedTextSpan( TextSpan.FromBounds( textSpan.Span.Start, splitPosition ), textSpan.Classification ),
-                new MarkedTextSpan(
-                    TextSpan.FromBounds( splitPosition, textSpan.Span.End ),
-                    textSpan.Classification ));
+                    new MarkedTextSpan(
+                        TextSpan.FromBounds( splitPosition, textSpan.Span.End ),
+                        textSpan.Classification ));
         }
 
         public TextSpanClassification GetCategory( in TextSpan textSpan )
@@ -152,21 +151,17 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return markedTextSpan.Classification;
                 }
-                else
-                {
-                    return TextSpanClassification.Conflict;
-                }
+
+                return TextSpanClassification.Conflict;
             }
-            else
-            {
-                // This should not happen because our partition covers [0,int.MaxValue]
-                return TextSpanClassification.Default;
-            }
+
+            // This should not happen because our partition covers [0,int.MaxValue]
+            return TextSpanClassification.Default;
         }
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )
         {
-            var previousSpan = default( ClassifiedTextSpan );
+            var previousSpan = default(ClassifiedTextSpan);
 
             foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
             {
@@ -175,7 +170,9 @@ namespace Caravela.Framework.Impl.Templating
                 if ( classifiedSpan.Classification == previousSpan.Classification &&
                      classifiedSpan.Span.Start == previousSpan.Span.End )
                 {
-                    previousSpan = new ClassifiedTextSpan( TextSpan.FromBounds( previousSpan.Span.Start, classifiedSpan.Span.End ), classifiedSpan.Classification );
+                    previousSpan = new ClassifiedTextSpan(
+                        TextSpan.FromBounds( previousSpan.Span.Start, classifiedSpan.Span.End ),
+                        classifiedSpan.Classification );
                 }
                 else
                 {
@@ -201,14 +198,14 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public IEnumerator<ClassifiedTextSpan> GetEnumerator()
-            => this.GetClassifiedSpans( new TextSpan( 0, int.MaxValue ) ).GetEnumerator();
+        public IEnumerator<ClassifiedTextSpan> GetEnumerator() => this.GetClassifiedSpans( new TextSpan( 0, int.MaxValue ) ).GetEnumerator();
 
         public override string ToString()
         {
             // Used for unit testing. Don't change the rendering logic.
             var stringBuilder = new StringBuilder();
             stringBuilder.Append( "{ " );
+
             foreach ( var pair in this._spans )
             {
                 if ( stringBuilder.Length > 2 )

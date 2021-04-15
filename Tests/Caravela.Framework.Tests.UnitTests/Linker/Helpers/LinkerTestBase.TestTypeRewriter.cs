@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
@@ -13,7 +10,12 @@ using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+// ReSharper disable SuspiciousTypeConversion.Global
 
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
@@ -35,8 +37,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             public TestTypeRewriter( TestRewriter owner )
             {
                 this._owner = owner;
-                this._observableTransformations = new();
-                this._nonObservableTransformations = new();
+                this._observableTransformations = new List<IObservableTransformation>();
+                this._nonObservableTransformations = new List<INonObservableTransformation>();
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -72,7 +74,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-
                 if ( HasPseudoAttribute( node ) )
                 {
                     var newNode = this.ProcessPseudoAttributeNode( node, out var isPseudoMember );
@@ -154,39 +155,48 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 {
                     // Introduction will create a temporary declaration, that will help us to provide values for IMethod member.
                     isPseudoMember = true;
+
                     return this.ProcessPseudoIntroduction( node, newAttributeLists, pseudoIntroductionAttribute, forceNotInlineable );
                 }
-                else if ( pseudoOverrideAttribute != null )
+
+                if ( pseudoOverrideAttribute != null )
                 {
                     isPseudoMember = true;
+
                     return this.ProcessPseudoOverride( node, newAttributeLists, pseudoOverrideAttribute, forceNotInlineable );
                 }
-                else if ( forceNotInlineable )
+
+                if ( forceNotInlineable )
                 {
                     // If pseudo attribute is on the target declaration, generate the attribute there.
                     newAttributeLists.Add(
                         AttributeList(
                             SingletonSeparatedList(
                                 Attribute(
-                                    QualifiedName(
                                         QualifiedName(
                                             QualifiedName(
-                                                IdentifierName( "Caravela" ),
-                                                IdentifierName( "Framework" ) ),
-                                            IdentifierName( "Aspects" ) ),
-                                        IdentifierName( "AspectLinkerOptions" ) ) )
-                                .WithArgumentList(
-                                    AttributeArgumentList(
-                                        SingletonSeparatedList(
-                                            AttributeArgument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) )
-                                            .WithNameEquals( NameEquals( IdentifierName( "ForceNotInlineable" ) ) ) ) ) ) ) ) );
+                                                QualifiedName(
+                                                    IdentifierName( "Caravela" ),
+                                                    IdentifierName( "Framework" ) ),
+                                                IdentifierName( "Aspects" ) ),
+                                            IdentifierName( "AspectLinkerOptions" ) ) )
+                                    .WithArgumentList(
+                                        AttributeArgumentList(
+                                            SingletonSeparatedList(
+                                                AttributeArgument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) )
+                                                    .WithNameEquals( NameEquals( IdentifierName( "ForceNotInlineable" ) ) ) ) ) ) ) ) );
                 }
 
                 isPseudoMember = false;
+
                 return node.WithAttributeLists( List( newAttributeLists ) );
             }
 
-            private MethodDeclarationSyntax ProcessPseudoIntroduction( MethodDeclarationSyntax node, List<AttributeListSyntax> newAttributeLists, AttributeSyntax attribute, bool forceNotInlineable )
+            private MethodDeclarationSyntax ProcessPseudoIntroduction(
+                MethodDeclarationSyntax node,
+                List<AttributeListSyntax> newAttributeLists,
+                AttributeSyntax attribute,
+                bool forceNotInlineable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 1 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
@@ -196,6 +206,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 var aspectName = attribute.ArgumentList.Arguments[0].ToString();
 
                 string? layerName = null;
+
                 if ( attribute.ArgumentList.Arguments.Count == 2 )
                 {
                     layerName = attribute.ArgumentList.Arguments[1].ToString();
@@ -204,35 +215,43 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 this._owner.AddAspectLayer( aspectName.AssertNotNull(), layerName );
 
                 var symbolHelperDeclaration =
-                    AssignNodeId( MarkTemporary(
-                        node.WithAttributeLists( List<AttributeListSyntax>() )
-                        .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) ) ) );
+                    AssignNodeId(
+                        MarkTemporary(
+                            node.WithAttributeLists( List<AttributeListSyntax>() )
+                                .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) ) ) );
 
                 var introductionSyntax = node.WithAttributeLists( List( newAttributeLists ) );
 
                 // Create transformation fake.
-                var transformation = (IMemberIntroduction) A.Fake<object>( o => o
-                        .Implements<IObservableTransformation>()
-                        .Implements<IMemberIntroduction>()
-                        .Implements<IMethod>()
-                        .Implements<ICodeElementInternal>()
-                        .Implements<ITestTransformation>() );
+                var transformation = (IMemberIntroduction) A.Fake<object>(
+                    o => o
+                         .Implements<IObservableTransformation>()
+                         .Implements<IMemberIntroduction>()
+                         .Implements<IMethod>()
+                         .Implements<ICodeElementInternal>()
+                         .Implements<ITestTransformation>() );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TargetSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                    new[]
-                    {
-                        new IntroducedMember(
-                            transformation,
-                            introductionSyntax,
-                            new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                            IntroducedMemberSemantic.Introduction,
-                            AspectLinkerOptions.Create( forceNotInlineable) )
-                    } );
+
+                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                 .Returns(
+                     new[]
+                     {
+                         new IntroducedMember(
+                             transformation,
+                             introductionSyntax,
+                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
+                             IntroducedMemberSemantic.Introduction,
+                             AspectLinkerOptions.Create( forceNotInlineable ) )
+                     } );
+
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId ).Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
+                 .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( node.Identifier.ValueText );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
@@ -241,17 +260,23 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 return symbolHelperDeclaration;
             }
 
-            private MethodDeclarationSyntax ProcessPseudoOverride( MethodDeclarationSyntax node, List<AttributeListSyntax> newAttributeLists, AttributeSyntax attribute, bool forceNotInlineable )
+            private MethodDeclarationSyntax ProcessPseudoOverride(
+                MethodDeclarationSyntax node,
+                List<AttributeListSyntax> newAttributeLists,
+                AttributeSyntax attribute,
+                bool forceNotInlineable )
             {
                 if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count < 2 || attribute.ArgumentList.Arguments.Count > 3 )
                 {
-                    throw new ArgumentException( "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
+                    throw new ArgumentException(
+                        "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
                 }
 
                 var overriddenElementName = attribute.ArgumentList.Arguments[0].ToString();
                 var aspectName = attribute.ArgumentList.Arguments[1].ToString();
 
                 string? layerName = null;
+
                 if ( attribute.ArgumentList.Arguments.Count == 3 )
                 {
                     layerName = attribute.ArgumentList.Arguments[2].ToString();
@@ -259,44 +284,52 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 this._owner.AddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IMemberIntroduction) A.Fake<object>( o => o
-                    .Implements<INonObservableTransformation>()
-                    .Implements<IMemberIntroduction>()
-                    .Implements<IOverriddenElement>()
-                    .Implements<ITestTransformation>() );
+                var transformation = (IMemberIntroduction) A.Fake<object>(
+                    o => o
+                         .Implements<INonObservableTransformation>()
+                         .Implements<IMemberIntroduction>()
+                         .Implements<IOverriddenElement>()
+                         .Implements<ITestTransformation>() );
 
-                var methodBodyRewriter = new TestMethodBodyRewriter( this._owner, node, aspectName, layerName );
+                var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
                 var rewrittenMethodBody = methodBodyRewriter.VisitBlock( node.Body.AssertNotNull() );
 
                 var overrideSyntax = node.WithAttributeLists( List( newAttributeLists ) ).WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
+
                 var symbolHelperDeclaration =
-                    AssignNodeId( MarkTemporary(
-                        node.WithAttributeLists( List<AttributeListSyntax>() )
-                        .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) )
-                        .WithBody(
-                            node.ReturnType.ToString() == "void"
-                            ? Block()
-                            : Block(
-                                ReturnStatement(
-                                    LiteralExpression(
-                                    SyntaxKind.DefaultLiteralExpression,
-                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) );
+                    AssignNodeId(
+                        MarkTemporary(
+                            node.WithAttributeLists( List<AttributeListSyntax>() )
+                                .WithIdentifier( Identifier( node.Identifier.ValueText + "__SymbolHelper" ) )
+                                .WithBody(
+                                    node.ReturnType.ToString() == "void"
+                                        ? Block()
+                                        : Block(
+                                            ReturnStatement(
+                                                LiteralExpression(
+                                                    SyntaxKind.DefaultLiteralExpression,
+                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) ).Returns(
-                    new[]
-                    {
-                        new IntroducedMember(
-                            transformation,
-                            overrideSyntax,
-                            new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                            IntroducedMemberSemantic.MethodOverride,
-                            AspectLinkerOptions.Create( forceNotInlineable ) )
-                    } );
+
+                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                 .Returns(
+                     new[]
+                     {
+                         new IntroducedMember(
+                             transformation,
+                             overrideSyntax,
+                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
+                             IntroducedMemberSemantic.MethodOverride,
+                             AspectLinkerOptions.Create( forceNotInlineable ) )
+                     } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
-                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId ).Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
+                A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
+                 .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenElementName ).Returns( overriddenElementName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 

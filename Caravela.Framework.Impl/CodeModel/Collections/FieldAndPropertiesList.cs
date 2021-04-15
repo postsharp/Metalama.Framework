@@ -1,14 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
-
     internal class FieldAndPropertiesList : IFieldOrPropertyList
     {
         private readonly IFieldList _fields;
@@ -20,8 +19,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             this._properties = properties;
         }
 
-        public IEnumerable<IFieldOrProperty> OfName( string name )
-            => this._fields.OfName( name ).Concat<IFieldOrProperty>( this._properties.OfName( name ) );
+        public IEnumerable<IFieldOrProperty> OfName( string name ) => this._fields.OfName( name ).Concat<IFieldOrProperty>( this._properties.OfName( name ) );
 
         public IEnumerator<IFieldOrProperty> GetEnumerator() => this._fields.Concat<IFieldOrProperty>( this._properties ).GetEnumerator();
 
@@ -37,10 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
                 {
                     return this._fields[index];
                 }
-                else
-                {
-                    return this._properties[index - this._fields.Count];
-                }
+
+                return this._properties[index - this._fields.Count];
             }
         }
     }

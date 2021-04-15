@@ -1,22 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal partial class Method : MethodBase, IMethod
     {
-
-        public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
-        {
-        }
+        public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 
         [Memo]
         public IParameter ReturnParameter => new MethodReturnParameter( this );
@@ -25,16 +23,15 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
 
         [Memo]
-        public IGenericParameterList GenericParameters =>
-            new GenericParameterList(
+        public IGenericParameterList GenericParameters
+            => new GenericParameterList(
                 this.MethodSymbol.TypeParameters.Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ),
                 this.Compilation );
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 
         [Memo]
-        public IReadOnlyList<IType> GenericArguments =>
-            this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
+        public IReadOnlyList<IType> GenericArguments => this.MethodSymbol.TypeArguments.Select( this.Compilation.Factory.GetIType ).ToImmutableList();
 
         public bool IsOpenGeneric => this.GenericArguments.Any( ga => ga is IGenericParameter ) || this.DeclaringType.IsOpenGeneric;
 
@@ -42,7 +39,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool HasBase => true;
 
-        public IMethodInvocation Base => new MethodInvocation( this ).Base;
+        public IMethodInvocation Base => throw new NotImplementedException();
 
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {

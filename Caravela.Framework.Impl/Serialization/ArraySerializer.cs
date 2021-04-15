@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -22,12 +22,14 @@ namespace Caravela.Framework.Impl.Serialization
         public ExpressionSyntax Serialize( Array array )
         {
             var elementType = array.GetType().GetElementType()!;
+
             if ( array.Rank > 1 )
             {
                 throw SerializationDiagnosticDescriptors.MultidimensionalArray.CreateException( array.GetType() );
             }
 
             var lt = new List<ExpressionSyntax>();
+
             foreach ( var o in array )
             {
                 ObjectSerializer.ThrowIfStackTooDeep( o );
@@ -35,18 +37,14 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             return ArrayCreationExpression(
-                    ArrayType(
-                            ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
-                        .WithRankSpecifiers(
-                            SingletonList(
-                                ArrayRankSpecifier(
-                                    SingletonSeparatedList<ExpressionSyntax>(
-                                        OmittedArraySizeExpression() ) ) ) ) )
-                .WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.ArrayInitializerExpression,
-                        SeparatedList( lt ) ) )
-                .NormalizeWhitespace();
+                       ArrayType( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
+                           .WithRankSpecifiers(
+                               SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
+                   .WithInitializer(
+                       InitializerExpression(
+                           SyntaxKind.ArrayInitializerExpression,
+                           SeparatedList( lt ) ) )
+                   .NormalizeWhitespace();
         }
     }
 }

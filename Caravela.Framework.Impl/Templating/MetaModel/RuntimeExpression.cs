@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -83,14 +83,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         }
 
         public RuntimeExpression( ExpressionSyntax syntax, IType type, bool isReferenceable = false )
-            : this( syntax, type.GetSymbol(), isReferenceable )
-        {
-        }
+            : this( syntax, type.GetSymbol(), isReferenceable ) { }
 
         public RuntimeExpression( ExpressionSyntax syntax )
-            : this( syntax, (ITypeSymbol?) null, false )
-        {
-        }
+            : this( syntax, (ITypeSymbol?) null, false ) { }
 
         public static ExpressionSyntax GetSyntaxFromDynamic( object? value )
             => FromDynamic( value )?.Syntax ?? SyntaxFactory.LiteralExpression( SyntaxKind.NullKeyword );
@@ -104,7 +100,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 // This case is used to simplify tests.
                 IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
 
-                _ => throw new ArgumentOutOfRangeException( nameof( value ) )
+                _ => throw new ArgumentOutOfRangeException( nameof(value) )
             };
 
         public static RuntimeExpression[]? FromDynamic( object[]? array )
@@ -115,16 +111,15 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 {
                     return Array.Empty<RuntimeExpression>();
                 }
-                else
-                {
-                    var newArray = new RuntimeExpression[array.Length];
-                    for ( var i = 0; i < newArray.Length; i++ )
-                    {
-                        newArray[i] = FromDynamic( array[i] ).AssertNotNull();
-                    }
 
-                    return newArray;
+                var newArray = new RuntimeExpression[array.Length];
+
+                for ( var i = 0; i < newArray.Length; i++ )
+                {
+                    newArray[i] = FromDynamic( array[i] ).AssertNotNull();
                 }
+
+                return newArray;
             }
 
             return array switch
@@ -151,12 +146,10 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             {
                 return this.Syntax;
             }
-            else
-            {
-                var cast = (ExpressionSyntax) CSharpSyntaxGenerator.Instance.CastExpression( targetTypeSymbol, this.Syntax );
 
-                return addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast;
-            }
+            var cast = (ExpressionSyntax) CSharpSyntaxGenerator.Instance.CastExpression( targetTypeSymbol, this.Syntax );
+
+            return addsParenthesis ? SyntaxFactory.ParenthesizedExpression( cast ) : cast;
         }
     }
 }

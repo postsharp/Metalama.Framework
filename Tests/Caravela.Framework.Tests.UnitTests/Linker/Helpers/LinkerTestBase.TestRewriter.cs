@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
@@ -27,11 +27,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             {
                 return node;
             }
-            else
-            {
-                var id = Interlocked.Increment( ref _nextNodeId ).ToString();
-                return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
-            }
+
+            var id = Interlocked.Increment( ref _nextNodeId ).ToString();
+
+            return node.WithAdditionalAnnotations( new SyntaxAnnotation( _testNodeIdAnnotationId, id ) );
         }
 
         private static string GetNodeId( SyntaxNode node )
@@ -60,7 +59,6 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
         /// </summary>
         private class TestRewriter : CSharpSyntaxRewriter
         {
-
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<IObservableTransformation> _observableTransformations;
             private readonly List<INonObservableTransformation> _nonObservableTransformations;

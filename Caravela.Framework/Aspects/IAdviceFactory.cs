@@ -28,7 +28,11 @@ namespace Caravela.Framework.Aspects
         /// <param name="scope">Introduction scope.</param>
         /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns></returns>
-        IIntroduceMethodAdvice IntroduceMethod( INamedType type, string defaultTemplate, IntroductionScope scope = IntroductionScope.Default, AspectLinkerOptions? aspectLinkerOptions = null );
+        IIntroduceMethodAdvice IntroduceMethod(
+            INamedType type,
+            string defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
 
         /// <summary>
         /// Gets a factory objects that allows to add advices to other layers than the default one.

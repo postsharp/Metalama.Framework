@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// <returns>The type's fully qualified name, such as "System.Int32".</returns>
         public static string ToCSharpQualifiedName( Type type )
         {
-            return GetCSTypeName( type );
+            return GetCSharpTypeName( type );
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="type">The type.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">type.</exception>
-        private static string GetCSTypeName( this Type type )
+        private static string GetCSharpTypeName( this Type type )
         {
             // https://stackoverflow.com/a/45718771/1580088
             // if ( type == typeof(string) )
@@ -54,23 +54,23 @@ namespace Caravela.Framework.Impl.Serialization
             {
                 return $"{ToGenericTypeString( type )}";
             }
-            else if ( type.IsArray )
+
+            if ( type.IsArray )
             {
                 var arrayLength = new List<string>();
+
                 for ( var i = 0; i < type.GetArrayRank(); i++ )
                 {
                     arrayLength.Add( "[]" );
                 }
 
-                return GetCSTypeName( type.GetElementType() ) + string.Join( "", arrayLength ).Replace( "+", "." );
+                return GetCSharpTypeName( type.GetElementType() ) + string.Join( "", arrayLength ).Replace( "+", "." );
             }
-            else
-            {
-                return type.FullName.Replace( "+", "." );
-            }
+
+            return type.FullName.Replace( "+", "." );
         }
 
-        private static string ToCSReservatedWord( this Type type, bool fullName )
+        private static string ToCSharpReservedWord( this Type type, bool fullName )
         {
             // if ( type == typeof(string) )
             // {
@@ -95,10 +95,8 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     return type.FullName;
                 }
-                else
-                {
-                    return type.Name;
-                }
+
+                return type.Name;
             }
         }
 
@@ -109,10 +107,14 @@ namespace Caravela.Framework.Impl.Serialization
                 return t.Name; // Generic argument stub
             }
 
-            var isGeneric = t.IsGenericType || t.FullName.IndexOf( '`' ) >= 0; // an array of generic types is not considered a generic type although it still have the genetic notation
+            var isGeneric = t.IsGenericType
+                            || t.FullName.IndexOf( '`' )
+                            >= 0; // an array of generic types is not considered a generic type although it still have the genetic notation
+
             var isArray = !t.IsGenericType && t.FullName.IndexOf( '`' ) >= 0;
             var genericType = t;
-            while ( genericType.IsNested && genericType.DeclaringType.GetGenericArguments().Count() == t.GetGenericArguments().Count() )
+
+            while ( genericType.IsNested && genericType.DeclaringType.GetGenericArguments().Length == t.GetGenericArguments().Length )
             {
                 // Non generic class in a generic class is also considered in Type as being generic
 
@@ -121,20 +123,25 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( !isGeneric )
             {
-                return ToCSReservatedWord( t, true ).Replace( '+', '.' );
+                return ToCSharpReservedWord( t, true ).Replace( '+', '.' );
             }
 
             var
                 arguments = arg.Any()
                     ? arg
                     : t.GetGenericArguments(); // if arg has any then we are in the recursive part, note that we always must take arguments from t, since only t (the last one) will actually have the constructed type arguments and all others will just contain the generic parameters
-            var genericTypeName = genericType.ToCSReservatedWord( true );
+
+            var genericTypeName = genericType.ToCSharpReservedWord( true );
+
             if ( genericType.IsNested )
             {
-                var argumentsToPass = arguments.Take( genericType.DeclaringType.GetGenericArguments().Count() )
-                    .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDfintion, and only when all parameters including of the innermost are set
-                arguments = arguments.Skip( argumentsToPass.Count() ).ToArray();
-                genericTypeName = genericType.DeclaringType.ToGenericTypeString( argumentsToPass ) + "." + ToCSReservatedWord( genericType, false ); // Recursive
+                var argumentsToPass = arguments.Take( genericType.DeclaringType.GetGenericArguments().Length )
+                                               .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDefinition, and only when all parameters including of the innermost are set
+
+                arguments = arguments.Skip( argumentsToPass.Length ).ToArray();
+
+                genericTypeName =
+                    genericType.DeclaringType.ToGenericTypeString( argumentsToPass ) + "." + ToCSharpReservedWord( genericType, false ); // Recursive
             }
 
             if ( isArray )
@@ -149,6 +156,7 @@ namespace Caravela.Framework.Impl.Serialization
 
                 // Recursive
                 genericTypeName = genericTypeName + "<" + genericArgs + ">";
+
                 if ( isArray )
                 {
                     genericTypeName += "[]";
@@ -157,12 +165,14 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( t != genericType )
             {
-                genericTypeName += t.FullName.Replace( genericType.ToCSReservatedWord( true ), "" ).Replace( '+', '.' );
+                genericTypeName += t.FullName.Replace( genericType.ToCSharpReservedWord( true ), "" ).Replace( '+', '.' );
             }
 
             if ( genericTypeName.IndexOf( '[' ) >= 0 && genericTypeName.IndexOf( ']' ) != genericTypeName.IndexOf( '[' ) + 1 )
             {
-                genericTypeName = genericTypeName.Substring( 0, genericTypeName.IndexOf( '[' ) ); // For a non generic class nested in a generic class we will still have the type parameters at the end
+                genericTypeName = genericTypeName.Substring(
+                    0,
+                    genericTypeName.IndexOf( '[' ) ); // For a non generic class nested in a generic class we will still have the type parameters at the end
             }
 
             return genericTypeName;

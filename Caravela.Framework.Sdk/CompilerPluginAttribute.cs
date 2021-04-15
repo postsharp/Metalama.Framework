@@ -5,7 +5,6 @@ using System;
 
 namespace Caravela.Framework.Sdk
 {
-
     // IMPORTANT: If you rename this class, or move it to a different namespace, you also have to update 
     // src\Compilers\Core\Portable\DiagnosticAnalyzer\AnalyzerFileReference.cs in the Caravela.Compiler repo.
     // Plus
@@ -15,7 +14,5 @@ namespace Caravela.Framework.Sdk
     /// and must be annotated with this custom attribute.
     /// </summary>
     [AttributeUsage( AttributeTargets.Class )]
-    public class CompilerPluginAttribute : Attribute
-    {
-    }
+    public class CompilerPluginAttribute : Attribute { }
 }

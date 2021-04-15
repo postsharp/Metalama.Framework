@@ -14,10 +14,10 @@ namespace Caravela.Framework.Impl.Linking
     //   * A1, which contains annotated call to A.
     //   * A2, which contains annotated call to A.
     //
-    // Uninlined linked code (if no inlining is possible) contains:
+    // Non-inlined linked code (if no inlining is possible) contains:
     //   * A, which contains only a call A1.
     //   * A1, which replaces the annotated call with a call to A2.
-    //   * A2, which replaced the annotatated call with a call to Ao.
+    //   * A2, which replaced the annotated call with a call to Ao.
     //   * Ao, which contains the original method body.
     //
     // When inlining we need to know whether A1, A2 and Ao will be called from multiple places. This information is coming from analysis phase.
@@ -29,11 +29,9 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal partial class LinkerLinkingStep
     {
-        public static LinkerLinkingStep Instance { get; } = new LinkerLinkingStep();
+        public static LinkerLinkingStep Instance { get; } = new();
 
-        private LinkerLinkingStep()
-        {
-        }
+        private LinkerLinkingStep() { }
 
         public AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {

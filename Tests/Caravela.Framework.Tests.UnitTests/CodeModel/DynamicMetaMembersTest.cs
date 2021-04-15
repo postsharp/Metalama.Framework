@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
@@ -34,6 +34,7 @@ class TargetCode
     }
 
 }";
+
             var generator = CSharpSyntaxGenerator.Instance;
 
             var compilation = CreateCompilation( code );
@@ -73,7 +74,8 @@ class TargetCode
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
 
             // Test in/out.
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+
             AssertEx.DynamicEquals(
                 byRefMethod.Invoke(
                     null,
@@ -103,11 +105,12 @@ class TargetCode
     {
     }
 }";
+
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
-            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( string ) )! );
-            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( int ) )! );
+            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) )! );
+            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) )! );
 
             AssertEx.DynamicEquals(
                 method.Invoke( null ),
@@ -125,6 +128,7 @@ class TargetCode
         void Local() {}
     }
 }";
+
             var compilation = CreateCompilation( code );
             var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
@@ -134,8 +138,7 @@ class TargetCode
 
             AssertEx.ThrowsWithDiagnostic(
                 GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction,
-                () => localFunction.Invoke(
-                    new RuntimeExpression( SyntaxFactory.ThisExpression() ) ) );
+                () => localFunction.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression() ) ) );
         }
 
         [Fact]
@@ -148,18 +151,19 @@ class TargetCode
     {
     }
 }";
+
             var compilation = CreateCompilation( code );
             var method = compilation.DeclaredTypes.Single().Methods.Single();
 
             AdviceParameterList adviceParameterList = new( method );
 
-            AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
-            AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
+            _ = AssertEx.DynamicEquals( adviceParameterList[0].Value, @"i" );
+            _ = AssertEx.DynamicEquals( adviceParameterList[1].Value, @"j" );
 
             Assert.Equal( adviceParameterList[0], adviceParameterList["i"] );
             Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );
 
-            Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof( int ) ) ).Name );
+            Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof(int) ) )!.Name );
         }
 
         [Fact]
@@ -171,6 +175,7 @@ class TargetCode
     TargetCode P { get; set; }
     int this[int index] => 42;
 }";
+
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.Single();

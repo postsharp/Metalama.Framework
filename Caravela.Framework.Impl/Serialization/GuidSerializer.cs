@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -26,22 +26,24 @@ namespace Caravela.Framework.Impl.Serialization
             var i = b[13];
             var j = b[14];
             var k = b[15];
+
             return ObjectCreationExpression(
-                    QualifiedName(
-                        IdentifierName( "System" ),
-                        IdentifierName( "Guid" ) ) )
-                .AddArgumentListArguments(
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) ).NormalizeWhitespace();
+                       QualifiedName(
+                           IdentifierName( "System" ),
+                           IdentifierName( "Guid" ) ) )
+                   .AddArgumentListArguments(
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
+                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
+                   .NormalizeWhitespace();
         }
     }
 }

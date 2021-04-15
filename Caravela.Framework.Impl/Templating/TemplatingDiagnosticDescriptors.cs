@@ -7,6 +7,8 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
+#pragma warning disable SA1118 // Allow multi-line parameters.
+
     internal static class TemplatingDiagnosticDescriptors
     {
         // Reserved range 100-199
@@ -49,8 +51,10 @@ namespace Caravela.Framework.Impl.Templating
         internal static readonly StrongDiagnosticDescriptor<string> SplitVariables
             = new(
                 "CR0105",
-                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
-                "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; "
+                + "one for run-time variables, and one for compile-time variables",
+                "Local variables {0} cannot be declared in the same declaration. "
+                + "Split them into different declarations; one for run-time variables, and one for compile-time variables",
                 _category,
                 DiagnosticSeverity.Error );
 

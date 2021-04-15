@@ -1,10 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
@@ -12,6 +8,10 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl
         {
             this.AspectType = aspectType;
 
-            var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof( IAdviceAttribute ) ).AssertNotNull();
+            var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IAdviceAttribute) ).AssertNotNull();
 
             this._declarativeAdviceAttributes =
                 (from method in aspectType.Methods
@@ -36,7 +36,6 @@ namespace Caravela.Framework.Impl
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
         {
-
             return aspectInstance.CodeElement switch
             {
                 ICompilation compilation => this.EvaluateAspect( compilation, aspectInstance ),
@@ -54,24 +53,24 @@ namespace Caravela.Framework.Impl
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this.AspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( IAspect<T> ) );
+                var interfaceType = this.AspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(IAspect<T>) );
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
                         codeElement.GetDiagnosticLocation(),
                         (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
 
-                return new(
+                return new AspectInstanceResult(
                     false,
                     new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
                     ImmutableArray<IAspectSource>.Empty );
             }
 
-            var declarativeAdvices = this._declarativeAdviceAttributes.Select( x => this.CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
+            var declarativeAdvices =
+                this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
 
-            var aspectBuilder = new AspectBuilder<T>(
-                codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
+            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices, new AdviceFactory( this.AspectType, aspect ) );
 
             using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {
@@ -83,10 +82,10 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
             where T : ICodeElement
         {
-            return AdviceAttributeFactory.CreateAdvice( attribute, aspect, codeElement, templateMethod );
+            return attribute.CreateAdvice( aspect, codeElement, templateMethod );
         }
     }
 }

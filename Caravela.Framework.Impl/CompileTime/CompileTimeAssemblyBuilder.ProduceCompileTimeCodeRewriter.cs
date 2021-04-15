@@ -1,12 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -17,8 +16,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
-
-            private readonly TemplateCompiler _templateCompiler;
             private readonly Compilation _compileTimeCompilation;
             private readonly List<Diagnostic> _diagnostics = new();
 
@@ -30,12 +27,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public ProduceCompileTimeCodeRewriter(
                 ISymbolClassifier symbolClassifier,
-                TemplateCompiler templateCompiler,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation )
                 : base( symbolClassifier, runTimeCompilation )
             {
-                this._templateCompiler = templateCompiler;
                 this._compileTimeCompilation = compileTimeCompilation;
             }
 
@@ -69,18 +64,22 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 case MethodDeclarationSyntax method:
                                     members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+
                                     break;
+
                                 case TypeDeclarationSyntax nestedType:
                                     members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ).AssertNotNull() );
+
                                     break;
+
                                 default:
                                     members.Add( member );
+
                                     break;
                             }
                         }
 
                         return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
-
                 }
             }
 
@@ -91,7 +90,13 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( methodSymbol != null && this.SymbolClassifier.IsTemplate( methodSymbol ) )
                 {
                     var success =
-                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedNode );
+                        TemplateCompiler.TryCompile(
+                            this._compileTimeCompilation,
+                            node,
+                            this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                            this._diagnostics,
+                            out _,
+                            out var transformedNode );
 
                     if ( success )
                     {
@@ -117,10 +122,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
 
             public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
@@ -131,10 +134,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
 
             // TODO: top-level statements?

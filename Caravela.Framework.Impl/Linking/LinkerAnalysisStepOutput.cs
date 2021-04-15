@@ -7,11 +7,14 @@ using Microsoft.CodeAnalysis.CSharp;
 namespace Caravela.Framework.Impl.Linking
 {
     /// <summary>
-    /// Output of the linker's analysis.
+    /// Output of the linker analysis.
     /// </summary>
     internal class LinkerAnalysisStepOutput
     {
-        public LinkerAnalysisStepOutput( ImmutableDiagnosticList diagnostics, CSharpCompilation intermediateCompilation, LinkerAnalysisRegistry analysisRegistry )
+        public LinkerAnalysisStepOutput(
+            ImmutableDiagnosticList diagnostics,
+            CSharpCompilation intermediateCompilation,
+            LinkerAnalysisRegistry analysisRegistry )
         {
             this.Diagnostics = diagnostics;
             this.IntermediateCompilation = intermediateCompilation;

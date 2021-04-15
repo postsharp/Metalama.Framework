@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        private PropertyInvocation Invocation => new PropertyInvocation( this ); 
+        private PropertyInvocation Invocation => new( this );
 
         public override ISymbol Symbol => this._symbol;
 
@@ -37,8 +37,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IParameterList Parameters =>
-            new ParameterList(
+        public IParameterList Parameters
+            => new ParameterList(
                 this._symbol.Parameters.Select( p => new CodeElementLink<IParameter>( p ) ),
                 this.Compilation );
 

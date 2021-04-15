@@ -6,9 +6,8 @@ namespace Caravela.Framework.Impl.Linking
     /// <summary>
     /// Transforms the initial C# compilation using all transformations and aspect ordering determined in earlier stages.
     /// </summary>
-    internal partial class AspectLinker
+    internal class AspectLinker
     {
-
         private readonly AspectLinkerInput _input;
 
         public AspectLinker( AspectLinkerInput input )
