@@ -81,8 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                             var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
-                            var transformedMethod = method.WithBody(
-                                this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
 
                             newMembers.Add( transformedMethod );
                         }
