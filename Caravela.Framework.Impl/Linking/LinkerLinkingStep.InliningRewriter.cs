@@ -169,11 +169,15 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         return newBlock.WithStatements( List( statements ) );
                     }
-
-                    return newBlock;
+                    else
+                    {
+                        return newBlock;
+                    }
                 }
-
-                return newSyntax;
+                else
+                {
+                    return newSyntax;
+                }
             }
 
             // TODO: This should move to a separate rewriter and unite with what template compiler currently does (or should do).
@@ -237,8 +241,10 @@ namespace Caravela.Framework.Impl.Linking
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );
                 }
-
-                return node.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
+                else
+                {
+                    return node.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
+                }
             }
 
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
@@ -271,16 +277,18 @@ namespace Caravela.Framework.Impl.Linking
                     //       This is satisfied for all proceed().
 
                     // Inline the method body.
-                    return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
+                    return this.GetInlinedMethodBody( resolvedSymbol, this.GetAssignmentVariableName( node.Left ) );
                 }
-
-                // Replace with invocation of the correct override.
-                return node.Update(
-                    node.Left,
-                    node.OperatorToken,
-                    invocation.Update(
-                        ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
-                        invocation.ArgumentList ) );
+                else
+                {
+                    // Replace with invocation of the correct override.
+                    return node.Update(
+                        node.Left,
+                        node.OperatorToken,
+                        invocation.Update(
+                            this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                            invocation.ArgumentList ) );
+                }
             }
 
             private BlockSyntax? GetInlinedMethodBody( IMethodSymbol calledMethodSymbol, string? returnVariableName )
@@ -303,14 +311,16 @@ namespace Caravela.Framework.Impl.Linking
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;
                 }
-
-                // The method does not have simple control flow - we should expect goto and thus create a label.
-                // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
-                return
-                    Block(
-                            rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( GetReturnLabelName( labelId ), EmptyStatement() ) )
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                else
+                {
+                    // The method does not have simple control flow - we should expect goto's and thus create a label.
+                    // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
+                    return
+                        Block(
+                                rewrittenBlock.AssertNotNull(),
+                                LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ) )
+                            .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                }
             }
 
             /// <summary>
@@ -320,7 +330,7 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="expression">Call expression.</param>
             /// <param name="methodSymbol"></param>
             /// <returns></returns>
-            private static ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
+            private ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
@@ -331,8 +341,10 @@ namespace Caravela.Framework.Impl.Linking
                         memberAccess.OperatorToken,
                         IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
                 }
-
-                return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                else
+                {
+                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                }
             }
 
             public override SyntaxNode? VisitReturnStatement( ReturnStatementSyntax node )
@@ -376,52 +388,66 @@ namespace Caravela.Framework.Impl.Linking
                                             IdentifierName( this._returnVariableName ),
                                             node.Expression ) );
                             }
-
-                            return
-                                Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( this._returnVariableName.AssertNotNull() ),
-                                                node.Expression ) ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) ) )
-                                    .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                            else
+                            {
+                                return
+                                    Block(
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                    IdentifierName( this._returnVariableName.AssertNotNull() ),
+                                                    node.Expression ) ),
+                                            GotoStatement(
+                                                SyntaxKind.GotoStatement,
+                                                IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) )
+                                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                            }
                         }
-
-                        return node;
+                        else
+                        {
+                            return node;
+                        }
                     }
-
+                    else
+                    {
+                        if ( this._returnVariableName == null )
+                        {
+                            if ( this._analysisRegistry.HasSimpleReturnControlFlow( this._contextSymbol ) )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return
+                                    GotoStatement(
+                                        SyntaxKind.GotoStatement,
+                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                            }
+                        }
+                        else
+                        {
+                            // This happens when a template assigns result into a variable but is then applied on a void method.
+                            return
+                                GotoStatement(
+                                    SyntaxKind.GotoStatement,
+                                    IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                        }
+                    }
+                }
+                else
+                {
                     if ( this._returnVariableName == null )
                     {
-                        if ( this._analysisRegistry.HasSimpleReturnControlFlow( this._contextSymbol ) )
-                        {
-                            return null;
-                        }
-
-                        return
-                            GotoStatement(
-                                SyntaxKind.GotoStatement,
-                                IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
+                        return node;
                     }
-
-                    // This happens when a template assigns result into a variable but is then applied on a void method.
-                    return
-                        GotoStatement(
-                            SyntaxKind.GotoStatement,
-                            IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
+                    else
+                    {
+                        throw new AssertionFailedException();
+                    }
                 }
-
-                if ( this._returnVariableName == null )
-                {
-                    return node;
-                }
-
-                throw new AssertionFailedException();
             }
 
-            private static string GetAssignmentVariableName( ExpressionSyntax left )
+            private string GetAssignmentVariableName( ExpressionSyntax left )
             {
                 switch ( left.Kind() )
                 {
@@ -436,7 +462,7 @@ namespace Caravela.Framework.Impl.Linking
             private int GetNextReturnLabelId() => (this._returnLabelId ?? 0) + 1;
 
             // TODO: Create more contextual return label names.
-            private static string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
+            private string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
         }
     }
 }

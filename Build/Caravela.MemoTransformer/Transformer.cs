@@ -41,7 +41,7 @@ namespace Caravela.MemoTransformer
             public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 if ( !node.AttributeLists.SelectMany( al => al.Attributes )
-                          .Any( a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute" ) )
+                    .Any( a => a.Name.ToString() == "Memo" || a.Name.ToString() == "MemoAttribute" ) )
                 {
                     return node;
                 }
@@ -82,8 +82,8 @@ namespace Caravela.MemoTransformer
                     ReturnStatement( IdentifierName( fieldName ) ) );
 
                 var newNode = node.WithExpressionBody( null )
-                                  .WithSemicolonToken( default )
-                                  .AddAccessorListAccessors( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, block ) );
+                    .WithSemicolonToken( default )
+                    .AddAccessorListAccessors( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, block ) );
 
                 // PropertyType? field;
                 this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );

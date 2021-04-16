@@ -121,11 +121,11 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IConstructor? StaticConstructor
             => this.TypeSymbol
-                   .GetMembers()
-                   .OfType<IMethodSymbol>()
-                   .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                   .Select( m => this.Compilation.Factory.GetConstructor( m ) )
-                   .SingleOrDefault();
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where( m => m.MethodKind == MethodKind.StaticConstructor )
+                .Select( m => this.Compilation.Factory.GetConstructor( m ) )
+                .SingleOrDefault();
 
         public bool IsPartial
         {

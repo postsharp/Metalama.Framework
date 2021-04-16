@@ -27,8 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             {
                 return SymbolEqualityComparer.Default.Equals( xSymbol, GetSymbol( y ) );
             }
-
-            return ReferenceEquals( x.Target, y.Target );
+            else
+            {
+                return ReferenceEquals( x.Target, y.Target );
+            }
         }
 
         public int GetHashCode( T? obj )
@@ -37,15 +39,19 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             {
                 return 0;
             }
-
-            var xSymbol = GetSymbol( obj );
-
-            if ( xSymbol != null )
+            else
             {
-                return SymbolEqualityComparer.Default.GetHashCode( xSymbol );
-            }
+                var xSymbol = GetSymbol( obj );
 
-            return RuntimeHelpers.GetHashCode( obj.Target );
+                if ( xSymbol != null )
+                {
+                    return SymbolEqualityComparer.Default.GetHashCode( xSymbol );
+                }
+                else
+                {
+                    return RuntimeHelpers.GetHashCode( obj.Target );
+                }
+            }
         }
     }
 }

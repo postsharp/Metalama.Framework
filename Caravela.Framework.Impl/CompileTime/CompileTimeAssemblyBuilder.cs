@@ -40,13 +40,13 @@ namespace Caravela.Framework.Impl.CompileTime
             var caravelaAssemblies = new[] { "Caravela.Framework.dll", "Caravela.Framework.Sdk.dll", "Caravela.Framework.Impl.dll" };
 
             var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
-                                         .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
-                                         .Select( a => a.Location )
-                                         .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
+                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
+                .Select( a => a.Location )
+                .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
 
             _fixedReferences = referenceAssemblyPaths.Concat( caravelaPaths )
-                                                     .Select( path => MetadataReference.CreateFromFile( path ) )
-                                                     .ToImmutableArray();
+                .Select( path => MetadataReference.CreateFromFile( path ) )
+                .ToImmutableArray();
         }
 
         // cannot be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
@@ -77,23 +77,23 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var compileTimeReferences =
                 runTimeCompilation.References
-                                  .Select(
-                                      reference =>
-                                      {
-                                          if ( reference is PortableExecutableReference { FilePath: not null } peReference )
-                                          {
-                                              var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( peReference.FilePath! );
+                    .Select(
+                        reference =>
+                        {
+                            if ( reference is PortableExecutableReference { FilePath: not null } peReference )
+                            {
+                                var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( peReference.FilePath! );
 
-                                              if ( assemblyBytes != null )
-                                              {
-                                                  return MetadataReference.CreateFromImage( assemblyBytes );
-                                              }
-                                          }
+                                if ( assemblyBytes != null )
+                                {
+                                    return MetadataReference.CreateFromImage( assemblyBytes );
+                                }
+                            }
 
-                                          return null!;
-                                      } )
-                                  .Where( r => r != null )
-                                  .Concat( _fixedReferences );
+                            return null!;
+                        } )
+                    .Where( r => r != null )
+                    .Concat( _fixedReferences );
 
             var compileTimeCompilation = CSharpCompilation.Create(
                 runTimeCompilation.AssemblyName,

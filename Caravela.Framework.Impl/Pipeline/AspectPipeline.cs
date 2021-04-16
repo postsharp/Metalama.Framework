@@ -134,9 +134,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
-                                       .Where( t => !t.IsAbstract )
-                                       .SelectMany( at => at.Layers )
-                                       .ToImmutableArray();
+                .Where( t => !t.IsAbstract )
+                .SelectMany( at => at.Layers )
+                .ToImmutableArray();
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
@@ -153,9 +153,9 @@ namespace Caravela.Framework.Impl.Pipeline
             this._aspectLayers = sortedAspectLayers.ToImmutableArray();
 
             this._stages = this._aspectLayers
-                               .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
-                               .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), this.CompileTimeAssemblyLoader ) )
-                               .ToImmutableArray();
+                .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
+                .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), this.CompileTimeAssemblyLoader ) )
+                .ToImmutableArray();
 
             pipelineStageResult = new PipelineStageResult( this.Context.Compilation, this._aspectLayers );
 

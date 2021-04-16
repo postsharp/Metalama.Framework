@@ -185,10 +185,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
             var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
 
             var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
-                                                                                   .Single( m => m.Name == "Method" )
-                                                                                   .DeclaringSyntaxReferences
-                                                                                   .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
-                                                                                   .Single();
+                .Single( m => m.Name == "Method" )
+                .DeclaringSyntaxReferences
+                .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
+                .Single();
 
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
             var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );

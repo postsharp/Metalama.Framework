@@ -97,7 +97,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return node.WithoutAnnotations( _colorAnnotationKind )
-                       .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
+                .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
         }
 
         public static SyntaxToken AddColoringAnnotation( this SyntaxToken node, TextSpanClassification color )
@@ -108,7 +108,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return node.WithoutAnnotations( _colorAnnotationKind )
-                       .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
+                .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
         }
 
         public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )

@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return new DynamicMember(
                     SyntaxFactory.InvocationExpression( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
-                                 .AddArgumentListArguments( arguments ),
+                        .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,
                     false );
             }

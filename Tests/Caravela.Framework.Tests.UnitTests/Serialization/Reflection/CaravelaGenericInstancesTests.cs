@@ -46,7 +46,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var allProperties = innerType.Fields;
 
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( allProperties.Single().Type ) )
-                                 .ToString();
+                .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
             Assert.Equal( expected, serialized );

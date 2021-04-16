@@ -51,8 +51,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, roslynCompilation );
 
             this._transformations = ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation>
-                                    .Empty
-                                    .WithKeyComparer( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
+                .Empty
+                .WithKeyComparer( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
 
             this.Factory = new CodeElementFactory( this );
 
@@ -91,9 +91,9 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
-                                  .Cast<AttributeBuilder>()
-                                  .Concat( observableTransformations.OfType<AttributeBuilder>() )
-                                  .Select( a => new AttributeLink( a ) );
+                    .Cast<AttributeBuilder>()
+                    .Concat( observableTransformations.OfType<AttributeBuilder>() )
+                    .Select( a => new AttributeLink( a ) );
 
             // TODO: Process IRemoveMember.
 

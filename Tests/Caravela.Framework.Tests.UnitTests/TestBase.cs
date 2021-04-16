@@ -27,17 +27,17 @@ namespace Caravela.Framework.Tests.UnitTests
             static CSharpCompilation CreateEmptyCompilation()
             {
                 return CSharpCompilation.Create( "test_" + Guid.NewGuid() )
-                                        .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
-                                        .AddReferences(
-                                            new[] { "netstandard", "System.Runtime" }
-                                                .Select(
-                                                    r => MetadataReference.CreateFromFile(
-                                                        Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
-                                        .AddReferences(
-                                            MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
-                                            MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
-                                            MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
-                                            MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
+                    .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
+                    .AddReferences(
+                        new[] { "netstandard", "System.Runtime" }
+                            .Select(
+                                r => MetadataReference.CreateFromFile(
+                                    Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
+                    .AddReferences(
+                        MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
             }
 
             var mainRoslynCompilation = CreateEmptyCompilation();

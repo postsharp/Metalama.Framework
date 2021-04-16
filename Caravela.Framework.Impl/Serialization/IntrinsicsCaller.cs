@@ -17,21 +17,21 @@ namespace Caravela.Framework.Impl.Serialization
         public static InvocationExpressionSyntax CreateLdTokenExpression( string methodName, string documentationId )
         {
             return SyntaxFactory.InvocationExpression(
-                                    SyntaxFactory.MemberAccessExpression(
-                                        SyntaxKind.SimpleMemberAccessExpression,
-                                        SyntaxFactory.MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            SyntaxFactory.MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                SyntaxFactory.IdentifierName( "Caravela" ),
-                                                SyntaxFactory.IdentifierName( "Compiler" ) ),
-                                            SyntaxFactory.IdentifierName( "Intrinsics" ) ),
-                                        SyntaxFactory.IdentifierName( methodName ) ) )
-                                .AddArgumentListArguments(
-                                    SyntaxFactory.Argument(
-                                        SyntaxFactory.LiteralExpression(
-                                            SyntaxKind.StringLiteralExpression,
-                                            SyntaxFactory.Literal( documentationId ) ) ) );
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            SyntaxFactory.MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.IdentifierName( "Caravela" ),
+                                SyntaxFactory.IdentifierName( "Compiler" ) ),
+                            SyntaxFactory.IdentifierName( "Intrinsics" ) ),
+                        SyntaxFactory.IdentifierName( methodName ) ) )
+                .AddArgumentListArguments(
+                    SyntaxFactory.Argument(
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            SyntaxFactory.Literal( documentationId ) ) ) );
         }
     }
 }

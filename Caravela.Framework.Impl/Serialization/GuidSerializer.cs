@@ -28,22 +28,22 @@ namespace Caravela.Framework.Impl.Serialization
             var k = b[15];
 
             return ObjectCreationExpression(
-                       QualifiedName(
-                           IdentifierName( "System" ),
-                           IdentifierName( "Guid" ) ) )
-                   .AddArgumentListArguments(
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
-                       Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
-                   .NormalizeWhitespace();
+                    QualifiedName(
+                        IdentifierName( "System" ),
+                        IdentifierName( "Guid" ) ) )
+                .AddArgumentListArguments(
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
+                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

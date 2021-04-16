@@ -28,10 +28,10 @@ namespace Caravela.Framework.Impl.AspectOrdering
             // Get compile-time level attributes of the current assembly and all referenced assemblies.
             var attributes =
                 roslynCompilation.Assembly.Modules
-                                 .SelectMany( m => m.ReferencedAssemblySymbols )
-                                 .Concat( new[] { roslynCompilation.Assembly } )
-                                 .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                                 .Where( a => SymbolEqualityComparer.Default.Equals( a.attribute.AttributeClass, attributeType ) );
+                    .SelectMany( m => m.ReferencedAssemblySymbols )
+                    .Concat( new[] { roslynCompilation.Assembly } )
+                    .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
+                    .Where( a => SymbolEqualityComparer.Default.Equals( a.attribute.AttributeClass, attributeType ) );
 
             return attributes.Select(
                 attribute =>

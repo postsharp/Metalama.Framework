@@ -338,7 +338,7 @@ namespace Caravela.Framework.Impl.Templating
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
                 }
                 else if ( symbol.GetAttributes()
-                                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
+                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -368,7 +368,7 @@ namespace Caravela.Framework.Impl.Templating
                     var transformedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
                     return node.Update( transformedExpression, node.OperatorToken, transformedName )
-                               .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                        .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
                 }
             }
 
@@ -478,21 +478,21 @@ namespace Caravela.Framework.Impl.Templating
 
                 var annotatedElse = node.Else != null
                     ? ElseClause(
-                          node.Else.ElseKeyword,
-                          (StatementSyntax) this.Visit( node.Else.Statement )! )
-                      .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly )
-                      .WithTriviaFrom( node.Else )
+                            node.Else.ElseKeyword,
+                            (StatementSyntax) this.Visit( node.Else.Statement )! )
+                        .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly )
+                        .WithTriviaFrom( node.Else )
                     : null;
 
                 return node.Update(
-                               node.AttributeLists,
-                               node.IfKeyword,
-                               node.OpenParenToken,
-                               annotatedCondition,
-                               node.CloseParenToken,
-                               annotatedStatement,
-                               annotatedElse )
-                           .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                        node.AttributeLists,
+                        node.IfKeyword,
+                        node.OpenParenToken,
+                        annotatedCondition,
+                        node.CloseParenToken,
+                        annotatedStatement,
+                        annotatedElse )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
 
             // We have an if statement where the condition is a runtime expression. Any variable assignment
@@ -571,17 +571,17 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 return ForEachStatement(
-                           default,
-                           node.ForEachKeyword,
-                           node.OpenParenToken,
-                           node.Type,
-                           node.Identifier,
-                           node.InKeyword,
-                           annotatedExpression,
-                           node.CloseParenToken,
-                           annotatedStatement )
-                       .AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly )
-                       .WithSymbolAnnotationsFrom( node );
+                        default,
+                        node.ForEachKeyword,
+                        node.OpenParenToken,
+                        node.Type,
+                        node.Identifier,
+                        node.InKeyword,
+                        annotatedExpression,
+                        node.CloseParenToken,
+                        annotatedStatement )
+                    .AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly )
+                    .WithSymbolAnnotationsFrom( node );
             }
         }
 
@@ -816,7 +816,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 return node.Update( node.AttributeLists, node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement )
-                           .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
 
             // We have an while statement where the condition is a runtime expression. Any variable assignment
@@ -964,14 +964,14 @@ namespace Caravela.Framework.Impl.Templating
                 }
 
                 return node.Update(
-                               node.SwitchKeyword,
-                               node.OpenParenToken,
-                               annotatedExpression,
-                               node.CloseParenToken,
-                               node.OpenBraceToken,
-                               List( transformedSections ),
-                               node.CloseBraceToken )
-                           .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                        node.SwitchKeyword,
+                        node.OpenParenToken,
+                        annotatedExpression,
+                        node.CloseParenToken,
+                        node.OpenBraceToken,
+                        List( transformedSections ),
+                        node.CloseBraceToken )
+                    .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
             else
             {

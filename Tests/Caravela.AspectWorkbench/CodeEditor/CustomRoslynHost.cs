@@ -24,20 +24,20 @@ namespace Caravela.AspectWorkbench.CodeEditor
                 ImmutableArray.Create( "IDE0051" /* Private member is unused. */ ),
                 new[] { Assembly.Load( "RoslynPad.Roslyn.Windows" ), Assembly.Load( "RoslynPad.Editor.Windows" ) },
                 RoslynHostReferences.Empty
-                                    .With(
-                                        assemblyReferences: new[]
-                                        {
-                                            typeof(object).Assembly,
-                                            typeof(DateTime).Assembly,
-                                            typeof(Enumerable).Assembly,
-                                            typeof(Console).Assembly,
-                                            typeof(DynamicAttribute).Assembly,
-                                            typeof(SyntaxFactory).Assembly,
-                                            typeof(TemplateContext).Assembly,
-                                            typeof(TemplateSyntaxFactory).Assembly,
-                                            typeof(TestTemplateAttribute).Assembly,
-                                            typeof(TestOutputAttribute).Assembly
-                                        } ) );
+                    .With(
+                        assemblyReferences: new[]
+                        {
+                            typeof(object).Assembly,
+                            typeof(DateTime).Assembly,
+                            typeof(Enumerable).Assembly,
+                            typeof(Console).Assembly,
+                            typeof(DynamicAttribute).Assembly,
+                            typeof(SyntaxFactory).Assembly,
+                            typeof(TemplateContext).Assembly,
+                            typeof(TemplateSyntaxFactory).Assembly,
+                            typeof(TestTemplateAttribute).Assembly,
+                            typeof(TestOutputAttribute).Assembly
+                        } ) );
 
             return host;
         }

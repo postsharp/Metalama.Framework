@@ -24,12 +24,12 @@ namespace Caravela.Framework.Impl.Serialization
             var typeCreation = this._caravelaTypeSerializer.Serialize( CompileTimeType.Create( o.ContainingType ) );
 
             return InvocationExpression(
-                       MemberAccessExpression(
-                           SyntaxKind.SimpleMemberAccessExpression,
-                           typeCreation,
-                           IdentifierName( "GetEvent" ) ) )
-                   .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
-                   .NormalizeWhitespace();
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        typeCreation,
+                        IdentifierName( "GetEvent" ) ) )
+                .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

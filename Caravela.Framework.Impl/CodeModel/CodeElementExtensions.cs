@@ -58,13 +58,13 @@ namespace Caravela.Framework.Impl.CodeModel
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
                     INamedType namedType => namedType.NestedTypes
-                                                     .Concat<ICodeElement>( namedType.Methods )
-                                                     .Concat( namedType.Properties )
-                                                     .Concat( namedType.Events ),
+                        .Concat<ICodeElement>( namedType.Methods )
+                        .Concat( namedType.Properties )
+                        .Concat( namedType.Events ),
                     IMethod method => method.LocalFunctions
-                                            .Concat<ICodeElement>( method.Parameters )
-                                            .Concat( method.GenericParameters )
-                                            .ConcatNotNull( method.ReturnParameter ),
+                        .Concat<ICodeElement>( method.Parameters )
+                        .Concat( method.GenericParameters )
+                        .ConcatNotNull( method.ReturnParameter ),
                     _ => null
                 } );
 
@@ -90,11 +90,11 @@ namespace Caravela.Framework.Impl.CodeModel
             => symbol switch
             {
                 IMethodSymbol method => method
-                                        .GetAttributes()
-                                        .ToAttributeLinks( method )
-                                        .Concat(
-                                            method.GetReturnTypeAttributes()
-                                                  .Select( a => new AttributeLink( a, CodeElementLink.ReturnParameter( method ) ) ) ),
+                    .GetAttributes()
+                    .ToAttributeLinks( method )
+                    .Concat(
+                        method.GetReturnTypeAttributes()
+                            .Select( a => new AttributeLink( a, CodeElementLink.ReturnParameter( method ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 

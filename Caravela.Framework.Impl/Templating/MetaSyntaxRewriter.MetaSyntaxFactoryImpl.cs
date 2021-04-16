@@ -78,10 +78,10 @@ namespace Caravela.Framework.Impl.Templating
             public ArrayTypeSyntax ArrayType<T>()
             {
                 return SyntaxFactory.ArrayType( this.Type( typeof(T) ) )
-                                    .WithRankSpecifiers(
-                                        SyntaxFactory.SingletonList(
-                                            SyntaxFactory.ArrayRankSpecifier(
-                                                SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
+                    .WithRankSpecifiers(
+                        SyntaxFactory.SingletonList(
+                            SyntaxFactory.ArrayRankSpecifier(
+                                SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
             }
 
             public ExpressionSyntax Kind( SyntaxKind kind )

@@ -32,12 +32,12 @@ namespace Caravela.Framework.Impl.Serialization
                 var innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
 
                 return InvocationExpression(
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               innerTypeCreation,
-                               IdentifierName( "MakeArrayType" ) ) )
-                       .AddArgumentListArguments( makeArrayTypeArguments )
-                       .NormalizeWhitespace();
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            innerTypeCreation,
+                            IdentifierName( "MakeArrayType" ) ) )
+                    .AddArgumentListArguments( makeArrayTypeArguments )
+                    .NormalizeWhitespace();
             }
 
             if ( symbol is ITypeParameterSymbol typeParameterSymbol )
@@ -92,12 +92,12 @@ namespace Caravela.Framework.Impl.Serialization
                 }
 
                 return InvocationExpression(
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               CreateTypeCreationExpressionFromSymbolLeaf( basicType ),
-                               IdentifierName( "MakeGenericType" ) ) )
-                       .AddArgumentListArguments( arguments.Select( arg => Argument( arg ) ).ToArray() )
-                       .NormalizeWhitespace();
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            CreateTypeCreationExpressionFromSymbolLeaf( basicType ),
+                            IdentifierName( "MakeGenericType" ) ) )
+                    .AddArgumentListArguments( arguments.Select( arg => Argument( arg ) ).ToArray() )
+                    .NormalizeWhitespace();
             }
 
             return CreateTypeCreationExpressionFromSymbolLeaf( symbol );
@@ -109,15 +109,15 @@ namespace Caravela.Framework.Impl.Serialization
             var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), documentationId );
 
             return InvocationExpression(
-                       MemberAccessExpression(
-                           SyntaxKind.SimpleMemberAccessExpression,
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               IdentifierName( "System" ),
-                               IdentifierName( "Type" ) ),
-                           IdentifierName( "GetTypeFromHandle" ) ) )
-                   .AddArgumentListArguments( Argument( token ) )
-                   .NormalizeWhitespace();
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName( "System" ),
+                            IdentifierName( "Type" ) ),
+                        IdentifierName( "GetTypeFromHandle" ) ) )
+                .AddArgumentListArguments( Argument( token ) )
+                .NormalizeWhitespace();
         }
     }
 }

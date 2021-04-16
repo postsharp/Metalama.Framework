@@ -24,8 +24,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {
             var adviceResults = this._advices
-                                    .Select( ai => ai.ToResult( compilation ) )
-                                    .ToList();
+                .Select( ai => ai.ToResult( compilation ) )
+                .ToList();
 
             var addedObservableIntroductions = adviceResults.SelectMany( ar => ar.ObservableTransformations ).ToReadOnlyList();
             var addedNonObservableTransformations = adviceResults.SelectMany( ar => ar.NonObservableTransformations );

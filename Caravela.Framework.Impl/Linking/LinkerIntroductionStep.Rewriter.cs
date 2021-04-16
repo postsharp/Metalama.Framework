@@ -171,9 +171,9 @@ namespace Caravela.Framework.Impl.Linking
                 // Don't disable or restore warnings that have been suppressed in a parent scope.
 
                 var remainingErrorCodes = node
-                                          .ErrorCodes
-                                          .Where( c => !this._activeSuppressions.Contains( GetErrorCode( c ) ) )
-                                          .ToImmutableArray();
+                    .ErrorCodes
+                    .Where( c => !this._activeSuppressions.Contains( GetErrorCode( c ) ) )
+                    .ToImmutableArray();
 
                 if ( remainingErrorCodes.IsEmpty )
                 {

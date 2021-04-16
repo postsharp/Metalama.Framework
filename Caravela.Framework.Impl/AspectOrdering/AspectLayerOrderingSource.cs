@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification()
             => this._aspectTypes
-                   .Where( at => at.Layers.Count > 1 )
-                   .Select( at => new AspectOrderSpecification( at.Layers.Select( l => l.AspectLayerId.FullName ) ) );
+                .Where( at => at.Layers.Count > 1 )
+                .Select( at => new AspectOrderSpecification( at.Layers.Select( l => l.AspectLayerId.FullName ) ) );
     }
 }

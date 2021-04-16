@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Serialization
             if ( genericType.IsNested )
             {
                 var argumentsToPass = arguments.Take( genericType.DeclaringType.GetGenericArguments().Length )
-                                               .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDefinition, and only when all parameters including of the innermost are set
+                    .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDefinition, and only when all parameters including of the innermost are set
 
                 arguments = arguments.Skip( argumentsToPass.Length ).ToArray();
 

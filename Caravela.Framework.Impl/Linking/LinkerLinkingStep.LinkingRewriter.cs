@@ -70,8 +70,8 @@ namespace Caravela.Framework.Impl.Linking
                         {
                             // Body of the last (outermost) override is not inlineable. We need to emit a trampoline method.
                             var transformedMethod = method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) )
-                                                          .WithLeadingTrivia( method.GetLeadingTrivia() )
-                                                          .WithTrailingTrivia( method.GetTrailingTrivia() );
+                                .WithLeadingTrivia( method.GetLeadingTrivia() )
+                                .WithTrailingTrivia( method.GetTrailingTrivia() );
 
                             newMembers.Add( transformedMethod );
                         }

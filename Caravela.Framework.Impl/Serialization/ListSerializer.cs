@@ -32,20 +32,20 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             return ObjectCreationExpression(
-                       QualifiedName(
-                           QualifiedName(
-                               QualifiedName(
-                                   IdentifierName( "System" ),
-                                   IdentifierName( "Collections" ) ),
-                               IdentifierName( "Generic" ) ),
-                           GenericName( Identifier( "List" ) )
-                               .WithTypeArgumentList(
-                                   TypeArgumentList( SingletonSeparatedList( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
-                   .WithInitializer(
-                       InitializerExpression(
-                           SyntaxKind.CollectionInitializerExpression,
-                           SeparatedList( lt ) ) )
-                   .NormalizeWhitespace();
+                    QualifiedName(
+                        QualifiedName(
+                            QualifiedName(
+                                IdentifierName( "System" ),
+                                IdentifierName( "Collections" ) ),
+                            IdentifierName( "Generic" ) ),
+                        GenericName( Identifier( "List" ) )
+                            .WithTypeArgumentList(
+                                TypeArgumentList( SingletonSeparatedList( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
+                .WithInitializer(
+                    InitializerExpression(
+                        SyntaxKind.CollectionInitializerExpression,
+                        SeparatedList( lt ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

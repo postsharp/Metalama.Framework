@@ -37,12 +37,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IEnumerable<AspectInstance> GetAspectInstances( AspectType aspectType )
             => this._compilation.GetAllAttributesOfType( aspectType.Type )
-                   .Select(
-                       attribute =>
-                       {
-                           var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
+                .Select(
+                    attribute =>
+                    {
+                        var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
 
-                           return aspectType.CreateAspectInstance( aspect, attribute.ContainingElement.AssertNotNull() );
-                       } );
+                        return aspectType.CreateAspectInstance( aspect, attribute.ContainingElement.AssertNotNull() );
+                    } );
     }
 }

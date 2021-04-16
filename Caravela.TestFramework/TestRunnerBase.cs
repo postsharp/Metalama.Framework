@@ -81,12 +81,12 @@ namespace Caravela.TestFramework
             var solution = workspace1.CurrentSolution;
 
             var project = solution.AddProject( guid.ToString(), guid.ToString(), LanguageNames.CSharp )
-                                  .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
-                                  .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
-                                  .AddMetadataReference( MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
-                                  .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TemplateSyntaxFactory).Assembly.Location ) )
-                                  .AddMetadataReference( MetadataReference.CreateFromFile( typeof(MetadataLoadContext).Assembly.Location ) )
-                                  .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TestOutputAttribute).Assembly.Location ) );
+                .WithCompilationOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
+                .AddMetadataReferences( referenceAssemblies.Select( f => MetadataReference.CreateFromFile( f ) ) )
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TemplateSyntaxFactory).Assembly.Location ) )
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(MetadataLoadContext).Assembly.Location ) )
+                .AddMetadataReference( MetadataReference.CreateFromFile( typeof(TestOutputAttribute).Assembly.Location ) );
 
             // Don't add the assembly containing the code to test because it would result in duplicate symbols.
 

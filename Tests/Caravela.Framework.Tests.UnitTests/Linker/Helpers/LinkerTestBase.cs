@@ -104,8 +104,8 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             var nodeIdToCodeElement = new Dictionary<string, ICodeElement>();
 
             var symbolToCodeElement = initialCompilationModel.GetContainedElements()
-                                                             .Where( x => x is CodeElement )
-                                                             .ToDictionary( x => ((CodeElement) x).Symbol, x => x );
+                .Where( x => x is CodeElement )
+                .ToDictionary( x => ((CodeElement) x).Symbol, x => x );
 
             var nodeIdToSyntaxNode = new Dictionary<string, SyntaxNode>();
             var syntaxNodeToSymbol = new Dictionary<SyntaxNode, ISymbol>();
@@ -152,13 +152,13 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     var symbolHelperSymbol = (IMethodSymbol) syntaxNodeToSymbol[symbolHelperNode];
 
                     var overridenMemberSymbol = containingSymbol.GetMembers()
-                                                                .Where(
-                                                                    x =>
-                                                                        x.Name == overriddenElementName
-                                                                        && x is IMethodSymbol methodSymbol
-                                                                        && methodSymbol.Parameters.Select( p => p.Type )
-                                                                                       .SequenceEqual( symbolHelperSymbol.Parameters.Select( p => p.Type ) ) )
-                                                                .Single();
+                        .Where(
+                            x =>
+                                x.Name == overriddenElementName
+                                && x is IMethodSymbol methodSymbol
+                                && methodSymbol.Parameters.Select( p => p.Type )
+                                    .SequenceEqual( symbolHelperSymbol.Parameters.Select( p => p.Type ) ) )
+                        .Single();
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];
 
@@ -179,7 +179,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     A.CallTo( () => observableTransformation.ContainingElement ).Returns( containingElement );
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPositionNode )
-                     .Returns( (MemberDeclarationSyntax) insertPositionNode );
+                        .Returns( (MemberDeclarationSyntax) insertPositionNode );
 
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 

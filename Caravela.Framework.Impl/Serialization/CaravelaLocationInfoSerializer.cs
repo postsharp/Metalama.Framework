@@ -90,27 +90,27 @@ namespace Caravela.Framework.Impl.Serialization
                 var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( o.Field!.DeclaringType ) );
 
                 propertyInfo = InvocationExpression(
-                                   MemberAccessExpression(
-                                       SyntaxKind.SimpleMemberAccessExpression,
-                                       typeCreation,
-                                       IdentifierName( "GetField" ) ) )
-                               .AddArgumentListArguments(
-                                   Argument(
-                                       LiteralExpression(
-                                           SyntaxKind.StringLiteralExpression,
-                                           Literal( o.Field.Name ) ) ),
-                                   Argument( allBindingFlags ) )
-                               .NormalizeWhitespace();
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            typeCreation,
+                            IdentifierName( "GetField" ) ) )
+                    .AddArgumentListArguments(
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( o.Field.Name ) ) ),
+                        Argument( allBindingFlags ) )
+                    .NormalizeWhitespace();
             }
 
             return ObjectCreationExpression(
-                       QualifiedName(
-                           QualifiedName(
-                               IdentifierName( "Caravela" ),
-                               IdentifierName( "Framework" ) ),
-                           IdentifierName( "LocationInfo" ) ) )
-                   .AddArgumentListArguments( Argument( propertyInfo ) )
-                   .NormalizeWhitespace();
+                    QualifiedName(
+                        QualifiedName(
+                            IdentifierName( "Caravela" ),
+                            IdentifierName( "Framework" ) ),
+                        IdentifierName( "LocationInfo" ) ) )
+                .AddArgumentListArguments( Argument( propertyInfo ) )
+                .NormalizeWhitespace();
         }
 
         private static ExpressionSyntax MemberAccess( params string[] names )
@@ -128,8 +128,8 @@ namespace Caravela.Framework.Impl.Serialization
         private static ExpressionSyntax CreateBindingFlags()
         {
             return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }
-                   .Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
-                   .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
+                .Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
+                .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
     }
 }

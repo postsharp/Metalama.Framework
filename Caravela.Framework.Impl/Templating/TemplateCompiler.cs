@@ -29,9 +29,9 @@ namespace Caravela.Framework.Impl.Templating
                 var markerAnnotation = new SyntaxAnnotation();
 
                 var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot()
-                                                    .ReplaceNode(
-                                                        sourceSyntaxRoot,
-                                                        currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
+                    .ReplaceNode(
+                        sourceSyntaxRoot,
+                        currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
 
                 currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             }

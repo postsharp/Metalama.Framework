@@ -36,12 +36,12 @@ namespace Caravela.Framework.Impl.CompileTime
                         .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
 
                 return method
-                       .WithBody( null )
-                       .WithExpressionBody( ArrowExpressionClause( body ) )
-                       .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                       .NormalizeWhitespace()
-                       .WithLeadingTrivia( method.GetLeadingTrivia() )
-                       .WithTrailingTrivia( LineFeed, LineFeed );
+                    .WithBody( null )
+                    .WithExpressionBody( ArrowExpressionClause( body ) )
+                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( method.GetLeadingTrivia() )
+                    .WithTrailingTrivia( LineFeed, LineFeed );
             }
 
             protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )

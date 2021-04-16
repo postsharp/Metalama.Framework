@@ -12,14 +12,14 @@ namespace Caravela.Framework.Impl.Serialization
         public override ExpressionSyntax Serialize( UIntPtr o )
         {
             return SyntaxFactory.ObjectCreationExpression(
-                                    SyntaxFactory.QualifiedName(
-                                        SyntaxFactory.IdentifierName( "System" ),
-                                        SyntaxFactory.IdentifierName( "UIntPtr" ) ) )
-                                .AddArgumentListArguments(
-                                    SyntaxFactory.Argument(
-                                        SyntaxFactory.LiteralExpression(
-                                            SyntaxKind.NumericLiteralExpression,
-                                            SyntaxFactory.Literal( o.ToUInt64() ) ) ) );
+                    SyntaxFactory.QualifiedName(
+                        SyntaxFactory.IdentifierName( "System" ),
+                        SyntaxFactory.IdentifierName( "UIntPtr" ) ) )
+                .AddArgumentListArguments(
+                    SyntaxFactory.Argument(
+                        SyntaxFactory.LiteralExpression(
+                            SyntaxKind.NumericLiteralExpression,
+                            SyntaxFactory.Literal( o.ToUInt64() ) ) ) );
         }
     }
 }

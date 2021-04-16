@@ -25,11 +25,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private static readonly ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
             = ImmutableDictionary.Create<string, SuppressionDescriptor>( StringComparer.OrdinalIgnoreCase )
-                                 .AddRange(
-                                     _supportedSuppressions.Select(
-                                         id => new KeyValuePair<string, SuppressionDescriptor>(
-                                             id,
-                                             new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
+                .AddRange(
+                    _supportedSuppressions.Select(
+                        id => new KeyValuePair<string, SuppressionDescriptor>(
+                            id,
+                            new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {

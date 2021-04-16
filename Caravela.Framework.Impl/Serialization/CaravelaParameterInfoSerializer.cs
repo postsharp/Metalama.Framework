@@ -36,19 +36,19 @@ namespace Caravela.Framework.Impl.Serialization
             var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CompileTimeMethodInfo( method! ) );
 
             return ElementAccessExpression(
-                       InvocationExpression(
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               retrieveMethodBase,
-                               IdentifierName( "GetParameters" ) ) ) )
-                   .WithArgumentList(
-                       BracketedArgumentList(
-                           SingletonSeparatedList(
-                               Argument(
-                                   LiteralExpression(
-                                       SyntaxKind.NumericLiteralExpression,
-                                       Literal( ordinal ) ) ) ) ) )
-                   .NormalizeWhitespace();
+                    InvocationExpression(
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            retrieveMethodBase,
+                            IdentifierName( "GetParameters" ) ) ) )
+                .WithArgumentList(
+                    BracketedArgumentList(
+                        SingletonSeparatedList(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NumericLiteralExpression,
+                                    Literal( ordinal ) ) ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

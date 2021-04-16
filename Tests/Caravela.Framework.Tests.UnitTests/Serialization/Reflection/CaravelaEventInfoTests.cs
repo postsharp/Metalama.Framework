@@ -88,8 +88,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var e = (single as Event)!;
 
             var actual = new CaravelaEventInfoSerializer( new CaravelaTypeSerializer() )
-                         .Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingElement! ) )
-                         .ToString();
+                .Serialize( new CompileTimeEventInfo( e.Symbol, (IType) e.ContainingElement! ) )
+                .ToString();
 
             return actual;
         }

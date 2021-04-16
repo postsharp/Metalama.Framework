@@ -16,19 +16,19 @@ namespace Caravela.Framework.Impl.Serialization
             var isoTime = o.ToString( "o" );
 
             return InvocationExpression(
-                       MemberAccessExpression(
-                           SyntaxKind.SimpleMemberAccessExpression,
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               IdentifierName( "System" ),
-                               IdentifierName( "DateTimeOffset" ) ),
-                           IdentifierName( "Parse" ) ) )
-                   .AddArgumentListArguments(
-                       Argument(
-                           LiteralExpression(
-                               SyntaxKind.StringLiteralExpression,
-                               Literal( isoTime ) ) ) )
-                   .NormalizeWhitespace();
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            IdentifierName( "System" ),
+                            IdentifierName( "DateTimeOffset" ) ),
+                        IdentifierName( "Parse" ) ) )
+                .AddArgumentListArguments(
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            Literal( isoTime ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

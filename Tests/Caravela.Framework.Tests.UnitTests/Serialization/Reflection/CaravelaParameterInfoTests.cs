@@ -173,8 +173,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer )
-                         .Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
-                         .ToString();
+                .Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                .ToString();
 
             return actual;
         }
@@ -184,14 +184,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
 
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" )
-                                    .Methods.Single( m => m.Name == "Method" )
-                                    .Parameters.First( p => p.Name == "target" );
+                .Methods.Single( m => m.Name == "Method" )
+                .Parameters.First( p => p.Name == "target" );
 
             var parameter = (Parameter) single;
 
             var actual = new CaravelaParameterInfoSerializer( this._caravelaMethodInfoSerializer )
-                         .Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
-                         .ToString();
+                .Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                .ToString();
 
             return actual;
         }
@@ -203,7 +203,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var p = (MethodReturnParameter) single;
 
             var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CompileTimeReturnParameterInfo( p ) )
-                                                                                                        .ToString();
+                .ToString();
 
             return actual;
         }
@@ -215,7 +215,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var p = (MethodReturnParameter) single;
 
             var actual = new CaravelaReturnParameterInfoSerializer( this._caravelaMethodInfoSerializer ).Serialize( new CompileTimeReturnParameterInfo( p ) )
-                                                                                                        .ToString();
+                .ToString();
 
             return actual;
         }

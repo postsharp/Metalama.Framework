@@ -14,15 +14,15 @@ namespace Caravela.Framework.Impl.Serialization
         public override ExpressionSyntax Serialize( TimeSpan o )
         {
             return ObjectCreationExpression(
-                       QualifiedName(
-                           IdentifierName( "System" ),
-                           IdentifierName( "TimeSpan" ) ) )
-                   .AddArgumentListArguments(
-                       Argument(
-                           LiteralExpression(
-                               SyntaxKind.NumericLiteralExpression,
-                               Literal( o.Ticks ) ) ) )
-                   .NormalizeWhitespace();
+                    QualifiedName(
+                        IdentifierName( "System" ),
+                        IdentifierName( "TimeSpan" ) ) )
+                .AddArgumentListArguments(
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.NumericLiteralExpression,
+                            Literal( o.Ticks ) ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

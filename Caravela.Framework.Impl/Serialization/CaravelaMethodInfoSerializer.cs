@@ -31,33 +31,33 @@ namespace Caravela.Framework.Impl.Serialization
                 var typeHandle = CreateTypeHandleExpression( typeSerializer, declaringGenericTypeSymbol );
 
                 return InvocationExpression(
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               MemberAccessExpression(
-                                   SyntaxKind.SimpleMemberAccessExpression,
-                                   MemberAccessExpression(
-                                       SyntaxKind.SimpleMemberAccessExpression,
-                                       IdentifierName( "System" ),
-                                       IdentifierName( "Reflection" ) ),
-                                   IdentifierName( "MethodBase" ) ),
-                               IdentifierName( "GetMethodFromHandle" ) ) )
-                       .AddArgumentListArguments( Argument( methodToken ), Argument( typeHandle ) )
-                       .NormalizeWhitespace();
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName( "System" ),
+                                    IdentifierName( "Reflection" ) ),
+                                IdentifierName( "MethodBase" ) ),
+                            IdentifierName( "GetMethodFromHandle" ) ) )
+                    .AddArgumentListArguments( Argument( methodToken ), Argument( typeHandle ) )
+                    .NormalizeWhitespace();
             }
 
             return InvocationExpression(
-                       MemberAccessExpression(
-                           SyntaxKind.SimpleMemberAccessExpression,
-                           MemberAccessExpression(
-                               SyntaxKind.SimpleMemberAccessExpression,
-                               MemberAccessExpression(
-                                   SyntaxKind.SimpleMemberAccessExpression,
-                                   IdentifierName( "System" ),
-                                   IdentifierName( "Reflection" ) ),
-                               IdentifierName( "MethodBase" ) ),
-                           IdentifierName( "GetMethodFromHandle" ) ) )
-                   .AddArgumentListArguments( Argument( methodToken ) )
-                   .NormalizeWhitespace();
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                IdentifierName( "System" ),
+                                IdentifierName( "Reflection" ) ),
+                            IdentifierName( "MethodBase" ) ),
+                        IdentifierName( "GetMethodFromHandle" ) ) )
+                .AddArgumentListArguments( Argument( methodToken ) )
+                .NormalizeWhitespace();
         }
 
         private static ExpressionSyntax CreateTypeHandleExpression( CaravelaTypeSerializer typeSerializer, ITypeSymbol type )

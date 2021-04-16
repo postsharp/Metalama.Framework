@@ -22,10 +22,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IEnumerable<AspectInstance> GetAspectInstances( AspectType aspectType )
             => this._aspectSources
-                   .Where( s => s.Type.Equals( aspectType.Type ) )
-                   .Select( a => a.Source )
-                   .Distinct()
-                   .SelectMany( a => a.GetAspectInstances( aspectType ) );
+                .Where( s => s.Type.Equals( aspectType.Type ) )
+                .Select( a => a.Source )
+                .Distinct()
+                .SelectMany( a => a.GetAspectInstances( aspectType ) );
 
         public void Add( IAspectSource aspectSource, INamedType aspectType )
         {

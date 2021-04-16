@@ -73,9 +73,9 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
-                                              .Concat( assembly.Modules.First().GetAttributes() )
-                                              .Select( this.GetAttributeScope )
-                                              .FirstOrDefault( s => s != null );
+                .Concat( assembly.Modules.First().GetAttributes() )
+                .Select( this.GetAttributeScope )
+                .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
             {

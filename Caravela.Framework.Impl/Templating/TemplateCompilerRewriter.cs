@@ -617,13 +617,13 @@ namespace Caravela.Framework.Impl.Templating
             var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
 
             var result = MethodDeclaration(
-                             this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
-                             Identifier( node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix ) )
-                         .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
-                         .NormalizeWhitespace()
-                         .WithBody( body )
-                         .WithLeadingTrivia( node.GetLeadingTrivia() )
-                         .WithTrailingTrivia( LineFeed, LineFeed );
+                    this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
+                    Identifier( node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix ) )
+                .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                .NormalizeWhitespace()
+                .WithBody( body )
+                .WithLeadingTrivia( node.GetLeadingTrivia() )
+                .WithTrailingTrivia( LineFeed, LineFeed );
 
             this.Unindent( 3 );
 
@@ -816,10 +816,10 @@ namespace Caravela.Framework.Impl.Templating
                             }
 
                             var leadingTrivia = TriviaList( CarriageReturnLineFeed )
-                                                .AddRange( this.GetIndentation() )
-                                                .Add( Comment( "// " + statementComment ) )
-                                                .Add( CarriageReturnLineFeed )
-                                                .AddRange( this.GetIndentation() );
+                                .AddRange( this.GetIndentation() )
+                                .Add( Comment( "// " + statementComment ) )
+                                .Add( CarriageReturnLineFeed )
+                                .AddRange( this.GetIndentation() );
 
                             var trailingTrivia = TriviaList( CarriageReturnLineFeed, CarriageReturnLineFeed );
 

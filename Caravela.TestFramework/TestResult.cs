@@ -105,8 +105,8 @@ namespace Caravela.TestFramework
                     .OfType<MemberDeclarationSyntax>()
                     .Where(
                         m => m.AttributeLists
-                              .SelectMany( list => list.Attributes )
-                              .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
+                            .SelectMany( list => list.Attributes )
+                            .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
                     .ToList();
 
             var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;

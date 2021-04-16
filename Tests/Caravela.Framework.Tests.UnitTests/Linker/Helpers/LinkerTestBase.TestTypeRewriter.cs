@@ -223,33 +223,33 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 // Create transformation fake.
                 var transformation = (IMemberIntroduction) A.Fake<object>(
                     o => o
-                         .Implements<IObservableTransformation>()
-                         .Implements<IMemberIntroduction>()
-                         .Implements<IMethod>()
-                         .Implements<ICodeElementInternal>()
-                         .Implements<ITestTransformation>() );
+                        .Implements<IObservableTransformation>()
+                        .Implements<IMemberIntroduction>()
+                        .Implements<IMethod>()
+                        .Implements<ICodeElementInternal>()
+                        .Implements<ITestTransformation>() );
 
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TargetSyntaxTree ).Returns( node.SyntaxTree );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
-                 .Returns(
-                     new[]
-                     {
-                         new IntroducedMember(
-                             transformation,
-                             introductionSyntax,
-                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                             IntroducedMemberSemantic.Introduction,
-                             AspectLinkerOptions.Create( forceNotInlineable ),
-                             null )
-                     } );
+                    .Returns(
+                        new[]
+                        {
+                            new IntroducedMember(
+                                transformation,
+                                introductionSyntax,
+                                new AspectLayerId( aspectName.AssertNotNull(), layerName ),
+                                IntroducedMemberSemantic.Introduction,
+                                AspectLinkerOptions.Create( forceNotInlineable ),
+                                null )
+                        } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                 .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                    .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( node.Identifier.ValueText );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
@@ -285,10 +285,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 var transformation = (IMemberIntroduction) A.Fake<object>(
                     o => o
-                         .Implements<INonObservableTransformation>()
-                         .Implements<IMemberIntroduction>()
-                         .Implements<IOverriddenElement>()
-                         .Implements<ITestTransformation>() );
+                        .Implements<INonObservableTransformation>()
+                        .Implements<IMemberIntroduction>()
+                        .Implements<IOverriddenElement>()
+                        .Implements<ITestTransformation>() );
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
                 var rewrittenMethodBody = methodBodyRewriter.VisitBlock( node.Body.AssertNotNull() );
@@ -313,22 +313,22 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
-                 .Returns(
-                     new[]
-                     {
-                         new IntroducedMember(
-                             transformation,
-                             overrideSyntax,
-                             new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                             IntroducedMemberSemantic.MethodOverride,
-                             AspectLinkerOptions.Create( forceNotInlineable ),
-                             null )
-                     } );
+                    .Returns(
+                        new[]
+                        {
+                            new IntroducedMember(
+                                transformation,
+                                overrideSyntax,
+                                new AspectLayerId( aspectName.AssertNotNull(), layerName ),
+                                IntroducedMemberSemantic.MethodOverride,
+                                AspectLinkerOptions.Create( forceNotInlineable ),
+                                null )
+                        } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                 .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
+                    .Returns( GetNodeId( this._currentInsertPosition.AssertNotNull() ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenElementName ).Returns( overriddenElementName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );

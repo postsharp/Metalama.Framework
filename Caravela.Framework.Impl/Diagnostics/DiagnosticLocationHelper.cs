@@ -30,8 +30,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
 
             var bestDeclaration = symbol.DeclaringSyntaxReferences
-                                        .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
-                                        .FirstOrDefault();
+                .OrderByDescending( r => r.SyntaxTree.FilePath.Length )
+                .FirstOrDefault();
 
             var syntax = bestDeclaration?.GetSyntax();
 

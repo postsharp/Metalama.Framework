@@ -37,14 +37,13 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             return ArrayCreationExpression(
-                       ArrayType( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
-                           .WithRankSpecifiers(
-                               SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
-                   .WithInitializer(
-                       InitializerExpression(
-                           SyntaxKind.ArrayInitializerExpression,
-                           SeparatedList( lt ) ) )
-                   .NormalizeWhitespace();
+                    ArrayType( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
+                        .WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
+                .WithInitializer(
+                    InitializerExpression(
+                        SyntaxKind.ArrayInitializerExpression,
+                        SeparatedList( lt ) ) )
+                .NormalizeWhitespace();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsSealed => this.MemberBuilder.IsSealed;
 
-        public bool IsReadOnly => this.MemberBuilder.IsFrozen;
+        public bool IsReadOnly => this.MemberBuilder.IsReadOnly;
 
         public bool IsOverride => this.MemberBuilder.IsOverride;
 

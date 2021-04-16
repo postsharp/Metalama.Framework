@@ -25,8 +25,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
 
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
-                                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
-                                 .ToString();
+                    CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
+                .ToString();
 
             this.AssertEqual(
                 @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}""))",
@@ -41,8 +41,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 
             var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
-                                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
-                                 .ToString();
+                    CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
+                .ToString();
 
             this.AssertEqual(
                 @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method""))",

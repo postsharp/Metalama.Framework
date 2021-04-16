@@ -76,10 +76,10 @@ namespace Caravela.Framework.Impl.Linking
             //       Maybe have all transformations already together in the input?
             var allTransformations =
                 input.CompilationModel.GetAllObservableTransformations()
-                     .SelectMany( x => x.Transformations )
-                     .OfType<ISyntaxTreeTransformation>()
-                     .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
-                     .ToList();
+                    .SelectMany( x => x.Transformations )
+                    .OfType<ISyntaxTreeTransformation>()
+                    .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
+                    .ToList();
 
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )

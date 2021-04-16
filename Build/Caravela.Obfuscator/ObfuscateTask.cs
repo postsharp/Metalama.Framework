@@ -381,7 +381,7 @@ namespace Caravela.Obfuscator
                                     this.Project.Module,
                                     implementedInterfaceType.GetGenericContext(),
                                     translatedInterfaceMethod.GetGenericContext()
-                                                             .GetGenericMethodParameters() );
+                                        .GetGenericMethodParameters() );
 
                                 if ( !translatedInterfaceMethod.MapGenericArguments( genericMap ).DefinitionMatchesReference( method ) )
                                 {

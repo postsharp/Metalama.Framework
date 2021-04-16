@@ -54,13 +54,11 @@ namespace Caravela.Framework.Impl.Linking
             if ( this.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.GetAttributes()
-                           .Any(
-                               attributeData =>
-                                   attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
-                                   && attributeData.NamedArguments
-                                                   .Any(
-                                                       pair => pair.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable)
-                                                               && (bool?) pair.Value.Value == true ) ) )
+                    .Any(
+                        attributeData =>
+                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
+                            && attributeData.NamedArguments
+                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
                 {
                     // Inlining is explicitly disabled for the method.
                     return false;
@@ -74,8 +72,7 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
-
-            if ( this.IsOverride( symbol ) )
+            else if ( this.IsOverride( symbol ) )
             {
                 var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( symbol );
 
@@ -97,8 +94,10 @@ namespace Caravela.Framework.Impl.Linking
 
                 return counter <= 1;
             }
-
-            throw new NotSupportedException();
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>

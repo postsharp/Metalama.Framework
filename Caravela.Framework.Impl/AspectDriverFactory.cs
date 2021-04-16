@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl
             this._compilation = compilation;
 
             this._weaverTypes = plugins.OfType<IAspectWeaver>()
-                                       .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
+                .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
         }
 
         public IAspectDriver GetAspectDriver( INamedType type )

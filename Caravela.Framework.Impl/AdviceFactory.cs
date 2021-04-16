@@ -46,8 +46,8 @@ namespace Caravela.Framework.Impl
             var method = methods.Single();
 
             if ( !method.SelectSelfAndAncestors( m => m.OverriddenMethod )
-                        .SelectMany( m => m.GetAttributes() )
-                        .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+                .SelectMany( m => m.GetAttributes() )
+                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
             {
                 throw GeneralDiagnosticDescriptors.TemplateMethodMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
             }

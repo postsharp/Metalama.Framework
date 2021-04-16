@@ -53,8 +53,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var parameters = attribute.ConstructorArguments.Select(
-                                          ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) )
-                                      .ToArray();
+                    ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) )
+                .ToArray();
 
             var result = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
 

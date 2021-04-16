@@ -158,13 +158,13 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 var cycleNodes = cycleStack.Select( index => unsortedAspectLayers[index].AspectLayerId.FullName ).ToList();
 
                 var cycleLocations = cycleNodes
-                                     .SelectMany( c => aspectLayerNameToLocationsMapping[c] )
-                                     .Select( s => s.DiagnosticLocation )
-                                     .WhereNotNull()
-                                     .GroupBy( l => l )
-                                     .OrderByDescending( g => g.Count() )
-                                     .Select( g => g.Key )
-                                     .ToList();
+                    .SelectMany( c => aspectLayerNameToLocationsMapping[c] )
+                    .Select( s => s.DiagnosticLocation )
+                    .WhereNotNull()
+                    .GroupBy( l => l )
+                    .OrderByDescending( g => g.Count() )
+                    .Select( g => g.Key )
+                    .ToList();
 
                 var mainLocation = cycleLocations.FirstOrDefault();
                 var additionalLocations = cycleLocations.Skip( 1 );

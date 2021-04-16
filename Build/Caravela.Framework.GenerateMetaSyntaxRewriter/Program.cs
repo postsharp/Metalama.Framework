@@ -59,21 +59,21 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 var factoryMethodName = RemoveSuffix( nodeTypeName, "Syntax" );
 
                 var factoryMethod = allFactoryMethods.Where( m => m.Name == factoryMethodName )
-                                                     .OrderByDescending( m => m.GetParameters().Length )
-                                                     .ThenByDescending(
-                                                         delegate( MethodInfo m )
-                                                         {
-                                                             // Prefer tokens to strings and lists to arrays.
-                                                             var p = m.GetParameters();
+                    .OrderByDescending( m => m.GetParameters().Length )
+                    .ThenByDescending(
+                        delegate( MethodInfo m )
+                        {
+                            // Prefer tokens to strings and lists to arrays.
+                            var p = m.GetParameters();
 
-                                                             if ( p.Length == 0 )
-                                                             {
-                                                                 return 0;
-                                                             }
+                            if ( p.Length == 0 )
+                            {
+                                return 0;
+                            }
 
-                                                             return p[0].ParameterType == typeof(string) || p[0].ParameterType.IsArray ? 1 : 2;
-                                                         } )
-                                                     .FirstOrDefault();
+                            return p[0].ParameterType == typeof(string) || p[0].ParameterType.IsArray ? 1 : 2;
+                        } )
+                    .FirstOrDefault();
 
                 if ( factoryMethod == null )
                 {
@@ -85,7 +85,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 var parameters = factoryMethod.GetParameters();
 
                 var properties = nodeType.GetProperties( BindingFlags.Public | BindingFlags.Instance )
-                                         .ToDictionary( p => p.Name, StringComparer.OrdinalIgnoreCase );
+                    .ToDictionary( p => p.Name, StringComparer.OrdinalIgnoreCase );
 
                 string FindProperty( ParameterInfo parameter )
                 {
@@ -186,20 +186,19 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "\t{" );
 
             foreach ( var methodGroup in typeof(SyntaxFactory).GetMethods( BindingFlags.Public | BindingFlags.Static )
-                                                              .OrderBy( m => m.Name )
-                                                              .GroupBy( m => m.Name ) )
+                .OrderBy( m => m.Name )
+                .GroupBy( m => m.Name ) )
             {
                 MethodInfo SelectBestMethod( IEnumerable<MethodInfo> methods )
                     => methods
-                       .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof(ParamArrayAttribute) ) ?? false ? 0 : 1 )
-                       .First();
+                        .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof(ParamArrayAttribute) ) ?? false ? 0 : 1 )
+                        .First();
 
                 foreach ( var methodsWithSameParameterCount in methodGroup
-                                                               .Select(
-                                                                   m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
-                                                               .GroupBy( m => m.Parameters, m => m.Method )
-                                                               .Select( SelectBestMethod )
-                                                               .GroupBy( m => m.GetParameters().Length ) )
+                    .Select( m => (Method: m, Parameters: string.Join( ",", m.GetParameters().Select( p => p.Name ) )) )
+                    .GroupBy( m => m.Parameters, m => m.Method )
+                    .Select( SelectBestMethod )
+                    .GroupBy( m => m.GetParameters().Length ) )
                 {
                     void WriteSyntaxFactoryMethod( MethodInfo method, string? suffix = null )
                     {
