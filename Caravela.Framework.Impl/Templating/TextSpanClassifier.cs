@@ -18,14 +18,12 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
     {
-        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new ClassifiedTextSpanCollection();
+        private readonly ClassifiedTextSpanCollection _classifiedTextSpans = new();
         private readonly SourceText _sourceText;
         private readonly bool _processAllTypes;
         private readonly string _sourceString;
         private readonly MarkAllChildrenWalker _markAllChildrenWalker;
         private bool _isInTemplate;
-
-#pragma warning disable 618
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
@@ -53,7 +51,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( node.GetScopeFromAnnotation() != SymbolDeclarationScope.RunTimeOnly )
             {
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
                 this.Mark( node.Keyword, TextSpanClassification.CompileTime );
@@ -76,7 +74,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Template )
+            if ( node.IsTemplateFromAnnotation() )
             {
                 this._isInTemplate = true;
 
@@ -223,18 +221,18 @@ namespace Caravela.Framework.Impl.Templating
                 var previousChar = trivia.Span.Start == 0 ? '\0' : this._sourceString[trivia.Span.Start - 1];
                 var triviaStart = trivia.Span.Start;
                 var triviaEnd = trivia.Span.End;
-                
+
                 // If we have an indenting trivia, trim the start of the span.
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for (; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
+                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
                     {
                     }
                 }
-                
+
                 // If we end with an endline or space, trim it.
-                for (; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- )
+                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- )
                 {
                 }
 

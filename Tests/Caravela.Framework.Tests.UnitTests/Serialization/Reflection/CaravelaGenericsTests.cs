@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void FieldInNestedType()
         {
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CompileTimeLocationInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Properties.Single() ) )
+            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CompileTimeLocationInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
             this.AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))", serialized );
 

@@ -6,6 +6,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Linking
 {
+    // TODO: the use of LinkerIntroducedMember is a smell/hack.
+
     /// <summary>
     /// Extended <see cref="IntroducedMember"/> used by <see cref="AspectLinker"/>.
     /// </summary>
@@ -16,8 +18,8 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public string LinkerNodeId { get; }
 
-        public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original ) 
-            : base(original.Introductor, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.LinkerOptions)
+        public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original )
+            : base( original.Introduction, linkerAnnotatedSyntax, original.AspectLayerId, original.Semantic, original.LinkerOptions, original.CodeElement )
         {
             this.LinkerNodeId = linkerNodeId;
         }

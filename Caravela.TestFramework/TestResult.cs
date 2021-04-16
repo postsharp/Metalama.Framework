@@ -109,12 +109,12 @@ namespace Caravela.TestFramework
                     .ToList();
 
             var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
-        
+
             // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
-                    .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Error )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`\n" )
+                    .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment );
 
@@ -136,12 +136,12 @@ namespace Caravela.TestFramework
         /// </summary>
         public bool Success { get; private set; } = true;
 
-        internal void SetFailed(string reason )
+        internal void SetFailed( string reason )
         {
             this.Success = false;
             this.ErrorMessage = reason;
-            
-            this.SetTransformedTarget( SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ));
+
+            this.SetTransformedTarget( SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
         }
     }
 }

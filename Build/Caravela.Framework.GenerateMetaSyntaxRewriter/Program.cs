@@ -18,6 +18,11 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             return s.EndsWith( suffix ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
         }
 
+        // private static string RemovePrefix( string s, string prefix )
+        // {
+        //    return s.Substring( prefix.Length );
+        // }
+
         private static void Main()
         {
 
@@ -42,6 +47,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             var allFactoryMethods =
                 typeof( SyntaxFactory ).GetMethods( BindingFlags.Static | BindingFlags.Public ).ToArray();
 
+            // Generate Visit* and Transform* methods.
             foreach ( var method in typeof( CSharpSyntaxRewriter ).GetMethods( BindingFlags.Public | BindingFlags.Instance ).OrderBy( m => m.Name ) )
             {
                 if ( !method.Name.StartsWith( "Visit" ) || method.ReturnType != typeof( SyntaxNode ) )
@@ -117,7 +123,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( "\t\t\t}" );
                 writer.WriteLine( "\t\t}" );
 
-                // Generate the Transform method.
+                // Generate the Transform* method.
                 writer.WriteLine( $"\t\tprotected virtual ExpressionSyntax Transform{factoryMethodName}( {nodeTypeName} node)" );
                 writer.WriteLine( "\t\t{" );
                 writer.WriteLine( "\t\t\tthis.Indent();" );
@@ -134,7 +140,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                     {
                         if ( i > 0 )
                         {
-                            writer.WriteLine( "\t\t\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(this.GetLineBreak())," );
+                            writer.WriteLine( "\t\t\tToken(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak())," );
                         }
 
                         writer.WriteLine( $"\t\t\tArgument(this.Transform({FindProperty( parameters[i] )})).WithLeadingTrivia(this.GetIndentation())," );
@@ -148,6 +154,29 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 writer.WriteLine( "\t\t}" );
             }
 
+            // Generate Transform method (big switch).
+            // writer.WriteLine( "\t\tprotected virtual ExpressionSyntax Transform(SyntaxNode node)" );
+            // writer.WriteLine( "\t\t{" );
+            // writer.WriteLine( "\t\t\tswitch ( node.Kind() )" );
+            // writer.WriteLine( "\t\t\t{" );
+
+            // var syntaxDocument = XElement.Load( "https://raw.githubusercontent.com/dotnet/roslyn/main/src/Compilers/CSharp/Portable/Syntax/Syntax.xml" );
+            // foreach ( var node in syntaxDocument.Elements("Node"))
+            // {
+            //    foreach ( var kind in node.Elements("Kind") )
+            //    {
+            //        writer.WriteLine( $"\t\t\t\tcase SyntaxKind.{kind.Attribute( "Name" ).Value}: " );
+            //    }
+
+            // writer.WriteLine( $"\t\t\t\t\treturn this.Transform{node.Attribute("Name").Value.Replace("Syntax", "")}( ({node.Attribute("Name").Value}) node ) ;" );
+            // }
+
+            // writer.WriteLine( $"\t\t\t\tdefault: " );
+            // writer.WriteLine( $"\t\t\t\t\tthrow new AssertionFailedException();" );
+            // writer.WriteLine( "\t\t\t}" );
+            // writer.WriteLine( "\t\t}" );
+
+            // Generate MetaSyntaxFactoryImpl.
             writer.WriteLine( "\tpartial class MetaSyntaxFactoryImpl" );
             writer.WriteLine( "\t{" );
 
@@ -223,7 +252,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
                         if ( method.IsGenericMethod )
                         {
-                            var genericArguments = string.Join( ", ", method.GetGenericArguments().Select( t => $"this.TypeName(typeof({t.Name}))" ) );
+                            var genericArguments = string.Join( ", ", method.GetGenericArguments().Select( t => $"this.Type(typeof({t.Name}))" ) );
                             factoryMethod = $"this.GenericSyntaxFactoryMethod( \"{method.Name}\", {genericArguments} )";
                         }
                         else
@@ -251,10 +280,10 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                             if ( IsEnumerable( parameter ) )
                             {
                                 var itemType = parameter.ParameterType.GenericTypeArguments[0];
-                                var typeOfItemType = itemType.IsGenericParameter ? $"typeof({itemType.Name})" : $"typeof({itemType.Name})";
+                                var typeOfItemType = $"typeof({itemType.Name})";
                                 writer.Write(
                                     $"\t\t\t\tSyntaxFactory.Argument(SyntaxFactory.ArrayCreationExpression( \n" +
-                                    $"\t\t\t\t\tSyntaxFactory.ArrayType( this.TypeName({typeOfItemType}) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), \n" +
+                                    $"\t\t\t\t\tSyntaxFactory.ArrayType( this.Type({typeOfItemType}) ).WithRankSpecifiers(SyntaxFactory.SingletonList(SyntaxFactory.ArrayRankSpecifier(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(SyntaxFactory.OmittedArraySizeExpression() ) ) ) ), \n" +
                                     $"\t\t\t\t\tSyntaxFactory.InitializerExpression( SyntaxKind.ArrayInitializerExpression, SyntaxFactory.SeparatedList( @{parameter.Name} ))\n" +
                                     $"\t\t\t\t))" );
                             }

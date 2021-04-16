@@ -10,6 +10,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Accessibility = Caravela.Framework.Code.Accessibility;
@@ -104,16 +105,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static MemberLink<T> ToMemberLink<T>( this T member )
             where T : class, IMember
-            => new MemberLink<T>( ((ICodeElementInternal) member).ToLink() );
+            => new( ((ICodeElementInternal) member).ToLink() );
 
-        public static Location? GetLocation( this ICodeElement codeElement )
+        public static Location? GetDiagnosticLocation( this ICodeElement codeElement )
             => codeElement switch
             {
                 IHasDiagnosticLocation hasLocation => hasLocation.DiagnosticLocation,
                 _ => null
             };
 
-        internal static void CheckArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? arguments )
+        internal static void CheckArguments( this ICodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -123,19 +124,19 @@ namespace Caravela.Framework.Impl.CodeModel
                 var requiredArguments = parameters.Count - 1;
                 if ( argumentsLength < requiredArguments )
                 {
-                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments, codeElement, requiredArguments );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (codeElement, requiredArguments) );
                 }
             }
             else
             {
                 if ( argumentsLength != parameters.Count )
                 {
-                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MemberRequiresNArguments, codeElement, parameters.Count );
+                    throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (codeElement, parameters.Count) );
                 }
             }
         }
 
-        internal static ArgumentSyntax[] GetArguments( this CodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? args )
+        internal static ArgumentSyntax[] GetArguments( this ICodeElement codeElement, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? args )
         {
             CheckArguments( codeElement, parameters, args );
 
@@ -170,10 +171,9 @@ namespace Caravela.Framework.Impl.CodeModel
                         if ( !arg.IsReferenceable )
                         {
                             throw new InvalidUserCodeException(
-                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
-                                arg.Syntax,
-                                parameter.Name,
-                                parameter.DeclaringMember );
+                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateDiagnostic(
+                                    null,
+                                    (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
                         }
 
                         var syntax = parameter.IsRef() ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
@@ -193,23 +193,23 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, RuntimeExpression? instance )
-            where T : CodeElement, IMember
+            where T : IMember
         {
 
             if ( codeElement.IsStatic )
             {
                 if ( instance != null )
                 {
-                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember, codeElement );
+                    throw GeneralDiagnosticDescriptors.CannotProvideInstanceForStaticMember.CreateException( codeElement );
                 }
 
-                return (ExpressionSyntax) codeElement.Compilation.SyntaxGenerator.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
+                return (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
             }
             else
             {
                 if ( instance == null )
                 {
-                    throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember, codeElement );
+                    throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( codeElement );
                 }
 
                 return instance.ToTypedExpression( codeElement.DeclaringType, true );

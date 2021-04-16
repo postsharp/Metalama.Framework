@@ -4,5 +4,5 @@
         throw new global::System.ArgumentException("IsNullOrEmpty", "a");
     }
 
-    return a;
+    return this.Method(a);
 }

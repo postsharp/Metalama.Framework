@@ -20,7 +20,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public abstract class TestRunnerBase
     {
-          
+
         public TestRunnerBase( string? projectDirectory )
         {
             this.ProjectDirectory = projectDirectory;
@@ -39,29 +39,34 @@ namespace Caravela.TestFramework
         public virtual async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             // Source.
-            var project = this.CreateProject();
+            var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
             var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, encoding: Encoding.UTF8 ) );
 
             var initialCompilation = CSharpCompilation.Create(
-                "assemblyName",
+                "test",
                 new[] { (await testDocument.GetSyntaxTreeAsync())! },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
 
             var result = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
 
-            var diagnostics = initialCompilation.GetDiagnostics();
-
-            result.AddDiagnostics( diagnostics );
-
-            if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            if ( this.ReportInvalidInputCompilation )
             {
-                result.SetFailed( "The initial compilation failed." );
-                return result;
+                var diagnostics = initialCompilation.GetDiagnostics();
+
+                result.AddDiagnostics( diagnostics );
+
+                if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                {
+                    result.SetFailed( "The initial compilation failed." );
+                    return result;
+                }
             }
 
             return result;
         }
+
+        protected virtual bool ReportInvalidInputCompilation => true;
 
         /// <summary>
         /// Creates a new project that is used to compile the test source.
@@ -80,8 +85,10 @@ namespace Caravela.TestFramework
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) )
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TemplateSyntaxFactory ).Assembly.Location ) )
                     .AddMetadataReference( MetadataReference.CreateFromFile( typeof( MetadataLoadContext ).Assembly.Location ) )
-                    .AddMetadataReference( MetadataReference.CreateFromFile( this.GetType().Assembly.Location ) )
-                ;
+                    .AddMetadataReference( MetadataReference.CreateFromFile( typeof( TestOutputAttribute ).Assembly.Location ) );
+            
+            // Don't add the assembly containing the code to test because it would result in duplicate symbols.
+            
             return project;
         }
     }

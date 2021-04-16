@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation,  INamedType aspectType )
+        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, AspectType aspectType )
             => this._aspectSources
                 .Where( s => s.Type.Equals( aspectType ) )
                 .Select( a => a.Source )

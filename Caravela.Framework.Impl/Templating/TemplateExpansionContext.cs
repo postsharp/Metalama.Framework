@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,28 +10,30 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    // TODO: This is a temporary implementation of ITemplateExpansionContext.
-    internal class TemplateExpansionContext : ITemplateExpansionContext
+    // TODO: This is a temporary implementation of TemplateExpansionContext.
+
+    internal class TemplateExpansionContext
     {
         private readonly IMethod _targetMethod;
+
+        public TemplateExpansionLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(
             object templateInstance,
             IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl,
-            ITemplateExpansionLexicalScope lexicalScope,
+            TemplateExpansionLexicalScope lexicalScope,
             DiagnosticSink diagnosticSink )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
             this.Compilation = compilation;
             this.ProceedImplementation = proceedImpl;
-            this.CurrentLexicalScope = lexicalScope;
             this.DiagnosticSink = diagnosticSink;
-            Invariant.Assert( diagnosticSink.DefaultLocation != null );
-            Invariant.Assert(
-                diagnosticSink.DefaultLocation!.Equals( targetMethod.DiagnosticLocation ) );
+            this.LexicalScope = lexicalScope;
+            Invariant.Assert( diagnosticSink.DefaultScope != null );
+            Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
         }
 
         public ICodeElement TargetDeclaration => this._targetMethod;
@@ -43,8 +43,6 @@ namespace Caravela.Framework.Impl.Templating
         public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
-
-        public ITemplateExpansionLexicalScope CurrentLexicalScope { get; private set; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
@@ -68,33 +66,6 @@ namespace Caravela.Framework.Impl.Templating
             return ReturnStatement( CastExpression( ParseTypeName( this._targetMethod.ReturnType.ToDisplayString() ), returnExpression ) );
         }
 
-        public IDisposable OpenNestedScope()
-        {
-            var nestedScope = this.CurrentLexicalScope.OpenNestedScope();
-            var cookie = new LexicalScopeCookie( this, this.CurrentLexicalScope, nestedScope );
-            this.CurrentLexicalScope = nestedScope;
-            return cookie;
-        }
-
         public DiagnosticSink DiagnosticSink { get; }
-
-        private class LexicalScopeCookie : IDisposable
-        {
-            private readonly TemplateExpansionContext _context;
-            private readonly ITemplateExpansionLexicalScope _previousScope;
-            private readonly ITemplateExpansionLexicalScope _newScope;
-
-            public LexicalScopeCookie( TemplateExpansionContext context, ITemplateExpansionLexicalScope previousScope, ITemplateExpansionLexicalScope newScope )
-            {
-                this._context = context;
-                this._previousScope = previousScope;
-                this._newScope = newScope;
-            }
-
-            public void Dispose()
-            {
-                this._context.CurrentLexicalScope = this._previousScope;
-            }
-        }
     }
 }

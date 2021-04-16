@@ -10,7 +10,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -20,7 +19,7 @@ using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodInternal
+    internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder
     {
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -117,18 +116,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         }
                         : null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions ) };
+            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this ) };
         }
 
         // TODO: Temporary
         public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
-        public IReadOnlyList<ISymbol> LookupSymbols()
-        {
-            // TODO: implement.
-            return Array.Empty<ISymbol>();
-        }
+        
+        public IMethod? OverriddenMethod => throw new NotImplementedException();
     }
 }

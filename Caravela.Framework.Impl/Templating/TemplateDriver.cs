@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -21,10 +22,10 @@ namespace Caravela.Framework.Impl.Templating
             this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof( templateMethodInfo ) );
         }
 
-        public BlockSyntax ExpandDeclaration( ITemplateExpansionContext templateExpansionContext )
+        public BlockSyntax ExpandDeclaration( TemplateExpansionContext templateExpansionContext )
         {
             Invariant.Assert(
-                templateExpansionContext.DiagnosticSink.DefaultLocation != null );
+                templateExpansionContext.DiagnosticSink.DefaultScope != null );
 
             // TODO: support target declaration other than a method.
             if ( templateExpansionContext.TargetDeclaration is not IMethod )
@@ -39,14 +40,17 @@ namespace Caravela.Framework.Impl.Templating
             TemplateSyntaxFactory.Initialize( templateExpansionContext );
 
             SyntaxNode output;
-            try
+            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
             {
-                output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
-            }
-            catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
-            {
-                ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
-                throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
+                try
+                {
+                    output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
+                }
+                catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
+                {
+                    ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                    throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
+                }
             }
 
             var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );

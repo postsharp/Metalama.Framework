@@ -12,7 +12,6 @@ namespace Caravela.TestFramework
     /// </summary>
     public partial class AspectTestRunner : TestRunnerBase
     {
-
         public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory )
         {
         }
@@ -23,23 +22,32 @@ namespace Caravela.TestFramework
         /// <returns>The result of the test execution.</returns>
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
-            var testResult = await base.RunTestAsync( testInput );
+            var testResult = await base.RunTestAsync(testInput);
 
-            var context = new AspectTestPipelineContext( testResult );
-            var pipeline = new CompileTimeAspectPipeline( context );
-            if ( pipeline.TryExecute( out var resultCompilation ) )
+            var context = new AspectTestPipelineContext(testResult);
+            var pipeline = new CompileTimeAspectPipeline(context);
+            if (pipeline.TryExecute(out var resultCompilation))
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
-                
-                testResult.SetTransformedTarget( syntaxRoot );
+
+                if ( testInput.Options.IncludeFinalDiagnostics )
+                {
+                    var finalDiagnostics = resultCompilation.GetDiagnostics();
+                    testResult.AddDiagnostics( finalDiagnostics );
+                }
+
+                testResult.SetTransformedTarget(syntaxRoot);
             }
             else
             {
-                testResult.SetFailed( "The pipeline failed." );
+                testResult.SetFailed("The pipeline failed.");
             }
 
             return testResult;
         }
+
+        // We don't want the base class to report errors in the input compilation because the pipeline does.
+        protected override bool ReportInvalidInputCompilation => false;
     }
 }

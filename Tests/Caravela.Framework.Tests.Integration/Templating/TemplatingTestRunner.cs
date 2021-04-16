@@ -11,10 +11,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using Xunit;
 
@@ -81,7 +84,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
-            Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
+            if ( templateSyntaxRoot != null && annotatedTemplateSyntax != null )
+            {
+                Assert.Equal( templateSyntaxRoot.ToString(), annotatedTemplateSyntax.ToString() );
+            }
 
             result.AnnotatedTemplateSyntax = annotatedTemplateSyntax;
             result.TransformedTemplateSyntax = transformedTemplateSyntax;
@@ -125,8 +131,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                // We throw an exception because compilation here are not user errors, our errors.                
-                throw new AssertionFailedException( "The final template compilation failed.", emitResult.Diagnostics );
+                result.AddDiagnostics( emitResult.Diagnostics );
+                result.SetFailed( "The final template compilation failed." );
+                return result;
             }
 
             buildTimeAssemblyStream.Seek( 0, SeekOrigin.Begin );
@@ -142,8 +149,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 Invariant.Assert( templateMethod != null );
                 var driver = new TemplateDriver( templateMethod );
 
-                var caravelaCompilation = CompilationModel.CreateInitialInstance( (CSharpCompilation) result.InitialCompilation );
-                var expansionContext = new TestTemplateExpansionContext( assembly, caravelaCompilation );
+                var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) result.InitialCompilation );
+                var expansionContext = CreateTemplateExpansionContext( assembly, compilationModel );
 
                 var output = driver.ExpandDeclaration( expansionContext );
                 result.SetTransformedTarget( output );
@@ -155,5 +162,42 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             return result;
         }
+
+        private static TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
+        {
+            var roslynCompilation = compilation.RoslynCompilation;
+
+            var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
+            var templateInstance = Activator.CreateInstance( templateType )!;
+
+            var targetType = assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
+            var targetCaravelaType = compilation.Factory.GetTypeByReflectionName( targetType.FullName! )!;
+            var targetMethod = targetCaravelaType.Methods.Single( m => m.Name == "Method" );
+
+            var diagnostics = new DiagnosticSink( targetMethod );
+
+            var roslynTargetType = roslynCompilation.Assembly.GetTypes().Single( t => t.Name.Equals( "TargetCode", StringComparison.Ordinal ) );
+            var roslynTargetMethod = (BaseMethodDeclarationSyntax) roslynTargetType.GetMembers()
+                .Single( m => m.Name == "Method" )
+                .DeclaringSyntaxReferences
+                .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
+                .Single();
+
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
+            var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );
+            if ( roslynTargetMethodSymbol == null )
+            {
+                throw new InvalidOperationException( "The symbol of the target method was not found." );
+            }
+
+            var lexicalScope = new TemplateExpansionLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+            return new TemplateExpansionContext(
+                templateInstance,
+                targetMethod,
+                compilation,
+                new LinkerOverrideProceedImpl( default, targetMethod ),
+                lexicalScope,
+                diagnostics );
         }
+    }
 }

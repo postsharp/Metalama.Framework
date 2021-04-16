@@ -33,6 +33,8 @@ namespace Caravela.TestFramework
         /// </remarks>
         protected string ProjectDirectory { get; }
 
+        protected string TestInputsDirectory { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitTestBase"/> class.
         /// </summary>
@@ -41,6 +43,7 @@ namespace Caravela.TestFramework
         {
             this.Logger = logger;
             this.ProjectDirectory = TestEnvironment.GetProjectDirectory( this.GetType().Assembly );
+            this.TestInputsDirectory = TestEnvironment.GetTestInputsDirectory( this.GetType().Assembly );
         }
 
         protected void WriteDiagnostic( Diagnostic diagnostic )
@@ -49,7 +52,7 @@ namespace Caravela.TestFramework
         }
 
         protected abstract TestRunnerBase CreateTestRunner();
-        
+
         protected void WriteDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
             foreach ( var diagnostic in diagnostics )
@@ -68,7 +71,7 @@ namespace Caravela.TestFramework
         /// <returns>The result of the test execution.</returns>
         protected async Task<TestResult> GetTestResultAsync( string relativeTestPath )
         {
-            var testSourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
+            var testSourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
 
             var testRunner = this.CreateTestRunner();
             var testSource = await File.ReadAllTextAsync( testSourceAbsolutePath );
@@ -85,6 +88,8 @@ namespace Caravela.TestFramework
             Assert.True( result.Success, result.ErrorMessage );
         }
 
+        public static string? NormalizeString( string? s ) => s?.Trim()?.Replace( "\r", "" );
+
         /// <summary>
         /// Runs the template test with the given path of the source file and asserts that the result of the code transformation matches the expected result.
         /// </summary>
@@ -96,14 +101,12 @@ namespace Caravela.TestFramework
 
             // Compare the "Target" region of the transformed code to the expected output.
             // If the region is not found then compare the complete transformed code.
-            var sourceAbsolutePath = Path.Combine( this.ProjectDirectory, relativeTestPath );
-            var expectedTransformedPath = Path.Combine( 
+            var sourceAbsolutePath = Path.Combine( this.TestInputsDirectory, relativeTestPath );
+            var expectedTransformedPath = Path.Combine(
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + ".transformed.txt" );
 
             Assert.NotNull( testResult.TransformedTargetSourceText );
-
-            static string NormalizeString( string s ) => s.Trim().Replace( "\r", "" );
 
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
 
@@ -114,7 +117,7 @@ namespace Caravela.TestFramework
                 "transformed",
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
-            
+
             if ( !File.Exists( actualTransformedPath ) || NormalizeString( File.ReadAllText( actualTransformedPath ) ) != actualTransformedSourceText )
             {
                 Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );

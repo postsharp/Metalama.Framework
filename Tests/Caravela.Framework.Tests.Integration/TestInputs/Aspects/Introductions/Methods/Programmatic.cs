@@ -9,20 +9,20 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
 {
     public class IntroductionAttribute : Attribute, IAspect<INamedType>
     {
-        public void Initialize( IAspectBuilder<INamedType> aspectBuilder )
+        public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
-            var advice = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof( Template ) );
+            var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
 
             advice.Builder.Name = "IntroducedMethod";
-            advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType( typeof( int ) );
-            advice.Builder.AddParameter( "x", typeof(int) );
-            advice.Builder.AddParameter( "y", typeof(int) );
+            advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
+            advice.Builder.AddParameter("x", typeof(int));
+            advice.Builder.AddParameter("y", typeof(int));
         }
 
         [IntroduceMethodTemplate]
         public dynamic Template()
         {
-            Console.WriteLine( "This is introduced method." );
+            Console.WriteLine("This is introduced method.");
             return proceed();
         }
     }

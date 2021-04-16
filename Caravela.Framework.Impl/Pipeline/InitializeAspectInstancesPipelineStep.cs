@@ -7,7 +7,6 @@ using System.Linq;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -16,7 +15,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
     {
-        private readonly List<AspectInstance> _aspectInstances = new List<AspectInstance>();
+        private readonly List<AspectInstance> _aspectInstances = new();
 
         public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer )
         {
@@ -30,11 +29,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
-            var aspectInitializerDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics );
+            var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
+            var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );
             var addedAspectSources = aspectInstanceResults.SelectMany( air => air.AspectSources );
             var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices ).Cast<Advice>();
 
-            pipelineStepsState.AddDiagnostics( aspectInitializerDiagnostics );
+            pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions );
             success &= pipelineStepsState.AddAspectSources( addedAspectSources );
             success &= pipelineStepsState.AddAdvices( addedAdvices );
 

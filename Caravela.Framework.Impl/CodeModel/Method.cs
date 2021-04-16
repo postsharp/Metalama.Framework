@@ -9,15 +9,19 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    internal partial class Method : MethodBase, IMethodInternal
+    internal partial class Method : MethodBase, IMethod
     {
 
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
+            if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
+            {
+                throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
+            }
         }
 
         [Memo]
@@ -53,23 +57,24 @@ namespace Caravela.Framework.Impl.CodeModel
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
 
-        IReadOnlyList<ISymbol> IMethodInternal.LookupSymbols()
-        {
-            if ( this.Symbol.DeclaringSyntaxReferences.Length == 0 )
-            {
-                throw new InvalidOperationException();
-            }
-
-            var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
-            var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-            var methodBodyNode = ((MethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
-            var lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
-
-            return semanticModel.LookupSymbols( lookupPosition );
-        }
-
         public override bool IsReadOnly => this.MethodSymbol.IsReadOnly;
 
         public override bool IsAsync => this.MethodSymbol.IsAsync;
+
+        public IMethod? OverriddenMethod
+        {
+            get
+            {
+                var overriddenMethod = this.MethodSymbol.OverriddenMethod;
+                if ( overriddenMethod != null )
+                {
+                    return this.Compilation.Factory.GetMethod( overriddenMethod );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

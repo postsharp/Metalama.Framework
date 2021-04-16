@@ -31,9 +31,9 @@ namespace Caravela.Framework.Impl.Linking
                 this._introducedMembersByInsertPosition = new Dictionary<MemberDeclarationSyntax, List<LinkerIntroducedMember>>();
             }
 
-            public void Add(IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers)
+            public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
             {
-                foreach (var introducedMember in introducedMembers)
+                foreach ( var introducedMember in introducedMembers )
                 {
                     var id = Interlocked.Increment( ref this._nextId ).ToString();
                     var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     this._introducedMembers.Add( linkerIntroducedMember );
 
-                    if ( !this._introducedMembersByInsertPosition.TryGetValue(memberIntroduction.InsertPositionNode, out var nodes))
+                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPositionNode, out var nodes ) )
                     {
                         this._introducedMembersByInsertPosition[memberIntroduction.InsertPositionNode] = nodes = new List<LinkerIntroducedMember>();
                     }
@@ -57,7 +57,7 @@ namespace Caravela.Framework.Impl.Linking
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( MemberDeclarationSyntax position )
             {
-                if (this._introducedMembersByInsertPosition.TryGetValue(position, out var introducedMembers))
+                if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
                 {
                     // IMPORTANT - do not change the introduced node here.
                     return introducedMembers;

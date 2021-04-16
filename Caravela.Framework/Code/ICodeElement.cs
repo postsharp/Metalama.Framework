@@ -10,8 +10,8 @@ namespace Caravela.Framework.Code
     /// Represent an element of code. Implementations of <see cref="ICodeElement"/>
     /// are always declarations, never elements of the method body.
     /// </summary>
-    [CompileTime]
-    public interface ICodeElement : IDisplayable, IDiagnosticTarget
+    [CompileTimeOnly]
+    public interface ICodeElement : IDisplayable, IDiagnosticScope, ICompilationElement
     {
         /// <summary>
         /// Gets the origin (<see cref="CodeOrigin.Source"/>, <see cref="CodeOrigin.Generator"/> or <see cref="CodeOrigin.Aspect"/>
@@ -35,12 +35,5 @@ namespace Caravela.Framework.Code
         /// Gets the kind of element of code.
         /// </summary>
         public CodeElementKind ElementKind { get; }
-
-    /// <summary>
-        /// Gets the <see cref="ICompilation"/> to which the current code element belongs. Note that the same logical code element can be
-        /// represented by different object instances, each in a different compilation. Within the same compilation, each code element
-        /// is represented by only one object instance.
-    /// </summary>
-        ICompilation Compilation { get; }
     }
 }

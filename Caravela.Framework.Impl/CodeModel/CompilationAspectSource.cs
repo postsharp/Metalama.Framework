@@ -6,7 +6,6 @@ using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -35,11 +34,11 @@ namespace Caravela.Framework.Impl.CodeModel
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, INamedType aspectType ) =>
-            (compilation ?? this._initialCompilation).GetAllAttributesOfType( aspectType ).Select( attribute =>
+        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, AspectType aspectType ) =>
+            (compilation ?? this._initialCompilation).GetAllAttributesOfType( aspectType.Type ).Select( attribute =>
             {
                 var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
-                return new AspectInstance( aspect, (ISdkCodeElement) attribute.ContainingElement!, attribute.Type );
+                return aspectType.CreateAspectInstance( aspect, attribute.ContainingElement.AssertNotNull() );
             } );
     }
 }

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         }
     }
 
-    [CompileTime]
+    [CompileTimeOnly]
     class CompileTimeClass
     {
         public void CompileTimeMethod()

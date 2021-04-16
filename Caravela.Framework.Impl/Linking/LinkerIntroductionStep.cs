@@ -3,10 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 
@@ -70,17 +68,16 @@ namespace Caravela.Framework.Impl.Linking
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
-            var diagnostics = new DiagnosticList( null );
+            var diagnostics = new DiagnosticSink();
             var nameProvider = new LinkerIntroductionNameProvider();
-            var proceedImplFactory = new LinkerProceedImplementationFactory();
-            var lexicalScopeHelper = new LexicalScopeHelper();
+            var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
             var allTransformations =
-                input.FinalCompilationModel.GetAllObservableTransformations()
+                input.CompilationModel.GetAllObservableTransformations()
                 .SelectMany( x => x.Transformations )
                 .OfType<ISyntaxTreeTransformation>()
                 .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
@@ -89,25 +86,27 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), proceedImplFactory );
+                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ) );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );
             }
 
-            var intermediateCompilation = input.InitialCompilation;
+            // Group diagnostic suppressions by target.
+            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
+                s => s.CodeElement,
+                input.CompilationModel.InvariantComparer );
 
             // Process syntax trees one by one.
-            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics );
+            var intermediateCompilation = input.InitialCompilation;
+            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics, suppressionsByTarget, input.CompilationModel );
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
                 var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
 
-#if DEBUG
-                // Improve readibility of intermediate compilation in debug builds.
-                newRoot = SyntaxNodeExtensions.NormalizeWhitespace( newRoot );
-#endif
+                // Improve readability of intermediate compilation in debug builds.
+                newRoot = newRoot.NormalizeWhitespace();
 
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
@@ -115,38 +114,9 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
-            var introductionRegistry = new LinkerIntroductionRegistry( input.FinalCompilationModel, intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
+            var introductionRegistry = new LinkerIntroductionRegistry( input.CompilationModel, intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
-            return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
-        }
-
-        private class LexicalScopeHelper
-        {
-            private readonly Dictionary<ICodeElement, LinkerLexicalScope> _scopes = new Dictionary<ICodeElement, LinkerLexicalScope>();
-
-            public ITemplateExpansionLexicalScope GetLexicalScope( IMemberIntroduction introduction )
-            {
-                // TODO: This will need to be changed for other transformations than methods.
-
-                if ( introduction is IOverriddenElement overriddenElement )
-                {
-                    if ( !this._scopes.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
-                    {
-                        this._scopes[overriddenElement.OverriddenElement] = lexicalScope =
-                            LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromElement( overriddenElement.OverriddenElement ) );
-
-                        return lexicalScope;
-                    }
-
-                    this._scopes[overriddenElement.OverriddenElement] = lexicalScope = LinkerLexicalScope.CreateEmpty( lexicalScope.GetTransitiveClosure() );
-                    return lexicalScope;
-                }
-                else
-                {
-                    // For other member types we need to create empty lexical scope.
-                    return LinkerLexicalScope.CreateEmpty();
-                }
-            }
+            return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
     }
 }

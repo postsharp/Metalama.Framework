@@ -7,7 +7,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLoc
         [TestTemplate]
         dynamic Template()
         {
-            lock ( target.This )
+            lock (target.This)
             {
                 return proceed();
             }

@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        StatementSyntax IProceedImpl.CreateAssignStatement( string returnValueLocalName )
+        StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
         {
             // Emit `xxx = <original_method_call>`.
             return

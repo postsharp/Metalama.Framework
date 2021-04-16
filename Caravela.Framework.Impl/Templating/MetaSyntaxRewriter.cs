@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </remarks>
     internal abstract partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
     {
-        private readonly Stack<string> _indentTriviaStack = new Stack<string>();
+        private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
 
         /// <summary>
@@ -65,12 +65,14 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
+
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true ) =>
             lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
-                : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
+                : new[] { Whitespace( this.GetIndentationWhitespace() ) };
 
-        protected SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();
+        protected static SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();
 
         /// <summary>
         /// Adds indentation to a <see cref="SyntaxNode"/> and all its children.
@@ -100,7 +102,20 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
                 {
-                    return this.TransformExpression( (ExpressionSyntax) transformedNode );
+                    // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
+                    // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
+
+                    switch ( transformedNode )
+                    {
+                        case ExpressionSyntax expression:
+                            return this.TransformExpression( expression );
+
+                        case ArgumentSyntax argument:
+                            return this.TransformArgument( argument );
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
                 }
                 else
                 {
@@ -197,13 +212,18 @@ namespace Caravela.Framework.Impl.Templating
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )
         {
-            if ( token.Kind() == SyntaxKind.None )
+            switch ( token.Kind() )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) );
-            }
-            else if ( token.Kind() == SyntaxKind.IdentifierToken )
-            {
-                return this.MetaSyntaxFactory.Identifier( this.MetaSyntaxFactory.LiteralExpression( token.Text ) );
+                case SyntaxKind.None:
+                    return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) );
+
+                case SyntaxKind.IdentifierToken:
+                    return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( token.Text ) );
+
+                case SyntaxKind.CharacterLiteralToken:
+                case SyntaxKind.NumericLiteralToken:
+                case SyntaxKind.StringLiteralToken:
+                    return this.MetaSyntaxFactory.Literal( token );
             }
 
             var defaultToken = Token( token.Kind() );
@@ -229,19 +249,22 @@ namespace Caravela.Framework.Impl.Templating
                 return this.MetaSyntaxFactory.Token(
                     LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
                     this.Transform( token.Kind() ),
-                    this.MetaSyntaxFactory.LiteralExpression( token.Text ),
-                    this.MetaSyntaxFactory.LiteralExpression( token.ValueText ),
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) )
-                );
+                    SyntaxFactoryEx.LiteralExpression( token.Text ),
+                    SyntaxFactoryEx.LiteralExpression( token.ValueText ),
+                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
             }
         }
 
+#pragma warning disable CA1822 // Mark members as static
+        
+        // Not static for uniformity with other methods.
         protected ExpressionSyntax Transform( bool value )
         {
             return value
                 ? LiteralExpression( SyntaxKind.TrueLiteralExpression )
                 : LiteralExpression( SyntaxKind.FalseLiteralExpression );
         }
+#pragma warning restore CA1822 // Mark members as static
 
 #if DEBUG
         public override TNode? VisitListElement<TNode>( TNode? node )

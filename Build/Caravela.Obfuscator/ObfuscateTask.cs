@@ -22,8 +22,8 @@ namespace Caravela.Obfuscator
     /// </summary>
     public sealed class ObfuscateTask : Task
     {
-        private readonly Dictionary<NamedMetadataDeclaration, string> _obfuscatedDeclarations = new Dictionary<NamedMetadataDeclaration, string>( 4096 );
-        private readonly Set<TypeDefDeclaration> _obfuscatedTypes = new Set<TypeDefDeclaration>( 1024 );
+        private readonly Dictionary<NamedMetadataDeclaration, string> _obfuscatedDeclarations = new( 4096 );
+        private readonly Set<TypeDefDeclaration> _obfuscatedTypes = new( 1024 );
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private IType _obfuscationAttributeType;
@@ -143,7 +143,7 @@ namespace Caravela.Obfuscator
                             hashablePath = mutableSourceDocument.FileName;
                         }
 
-                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath );
+                        mutableSourceDocument.FileName = this._currentObfuscationTable.CreateHash( hashablePath, false );
                     }
                 }
             }
@@ -276,7 +276,7 @@ namespace Caravela.Obfuscator
                  (type.Attributes & TypeAttributes.Serializable) == 0 &&
                  !this.IsObfuscationExcluded( type ) )
             {
-                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name ) );
+                this._obfuscatedDeclarations.Add( type, this._currentObfuscationTable.CreateHash( type.Name, true ) );
             }
 
             // Obfuscate generic parameter names.
@@ -430,7 +430,7 @@ namespace Caravela.Obfuscator
                 else
                 {
                     // Obfuscate the name of the current method.
-                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name ) );
+                    this._obfuscatedDeclarations.Add( method, this._currentObfuscationTable.CreateHash( method.Name, false ) );
                 }
 
                 if ( !method.IsPublic() )
@@ -476,7 +476,7 @@ namespace Caravela.Obfuscator
                     continue;
                 }
 
-                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name ) );
+                this._obfuscatedDeclarations.Add( field, this._currentObfuscationTable.CreateHash( field.Name, false ) );
             }
         }
 

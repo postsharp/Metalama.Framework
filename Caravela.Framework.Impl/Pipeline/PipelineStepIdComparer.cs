@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 return -1;
             }
-            
+
             if ( xOrderedPart.Order > yOrderedPart.Order )
             {
                 return 1;
@@ -52,18 +52,18 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 return -1;
             }
-            
+
             if ( x.Depth > y.Depth )
             {
                 return -1;
             }
 
-            if ( !x.Equals(y) )
+            if ( !x.Equals( y ) )
             {
                 // The steps must be different here, otherwise there would be a duplicate key in the skip list of PipelineStepsState.
                 throw new AssertionFailedException();
             }
-            
+
             return 0;
         }
     }

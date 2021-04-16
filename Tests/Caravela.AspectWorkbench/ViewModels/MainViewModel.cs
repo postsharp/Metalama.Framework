@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
+using System.Windows.Media;
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Templating;
@@ -41,7 +42,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public FlowDocument? TransformedTargetDocument { get; set; }
 
-        public string? ErrorsText { get; set; }
+        public FlowDocument? ErrorsDocument { get; set; }
 
         public bool IsNewTest => string.IsNullOrEmpty( this.CurrentPath );
 
@@ -54,70 +55,92 @@ namespace Caravela.AspectWorkbench.ViewModels
                 throw new InvalidOperationException( $"Property {nameof( this.TestText )} not set." );
             }
 
-            this.ErrorsText = string.Empty;
-            this.TransformedTargetDocument = null;
-
-            TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" ) ? new TemplatingTestRunner() : new AspectTestRunner();
-            var syntaxColorizer = new SyntaxColorizer(testRunner.CreateProject());
-
-            var testInput = new TestInput( "interactive", this.TestText );
-
-            var compilationStopwatch = Stopwatch.StartNew();
-            
-            var testResult = await testRunner.RunTestAsync( testInput );
-            compilationStopwatch.Stop();
-
-            var highlightingStopwatch = Stopwatch.StartNew();
-            var highlightingResult = await testRunner.RunTestAsync( testInput );
-            highlightingStopwatch.Stop();
-            
-            if ( highlightingResult.AnnotatedTemplateSyntax != null )
+            try
             {
-                // Display the annotated syntax tree.
-                var sourceText = await highlightingResult.TemplateDocument.GetTextAsync();
-                var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
-                classifier.Visit( highlightingResult.AnnotatedTemplateSyntax );
-                var metaSpans = classifier.ClassifiedTextSpans;
 
-                this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+                this.ErrorsDocument = new FlowDocument();
+                this.TransformedTargetDocument = null;
+
+                TestRunnerBase testRunner = this.TestText.Contains( "[TestTemplate]" ) ? new TemplatingTestRunner() : new AspectTestRunner();
+                var syntaxColorizer = new SyntaxColorizer( testRunner.CreateProject() );
+
+                var testInput = new TestInput( "interactive", this.TestText );
+
+                var compilationStopwatch = Stopwatch.StartNew();
+
+                var testResult = await testRunner.RunTestAsync( testInput );
+                compilationStopwatch.Stop();
+
+                if ( testResult.AnnotatedTemplateSyntax != null )
+                {
+                    // Display the annotated syntax tree.
+                    var sourceText = await testResult.TemplateDocument.GetTextAsync();
+                    var classifier = new TextSpanClassifier( sourceText, testRunner is TemplatingTestRunner );
+                    classifier.Visit( testResult.AnnotatedTemplateSyntax );
+                    var metaSpans = classifier.ClassifiedTextSpans;
+
+                    this.ColoredTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( sourceText, metaSpans );
+                }
+
+                if ( testResult.TransformedTemplateSyntax != null )
+                {
+                    // Render the transformed tree.
+                    var project3 = testRunner.CreateProject();
+                    var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
+                    var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
+
+                    var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
+                    var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
+                    var spanMarker = new TextSpanClassifier( text4 );
+                    spanMarker.Visit( formattedTransformedSyntaxRoot );
+                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                }
+
+                var errorsDocument = new FlowDocument();
+
+                if ( testResult.TransformedTargetSourceText != null )
+                {
+                    // Display the transformed code.
+                    this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
+
+                    // Compare the output and shows the result.
+                    if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
+                         UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
+                    {
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                    }
+                    else
+                    {
+                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                    }
+                }
+
+                var errors = testResult.Diagnostics;
+
+                errorsDocument.Blocks.AddRange(
+                    errors.Select( e => new Paragraph(
+                        inline: new Run( e.ToString() )
+                        {
+                            Foreground = e.Severity switch
+                            {
+                                DiagnosticSeverity.Error => Brushes.Red,
+                                DiagnosticSeverity.Warning => Brushes.Chocolate,
+                                _ => Brushes.Black
+                            }
+                        } ) ) );
+
+                if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
+                {
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( testResult.ErrorMessage ) { Foreground = Brushes.Red } ) );
+                }
+
+                this.ErrorsDocument = errorsDocument;
             }
-
-            if ( testResult.TransformedTemplateSyntax != null )
+            catch ( Exception e )
             {
-                // Render the transformed tree.
-                var project3 = testRunner.CreateProject();
-                var document3 = project3.AddDocument( "name.cs", testResult.TransformedTemplateSyntax );
-                var optionSet = (await document3.GetOptionsAsync()).WithChangedOption( FormattingOptions.IndentationSize, 4 );
-
-                var formattedTransformedSyntaxRoot = Formatter.Format( testResult.TransformedTemplateSyntax, project3.Solution.Workspace, optionSet );
-                var text4 = formattedTransformedSyntaxRoot.GetText( Encoding.UTF8 );
-                var spanMarker = new TextSpanClassifier( text4 );
-                spanMarker.Visit( formattedTransformedSyntaxRoot );
-                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoring( text4, spanMarker.ClassifiedTextSpans );
+                var errorsDocument = new FlowDocument();
+                errorsDocument.Blocks.Add( new Paragraph( new Run( e.ToString() ) { Foreground = Brushes.Red } ) );
             }
-            
-            if ( testResult.TransformedTargetSourceText != null )
-            {
-                // Display the transformed code.
-                this.TransformedTargetDocument = await syntaxColorizer.WriteSyntaxColoring( testResult.TransformedTargetSourceText, null );
-            }
-
-            var errorsTextBuilder = new StringBuilder();
-
-            var errors = testResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error );
-            foreach ( var e in errors )
-            {
-                errorsTextBuilder.AppendLine( e.Location + ":" + e.Id + " " + e.GetMessage() );
-            }
-
-            if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
-            {
-                errorsTextBuilder.AppendLine( testResult.ErrorMessage );
-            }
-
-            errorsTextBuilder.AppendLine( $"It took {compilationStopwatch.Elapsed.TotalSeconds:f1} s to compile and {highlightingStopwatch.Elapsed.TotalSeconds:f1} s to highlight." );
-
-            this.ErrorsText = errorsTextBuilder.ToString();
         }
 
         public void NewTest()
@@ -131,7 +154,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task LoadTestAsync( string filePath )
         {
-            this._currentTest = await this._testSerializer.LoadFromFileAsync( filePath );
+            this._currentTest = await TestSerializer.LoadFromFileAsync( filePath );
 
             var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." );
 
@@ -166,7 +189,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             this.CurrentPath = filePath;
 
-            await this._testSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
+            await TestSerializer.SaveToFileAsync( this._currentTest, this.CurrentPath );
         }
     }
 }

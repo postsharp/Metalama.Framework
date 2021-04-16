@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestField()
         {
             var code = "class Target { public int Field; }";
-            var serialized = this.SerializeField( code );
+            var serialized = SerializeField( code );
             this.AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))", serialized );
 
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestFieldGeneric()
         {
             var code = "class Target<TKey> { public TKey[] Field; }";
-            var serialized = this.SerializeField( code );
+            var serialized = SerializeField( code );
             this.AssertEqual( @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))", serialized );
 
             TestExpression<FieldInfo>( code, CaravelaPropertyInfoTests.StripLocationInfo( serialized ), ( info ) =>
@@ -42,10 +42,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             } );
         }
 
-        private string SerializeField( string code )
+        private static string SerializeField( string code )
         {
             var compilation = CreateCompilation( code );
-            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Field" );
+            var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Fields.Single( m => m.Name == "Field" );
             var actual = new CaravelaLocationInfoSerializer( new ObjectSerializers() ).Serialize( new CompileTimeLocationInfo( (Field) single ) ).ToString();
             return actual;
         }

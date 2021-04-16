@@ -6,20 +6,29 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
-    public abstract partial class DiagnosticSink
+    public partial class DiagnosticSink
     {
         private class NonLocalizableString : LocalizableString
         {
             private readonly string _text;
+            private readonly object[]? _args;
 
-            public NonLocalizableString( string text )
+            public NonLocalizableString( string text, object[]? args )
             {
                 this._text = text;
+                this._args = args;
             }
 
             protected override string GetText( IFormatProvider? formatProvider )
             {
-                return this._text;
+                if ( this._args == null || this._args.Length == 0 )
+                {
+                    return this._text;
+                }
+                else
+                {
+                    return string.Format( formatProvider, this._text, formatProvider );
+                }
             }
 
             protected override int GetHash()

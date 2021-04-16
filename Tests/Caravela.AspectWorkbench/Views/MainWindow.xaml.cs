@@ -60,6 +60,9 @@ namespace Caravela.AspectWorkbench.Views
                 case nameof( MainViewModel.TransformedTargetDocument ):
                     this.transformedCodeRichBox.Document = this._viewModel.TransformedTargetDocument ?? new FlowDocument();
                     break;
+                case nameof( MainViewModel.ErrorsDocument ):
+                    this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
+                    break;
             }
         }
 
@@ -129,8 +132,8 @@ namespace Caravela.AspectWorkbench.Views
                 return;
             }
 
-            this._viewModel.ExpectedOutputText = new TextRange( 
-                this._viewModel.TransformedTargetDocument.ContentStart, 
+            this._viewModel.ExpectedOutputText = new TextRange(
+                this._viewModel.TransformedTargetDocument.ContentStart,
                 this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
         }
     }

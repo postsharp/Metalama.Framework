@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Kinds of a <see cref="ICodeElement"/>.
     /// </summary>
-    [CompileTime]
+    [CompileTimeOnly]
     public enum CodeElementKind
     {
         /// <summary>

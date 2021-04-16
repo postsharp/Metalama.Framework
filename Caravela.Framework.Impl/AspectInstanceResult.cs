@@ -3,13 +3,13 @@
 
 using System.Collections.Generic;
 using Caravela.Framework.Advices;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Diagnostics;
 
 namespace Caravela.Framework.Impl
 {
     internal record AspectInstanceResult(
         bool Success,
-        IReadOnlyList<Diagnostic> Diagnostics,
+        ImmutableDiagnosticList Diagnostics,
         IReadOnlyList<IAdvice> Advices,
         IReadOnlyList<IAspectSource> AspectSources );
 }

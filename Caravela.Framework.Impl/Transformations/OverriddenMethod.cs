@@ -7,6 +7,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,7 +49,7 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            using ( context.DiagnosticSink.WithDefaultLocation( this.OverriddenDeclaration.DiagnosticLocation ) )
+            using ( context.DiagnosticSink.WithDefaultScope( this.OverriddenDeclaration ) )
             {
                 var methodName = context.IntroductionNameProvider.GetOverrideName( this.Advice.AspectLayerId, this.OverriddenDeclaration );
 
@@ -56,15 +57,20 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     this.OverriddenDeclaration,
                     this.OverriddenDeclaration.Compilation,
-                    context.ProceedImplementationFactory.Get( this.Advice.AspectLayerId, this.OverriddenDeclaration ),
+                    new LinkerOverrideProceedImpl( this.Advice.AspectLayerId, this.OverriddenDeclaration ),
                     context.LexicalScope,
                     context.DiagnosticSink );
 
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
-                var newMethodBody = new TemplateDriver(
-                        this.Advice.Aspect.Aspect.GetType().GetMethod( compiledTemplateMethodName ).AssertNotNull() )
-                    .ExpandDeclaration( expansionContext );
+                var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
+                if ( templateMethod == null )
+                {
+                    // This is caused by an error upstream;
+                    return Enumerable.Empty<IntroducedMember>();
+                }
+                
+                var newMethodBody = new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
 
                 var overrides = new[]
                 {
@@ -83,7 +89,8 @@ namespace Caravela.Framework.Impl.Transformations
                             null ),
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.MethodOverride,
-                        this.LinkerOptions )
+                        this.LinkerOptions,
+                        this.OverriddenDeclaration)
                 };
 
                 return overrides;

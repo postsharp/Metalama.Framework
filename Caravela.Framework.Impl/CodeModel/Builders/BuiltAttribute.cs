@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Caravela.Framework.Code;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public INamedType Type => this.Compilation.Factory.GetCodeElement( this.AttributeBuilder.Constructor.DeclaringType );
 
         [Memo]
-        public IMethod Constructor => this.Compilation.Factory.GetMethod( this.AttributeBuilder.Constructor );
+        public IConstructor Constructor => this.Compilation.Factory.GetCodeElement( this.AttributeBuilder.Constructor );
 
         public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeBuilder.ConstructorArguments;
 

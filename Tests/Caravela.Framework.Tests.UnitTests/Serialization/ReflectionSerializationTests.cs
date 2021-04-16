@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
     public class ReflectionSerializationTests : TestBase
     {
         [Fact]
-        private void MethodHandleTest()
+        public void MethodHandleTest()
         {
             var code = @"
 class C

@@ -1,4 +1,4 @@
 root = true
 
 [*.cs]
-dotnet_analyzer_diagnostic.severity = suggestion
+dotnet_analyzer_diagnostic.severity = none

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestFieldLikeEvent()
         {
             var code = "class Target { public event System.Action Activated; }";
-            var serialized = this.SerializeEvent( code );
+            var serialized = SerializeEvent( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestCustomEvent()
         {
             var code = "class Target { public event System.Action Activated { add { } remove { } } }";
-            var serialized = this.SerializeEvent( code );
+            var serialized = SerializeEvent( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestCustomGenericEvent()
         {
             var code = "class Target<TKey> { public event System.Func<TKey> Activated { add { } remove { } } }";
-            var serialized = this.SerializeEvent( code );
+            var serialized = SerializeEvent( code );
             this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).GetEvent(""Activated"")", serialized );
 
             TestExpression<EventInfo>( code, serialized, ( info ) =>
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             } );
         }
 
-        private string SerializeEvent( string code )
+        private static string SerializeEvent( string code )
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Events.Single( m => m.Name == "Activated" );

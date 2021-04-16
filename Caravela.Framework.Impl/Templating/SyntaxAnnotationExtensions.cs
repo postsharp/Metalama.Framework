@@ -16,12 +16,13 @@ namespace Caravela.Framework.Impl.Templating
         private const string _proceedAnnotationKind = "proceed";
         private const string _noindentAnnotationKind = "noindent";
         private const string _colorAnnotationKind = "color";
+        private const string _templateAnnotationKind = "template";
 
-        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "buildtime" );
-        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "runtime" );
-        private static readonly SyntaxAnnotation _templateAnnotation = new SyntaxAnnotation( _scopeAnnotationKind, "template" );
-        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new SyntaxAnnotation( _noindentAnnotationKind );
-        
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildtime" );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runtime" );
+        private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
+        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noindentAnnotationKind );
+
         private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
@@ -45,9 +46,6 @@ namespace Caravela.Framework.Impl.Templating
 
                     case "runtime":
                         return SymbolDeclarationScope.RunTimeOnly;
-
-                    case "template":
-                        return SymbolDeclarationScope.Template;
 
                     default:
                         throw new AssertionFailedException();
@@ -142,13 +140,17 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
-                case SymbolDeclarationScope.Template:
-                    return node.WithAdditionalAnnotations( _templateAnnotation );
-
                 default:
                     return node;
             }
         }
+
+        public static T AddIsTemplateAnnotation<T>( this T node )
+            where T : SyntaxNode
+            => node.WithAdditionalAnnotations( _templateAnnotation );
+
+        public static bool IsTemplateFromAnnotation( this SyntaxNode node )
+            => node.HasAnnotation( _templateAnnotation );
 
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
@@ -167,6 +169,5 @@ namespace Caravela.Framework.Impl.Templating
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
-
     }
 }

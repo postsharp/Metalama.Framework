@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly TemplateCompiler _templateCompiler;
         private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly Random _random = new();
-        private (Compilation Compilation, MemoryStream CompileTimeAssembly)? _previousCompilation;
+        private readonly Dictionary<string, MemoryStream> _builtAssemblies = new();
 
         static CompileTimeAssemblyBuilder()
         {
@@ -37,7 +37,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var caravelaAssemblies = new[]
             {
-                "Caravela.Reactive.dll",
                 "Caravela.Framework.dll",
                 "Caravela.Framework.Sdk.dll",
                 "Caravela.Framework.Impl.dll"
@@ -77,6 +76,8 @@ namespace Caravela.Framework.Impl.CompileTime
             this._templateCompiler = templateCompiler;
             this._resources = resources;
         }
+
+        public IReadOnlyDictionary<string, MemoryStream> BuiltAssemblies => this._builtAssemblies;
 
         private Compilation? CreateCompileTimeAssembly( Compilation runTimeCompilation )
         {
@@ -158,6 +159,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new AssertionFailedException( "Cannot compile the compile-time assembly.", result.Diagnostics );
             }
 
+            this._builtAssemblies.Add( compilation.AssemblyName!, stream );
+
             return stream;
         }
 
@@ -220,11 +223,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )
         {
-            if ( compilation == this._previousCompilation?.Compilation )
+            var sourceCodeDiagnostics = compilation.GetDiagnostics();
+            if ( sourceCodeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
-                var lastStream = this._previousCompilation.Value.CompileTimeAssembly;
-                lastStream.Position = 0;
-                return lastStream;
+                // We don't continue with errors in the source code. This ensures that errors discovered later
+                // can be attributed to the template compiler instead of to the user.
+                throw new InvalidUserCodeException( "The compile-time part of user code is invalid.", sourceCodeDiagnostics );
             }
 
             var compileTimeCompilation = this.CreateCompileTimeAssembly( compilation );
@@ -237,8 +241,6 @@ namespace Caravela.Framework.Impl.CompileTime
             var stream = this.Emit( compileTimeCompilation );
 
             stream = Callbacks.AssemblyRewriter?.Invoke( stream ) ?? stream;
-
-            this._previousCompilation = (compilation, stream);
 
             return stream;
         }

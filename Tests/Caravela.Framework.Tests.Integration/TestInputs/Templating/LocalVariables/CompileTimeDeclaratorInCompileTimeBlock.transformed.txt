@@ -3,5 +3,5 @@
     global::System.Console.WriteLine(1);
     global::System.Console.WriteLine(0);
     global::System.Console.WriteLine(0);
-    return a + b;
+    return this.Method(a, b);
 }

@@ -10,7 +10,7 @@ using Caravela.Framework.Impl.CodeModel.Links;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethod, IMemberLink<IMethod>, IMethodInternal
+    internal class BuiltMethod : BuiltMember, IMethod, IMemberLink<IMethod>
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
         {
@@ -57,11 +57,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethodInvocation Base => throw new NotImplementedException();
 
-        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
+        public IMethod? OverriddenMethod => throw new NotImplementedException();
 
-        public IReadOnlyList<Microsoft.CodeAnalysis.ISymbol> LookupSymbols()
-        {
-            return ((MethodBuilder)this.Builder).LookupSymbols();
-        }
+        IMethod ICodeElementLink<IMethod>.GetForCompilation( CompilationModel compilation ) => (IMethod) this.GetForCompilation( compilation );
     }
 }

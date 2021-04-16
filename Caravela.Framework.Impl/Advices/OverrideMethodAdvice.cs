@@ -6,7 +6,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Advices
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray.Create<INonObservableTransformation>(
-                    new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod ) ) );
+                    new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) ) );
         }
     }
 }

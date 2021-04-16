@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
     /// </summary>
     internal class ObjectSerializers
     {
-        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new ConcurrentDictionary<Type, ObjectSerializer>();
+        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new();
         private readonly EnumSerializer _enumSerializer;
         private readonly ArraySerializer _arraySerializer;
 
@@ -125,7 +125,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( !this._serializers.TryGetValue( mainType, out var serializer ) )
             {
-                throw new InvalidUserCodeException( GeneralDiagnosticDescriptors.UnsupportedSerialization, mainType );
+                throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( mainType );
             }
 
             return serializer.SerializeObject( o );

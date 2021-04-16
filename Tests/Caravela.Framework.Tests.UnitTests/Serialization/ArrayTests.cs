@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public class ArrayTests
     {
-        private readonly ObjectSerializers _serializers = new ObjectSerializers();
+        private readonly ObjectSerializers _serializers = new();
 
         [Fact]
         public void TestBasicArray()

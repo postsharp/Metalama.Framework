@@ -10,18 +10,12 @@ namespace Caravela.Framework.Code
     /// A class, struct, enum or delegate are represented as an <see cref="INamedType"/>, which
     /// derive from <see cref="IType"/>.
     /// </summary>
-    [CompileTime]
-    public interface IType : IDisplayable
+    [CompileTimeOnly]
+    public interface IType : ICompilationElement, IDisplayable
     {
         /// <summary>
         /// Gets the kind of type.
         /// </summary>
         TypeKind TypeKind { get; }
-
-        /// <summary>
-        /// Gets the <see cref="ICompilation"/> to which this type belongs (which does not mean that the type is declared
-        /// by the main project of the compilation).
-        /// </summary>
-        ICompilation Compilation { get; }
     }
 }

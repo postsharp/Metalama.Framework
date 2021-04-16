@@ -102,11 +102,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         Console.WriteLine( exception.ToString() );
 
-                        this.Context.ReportDiagnostic( Diagnostic.Create(
-                            GeneralDiagnosticDescriptors.UncaughtException,
-                            null,
-                            exception.ToDiagnosticString(),
-                            path ) );
+                        this.Context.ReportDiagnostic( GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
                     }
                     else
                     {
@@ -172,7 +168,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var hasError = false;
-            foreach ( var diagnostic in pipelineStageResult.Diagnostics )
+            foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
                 this.Context.ReportDiagnostic( diagnostic );
                 hasError |= diagnostic.Severity >= DiagnosticSeverity.Error;
@@ -218,7 +214,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelPipelineStage( weaver, (ISdkNamedType) compilation.Factory.GetTypeByReflectionName( partData.AspectType.Name )!, this );
+                    return new LowLevelPipelineStage( weaver, partData.AspectType, this );
 
                 case nameof( AspectDriver ):
 

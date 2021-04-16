@@ -23,13 +23,19 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
-            var linker = new AspectLinker( new AspectLinkerInput( input.Compilation, pipelineStepResult.Compilation, pipelineStepResult.NonObservableTransformations, input.AspectLayers ) );
+            var linker = new AspectLinker( new AspectLinkerInput( 
+                input.Compilation, 
+                pipelineStepResult.Compilation, 
+                pipelineStepResult.NonObservableTransformations, 
+                input.AspectLayers,
+                input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepResult.Diagnostics.DiagnosticSuppressions )) );
+            
             var linkerResult = linker.ToResult();
 
             return new PipelineStageResult(
                 linkerResult.Compilation,
                 input.AspectLayers,
-                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ).ToList(),
+                pipelineStepResult.Diagnostics.Concat( linkerResult.Diagnostics ),
                 pipelineStepResult.NonObservableTransformations.OfType<ManagedResourceBuilder>().Select( r => r.ToResourceDescription() ).ToList(),
                 pipelineStepResult.ExternalAspectSources );
         }

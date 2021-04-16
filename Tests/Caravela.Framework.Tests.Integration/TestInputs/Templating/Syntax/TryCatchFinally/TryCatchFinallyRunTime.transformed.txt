@@ -2,8 +2,8 @@
     try
     {
         global::System.Console.WriteLine("try");
-        int result;
-        result = a;
+        global::System.Int32 result;
+        result = this.Method(a);
         global::System.Console.WriteLine("success");
         return (int)result;
     }

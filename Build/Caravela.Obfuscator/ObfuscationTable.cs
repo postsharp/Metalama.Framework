@@ -13,8 +13,8 @@ namespace Caravela.Obfuscator
     internal class ObfuscationTable
     {
         private readonly SHA256 _sha1 = SHA256.Create();
-        private readonly Dictionary<string, string> _hashToName = new Dictionary<string, string>( 32 * 1024 );
-        private readonly Dictionary<string, string> _nameToHash = new Dictionary<string, string>( 32 * 1024 );
+        private readonly Dictionary<string, string> _hashToName = new( 32 * 1024 );
+        private readonly Dictionary<string, string> _nameToHash = new( 32 * 1024 );
 
         public int Count => this._nameToHash.Count;
 
@@ -31,7 +31,7 @@ namespace Caravela.Obfuscator
             return hashString;
         }
 
-        public string CreateHash( string input )
+        public string CreateHash( string input, bool isTypeName )
         {
             input = input.Normalize();
 
@@ -60,7 +60,12 @@ namespace Caravela.Obfuscator
             do
             {
                 var hash = this._sha1.ComputeHash( inputBytes );
-                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen );
+                hashString = "^" + Convert.ToBase64String( hash, 0, hashLen ).TrimEnd( '=' ).Replace( '+', '_' ).Replace( '/', '_' );
+
+                if ( isTypeName )
+                {
+                    hashString = "Obfuscated." + hashString;
+                }
 
                 if ( this._hashToName.TryGetValue( hashString, out var existingName ) && existingName != input )
                 {

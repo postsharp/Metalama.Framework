@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,9 +18,9 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly ISdkNamedType _aspectType;
+        private readonly AspectType _aspectType;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, ISdkNamedType aspectType, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectType aspectType, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectType = aspectType;
@@ -28,8 +29,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( null, this._aspectType ) ).ToImmutableArray();
-            var diagnostics = new List<Diagnostic>();
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( null, this._aspectType ) ).ToImmutableArray<IAspectInstance>();
+            var diagnostics = new DiagnosticSink();
 
             if ( !aspectInstances.Any() )
             {
@@ -38,7 +39,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.Add, resources.Add );
+            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
 
             CSharpCompilation newCompilation;
             try
@@ -48,14 +49,14 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnostics.Add( Diagnostic.Create( GeneralDiagnosticDescriptors.ExceptionInWeaver, null, this._aspectType, ex.ToDiagnosticString() ) );
+                diagnostics.ReportDiagnostic( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects
             return new PipelineStageResult(
                 newCompilation,
                 input.AspectLayers,
-                input.Diagnostics.Concat( diagnostics ).ToList(),
+                input.Diagnostics.Concat( diagnostics.ToImmutable() ),
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
         }

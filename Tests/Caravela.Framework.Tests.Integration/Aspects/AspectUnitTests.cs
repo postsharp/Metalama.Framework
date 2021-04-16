@@ -15,20 +15,24 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Aspects\Order" )]
+        [FromDirectory( @"Aspects\Order" )]
         public Task Order( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Aspects\Introductions\Methods" )]
+        [FromDirectory( @"Aspects\Introductions\Methods" )]
         public Task Introductions( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Aspects\Overrides\Methods" )]
+        [FromDirectory( @"Aspects\Overrides\Methods" )]
         public Task Overrides( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Aspects\Samples" )]
+        [FromDirectory( @"Aspects\Samples" )]
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
+        [FromDirectory( @"Aspects\Applying" )]
+        public Task Applying( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         protected override TestRunnerBase CreateTestRunner() => new AspectTestRunner( this.ProjectDirectory );
     }

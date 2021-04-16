@@ -261,11 +261,14 @@ dotnet_diagnostic.SA1633.severity = none
 # SA1200: Using directives should be placed correctly
 dotnet_diagnostic.SA1200.severity = none
 
+# SA1204: Static members should appear before non-static members
+dotnet_diagnostic.SA1204.severity = none
+
 # SA1505: Opening braces should not be followed by blank line
 dotnet_diagnostic.SA1505.severity = none
 
 # SA1600: Elements should be documented
-dotnet_diagnostic.SA1600.severity = suggestion
+dotnet_diagnostic.SA1600.severity = none
 
 # SA1008: Opening parenthesis should be spaced correctly
 dotnet_diagnostic.SA1008.severity = none
@@ -277,31 +280,31 @@ dotnet_diagnostic.SA1128.severity = none
 dotnet_diagnostic.SA1202.severity = none
 
 # SA1614: Element parameter documentation should have text
-dotnet_diagnostic.SA1614.severity = suggestion
+dotnet_diagnostic.SA1614.severity = none
 
 # SA1615: Element return value should be documented
-dotnet_diagnostic.SA1615.severity = suggestion
+dotnet_diagnostic.SA1615.severity = none
 
 # SA1616: Element return value documentation should have text
-dotnet_diagnostic.SA1616.severity = suggestion
+dotnet_diagnostic.SA1616.severity = none
 
 # SA1201: Elements should appear in the correct order
 dotnet_diagnostic.SA1201.severity = suggestion
 
 # SA1601: Partial elements should be documented
-dotnet_diagnostic.SA1601.severity = suggestion
+dotnet_diagnostic.SA1601.severity = none
 
 # SA1003: Symbols should be spaced correctly
 dotnet_diagnostic.SA1003.severity = none
 
 # SA1622: Generic type parameter documentation should have text
-dotnet_diagnostic.SA1622.severity = suggestion
+dotnet_diagnostic.SA1622.severity = none
 
 # SA1512: Single-line comments should not be followed by blank line
-dotnet_diagnostic.SA1512.severity = suggestion
+dotnet_diagnostic.SA1512.severity = none
 
 # SA1611: Element parameters should be documented
-dotnet_diagnostic.SA1611.severity = suggestion
+dotnet_diagnostic.SA1611.severity = none
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none
@@ -326,6 +329,12 @@ dotnet_diagnostic.CA1725.severity = warning
 
 # CA1805: Do not initialize unnecessarily
 dotnet_diagnostic.CA1805.severity = warning
+
+# CA1822: Member can be marked as static
+dotnet_diagnostic.CA1822.severity = warning
+
+# CA1829: Use the Count property instead of Enumerable.Count()
+dotnet_diagnostic.CA1829.severity = warning
 
 # CA2201: Do not raise reserved exception types
 dotnet_diagnostic.CA2201.severity = warning
@@ -383,6 +392,9 @@ dotnet_diagnostic.IDE0005.severity = warning
 
 # IDE0007: Use implicit type
 dotnet_diagnostic.IDE0007.severity = warning
+
+# IDE0007: Use explicit type
+dotnet_diagnostic.IDE0008.severity = none
 
 # IDE0009: Member access should be qualified.
 dotnet_diagnostic.IDE0009.severity = warning
@@ -459,6 +471,9 @@ dotnet_diagnostic.IDE0048.severity = warning
 # IDE0050: Convert to tuple
 dotnet_diagnostic.IDE0050.severity = warning
 
+# IDE0051: Private member is unused
+dotnet_diagnostic.IDE0051.severity = warning
+
 # IDE0054: Use compound assignment
 dotnet_diagnostic.IDE0054.severity = warning
 
@@ -466,7 +481,7 @@ dotnet_diagnostic.IDE0054.severity = warning
 dotnet_diagnostic.IDE0057.severity = suggestion
 
 # IDE0058: Expression value is never used
-dotnet_diagnostic.IDE0058.severity = suggestion
+dotnet_diagnostic.IDE0058.severity = none
 
 # IDE0059: Unnecessary assignment of a value
 dotnet_diagnostic.IDE0059.severity = warning
@@ -504,6 +519,10 @@ dotnet_diagnostic.IDE0082.severity = warning
 # IDE0083: Use pattern matching
 dotnet_diagnostic.IDE0083.severity = suggestion
 
+# IDE0090: 'new' expression can be simplified
+dotnet_diagnostic.IDE0083.severity = warning
+
+
 # IDE1005: Delegate invocation can be simplified.
 dotnet_diagnostic.IDE1005.severity = warning
 
@@ -523,7 +542,7 @@ dotnet_diagnostic.SA1618.severity = suggestion
 dotnet_diagnostic.SA1021.severity = none
 
 # SA1402: File may only contain a single type
-dotnet_diagnostic.SA1402.severity = none
+dotnet_diagnostic.SA1402.severity = warning
 
 # SA1604: Element documentation should have summary
 dotnet_diagnostic.SA1604.severity = none

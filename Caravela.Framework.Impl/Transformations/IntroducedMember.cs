@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,7 +17,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <summary>
         /// Gets the <see cref="IMemberIntroduction" /> that created this object.
         /// </summary>
-        public IMemberIntroduction Introductor { get; }
+        public IMemberIntroduction Introduction { get; }
 
         /// <summary>
         /// Gets the syntax of the introduced member.
@@ -37,14 +38,28 @@ namespace Caravela.Framework.Impl.Transformations
         /// Gets options for the linker.
         /// </summary>
         public AspectLinkerOptions? LinkerOptions { get; }
+        
+        /// <summary>
+        /// Gets the code element (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
+        /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
+        /// are not suppressed from the introduced member.
+        /// </summary>
+        public ICodeElement? CodeElement { get; }
 
-        public IntroducedMember( IMemberIntroduction introductor, MemberDeclarationSyntax syntax, AspectLayerId aspectLayerId, IntroducedMemberSemantic semantic, AspectLinkerOptions? linkerOptions )
+        public IntroducedMember( 
+            IMemberIntroduction introduction, 
+            MemberDeclarationSyntax syntax,
+            AspectLayerId aspectLayerId,
+            IntroducedMemberSemantic semantic,
+            AspectLinkerOptions? linkerOptions,
+            ICodeElement? codeElement )
         {
-            this.Introductor = introductor;
+            this.Introduction = introduction;
             this.Syntax = syntax;
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.LinkerOptions = linkerOptions;
+            this.CodeElement = codeElement;
         }
 
         /// <summary>
@@ -52,9 +67,9 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         /// <param name="syntax">Syntax to be used.</param>
         /// <returns>A new instance with specified syntax.</returns>
-        public IntroducedMember WithSyntax(MemberDeclarationSyntax syntax)
+        public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
         {
-            return new IntroducedMember( this.Introductor, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions );
+            return new IntroducedMember( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.CodeElement );
         }
     }
 

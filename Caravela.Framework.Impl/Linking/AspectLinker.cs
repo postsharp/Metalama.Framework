@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
             var introductionStepOutput = LinkerIntroductionStep.Instance.Execute( this._input );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
-            var analysisStepOutput = LinkerAnalysisStep.Instance.Execute(introductionStepOutput);
+            var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
             var linkingStepOutput = LinkerLinkingStep.Instance.Execute( analysisStepOutput );

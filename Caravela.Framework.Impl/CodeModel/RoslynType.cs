@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using TypeKind = Caravela.Framework.Code.TypeKind;
@@ -22,11 +23,11 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
-            this.Symbol.ToDisplayString();
+            this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public abstract TypeKind TypeKind { get; }
 
-        ICompilation IType.Compilation => this.Compilation;
+        ICompilation ICompilationElement.Compilation => this.Compilation;
 
         ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;
 

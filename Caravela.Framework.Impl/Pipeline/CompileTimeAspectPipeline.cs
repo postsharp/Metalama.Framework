@@ -24,9 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
             try
             {
 
-                var pipeline = new CompileTimeAspectPipeline( this.Context );
-
-                if ( !pipeline.TryExecuteCore( out var result ) )
+                if ( !this.TryExecuteCore( out var result ) )
                 {
                     outputCompilation = null;
                     return false;
@@ -34,24 +32,32 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 foreach ( var resource in result.Resources )
                 {
-                    pipeline.Context.ManifestResources.Add( resource );
+                    this.Context.ManifestResources.Add( resource );
                 }
 
-                var compileTimeAssemblyBuilder = pipeline.CompileTimeAssemblyBuilder.AssertNotNull();
+                var compileTimeAssemblyBuilder = this.CompileTimeAssemblyBuilder.AssertNotNull();
 
                 if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    var compileTimeAssembly = compileTimeAssemblyBuilder.EmitCompileTimeAssembly( result.Compilation );
-
-                    if ( compileTimeAssembly != null )
+                    if ( compileTimeAssemblyBuilder.BuiltAssemblies.TryGetValue( this.Context.Compilation.AssemblyName!, out var compileTimeAssembly ) )
                     {
-                        pipeline.Context.ManifestResources.Add( new ResourceDescription(
+                        this.Context.ManifestResources.Add( new ResourceDescription(
                             compileTimeAssemblyBuilder.GetResourceName(), () => compileTimeAssembly, isPublic: true ) );
                     }
                 }
 
                 outputCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
                 return true;
+            }
+            catch ( InvalidUserCodeException exception )
+            {
+                foreach ( var diagnostic in exception.Diagnostics )
+                {
+                    this.Context.ReportDiagnostic( diagnostic );
+                }
+
+                outputCompilation = null;
+                return false;
             }
             catch ( Exception exception ) when ( this.Context.HandleExceptions )
             {

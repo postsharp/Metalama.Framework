@@ -31,9 +31,11 @@ namespace Caravela.Framework.Impl.Pipeline
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
-            DiagnosticList diagnostics = new();
+            DiagnosticSink diagnostics = new();
 
             var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
+
+            LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
 
             foreach ( var transformationGroup in transformations )
             {
@@ -68,8 +70,7 @@ namespace Caravela.Framework.Impl.Pipeline
                             var introductionContext = new MemberIntroductionContext(
                                 diagnostics,
                                 new LinkerIntroductionNameProvider(),
-                                LinkerLexicalScope.CreateEmpty(),
-                                new LinkerProceedImplementationFactory() );
+                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ) );
 
                             classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
                             break;
@@ -86,9 +87,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
                         SyntaxFactory.ParseName( declaringType.Namespace ),
-                                                default,
-                                                default,
-                                                SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
+                        default,
+                        default,
+                        SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
                 }
 
                 var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );

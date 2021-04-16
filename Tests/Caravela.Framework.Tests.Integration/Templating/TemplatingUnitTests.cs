@@ -17,31 +17,27 @@ namespace Caravela.Framework.Tests.Integration.Templating
         }
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\Syntax" )]
+        [FromDirectory( @"Templating\Syntax" )]
         public Task Syntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\LocalVariables" )]
+        [FromDirectory( @"Templating\LocalVariables" )]
         public Task LocalVariables( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\Proceed" )]
-        public Task Proceed( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        [FromDirectory( @"Templating\MagicKeywords" )]
+        public Task MagicKeywords( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\Return" )]
+        [FromDirectory( @"Templating\Return" )]
         public Task Return( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\Samples" )]
-        public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
-
-        [Theory]
-        [FromDirectory( @"TestInputs\Templating\NamespaceExpansion" )]
+        [FromDirectory( @"Templating\NamespaceExpansion" )]
         public Task NamespaceExpansion( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
-        [FromDirectory( @"TestInputs\Templating\UnsupportedSyntax" )]
+        [FromDirectory( @"Templating\UnsupportedSyntax" )]
         public async Task UnsupportedSyntax( string testName )
         {
             var testResult = await this.GetTestResultAsync( testName );
