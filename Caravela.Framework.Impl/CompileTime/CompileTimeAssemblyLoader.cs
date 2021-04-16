@@ -73,8 +73,13 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var reference = this._compilation.References.SingleOrDefault(
-                r => r is PortableExecutableReference { FilePath: not null } peReference
-                     && Path.GetFileNameWithoutExtension( peReference.FilePath ) == new AssemblyName( args.Name ).Name );
+                r =>
+                {
+                    var assemblyName = new AssemblyName( args.Name ).Name;
+
+                    return r is PortableExecutableReference { FilePath: not null } peReference
+                           && Path.GetFileNameWithoutExtension( peReference.FilePath ) == assemblyName;
+                } );
 
             if ( reference == null )
             {
