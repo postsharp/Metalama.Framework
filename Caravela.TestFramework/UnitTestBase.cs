@@ -88,6 +88,7 @@ namespace Caravela.TestFramework
             Assert.True( result.Success, result.ErrorMessage );
         }
 
+        // ReSharper disable once ConstantConditionalAccessQualifier
         public static string? NormalizeString( string? s ) => s?.Trim()?.Replace( "\r", "" );
 
         /// <summary>

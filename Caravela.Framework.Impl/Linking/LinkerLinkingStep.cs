@@ -27,13 +27,9 @@ namespace Caravela.Framework.Impl.Linking
     /// <summary>
     /// Linker linking step, which rewrites the intermediate compilation and produces the final compilation. 
     /// </summary>
-    internal partial class LinkerLinkingStep
+    internal static partial class LinkerLinkingStep
     {
-        public static LinkerLinkingStep Instance { get; } = new();
-
-        private LinkerLinkingStep() { }
-
-        public AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
+        public static AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
             var finalCompilation = input.IntermediateCompilation;
             var rewriter = new LinkingRewriter( input.IntermediateCompilation, input.AnalysisRegistry );
