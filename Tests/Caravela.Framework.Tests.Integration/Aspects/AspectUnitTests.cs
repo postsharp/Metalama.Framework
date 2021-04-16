@@ -15,6 +15,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         }
 
         [Theory]
+        [FromDirectory( @"TestInputs\Aspects\Order" )]
+        public Task Order( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
         [FromDirectory( @"TestInputs\Aspects\Introductions\Methods" )]
         public Task Introductions( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 

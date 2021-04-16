@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Sdk;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -21,12 +22,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType )
+        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation,  INamedType aspectType )
             => this._aspectSources
                 .Where( s => s.Type.Equals( aspectType ) )
                 .Select( a => a.Source )
                 .Distinct()
-                .SelectMany( a => a.GetAspectInstances( aspectType ) );
+                .SelectMany( a => a.GetAspectInstances( compilation, aspectType ) );
 
         public void Add( IAspectSource aspectSource, INamedType aspectType )
         {

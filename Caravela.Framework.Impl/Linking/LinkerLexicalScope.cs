@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 
@@ -94,10 +95,16 @@ namespace Caravela.Framework.Impl.Linking
             return false;
         }
 
-        internal static LinkerLexicalScope CreateFromMethod( IMethodInternal overriddenElement )
+        internal static LinkerLexicalScope CreateFromElement( ICodeElement overriddenElement )
         {
-            // TODO: This probably does not handle namespaces?
-            return new LinkerLexicalScope( overriddenElement.LookupSymbols().Select( x => x.Name ) );
+            if ( overriddenElement is IMethodInternal method )
+            {
+                return new LinkerLexicalScope( method.LookupSymbols().Select( x => x.Name ) );
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
         }
 
         internal static LinkerLexicalScope CreateEmpty( ITemplateExpansionLexicalScope? parent = null )

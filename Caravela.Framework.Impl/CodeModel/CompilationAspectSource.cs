@@ -12,12 +12,12 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class CompilationAspectSource : IAspectSource
     {
-        private readonly CompilationModel _compilation;
+        private readonly CompilationModel _initialCompilation;
         private readonly CompileTimeAssemblyLoader _loader;
 
-        public CompilationAspectSource( CompilationModel compilation, CompileTimeAssemblyLoader loader )
+        public CompilationAspectSource( CompilationModel initialCompilation, CompileTimeAssemblyLoader loader )
         {
-            this._compilation = compilation;
+            this._initialCompilation = initialCompilation;
             this._loader = loader;
         }
 
@@ -27,16 +27,16 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             get
             {
-                var aspectType = this._compilation.Factory.GetTypeByReflectionType( typeof( IAspect ) );
-                return this._compilation.GetAllAttributeTypes().Where( t => t.Is( aspectType ) && t.TypeKind == TypeKind.Class );
+                var aspectType = this._initialCompilation.Factory.GetTypeByReflectionType( typeof( IAspect ) );
+                return this._initialCompilation.GetAllAttributeTypes().Where( t => t.Is( aspectType ) && t.TypeKind == TypeKind.Class );
             }
         }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( INamedType aspectType ) =>
-            this._compilation.GetAllAttributesOfType( aspectType ).Select( attribute =>
+        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, INamedType aspectType ) =>
+            (compilation ?? this._initialCompilation).GetAllAttributesOfType( aspectType ).Select( attribute =>
             {
                 var aspect = (IAspect) this._loader.CreateAttributeInstance( attribute );
                 return new AspectInstance( aspect, (ISdkCodeElement) attribute.ContainingElement!, attribute.Type );

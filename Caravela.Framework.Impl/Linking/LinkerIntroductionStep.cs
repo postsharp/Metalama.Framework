@@ -115,7 +115,7 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
-            var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
+            var introductionRegistry = new LinkerIntroductionRegistry( input.FinalCompilationModel, intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics, intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }
@@ -133,7 +133,7 @@ namespace Caravela.Framework.Impl.Linking
                     if ( !this._scopes.TryGetValue( overriddenElement.OverriddenElement, out var lexicalScope ) )
                     {
                         this._scopes[overriddenElement.OverriddenElement] = lexicalScope =
-                            LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromMethod( (IMethodInternal) overriddenElement.OverriddenElement ) );
+                            LinkerLexicalScope.CreateEmpty( LinkerLexicalScope.CreateFromElement( overriddenElement.OverriddenElement ) );
 
                         return lexicalScope;
                     }

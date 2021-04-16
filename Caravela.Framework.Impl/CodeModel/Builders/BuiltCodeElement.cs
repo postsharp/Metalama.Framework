@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Aspect;
 
-        public ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Builder );
+        public ICodeElement? ContainingElement => this.Builder.ContainingElement;
 
         [Memo]
         public IAttributeList Attributes =>
