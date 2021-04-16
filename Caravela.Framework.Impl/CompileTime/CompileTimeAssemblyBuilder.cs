@@ -80,9 +80,9 @@ namespace Caravela.Framework.Impl.CompileTime
                                   .Select(
                                       reference =>
                                       {
-                                          if ( reference is PortableExecutableReference { FilePath: string path } )
+                                          if ( reference is PortableExecutableReference { FilePath: not null } peReference )
                                           {
-                                              var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path! );
+                                              var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( peReference.FilePath );
 
                                               if ( assemblyBytes != null )
                                               {
