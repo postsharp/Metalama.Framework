@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.Templating
         public SyntaxNode AnnotateTree( SyntaxNode root, SemanticModel semanticModel )
         {
             var rewriter = new AnnotatingRewriter( semanticModel, this );
+
             return rewriter.Visit( root )!;
         }
 
@@ -116,16 +117,14 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         public ISymbol? GetSymbol( SyntaxNode node )
         {
-
             var annotation = node.GetAnnotations( "symbol" ).SingleOrDefault();
+
             if ( annotation is not null )
             {
                 return this._annotationToSymbolMap[annotation];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>
@@ -136,14 +135,13 @@ namespace Caravela.Framework.Impl.Templating
         public ISymbol? GetDeclaredSymbol( SyntaxNode node )
         {
             var annotation = node.GetAnnotations( "declared" ).SingleOrDefault();
+
             if ( annotation is not null )
             {
                 return this._annotationToDeclaredSymbolMap[annotation];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>
@@ -181,6 +179,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var index = argument.Parent.ChildNodes().ToList().IndexOf( argument );
+
             if ( index == -1 )
             {
                 return null;
@@ -192,6 +191,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var lastParameter = parameters.Last();
+
             if ( lastParameter.IsParams )
             {
                 return lastParameter;
@@ -206,14 +206,13 @@ namespace Caravela.Framework.Impl.Templating
         public ITypeSymbol? GetType( SyntaxNode node )
         {
             var annotation = node.GetAnnotations( "type" ).SingleOrDefault();
+
             if ( annotation is not null )
             {
                 return this._annotationToTypeMap[annotation];
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         /// <summary>

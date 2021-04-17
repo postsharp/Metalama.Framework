@@ -1,26 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-
     /// <summary>
     /// Represent a source-code field promoted to a property by an aspect.
     /// </summary>
     internal sealed class PromotedField : Member, IProperty, IReplaceMemberTransformation
     {
         private readonly IFieldSymbol _symbol;
-        
+
         [Memo]
-        private PropertyInvocation Invocation => new PropertyInvocation( this );
+        private PropertyInvocation Invocation => new( this );
 
         public override CodeElementKind ElementKind => CodeElementKind.Field;
 
@@ -55,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => new PropertyInvocation( this ).Base;
 
-        public IPropertyInvocation Base => this.Base;
+        public IPropertyInvocation Base => throw new NotImplementedException();
 
         RefKind IProperty.RefKind => RefKind.None;
 
@@ -71,14 +70,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool IsAsync => false;
 
-        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args )
-            => this.Invocation.GetIndexerValue( instance, args );
+        dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args ) => this.Invocation.GetIndexerValue( instance, args );
 
-        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args ) 
+        dynamic IPropertyInvocation.SetIndexerValue( dynamic? instance, dynamic value, params dynamic[] args )
             => this.Invocation.SetIndexerValue( instance, value, args );
 
-        MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => new MemberLink<IMember>( this._symbol );
-        
+        MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => new( this._symbol );
+
         ICodeElement IObservableTransformation.ContainingElement => this.ContainingElement.AssertNotNull();
     }
 }

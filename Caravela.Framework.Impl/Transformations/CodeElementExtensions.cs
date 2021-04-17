@@ -1,15 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.Transformations
 {
@@ -17,46 +18,57 @@ namespace Caravela.Framework.Impl.Transformations
     {
         public static SyntaxTokenList GetSyntaxModifierList( this ICodeElement codeElement )
         {
-            if ( codeElement is IMethod imethod )
+            if ( codeElement is IMethod method )
             {
                 // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
                 var tokens = new List<SyntaxToken>();
 
-                switch ( imethod.Accessibility )
+                switch ( method.Accessibility )
                 {
-                    case Code.Accessibility.Private:
+                    case Accessibility.Private:
                         tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
+
                         break;
-                    case Code.Accessibility.ProtectedAndInternal:
+
+                    case Accessibility.ProtectedAndInternal:
                         tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
                         tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+
                         break;
-                    case Code.Accessibility.Protected:
+
+                    case Accessibility.Protected:
                         tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+
                         break;
-                    case Code.Accessibility.Internal:
+
+                    case Accessibility.Internal:
                         tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+
                         break;
-                    case Code.Accessibility.ProtectedOrInternal:
+
+                    case Accessibility.ProtectedOrInternal:
                         tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
                         tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+
                         break;
-                    case Code.Accessibility.Public:
+
+                    case Accessibility.Public:
                         tokens.Add( Token( SyntaxKind.PublicKeyword ) );
+
                         break;
                 }
 
-                if ( imethod.IsStatic )
+                if ( method.IsStatic )
                 {
                     tokens.Add( Token( SyntaxKind.StaticKeyword ) );
                 }
 
-                if ( imethod.IsAbstract )
+                if ( method.IsAbstract )
                 {
                     tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
                 }
 
-                if ( imethod.IsVirtual )
+                if ( method.IsVirtual )
                 {
                     tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
                 }
@@ -77,8 +89,8 @@ namespace Caravela.Framework.Impl.Transformations
             // TODO: generics
             return
                 method.GenericParameters.Count > 0
-                ? throw new NotImplementedException()
-                : null;
+                    ? throw new NotImplementedException()
+                    : null;
         }
 
         public static ParameterListSyntax GetSyntaxParameterList( this IMethod method )

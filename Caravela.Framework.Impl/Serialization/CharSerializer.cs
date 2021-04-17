@@ -7,7 +7,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-
     internal class CharSerializer : TypedObjectSerializer<char>
     {
         public override ExpressionSyntax Serialize( char o )

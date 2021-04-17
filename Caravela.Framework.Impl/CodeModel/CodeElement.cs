@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
@@ -11,6 +8,9 @@ using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -31,8 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
-        public virtual IAttributeList Attributes =>
-            new AttributeList(
+        public virtual IAttributeList Attributes
+            => new AttributeList(
                 this.Symbol!.GetAttributes()
                     .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ),
                 this.Compilation );
@@ -43,8 +43,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public virtual CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromSymbol( this.Symbol );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
-            this.Symbol.ToDisplayString( format.ToRoslyn() );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
 

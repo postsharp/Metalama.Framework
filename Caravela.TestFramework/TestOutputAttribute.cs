@@ -10,7 +10,5 @@ namespace Caravela.TestFramework
     /// and compared with the expected output. 
     /// </summary>
     [AttributeUsage( AttributeTargets.All )]
-    public sealed class TestOutputAttribute : Attribute
-    {
-    }
+    public sealed class TestOutputAttribute : Attribute { }
 }

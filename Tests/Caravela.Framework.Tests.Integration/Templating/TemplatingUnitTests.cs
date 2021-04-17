@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Threading.Tasks;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -12,9 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 {
     public class TemplatingUnitTests : UnitTestBase
     {
-        public TemplatingUnitTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public TemplatingUnitTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [FromDirectory( @"Templating\Syntax" )]
@@ -42,7 +40,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         {
             var testResult = await this.GetTestResultAsync( testName );
             Assert.False( testResult.Success );
-            Assert.Contains( testResult.Diagnostics, d => d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) );
+
+            Assert.Contains(
+                testResult.Diagnostics,
+                d => d.Id.Equals( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported.Id, StringComparison.Ordinal ) );
         }
 
         protected override TestRunnerBase CreateTestRunner() => new TemplatingTestRunner( this.ProjectDirectory );

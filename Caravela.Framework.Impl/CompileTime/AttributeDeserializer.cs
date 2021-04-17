@@ -1,14 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
 using Attribute = System.Attribute;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 using TypeKind = Caravela.Framework.Code.TypeKind;
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
-        public static AttributeDeserializer SystemTypesDeserializer { get; } = new AttributeDeserializer( new SystemTypeResolver() );
+        public static AttributeDeserializer SystemTypesDeserializer { get; } = new( new SystemTypeResolver() );
 
         private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
 
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public T CreateAttribute<T>( IAttribute attribute )
             where T : Attribute
-            => (T) this.CreateAttribute( attribute, typeof( T ) );
+            => (T) this.CreateAttribute( attribute, typeof(T) );
 
         public Attribute CreateAttribute( IAttribute attribute )
         {
@@ -52,7 +53,8 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var parameters = attribute.ConstructorArguments.Select(
-                ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) ).ToArray();
+                    ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) )
+                .ToArray();
 
             var result = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
 
@@ -71,15 +73,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    throw new InvalidOperationException(
-                        $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
+                    throw new InvalidOperationException( $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
                 }
             }
 
             return result;
         }
 
-        private object? TranslateAttributeArgument( TypedConstant typedConstant, Type targetType ) => this.TranslateAttributeArgument( typedConstant.Value, typedConstant.Type, targetType );
+        private object? TranslateAttributeArgument( TypedConstant typedConstant, Type targetType )
+            => this.TranslateAttributeArgument( typedConstant.Value, typedConstant.Type, targetType );
 
         private object? TranslateAttributeArgument( object? value, IType sourceType, Type targetType )
         {
@@ -94,7 +96,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.TranslateAttributeArgument( typedConstant, targetType );
 
                 case IType type:
-                    if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
+                    if ( !targetType.IsAssignableFrom( typeof(Type) ) )
                     {
                         throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
                     }
@@ -103,18 +105,21 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
-                    if ( !targetType.IsAssignableFrom( typeof( string ) ) )
+                    if ( !targetType.IsAssignableFrom( typeof(string) ) )
                     {
                         throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
                     }
 
                     return str;
 
-                case IEnumerable list:
+                case IEnumerable enumerable:
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
-                    var elementType = targetType.GetElementType() ?? typeof( object );
+
+                    var list = enumerable.ToReadOnlyList();
+                    var elementType = targetType.GetElementType() ?? typeof(object);
 
                     var count = 0;
+
                     foreach ( var unused in list )
                     {
                         count++;
@@ -123,6 +128,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     var array = Array.CreateInstance( elementType, count );
 
                     var index = 0;
+
                     foreach ( var item in list )
                     {
                         array.SetValue( this.TranslateAttributeArgument( item, sourceType, elementType ), index );
@@ -132,10 +138,12 @@ namespace Caravela.Framework.Impl.CompileTime
                     return array;
 
                 default:
-                    if ( sourceType is INamedType enumType && enumType.TypeKind == TypeKind.Enum && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
+                    if ( sourceType is INamedType enumType && enumType.TypeKind == TypeKind.Enum
+                                                           && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
                     {
                         // Convert the underlying value of an enum to a strongly typed enum when we can.
                         var enumReflectionType = this._compileTimeTypeResolver.GetCompileTimeType( enumTypeSymbol, false );
+
                         if ( enumReflectionType != null )
                         {
                             value = Enum.ToObject( enumReflectionType, value );

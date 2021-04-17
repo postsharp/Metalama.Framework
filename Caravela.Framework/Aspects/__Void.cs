@@ -4,6 +4,8 @@
 using System;
 using System.ComponentModel;
 
+// ReSharper disable InconsistentNaming
+
 namespace Caravela.Framework.Aspects
 {
     /// <summary>

@@ -5,13 +5,10 @@ using System;
 
 namespace Caravela.Framework.Project
 {
-
     /// <summary>
-    /// Custom attribute that means that the method must be processed syntaxically by the template compiler instead of being classically
-    /// compile-time or run-time. Used to add trivias to the transformed code.
+    /// Custom attribute that means that the method must be processed syntactically by the template compiler instead of being classically
+    /// compile-time or run-time. Used to add trivia to the transformed code.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method )]
-    public class PragmaAttribute : TemplateKeywordAttribute
-    {
-    }
+    public class PragmaAttribute : TemplateKeywordAttribute { }
 }

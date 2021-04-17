@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-
     internal static class EnumerableExtensions
     {
         public static IEnumerable<T> WhereNotNull<T>( this IEnumerable<T?> items )
@@ -19,18 +18,18 @@ namespace Caravela.Framework.Impl
             {
                 return a;
             }
-            else if ( a.Count == 0 )
+
+            if ( a.Count == 0 )
             {
                 // ReSharper disable once RedundantExplicitArrayCreation
                 return new T[] { b! };
             }
-            else
-            {
-                var l = new List<T>( a.Count + 1 );
-                l.AddRange( a );
-                l.Add( b );
-                return l;
-            }
+
+            var l = new List<T>( a.Count + 1 );
+            l.AddRange( a );
+            l.Add( b );
+
+            return l;
         }
 
         public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, T b )
@@ -39,13 +38,12 @@ namespace Caravela.Framework.Impl
             {
                 return new[] { b };
             }
-            else
-            {
-                var l = new List<T>( a.Count + 1 );
-                l.AddRange( a );
-                l.Add( b );
-                return l;
-            }
+
+            var l = new List<T>( a.Count + 1 );
+            l.AddRange( a );
+            l.Add( b );
+
+            return l;
         }
 
         public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, IReadOnlyList<T>? b )
@@ -54,17 +52,17 @@ namespace Caravela.Framework.Impl
             {
                 return a;
             }
-            else if ( a.Count == 0 )
+
+            if ( a.Count == 0 )
             {
                 return b;
             }
-            else
-            {
-                var l = new List<T>( a.Count + b.Count );
-                l.AddRange( a );
-                l.AddRange( b );
-                return l;
-            }
+
+            var l = new List<T>( a.Count + b.Count );
+            l.AddRange( a );
+            l.AddRange( b );
+
+            return l;
         }
     }
 }

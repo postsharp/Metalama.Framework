@@ -14,24 +14,23 @@ namespace Caravela.Framework.Impl.Serialization
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
+                    SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
                     SyntaxFactory.IdentifierName( "PositiveInfinity" ) );
             }
-            else if ( float.IsNegativeInfinity( o ) )
+
+            if ( float.IsNegativeInfinity( o ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
+                    SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
                     SyntaxFactory.IdentifierName( "NegativeInfinity" ) );
             }
-            else if ( float.IsNaN( o ) )
+
+            if ( float.IsNaN( o ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.PredefinedType(
-                        SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
+                    SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.FloatKeyword ) ),
                     SyntaxFactory.IdentifierName( "NaN" ) );
             }
 

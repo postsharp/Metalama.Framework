@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl.Diagnostics
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
             this._diagnostics.Add( diagnostic );
         }
-     
+
         public void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
         {
             foreach ( var diagnostic in diagnostics )
@@ -50,8 +50,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._suppressions.Add( suppression );
         }
 
-        public void SuppressDiagnostic( string id, ICodeElement scope )
-         => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+        public void SuppressDiagnostic( string id, ICodeElement scope ) => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
 
         public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
         {
@@ -69,8 +68,8 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        private static RoslynDiagnosticSeverity MapSeverity( Severity severity ) =>
-            severity switch
+        private static RoslynDiagnosticSeverity MapSeverity( Severity severity )
+            => severity switch
             {
                 Severity.Error => RoslynDiagnosticSeverity.Error,
                 Severity.Hidden => RoslynDiagnosticSeverity.Hidden,
@@ -83,6 +82,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             var oldScope = this.DefaultScope;
             this.DefaultScope = scope;
+
             return new RestoreLocationCookie( this, oldScope );
         }
 
@@ -120,9 +120,9 @@ namespace Caravela.Framework.Impl.Diagnostics
 
             this.ReportDiagnostic( severity, this.DefaultScope, id, formatMessage, args );
         }
-    
+
         public ImmutableDiagnosticList ToImmutable()
-            => new ImmutableDiagnosticList( 
+            => new(
                 this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
                 this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
     }

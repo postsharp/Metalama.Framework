@@ -15,13 +15,13 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Calls the semantic in the original order, before any transformation.
         /// </summary>
-        Original,
+        Original
     }
 
     /// <summary>
     /// Wrapper of the linker annotation on nodes.
     /// </summary>
-    internal struct LinkerAnnotation
+    internal readonly struct LinkerAnnotation
     {
         /// <summary>
         /// Gets the aspect layer.

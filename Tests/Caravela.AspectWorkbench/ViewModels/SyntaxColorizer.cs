@@ -1,6 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Classification;
+using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,16 +12,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Caravela.Framework.DesignTime.Contracts;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Classification;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
     internal class SyntaxColorizer
     {
-
         private static readonly Dictionary<string, Color> _classificationToColor = new()
         {
             { ClassificationTypeNames.Comment, Colors.Green },
@@ -84,7 +83,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             { ClassificationTypeNames.RegexAlternation, Colors.Indigo },
             { ClassificationTypeNames.RegexText, Colors.Indigo },
             { ClassificationTypeNames.RegexSelfEscapedCharacter, Colors.Indigo },
-            { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo },
+            { ClassificationTypeNames.RegexOtherEscape, Colors.Indigo }
         };
 
         private readonly Project _project;
@@ -106,8 +105,9 @@ namespace Caravela.AspectWorkbench.ViewModels
             var roslynClassifiedSpans =
                 await Classifier.GetClassifiedSpansAsync( document, TextSpan.FromBounds( 0, text.Length ) );
 
-            var ranges = roslynClassifiedSpans.Select( classifiedSpan =>
-                 new TextRange( classifiedSpan, text.GetSubText( classifiedSpan.TextSpan ).ToString() ) );
+            var ranges = roslynClassifiedSpans.Select(
+                classifiedSpan =>
+                    new TextRange( classifiedSpan, text.GetSubText( classifiedSpan.TextSpan ).ToString() ) );
 
             ranges = TextRange.FillGaps( text, ranges );
 
@@ -127,6 +127,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     case TextSpanClassification.Dynamic:
                         foreground = Colors.Fuchsia;
                         fontWeight = FontWeights.Heavy;
+
                         break;
 
                     default:
@@ -141,6 +142,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         }
 
                         fontWeight = FontWeights.Normal;
+
                         break;
                 }
 
@@ -152,10 +154,12 @@ namespace Caravela.AspectWorkbench.ViewModels
                     case TextSpanClassification.CompileTime:
                     case TextSpanClassification.Dynamic:
                         background = WithAlpha( Colors.SlateGray, 0.2 );
+
                         break;
 
                     default:
                         background = Colors.White;
+
                         break;
                 }
 
@@ -166,6 +170,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                     ToolTip = range.ClassificationType,
                     FontWeight = fontWeight
                 };
+
                 ToolTipService.SetShowOnDisabled( run, true );
                 paragraph.Inlines.Add( run );
             }

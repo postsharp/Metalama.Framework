@@ -258,11 +258,22 @@ dotnet_diagnostic.SA1309.severity = none
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
-# SA1200: Using directives should be placed correctly
+# SA1200: Using directives should be placed within namespace
 dotnet_diagnostic.SA1200.severity = none
 
 # SA1204: Static members should appear before non-static members
 dotnet_diagnostic.SA1204.severity = none
+
+# SA1208: Using directive should appear before...
+dotnet_diagnostic.SA1208.severity = none
+
+# SA1501: Statement should not be on a single line
+dotnet_diagnostic.SA1501.severity = none
+
+
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none
+
 
 # SA1505: Opening braces should not be followed by blank line
 dotnet_diagnostic.SA1505.severity = none

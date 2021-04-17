@@ -6,7 +6,5 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a list of fields.
     /// </summary>
-    public interface IFieldList : IMemberList<IField>
-    {
-    }
+    public interface IFieldList : IMemberList<IField> { }
 }

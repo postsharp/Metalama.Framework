@@ -6,7 +6,6 @@ using Caravela.Framework.Diagnostics;
 
 namespace Caravela.Framework.Aspects
 {
-
     /// <summary>
     /// An object by the <see cref="IAspect{T}.Initialize"/> method of the aspect to provide advices and child
     /// aspects. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.

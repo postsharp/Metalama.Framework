@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public T? GetCompilerService<T>()
             where T : class, ICompilerService
-            => typeof( T ) == typeof( IClassificationService ) ? (T) (object) this : null;
+            => typeof(T) == typeof(IClassificationService) ? (T) (object) this : null;
 
         event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded
         {
@@ -42,18 +42,19 @@ namespace Caravela.Framework.Impl.DesignTime
             remove { }
         }
 
-        public bool TryGetClassifiedTextSpans( SemanticModel semanticModel, SyntaxNode root, [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
+        public bool TryGetClassifiedTextSpans(
+            SemanticModel semanticModel,
+            SyntaxNode root,
+            [NotNullWhen( true )] out IReadOnlyClassifiedTextSpanCollection? classifiedTextSpans )
         {
             // TODO: if the root is not "our", return false.
 
             var diagnostics = new List<Diagnostic>();
-            var templateCompiler = new TemplateCompiler();
 
-            _ = templateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, out var annotatedSyntaxRoot );
+            _ = TemplateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, out var annotatedSyntaxRoot );
 
             if ( annotatedSyntaxRoot != null )
             {
-
                 var text = semanticModel.SyntaxTree.GetText();
                 var classifier = new TextSpanClassifier( text );
                 classifier.Visit( annotatedSyntaxRoot );
@@ -62,6 +63,7 @@ namespace Caravela.Framework.Impl.DesignTime
             else
             {
                 classifiedTextSpans = null;
+
                 return false;
             }
 

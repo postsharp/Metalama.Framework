@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Immutable;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -18,7 +18,11 @@ namespace Caravela.Framework.Impl.Advices
 
         public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
 
-        public OverrideMethodAdvice( AspectInstance aspect, IMethod targetDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
+        public OverrideMethodAdvice(
+            AspectInstance aspect,
+            IMethod targetDeclaration,
+            IMethod templateMethod,
+            AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;
@@ -26,7 +30,7 @@ namespace Caravela.Framework.Impl.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return new AdviceResult(
+            return new(
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray.Create<INonObservableTransformation>(

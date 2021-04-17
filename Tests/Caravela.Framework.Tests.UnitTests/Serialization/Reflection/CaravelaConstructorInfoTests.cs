@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
-using System.Reflection;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization.Reflection;
+using Caravela.Framework.Impl.Serialization;
+using System.Linq;
+using System.Reflection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,13 +20,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target { public Target(int hello) { } }";
             var serialized = SerializeConstructor( code );
-            this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)""))", serialized );
 
-            TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target", info.DeclaringType!.Name );
-                Assert.Single( info.GetParameters() );
-            } );
+            this.AssertEqual(
+                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)""))",
+                serialized );
+
+            TestExpression<ConstructorInfo>(
+                code,
+                serialized,
+                info =>
+                {
+                    Assert.Equal( "Target", info.DeclaringType!.Name );
+                    Assert.Single( info.GetParameters() );
+                } );
         }
 
         [Fact]
@@ -34,13 +40,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<T> where T: struct { public Target(T hello) { } }";
             var serialized = SerializeConstructor( code );
-            this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)", serialized );
 
-            TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target`1", info.DeclaringType!.Name );
-                Assert.Single( info.GetParameters() );
-            } );
+            this.AssertEqual(
+                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)",
+                serialized );
+
+            TestExpression<ConstructorInfo>(
+                code,
+                serialized,
+                info =>
+                {
+                    Assert.Equal( "Target`1", info.DeclaringType!.Name );
+                    Assert.Single( info.GetParameters() );
+                } );
         }
 
         [Fact]
@@ -48,13 +60,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target {  }";
             var serialized = SerializeConstructor( code );
-            this.AssertEqual( @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))", serialized );
 
-            TestExpression<ConstructorInfo>( code, serialized, ( info ) =>
-            {
-                Assert.Equal( "Target", info.DeclaringType!.Name );
-                Assert.Empty( info.GetParameters() );
-            } );
+            this.AssertEqual(
+                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor""))",
+                serialized );
+
+            TestExpression<ConstructorInfo>(
+                code,
+                serialized,
+                info =>
+                {
+                    Assert.Equal( "Target", info.DeclaringType!.Name );
+                    Assert.Empty( info.GetParameters() );
+                } );
         }
 
         // If there is no constructor, there is no constructor to serialize. We are at C#, not IL level.
@@ -67,11 +85,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var single = methods.Single();
             var p = (single as Constructor)!;
             var actual = new CaravelaConstructorInfoSerializer( new CaravelaTypeSerializer() ).Serialize( new CompileTimeConstructorInfo( p ) ).ToString();
+
             return actual;
         }
 
-        public CaravelaConstructorInfoTests( ITestOutputHelper helper ) : base( helper )
-        {
-        }
+        public CaravelaConstructorInfoTests( ITestOutputHelper helper ) : base( helper ) { }
     }
 }

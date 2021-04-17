@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
@@ -21,12 +21,12 @@ namespace Caravela.Framework.Impl
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public IEnumerable<AspectType> GetAspectTypes( IEnumerable<INamedType> attributeTypes )
+        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedType> attributeTypes )
         {
-
             foreach ( var attributeType in attributeTypes.OrderBy( at => this._compilation.GetDepth( at ) ) )
             {
                 AspectType? baseAspectType;
+
                 if ( attributeType.BaseType != null )
                 {
                     _ = this._aspectTypes.TryGetValue( attributeType.BaseType, out baseAspectType );
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl
                 {
                     var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                    aspectType = new( attributeType, baseAspectType, aspectDriver );
+                    aspectType = new AspectType( attributeType, baseAspectType, aspectDriver );
 
                     this._aspectTypes.Add( attributeType, aspectType );
                 }

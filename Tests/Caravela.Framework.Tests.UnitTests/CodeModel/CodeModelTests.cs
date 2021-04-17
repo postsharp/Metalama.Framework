@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Code;
 using Xunit;
 using static Caravela.Framework.Code.MethodKind;
 using static Caravela.Framework.Code.RefKind;
@@ -117,6 +117,7 @@ class TestAttribute : Attribute
     public E E { get; set; }
     public Type[] Types { get; set; }
 }";
+
             var compilation = CreateCompilation( code );
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
@@ -168,8 +169,7 @@ interface I<T>
             CheckParameterData( m2.ReturnParameter!, m2, "int", null, -1 );
             Assert.Equal( 0, m2.Parameters.Count );
 
-            static void CheckParameterData(
-                IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
+            static void CheckParameterData( IParameter parameter, ICodeElement containingElement, string typeName, string? name, int index )
             {
                 Assert.Same( containingElement, parameter.ContainingElement );
                 Assert.Equal( typeName, parameter.ParameterType.ToString() );
@@ -252,16 +252,17 @@ class C
                                  from method in type.Methods
                                  from parameter in method.Parameters
                                  select parameter.ParameterType;
+
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
-            Assert.True( parameterType.Is( typeof( int[] ) ) );
-            Assert.False( parameterType.Is( typeof( int[,] ) ) );
+            Assert.True( parameterType.Is( typeof(int[]) ) );
+            Assert.False( parameterType.Is( typeof(int[,]) ) );
 
             var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
 
             Assert.Equal( "int", arrayType.ElementType.ToString() );
-            Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
+            Assert.True( arrayType.ElementType.Is( typeof(int) ) );
             Assert.Equal( 1, arrayType.Rank );
         }
 
@@ -444,10 +445,10 @@ class C
             foreach ( var parameter in parametersWithoutDefaults )
             {
                 Assert.False( parameter.DefaultValue.IsAssigned );
-                Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
+                _ = Assert.Throws<InvalidOperationException>( () => parameter.DefaultValue.Value );
             }
 
-            var parametersWithDefaults = method.Parameters.Skip( 1 );
+            var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();
 
             foreach ( var parameter in parametersWithDefaults )
             {
@@ -462,12 +463,18 @@ class C
         {
             var compilation = CreateCompilation( null );
 
-            Assert.Equal( "System.Collections.Generic.List<T>.Enumerator", compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
-            Assert.Equal( "System.Collections.Generic.Dictionary<int, string>", compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
-            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
+            Assert.Equal(
+                "System.Collections.Generic.List<T>.Enumerator",
+                compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) )!.ToString() );
 
-            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Equal(
+                "System.Collections.Generic.Dictionary<int, string>",
+                compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) )!.ToString() );
+
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) )!.ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) )!.ToString() );
+
+            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );
         }
 
         [Fact]
@@ -488,10 +495,13 @@ class C<T>
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var fieldTypes = type.Fields.Select( p => (INamedType) p.Type );
+            var fieldTypes = type.Fields.Select( p => (INamedType) p.Type ).ToList();
 
             Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
-            Assert.Equal( new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" }, fieldTypes.Select( t => t.FullName ) );
+
+            Assert.Equal(
+                new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" },
+                fieldTypes.Select( t => t.FullName ) );
         }
 
         [Fact]
@@ -531,8 +541,8 @@ class C<TC>
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) )!;
-            var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) )!;
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) )!;
+            var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) )!;
 
             var openTypeMethod = type.Methods.First();
             var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();

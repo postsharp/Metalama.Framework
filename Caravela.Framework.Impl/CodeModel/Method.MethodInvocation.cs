@@ -1,12 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -21,8 +20,6 @@ namespace Caravela.Framework.Impl.CodeModel
                 this._method = method;
             }
 
-            public IMethodInvocation Base => throw new InvalidOperationException();
-
             public object Invoke( object? instance, params object[] args )
             {
                 if ( this._method.IsOpenGeneric )
@@ -35,6 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
                         this._method.Name,
                         this._method.GenericArguments.Select( a => a.GetSymbol() ) )
                     : SyntaxFactory.IdentifierName( this._method.Name );
+
                 var arguments = this._method.GetArguments( this._method.Parameters, RuntimeExpression.FromDynamic( args ) );
 
                 if ( ((IMethod) this._method).MethodKind == MethodKind.LocalFunction )

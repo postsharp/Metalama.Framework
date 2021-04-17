@@ -1,15 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaLocationInfoSerializer : TypedObjectSerializer<CompileTimeLocationInfo>
     {
@@ -27,9 +27,11 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
         {
             ExpressionSyntax propertyInfo;
             var allBindingFlags = CreateBindingFlags();
+
             if ( o.Property != null )
             {
                 var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( o.Property.DeclaringType ) );
+
                 if ( o.Property.Parameters.Count == 0 )
                 {
                     propertyInfo = InvocationExpression(
@@ -48,6 +50,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                 {
                     var returnTypeCreation = this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( o.Property.Type ) );
                     var parameterTypes = new List<ExpressionSyntax>();
+
                     foreach ( var parameter in o.Property.Parameters )
                     {
                         parameterTypes.Add( this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( parameter.ParameterType ) ) );
@@ -65,8 +68,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                                     LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
                                         Literal( propertyName ) ) ),
-                                Argument(
-                                    returnTypeCreation ),
+                                Argument( returnTypeCreation ),
                                 Argument(
                                     ArrayCreationExpression(
                                             ArrayType(
@@ -75,9 +77,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
                                                         IdentifierName( "Type" ) ) )
                                                 .WithRankSpecifiers(
                                                     SingletonList(
-                                                        ArrayRankSpecifier(
-                                                            SingletonSeparatedList<ExpressionSyntax>(
-                                                                OmittedArraySizeExpression() ) ) ) ) )
+                                                        ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
                                         .WithInitializer(
                                             InitializerExpression(
                                                 SyntaxKind.ArrayInitializerExpression,
@@ -88,6 +88,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
             else
             {
                 var typeCreation = this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( o.Field!.DeclaringType ) );
+
                 propertyInfo = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
@@ -115,6 +116,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
         private static ExpressionSyntax MemberAccess( params string[] names )
         {
             ExpressionSyntax result = IdentifierName( names[0] );
+
             for ( var i = 1; i < names.Length; i++ )
             {
                 result = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, result, IdentifierName( names[i] ) );
@@ -125,7 +127,8 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
 
         private static ExpressionSyntax CreateBindingFlags()
         {
-            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }.Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
+            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }
+                .Select( f => MemberAccess( "System", "Reflection", "BindingFlags", f ) )
                 .Aggregate( ( l, r ) => BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
     }

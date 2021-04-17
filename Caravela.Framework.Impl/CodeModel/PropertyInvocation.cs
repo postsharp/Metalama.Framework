@@ -9,7 +9,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-
     internal class PropertyInvocation : FieldOrPropertyInvocation
     {
         protected IProperty Property => (IProperty) this.Member;
@@ -30,6 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var arguments = this.Member.GetArguments( this.Property.Parameters, args );
 
             var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
+
             return expression;
         }
 
@@ -52,8 +52,6 @@ namespace Caravela.Framework.Impl.CodeModel
             return new DynamicMember( expression, this.Member.Type, false );
         }
 
-        public PropertyInvocation( IProperty member ) : base( member )
-        {
-        }
+        public PropertyInvocation( IProperty member ) : base( member ) { }
     }
 }

@@ -1,8 +1,8 @@
 ﻿#pragma warning disable CS0219
 
 using Caravela.Framework.Project;
-using Caravela.Framework.Tests.Integration.Templating;
 using System;
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations

@@ -1,18 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating
 {
-
     /// <summary>
     /// This class is used at *run-time* by the generated template code. Do not remove or refactor
     /// without analysing impact on generated code.
@@ -25,7 +24,8 @@ namespace Caravela.Framework.Impl.Templating
         [ThreadStatic]
         private static TemplateExpansionContext? _expansionContext;
 
-        internal static TemplateExpansionContext ExpansionContext => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
+        internal static TemplateExpansionContext ExpansionContext
+            => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
         internal static void Initialize( TemplateExpansionContext expansionContext )
         {
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( comments != null && comments.Length > 0 )
             {
-                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.Select( c => SyntaxFactory.Comment( "// " + c + "\n" ) )) ) );
+                list.Add( new StatementOrTrivia( SyntaxFactory.TriviaList( comments.Select( c => SyntaxFactory.Comment( "// " + c + "\n" ) ) ) ) );
             }
         }
 
@@ -64,9 +64,9 @@ namespace Caravela.Framework.Impl.Templating
                         }
 
                         statementList.Add( statement );
-                        
+
                         break;
-                    
+
                     case SyntaxTriviaList trivia:
                         if ( statementList.Count == 0 )
                         {
@@ -75,14 +75,14 @@ namespace Caravela.Framework.Impl.Templating
                         }
                         else
                         {
-                            var previousStatement = statementList[statementList.Count-1];
-                            
+                            var previousStatement = statementList[statementList.Count - 1];
+
                             statementList[statementList.Count - 1] =
                                 previousStatement.WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( trivia ) );
                         }
 
                         break;
-                    
+
                     default:
                         continue;
                 }
@@ -102,7 +102,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public static SyntaxKind BooleanKeyword( bool value ) => value ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression;
 
-        public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression ) => ExpansionContext.CreateReturnStatement( returnExpression );
+        public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
+            => ExpansionContext.CreateReturnStatement( returnExpression );
 
         public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicMember dynamicMember, string member )
         {
@@ -111,10 +112,13 @@ namespace Caravela.Framework.Impl.Templating
                 return metaMemberDifferentiated.CreateMemberAccessExpression( member );
             }
 
-            return new( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, dynamicMember.CreateExpression().Syntax, SyntaxFactory.IdentifierName( member ) ) );
+            return new RuntimeExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    dynamicMember.CreateExpression().Syntax,
+                    SyntaxFactory.IdentifierName( member ) ) );
         }
 
-        public static SyntaxToken GetUniqueIdentifier( string hint ) =>
-            SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
+        public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
     }
 }

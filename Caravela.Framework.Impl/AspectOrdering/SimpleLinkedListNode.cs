@@ -16,7 +16,6 @@ namespace Caravela.Framework.Impl.AspectOrdering
     /// you get an enumeration of the current node and all the next nodes.</remarks>
     internal sealed class SimpleLinkedListNode<T>
     {
-
         /// <summary>
         /// Inserts a value at the beginning of a list.
         /// </summary>
@@ -87,6 +86,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             if ( (value == null && node.Value == null) || Equals( node.Value, value ) )
             {
                 node = node.Next;
+
                 return true;
             }
 
@@ -97,6 +97,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 if ( (value == null && cursor.Value == null) || Equals( cursor.Value, value ) )
                 {
                     previousNode.Next = cursor.Next;
+
                     return true;
                 }
 
@@ -106,9 +107,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             return false;
         }
 
-        private SimpleLinkedListNode()
-        {
-        }
+        private SimpleLinkedListNode() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SimpleLinkedListNode{T}"/> class.

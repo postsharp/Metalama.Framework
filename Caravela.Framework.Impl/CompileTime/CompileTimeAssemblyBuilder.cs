@@ -1,19 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Impl.Utilities;
-using Caravela.Framework.Sdk;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Emit;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -23,10 +22,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private readonly IServiceProvider _serviceProvider;
         private readonly ISymbolClassifier _symbolClassifier;
-        private readonly TemplateCompiler _templateCompiler;
         private readonly IEnumerable<ResourceDescription>? _resources;
         private readonly Random _random = new();
         private readonly Dictionary<string, MemoryStream> _builtAssemblies = new();
+
+#pragma warning disable CA1822 // Will be non-static.
+        public string ResourceName => "Caravela.CompileTimeAssembly.dll";
+#pragma warning disable CA1822
 
         static CompileTimeAssemblyBuilder()
         {
@@ -35,19 +37,16 @@ namespace Caravela.Framework.Impl.CompileTime
             // the SDK assembly might not be loaded at this point, so make sure it is
             _ = new AspectWeaverAttribute( null! );
 
-            var caravelaAssemblies = new[]
-            {
-                "Caravela.Framework.dll",
-                "Caravela.Framework.Sdk.dll",
-                "Caravela.Framework.Impl.dll"
-            };
+            var caravelaAssemblies = new[] { "Caravela.Framework.dll", "Caravela.Framework.Sdk.dll", "Caravela.Framework.Impl.dll" };
+
             var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
                 .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
                 .Select( a => a.Location )
                 .Where( path => caravelaAssemblies.Contains( Path.GetFileName( path ) ) );
 
             _fixedReferences = referenceAssemblyPaths.Concat( caravelaPaths )
-                .Select( path => MetadataReference.CreateFromFile( path ) ).ToImmutableArray();
+                .Select( path => MetadataReference.CreateFromFile( path ) )
+                .ToImmutableArray();
         }
 
         // cannot be constructor-injected, because CompileTimeAssemblyLoader and CompileTimeAssemblyBuilder depend on each other
@@ -60,20 +59,15 @@ namespace Caravela.Framework.Impl.CompileTime
             : this(
                 serviceProvider,
                 new SymbolClassifier( roslynCompilation ),
-                new TemplateCompiler(),
-                resources )
-        {
-        }
+                resources ) { }
 
         public CompileTimeAssemblyBuilder(
             IServiceProvider serviceProvider,
             ISymbolClassifier symbolClassifier,
-            TemplateCompiler templateCompiler,
             IEnumerable<ResourceDescription>? resources )
         {
             this._serviceProvider = serviceProvider;
             this._symbolClassifier = symbolClassifier;
-            this._templateCompiler = templateCompiler;
             this._resources = resources;
         }
 
@@ -83,20 +77,21 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var compileTimeReferences =
                 runTimeCompilation.References
-                    .Select( reference =>
-                    {
-                        if ( reference is PortableExecutableReference { FilePath: string path } )
+                    .Select(
+                        reference =>
                         {
-                            var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( path );
-
-                            if ( assemblyBytes != null )
+                            if ( reference is PortableExecutableReference { FilePath: not null } peReference )
                             {
-                                return MetadataReference.CreateFromImage( assemblyBytes );
-                            }
-                        }
+                                var assemblyBytes = this.CompileTimeAssemblyLoader?.GetCompileTimeAssembly( peReference.FilePath! );
 
-                        return null!;
-                    } )
+                                if ( assemblyBytes != null )
+                                {
+                                    return MetadataReference.CreateFromImage( assemblyBytes );
+                                }
+                            }
+
+                            return null!;
+                        } )
                     .Where( r => r != null )
                     .Concat( _fixedReferences );
 
@@ -106,7 +101,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeReferences,
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) );
 
-            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter( this._symbolClassifier, this._templateCompiler, runTimeCompilation, compileTimeCompilation );
+            var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+                this._symbolClassifier,
+                runTimeCompilation,
+                compileTimeCompilation );
+
             var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
 
             if ( !produceCompileTimeCodeRewriter.Success )
@@ -126,9 +125,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 SyntaxFactory.ParseSyntaxTree(
                     $"[assembly: System.Reflection.AssemblyVersion(\"{this.GetUniqueVersion()}\")]",
                     runTimeCompilation.SyntaxTrees.First().Options ) );
+
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( modifiedRunTimeCompilation.SyntaxTrees );
 
-            compileTimeCompilation = new RemoveInvalidUsingsRewriter( compileTimeCompilation ).VisitAllTrees( compileTimeCompilation );
+            compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitAllTrees( compileTimeCompilation );
 
             return compileTimeCompilation;
         }
@@ -148,7 +148,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private MemoryStream Emit( Compilation compilation )
         {
-
             var buildOptions = this._serviceProvider.GetService<IBuildOptions>();
             var compileTimeProjectDirectory = buildOptions.CompileTimeProjectDirectory;
 
@@ -179,6 +178,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 compilation = compilation.WithOptions( compilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
                 var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
+
                 foreach ( var tree in compilation.SyntaxTrees )
                 {
                     // Find a decent and unique name.
@@ -187,6 +187,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( names.Contains( treeName ) )
                     {
                         var treeNameSuffix = treeName;
+
                         for ( var i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
                         {
                             // Intentionally empty.
@@ -218,12 +219,14 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             stream.Position = 0;
+
             return result;
         }
 
         public MemoryStream? EmitCompileTimeAssembly( Compilation compilation )
         {
             var sourceCodeDiagnostics = compilation.GetDiagnostics();
+
             if ( sourceCodeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
             {
                 // We don't continue with errors in the source code. This ensures that errors discovered later
@@ -245,12 +248,10 @@ namespace Caravela.Framework.Impl.CompileTime
             return stream;
         }
 
-        public string GetResourceName() => "Caravela.CompileTimeAssembly.dll";
-
         /// <summary>
         /// Prepares run-time assembly by making compile-time only methods throw <see cref="NotSupportedException"/>.
         /// </summary>
-        public CSharpCompilation PrepareRunTimeAssembly( CSharpCompilation compilation ) =>
-            new PrepareRunTimeAssemblyRewriter( this._symbolClassifier, compilation ).VisitAllTrees( compilation );
+        public CSharpCompilation PrepareRunTimeAssembly( CSharpCompilation compilation )
+            => new PrepareRunTimeAssemblyRewriter( this._symbolClassifier, compilation ).VisitAllTrees( compilation );
     }
 }

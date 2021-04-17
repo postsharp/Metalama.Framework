@@ -14,22 +14,22 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         private static readonly ConcurrentDictionary<Type, Func<object, object[]>> _cache = new();
 
-        public static object[] ToArray( object valueTuple )
-            => _cache.GetOrAdd( valueTuple.GetType(), CreateAdapter ).Invoke( valueTuple );
+        public static object[] ToArray( object valueTuple ) => _cache.GetOrAdd( valueTuple.GetType(), CreateAdapter ).Invoke( valueTuple );
 
         private static Func<object, object[]> CreateAdapter( Type type )
         {
             var arity = type.GetGenericArguments().Length;
-            var input = Expression.Parameter( typeof( object ) );
+            var input = Expression.Parameter( typeof(object) );
             var convertedInput = Expression.Convert( input, type );
             var fields = new Expression[arity];
 
             for ( var i = 0; i < arity; i++ )
             {
-                fields[i] = Expression.Convert( Expression.Field( convertedInput, $"Item{i + 1}" ), typeof( object ) );
+                fields[i] = Expression.Convert( Expression.Field( convertedInput, $"Item{i + 1}" ), typeof(object) );
             }
 
-            var array = Expression.NewArrayInit( typeof( object ), fields );
+            var array = Expression.NewArrayInit( typeof(object), fields );
+
             return Expression.Lambda<Func<object, object[]>>( array, input ).Compile();
         }
     }

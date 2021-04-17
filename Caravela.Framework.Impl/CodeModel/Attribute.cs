@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -46,8 +46,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<TypedConstant> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public INamedArgumentList NamedArguments =>
-            new NamedArgumentsList(
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentsList(
                 this._data.NamedArguments
                     .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) ) );
 
@@ -60,7 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 TypedConstantKind.Primitive or TypedConstantKind.Enum => constant.Value,
                 TypedConstantKind.Type => constant.Value == null ? null : this._compilation.Factory.GetIType( (ITypeSymbol) constant.Value ),
                 TypedConstantKind.Array => constant.Values.Select( this.Translate ).ToImmutableArray(),
-                _ => throw new ArgumentException( nameof( constant ) )
+                _ => throw new ArgumentException( nameof(constant) )
             };
 
             return new TypedConstant( type, value );
