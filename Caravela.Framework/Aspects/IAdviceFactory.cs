@@ -36,6 +36,8 @@ namespace Caravela.Framework.Aspects
             ConflictBehavior conflictBehavior = ConflictBehavior.Default, 
             AspectLinkerOptions? aspectLinkerOptions = null );
 
+        IOverridePropertyAdvice OverrideProperty( IFieldOrProperty targetDeclaration, string defaultGetTemplate, string defaultSetTemplate, AspectLinkerOptions? aspectLinkerOptions = null );
+
         /// <summary>
         /// Gets a factory objects that allows to add advices to other layers than the default one.
         /// </summary>

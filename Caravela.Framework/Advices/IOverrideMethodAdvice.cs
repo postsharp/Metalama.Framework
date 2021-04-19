@@ -10,5 +10,6 @@ namespace Caravela.Framework.Advices
     /// </summary>
     public interface IOverrideMethodAdvice : IAdvice<IMethod>
     {
+        // TODO: Members (get-only in the spec).
     }
 }
