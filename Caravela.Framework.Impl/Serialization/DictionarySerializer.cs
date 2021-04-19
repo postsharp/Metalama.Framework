@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -29,6 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
             var dictionaryType = o.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];
             var valueType = dictionaryType.GetGenericArguments()[1];
+
             var creationExpression = ObjectCreationExpression(
                 QualifiedName(
                     QualifiedName(
@@ -36,8 +37,7 @@ namespace Caravela.Framework.Impl.Serialization
                             IdentifierName( "System" ),
                             IdentifierName( "Collections" ) ),
                         IdentifierName( "Generic" ) ),
-                    GenericName(
-                            Identifier( "Dictionary" ) )
+                    GenericName( Identifier( "Dictionary" ) )
                         .WithTypeArgumentList(
                             TypeArgumentList(
                                 SeparatedList<TypeSyntax>(
@@ -45,16 +45,17 @@ namespace Caravela.Framework.Impl.Serialization
                                     {
                                         ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( keyType ) ),
                                         Token( SyntaxKind.CommaToken ),
-                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) ),
+                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) )
                                     } ) ) ) ) );
 
             dynamic dictionary = o;
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;
 
-            if ( keyType == typeof( string ) )
+            if ( keyType == typeof(string) )
             {
                 string? comparerName = null;
+
                 if ( dictionary.Comparer is StringComparer sc )
                 {
                     if ( sc == StringComparer.Ordinal )
@@ -119,20 +120,23 @@ namespace Caravela.Framework.Impl.Serialization
 
             var lt = new List<InitializerExpressionSyntax>();
             var nonGenericDictionary = (IDictionary) o;
+
             foreach ( var key in nonGenericDictionary.Keys )
             {
                 ThrowIfStackTooDeep( o );
 
                 var value = nonGenericDictionary[key];
-                lt.Add( InitializerExpression(
-                    SyntaxKind.ComplexElementInitializerExpression,
-                    SeparatedList<ExpressionSyntax>(
-                        new SyntaxNodeOrToken[]
-                        {
-                            this._serializers.SerializeToRoslynCreationExpression( key ),
-                            Token(SyntaxKind.CommaToken),
-                            this._serializers.SerializeToRoslynCreationExpression( value )
-                        } ) ) );
+
+                lt.Add(
+                    InitializerExpression(
+                        SyntaxKind.ComplexElementInitializerExpression,
+                        SeparatedList<ExpressionSyntax>(
+                            new SyntaxNodeOrToken[]
+                            {
+                                this._serializers.SerializeToRoslynCreationExpression( key ),
+                                Token( SyntaxKind.CommaToken ),
+                                this._serializers.SerializeToRoslynCreationExpression( value )
+                            } ) ) );
             }
 
             creationExpression = creationExpression.WithInitializer(
@@ -140,6 +144,7 @@ namespace Caravela.Framework.Impl.Serialization
                         SyntaxKind.CollectionInitializerExpression,
                         SeparatedList<ExpressionSyntax>( lt ) ) )
                 .NormalizeWhitespace();
+
             return creationExpression;
         }
     }

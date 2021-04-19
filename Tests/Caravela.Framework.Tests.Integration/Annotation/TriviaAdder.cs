@@ -22,6 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Annotation
 
             newNode = newNode.WithLeadingTrivia( SyntaxFactory.Space );
             newNode = newNode.WithTrailingTrivia( SyntaxFactory.Space );
+
             return newNode;
         }
     }

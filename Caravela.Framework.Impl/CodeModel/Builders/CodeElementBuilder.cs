@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IAttributeList ICodeElement.Attributes => this.Attributes;
 
-        public AttributeBuilderList Attributes { get; } = new AttributeBuilderList();
+        public AttributeBuilderList Attributes { get; } = new();
 
         public abstract CodeElementKind ElementKind { get; }
 
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             return "CodeElementBuilder";
         }
 
-        public bool IsReadOnly { get; private set; }
+        public bool IsFrozen { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public virtual void Freeze()
         {
-            this.IsReadOnly = true;
+            this.IsFrozen = true;
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;

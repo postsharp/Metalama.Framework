@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
+using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
@@ -14,9 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public static MethodList Empty { get; } = new MethodList();
 
-        private MethodList()
-        {
-        }
+        private MethodList() { }
 
         public MethodList( CodeElement? containingElement, IEnumerable<MemberLink<IMethod>> sourceItems ) : base( containingElement, sourceItems )
         {

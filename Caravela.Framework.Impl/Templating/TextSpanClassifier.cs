@@ -41,8 +41,8 @@ namespace Caravela.Framework.Impl.Templating
 
         public IReadOnlyClassifiedTextSpanCollection ClassifiedTextSpans => this._classifiedTextSpans;
 
-        private static bool ShouldMarkTrivias( TextSpanClassification classification ) =>
-            classification switch
+        private static bool ShouldMarkTrivia( TextSpanClassification classification )
+            => classification switch
             {
                 TextSpanClassification.CompileTime => true,
                 TextSpanClassification.RunTime => true,
@@ -66,10 +66,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 base.VisitClassDeclaration( node );
             }
-            else
-            {
-                // We don't process the type at all.
-            }
         }
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
@@ -82,6 +78,7 @@ namespace Caravela.Framework.Impl.Templating
                 this.Mark( node.Identifier, TextSpanClassification.CompileTime );
                 this.Mark( node.ParameterList, TextSpanClassification.CompileTime );
                 this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
+
                 if ( node.Body != null )
                 {
                     this.Mark( node.Body.OpenBraceToken, TextSpanClassification.CompileTime );
@@ -132,6 +129,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._isInTemplate )
             {
                 var colorFromAnnotation = token.GetColorFromAnnotation();
+
                 if ( colorFromAnnotation != TextSpanClassification.Default )
                 {
                     this.Mark( token, colorFromAnnotation );
@@ -144,6 +142,7 @@ namespace Caravela.Framework.Impl.Templating
             base.VisitVariableDeclarator( node );
 
             var colorFromAnnotation = node.Identifier.GetColorFromAnnotation();
+
             if ( colorFromAnnotation != TextSpanClassification.Default )
             {
                 this.Mark( node.Identifier, colorFromAnnotation );
@@ -162,6 +161,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 // Mark the node.
                 var colorFromAnnotation = node.GetColorFromAnnotation();
+
                 if ( colorFromAnnotation != TextSpanClassification.Default )
                 {
                     this.Mark( node, colorFromAnnotation );
@@ -200,7 +200,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             this.Mark( token.Span, classification );
 
-            if ( ShouldMarkTrivias( classification ) )
+            if ( ShouldMarkTrivia( classification ) )
             {
                 this.Mark( token.LeadingTrivia, classification );
                 this.Mark( token.TrailingTrivia, classification );
@@ -226,15 +226,11 @@ namespace Caravela.Framework.Impl.Templating
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
-                    {
-                    }
+                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
                 }
 
-                // If we end with an endline or space, trim it.
-                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- )
-                {
-                }
+                // If we end with an end-of-line or space, trim it.
+                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- ) { }
 
                 if ( triviaStart != triviaEnd )
                 {
@@ -251,6 +247,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
 #if DEBUG
+
             // ReSharper disable once UnusedVariable
             var text = this._sourceText.GetSubText( span ).ToString();
 #endif

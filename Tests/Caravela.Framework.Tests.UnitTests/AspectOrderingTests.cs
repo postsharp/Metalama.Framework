@@ -1,12 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Impl;
-using Caravela.Framework.Impl.AspectOrdering;
-using Microsoft.CodeAnalysis;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var aspectTypeFactory = new AspectTypeFactory( compilation, new AspectDriverFactory( compilation, ImmutableArray<object>.Empty ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() );
+            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 

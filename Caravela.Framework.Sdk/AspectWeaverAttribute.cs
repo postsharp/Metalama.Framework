@@ -5,7 +5,6 @@ using System;
 
 namespace Caravela.Framework.Sdk
 {
-
     /// <summary>
     /// Custom attribute that, when applied to a type implementing <see cref="IAspectWeaver"/>, exports this type
     /// as an aspect weaver. Additionally, aspect weavers must have the <see cref="CompilerPluginAttribute"/>.

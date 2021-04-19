@@ -1,10 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Builders;
@@ -16,6 +12,10 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -23,10 +23,10 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
         {
-            return new CompilationModel( roslynCompilation );
+            return new( roslynCompilation );
         }
 
-        internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IEnumerable<IObservableTransformation> introducedElements )
+        internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedElements )
         {
             if ( !introducedElements.Any() )
             {
@@ -60,6 +60,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var allCodeElements = assembly.Concat( assembly.SelectDescendants<ISymbol>( s => s.GetContainedSymbols() ) );
 
             var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
+
             this._allAttributesByType = ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink>
                 .Create( allAttributes, a => a.AttributeType, CodeElementLinkEqualityComparer<CodeElementLink<INamedType>>.Instance );
         }
@@ -69,7 +70,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IEnumerable<IObservableTransformation> observableTransformations )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             this.Revision = prototype.Revision + 1;
             this.RoslynCompilation = prototype.RoslynCompilation;
@@ -102,7 +103,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
 
-        internal CSharpSyntaxGenerator SyntaxGenerator { get; } = new CSharpSyntaxGenerator();
+        internal CSharpSyntaxGenerator SyntaxGenerator { get; } = new();
 
         public int Revision { get; }
 
@@ -115,8 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( t => new MemberLink<INamedType>( t ) ) );
 
         [Memo]
-        public IReadOnlyList<INamedType> DeclaredAndReferencedTypes =>
-            this.RoslynCompilation.GetTypes().Select( this.Factory.GetNamedType ).ToImmutableArray();
+        public IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.Factory.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public IAttributeList Attributes =>
@@ -125,10 +125,10 @@ namespace Caravela.Framework.Impl.CodeModel
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                    .Select(
-                        a => new AttributeLink( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
+                    .Select( a => new AttributeLink( a, this.RoslynCompilation.Assembly.ToLink() ) ) );
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
         public CSharpCompilation RoslynCompilation { get; }
 
@@ -171,27 +171,26 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return value;
             }
-            else
+
+            switch ( codeElement )
             {
-                switch ( codeElement )
-                {
-                    case INamedType namedType:
-                        return this.GetDepth( namedType );
+                case INamedType namedType:
+                    return this.GetDepth( namedType );
 
-                    case ICompilation:
-                        return 0;
+                case ICompilation:
+                    return 0;
 
-                    case IAssembly:
-                        // Order with Compilation matters. We want the root compilation to be ordered first.
-                        return 1;
+                case IAssembly:
+                    // Order with Compilation matters. We want the root compilation to be ordered first.
+                    return 1;
 
-                    default:
-                        {
-                            var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
-                            this._depthsCache = this._depthsCache.SetItem( link, depth );
-                            return depth;
-                        }
-                }
+                default:
+                    {
+                        var depth = this.GetDepth( codeElement.ContainingElement! ) + 1;
+                        this._depthsCache = this._depthsCache.SetItem( link, depth );
+
+                        return depth;
+                    }
             }
         }
 
@@ -203,26 +202,24 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return depth;
             }
-            else
+
+            depth = this.GetDepth( namedType.ContainingElement! );
+
+            if ( namedType.BaseType != null )
             {
-                depth = this.GetDepth( namedType.ContainingElement! );
-
-                if ( namedType.BaseType != null )
-                {
-                    depth = Math.Max( depth, this.GetDepth( namedType.BaseType ) );
-                }
-
-                foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
-                {
-                    depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
-                }
-
-                depth++;
-
-                this._depthsCache = this._depthsCache.SetItem( link, depth );
-
-                return depth;
+                depth = Math.Max( depth, this.GetDepth( namedType.BaseType ) );
             }
+
+            foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
+            {
+                depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
+            }
+
+            depth++;
+
+            this._depthsCache = this._depthsCache.SetItem( link, depth );
+
+            return depth;
         }
 
         CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();

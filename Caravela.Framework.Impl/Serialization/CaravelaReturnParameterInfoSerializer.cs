@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaReturnParameterInfoSerializer : TypedObjectSerializer<CompileTimeReturnParameterInfo>
     {
@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
         public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo o )
         {
             var methodBaseExpression = this._methodInfoSerializer.Serialize( new CompileTimeMethodInfo( o.Method ) );
+
             return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(

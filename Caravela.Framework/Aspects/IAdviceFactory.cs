@@ -30,10 +30,10 @@ namespace Caravela.Framework.Aspects
         /// <param name="aspectLinkerOptions">Aspect linker options.</param>
         /// <returns></returns>
         IIntroduceMethodAdvice IntroduceMethod( 
-            INamedType type, 
-            string defaultTemplate, 
-            IntroductionScope scope = IntroductionScope.Default, 
-            ConflictBehavior conflictBehavior = ConflictBehavior.Default, 
+            INamedType type,
+            string defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null );
 
         /// <summary>

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -12,6 +13,7 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: Obviously these replace methods are not very efficient.
             var cleanAspectName = aspectLayer.AspectName.Replace( "_", "__" ).Replace( ".", "_" );
             var cleanLayerName = aspectLayer.LayerName?.Replace( "_", "__" )?.Replace( ".", "_" );
+
             return
                 cleanLayerName != null
                     ? $"__{overriddenDeclaration.Name}__{cleanAspectName}__{cleanLayerName}"

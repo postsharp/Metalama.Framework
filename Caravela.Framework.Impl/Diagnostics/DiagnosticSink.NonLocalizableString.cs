@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -25,10 +25,8 @@ namespace Caravela.Framework.Impl.Diagnostics
                 {
                     return this._text;
                 }
-                else
-                {
-                    return string.Format( formatProvider, this._text, formatProvider );
-                }
+
+                return string.Format( formatProvider, this._text, formatProvider );
             }
 
             protected override int GetHash()

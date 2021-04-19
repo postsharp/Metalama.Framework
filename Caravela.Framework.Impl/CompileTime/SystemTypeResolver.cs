@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -21,13 +21,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     return new CompileTimeType( typeSymbol );
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
 
             var typeName = ReflectionNameHelper.GetReflectionName( typeSymbol );
+
             if ( typeSymbol.ContainingAssembly != null )
             {
                 var assemblyName = typeSymbol.ContainingAssembly.Name;
@@ -42,14 +41,13 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var type = Type.GetType( typeName );
+
             if ( type == null )
             {
                 return ReturnNullOrMock();
             }
-            else
-            {
-                return type;
-            }
+
+            return type;
         }
     }
 }

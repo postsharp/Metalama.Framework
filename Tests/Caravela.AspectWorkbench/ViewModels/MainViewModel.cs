@@ -1,13 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
-using System.Windows.Media;
 using Caravela.AspectWorkbench.Model;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Tests.Integration.Templating;
@@ -15,20 +8,20 @@ using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Formatting;
 using PostSharp.Patterns.Model;
+using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private readonly TestSerializer _testSerializer;
-
         private TemplateTest? _currentTest;
-
-        public MainViewModel()
-        {
-            this._testSerializer = new();
-        }
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
 
@@ -52,12 +45,11 @@ namespace Caravela.AspectWorkbench.ViewModels
         {
             if ( this.TestText == null )
             {
-                throw new InvalidOperationException( $"Property {nameof( this.TestText )} not set." );
+                throw new InvalidOperationException( $"Property {nameof(this.TestText)} not set." );
             }
 
             try
             {
-
                 this.ErrorsDocument = new FlowDocument();
                 this.TransformedTargetDocument = null;
 
@@ -107,27 +99,30 @@ namespace Caravela.AspectWorkbench.ViewModels
                     if ( UnitTestBase.NormalizeString( this.ExpectedOutputText ) ==
                          UnitTestBase.NormalizeString( testResult.TransformedTargetSourceText.ToString() ) )
                     {
-                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                        errorsDocument.Blocks.Add(
+                            new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
                     }
                     else
                     {
-                        errorsDocument.Blocks.Add( new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                        errorsDocument.Blocks.Add(
+                            new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
                     }
                 }
 
                 var errors = testResult.Diagnostics;
 
                 errorsDocument.Blocks.AddRange(
-                    errors.Select( e => new Paragraph(
-                        inline: new Run( e.ToString() )
-                        {
-                            Foreground = e.Severity switch
+                    errors.Select(
+                        e => new Paragraph(
+                            new Run( e.ToString() )
                             {
-                                DiagnosticSeverity.Error => Brushes.Red,
-                                DiagnosticSeverity.Warning => Brushes.Chocolate,
-                                _ => Brushes.Black
-                            }
-                        } ) ) );
+                                Foreground = e.Severity switch
+                                {
+                                    DiagnosticSeverity.Error => Brushes.Red,
+                                    DiagnosticSeverity.Warning => Brushes.Chocolate,
+                                    _ => Brushes.Black
+                                }
+                            } ) ) );
 
                 if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
                 {
@@ -156,7 +151,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         {
             this._currentTest = await TestSerializer.LoadFromFileAsync( filePath );
 
-            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." );
+            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
 
             this.TestText = input.TestSource;
             this.ExpectedOutputText = this._currentTest.ExpectedOutput;
@@ -167,7 +162,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task SaveTestAsync( string? filePath )
         {
-            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof( filePath ) );
+            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof(filePath) );
 
             if ( string.IsNullOrEmpty( filePath ) )
             {
@@ -176,7 +171,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             if ( string.IsNullOrEmpty( this.TestText ) )
             {
-                throw new InvalidOperationException( $"The {nameof( this.TestText )} property cannot be null." );
+                throw new InvalidOperationException( $"The {nameof(this.TestText)} property cannot be null." );
             }
 
             if ( this._currentTest == null )

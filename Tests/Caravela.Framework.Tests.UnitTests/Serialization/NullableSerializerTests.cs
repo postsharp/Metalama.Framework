@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -22,11 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestListOfNullables()
         {
-            var list = new List<float?>
-            {
-                5,
-                null
-            };
+            var list = new List<float?> { 5, null };
             this.AssertSerialization( "new System.Collections.Generic.List<System.Nullable<System.Single>>{5F, null}", list );
         }
 

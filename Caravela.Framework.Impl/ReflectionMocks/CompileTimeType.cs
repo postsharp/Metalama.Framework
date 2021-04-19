@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Globalization;
-using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Globalization;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static CompileTimeType Create( IType type )
         {
-            return new CompileTimeType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
+            return new( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
         public override string Namespace => ReflectionNameHelper.GetReflectionName( this.TypeSymbol.ContainingNamespace );
@@ -43,7 +43,13 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         protected override TypeAttributes GetAttributeFlagsImpl() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        protected override ConstructorInfo GetConstructorImpl( BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        protected override ConstructorInfo GetConstructorImpl(
+            BindingFlags bindingAttr,
+            Binder binder,
+            CallingConventions callConvention,
+            Type[] types,
+            ParameterModifier[] modifiers )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override ConstructorInfo[] GetConstructors( BindingFlags bindingAttr ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -59,13 +65,29 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override MemberInfo[] GetMembers( BindingFlags bindingAttr ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        protected override MethodInfo GetMethodImpl( string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        protected override MethodInfo GetMethodImpl(
+            string name,
+            BindingFlags bindingAttr,
+            Binder binder,
+            CallingConventions callConvention,
+            Type[] types,
+            ParameterModifier[] modifiers )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override MethodInfo[] GetMethods( BindingFlags bindingAttr ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override PropertyInfo[] GetProperties( BindingFlags bindingAttr ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object InvokeMember( string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParameters ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object InvokeMember(
+            string name,
+            BindingFlags invokeAttr,
+            Binder binder,
+            object target,
+            object[] args,
+            ParameterModifier[] modifiers,
+            CultureInfo culture,
+            string[] namedParameters )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override Type UnderlyingSystemType => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
@@ -87,7 +109,14 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override Guid GUID => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        protected override PropertyInfo GetPropertyImpl( string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        protected override PropertyInfo GetPropertyImpl(
+            string name,
+            BindingFlags bindingAttr,
+            Binder binder,
+            Type returnType,
+            Type[] types,
+            ParameterModifier[] modifiers )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         protected override bool HasElementTypeImpl() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

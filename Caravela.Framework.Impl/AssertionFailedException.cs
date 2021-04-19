@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -37,20 +37,19 @@ namespace Caravela.Framework.Impl
             {
                 return base.ToString();
             }
-            else
+
+            StringBuilder stringBuilder = new( base.ToString() );
+            stringBuilder.AppendLine( "   +----- Diagnostics " );
+
+            foreach ( var diagnostic in this.Diagnostics )
             {
-                StringBuilder stringBuilder = new( base.ToString() );
-                stringBuilder.AppendLine( "   +----- Diagnostics " );
-                foreach ( var diagnostic in this.Diagnostics )
-                {
-                    stringBuilder.Append( "   | " );
-                    stringBuilder.AppendLine( diagnostic.ToString() );
-                }
-
-                stringBuilder.AppendLine( "   +----- " );
-
-                return stringBuilder.ToString();
+                stringBuilder.Append( "   | " );
+                stringBuilder.AppendLine( diagnostic.ToString() );
             }
+
+            stringBuilder.AppendLine( "   +----- " );
+
+            return stringBuilder.ToString();
         }
     }
 }

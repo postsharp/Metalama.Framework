@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -48,7 +48,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             set => throw new NotImplementedException();
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this._parameter.ToDisplayString( format, context );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this._parameter.ToDisplayString( format, context );
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 

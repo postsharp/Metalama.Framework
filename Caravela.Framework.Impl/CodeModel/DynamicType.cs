@@ -3,16 +3,14 @@
 
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal class DynamicType : RoslynType<IDynamicTypeSymbol>, IDynamicType
     {
+        internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
-        internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
-        {
-        }
-
-        public override Code.TypeKind TypeKind => Code.TypeKind.Dynamic;
+        public override TypeKind TypeKind => TypeKind.Dynamic;
     }
 }

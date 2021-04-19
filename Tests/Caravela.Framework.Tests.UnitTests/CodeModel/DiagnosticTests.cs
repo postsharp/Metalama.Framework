@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.CodeModel
@@ -55,16 +55,17 @@ class C<T> : object
 
             // Fields
             AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );
-            
+
             // Attributes
             AssertLocation( "NonSerialized", type.Fields.OfName( "field1" ).Single().Attributes.Single().GetDiagnosticLocation() );
         }
-        
+
         private static void AssertLocation( string? expectedText, Location? location )
         {
             if ( expectedText == null )
             {
                 Assert.Null( location );
+
                 return;
             }
 

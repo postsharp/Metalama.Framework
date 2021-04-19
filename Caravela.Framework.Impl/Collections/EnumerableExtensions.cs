@@ -2,12 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
     public static class EnumerableExtensions
     {
+        public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection is IReadOnlyList<T> list ? list : collection.ToList();
+
+        public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
+            => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
 
         public static IEnumerable<T> SelectSelfAndAncestors<T>( this T item, Func<T, T?> getParent )
             where T : class
@@ -70,7 +76,8 @@ namespace Caravela.Framework.Impl.Collections
             return list;
         }
 
-        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>( this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
+        public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>(
+            this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 

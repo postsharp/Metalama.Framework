@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Collections
 {
     public partial class ImmutableMultiValueDictionary<TKey, TValue>
     {
-        public struct Builder
+        public readonly struct Builder
         {
             private readonly ImmutableDictionary<TKey, Group>.Builder _dictionaryBuilder;
 
@@ -27,18 +27,18 @@ namespace Caravela.Framework.Impl.Collections
 
                     if ( !this._dictionaryBuilder.TryGetValue( key, out var group ) )
                     {
-                        @group = new Group( key, ImmutableArray<TValue>.Empty );
+                        group = new Group( key, ImmutableArray<TValue>.Empty );
                     }
 
-                    @group = @group.Add( value );
+                    group = group.Add( value );
 
-                    this._dictionaryBuilder[key] = @group;
+                    this._dictionaryBuilder[key] = group;
                 }
             }
 
             public ImmutableMultiValueDictionary<TKey, TValue> ToImmutable()
             {
-                return new ImmutableMultiValueDictionary<TKey, TValue>( this._dictionaryBuilder.ToImmutable() );
+                return new( this._dictionaryBuilder.ToImmutable() );
             }
         }
     }

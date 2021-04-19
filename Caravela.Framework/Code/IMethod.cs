@@ -51,7 +51,7 @@ namespace Caravela.Framework.Code
         /// Gets an object that allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
         IMethodInvocation Base { get; }
-        
+
         IMethod? OverriddenMethod { get; }
     }
 }

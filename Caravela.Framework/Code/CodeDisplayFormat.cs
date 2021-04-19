@@ -12,18 +12,15 @@ namespace Caravela.Framework.Code
     [CompileTimeOnly]
     public sealed class CodeDisplayFormat
     {
-
         // Prevents creation of custom instances.
-        private CodeDisplayFormat()
-        {
-        }
+        private CodeDisplayFormat() { }
 
-        public static CodeDisplayFormat FullyQualified { get; } = new CodeDisplayFormat();
+        public static CodeDisplayFormat FullyQualified { get; } = new();
 
-        public static CodeDisplayFormat DiagnosticMessage { get; } = new CodeDisplayFormat();
+        public static CodeDisplayFormat DiagnosticMessage { get; } = new();
 
-        public static CodeDisplayFormat MinimallyQualified { get; } = new CodeDisplayFormat();
+        public static CodeDisplayFormat MinimallyQualified { get; } = new();
 
-        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new CodeDisplayFormat();
+        public static CodeDisplayFormat ShortDiagnosticMessage { get; } = new();
     }
 }

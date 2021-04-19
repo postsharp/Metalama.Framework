@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -31,20 +31,16 @@ namespace Caravela.Framework.Impl.Templating
         private bool IsTemplate( SyntaxNode node )
         {
             var symbol = this._semanticAnnotationMap.GetDeclaredSymbol( node );
+
             if ( symbol != null )
             {
-                return this.IsTemplate( symbol );
+                return IsTemplate( symbol );
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
-        private bool IsTemplate( ISymbol symbol )
-        {
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TemplateAttribute ) );
-        }
+        private static bool IsTemplate( ISymbol symbol ) => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TemplateAttribute) );
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {

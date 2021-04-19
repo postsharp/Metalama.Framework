@@ -1,23 +1,24 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class EnumSerializer
+    internal static class EnumSerializer
     {
-        private static readonly Type[] _unsignedTypes = new[] { typeof( ushort ), typeof( uint ), typeof( ulong ), typeof( byte ) };
+        private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
-        public ExpressionSyntax Serialize( Enum o )
+        public static ExpressionSyntax Serialize( Enum o )
         {
             var enumType = o.GetType();
             var typeName = TypeNameUtility.ToCSharpQualifiedName( enumType );
             var name = Enum.GetName( enumType, o );
+
             if ( name != null )
             {
                 return MemberAccessExpression(
@@ -25,17 +26,16 @@ namespace Caravela.Framework.Impl.Serialization
                     ParseExpression( typeName ),
                     IdentifierName( name ) );
             }
-            else
-            {
-                var underlyingType = Enum.GetUnderlyingType( o.GetType() );
-                var literal = _unsignedTypes.Contains( underlyingType ) ? Literal( Convert.ToUInt64( o ) ) : Literal( Convert.ToInt64( o ) );
-                return CastExpression(
-                    ParseTypeName( typeName ),
-                    ParenthesizedExpression(
-                        LiteralExpression(
-                            SyntaxKind.NumericLiteralExpression,
-                            literal ) ) );
-            }
+
+            var underlyingType = Enum.GetUnderlyingType( o.GetType() );
+            var literal = _unsignedTypes.Contains( underlyingType ) ? Literal( Convert.ToUInt64( o ) ) : Literal( Convert.ToInt64( o ) );
+
+            return CastExpression(
+                ParseTypeName( typeName ),
+                ParenthesizedExpression(
+                    LiteralExpression(
+                        SyntaxKind.NumericLiteralExpression,
+                        literal ) ) );
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -55,16 +55,14 @@ namespace Caravela.Framework.Impl.Linking
     //   * Names(Subtree(R1)), Names(Subtree(R2)), Names(Subtree(R3)) are mutually disjoint
 
     /// <summary>
-    /// Aspect linker's introduction steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
+    /// Aspect linker introduction steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
     /// This results in the transformation registry and intermediate compilation, and also produces diagnostics.
     /// </summary>
     internal partial class LinkerIntroductionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerIntroductionStepOutput>
     {
-        public static LinkerIntroductionStep Instance { get; } = new LinkerIntroductionStep();
+        public static LinkerIntroductionStep Instance { get; } = new();
 
-        private LinkerIntroductionStep()
-        {
-        }
+        private LinkerIntroductionStep() { }
 
         public override LinkerIntroductionStepOutput Execute( AspectLinkerInput input )
         {
@@ -78,10 +76,10 @@ namespace Caravela.Framework.Impl.Linking
             //       Maybe have all transformations already together in the input?
             var allTransformations =
                 input.CompilationModel.GetAllObservableTransformations()
-                .SelectMany( x => x.Transformations )
-                .OfType<ISyntaxTreeTransformation>()
-                .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
-                .ToList();
+                    .SelectMany( x => x.Transformations )
+                    .OfType<ISyntaxTreeTransformation>()
+                    .Concat( input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
+                    .ToList();
 
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
@@ -93,13 +91,13 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             // Group diagnostic suppressions by target.
-            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary( 
+            var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
                 s => s.CodeElement,
-                input.CompilationModel.InvariantComparer);
+                input.CompilationModel.InvariantComparer );
 
             // Process syntax trees one by one.
             var intermediateCompilation = input.InitialCompilation;
-            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, diagnostics, suppressionsByTarget, input.CompilationModel );
+            Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, suppressionsByTarget, input.CompilationModel );
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
@@ -114,7 +112,10 @@ namespace Caravela.Framework.Impl.Linking
                 intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
             }
 
-            var introductionRegistry = new LinkerIntroductionRegistry( intermediateCompilation, syntaxTreeMapping, introducedMemberCollection.IntroducedMembers );
+            var introductionRegistry = new LinkerIntroductionRegistry(
+                intermediateCompilation,
+                syntaxTreeMapping,
+                introducedMemberCollection.IntroducedMembers );
 
             return new LinkerIntroductionStepOutput( diagnostics.ToImmutable(), intermediateCompilation, introductionRegistry, input.OrderedAspectLayers );
         }

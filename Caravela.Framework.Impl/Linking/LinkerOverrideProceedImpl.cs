@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
@@ -10,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -27,18 +27,16 @@ namespace Caravela.Framework.Impl.Linking
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
+            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
             {
                 // TODO: Add the namespace.
 #pragma warning disable CS0618 // Type or member is obsolete
-                return IdentifierName( nameof( __Void ) );
+                return IdentifierName( nameof(__Void) );
 #pragma warning restore CS0618 // Type or member is obsolete
             }
-            else
-            {
-                // TODO: Introduced types?
-                return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._originalDeclaration.ReturnType).Symbol );
-            }
+
+            // TODO: Introduced types?
+            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._originalDeclaration.ReturnType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
@@ -54,20 +52,17 @@ namespace Caravela.Framework.Impl.Linking
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
+            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
             {
                 // Emit `<original_method_call>; return`.
                 return Block(
                     ExpressionStatement( this.CreateOriginalMethodCall() ),
                     ReturnStatement() );
             }
-            else
-            {
-                // Emit `return <original_method_call>`.
-                return
-                    ReturnStatement(
-                        this.CreateOriginalMethodCall() );
-            }
+
+            // Emit `return <original_method_call>`.
+            return
+                ReturnStatement( this.CreateOriginalMethodCall() );
         }
 
         private InvocationExpressionSyntax CreateOriginalMethodCall()
@@ -77,19 +72,14 @@ namespace Caravela.Framework.Impl.Linking
             var invocation =
                 InvocationExpression(
                     !this._originalDeclaration.IsStatic
-                    ? MemberAccessExpression(
+                        ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( this._originalDeclaration.Name ) )
-                    : IdentifierName( this._originalDeclaration.Name ),
-                    ArgumentList(
-                        SeparatedList(
-                            this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
+                        : IdentifierName( this._originalDeclaration.Name ),
+                    ArgumentList( SeparatedList( this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
-            if ( this._aspectLayerId != null )
-            {
-                invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
-            }
+            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
 
             return invocation;
         }

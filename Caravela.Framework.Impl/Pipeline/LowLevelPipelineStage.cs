@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -42,6 +42,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
 
             CSharpCompilation newCompilation;
+
             try
             {
                 newCompilation = this._aspectWeaver.Transform( context );
@@ -49,7 +50,9 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 newCompilation = context.Compilation;
-                diagnostics.ReportDiagnostic( GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
+
+                diagnostics.ReportDiagnostic(
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Serialization;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 using System.Reflection;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Serialization.Reflection;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -25,21 +25,20 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static CompileTimeMethodInfo Create( IMethod method )
         {
-            return new CompileTimeMethodInfo( (method as Method)! );
+            return new( (method as Method)! );
         }
 
         public static ITypeSymbol? FindDeclaringTypeSymbol( Member method )
         {
             var methodDeclaringType = (method.DeclaringType as ITypeInternal)!;
             var typeSymbol = methodDeclaringType.TypeSymbol;
+
             if ( typeSymbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.TypeParameters.Length > 0 )
             {
                 return namedTypeSymbol;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
@@ -58,7 +57,8 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override ParameterInfo[] GetParameters() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override MethodAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

@@ -6,7 +6,5 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Read-only list of <see cref="IField"/> or <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrPropertyList : IMemberList<IFieldOrProperty>
-    {
-    }
+    public interface IFieldOrPropertyList : IMemberList<IFieldOrProperty> { }
 }

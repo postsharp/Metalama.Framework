@@ -8,7 +8,7 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface ICodeElementBuilder : ICodeElement
     {
-        bool IsReadOnly { get; }
+        bool IsFrozen { get; }
 
         /// <summary>
         /// Adds a custom attribute to the current code element.

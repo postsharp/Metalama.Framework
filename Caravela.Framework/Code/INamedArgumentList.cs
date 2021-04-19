@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Code
 {
-
     /// <summary>
     /// A list of named arguments exposed by <see cref="IAttribute.NamedArguments"/>.
     /// </summary>
@@ -18,7 +17,7 @@ namespace Caravela.Framework.Code
         /// Tries to get a named argument and returns <c>true</c> if such argument was defined, even if its value was set to <c>null</c>.
         /// </summary>
         /// <param name="name">Member name.</param>
-        /// <param name="value">Member alue.</param>
+        /// <param name="value">Member value.</param>
         /// <returns></returns>
         bool TryGetByName( string name, out TypedConstant value );
 

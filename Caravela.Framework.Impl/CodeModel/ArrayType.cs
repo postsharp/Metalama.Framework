@@ -9,9 +9,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
     {
-        internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
-        {
-        }
+        internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
         public override TypeKind TypeKind => TypeKind.Array;
 

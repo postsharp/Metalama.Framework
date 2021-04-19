@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;
 
-        public IAdviceParameter this[int index] => this._parameters[index];
+        public IAdviceParameter this[ int index ] => this._parameters[index];
 
         public int Count => this._parameters.Length;
 
@@ -32,14 +32,13 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public IAdviceParameter this[string name]
+        public IAdviceParameter this[ string name ]
             => this.SingleOrDefault( p => p.Name == name )
                ?? throw new KeyNotFoundException( $"There is no parameter named '{name}' in method '{this._method.ToDisplayString()}" );
 
         public IEnumerable<IAdviceParameter> OfType( IType type ) => this.Where( p => p.ParameterType.Is( type ) );
 
-        public IEnumerable<IAdviceParameter> OfType( Type type ) =>
-            this.OfType( this.Compilation.Factory.GetTypeByReflectionType( type ).AssertNotNull() );
+        public IEnumerable<IAdviceParameter> OfType( Type type ) => this.OfType( this.Compilation.Factory.GetTypeByReflectionType( type ).AssertNotNull() );
 
         public IAdviceParameterValueList Values => this;
 

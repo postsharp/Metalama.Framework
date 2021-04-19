@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -26,7 +26,12 @@ namespace Caravela.Framework.Impl.Linking
             private readonly string? _returnVariableName;
             private readonly int? _returnLabelId;
 
-            public InliningRewriter( LinkerAnalysisRegistry referenceRegistry, SemanticModel semanticModel, IMethodSymbol contextSymbol, string? returnVariableName = null, int? returnLabelId = null )
+            public InliningRewriter(
+                LinkerAnalysisRegistry referenceRegistry,
+                SemanticModel semanticModel,
+                IMethodSymbol contextSymbol,
+                string? returnVariableName = null,
+                int? returnLabelId = null )
             {
                 this._analysisRegistry = referenceRegistry;
                 this._semanticModel = semanticModel;
@@ -219,7 +224,11 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 // If the body is inlineable, inline it.
-                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation.AssertNotNull() );
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference(
+                    this._contextSymbol,
+                    calleeSymbol,
+                    annotation.AssertNotNull() );
+
                 if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // TODO: Inlineability also depends on parameters passed. 
@@ -253,7 +262,11 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
 
                 // We are on an assignment of a method return value to a variable.      
-                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation.AssertNotNull() );
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference(
+                    this._contextSymbol,
+                    calleeSymbol,
+                    annotation.AssertNotNull() );
+
                 if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // TODO: Inlineability also depends on parameters passed. 
@@ -269,7 +282,12 @@ namespace Caravela.Framework.Impl.Linking
                 else
                 {
                     // Replace with invocation of the correct override.
-                    return node.Update( node.Left, node.OperatorToken, invocation.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update(
+                        node.Left,
+                        node.OperatorToken,
+                        invocation.Update(
+                            ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                            invocation.ArgumentList ) );
                 }
             }
 
@@ -287,7 +305,8 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Replace with unified annotation for prettification rewriter.
                 rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
+                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
+                     || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
                 {
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;
@@ -317,7 +336,10 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
                 {
-                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
+                    return memberAccess.Update(
+                        memberAccess.Expression,
+                        memberAccess.OperatorToken,
+                        IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
                 }
                 else
                 {
@@ -330,6 +352,7 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: ref return etc.
 
                 var linkerAnnotation = node.Expression?.GetLinkerAnnotation();
+
                 if ( linkerAnnotation != null )
                 {
                     // This is an annotated invocation. By visiting the expression, we will either get a invocation or a block if the invocation target is inlineable.
