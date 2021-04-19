@@ -36,6 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return base.VisitClassDeclaration( node );
             }
 
+            // TODO: Properties
             public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly )

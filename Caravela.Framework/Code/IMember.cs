@@ -60,4 +60,12 @@ namespace Caravela.Framework.Code
         /// </summary>
         INamedType DeclaringType { get; }
     }
+
+    public enum Writeability
+    {
+        None,
+        ConstructorOnly,
+        InitOnly,
+        All
+    }
 }

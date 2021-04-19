@@ -107,6 +107,38 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            // TODO: Properties.
+            private new IEnumerable<MethodDeclarationSyntax> VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                var propertySymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
+                {
+                    var successGet =
+                        this._templateCompiler.TryCompile( this._compileTimeCompilation, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedGetNode );
+
+                    var successSet =
+                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedSetNode );
+
+                    var successSet =
+                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedSetNode );
+
+                    if ( transformedGetNode && transformedSetNode )
+                    {
+                        yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
+                    }
+                    else
+                    {
+                        this.Success = false;
+                    }
+                }
+                else
+                {
+                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
+                }
+            }
+
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
                 var transformedNode = (NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!;
