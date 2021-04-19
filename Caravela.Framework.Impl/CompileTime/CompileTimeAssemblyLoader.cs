@@ -2,11 +2,13 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,26 +19,38 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly CSharpCompilation _compilation;
-        private readonly CompileTimeAssemblyBuilder _compileTimeAssemblyBuilder;
 
-        private readonly Dictionary<IAssemblySymbol, Assembly> _assemblyMap = new();
+        public CompileTimeAssemblyBuilder CompileTimeAssemblyBuilder { get; }
+
+        private readonly Dictionary<IAssemblySymbol, Assembly?> _assemblyMap = new();
         private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
         private readonly AttributeDeserializer _attributeDeserializer;
 
-        public CompileTimeAssemblyLoader(
+        private CompileTimeAssemblyLoader(
             IServiceProvider serviceProvider,
             CSharpCompilation compilation,
             CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
-            this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
+            this.CompileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
 
             // TODO: this is probably not enough
             this._assemblyMap.Add( compilation.ObjectType.ContainingAssembly, typeof(object).Assembly );
 
             this._attributeDeserializer = new AttributeDeserializer( this );
             AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
+        }
+
+        public static CompileTimeAssemblyLoader Create(
+            IServiceProvider serviceProvider,
+            CSharpCompilation compilation )
+        {
+            CompileTimeAssemblyBuilder builder = new( serviceProvider );
+            CompileTimeAssemblyLoader loader = new( serviceProvider, compilation, builder );
+            builder.CompileTimeAssemblyLoader = loader;
+
+            return loader;
         }
 
         private static IEnumerable<ITypeSymbol> CollectTypeArguments( INamedTypeSymbol? s )
@@ -114,8 +128,10 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var assemblySymbol = typeSymbol.ContainingAssembly;
+
             var assembly = this.LoadCompileTimeAssembly( assemblySymbol );
-            var result = assembly.GetType( ReflectionNameHelper.GetReflectionName( typeSymbol ) );
+
+            var result = assembly?.GetType( ReflectionNameHelper.GetReflectionName( typeSymbol ) );
 
             if ( result == null )
             {
@@ -139,7 +155,19 @@ namespace Caravela.Framework.Impl.CompileTime
             return result;
         }
 
-        private static byte[]? GetResourceBytes( string assemblyPath, string resourceName )
+        public Assembly? LoadCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        {
+            DiagnosticList diagnostics = new();
+
+            if ( !this.TryLoadCompileTimeAssembly( assemblySymbol, diagnostics, out var assembly ) )
+            {
+                throw new InvalidUserCodeException( "Cannot compile the compile-time project.", diagnostics.ToImmutableArray() );
+            }
+
+            return assembly;
+        }
+
+        private static byte[]? ReadCompileTimeBytesFromRunTimeFile( string assemblyPath, string resourceName )
         {
             var resolver = new PathAssemblyResolver( new[] { typeof(object).Assembly.Location } );
             using var mlc = new MetadataLoadContext( resolver, typeof(object).Assembly.GetName().Name );
@@ -170,27 +198,36 @@ namespace Caravela.Framework.Impl.CompileTime
             return null;
         }
 
-        public byte[]? GetCompileTimeAssembly( string path )
+        public byte[]? GetCompileTimeAssemblyBytes( string path )
         {
             if ( this._assemblyBytesMap.TryGetValue( path, out var assemblyBytes ) )
             {
                 return assemblyBytes;
             }
 
-            assemblyBytes = GetResourceBytes( path, this._compileTimeAssemblyBuilder.ResourceName );
+            assemblyBytes = ReadCompileTimeBytesFromRunTimeFile( path, CompileTimeAssemblyBuilder.ResourceName );
 
             this._assemblyBytesMap.Add( path, assemblyBytes );
 
             return assemblyBytes;
         }
 
-        private byte[] GetCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        private bool TryGetCompileTimeAssemblyBytes( IAssemblySymbol assemblySymbol, IDiagnosticAdder diagnosticSink, out byte[]? compileTimeAssemblyBytes )
         {
             MemoryStream? assemblyStream;
 
             if ( assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol )
             {
-                assemblyStream = this._compileTimeAssemblyBuilder.EmitCompileTimeAssembly( sourceAssemblySymbol.Compilation );
+                if ( !this.CompileTimeAssemblyBuilder.TryEmitCompileTimeAssembly( sourceAssemblySymbol.Compilation, diagnosticSink, out assemblyStream ) )
+                {
+                    compileTimeAssemblyBytes = null;
+
+                    return false;
+                }
+                else
+                {
+                    compileTimeAssemblyBytes = assemblyStream?.ToArray();
+                }
             }
             else
             {
@@ -203,13 +240,26 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     // note: this should only happen in Try Caravela
                     var compilation = compilationReference.Compilation;
-                    assemblyStream = new CompileTimeAssemblyBuilder( this._serviceProvider, compilation ).EmitCompileTimeAssembly( compilation );
+
+                    if ( !new CompileTimeAssemblyBuilder( this._serviceProvider ).TryEmitCompileTimeAssembly(
+                        compilation,
+                        diagnosticSink,
+                        out assemblyStream ) )
+                    {
+                        compileTimeAssemblyBytes = null;
+
+                        return false;
+                    }
+                    else
+                    {
+                        compileTimeAssemblyBytes = assemblyStream?.ToArray();
+                    }
                 }
                 else
                 {
                     if ( reference is not PortableExecutableReference peReference )
                     {
-                        throw new InvalidOperationException( $"The assembly {assemblySymbol} does not correspond to a known kind of reference." );
+                        throw new AssertionFailedException( $"The assembly {assemblySymbol} does not correspond to a known kind of reference." );
                     }
 
                     if ( peReference.FilePath is not { } path )
@@ -217,32 +267,42 @@ namespace Caravela.Framework.Impl.CompileTime
                         throw new InvalidOperationException( $"Could not access path for the assembly {assemblySymbol}." );
                     }
 
-                    if ( this.GetCompileTimeAssembly( path ) is not { } assemblyBytes )
+                    if ( this.GetCompileTimeAssemblyBytes( path ) is not { } assemblyBytes )
                     {
                         throw new InvalidOperationException( $"Runtime assembly {assemblySymbol} does not contain a compile-time assembly resource." );
                     }
 
-                    return assemblyBytes;
+                    compileTimeAssemblyBytes = assemblyBytes;
                 }
             }
 
-            if ( assemblyStream == null )
-            {
-                throw new InvalidOperationException( $"Could not create compile-time assembly for {assemblySymbol}." );
-            }
-
-            return assemblyStream.ToArray();
+            return true;
         }
 
-        private Assembly LoadCompileTimeAssembly( IAssemblySymbol assemblySymbol )
+        public bool TryLoadCompileTimeAssembly( IAssemblySymbol assemblySymbol, IDiagnosticAdder diagnosticSink, out Assembly? compileTimeAssembly )
         {
-            if ( !this._assemblyMap.TryGetValue( assemblySymbol, out var assembly ) )
+            if ( !this._assemblyMap.TryGetValue( assemblySymbol, out compileTimeAssembly ) )
             {
-                assembly = Load( this.GetCompileTimeAssembly( assemblySymbol ) );
-                this._assemblyMap[assemblySymbol] = assembly;
+                if ( !this.TryGetCompileTimeAssemblyBytes( assemblySymbol, diagnosticSink, out var compileTimeAssemblyBytes ) )
+                {
+                    compileTimeAssembly = null;
+
+                    return false;
+                }
+
+                if ( compileTimeAssemblyBytes != null )
+                {
+                    compileTimeAssembly = Load( compileTimeAssemblyBytes );
+                }
+                else
+                {
+                    compileTimeAssembly = null;
+                }
+
+                this._assemblyMap[assemblySymbol] = compileTimeAssembly;
             }
 
-            return assembly;
+            return true;
         }
     }
 }

@@ -6,6 +6,7 @@ using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,7 +23,11 @@ namespace Caravela.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = true;
 
-        public static CSharpCompilation CreateRoslynCompilation( string? code, string? dependentCode = null, bool ignoreErrors = false )
+        public static CSharpCompilation CreateRoslynCompilation(
+            string? code,
+            string? dependentCode = null,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null )
         {
             static CSharpCompilation CreateEmptyCompilation()
             {
@@ -51,6 +56,11 @@ namespace Caravela.Framework.Tests.UnitTests
             {
                 var dependentCompilation = CreateEmptyCompilation().AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode ) );
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
+            }
+
+            if ( additionalReferences != null )
+            {
+                mainRoslynCompilation = mainRoslynCompilation.AddReferences( additionalReferences );
             }
 
             if ( !ignoreErrors )

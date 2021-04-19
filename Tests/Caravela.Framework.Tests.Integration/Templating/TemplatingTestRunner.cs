@@ -75,15 +75,13 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 result.Project.MetadataReferences,
                 (CSharpCompilationOptions) result.Project.CompilationOptions! );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, result );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
                 templateSyntaxRoot,
                 out var annotatedTemplateSyntax,
                 out var transformedTemplateSyntax );
-
-            result.AddDiagnostics( templateCompiler.Diagnostics );
 
             // Annotation shouldn't do any code transformations.
             // Otherwise, highlighted spans don't match the actual code.
@@ -136,7 +134,6 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
-                result.AddDiagnostics( emitResult.Diagnostics );
                 result.SetFailed( "The final template compilation failed." );
 
                 return result;

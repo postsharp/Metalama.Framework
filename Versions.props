@@ -1,13 +1,22 @@
 <Project>
 
+    <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
+
     <PropertyGroup>
 
 
-        <!-- TeamCity defines the environment variable VersionSuffix -->
         <MainVersion>0.1.4</MainVersion>
+
+        <!-- The version for the release build is set almost manually. -->
         <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
-        <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
+
+        <!-- The version for the debug build can be set by TeamCity. TeamCity defines the environment variable VersionSuffix -->
         <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
+
+        <!-- For local builds, the LocalBuildId property must be defined. If it is not defined, we use a generic name which works for
+             building binaries, but should not be used to generate packages -->
+        <LocalBuildId Condition="'$(LocalBuildId)'==''">LocalBuildIdUndefined</LocalBuildId>
+        <Version Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</Version>
 
         <!-- Version of dependencies -->
         <RoslynVersion>3.8.0</RoslynVersion>
@@ -21,6 +30,11 @@
 
     <Target Name="PrintVersion">
         <Message Text="Version=$(Version)" />
+    </Target>
+
+    <Target Name="ValidateVersion" BeforeTargets="Pack">
+        <Error Text="The LocalBuildId property is not defined. Run CreateLocalPackages.ps1"
+               Condition="'$(LocalBuildId)'=='LocalBuildIdUndefined'" />
     </Target>
 
 </Project>

@@ -19,6 +19,10 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
+        private const string _locationAnnotationKind = "location";
+        private readonly List<Location> _indexToLocationMap = new();
+        private readonly Dictionary<Location, int> _locationToIndexMap = new();
+        private readonly bool _mapLocation;
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
@@ -28,7 +32,12 @@ namespace Caravela.Framework.Impl.Templating
 
         private int _nextId;
 
-        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create( "local", "symbol", "declared", "type" );
+        public SemanticAnnotationMap( bool mapLocation )
+        {
+            this._mapLocation = true;
+        }
+
+        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create( "local", "symbol", "declared", "type", _locationAnnotationKind );
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -64,6 +73,24 @@ namespace Caravela.Framework.Impl.Templating
             var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
             var typeInfo = semanticModel.GetTypeInfo( originalNode );
             var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode );
+
+            // Cache location.
+            if ( this._mapLocation )
+            {
+                var location = originalNode.GetLocation();
+
+                if ( location != null )
+                {
+                    if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
+                    {
+                        index = this._locationToIndexMap.Count;
+                        this._indexToLocationMap.Add( location );
+                        this._locationToIndexMap.Add( location, index );
+                    }
+
+                    annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
+                }
+            }
 
             // Cache semanticModel.GetSymbolInfo
             if ( symbolInfo.Symbol != null )
@@ -108,6 +135,27 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return annotatedNode;
+        }
+
+        public Location? GetLocation( SyntaxNode node )
+        {
+            if ( !this._mapLocation )
+            {
+                return node.GetLocation();
+            }
+            else
+            {
+                var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
+
+                if ( annotation == null )
+                {
+                    return null;
+                }
+                else
+                {
+                    return this._indexToLocationMap[int.Parse( annotation.Data! )];
+                }
+            }
         }
 
         /// <summary>

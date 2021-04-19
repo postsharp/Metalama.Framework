@@ -17,11 +17,13 @@ namespace Caravela.Framework.Impl.Templating
         private const string _noIndentAnnotationKind = "noIndent";
         private const string _colorAnnotationKind = "color";
         private const string _templateAnnotationKind = "template";
+        private const string _scopeMismatchKind = "scopeMismatch";
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
+        private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SemanticAnnotationMap.AnnotationKinds.AddRange(
@@ -146,6 +148,12 @@ namespace Caravela.Framework.Impl.Templating
             => node.WithAdditionalAnnotations( _templateAnnotation );
 
         public static bool IsTemplateFromAnnotation( this SyntaxNode node ) => node.HasAnnotation( _templateAnnotation );
+
+        public static T AddScopeMismatchAnnotation<T>( this T node )
+            where T : SyntaxNode
+            => node.WithAdditionalAnnotations( _scopeMismatchAnnotation );
+
+        public static bool HasScopeMismatchAnnotation( this SyntaxNode node ) => node.HasAnnotation( _scopeMismatchAnnotation );
 
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode

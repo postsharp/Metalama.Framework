@@ -62,19 +62,13 @@ namespace Caravela.Framework.Impl.DesignTime
             BuildOptions options,
             CancellationToken cancellationToken )
         {
-            if ( !DesignTimeAspectPipelineCache.TryGet( compilation, out var pipelineResult ) )
-            {
-                using DesignTimeAspectPipeline pipeline = new( new DesignTimeAspectPipelineContext(
-                                                                   compilation,
-                                                                   options,
-                                                                   null,
-                                                                   cancellationToken ) );
+            // Execute the pipeline.
+            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+                compilation,
+                options,
+                cancellationToken );
 
-                _ = pipeline.TryExecute( out pipelineResult );
-
-                DesignTimeAspectPipelineCache.Add( compilation, pipelineResult );
-            }
-
+            // Report suppressions.
             if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
             {
                 var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
@@ -91,7 +85,10 @@ namespace Caravela.Framework.Impl.DesignTime
                         continue;
                     }
 
+                    // TODO: address warning.
+#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
                     var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
+#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
                     var symbol = semanticModel.GetEnclosingSymbol( diagnostic.Location.SourceSpan.Start );
 
                     if ( symbol == null )

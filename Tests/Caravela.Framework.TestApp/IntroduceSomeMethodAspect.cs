@@ -18,12 +18,13 @@ namespace Caravela.Framework.TestApp
         {
             Console.WriteLine( "From IntroduceSomeMethodAspect!" );
 
-            proceed();
+            var x = proceed();
         }
 
         [IntroduceMethod]
         public void SomeOtherIntroducedMethod()
         {
+            
         }
     }
 }
