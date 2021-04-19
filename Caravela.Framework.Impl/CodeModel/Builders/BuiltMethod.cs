@@ -26,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethodList LocalFunctions => MethodList.Empty;
 
         [Memo]
-        public IParameterList Parameters =>
-            new ParameterList(
+        public IParameterList Parameters
+            => new ParameterList(
                 this,
                 this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ) );
 
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.ParameterType );
 
         [Memo]
-        public IGenericParameterList GenericParameters =>
-            new GenericParameterList(
+        public IGenericParameterList GenericParameters
+            => new GenericParameterList(
                 this,
                 this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ) );
 

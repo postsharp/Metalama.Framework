@@ -37,8 +37,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IParameterList Parameters =>
-            new ParameterList(
+        public IParameterList Parameters
+            => new ParameterList(
                 this,
                 this._symbol.Parameters.Select( p => new CodeElementLink<IParameter>( p ) ) );
 

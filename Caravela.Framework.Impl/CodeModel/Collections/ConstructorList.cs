@@ -1,28 +1,32 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
+using System;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class ConstructorList : MethodBaseList<IConstructor>, IConstructorList
     {
-        public ConstructorList( CodeElement? containingElement, IEnumerable<MemberLink<IConstructor>> sourceItems ) : base( containingElement, sourceItems )
-        {
-        }
+        public ConstructorList( CodeElement? containingElement, IEnumerable<MemberLink<IConstructor>> sourceItems ) : base( containingElement, sourceItems ) { }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<Type?>? argumentTypes )
         {
-            return this.OfCompatibleSignature( (argumentTypes, this.ContainingElement.AssertNotNull().Compilation), null, 0, argumentTypes?.Count, GetParameter, false, true );
+            return this.OfCompatibleSignature(
+                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation),
+                null,
+                0,
+                argumentTypes?.Count,
+                GetParameter,
+                false,
+                true );
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
                 => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                   ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
-                   : (null, null);
+                    ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
+                    : (null, null);
         }
 
         public IEnumerable<IConstructor> OfCompatibleSignature( IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null )

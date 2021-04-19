@@ -54,17 +54,23 @@ namespace Caravela.Framework.Impl.Advices
             {
                 case nameof(IntroduceMethodAttribute):
                     {
-                        TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof( IntroduceMethodAttribute.ConflictBehavior ), out var conflictBehavior );
+                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
 
-                        var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod, scope, conflictBehavior, aspectLinkerOptions );
+                        var advice = new IntroduceMethodAdvice(
+                            aspect,
+                            (INamedType) declaration,
+                            (IMethod) templateMethod,
+                            scope,
+                            conflictBehavior,
+                            aspectLinkerOptions );
 
-                        if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
+                        if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
                             advice.Builder.Name = name;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
                         {
                             advice.Builder.IsVirtual = isVirtual;
                         }
@@ -74,12 +80,13 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Accessibility ), out var accessibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
                         {
                             advice.Builder.Accessibility = accessibility;
                         }
 
                         advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;
+
                         return advice;
                     }
             }

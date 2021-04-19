@@ -9,8 +9,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class PropertyList : MemberList<IProperty, MemberLink<IProperty>>, IPropertyList
     {
-        public PropertyList( NamedType containingElement, IEnumerable<MemberLink<IProperty>> sourceItems ) : base( containingElement, sourceItems )
-        {
-        }
+        public PropertyList( NamedType containingElement, IEnumerable<MemberLink<IProperty>> sourceItems ) : base( containingElement, sourceItems ) { }
     }
 }

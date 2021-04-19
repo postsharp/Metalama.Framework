@@ -317,9 +317,9 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
                     return
                         Block(
-                            rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( GetReturnLabelName( labelId ), EmptyStatement() ) )
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                                rewrittenBlock.AssertNotNull(),
+                                LabeledStatement( GetReturnLabelName( labelId ), EmptyStatement() ) )
+                            .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                 }
             }
 
@@ -392,15 +392,15 @@ namespace Caravela.Framework.Impl.Linking
                             {
                                 return
                                     Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( this._returnVariableName.AssertNotNull() ),
-                                                node.Expression ) ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) ) )
-                                    .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                    IdentifierName( this._returnVariableName.AssertNotNull() ),
+                                                    node.Expression ) ),
+                                            GotoStatement(
+                                                SyntaxKind.GotoStatement,
+                                                IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) ) )
+                                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                             }
                         }
                         else

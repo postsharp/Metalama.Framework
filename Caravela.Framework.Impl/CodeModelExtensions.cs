@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl
             }
             else
             {
-                throw new ArgumentOutOfRangeException( nameof( method ), "This is not a source symbol." );
+                throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
             }
         }
     }

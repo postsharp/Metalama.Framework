@@ -11,9 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TCodeElement : class, IMember
         where TSource : IMemberLink<TCodeElement>
     {
-        protected MemberList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems ) : base( containingElement, sourceItems )
-        {
-        }
+        protected MemberList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems ) : base( containingElement, sourceItems ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemberList{TCodeElement, TSource}"/> class that represents an empty list.

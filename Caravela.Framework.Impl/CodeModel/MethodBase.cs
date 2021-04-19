@@ -24,8 +24,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IMethodList LocalFunctions =>
-            new MethodList(
+        public IMethodList LocalFunctions
+            => new MethodList(
                 this,
                 this.MethodSymbol.DeclaringSyntaxReferences
                     .Select( r => r.GetSyntax() )
@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Select( s => new MemberLink<IMethod>( s ) ) );
 
         [Memo]
-        public IParameterList Parameters =>
-            new ParameterList(
+        public IParameterList Parameters
+            => new ParameterList(
                 this,
                 this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>( p ) ) );
 

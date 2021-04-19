@@ -9,8 +9,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class FieldList : MemberList<IField, MemberLink<IField>>, IFieldList
     {
-        public FieldList( INamedType containingElement, IEnumerable<MemberLink<IField>> sourceItems ) : base( containingElement, sourceItems )
-        {
-        }
+        public FieldList( INamedType containingElement, IEnumerable<MemberLink<IField>> sourceItems ) : base( containingElement, sourceItems ) { }
     }
 }

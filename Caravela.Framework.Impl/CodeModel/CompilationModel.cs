@@ -108,8 +108,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public int Revision { get; }
 
         [Memo]
-        public INamedTypeList DeclaredTypes =>
-            new NamedTypeList(
+        public INamedTypeList DeclaredTypes
+            => new NamedTypeList(
                 this,
                 this.RoslynCompilation.Assembly
                     .GetTypes()
@@ -119,8 +119,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.Factory.GetNamedType ).ToImmutableArray();
 
         [Memo]
-        public IAttributeList Attributes =>
-            new AttributeList(
+        public IAttributeList Attributes
+            => new AttributeList(
                 this,
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
@@ -146,8 +146,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this;
 
-        public IEnumerable<INamedType> GetAllAttributeTypes()
-            => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
+        public IEnumerable<INamedType> GetAllAttributeTypes() => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );

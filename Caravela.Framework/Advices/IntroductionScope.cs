@@ -12,7 +12,7 @@ namespace Caravela.Framework.Advices
         /// If the advice template is static, the behavior is the same as <see cref="Static"/>, otherwise behavior is the same as <see cref="Target"/>.
         /// </summary>
         Default,
-        
+
         /// <summary>
         /// Introduced member will be always of instance scope.
         /// </summary>

@@ -31,8 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
 
         [Memo]
-        public virtual IAttributeList Attributes =>
-            new AttributeList(
+        public virtual IAttributeList Attributes
+            => new AttributeList(
                 this,
                 this.Symbol!.GetAttributes()
                     .Select( a => new AttributeLink( a, CodeElementLink.FromSymbol<ICodeElement>( this.Symbol ) ) ) );

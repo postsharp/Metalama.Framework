@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         protected ImmutableArray<TSource> SourceItems { get; }
 
-        public CompilationModel Compilation => (CompilationModel)this.ContainingElement.AssertNotNull().Compilation;
+        public CompilationModel Compilation => (CompilationModel) this.ContainingElement.AssertNotNull().Compilation;
 
         protected CodeElementList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems )
         {

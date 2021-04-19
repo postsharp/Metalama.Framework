@@ -30,8 +30,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodSymbol.ReturnType );
 
         [Memo]
-        public IGenericParameterList GenericParameters =>
-            new GenericParameterList(
+        public IGenericParameterList GenericParameters
+            => new GenericParameterList(
                 this,
                 this.MethodSymbol.TypeParameters.Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
 

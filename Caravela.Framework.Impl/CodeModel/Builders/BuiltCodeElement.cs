@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Builder );
 
         [Memo]
-        public IAttributeList Attributes =>
-            new AttributeList(
+        public IAttributeList Attributes
+            => new AttributeList(
                 this,
                 this.Builder.Attributes
                     .Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ) );

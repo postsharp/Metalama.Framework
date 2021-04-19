@@ -59,25 +59,27 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>( t ) ) );
 
         [Memo]
-        public IPropertyList Properties =>
-            new PropertyList(
-                this, 
-                this.TypeSymbol.GetMembers().Select(
-                    m => m switch
-                    {
-                        IPropertySymbol p => new MemberLink<IProperty>( p ),
-                        _ => default
-                    } ) );
-
-        public IFieldList Fields =>
-            new FieldList(
+        public IPropertyList Properties
+            => new PropertyList(
                 this,
-                this.TypeSymbol.GetMembers().Select(
-                    m => m switch
-                    {
-                        IFieldSymbol p => new MemberLink<IField>( p ),
-                        _ => default
-                    } ) );
+                this.TypeSymbol.GetMembers()
+                    .Select(
+                        m => m switch
+                        {
+                            IPropertySymbol p => new MemberLink<IProperty>( p ),
+                            _ => default
+                        } ) );
+
+        public IFieldList Fields
+            => new FieldList(
+                this,
+                this.TypeSymbol.GetMembers()
+                    .Select(
+                        m => m switch
+                        {
+                            IFieldSymbol p => new MemberLink<IField>( p ),
+                            _ => default
+                        } ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -85,7 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IEventList Events
             => new EventList(
-                this, 
+                this,
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IEventSymbol>()
@@ -100,9 +102,10 @@ namespace Caravela.Framework.Impl.CodeModel
                     .OfType<IMethodSymbol>()
                     .Where( m => m.MethodKind != MethodKind.Constructor && m.MethodKind != MethodKind.StaticConstructor )
                     .Select( m => new MemberLink<IMethod>( m ) )
-                    .Concat( this.Compilation.GetObservableTransformationsOnElement( this )
-                        .OfType<MethodBuilder>()
-                        .Select( m => new MemberLink<IMethod>( m ) ) ) );
+                    .Concat(
+                        this.Compilation.GetObservableTransformationsOnElement( this )
+                            .OfType<MethodBuilder>()
+                            .Select( m => new MemberLink<IMethod>( m ) ) ) );
 
         [Memo]
         public IConstructorList Constructors
@@ -139,8 +142,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         [Memo]
-        public IGenericParameterList GenericParameters =>
-            new GenericParameterList(
+        public IGenericParameterList GenericParameters
+            => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
                     .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );

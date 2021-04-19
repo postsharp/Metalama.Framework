@@ -8,6 +8,7 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -32,7 +33,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
-        
+
         // TODO: How to implement this?
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
@@ -45,7 +46,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             // TODO: How to handle ambiguous match (e.g. due to null argument values)?
             var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).Single();
-            var ctorArguments = constructorArguments.Select( ( ca, i ) => new Code.TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) ).ToList();
+
+            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )
+                .ToList();
+
             return new AttributeBuilder( this, ctor, ctorArguments );
         }
 

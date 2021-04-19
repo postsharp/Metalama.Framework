@@ -12,72 +12,70 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         // TODO: Finish generics for OfCompatibleSignature (now matching is done only for number of parameters).
 
-        public static MethodList Empty { get; } = new MethodList();
+        public static MethodList Empty { get; } = new();
 
         private MethodList() { }
 
-        public MethodList( CodeElement? containingElement, IEnumerable<MemberLink<IMethod>> sourceItems ) : base( containingElement, sourceItems )
-        {
-        }
+        public MethodList( CodeElement? containingElement, IEnumerable<MemberLink<IMethod>> sourceItems ) : base( containingElement, sourceItems ) { }
 
-        public IEnumerable<IMethod> OfCompatibleSignature( 
-            string name, 
-            int? genericParameterCount, 
-            IReadOnlyList<Type?>? argumentTypes, 
-            bool? isStatic = false, 
+        public IEnumerable<IMethod> OfCompatibleSignature(
+            string name,
+            int? genericParameterCount,
+            IReadOnlyList<Type?>? argumentTypes,
+            bool? isStatic = false,
             bool declaredOnly = true )
         {
-            return this.OfCompatibleSignature( 
-                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation), 
-                name, 
-                genericParameterCount, 
-                argumentTypes?.Count, 
-                GetParameter, 
-                isStatic, 
+            return this.OfCompatibleSignature(
+                (argumentTypes, this.ContainingElement.AssertNotNull().Compilation),
+                name,
+                genericParameterCount,
+                argumentTypes?.Count,
+                GetParameter,
+                isStatic,
                 declaredOnly );
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
                 => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                   ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
-                   : (null, null);
+                    ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
+                    : (null, null);
         }
 
         public IEnumerable<IMethod> OfCompatibleSignature(
-            string name, 
-            int? genericParameterCount = null, 
+            string name,
+            int? genericParameterCount = null,
             IReadOnlyList<IType?>? argumentTypes = null,
-            IReadOnlyList<RefKind?>? refKinds = null, 
-            bool? isStatic = false, 
+            IReadOnlyList<RefKind?>? refKinds = null,
+            bool? isStatic = false,
             bool declaredOnly = true )
         {
-            return this.OfCompatibleSignature( 
-                (argumentTypes, refKinds), 
-                name, 
-                genericParameterCount, 
-                argumentTypes?.Count, 
-                GetParameter, 
-                isStatic, 
+            return this.OfCompatibleSignature(
+                (argumentTypes, refKinds),
+                name,
+                genericParameterCount,
+                argumentTypes?.Count,
+                GetParameter,
+                isStatic,
                 declaredOnly );
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<IType?>? ArgumentTypes, IReadOnlyList<RefKind?>? RefKinds) context, int index )
                 => (context.ArgumentTypes?[index], context.RefKinds?[index]);
         }
 
-        public IMethod? OfExactSignature( 
-            string name, 
-            int genericParameterCount, 
-            IReadOnlyList<IType> parameterTypes, 
-            IReadOnlyList<RefKind>? refKinds = null, 
-            bool? isStatic = false, 
+        public IMethod? OfExactSignature(
+            string name,
+            int genericParameterCount,
+            IReadOnlyList<IType> parameterTypes,
+            IReadOnlyList<RefKind>? refKinds = null,
+            bool? isStatic = false,
             bool declaredOnly = true )
         {
-            return this.OfExactSignature( 
-                (parameterTypes, refKinds), 
-                name, 
-                genericParameterCount, 
-                parameterTypes.Count, 
-                GetParameter, 
-                isStatic, 
+            return this.OfExactSignature(
+                (parameterTypes, refKinds),
+                name,
+                genericParameterCount,
+                parameterTypes.Count,
+                GetParameter,
+                isStatic,
                 declaredOnly );
 
             static (IType Type, RefKind RefKind) GetParameter( (IReadOnlyList<IType> ParameterTypes, IReadOnlyList<RefKind>? RefKinds) context, int index )
@@ -86,13 +84,13 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true, bool declaredOnly = true )
         {
-            return this.OfExactSignature( 
-                signatureTemplate, 
-                signatureTemplate.Name, 
-                signatureTemplate.GenericParameters.Count, 
-                signatureTemplate.Parameters.Count, 
-                GetParameter, 
-                matchIsStatic ? signatureTemplate.IsStatic : null, 
+            return this.OfExactSignature(
+                signatureTemplate,
+                signatureTemplate.Name,
+                signatureTemplate.GenericParameters.Count,
+                signatureTemplate.Parameters.Count,
+                GetParameter,
+                matchIsStatic ? signatureTemplate.IsStatic : null,
                 declaredOnly );
 
             static (IType Type, RefKind RefKind) GetParameter( IMethod context, int index )
