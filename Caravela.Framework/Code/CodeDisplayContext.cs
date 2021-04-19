@@ -9,7 +9,5 @@ namespace Caravela.Framework.Code
     /// Reserved for future use. Specifies the context for which the display string must be generated.
     /// </summary>
     [CompileTimeOnly]
-    public sealed class CodeDisplayContext
-    {
-    }
+    public sealed class CodeDisplayContext { }
 }

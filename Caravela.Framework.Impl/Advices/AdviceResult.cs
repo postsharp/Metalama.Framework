@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Immutable;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal class AdviceResult 
+    internal class AdviceResult
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
@@ -27,17 +27,17 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AdviceResult Create()
         {
-            return new AdviceResult( ImmutableArray<Diagnostic>.Empty, ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+            return new( ImmutableArray<Diagnostic>.Empty, ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
         }
 
-        public static AdviceResult Create(params ITransformation[] transformations )
+        public static AdviceResult Create( params ITransformation[] transformations )
         {
             ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
             ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
 
-            foreach (var transformation in transformations)
+            foreach ( var transformation in transformations )
             {
-                if (transformation is IObservableTransformation observableTransformation)
+                if ( transformation is IObservableTransformation observableTransformation )
                 {
                     if ( observableTransformations == null )
                     {
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Advices
 
                     observableTransformations.Add( observableTransformation );
                 }
-                else if (transformation is INonObservableTransformation nonObservableTransformation)
+                else if ( transformation is INonObservableTransformation nonObservableTransformation )
                 {
                     if ( nonObservableTransformations == null )
                     {
@@ -65,12 +65,13 @@ namespace Caravela.Framework.Impl.Advices
 
         public static AdviceResult Create( params Diagnostic[] diagnostics )
         {
-            return new AdviceResult( ImmutableArray.Create( diagnostics ), ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>.Empty );
+            return new( ImmutableArray.Create( diagnostics ), ImmutableArray<IObservableTransformation>.Empty, ImmutableArray<INonObservableTransformation>
+                            .Empty );
         }
 
         public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )
         {
-            return new AdviceResult( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
+            return new( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
         }
     }
 }

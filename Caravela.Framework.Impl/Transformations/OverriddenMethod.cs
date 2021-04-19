@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
@@ -11,11 +9,12 @@ using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Transformations
 {
-
     internal class OverriddenMethod : INonObservableTransformation, IMemberIntroduction, IOverriddenElement
     {
         public Advice Advice { get; }
@@ -41,11 +40,10 @@ namespace Caravela.Framework.Impl.Transformations
         }
 
         // TODO: Temporary
-        public SyntaxTree TargetSyntaxTree =>
-            this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
-            ? introduction.TargetSyntaxTree
-            :
-            ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        public SyntaxTree TargetSyntaxTree
+            => this.OverriddenDeclaration is ISyntaxTreeTransformation introduction
+                ? introduction.TargetSyntaxTree
+                : ((NamedType) this.OverriddenDeclaration.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
 
         public IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
@@ -64,12 +62,13 @@ namespace Caravela.Framework.Impl.Transformations
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 
                 var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
+
                 if ( templateMethod == null )
                 {
                     // This is caused by an error upstream;
                     return Enumerable.Empty<IntroducedMember>();
                 }
-                
+
                 var newMethodBody = new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
 
                 var overrides = new[]
@@ -90,7 +89,7 @@ namespace Caravela.Framework.Impl.Transformations
                         this.Advice.AspectLayerId,
                         IntroducedMemberSemantic.MethodOverride,
                         this.LinkerOptions,
-                        this.OverriddenDeclaration)
+                        this.OverriddenDeclaration )
                 };
 
                 return overrides;

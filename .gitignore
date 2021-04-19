@@ -29,10 +29,12 @@
 .vs/
 .vscode
 _ReSharper*/
-.idea/
 /artifacts/
 */packages/
 .packages/
 /shipping/
 *.g.cs
 .packages
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/shelf

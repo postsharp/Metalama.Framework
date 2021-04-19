@@ -34,7 +34,6 @@ namespace Caravela.Framework.Code
         /// <returns>A <see cref="IConstructor"/> that matches the given signature.</returns>
         IConstructor? OfExactSignature( IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null );
 
-
         /// <summary>
         /// Gets a constructor that exactly matches the signature of the specified method.
         /// </summary>

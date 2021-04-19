@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -21,14 +22,15 @@ namespace Caravela.Framework.Impl.CodeModel
             this._typeSymbol = typeSymbol;
         }
 
-        public Code.TypeKind TypeKind => Code.TypeKind.GenericParameter;
+        public TypeKind TypeKind => TypeKind.GenericParameter;
 
         public string Name => this._typeSymbol.Name;
 
         public int Index => this._typeSymbol.Ordinal;
 
         [Memo]
-        public IReadOnlyList<IType> TypeConstraints => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+        public IReadOnlyList<IType> TypeConstraints
+            => this._typeSymbol.ConstraintTypes.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public bool IsCovariant => this._typeSymbol.Variance == VarianceKind.Out;
 

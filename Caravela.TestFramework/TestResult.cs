@@ -1,13 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.TestFramework
 {
@@ -103,9 +103,10 @@ namespace Caravela.TestFramework
                 syntaxNode
                     .DescendantNodesAndSelf( _ => true )
                     .OfType<MemberDeclarationSyntax>()
-                    .Where( m => m.AttributeLists
-                        .SelectMany( list => list.Attributes )
-                        .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
+                    .Where(
+                        m => m.AttributeLists
+                            .SelectMany( list => list.Attributes )
+                            .Any( a => a.Name.ToString().Contains( "TestOutput" ) ) )
                     .ToList();
 
             var outputNode = outputNodes.FirstOrDefault() ?? syntaxNode;
@@ -116,11 +117,12 @@ namespace Caravela.TestFramework
                     .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
                     .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
                     .OrderByDescending( s => s )
-                    .Select( SyntaxFactory.Comment );
+                    .Select( SyntaxFactory.Comment )
+                    .ToList();
 
             if ( comments.Any() )
             {
-                comments = comments.Append( SyntaxFactory.LineFeed );
+                comments.Add( SyntaxFactory.LineFeed );
             }
 
             // Format the output code.
@@ -141,7 +143,8 @@ namespace Caravela.TestFramework
             this.Success = false;
             this.ErrorMessage = reason;
 
-            this.SetTransformedTarget( SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
+            this.SetTransformedTarget(
+                SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
         }
     }
 }

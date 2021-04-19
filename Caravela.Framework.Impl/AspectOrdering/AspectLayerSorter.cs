@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Collections;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Caravela.Framework.Impl.Collections;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.AspectOrdering
 {
@@ -59,6 +59,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     // Map the part string to a set of indices. We don't require the match to exist because it is a normal case
                     // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
                     ImmutableArray<int> currentIndices;
+
                     if ( matchExpression.EndsWith( ":*" ) )
                     {
                         var aspectName = matchExpression.Substring( 0, matchExpression.Length - 2 );
@@ -81,7 +82,10 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         if ( !previousIndices.IsEmpty )
                         {
                             // Index the relationship so we can later resolve locations.
-                            aspectLayerNameToLocationsMappingBuilder.AddRange( currentIndices, i => unsortedAspectLayers[i].AspectLayerId.FullName, _ => relationship );
+                            aspectLayerNameToLocationsMappingBuilder.AddRange(
+                                currentIndices,
+                                i => unsortedAspectLayers[i].AspectLayerId.FullName,
+                                _ => relationship );
 
                             // Add edges to previous nodes.
                             foreach ( var previousIndex in previousIndices )
@@ -106,11 +110,13 @@ namespace Caravela.Framework.Impl.AspectOrdering
             var predecessors = graph.GetInitialVector();
 
             var cycle = -1;
+
             for ( var i = 0; i < n; i++ )
             {
                 if ( !hasPredecessor[i] )
                 {
                     cycle = graph.DoBreadthFirstSearch( i, distances, predecessors );
+
                     if ( cycle >= 0 )
                     {
                         break;
@@ -128,6 +134,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         // There is a node that we haven't ordered, which means that there is a cycle.
                         // Force the detection on the node to find the cycle.
                         cycle = graph.DoBreadthFirstSearch( 0, distances, predecessors );
+
                         break;
                     }
                 }
@@ -140,6 +147,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 Stack<int> cycleStack = new( unsortedAspectLayers.Length );
 
                 var cursor = cycle;
+
                 do
                 {
                     cycleStack.Push( cursor );
@@ -147,14 +155,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
                 }
                 while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != AbstractGraph.NotDiscovered );
 
-                var cycleNodes = cycleStack.Select( index => unsortedAspectLayers[index].AspectLayerId.FullName );
+                var cycleNodes = cycleStack.Select( index => unsortedAspectLayers[index].AspectLayerId.FullName ).ToList();
+
                 var cycleLocations = cycleNodes
                     .SelectMany( c => aspectLayerNameToLocationsMapping[c] )
                     .Select( s => s.DiagnosticLocation )
                     .WhereNotNull()
                     .GroupBy( l => l )
                     .OrderByDescending( g => g.Count() )
-                    .Select( g => g.Key );
+                    .Select( g => g.Key )
+                    .ToList();
 
                 var mainLocation = cycleLocations.FirstOrDefault();
                 var additionalLocations = cycleLocations.Skip( 1 );
@@ -166,6 +176,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         mainLocation,
                         cycleNodesString,
                         additionalLocations );
+
                 reportDiagnostic( diagnostic );
 
                 return false;
@@ -173,6 +184,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
             // Sort the distances vector.
             var sortedIndexes = new int[n];
+
             for ( var i = 0; i < n; i++ )
             {
                 sortedIndexes[i] = i;
@@ -181,8 +193,9 @@ namespace Caravela.Framework.Impl.AspectOrdering
             Array.Sort( sortedIndexes, ( i, j ) => distances[i].CompareTo( distances[j] ) );
 
             // Build the ordered list of aspects and assign the distance.
-            // Note that we don't detect cycles because some aspect types that are present in the compilation may actually be ununsed.
+            // Note that we don't detect cycles because some aspect types that are present in the compilation may actually be unused.
             var sortedAspectLayersBuilder = ImmutableArray.CreateBuilder<OrderedAspectLayer>( n );
+
             for ( var i = 0; i < n; i++ )
             {
                 var order = distances[sortedIndexes[i]];

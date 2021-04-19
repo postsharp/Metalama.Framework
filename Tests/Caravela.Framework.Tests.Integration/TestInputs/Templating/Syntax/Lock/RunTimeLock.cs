@@ -1,3 +1,4 @@
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLock

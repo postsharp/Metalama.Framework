@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
-
     /// <summary>
     /// Custom attribute that, when added on a class implementing <see cref="IAspect{T}"/>, allows the aspect
     /// to provide advices into different aspect layers by calling the <see cref="IAdviceFactory.ForLayer"/> method.

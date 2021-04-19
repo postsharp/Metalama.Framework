@@ -51,12 +51,13 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
+            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
             {
                 return ReturnStatement();
             }
 
             var returnExpressionKind = returnExpression.Kind();
+
             if ( returnExpressionKind == SyntaxKind.DefaultLiteralExpression || returnExpressionKind == SyntaxKind.NullLiteralExpression )
             {
                 return ReturnStatement( returnExpression );

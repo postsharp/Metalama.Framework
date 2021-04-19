@@ -31,8 +31,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
 
                 // throw new System.NotSupportedException("message")
-                var body = ThrowExpression( ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
-                    .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
+                var body = ThrowExpression(
+                    ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
+                        .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
 
                 return method
                     .WithBody( null )
@@ -46,6 +47,7 @@ namespace Caravela.Framework.Impl.CompileTime
             protected SymbolDeclarationScope GetSymbolDeclarationScope( MemberDeclarationSyntax node )
             {
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+
                 return this.SymbolClassifier.GetSymbolDeclarationScope( symbol );
             }
         }

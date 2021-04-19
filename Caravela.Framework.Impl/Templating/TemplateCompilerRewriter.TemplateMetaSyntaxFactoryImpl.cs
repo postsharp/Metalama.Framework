@@ -9,7 +9,6 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-
         /// <summary>
         /// Generates code that invokes members of the <see cref="TemplateSyntaxFactory"/> class.
         /// </summary>
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl.Templating
             public MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
+                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
                     SyntaxFactory.IdentifierName( name ) );
 
             /// <summary>
@@ -40,11 +39,11 @@ namespace Caravela.Framework.Impl.Templating
             /// <param name="hint"></param>
             /// <returns></returns>
             public ExpressionSyntax GetUniqueIdentifier( string hint )
-                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.GetUniqueIdentifier ) ) )
-                    .WithArgumentList( SyntaxFactory.ArgumentList( SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[]
-                    {
-                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( hint ) )
-                    } ) ) );
+                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetUniqueIdentifier) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
+                                new SyntaxNodeOrToken[] { SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( hint ) ) } ) ) );
         }
     }
 }

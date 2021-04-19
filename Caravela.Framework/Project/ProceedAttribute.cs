@@ -9,7 +9,5 @@ namespace Caravela.Framework.Project
     /// Marks the method as having <c>proceed</c> semantics.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method )]
-    public class ProceedAttribute : TemplateKeywordAttribute
-    {
-    }
+    public class ProceedAttribute : TemplateKeywordAttribute { }
 }

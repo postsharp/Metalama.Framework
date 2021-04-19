@@ -24,9 +24,9 @@ namespace Caravela.Framework.DesignTime.Contracts
         private static readonly ConcurrentDictionary<Version, Task<ICompilerServiceProvider>> _getProviderTasks =
             new();
 
-        public static Version MatchAllVersion { get; } = new Version( 9999, 99 );
+        public static Version MatchAllVersion { get; } = new( 9999, 99 );
 
-        public static IDesignTimeEntryPointManager Instance { get; private set; }
+        public static IDesignTimeEntryPointManager Instance { get; }
 
         static DesignTimeEntryPointManager()
         {
@@ -34,10 +34,12 @@ namespace Caravela.Framework.DesignTime.Contracts
             // We're using a named AppDomain data slot for this. We have to synchronize access using a named semaphore.
 
             using var semaphore = new Semaphore( 1, 1, _appDomainDataName );
+
             try
             {
                 semaphore.WaitOne();
                 var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
+
                 if ( oldInstance != null )
                 {
                     Instance = oldInstance;
@@ -54,9 +56,7 @@ namespace Caravela.Framework.DesignTime.Contracts
             }
         }
 
-        private DesignTimeEntryPointManager()
-        {
-        }
+        private DesignTimeEntryPointManager() { }
 
         private readonly object _sync = new();
         private volatile TaskCompletionSource<ICompilerServiceProvider> _registrationTask = new();
@@ -64,12 +64,12 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         async ValueTask<ICompilerServiceProvider?> IDesignTimeEntryPointManager.GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
         {
-
             var task = _getProviderTasks.GetOrAdd( version, this.GetProviderForVersion );
 
             if ( !task.IsCompleted )
             {
                 var taskCancelled = new TaskCompletionSource<bool>();
+
                 using ( cancellationToken.Register( () => taskCancelled.SetCanceled() ) )
                 {
                     await Task.WhenAny( task, taskCancelled.Task );
@@ -81,7 +81,6 @@ namespace Caravela.Framework.DesignTime.Contracts
 
         private async Task<ICompilerServiceProvider> GetProviderForVersion( Version version )
         {
-
             while ( true )
             {
                 lock ( this._sync )

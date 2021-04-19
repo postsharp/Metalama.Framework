@@ -1,14 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Caravela.Framework.Impl.ReflectionMocks;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -22,14 +23,17 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<string, byte[]?> _assemblyBytesMap = new();
         private readonly AttributeDeserializer _attributeDeserializer;
 
-        public CompileTimeAssemblyLoader( IServiceProvider serviceProvider, CSharpCompilation compilation, CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
+        public CompileTimeAssemblyLoader(
+            IServiceProvider serviceProvider,
+            CSharpCompilation compilation,
+            CompileTimeAssemblyBuilder compileTimeAssemblyBuilder )
         {
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._compileTimeAssemblyBuilder = compileTimeAssemblyBuilder;
 
             // TODO: this is probably not enough
-            this._assemblyMap.Add( compilation.ObjectType.ContainingAssembly, typeof( object ).Assembly );
+            this._assemblyMap.Add( compilation.ObjectType.ContainingAssembly, typeof(object).Assembly );
 
             this._attributeDeserializer = new AttributeDeserializer( this );
             AppDomain.CurrentDomain.AssemblyResolve += this.CurrentDomain_AssemblyResolve;
@@ -51,7 +55,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static Assembly Load( byte[] assembly )
         {
-            // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targetting)
+            // TODO: use AssemblyLoadContext on .Net Core? (requires multi-targeting)
             return Assembly.Load( assembly );
         }
 
@@ -69,7 +73,14 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             var reference = this._compilation.References.SingleOrDefault(
-                r => r is PortableExecutableReference { FilePath: string path } && Path.GetFileNameWithoutExtension( path ) == new AssemblyName( args.Name ).Name );
+                r =>
+                {
+                    var assemblyName = new AssemblyName( args.Name ).Name;
+
+                    return r is PortableExecutableReference { FilePath: not null } peReference
+                           && Path.GetFileNameWithoutExtension( peReference.FilePath ) == assemblyName;
+                } );
+
             if ( reference == null )
             {
                 return null;
@@ -83,9 +94,8 @@ namespace Caravela.Framework.Impl.CompileTime
             return this.LoadCompileTimeAssembly( symbol );
         }
 
-        public object CreateAttributeInstance( Code.IAttribute attribute )
+        public object CreateAttributeInstance( IAttribute attribute )
         {
-
             return this._attributeDeserializer.CreateAttribute( attribute );
         }
 
@@ -129,13 +139,13 @@ namespace Caravela.Framework.Impl.CompileTime
             return result;
         }
 
-        private byte[]? GetResourceBytes( string assemblyPath, string resourceName )
+        private static byte[]? GetResourceBytes( string assemblyPath, string resourceName )
         {
-            var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );
-            using var mlc = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
+            var resolver = new PathAssemblyResolver( new[] { typeof(object).Assembly.Location } );
+            using var mlc = new MetadataLoadContext( resolver, typeof(object).Assembly.GetName().Name );
 
             // LoadFromAssemblyPath throws for mscorlib
-            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
+            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
             {
                 return null;
             }
@@ -153,12 +163,11 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var memoryStream = new MemoryStream( (int) resourceStream!.Length );
                 resourceStream.CopyTo( memoryStream );
+
                 return memoryStream.ToArray();
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         public byte[]? GetCompileTimeAssembly( string path )
@@ -168,9 +177,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 return assemblyBytes;
             }
 
-            assemblyBytes = this.GetResourceBytes( path, CompileTimeAssemblyBuilder.GetResourceName() );
+            assemblyBytes = GetResourceBytes( path, this._compileTimeAssemblyBuilder.ResourceName );
 
             this._assemblyBytesMap.Add( path, assemblyBytes );
+
             return assemblyBytes;
         }
 

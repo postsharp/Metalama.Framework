@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using Xunit;
+
+// ReSharper disable IdentifierTypo
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
@@ -34,7 +36,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestListInt()
         {
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>{4, 6, 8}", new List<int>() { 4, 6, 8 } );
+            this.AssertSerialization( "new System.Collections.Generic.List<System.Int32>{4, 6, 8}", new List<int> { 4, 6, 8 } );
         }
 
         [Fact]
@@ -46,12 +48,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestInfiniteRecursion()
         {
-            Assert.Throws<InvalidUserCodeException>( () =>
-            {
-                var o = new List<object>();
-                o.Add( o );
-                this._serializers.SerializeToRoslynCreationExpression( o );
-            } );
+            Assert.Throws<InvalidUserCodeException>(
+                () =>
+                {
+                    var o = new List<object>();
+                    o.Add( o );
+                    this._serializers.SerializeToRoslynCreationExpression( o );
+                } );
         }
 
         [Fact]
@@ -96,7 +99,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void TestEnumsGenerics()
         {
-            this.AssertSerialization( "(Caravela.Framework.Tests.UnitTests.Serialization.Box<System.Int32>.Color)(12L)", Box<int>.Color.Blue | Box<int>.Color.Red );
+            this.AssertSerialization(
+                "(Caravela.Framework.Tests.UnitTests.Serialization.Box<System.Int32>.Color)(12L)",
+                Box<int>.Color.Blue | Box<int>.Color.Red );
+
             this.AssertSerialization( "Caravela.Framework.Tests.UnitTests.Serialization.Box<System.Int32>.Color.Blue", Box<int>.Color.Blue );
             this.AssertSerialization( "Caravela.Framework.Tests.UnitTests.Serialization.Box<System.Int32>.InnerBox.Shiny.Yes", Box<int>.InnerBox.Shiny.Yes );
         }

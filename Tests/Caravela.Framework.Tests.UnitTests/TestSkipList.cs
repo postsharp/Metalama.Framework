@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Impl.Collections;
+using System;
 using Xunit;
 
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
@@ -28,6 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests
             }
 
             var old = int.MinValue;
+
             foreach ( var pair in skipList )
             {
                 Assert.True( old < pair.Key );
@@ -40,6 +41,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public void TestConflict( int attempt )
         {
             var skipList = new SkipListIndexedDictionary<int, int>();
+
             for ( var i = 0; i < 100; i++ )
             {
                 skipList.Add( i, i );
@@ -90,6 +92,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             const int n = 100;
             var skipList = new SkipListIndexedDictionary<int, int>();
+
             for ( var i = 0; i < n; i++ )
             {
                 skipList.Add( i, i );
@@ -107,6 +110,7 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             const int n = 100;
             var skipList = new SkipListIndexedDictionary<int, int>();
+
             for ( var i = 0; i < n; i++ )
             {
                 skipList.Add( i, i );

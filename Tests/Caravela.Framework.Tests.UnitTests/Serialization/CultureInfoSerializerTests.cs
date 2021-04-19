@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Globalization;
 using Caravela.Framework.Impl.Serialization;
+using System.Globalization;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization

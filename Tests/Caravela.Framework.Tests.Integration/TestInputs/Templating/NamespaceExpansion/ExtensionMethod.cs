@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Project;
-using Caravela.Framework.Tests.Integration.Templating;
+
+using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion

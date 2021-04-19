@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             { CodeDisplayFormat.FullyQualified, SymbolDisplayFormat.FullyQualifiedFormat },
             { CodeDisplayFormat.MinimallyQualified, SymbolDisplayFormat.MinimallyQualifiedFormat },
             { CodeDisplayFormat.DiagnosticMessage, SymbolDisplayFormat.CSharpErrorMessageFormat },
-            { CodeDisplayFormat.ShortDiagnosticMessage, SymbolDisplayFormat.CSharpShortErrorMessageFormat },
+            { CodeDisplayFormat.ShortDiagnosticMessage, SymbolDisplayFormat.CSharpShortErrorMessageFormat }
         };
 
         public static SymbolDisplayFormat? ToRoslyn( this CodeDisplayFormat? codeDisplayFormat )

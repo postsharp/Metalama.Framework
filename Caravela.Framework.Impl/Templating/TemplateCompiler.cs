@@ -1,20 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public class TemplateCompiler
+    public static class TemplateCompiler
     {
         public const string TemplateMethodSuffix = "_Template";
 
-        private bool TryAnnotate(
+        private static bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
@@ -27,9 +27,12 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Put the annotated node back into the original tree, so that diagnostics have correct locations.
                 var markerAnnotation = new SyntaxAnnotation();
-                var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot().ReplaceNode(
-                    sourceSyntaxRoot,
-                    currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
+
+                var annotatedTree = sourceSyntaxRoot.SyntaxTree.GetRoot()
+                    .ReplaceNode(
+                        sourceSyntaxRoot,
+                        currentSyntaxRoot.WithAdditionalAnnotations( markerAnnotation ) );
+
                 currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             }
 
@@ -55,14 +58,14 @@ namespace Caravela.Framework.Impl.Templating
             return true;
         }
 
-        public bool TryAnnotate(
+        public static bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             List<Diagnostic> diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
-            => this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
+            => TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
 
-        public bool TryCompile(
+        public static bool TryCompile(
             Compilation compileTimeCompilation,
             MethodDeclarationSyntax sourceSyntaxRoot,
             SemanticModel semanticModel,
@@ -70,10 +73,10 @@ namespace Caravela.Framework.Impl.Templating
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-
-            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
+            if ( !TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
+
                 return false;
             }
 

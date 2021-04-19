@@ -1,10 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
@@ -12,10 +8,11 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Caravela.Framework.Code.MethodKind;
-using RefKind = Caravela.Framework.Code.RefKind;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -32,14 +29,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
+
             return parameter;
         }
 
         public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
         {
-            var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
-            var typeConstant = defaultValue != null ? new TypedConstant( itype, defaultValue ) : default;
-            return this.AddParameter( name, itype, refKind, typeConstant );
+            var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
+            var typeConstant = defaultValue != null ? new TypedConstant( iType, defaultValue ) : default;
+
+            return this.AddParameter( name, iType, refKind, typeConstant );
         }
 
         public IGenericParameterBuilder AddGenericParameter( string name ) => throw new NotImplementedException();
@@ -49,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         IType IMethodBuilder.ReturnType
         {
             get => this.ReturnParameter.ParameterType;
-            set => this.ReturnParameter.ParameterType = value ?? throw new ArgumentNullException( nameof( value ) );
+            set => this.ReturnParameter.ParameterType = value ?? throw new ArgumentNullException( nameof(value) );
         }
 
         IType IMethod.ReturnType => this.ReturnParameter.ParameterType;
@@ -83,12 +82,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             this.LinkerOptions = linkerOptions;
+
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,
                     -1,
                     null,
-                    this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) ).AssertNotNull(),
+                    this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
                     RefKind.None );
         }
 
@@ -110,24 +110,28 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(),
                     this.ToDeclarationModifiers(),
-                    !this.ReturnParameter.ParameterType.Is( typeof( void ) )
+                    !this.ReturnParameter.ParameterType.Is( typeof(void) )
                         ? new[]
                         {
                             ReturnStatement(
                                 LiteralExpression(
                                     SyntaxKind.DefaultLiteralExpression,
-                                    Token (SyntaxKind.DefaultKeyword)))
+                                    Token( SyntaxKind.DefaultKeyword ) ) )
                         }
                         : null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this ) };
+            return new[]
+            {
+                new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
+            };
         }
 
         // TODO: Temporary
-        public override MemberDeclarationSyntax InsertPositionNode => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
+        public override MemberDeclarationSyntax InsertPositionNode
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-        
+
         public IMethod? OverriddenMethod => throw new NotImplementedException();
     }
 }

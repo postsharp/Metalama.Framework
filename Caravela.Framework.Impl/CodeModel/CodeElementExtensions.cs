@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Collections;
@@ -13,6 +10,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
@@ -22,13 +22,14 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal static class CodeElementExtensions
     {
-
         public static CodeElementKind GetCodeElementKind( this ISymbol symbol )
             => symbol switch
             {
                 INamespaceSymbol => CodeElementKind.Compilation,
                 INamedTypeSymbol => CodeElementKind.Type,
-                IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor ? CodeElementKind.Constructor : CodeElementKind.Method,
+                IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
+                    ? CodeElementKind.Constructor
+                    : CodeElementKind.Method,
                 IPropertySymbol => CodeElementKind.Property,
                 IFieldSymbol => CodeElementKind.Field,
                 ITypeParameterSymbol => CodeElementKind.GenericParameter,
@@ -36,8 +37,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol => CodeElementKind.Parameter,
                 IEventSymbol => CodeElementKind.Event,
                 ITypeSymbol => CodeElementKind.None,
-                _ => throw new ArgumentException( nameof( symbol ), $"Unexpected symbol: {symbol.GetType().Name}." )
-
+                _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
             };
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="codeElement"></param>
         /// <returns></returns>
-        public static IEnumerable<ICodeElement> GetContainedElements( this ICodeElement codeElement ) =>
-            new[] { codeElement }.SelectDescendants(
+        public static IEnumerable<ICodeElement> GetContainedElements( this ICodeElement codeElement )
+            => new[] { codeElement }.SelectDescendants(
                 child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,
@@ -73,8 +73,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static IEnumerable<ISymbol> GetContainedSymbols( this ISymbol symbol ) =>
-            symbol switch
+        public static IEnumerable<ISymbol> GetContainedSymbols( this ISymbol symbol )
+            => symbol switch
             {
                 IAssemblySymbol compilation => compilation.GetTypes(),
                 INamedTypeSymbol namedType => namedType.GetMembers().Where( IsVisible ).Concat( namedType.TypeParameters ),
@@ -83,17 +83,18 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => Array.Empty<ISymbol>()
             };
 
-        public static IEnumerable<AttributeLink> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol ) =>
-            attributes.Select( a => new AttributeLink( a, CodeElementLink.FromSymbol( declaringSymbol ) ) );
+        public static IEnumerable<AttributeLink> ToAttributeLinks( this IEnumerable<AttributeData> attributes, ISymbol declaringSymbol )
+            => attributes.Select( a => new AttributeLink( a, CodeElementLink.FromSymbol( declaringSymbol ) ) );
 
-        public static IEnumerable<AttributeLink> GetAllAttributes( this ISymbol symbol ) =>
-            symbol switch
+        public static IEnumerable<AttributeLink> GetAllAttributes( this ISymbol symbol )
+            => symbol switch
             {
                 IMethodSymbol method => method
                     .GetAttributes()
                     .ToAttributeLinks( method )
-                    .Concat( method.GetReturnTypeAttributes()
-                        .Select( a => new AttributeLink( a, CodeElementLink.ReturnParameter( method ) ) ) ),
+                    .Concat(
+                        method.GetReturnTypeAttributes()
+                            .Select( a => new AttributeLink( a, CodeElementLink.ReturnParameter( method ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol )
             };
 
@@ -118,10 +119,12 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
+
             if ( parameters.LastOrDefault()?.IsParams == true )
             {
                 // all non-params arguments have to be set + any number of params arguments
                 var requiredArguments = parameters.Count - 1;
+
                 if ( argumentsLength < requiredArguments )
                 {
                     throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (codeElement, requiredArguments) );
@@ -153,16 +156,16 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 ArgumentSyntax argument;
                 var parameter = parameters[i];
+
                 if ( i >= parameters.Count || parameter.IsParams )
                 {
-                    // params methods can be called as params or direcly with an array
-                    // so it's probably best to not do any typecheking for them
+                    // params methods can be called as params or directly with an array
+                    // so it's probably best to not do any type-checking for them
 
                     argument = SyntaxFactory.Argument( arg.Syntax );
                 }
                 else
                 {
-
                     if ( parameter.IsOut() || parameter.IsRef() )
                     {
                         // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
@@ -195,7 +198,6 @@ namespace Caravela.Framework.Impl.CodeModel
         internal static ExpressionSyntax GetReceiverSyntax<T>( this T codeElement, RuntimeExpression? instance )
             where T : IMember
         {
-
             if ( codeElement.IsStatic )
             {
                 if ( instance != null )
@@ -205,15 +207,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 return (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( codeElement.DeclaringType!.GetSymbol() );
             }
-            else
-            {
-                if ( instance == null )
-                {
-                    throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( codeElement );
-                }
 
-                return instance.ToTypedExpression( codeElement.DeclaringType, true );
+            if ( instance == null )
+            {
+                throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( codeElement );
             }
+
+            return instance.ToTypedExpression( codeElement.DeclaringType, true );
         }
 
         internal static ExpressionSyntax? ToExpressionSyntax( this in TypedConstant value, CompilationModel compilation )
@@ -222,50 +222,52 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return compilation.Factory.Serializers.SerializeToRoslynCreationExpression( value.Value );
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
-        internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind ) => roslynRefKind switch
-        {
-            Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
-            Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
-            Microsoft.CodeAnalysis.RefKind.RefReadOnly => RefKind.RefReadOnly,
-            _ => throw new InvalidOperationException( $"Roslyn RefKind {roslynRefKind} not recognized here." )
-        };
+        internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )
+            => roslynRefKind switch
+            {
+                Microsoft.CodeAnalysis.RefKind.None => RefKind.None,
+                Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
+                Microsoft.CodeAnalysis.RefKind.RefReadOnly => RefKind.RefReadOnly,
+                _ => throw new InvalidOperationException( $"Roslyn RefKind {roslynRefKind} not recognized here." )
+            };
 
-        internal static Microsoft.CodeAnalysis.RefKind ToRoslynRefKind( this RefKind ourRefKind ) => ourRefKind switch
-        {
-            RefKind.None => Microsoft.CodeAnalysis.RefKind.None,
-            RefKind.Ref => Microsoft.CodeAnalysis.RefKind.Ref,
-            RefKind.RefReadOnly => Microsoft.CodeAnalysis.RefKind.RefReadOnly,
-            _ => throw new InvalidOperationException( $"RefKind {ourRefKind} not recognized." )
-        };
+        internal static Microsoft.CodeAnalysis.RefKind ToRoslynRefKind( this RefKind ourRefKind )
+            => ourRefKind switch
+            {
+                RefKind.None => Microsoft.CodeAnalysis.RefKind.None,
+                RefKind.Ref => Microsoft.CodeAnalysis.RefKind.Ref,
+                RefKind.RefReadOnly => Microsoft.CodeAnalysis.RefKind.RefReadOnly,
+                _ => throw new InvalidOperationException( $"RefKind {ourRefKind} not recognized." )
+            };
 
-        internal static Accessibility ToOurVisibility( this Microsoft.CodeAnalysis.Accessibility accessibility ) => accessibility switch
-        {
-            Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
-            Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
-            Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.ProtectedAndInternal,
-            Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
-            Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
-            Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedOrInternal,
-            Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        internal static Accessibility ToOurVisibility( this Microsoft.CodeAnalysis.Accessibility accessibility )
+            => accessibility switch
+            {
+                Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
+                Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.ProtectedAndInternal,
+                Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
+                Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
+                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedOrInternal,
+                Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
-        internal static Microsoft.CodeAnalysis.Accessibility ToRoslynAccessibility( this Accessibility accessibility ) => accessibility switch
-        {
-            Accessibility.Private => Microsoft.CodeAnalysis.Accessibility.Private,
-            Accessibility.ProtectedAndInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
-            Accessibility.Protected => Microsoft.CodeAnalysis.Accessibility.Protected,
-            Accessibility.Internal => Microsoft.CodeAnalysis.Accessibility.Internal,
-            Accessibility.ProtectedOrInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
-            Accessibility.Public => Microsoft.CodeAnalysis.Accessibility.Public,
-            _ => throw new ArgumentOutOfRangeException()
-        };
+        internal static Microsoft.CodeAnalysis.Accessibility ToRoslynAccessibility( this Accessibility accessibility )
+            => accessibility switch
+            {
+                Accessibility.Private => Microsoft.CodeAnalysis.Accessibility.Private,
+                Accessibility.ProtectedAndInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal,
+                Accessibility.Protected => Microsoft.CodeAnalysis.Accessibility.Protected,
+                Accessibility.Internal => Microsoft.CodeAnalysis.Accessibility.Internal,
+                Accessibility.ProtectedOrInternal => Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal,
+                Accessibility.Public => Microsoft.CodeAnalysis.Accessibility.Public,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         internal static DeclarationModifiers ToDeclarationModifiers( this IMember member )
         {

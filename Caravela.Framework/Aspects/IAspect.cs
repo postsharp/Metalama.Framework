@@ -11,9 +11,7 @@ namespace Caravela.Framework.Aspects
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IAspect
-    {
-    }
+    public interface IAspect { }
 
     /// <summary>
     /// The base interface for all aspects, with the type parameter indicating to which types

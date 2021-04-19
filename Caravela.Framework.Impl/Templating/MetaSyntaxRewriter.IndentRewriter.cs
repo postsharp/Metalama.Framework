@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -25,6 +25,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( node.Arguments.Count > 1 || node.Arguments.Span.Length > _limit )
                 {
                     this._parent.Indent();
+
                     try
                     {
                         var indentedArguments =
@@ -40,10 +41,8 @@ namespace Caravela.Framework.Impl.Templating
                         this._parent.Unindent();
                     }
                 }
-                else
-                {
-                    return base.VisitArgumentList( node );
-                }
+
+                return base.VisitArgumentList( node );
             }
 
             public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
@@ -51,6 +50,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( node.Expressions.Count > 1 || node.Span.Length > _limit )
                 {
                     this._parent.Indent();
+
                     try
                     {
                         var indentedExpressions =
@@ -67,10 +67,8 @@ namespace Caravela.Framework.Impl.Templating
                         this._parent.Unindent();
                     }
                 }
-                else
-                {
-                    return base.VisitInitializerExpression( node );
-                }
+
+                return base.VisitInitializerExpression( node );
             }
 
             public override SyntaxNode? Visit( SyntaxNode? node )
@@ -79,10 +77,8 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     return node;
                 }
-                else
-                {
-                    return base.Visit( node );
-                }
+
+                return base.Visit( node );
             }
         }
     }

@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.CompileTime
         public SymbolClassifier( Compilation compilation )
         {
             this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
-            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeOnlyAttribute ).FullName ).AssertNotNull();
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
+            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
+            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
         }
 
         public bool IsTemplate( ISymbol symbol )
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look at the overriden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                return this.IsTemplate( overriddenMethod );
+                return this.IsTemplate( overriddenMethod! );
             }
 
             return false;
@@ -54,10 +54,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return SymbolDeclarationScope.Default;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
         protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol? assembly )
@@ -68,14 +66,17 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // TODO: be more strict with .NET Standard.
-            if ( assembly.Name != null &&
-                (assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase ) || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase )) )
+            if ( assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase )
+                 || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase ) )
             {
                 return SymbolDeclarationScope.Default;
             }
 
-            var scopeFromAttributes = assembly.GetAttributes().Concat( assembly.Modules.First().GetAttributes() )
-                .Select( this.GetAttributeScope ).FirstOrDefault( s => s != null );
+            var scopeFromAttributes = assembly.GetAttributes()
+                .Concat( assembly.Modules.First().GetAttributes() )
+                .Select( this.GetAttributeScope )
+                .FirstOrDefault( s => s != null );
+
             if ( scopeFromAttributes != null )
             {
                 return scopeFromAttributes.Value;
@@ -93,6 +94,7 @@ namespace Caravela.Framework.Impl.CompileTime
             SymbolDeclarationScope AddToCache( SymbolDeclarationScope scope )
             {
                 this._cache[symbol] = scope;
+
                 return scope;
             }
 
@@ -107,6 +109,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // From attributes.
             var scopeFromAttributes = symbol.GetAttributes().Select( this.GetAttributeScope ).FirstOrDefault( s => s != null );
+
             if ( scopeFromAttributes != null )
             {
                 return AddToCache( scopeFromAttributes.Value );
@@ -115,7 +118,8 @@ namespace Caravela.Framework.Impl.CompileTime
             // From overridden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                var scopeFromOverriddenMethod = this.GetSymbolDeclarationScope( overriddenMethod );
+                var scopeFromOverriddenMethod = this.GetSymbolDeclarationScope( overriddenMethod! );
+
                 if ( scopeFromOverriddenMethod != SymbolDeclarationScope.Default )
                 {
                     return AddToCache( scopeFromOverriddenMethod );
@@ -157,9 +161,9 @@ namespace Caravela.Framework.Impl.CompileTime
                             }
 
                             // From interfaces.
-                            foreach ( var iface in type.AllInterfaces )
+                            foreach ( var @interface in type.AllInterfaces )
                             {
-                                var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
+                                var scopeFromInterface = this.GetSymbolDeclarationScope( @interface );
 
                                 if ( scopeFromInterface != SymbolDeclarationScope.Default )
                                 {
@@ -183,11 +187,12 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                 case INamespaceSymbol:
-                    // Namespace can be either runtime, buildtime or both. We don't do more now but we may have TODO it based on assemblies defining the namespace.
+                    // Namespace can be either run-time, build-time or both. We don't do more now but we may have TODO it based on assemblies defining the namespace.
                     return AddToCache( SymbolDeclarationScope.Default );
             }
 
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
+
             if ( scopeFromAssembly != SymbolDeclarationScope.Default )
             {
                 return AddToCache( scopeFromAssembly );

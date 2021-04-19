@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using PostSharp.Extensibility;
 using PostSharp.Reflection;
 using PostSharp.Sdk.CodeModel;
 using PostSharp.Sdk.CodeModel.Helpers;
 using PostSharp.Sdk.Collections;
 using PostSharp.Sdk.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace Caravela.Obfuscator
 {
@@ -59,7 +59,7 @@ namespace Caravela.Obfuscator
         /// <returns></returns>
         public override bool Execute()
         {
-            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof( ObfuscationAttribute ) );
+            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof(ObfuscationAttribute) );
 
             // IMPORTANT: Pdb obfuscation has to be done before changing declaration names.
             // Obfuscate source documents in the PDB.
@@ -92,6 +92,7 @@ namespace Caravela.Obfuscator
             foreach ( var typeSpec in this.Project.Module.TypeSpecs )
             {
                 var typeDef = typeSpec.GetTypeDefinition( BindingOptions.DontThrowException );
+
                 if ( typeDef == null || typeDef.Module != this.Project.Module )
                 {
                     continue;
@@ -111,6 +112,7 @@ namespace Caravela.Obfuscator
             if ( !string.IsNullOrEmpty( this.MapFile ) )
             {
                 Message.Write( MessageLocation.Unknown, SeverityType.Info, "OB001", "Writing obfuscation map to {0}.", this.MapFile );
+
                 using ( TextWriter writer = File.CreateText( this.MapFile! ) )
                 {
                     this._currentObfuscationTable.Write( writer );
@@ -129,14 +131,18 @@ namespace Caravela.Obfuscator
                 foreach ( var sourceDocument in this.Project.Module.SourceDocuments )
                 {
                     var mutableSourceDocument = (IMutableSourceDocument) sourceDocument;
+
                     if ( !string.IsNullOrEmpty( mutableSourceDocument.FileName ) )
                     {
                         string hashablePath;
+
                         if ( rootFullPath != null )
                         {
                             var fileFullPath = Path.GetFullPath( mutableSourceDocument.FileName );
 
-                            hashablePath = fileFullPath.StartsWith( rootFullPath, StringComparison.Ordinal ) ? fileFullPath.Substring( rootFullPath.Length ) : fileFullPath;
+                            hashablePath = fileFullPath.StartsWith( rootFullPath, StringComparison.Ordinal )
+                                ? fileFullPath.Substring( rootFullPath.Length )
+                                : fileFullPath;
                         }
                         else
                         {
@@ -151,9 +157,11 @@ namespace Caravela.Obfuscator
             IMethodBodyVisitor[] visitors = { new InstructionBlockVisitor() };
 
             var methodEnumerator = this.Project.Module.GetDeclarationEnumerator( TokenType.MethodDef );
+
             while ( methodEnumerator.MoveNext() )
             {
                 var method = (MethodDefDeclaration) methodEnumerator.Current!;
+
                 if ( method.HasBody )
                 {
                     method.MethodBody.CustomDebuggingInformation = null;
@@ -167,6 +175,7 @@ namespace Caravela.Obfuscator
             public void EnterInstructionBlock( InstructionBlock instructionBlock )
             {
                 instructionBlock.CustomDebuggingInformation = null;
+
                 for ( var i = 0; i < instructionBlock.LocalConstantSymbolCount; i++ )
                 {
                     instructionBlock.GetLocalConstantSymbol( i ).Name = "c" + i;
@@ -178,21 +187,13 @@ namespace Caravela.Obfuscator
                 }
             }
 
-            public void EnterInstructionSequence( InstructionSequence instructionSequence )
-            {
-            }
+            public void EnterInstructionSequence( InstructionSequence instructionSequence ) { }
 
-            public void LeaveInstructionBlock( InstructionBlock instructionBlock )
-            {
-            }
+            public void LeaveInstructionBlock( InstructionBlock instructionBlock ) { }
 
-            public void LeaveInstructionSequence( InstructionSequence instructionSequence )
-            {
-            }
+            public void LeaveInstructionSequence( InstructionSequence instructionSequence ) { }
 
-            public void VisitInstruction( InstructionReader instructionReader )
-            {
-            }
+            public void VisitInstruction( InstructionReader instructionReader ) { }
         }
 
         private readonly TagId _excludeObfuscationTag = TagId.Register( "1F50C631-989F-48F9-B680-D64D374ED9F3" );
@@ -215,19 +216,19 @@ namespace Caravela.Obfuscator
             }
 
             var e = declaration.CustomAttributes.GetByTypeEnumerator( this._obfuscationAttributeType );
+
             if ( e.MoveNext() )
             {
                 var obfuscationAttribute = (ObfuscationAttribute) e.Current!.ConstructRuntimeObject();
+
                 if ( obfuscationAttribute.Exclude )
                 {
                     if ( inherited )
                     {
                         return obfuscationAttribute.ApplyToMembers;
                     }
-                    else
-                    {
-                        return true;
-                    }
+
+                    return true;
                 }
             }
 
@@ -252,6 +253,7 @@ namespace Caravela.Obfuscator
             }
 
             var baseType = type.BaseTypeDef;
+
             if ( baseType != null && baseType.Module == type.Module )
             {
                 this.PrepareType( baseType );
@@ -260,6 +262,7 @@ namespace Caravela.Obfuscator
             foreach ( var interfaceImplementation in type.InterfaceImplementations )
             {
                 var interfaceTypeDef = interfaceImplementation.ImplementedInterface.GetTypeDefinition();
+
                 if ( interfaceTypeDef.Module == this.Project.Module )
                 {
                     this.PrepareType( interfaceTypeDef );
@@ -332,7 +335,6 @@ namespace Caravela.Obfuscator
             // Obfuscate methods.
             foreach ( var method in type.Methods )
             {
-
                 // Ignore methods with special names.
                 if ( (method.Attributes & MethodAttributes.RTSpecialName) != 0 )
                 {
@@ -346,6 +348,7 @@ namespace Caravela.Obfuscator
                 {
                     // Do not obfuscate virtual methods that override a public or an external method.
                     var baseMethod = method.GetParentDefinition( true );
+
                     if ( baseMethod.Module != this.Project.Module ||
                          (baseMethod != method && !this._obfuscatedDeclarations.ContainsKey( baseMethod )) )
                     {
@@ -355,7 +358,6 @@ namespace Caravela.Obfuscator
                     // If the method is an implicit implementation of a public interface,
                     if ( method.Visibility == Visibility.Public )
                     {
-
                         foreach ( var implementedInterfaceType in implementedInterfaces )
                         {
                             var implementedInterfaceTypeDef = implementedInterfaceType.GetTypeDefinition();
@@ -367,7 +369,6 @@ namespace Caravela.Obfuscator
 
                             foreach ( var interfaceMethod in implementedInterfaceTypeDef.Methods.GetByName( method.Name ) )
                             {
-
                                 // Compare the signature.
                                 if ( interfaceMethod.Parameters.Count != method.Parameters.Count )
                                 {
@@ -375,6 +376,7 @@ namespace Caravela.Obfuscator
                                 }
 
                                 var translatedInterfaceMethod = (IGenericMethodDefinition) interfaceMethod.Translate( this.Project.Module );
+
                                 var genericMap = new GenericMap(
                                     this.Project.Module,
                                     implementedInterfaceType.GetGenericContext(),
@@ -468,6 +470,7 @@ namespace Caravela.Obfuscator
                 if ( field.IsConst )
                 {
                     type.Fields.Remove( field );
+
                     continue;
                 }
 

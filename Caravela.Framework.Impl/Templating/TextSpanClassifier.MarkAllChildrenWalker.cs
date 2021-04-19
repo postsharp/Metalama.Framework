@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
-
     public sealed partial class TextSpanClassifier
     {
         private class MarkAllChildrenWalker : CSharpSyntaxWalker
@@ -40,15 +39,10 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
-                if ( ShouldMarkTrivias( this._classification ) )
+                if ( ShouldMarkTrivia( this._classification ) )
                 {
-
                     this._parent.Mark( node.GetLeadingTrivia(), this._classification );
                     this._parent.Mark( node.GetTrailingTrivia(), this._classification );
-                }
-                else
-                {
-                    // We don't highlight the trivia of "special" spans because they are typically keyword-like.
                 }
             }
         }

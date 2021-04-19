@@ -3,7 +3,7 @@
 
 using Caravela.Framework.Code;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Transformations
 {
     /// <summary>
     /// Provides names for overriden declarations.

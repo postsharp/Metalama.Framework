@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CompileTime;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Caravela.Framework.Impl.CompileTime;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
@@ -40,11 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests
                 WriteFile( $"file{i}.cs", sourceFiles[i] );
             }
 
-            var psi = new ProcessStartInfo( "dotnet", "build" )
-            {
-                WorkingDirectory = dir,
-                RedirectStandardOutput = true
-            };
+            var psi = new ProcessStartInfo( "dotnet", "build" ) { WorkingDirectory = dir, RedirectStandardOutput = true };
             var process = Process.Start( psi )!;
             var completion = process.WaitForExitAsync();
             var outputPromise = process.StandardOutput.ReadToEndAsync();

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.Project;
+using Caravela.TestFramework;
 
 namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.LinqNotSupported
 {

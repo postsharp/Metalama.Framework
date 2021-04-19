@@ -16,7 +16,11 @@ namespace Caravela.Framework.Impl.Advices
 
         public new IMethod TargetDeclaration => (IMethod) base.TargetDeclaration;
 
-        public OverrideMethodAdvice( AspectInstance aspect, IMethod targetDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
+        public OverrideMethodAdvice(
+            AspectInstance aspect,
+            IMethod targetDeclaration,
+            IMethod templateMethod,
+            AspectLinkerOptions? linkerOptions = null ) : base( aspect, targetDeclaration )
         {
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;

@@ -30,6 +30,6 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Caravela, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
         /// The node including all children nodes must be evaluated at compile time.
         /// </summary>
-        CompileTimeOnly,
+        CompileTimeOnly
     }
 }

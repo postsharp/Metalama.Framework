@@ -1,18 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Transformations;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-
     internal sealed class IntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
     {
         private readonly MethodBuilder _methodBuilder;
@@ -27,11 +26,11 @@ namespace Caravela.Framework.Impl.Advices
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public IntroduceMethodAdvice( 
-            AspectInstance aspect, 
-            INamedType targetDeclaration, 
-            IMethod templateMethod, 
-            IntroductionScope scope, 
+        public IntroduceMethodAdvice(
+            AspectInstance aspect,
+            INamedType targetDeclaration,
+            IMethod templateMethod,
+            IntroductionScope scope,
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions )
             : base( aspect, targetDeclaration )
@@ -59,21 +58,25 @@ namespace Caravela.Framework.Impl.Advices
                     }
 
                 case IntroductionScope.Instance:
-                    if (this.TargetDeclaration.IsStatic && this.TargetDeclaration is IType)
+                    if ( this.TargetDeclaration.IsStatic && this.TargetDeclaration is IType )
                     {
                         // TODO: This should not be an exception.
-                        throw AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateException( (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) );
+                        throw AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateException(
+                            (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) );
                     }
 
                     this._methodBuilder.IsStatic = false;
+
                     break;
 
                 case IntroductionScope.Static:
                     this._methodBuilder.IsStatic = true;
+
                     break;
 
                 case IntroductionScope.Target:
                     this._methodBuilder.IsStatic = this.TargetDeclaration.IsStatic;
+
                     break;
 
                 default:
@@ -91,7 +94,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( templateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof( object ) );
+                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {
@@ -103,7 +106,12 @@ namespace Caravela.Framework.Impl.Advices
 
             foreach ( var templateParameter in templateMethod.Parameters )
             {
-                var parameterBuilder = this._methodBuilder.AddParameter( templateParameter.Name, templateParameter.ParameterType, templateParameter.RefKind, templateParameter.DefaultValue );
+                var parameterBuilder = this._methodBuilder.AddParameter(
+                    templateParameter.Name,
+                    templateParameter.ParameterType,
+                    templateParameter.RefKind,
+                    templateParameter.DefaultValue );
+
                 CopyAttributes( templateParameter, parameterBuilder );
             }
 
@@ -116,9 +124,9 @@ namespace Caravela.Framework.Impl.Advices
                 genericParameterBuilder.HasNonNullableValueTypeConstraint = templateGenericParameter.HasNonNullableValueTypeConstraint;
                 genericParameterBuilder.HasReferenceTypeConstraint = templateGenericParameter.HasReferenceTypeConstraint;
 
-                foreach (var templateGenericParamterConstraint in genericParameterBuilder.TypeConstraints )
+                foreach ( var templateGenericParameterConstraint in genericParameterBuilder.TypeConstraints )
                 {
-                    genericParameterBuilder.TypeConstraints.Add( templateGenericParamterConstraint );
+                    genericParameterBuilder.TypeConstraints.Add( templateGenericParameterConstraint );
                 }
 
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
@@ -131,7 +139,9 @@ namespace Caravela.Framework.Impl.Advices
                 // TODO: Don't copy all attributes, but how to decide which ones to keep?
                 foreach ( var codeElementAttribute in codeElement.Attributes )
                 {
-                    var builderAttribute = builder.AddAttribute( codeElementAttribute.Type, codeElementAttribute.ConstructorArguments.Select( x => x.Value ).ToArray() );
+                    var builderAttribute = builder.AddAttribute(
+                        codeElementAttribute.Type,
+                        codeElementAttribute.ConstructorArguments.Select( x => x.Value ).ToArray() );
 
                     foreach ( var codeElementAttributeNamedArgument in codeElementAttribute.NamedArguments )
                     {
@@ -151,11 +161,12 @@ namespace Caravela.Framework.Impl.Advices
             {
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
+
                 return AdviceResult.Create( this._methodBuilder, overriddenMethod );
             }
             else
             {
-                if (existingDeclaration.IsStatic != this._methodBuilder.IsStatic)
+                if ( existingDeclaration.IsStatic != this._methodBuilder.IsStatic )
                 {
                     return
                         AdviceResult.Create(
@@ -168,7 +179,7 @@ namespace Caravela.Framework.Impl.Advices
                 {
                     case ConflictBehavior.Fail:
                         // Produce fail diagnostic.
-                        return 
+                        return
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
@@ -180,16 +191,18 @@ namespace Caravela.Framework.Impl.Advices
                         return AdviceResult.Create();
 
                     case ConflictBehavior.New:
-                        // If the existing declaration is in the current type, we fail, otherwise, declare a newslot method and override.
-                        if ( ((IEqualityComparer<IType>)compilation.InvariantComparer).Equals(this.TargetDeclaration, existingDeclaration.DeclaringType) )
+                        // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
+
                             return AdviceResult.Create( overriddenMethod );
                         }
                         else
                         {
                             this._methodBuilder.IsNew = true;
                             var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
+
                             return AdviceResult.Create( this._methodBuilder, overriddenMethod );
                         }
 
@@ -197,9 +210,10 @@ namespace Caravela.Framework.Impl.Advices
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.TemplateMethod, this.LinkerOptions );
+
                             return AdviceResult.Create( overriddenMethod );
                         }
-                        else if ( existingDeclaration.IsSealed)
+                        else if ( existingDeclaration.IsSealed )
                         {
                             return
                                 AdviceResult.Create(
@@ -211,6 +225,7 @@ namespace Caravela.Framework.Impl.Advices
                         {
                             var overriddenMethod = new OverriddenMethod( this, this._methodBuilder, this.TemplateMethod, this.LinkerOptions );
                             this._methodBuilder.IsOverride = true;
+
                             return AdviceResult.Create( this._methodBuilder, overriddenMethod );
                         }
 

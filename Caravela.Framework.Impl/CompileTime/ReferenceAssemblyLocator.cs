@@ -51,11 +51,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
-                WorkingDirectory = tempProjectDirectory,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true
+                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
             };
+
             var process = Process.Start( psi ).AssertNotNull();
 
             var lines = new List<string>();
@@ -66,7 +64,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( process.ExitCode != 0 )
             {
-                throw new InvalidOperationException( "Error while building temporary project to locate reference assemblies:" + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                throw new InvalidOperationException(
+                    "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
+                                                                                             + string.Join( Environment.NewLine, lines ) );
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );
@@ -78,6 +78,7 @@ namespace Caravela.Framework.Impl.CompileTime
             using var sha1 = SHA1.Create();
 #pragma warning restore CA5350
             var hash = sha1.ComputeHash( Encoding.UTF8.GetBytes( input ) );
+
             return BitConverter.ToString( hash ).Replace( "-", "" );
         }
     }

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Concurrent;
-using System.Linq;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ITypeSymbol GetTypeSymbol( Type type ) => this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
 
-        public NameSyntax GetTypeNameSyntax( Type type ) =>
-            this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
+        public NameSyntax GetTypeNameSyntax( Type type )
+            => this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
     }
 }

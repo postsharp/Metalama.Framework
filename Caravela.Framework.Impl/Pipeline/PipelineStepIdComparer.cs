@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.AspectOrdering;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using Caravela.Framework.Impl.AspectOrdering;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -41,7 +42,8 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             // If topological distance is identical, order by name.
-            var nameOrder = xOrderedPart.AspectName.CompareTo( yOrderedPart.AspectName );
+            var nameOrder = string.Compare( xOrderedPart.AspectName, yOrderedPart.AspectName, StringComparison.Ordinal );
+
             if ( nameOrder != 0 )
             {
                 return nameOrder;

@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Linking
 {
     /// <summary>
     /// Represents a version of the symbol, i.e. a pair of ISymbol and AspectLayerId?.
     /// </summary>
-    internal struct SymbolVersion : IEquatable<SymbolVersion>
+    internal readonly struct SymbolVersion : IEquatable<SymbolVersion>
     {
         public ISymbol Symbol { get; }
 
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override bool Equals( object obj )
         {
-            return obj is SymbolVersion && this.Equals( (SymbolVersion) obj );
+            return obj is SymbolVersion version && this.Equals( version );
         }
 
         public override int GetHashCode()

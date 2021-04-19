@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// Gets options for the linker.
         /// </summary>
         public AspectLinkerOptions? LinkerOptions { get; }
-        
+
         /// <summary>
         /// Gets the code element (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
@@ -46,8 +46,8 @@ namespace Caravela.Framework.Impl.Transformations
         /// </summary>
         public ICodeElement? CodeElement { get; }
 
-        public IntroducedMember( 
-            IMemberIntroduction introduction, 
+        public IntroducedMember(
+            IMemberIntroduction introduction,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl.Transformations
         /// <returns>A new instance with specified syntax.</returns>
         public IntroducedMember WithSyntax( MemberDeclarationSyntax syntax )
         {
-            return new IntroducedMember( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.CodeElement );
+            return new( this.Introduction, syntax, this.AspectLayerId, this.Semantic, this.LinkerOptions, this.CodeElement );
         }
     }
 

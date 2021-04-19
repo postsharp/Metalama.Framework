@@ -15,14 +15,13 @@ namespace Caravela.Framework.Impl.Pipeline
         public Compilation Execute( TransformerContext transformerContext )
         {
             using CompileTimeAspectPipeline pipeline = new( new AspectPipelineContext( transformerContext ) );
+
             if ( pipeline.TryExecute( out var compilation ) )
             {
                 return compilation;
             }
-            else
-            {
-                return transformerContext.Compilation;
-            }
+
+            return transformerContext.Compilation;
         }
     }
 }

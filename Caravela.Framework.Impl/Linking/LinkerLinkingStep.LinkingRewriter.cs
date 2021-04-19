@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -28,8 +28,7 @@ namespace Caravela.Framework.Impl.Linking
                 this._referenceRegistry = referenceRegistry;
             }
 
-            internal static string GetOriginalBodyMethodName( string methodName )
-                => $"__{methodName}__OriginalBody";
+            internal static string GetOriginalBodyMethodName( string methodName ) => $"__{methodName}__OriginalBody";
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
@@ -38,13 +37,13 @@ namespace Caravela.Framework.Impl.Linking
 
                 foreach ( var member in node.Members )
                 {
-                    if ( member is not MethodDeclarationSyntax )
+                    if ( member is not MethodDeclarationSyntax method )
                     {
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+
                         continue;
                     }
 
-                    var method = (MethodDeclarationSyntax) member;
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( method )!;
 
@@ -54,12 +53,11 @@ namespace Caravela.Framework.Impl.Linking
                         if ( this._referenceRegistry.IsBodyInlineable( symbol ) )
                         {
                             // Method's body is inlineable, the method itself can be removed.
-                            continue;
                         }
                         else
                         {
                             // Rewrite the method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, method, symbol ) );
                             newMembers.Add( transformedMethod );
                         }
                     }
@@ -74,7 +72,7 @@ namespace Caravela.Framework.Impl.Linking
                             var transformedMethod = method.WithBody( GetTrampolineMethodBody( method, lastOverrideSymbol ) )
                                 .WithLeadingTrivia( method.GetLeadingTrivia() )
                                 .WithTrailingTrivia( method.GetTrailingTrivia() );
-                            
+
                             newMembers.Add( transformedMethod );
                         }
                         else
@@ -83,7 +81,8 @@ namespace Caravela.Framework.Impl.Linking
                             var lastOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                             // Inline overrides into this method.
-                            var transformedMethod = ((MethodDeclarationSyntax) member).WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+                            var transformedMethod = method.WithBody( this.GetRewrittenMethodBody( semanticModel, lastOverrideSyntax, lastOverrideSymbol ) );
+
                             newMembers.Add( transformedMethod );
                         }
 

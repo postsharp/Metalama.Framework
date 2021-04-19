@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework;
+using System.Linq;
 using Xunit;
+using Attribute = System.Attribute;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
@@ -39,6 +40,7 @@ class A : Attribute
 
     public override string ToString() => $""A({constructorArguments}, P={P})"";
 }";
+
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
 
@@ -48,7 +50,7 @@ class A : Attribute
             var builder = new CompileTimeAssemblyBuilder( serviceProvider, roslynCompilation );
             var loader = new CompileTimeAssemblyLoader( serviceProvider, roslynCompilation, builder );
 
-            var attribute = Assert.IsAssignableFrom<System.Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
+            var attribute = Assert.IsAssignableFrom<Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
             Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
         }
     }

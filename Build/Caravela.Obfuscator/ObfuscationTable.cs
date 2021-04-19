@@ -23,6 +23,7 @@ namespace Caravela.Obfuscator
         public string GetHash( string input )
         {
             input = input.Normalize();
+
             if ( !this._nameToHash.TryGetValue( input, out var hashString ) )
             {
                 throw new ArgumentException( "No hash available for this value." );
@@ -36,6 +37,7 @@ namespace Caravela.Obfuscator
             input = input.Normalize();
 
             int hashLen;
+
             if ( input.Length < 8 )
             {
                 hashLen = 3;
@@ -57,6 +59,7 @@ namespace Caravela.Obfuscator
 
             var inputBytes = Encoding.UTF8.GetBytes( input );
             var hasConflict = false;
+
             do
             {
                 var hash = this._sha1.ComputeHash( inputBytes );
@@ -81,6 +84,7 @@ namespace Caravela.Obfuscator
                 {
                     this._hashToName.Add( hashString, input );
                     this._nameToHash.Add( input, hashString );
+
                     if ( hasConflict )
                     {
                         this.ConflictCount++;

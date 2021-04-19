@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -26,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public abstract CodeElementBuilder Builder { get; }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
-            this.Builder.ToDisplayString( format, context );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.Builder.ToDisplayString( format, context );
 
         public IDiagnosticLocation? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
@@ -36,8 +36,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Builder );
 
         [Memo]
-        public IAttributeList Attributes =>
-            new AttributeList(
+        public IAttributeList Attributes
+            => new AttributeList(
                 this,
                 this.Builder.Attributes
                     .Select<AttributeBuilder, AttributeLink>( a => new AttributeLink( a ) ) );

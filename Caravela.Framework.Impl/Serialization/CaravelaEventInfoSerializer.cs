@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal class CaravelaEventInfoSerializer : TypedObjectSerializer<CompileTimeEventInfo>
     {
@@ -22,13 +22,13 @@ namespace Caravela.Framework.Impl.Serialization.Reflection
         {
             var eventName = o.Symbol.Name;
             var typeCreation = this._caravelaTypeSerializer.Serialize( CompileTimeType.Create( o.ContainingType ) );
+
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         typeCreation,
                         IdentifierName( "GetEvent" ) ) )
-                .AddArgumentListArguments(
-                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
+                .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
                 .NormalizeWhitespace();
         }
     }

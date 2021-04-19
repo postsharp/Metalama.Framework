@@ -20,7 +20,12 @@ namespace Caravela.Framework.Code
         /// <param name="isStatic">Constraint on staticity of the method.</param>
         /// <param name="declaredOnly"><c>True</c> if only declared methods should be considered or <c>false</c> if all methods, including those declared in base types should be considered.</param>
         /// <returns>Enumeration of methods matching specified constraints.</returns>
-        IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount, IReadOnlyList<Type?>? argumentTypes, bool? isStatic = false, bool declaredOnly = true );
+        IEnumerable<IMethod> OfCompatibleSignature(
+            string name,
+            int? genericParameterCount,
+            IReadOnlyList<Type?>? argumentTypes,
+            bool? isStatic = false,
+            bool declaredOnly = true );
 
         /// <summary>
         /// Gets an enumeration of methods with signatures compatible with specified constraints.
@@ -32,7 +37,13 @@ namespace Caravela.Framework.Code
         /// <param name="isStatic">Constraint on staticity of the method.</param>
         /// <param name="declaredOnly"><c>True</c> if only declared methods should be considered or <c>false</c> if all methods, including those declared in base types should be considered.</param>
         /// <returns>Enumeration of methods matching specified constraints. If <paramref name="declaredOnly" /> is set to <c>false</c>, only the top-most visible method of the same signature is included.</returns>
-        IEnumerable<IMethod> OfCompatibleSignature( string name, int? genericParameterCount = null, IReadOnlyList<IType?>? argumentTypes = null, IReadOnlyList<RefKind?>? refKinds = null, bool? isStatic = false, bool declaredOnly = true );
+        IEnumerable<IMethod> OfCompatibleSignature(
+            string name,
+            int? genericParameterCount = null,
+            IReadOnlyList<IType?>? argumentTypes = null,
+            IReadOnlyList<RefKind?>? refKinds = null,
+            bool? isStatic = false,
+            bool declaredOnly = true );
 
         /// <summary>
         /// Gets a method that exactly matches the specified signature.
@@ -44,7 +55,13 @@ namespace Caravela.Framework.Code
         /// <param name="isStatic">Staticity of the method.</param>
         /// <param name="declaredOnly"><c>True</c> if only declared methods should be considered or <c>false</c> if all methods, including those declared in base types should be considered.</param>
         /// <returns>A <see cref="IMethod"/> that matches the given signature. If <paramref name="declaredOnly" /> is set to <c>false</c>, the top-most visible method is shown.</returns>
-        IMethod? OfExactSignature( string name, int genericParameterCount, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool? isStatic = null, bool declaredOnly = true );
+        IMethod? OfExactSignature(
+            string name,
+            int genericParameterCount,
+            IReadOnlyList<IType> parameterTypes,
+            IReadOnlyList<RefKind>? refKinds = null,
+            bool? isStatic = null,
+            bool declaredOnly = true );
 
         /// <summary>
         /// Gets a method that exactly matches the signature of the specified method.

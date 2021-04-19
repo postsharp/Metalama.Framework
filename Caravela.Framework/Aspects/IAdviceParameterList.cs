@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
+using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     public interface IAdviceParameterList : IReadOnlyList<IAdviceParameter>
     {
-        IAdviceParameter this[string name] { get; }
+        IAdviceParameter this[ string name ] { get; }
 
         IEnumerable<IAdviceParameter> OfType( IType type );
 

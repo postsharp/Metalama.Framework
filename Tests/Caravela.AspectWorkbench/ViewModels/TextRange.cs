@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Generic;
 
 namespace Caravela.AspectWorkbench.ViewModels
 {
@@ -14,14 +14,10 @@ namespace Caravela.AspectWorkbench.ViewModels
         public string Text { get; }
 
         public TextRange( string classification, TextSpan span, SourceText text ) :
-            this( classification, span, text.GetSubText( span ).ToString() )
-        {
-        }
+            this( classification, span, text.GetSubText( span ).ToString() ) { }
 
         public TextRange( string classification, TextSpan span, string text ) :
-            this( new ClassifiedSpan( classification, span ), text )
-        {
-        }
+            this( new ClassifiedSpan( classification, span ), text ) { }
 
         public TextRange( ClassifiedSpan classifiedSpan, string text )
         {
@@ -38,6 +34,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             foreach ( var range in ranges )
             {
                 var start = range.TextSpan.Start;
+
                 if ( start > current )
                 {
                     yield return new TextRange( whitespaceClassification, TextSpan.FromBounds( current, start ), text );
@@ -62,6 +59,6 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public TextSpan TextSpan => this.ClassifiedSpan.TextSpan;
 
-        public override string ToString() => this.ClassificationType ?? "null" + ":" + this.Text;
+        public override string ToString() => this.ClassificationType + ":" + this.Text;
     }
 }

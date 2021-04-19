@@ -1,16 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
 {
-
     internal class LexicalScopeFactory
     {
         private readonly CompilationModel _compilation;
@@ -30,6 +29,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     case CodeElement sourceCodeElement:
                         this._scopes[sourceCodeElement] = lexicalScope = new TemplateExpansionLexicalScope( sourceCodeElement.LookupSymbols() );
+
                         break;
 
                     default:
@@ -65,16 +65,19 @@ namespace Caravela.Framework.Impl.Linking
                             var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( introduction.TargetSyntaxTree );
 
                             int lookupPosition;
+
                             switch ( introduction.InsertPositionNode )
                             {
                                 case TypeDeclarationSyntax type:
                                     // The lookup position is inside the type.
                                     lookupPosition = type.CloseBraceToken.SpanStart - 1;
+
                                     break;
 
                                 default:
                                     // The lookup position is after the member.
                                     lookupPosition = introduction.InsertPositionNode.Span.End + 1;
+
                                     break;
                             }
 

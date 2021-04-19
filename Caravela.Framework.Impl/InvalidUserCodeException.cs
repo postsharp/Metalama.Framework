@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl
 {
@@ -19,14 +19,10 @@ namespace Caravela.Framework.Impl
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
         internal InvalidUserCodeException( DiagnosticDescriptor diagnosticDescriptor, params object[] args )
-            : this( diagnosticDescriptor, null, args )
-        {
-        }
+            : this( diagnosticDescriptor, null, args ) { }
 
         internal InvalidUserCodeException( DiagnosticDescriptor diagnosticDescriptor, Location? location, params object[] args )
-            : this( Diagnostic.Create( diagnosticDescriptor, location, args ) )
-        {
-        }
+            : this( Diagnostic.Create( diagnosticDescriptor, location, args ) ) { }
 
         internal InvalidUserCodeException( string message, ImmutableArray<Diagnostic> diagnostics ) : base( GetMessage( message, diagnostics ) )
         {

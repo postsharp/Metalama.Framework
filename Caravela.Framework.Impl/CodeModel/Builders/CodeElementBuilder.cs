@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -25,27 +26,30 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IAttributeList ICodeElement.Attributes => this.Attributes;
 
-        public AttributeBuilderList Attributes { get; } = new AttributeBuilderList();
+        public AttributeBuilderList Attributes { get; } = new();
 
         public abstract CodeElementKind ElementKind { get; }
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
-        
+
         // TODO: How to implement this?
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             return "CodeElementBuilder";
         }
 
-        public bool IsReadOnly { get; private set; }
+        public bool IsFrozen { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
             // TODO: How to handle ambiguous match (e.g. due to null argument values)?
             var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).Single();
-            var ctorArguments = constructorArguments.Select( ( ca, i ) => new Code.TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) ).ToList();
+
+            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )
+                .ToList();
+
             return new AttributeBuilder( this, ctor, ctorArguments );
         }
 
@@ -53,7 +57,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public virtual void Freeze()
         {
-            this.IsReadOnly = true;
+            this.IsFrozen = true;
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;

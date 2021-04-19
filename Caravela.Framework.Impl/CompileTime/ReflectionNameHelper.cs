@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Text;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -30,6 +30,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     case ITypeSymbol typeSymbol:
                         Format( typeSymbol );
                         sb.Append( '+' );
+
                         break;
 
                     case INamespaceSymbol namespaceSymbol:
@@ -56,6 +57,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         case IArrayTypeSymbol arrayTypeSymbol:
                             Format( arrayTypeSymbol.ElementType );
                             sb.Append( "[]" );
+
                             break;
 
                         default:
