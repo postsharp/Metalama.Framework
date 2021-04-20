@@ -2,18 +2,18 @@ using System;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeSimpleLambda
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.CompileTimeSimpleLambda
 {
     class Aspect
-    {
+    {     
         [TestTemplate]
         dynamic Template()
         {
-            Func<int, int> action = x => x + 1;
+            Func<int, int> action = x => x + compileTime(1);
+        
+            var result = compileTime(1);
 
-            dynamic result = proceed();
-
-            action(result);
+            result = action(result);
 
             return result;
         }

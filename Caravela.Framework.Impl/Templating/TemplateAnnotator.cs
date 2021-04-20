@@ -105,6 +105,12 @@ namespace Caravela.Framework.Impl.Templating
                 // default value: run-time only.
                 return SymbolDeclarationScope.RunTimeOnly;
             }
+            else if ( symbol is IParameterSymbol )
+            {
+                // Until we support template parameters and local functions, all parameters are parameters
+                // of expression lambdas, which are default-scoped.
+                return SymbolDeclarationScope.Default;
+            }
 
             // For other symbols, we use the SymbolScopeClassifier.
             var scopeFromClassifier = this._symbolScopeClassifier.GetSymbolDeclarationScope( symbol );
@@ -871,18 +877,42 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            if ( node.ExpressionBody != null )
+            {
+                var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
+                var scope = annotatedExpression.GetScopeFromAnnotation();
 
-            return base.VisitParenthesizedLambdaExpression( node );
+                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( scope );
+            }
+            else
+            {
+                // it means Expression is a Block
+                // TODO add more specific message, because only part of LanguageFeature is not supported
+                var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
+                this.Diagnostics.Add( diagnostic );
+
+                return base.VisitParenthesizedLambdaExpression( node );
+            }
         }
 
         public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
         {
-            var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
-            this.Diagnostics.Add( diagnostic );
+            if ( node.ExpressionBody != null )
+            {
+                var annotatedExpression = (ExpressionSyntax)this.Visit( node.ExpressionBody )!;
+                var scope = annotatedExpression.GetScopeFromAnnotation();
 
-            return base.VisitSimpleLambdaExpression( node );
+                return node.WithExpressionBody(annotatedExpression).AddScopeAnnotation( scope );
+            }
+            else
+            {
+                // it means Expression is a Block
+                // TODO add more specific message, because only part of LanguageFeature is not supported
+                var diagnostic = TemplatingDiagnosticDescriptors.CreateLanguageFeatureIsNotSupported( node );
+                this.Diagnostics.Add( diagnostic );
+
+                return base.VisitSimpleLambdaExpression( node );
+            }
         }
 
         private void RequireScope( SwitchSectionSyntax section, SymbolDeclarationScope requiredScope )
