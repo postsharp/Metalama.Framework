@@ -1,15 +1,19 @@
 using System;
-using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Project;
+using Caravela.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeSimpleLambda
+namespace Caravela.Framework.Tests.Integration.Templating.UnsuportedSyntax.StatementParenthesizedLambdaNotSupported
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            Func<int, int> action = x => x + 1;
+            Action<object> action = (object p) =>
+            {
+                Console.WriteLine(p.ToString());
+            };
 
             dynamic result = proceed();
 

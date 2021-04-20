@@ -2,14 +2,14 @@ using System;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeSimpleLambda
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeParenthesizedLambda
 {
     class Aspect
     {
         [TestTemplate]
         dynamic Template()
         {
-            Func<int, int> action = x => x + 1;
+            Func<int, int> action = (int x) => x + 1;
 
             dynamic result = proceed();
 
