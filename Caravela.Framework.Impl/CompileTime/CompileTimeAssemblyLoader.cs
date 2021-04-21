@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -108,9 +109,9 @@ namespace Caravela.Framework.Impl.CompileTime
             return this.LoadCompileTimeAssembly( symbol );
         }
 
-        public object CreateAttributeInstance( IAttribute attribute )
+        public bool TryCreateAttributeInstance( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
-            return this._attributeDeserializer.CreateAttribute( attribute );
+            return this._attributeDeserializer.TryCreateAttribute( attribute, diagnosticAdder, out attributeInstance );
         }
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock )

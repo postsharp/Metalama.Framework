@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
@@ -11,7 +12,6 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
-using Attribute = System.Attribute;
 
 namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
@@ -93,7 +93,11 @@ class A : Attribute
 
             var loader = CompileTimeAssemblyLoader.Create( serviceProvider, roslynCompilation );
 
-            var attribute = Assert.IsAssignableFrom<Attribute>( loader.CreateAttributeInstance( compilation.Attributes.First() ) );
+            if ( !loader.TryCreateAttributeInstance( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
+            {
+                throw new AssertionFailedException();
+            }
+
             Assert.Equal( "A(42, A, C`1+N`1[System.Int32[],System.String], C`1+N`1[T1,T2], P=13)", attribute.ToString() );
         }
 

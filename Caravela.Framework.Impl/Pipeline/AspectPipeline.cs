@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var driverFactory = new AspectDriverFactory( compilation, this.Context.Plugins );
             var aspectTypeFactory = new AspectTypeFactory( compilation, driverFactory );
 
-            var aspectTypes = aspectTypeFactory.GetAspectTypes( GetAspectTypes( compilation ) ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetAspectTypes( GetAspectTypes( compilation ), diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 new AttributeAspectOrderingSource( compilation ), new AspectLayerOrderingSource( aspectTypes )
             };
 
-            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder.ReportDiagnostic, out var sortedAspectLayers ) )
+            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
             {
                 pipelineStageResult = null;
 

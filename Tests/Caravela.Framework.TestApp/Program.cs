@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
@@ -9,8 +10,16 @@ namespace Caravela.Framework.TestApp
     [IntroduceSomeMethodAspect]
     internal partial class Program
     {
+        [SuppressWarning("CS1998", "IDE0051")]
+        private static async Task MethodAsync()
+        {
+
+        }
+
         private static void Main()
         {
+            //Console.WriteLine( $"x={x}" );
+
             SomeIntroducedMethod();
             (new Program()).SomeOtherIntroducedMethod();
 

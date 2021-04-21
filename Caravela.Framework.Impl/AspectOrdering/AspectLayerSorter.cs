@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Collections;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -18,18 +18,18 @@ namespace Caravela.Framework.Impl.AspectOrdering
         public static bool TrySort(
             ImmutableArray<AspectLayer> unsortedAspectLayers,
             IReadOnlyList<IAspectOrderingSource> aspectOrderingSources,
-            Action<Diagnostic> reportDiagnostic,
+            IDiagnosticAdder diagnosticAdder,
             out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
             => TrySort(
                 unsortedAspectLayers,
-                aspectOrderingSources.SelectMany( s => s.GetAspectOrderSpecification() ).ToImmutableArray(),
-                reportDiagnostic,
+                aspectOrderingSources.SelectMany( s => s.GetAspectOrderSpecification( diagnosticAdder ) ).ToImmutableArray(),
+                diagnosticAdder,
                 out sortedAspectLayers );
 
         public static bool TrySort(
             ImmutableArray<AspectLayer> unsortedAspectLayers,
             IReadOnlyList<AspectOrderSpecification> relationships,
-            Action<Diagnostic> reportDiagnostic,
+            IDiagnosticAdder diagnosticAdder,
             out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         {
             // Build a graph of dependencies between unorderedTransformations.
@@ -177,7 +177,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                         cycleNodesString,
                         additionalLocations );
 
-                reportDiagnostic( diagnostic );
+                diagnosticAdder.ReportDiagnostic( diagnostic );
 
                 return false;
             }

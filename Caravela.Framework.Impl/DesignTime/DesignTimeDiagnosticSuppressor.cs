@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
-        private static readonly string[] _vs = { "IDE001" };
+        private static readonly string[] _vs = { "CS1998", "IDE0051" };
         private static readonly string[] _supportedSuppressions = _vs;
 
         private static readonly ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
@@ -85,11 +85,12 @@ namespace Caravela.Framework.Impl.DesignTime
                         continue;
                     }
 
-                    // TODO: address warning.
 #pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
                     var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
 #pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-                    var symbol = semanticModel.GetEnclosingSymbol( diagnostic.Location.SourceSpan.Start );
+
+                    var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
 
                     if ( symbol == null )
                     {

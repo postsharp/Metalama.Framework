@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( syntaxTree != null )
             {
-                selectedDiagnostics = selectedDiagnostics.Where( d => d.Location.SourceTree.FilePath == syntaxTree.FilePath );
+                selectedDiagnostics = selectedDiagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTree.FilePath );
             }
 
             foreach ( var diagnostic in selectedDiagnostics )
