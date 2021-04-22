@@ -230,7 +230,7 @@ namespace Caravela.Framework.Impl.Templating
             // tuple can be initialize from variables and then items take names from variable name
             // but variable name is not safe and could be renamed because of target variables 
             // in this case we initialize tuple with explicit names
-            var symbol = (INamedTypeSymbol) this._semanticAnnotationMap.GetType( node )!;
+            var symbol = (INamedTypeSymbol) this._semanticAnnotationMap.GetExpressionType( node )!;
             var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
             for ( var i = 0; i < symbol.TupleElements.Length; i++ )
@@ -402,7 +402,7 @@ namespace Caravela.Framework.Impl.Templating
                     return expression;
             }
 
-            var type = this._semanticAnnotationMap.GetType( expression )!;
+            var type = this._semanticAnnotationMap.GetExpressionType( expression )!;
 
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateLiteralExpressionFactory( SyntaxKind syntaxKind )
@@ -497,7 +497,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // Cast to dynamic expressions.
             if ( transformationKind != TransformationKind.Transform &&
-                 this._semanticAnnotationMap.GetType( node.Expression ) is IDynamicTypeSymbol )
+                 this._semanticAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
             {
                 return InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.CreateDynamicMemberAccessExpression) ),
@@ -874,7 +874,7 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
         {
             if ( node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
-                 this._semanticAnnotationMap.GetType( node.Expression )!.Kind != SymbolKind.DynamicType )
+                 this._semanticAnnotationMap.GetExpressionType( node.Expression )!.Kind != SymbolKind.DynamicType )
             {
                 var token = this.MetaSyntaxFactory.Token(
                     LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
@@ -1042,7 +1042,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.Expression != null && this.IsProceed( node.Expression ) )
             {
-                var expressionType = this._semanticAnnotationMap.GetType( node.Expression );
+                var expressionType = this._semanticAnnotationMap.GetExpressionType( node.Expression );
 
                 if ( expressionType == null )
                 {

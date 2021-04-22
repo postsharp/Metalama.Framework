@@ -67,6 +67,13 @@ namespace Caravela.Framework.Impl.Templating
             this.ReportDiagnostic( TemplatingDiagnosticDescriptors.LanguageFeatureIsNotSupported, node, node.Kind().ToString() );
         }
 
+        /// <summary>
+        /// Reports a diagnostic.
+        /// </summary>
+        /// <param name="descriptor">Diagnostic descriptor.</param>
+        /// <param name="targetNode">Node on which the diagnostic should be reported.</param>
+        /// <param name="arguments">Arguments of the formatting string.</param>
+        /// <typeparam name="T"></typeparam>
         private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, SyntaxNode targetNode, T arguments )
         {
             var location = this._semanticAnnotationMap.GetLocation( targetNode );
@@ -165,7 +172,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        private bool IsDynamic( SyntaxNode originalNode ) => this._semanticAnnotationMap.GetType( originalNode ) is IDynamicTypeSymbol;
+        private bool IsDynamic( SyntaxNode originalNode ) => this._semanticAnnotationMap.GetExpressionType( originalNode ) is IDynamicTypeSymbol;
 
         /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.

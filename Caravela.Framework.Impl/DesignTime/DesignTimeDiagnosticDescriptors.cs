@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 = new(
                     "CR0300",
                     "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. "+
+                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
                     "Consider adding [CompileTimeOnly] to '{0}', or do not use '{1}' in '{0}'.'",
                     _category,
                     DiagnosticSeverity.Error );

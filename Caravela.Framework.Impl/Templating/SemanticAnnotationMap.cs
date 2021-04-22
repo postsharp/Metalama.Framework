@@ -13,16 +13,26 @@ namespace Caravela.Framework.Impl.Templating
     /// <summary>
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)
     /// so that the <see cref="SemanticModel"/> does not need to re-evaluated everything the syntax tree
-    /// has changes that don't affect symbols. A syntax tree can be annotated using <see cref="AnnotateTree"/>
+    /// has changes that don't affect symbols. It also caches the <see cref="Location"/> of nodes, so that diagnostics
+    /// on transformed node can be reported to their original location. A syntax tree can be annotated using <see cref="AnnotateTree"/>
     /// and the symbols can then be retrieved using <see cref="GetSymbol"/>,
-    /// <see cref="GetType"/> and <see cref="GetDeclaredSymbol"/>.
+    /// <see cref="GetExpressionType"/>, <see cref="GetDeclaredSymbol"/> and <see cref="GetLocation"/>.
     /// </summary>
     internal sealed class SemanticAnnotationMap
     {
         private const string _locationAnnotationKind = "location";
+        private const string _symbolAnnotationKind = "symbol";
+        private const string _declaredSymbolAnnotationKind = "declared";
+        private const string _expressionTypeAnnotationKind = "type";
+
+        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
+            _symbolAnnotationKind,
+            _declaredSymbolAnnotationKind,
+            _expressionTypeAnnotationKind,
+            _locationAnnotationKind );
+
         private readonly List<Location> _indexToLocationMap = new();
         private readonly Dictionary<Location, int> _locationToIndexMap = new();
-        private readonly bool _mapLocation;
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _declaredSymbolToAnnotationMap = new();
         private readonly Dictionary<SyntaxAnnotation, ISymbol> _annotationToDeclaredSymbolMap = new();
         private readonly Dictionary<ISymbol, SyntaxAnnotation> _symbolToAnnotationMap = new();
@@ -31,13 +41,6 @@ namespace Caravela.Framework.Impl.Templating
         private readonly Dictionary<SyntaxAnnotation, ITypeSymbol> _annotationToTypeMap = new();
 
         private int _nextId;
-
-        public SemanticAnnotationMap( bool mapLocation )
-        {
-            this._mapLocation = true;
-        }
-
-        internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create( "local", "symbol", "declared", "type", _locationAnnotationKind );
 
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
@@ -64,33 +67,30 @@ namespace Caravela.Framework.Impl.Templating
             // Don't run twice.
             if ( transformedNode.HasAnnotations( AnnotationKinds ) )
             {
-                return transformedNode;
+                throw new AssertionFailedException();
             }
 
             var annotatedNode = transformedNode;
+
+            // Cache location.
+            var location = originalNode.GetLocation();
+
+            if ( location != null )
+            {
+                if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
+                {
+                    index = this._locationToIndexMap.Count;
+                    this._indexToLocationMap.Add( location );
+                    this._locationToIndexMap.Add( location, index );
+                }
+
+                annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
+            }
 
             // Get info from the semantic mode.
             var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
             var typeInfo = semanticModel.GetTypeInfo( originalNode );
             var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode );
-
-            // Cache location.
-            if ( this._mapLocation )
-            {
-                var location = originalNode.GetLocation();
-
-                if ( location != null )
-                {
-                    if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
-                    {
-                        index = this._locationToIndexMap.Count;
-                        this._indexToLocationMap.Add( location );
-                        this._locationToIndexMap.Add( location, index );
-                    }
-
-                    annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
-                }
-            }
 
             // Cache semanticModel.GetSymbolInfo
             if ( symbolInfo.Symbol != null )
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( !this._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
                 {
                     this._nextId++;
-                    annotation = new SyntaxAnnotation( "symbol", this._nextId.ToString() );
+                    annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._nextId.ToString() );
                     this._symbolToAnnotationMap[symbolInfo.Symbol] = annotation;
                     this._annotationToSymbolMap[annotation] = symbolInfo.Symbol;
                 }
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( !this._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
                 {
                     this._nextId++;
-                    annotation = new SyntaxAnnotation( "declared", this._nextId.ToString() );
+                    annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._nextId.ToString() );
                     this._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
                     this._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
                 }
@@ -126,7 +126,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( !this._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                 {
                     this._nextId++;
-                    annotation = new SyntaxAnnotation( "type", this._nextId.ToString() );
+                    annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._nextId.ToString() );
                     this._typeToAnnotationMap[typeInfo.Type] = annotation;
                     this._annotationToTypeMap[annotation] = typeInfo.Type;
                 }
@@ -139,22 +139,15 @@ namespace Caravela.Framework.Impl.Templating
 
         public Location? GetLocation( SyntaxNode node )
         {
-            if ( !this._mapLocation )
+            var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
+
+            if ( annotation == null )
             {
-                return node.GetLocation();
+                return null;
             }
             else
             {
-                var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
-
-                if ( annotation == null )
-                {
-                    return null;
-                }
-                else
-                {
-                    return this._indexToLocationMap[int.Parse( annotation.Data! )];
-                }
+                return this._indexToLocationMap[int.Parse( annotation.Data! )];
             }
         }
 
@@ -165,7 +158,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         public ISymbol? GetSymbol( SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( "symbol" ).SingleOrDefault();
+            var annotation = node.GetAnnotations( _symbolAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {
@@ -182,7 +175,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         public ISymbol? GetDeclaredSymbol( SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( "declared" ).SingleOrDefault();
+            var annotation = node.GetAnnotations( _declaredSymbolAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {
@@ -251,9 +244,9 @@ namespace Caravela.Framework.Impl.Templating
         /// <summary>
         /// Returns the result of <c>semanticModel.GetTypeInfo(node).Type</c>.
         /// </summary>
-        public ITypeSymbol? GetType( SyntaxNode node )
+        public ITypeSymbol? GetExpressionType( SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( "type" ).SingleOrDefault();
+            var annotation = node.GetAnnotations( _expressionTypeAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {

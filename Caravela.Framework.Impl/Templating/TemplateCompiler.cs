@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Annotate the syntax tree with symbols.
-            symbolAnnotationMap = new SemanticAnnotationMap( reportDiagnosticsToInitialCompilation );
+            symbolAnnotationMap = new SemanticAnnotationMap();
             currentSyntaxRoot = symbolAnnotationMap.AnnotateTree( sourceSyntaxRoot, semanticModel );
 
             FixupTreeForDiagnostics();

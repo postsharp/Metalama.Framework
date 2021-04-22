@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl
             AspectType? baseAspectType,
             IAspectDriver? aspectDriver,
             IDiagnosticAdder diagnosticAdder,
-            [NotNullWhen(true)] out AspectType? aspectType )
+            [NotNullWhen( true )] out AspectType? aspectType )
         {
             var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
 

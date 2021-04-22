@@ -57,7 +57,11 @@ namespace Caravela.Framework.Impl.CompileTime
             return this.TryCreateAttribute( attribute, type, diagnosticAdder, out attributeInstance! );
         }
 
-        private bool TryCreateAttribute( IAttribute attribute, Type type, IDiagnosticAdder diagnosticAdder, [NotNullWhen(true)] out Attribute? attributeInstance )
+        private bool TryCreateAttribute(
+            IAttribute attribute,
+            Type type,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var constructor = type.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
