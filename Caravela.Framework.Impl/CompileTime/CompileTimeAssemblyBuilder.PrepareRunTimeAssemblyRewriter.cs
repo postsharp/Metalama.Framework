@@ -67,8 +67,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( this.GetSymbolDeclarationScope( node ) is SymbolDeclarationScope.CompileTimeOnly )
                 {
-                    if ( node.Modifiers.All(x => x.Kind() != SyntaxKind.AbstractKeyword)
-                        && node.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true )
+                    if ( node.Modifiers.All( x => x.Kind() != SyntaxKind.AbstractKeyword )
+                         && node.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true )
                     {
                         // This is auto property - we keep it as it is (otherwise we lose the initial value and the fact that it is an auto property).
                         return node;

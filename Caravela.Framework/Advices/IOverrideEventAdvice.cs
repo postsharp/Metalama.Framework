@@ -5,7 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices
 {
-    public interface IOverrideEventAdvice : IAdvice<IProperty>
-    {
-    }
+    public interface IOverrideEventAdvice : IAdvice<IProperty> { }
 }

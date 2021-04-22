@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IParameter ReturnParameter => new ReturnParam( this );
 
         [Memo]
-        public IType ReturnType =>
-            this._semantic != PseudoAccessorSemantic.Get
-            ? ((CompilationModel)this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof( void ) )
-            : ((IProperty) this._containingMember).Type;
+        public IType ReturnType
+            => this._semantic != PseudoAccessorSemantic.Get
+                ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof(void) )
+                : ((IProperty) this._containingMember).Type;
 
         [Memo]
         public IGenericParameterList GenericParameters => new GenericParameterList( this, Enumerable.Empty<CodeElementLink<IGenericParameter>>() );
@@ -44,15 +44,15 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool HasBase => false;
 
         public IMethodInvocation Base => throw new InvalidOperationException();
-        
+
         public IMethod? OverriddenMethod => null;
 
         public IMethodList LocalFunctions => MethodList.Empty;
 
         public IParameterList Parameters => throw new NotImplementedException();
 
-        public MethodKind MethodKind => 
-            this._semantic switch 
+        public MethodKind MethodKind
+            => this._semantic switch
             {
                 PseudoAccessorSemantic.Get => MethodKind.PropertyGet,
                 PseudoAccessorSemantic.Set => MethodKind.PropertySet,
@@ -64,8 +64,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Accessibility Accessibility => this._containingMember.Accessibility;
 
-        public string Name =>
-            this._semantic switch
+        public string Name
+            => this._semantic switch
             {
                 PseudoAccessorSemantic.Get => $"get_{this._containingMember.Name}",
                 PseudoAccessorSemantic.Set => $"set_{this._containingMember.Name}",
@@ -105,14 +105,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public ICompilation Compilation => this._containingMember.Compilation;
 
-        public dynamic Invoke( dynamic? instance, params dynamic[] args )
-            => throw new NotImplementedException();
+        public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => throw new NotImplementedException();
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        public IMethod WithGenericArguments( params IType[] genericArguments ) 
-            => throw new NotSupportedException();
+        public IMethod WithGenericArguments( params IType[] genericArguments ) => throw new NotSupportedException();
 
         private sealed class ReturnParam : IParameter
         {
@@ -120,13 +117,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public IMember DeclaringMember => this.DeclaringAccessor;
 
-            public RefKind RefKind => this.DeclaringAccessor.ContainingElement switch
-            {
-                Property property => property.RefKind,
-                Field _ => RefKind.None,
-                Event _ => RefKind.None,
-                _ => throw new AssertionFailedException()
-            };
+            public RefKind RefKind
+                => this.DeclaringAccessor.ContainingElement switch
+                {
+                    Property property => property.RefKind,
+                    Field _ => RefKind.None,
+                    Event _ => RefKind.None,
+                    _ => throw new AssertionFailedException()
+                };
 
             public IType ParameterType => this.DeclaringAccessor.ReturnType;
 
@@ -148,15 +146,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public IDiagnosticLocation? DiagnosticLocation => throw new NotImplementedException();
 
-            public ICompilation Compilation => throw new System.NotImplementedException();
+            public ICompilation Compilation => throw new NotImplementedException();
 
             public ReturnParam( PseudoAccessor declaringAccessor )
             {
                 this.DeclaringAccessor = declaringAccessor;
             }
 
-            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-                => throw new NotImplementedException();
+            public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
         }
     }
 }

@@ -21,7 +21,9 @@ namespace Caravela.Framework.Advices
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
+            get
+                => this._accessibility
+                   ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
             set => this._accessibility = value;
         }
 

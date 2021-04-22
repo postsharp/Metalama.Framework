@@ -27,7 +27,12 @@ namespace Caravela.Framework.Impl.Transformations
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public OverriddenProperty( Advice advice, IProperty overriddenDeclaration, IMethod? getTemplateMethod, IMethod? setTemplateMethod, AspectLinkerOptions? linkerOptions = null )
+        public OverriddenProperty(
+            Advice advice,
+            IProperty overriddenDeclaration,
+            IMethod? getTemplateMethod,
+            IMethod? setTemplateMethod,
+            AspectLinkerOptions? linkerOptions = null )
         {
             Invariant.Assert( advice != null );
             Invariant.Assert( overriddenDeclaration != null );

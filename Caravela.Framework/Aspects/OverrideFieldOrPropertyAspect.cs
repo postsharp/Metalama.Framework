@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Advices;
 using Caravela.Framework.Code;
+using System;
 
 namespace Caravela.Framework.Aspects
 {
@@ -16,13 +16,14 @@ namespace Caravela.Framework.Aspects
         /// <inheritdoc />
         public virtual void Initialize( IAspectBuilder<IFieldOrProperty> aspectBuilder )
         {
-            aspectBuilder.AdviceFactory.OverrideFieldOrProperty( aspectBuilder.TargetDeclaration, nameof( this.OverrideProperty ) );
+            aspectBuilder.AdviceFactory.OverrideFieldOrProperty( aspectBuilder.TargetDeclaration, nameof(this.OverrideProperty) );
         }
 
         [OverrideFieldOrPropertyTemplate]
         public abstract dynamic? OverrideProperty
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

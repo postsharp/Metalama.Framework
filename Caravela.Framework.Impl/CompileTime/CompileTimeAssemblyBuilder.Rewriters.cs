@@ -40,9 +40,9 @@ namespace Caravela.Framework.Impl.CompileTime
                     .WithTrailingTrivia( LineFeed, LineFeed );
             }
 
-            protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody(BasePropertyDeclarationSyntax baseProperty, string message)
+            protected static BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax baseProperty, string message )
             {
-                if ( baseProperty.Modifiers.Any(x => x.Kind() == SyntaxKind.AbstractKeyword ) )
+                if ( baseProperty.Modifiers.Any( x => x.Kind() == SyntaxKind.AbstractKeyword ) )
                 {
                     // Abstract property - we don't have to do anything with it.
                     return baseProperty;

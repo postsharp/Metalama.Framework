@@ -32,7 +32,11 @@ namespace Caravela.Framework.Impl
             this._compilation = compilation;
         }
 
-        private IMethod? GetTemplateMethod( string methodName, Type expectedAttributeType, string adviceName, [DoesNotReturnIf(true)] bool throwIfMissing = true )
+        private IMethod? GetTemplateMethod(
+            string methodName,
+            Type expectedAttributeType,
+            string adviceName,
+            [DoesNotReturnIf( true )] bool throwIfMissing = true )
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
@@ -88,11 +92,21 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty( IFieldOrProperty targetDeclaration, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IOverrideFieldOrPropertyAdvice OverrideFieldOrProperty(
+            IFieldOrProperty targetDeclaration,
+            string defaultTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // Set template represents both set and init accessors.
-            var getTemplateMethod = this.GetTemplateMethod( $"get_{defaultTemplate}", typeof( OverrideFieldOrPropertyTemplateAttribute ), nameof( this.OverrideFieldOrProperty ) );
-            var setTemplateMethod = this.GetTemplateMethod( $"set_{defaultTemplate}", typeof( OverrideFieldOrPropertyTemplateAttribute ), nameof( this.OverrideFieldOrProperty ) );
+            var getTemplateMethod = this.GetTemplateMethod(
+                $"get_{defaultTemplate}",
+                typeof(OverrideFieldOrPropertyTemplateAttribute),
+                nameof(this.OverrideFieldOrProperty) );
+
+            var setTemplateMethod = this.GetTemplateMethod(
+                $"set_{defaultTemplate}",
+                typeof(OverrideFieldOrPropertyTemplateAttribute),
+                nameof(this.OverrideFieldOrProperty) );
 
             var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
             this._advices.Add( advice );
@@ -100,11 +114,22 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors( IFieldOrProperty targetDeclaration, string? defaultGetTemplate, string? setTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IOverrideFieldOrPropertyAdvice OverrideFieldOrPropertyAccessors(
+            IFieldOrProperty targetDeclaration,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // Set template represents both set and init accessors.
-            var getTemplateMethod = this.GetTemplateMethod( defaultGetTemplate, typeof( OverrideFieldOrPropertyGetTemplateAttribute ), nameof( this.OverrideFieldOrPropertyAccessors ) );
-            var setTemplateMethod = this.GetTemplateMethod( setTemplate, typeof( OverrideFieldOrPropertySetTemplateAttribute ), nameof( this.OverrideFieldOrPropertyAccessors ) );
+            var getTemplateMethod = this.GetTemplateMethod(
+                defaultGetTemplate,
+                typeof(OverrideFieldOrPropertyGetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
+
+            var setTemplateMethod = this.GetTemplateMethod(
+                setTemplate,
+                typeof(OverrideFieldOrPropertySetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
             this._advices.Add( advice );
@@ -112,22 +137,44 @@ namespace Caravela.Framework.Impl
             return advice;
         }
 
-        public IIntroduceFieldAdvice IntroduceField( INamedType targetType, IntroductionScope scope = IntroductionScope.Default, ConflictBehavior conflictBehavior = ConflictBehavior.Default, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IIntroduceFieldAdvice IntroduceField(
+            INamedType targetType,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceProperty( INamedType targetType, string? defaultGetTemplate, string? setTemplate, IntroductionScope scope = IntroductionScope.Default, ConflictBehavior conflictBehavior = ConflictBehavior.Default, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string? defaultGetTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             throw new NotImplementedException();
         }
 
-        public IOverrideEventAdvice OverrideEventAccessors( IEvent targetDeclaration, string? addTemplate, string? removeTemplate, string? invokeTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IOverrideEventAdvice OverrideEventAccessors(
+            IEvent targetDeclaration,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             throw new NotImplementedException();
         }
 
-        public IIntroducePropertyAdvice IntroduceEvent( INamedType targetType, string? addTemplate, string? removeTemplate, string? invokeTemplate = null, IntroductionScope scope = IntroductionScope.Default, ConflictBehavior conflictBehavior = ConflictBehavior.Default, AspectLinkerOptions? aspectLinkerOptions = null )
+        public IIntroducePropertyAdvice IntroduceEvent(
+            INamedType targetType,
+            string? addTemplate,
+            string? removeTemplate,
+            string? invokeTemplate = null,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
         {
             throw new NotImplementedException();
         }

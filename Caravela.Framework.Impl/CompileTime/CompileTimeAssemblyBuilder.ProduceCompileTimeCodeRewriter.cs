@@ -141,7 +141,9 @@ namespace Caravela.Framework.Impl.CompileTime
                         if ( node.AccessorList != null )
                         {
                             var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
-                            var setAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
+
+                            var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
+                                a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
                             var propertyIdentifier = node switch
                             {
@@ -160,25 +162,25 @@ namespace Caravela.Framework.Impl.CompileTime
                             if ( getAccessor != null )
                             {
                                 success = success &&
-                                    TemplateCompiler.TryCompile(
-                                        this._compileTimeCompilation,
-                                        RewriteAccessorToMethod( getAccessor, propertyIdentifier, node.Type, propertyParameters ),
-                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnostics,
-                                        out _,
-                                        out transformedGetNode );
+                                          TemplateCompiler.TryCompile(
+                                              this._compileTimeCompilation,
+                                              RewriteAccessorToMethod( getAccessor, propertyIdentifier, node.Type, propertyParameters ),
+                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                              this._diagnostics,
+                                              out _,
+                                              out transformedGetNode );
                             }
 
                             if ( setAccessor != null )
                             {
                                 success = success &&
-                                    TemplateCompiler.TryCompile(
-                                        this._compileTimeCompilation,
-                                        RewriteAccessorToMethod( setAccessor, propertyIdentifier, node.Type, propertyParameters ),
-                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnostics,
-                                        out _,
-                                        out transformedSetNode );
+                                          TemplateCompiler.TryCompile(
+                                              this._compileTimeCompilation,
+                                              RewriteAccessorToMethod( setAccessor, propertyIdentifier, node.Type, propertyParameters ),
+                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                              this._diagnostics,
+                                              out _,
+                                              out transformedSetNode );
                             }
                         }
                     }
@@ -236,37 +238,42 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            private static MethodDeclarationSyntax RewriteAccessorToMethod( AccessorDeclarationSyntax node, string methodGroupName, TypeSyntax methodGroupReturnType, SeparatedSyntaxList<ParameterSyntax>? methodGroupParameters )
+            private static MethodDeclarationSyntax RewriteAccessorToMethod(
+                AccessorDeclarationSyntax node,
+                string methodGroupName,
+                TypeSyntax methodGroupReturnType,
+                SeparatedSyntaxList<ParameterSyntax>? methodGroupParameters )
             {
                 if ( UsesValueKeyword( node.Keyword ) )
                 {
                     return
                         MethodDeclaration(
-                            PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
-                            $"{node.Keyword.ValueText}_{methodGroupName}" )
-                        .WithParameterList(
-                            methodGroupParameters != null
-                            ? ParameterList( methodGroupParameters.Value.Add(
-                                Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) )
-                            : ParameterList(
-                                SingletonSeparatedList(
-                                    Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) ) )
-                        .WithExpressionBody( node.ExpressionBody )
-                        .WithBody( node.Body )
-                        .WithSemicolonToken( node.SemicolonToken )
-                        .NormalizeWhitespace();
+                                PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                                $"{node.Keyword.ValueText}_{methodGroupName}" )
+                            .WithParameterList(
+                                methodGroupParameters != null
+                                    ? ParameterList(
+                                        methodGroupParameters.Value.Add(
+                                            Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) )
+                                    : ParameterList(
+                                        SingletonSeparatedList(
+                                            Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) ) )
+                            .WithExpressionBody( node.ExpressionBody )
+                            .WithBody( node.Body )
+                            .WithSemicolonToken( node.SemicolonToken )
+                            .NormalizeWhitespace();
                 }
                 else
                 {
                     return
                         MethodDeclaration(
-                            methodGroupReturnType,
-                            $"{node.Keyword.ValueText}_{methodGroupName}" )
-                        .WithParameterList( methodGroupParameters != null ? ParameterList( methodGroupParameters.Value ) : ParameterList() )
-                        .WithExpressionBody( node.ExpressionBody )
-                        .WithBody( node.Body )
-                        .WithSemicolonToken( node.SemicolonToken )
-                        .NormalizeWhitespace();
+                                methodGroupReturnType,
+                                $"{node.Keyword.ValueText}_{methodGroupName}" )
+                            .WithParameterList( methodGroupParameters != null ? ParameterList( methodGroupParameters.Value ) : ParameterList() )
+                            .WithExpressionBody( node.ExpressionBody )
+                            .WithBody( node.Body )
+                            .WithSemicolonToken( node.SemicolonToken )
+                            .NormalizeWhitespace();
                 }
 
                 static bool UsesValueKeyword( SyntaxToken keyword )

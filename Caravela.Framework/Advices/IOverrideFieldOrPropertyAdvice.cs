@@ -5,7 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices
 {
-    public interface IOverrideFieldOrPropertyAdvice : IAdvice<IFieldOrProperty>
-    {
-    }
+    public interface IOverrideFieldOrPropertyAdvice : IAdvice<IFieldOrProperty> { }
 }

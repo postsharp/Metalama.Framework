@@ -21,19 +21,21 @@ namespace Caravela.Framework.Advices
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetAccessibility )} to get nullable value." );
+            get
+                => this._accessibility
+                   ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
             set => this._accessibility = value;
         }
 
         public bool IsVirtual
         {
-            get => this._isVirtual ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetIsVirtual )} to get nullable value." );
+            get => this._isVirtual ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
             set => this._isVirtual = value;
         }
 
         public bool IsSealed
         {
-            get => this._isSealed ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetIsSealed )} to get nullable value." );
+            get => this._isSealed ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
             set => this._isSealed = value;
         }
 

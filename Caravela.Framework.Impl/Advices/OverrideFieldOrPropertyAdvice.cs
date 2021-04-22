@@ -20,11 +20,11 @@ namespace Caravela.Framework.Impl
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public OverrideFieldOrPropertyAdvice( 
-            AspectInstance aspect, 
-            IFieldOrProperty targetDeclaration, 
-            IMethod getTemplateMethod, 
-            IMethod setTemplateMethod, 
+        public OverrideFieldOrPropertyAdvice(
+            AspectInstance aspect,
+            IFieldOrProperty targetDeclaration,
+            IMethod getTemplateMethod,
+            IMethod setTemplateMethod,
             AspectLinkerOptions aspectLinkerOptions ) : base( aspect, targetDeclaration )
         {
             this.GetTemplateMethod = getTemplateMethod;
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl
         public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Translate templates to this compilation.
-            if (this.TargetDeclaration is IField field)
+            if ( this.TargetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( this, field, this.LinkerOptions );
 
@@ -43,9 +43,9 @@ namespace Caravela.Framework.Impl
                     promotedField,
                     new OverriddenProperty( this, promotedField, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
             }
-            else if (this.TargetDeclaration is IProperty property)
+            else if ( this.TargetDeclaration is IProperty property )
             {
-                return AdviceResult.Create(new OverriddenProperty( this, property, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                return AdviceResult.Create( new OverriddenProperty( this, property, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
             }
             else
             {

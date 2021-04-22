@@ -5,7 +5,5 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Advices
 {
-    public interface IIntroducePropertyAdvice : IIntroduceAdvice<INamedType, IPropertyBuilder>
-    {
-    }
+    public interface IIntroducePropertyAdvice : IIntroduceAdvice<INamedType, IPropertyBuilder> { }
 }
