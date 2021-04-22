@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -18,21 +19,21 @@ namespace Caravela.Framework.Impl.CompileTime
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
             private readonly Compilation _compileTimeCompilation;
-            private readonly List<Diagnostic> _diagnostics = new();
+            private readonly IDiagnosticAdder _diagnosticAdder;
 
             public bool Success { get; private set; } = true;
-
-            public IReadOnlyList<Diagnostic> Diagnostics => this._diagnostics;
 
             public bool FoundCompileTimeCode { get; private set; }
 
             public ProduceCompileTimeCodeRewriter(
                 ISymbolClassifier symbolClassifier,
                 Compilation runTimeCompilation,
-                Compilation compileTimeCompilation )
-                : base( symbolClassifier, runTimeCompilation )
+                Compilation compileTimeCompilation,
+                IDiagnosticAdder diagnosticAdder )
+                : base( runTimeCompilation )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
+                this._diagnosticAdder = diagnosticAdder;
             }
 
             // TODO: assembly and module-level attributes?
@@ -105,7 +106,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             this._compileTimeCompilation,
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                            this._diagnostics,
+                            this._diagnosticAdder,
                             out _,
                             out var transformedNode );
 
@@ -166,7 +167,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               this._compileTimeCompilation,
                                               RewriteAccessorToMethod( getAccessor, propertyIdentifier, node.Type, propertyParameters ),
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnostics,
+                                              this._diagnosticAdder,
                                               out _,
                                               out transformedGetNode );
                             }
@@ -178,7 +179,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                               this._compileTimeCompilation,
                                               RewriteAccessorToMethod( setAccessor, propertyIdentifier, node.Type, propertyParameters ),
                                               this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnostics,
+                                              this._diagnosticAdder,
                                               out _,
                                               out transformedSetNode );
                             }

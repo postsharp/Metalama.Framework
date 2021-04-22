@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
-        private static readonly string[] _vs = { "IDE001" };
+        private static readonly string[] _vs = { "CS1998", "IDE0051" };
         private static readonly string[] _supportedSuppressions = _vs;
 
         private static readonly ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
@@ -62,19 +62,13 @@ namespace Caravela.Framework.Impl.DesignTime
             BuildOptions options,
             CancellationToken cancellationToken )
         {
-            if ( !DesignTimeAspectPipelineCache.TryGet( compilation, out var pipelineResult ) )
-            {
-                using DesignTimeAspectPipeline pipeline = new( new DesignTimeAspectPipelineContext(
-                                                                   compilation,
-                                                                   options,
-                                                                   null,
-                                                                   cancellationToken ) );
+            // Execute the pipeline.
+            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+                compilation,
+                options,
+                cancellationToken );
 
-                _ = pipeline.TryExecute( out pipelineResult );
-
-                DesignTimeAspectPipelineCache.Add( compilation, pipelineResult );
-            }
-
+            // Report suppressions.
             if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
             {
                 var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
@@ -91,8 +85,12 @@ namespace Caravela.Framework.Impl.DesignTime
                         continue;
                     }
 
+#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
                     var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
-                    var symbol = semanticModel.GetEnclosingSymbol( diagnostic.Location.SourceSpan.Start );
+#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
+
+                    var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
 
                     if ( symbol == null )
                     {

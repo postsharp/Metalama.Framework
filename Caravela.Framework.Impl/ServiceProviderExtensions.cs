@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
 
             if ( service == null )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Cannot get the service {typeof(T).Name}." );
             }
 
             return service;

@@ -38,7 +38,6 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IReadOnlyList<IType> GenericArguments => ImmutableList<IType>.Empty;
 
-        [Memo]
         public bool IsOpenGeneric => this._containingMember.DeclaringType.IsOpenGeneric;
 
         public bool HasBase => false;

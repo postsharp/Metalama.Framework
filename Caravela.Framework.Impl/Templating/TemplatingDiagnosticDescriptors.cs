@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -73,10 +72,5 @@ namespace Caravela.Framework.Impl.Templating
                 "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 DiagnosticSeverity.Error );
-
-        public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
-        {
-            return LanguageFeatureIsNotSupported.CreateDiagnostic( node.GetLocation(), node.Kind().ToString() );
-        }
     }
 }
