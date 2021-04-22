@@ -127,14 +127,16 @@ namespace Caravela.TestFramework
 
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
 
+            var storedTransformedSourceText = File.Exists( actualTransformedPath ) ? NormalizeString( File.ReadAllText( actualTransformedPath ) ) : null;
+
             if ( expectedTransformedSourceText == actualTransformedSourceText
-                 && NormalizeString( File.ReadAllText( actualTransformedPath ) ) != expectedNonNormalizedSourceText )
+                 && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
                 // Update the obj\transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
                 File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
             }
-            else if ( !File.Exists( actualTransformedPath ) || NormalizeString( File.ReadAllText( actualTransformedPath ) ) != actualTransformedSourceText )
+            else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedSourceText )
             {
                 File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
             }
