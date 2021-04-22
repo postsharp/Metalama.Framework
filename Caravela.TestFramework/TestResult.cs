@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,7 +15,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Represents the result of an integration test run.
     /// </summary>
-    public sealed class TestResult
+    public sealed class TestResult : IDiagnosticAdder
     {
         private readonly List<Diagnostic> _diagnostics = new();
 
@@ -33,9 +34,10 @@ namespace Caravela.TestFramework
             this.InitialCompilation = initialCompilation;
         }
 
-        internal void AddDiagnostic( Diagnostic diagnostic ) => this._diagnostics.Add( diagnostic );
-
-        internal void AddDiagnostics( IEnumerable<Diagnostic> diagnostics ) => this._diagnostics.AddRange( diagnostics );
+        public void ReportDiagnostic( Diagnostic diagnostic )
+        {
+            this._diagnostics.Add( diagnostic );
+        }
 
         /// <summary>
         /// Gets the list of diagnostics emitted during test run.

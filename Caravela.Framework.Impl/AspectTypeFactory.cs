@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Impl
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedType> attributeTypes )
+        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedType> attributeTypes, IDiagnosticAdder diagnosticAdder )
         {
             foreach ( var attributeType in attributeTypes.OrderBy( at => this._compilation.GetDepth( at ) ) )
             {
@@ -40,9 +41,10 @@ namespace Caravela.Framework.Impl
                 {
                     var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                    aspectType = new AspectType( attributeType, baseAspectType, aspectDriver );
-
-                    this._aspectTypes.Add( attributeType, aspectType );
+                    if ( AspectType.TryCreateAspectType( attributeType, baseAspectType, aspectDriver, diagnosticAdder, out aspectType ) )
+                    {
+                        this._aspectTypes.Add( attributeType, aspectType );
+                    }
                 }
             }
 

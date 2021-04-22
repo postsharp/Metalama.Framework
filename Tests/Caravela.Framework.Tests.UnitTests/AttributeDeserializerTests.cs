@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
@@ -18,7 +19,12 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateCompilation( code, dependentCode );
             AttributeDeserializer deserializer = new( new SystemTypeResolver() );
             var attribute = compilation.Attributes.Single();
-            var deserializedAttribute = deserializer.CreateAttribute( attribute );
+            DiagnosticList diagnosticList = new();
+
+            if ( !deserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) )
+            {
+                throw new AssertionFailedException();
+            }
 
             return deserializedAttribute.GetType().GetProperty( property ).AssertNotNull().GetValue( deserializedAttribute );
         }
@@ -92,6 +98,32 @@ namespace Caravela.Framework.Tests.UnitTests
             Assert.Equal( 1, objectValue );
         }
 
+        [Fact]
+        public void TestParams()
+        {
+            static object Deserialize( string args )
+            {
+                var code = $@"[assembly: Caravela.Framework.Tests.UnitTests.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
+                var compilation = CreateCompilation( code );
+                AttributeDeserializer deserializer = new( new SystemTypeResolver() );
+                var attribute = compilation.Attributes.Single();
+
+                if ( !deserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                return ((TestParamsAttribute) deserializedAttribute).Value;
+            }
+
+            Assert.Equal( new[] { "a", "b" }, Deserialize( "\"a\", \"b\"" ) );
+            Assert.Equal( new[] { "a" }, Deserialize( "\"a\"" ) );
+            Assert.Equal( new[] { 1, 2 }, Deserialize( "1, 2" ) );
+            Assert.Equal( new[] { 1 }, Deserialize( "1" ) );
+            Assert.Equal( new[] { typeof(int), typeof(string) }, Deserialize( "typeof(int), typeof(string)" ) );
+            Assert.Equal( new[] { typeof(int) }, Deserialize( "typeof(int)" ) );
+        }
+
         public enum TestEnum
         {
             A,
@@ -117,6 +149,19 @@ namespace Caravela.Framework.Tests.UnitTests
             public Type[]? TypeArrayProperty { get; set; }
 
             public TestEnum[]? EnumArrayProperty { get; set; }
+        }
+
+        public class TestParamsAttribute : Attribute
+        {
+            public object Value { get; private set; }
+
+            public TestParamsAttribute( params string[] p ) { this.Value = p; }
+
+            public TestParamsAttribute( params int[] p ) { this.Value = p; }
+
+            public TestParamsAttribute( params Type[] p ) { this.Value = p; }
+
+            public TestParamsAttribute( params object[] p ) { this.Value = p; }
         }
     }
 }

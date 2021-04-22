@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -19,11 +20,14 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public bool TryExecute( [NotNullWhen( true )] out DesignTimeAspectPipelineResult result )
         {
-            var success = this.TryExecuteCore( out var pipelineResult );
+            DiagnosticList diagnosticList = new();
+            var success = this.TryExecuteCore( diagnosticList, out var pipelineResult );
 
             result = new DesignTimeAspectPipelineResult(
                 pipelineResult?.AdditionalSyntaxTrees,
-                pipelineResult != null ? pipelineResult.Diagnostics : ImmutableDiagnosticList.Empty );
+                new ImmutableDiagnosticList(
+                    diagnosticList.ToImmutableArray(),
+                    pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
 
             return success;
         }

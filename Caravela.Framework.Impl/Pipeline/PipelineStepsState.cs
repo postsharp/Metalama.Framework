@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
     /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
     /// </summary>
-    internal class PipelineStepsState : IPipelineStepsResult
+    internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
@@ -200,5 +200,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
+
+        public void ReportDiagnostic( Diagnostic diagnostic ) => this._diagnostics.ReportDiagnostic( diagnostic );
     }
 }

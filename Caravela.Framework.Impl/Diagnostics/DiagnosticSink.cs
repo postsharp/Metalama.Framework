@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public partial class DiagnosticSink : IDiagnosticSink
+    public partial class DiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
@@ -34,14 +34,6 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
             this._diagnostics.Add( diagnostic );
-        }
-
-        public void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
-        {
-            foreach ( var diagnostic in diagnostics )
-            {
-                this.ReportDiagnostic( diagnostic );
-            }
         }
 
         public void SuppressDiagnostic( ScopedSuppression suppression )
@@ -95,7 +87,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             var diagnostic = Diagnostic.Create(
                 id,
                 "Caravela.User",
-                new NonLocalizableString( formatMessage, args ),
+                new NonLocalizedString( formatMessage, args ),
                 roslynSeverity,
                 roslynSeverity,
                 true,
@@ -125,5 +117,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             => new(
                 this._diagnostics?.ToImmutable() ?? ImmutableArray<Diagnostic>.Empty,
                 this._suppressions?.ToImmutable() ?? ImmutableArray<ScopedSuppression>.Empty );
+
+        public override string ToString() => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}";
     }
 }

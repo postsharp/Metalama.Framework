@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -17,11 +18,11 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context ) { }
 
-        public bool TryExecute( [NotNullWhen( true )] out Compilation? outputCompilation )
+        public bool TryExecute( IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Compilation? outputCompilation )
         {
             try
             {
-                if ( !this.TryExecuteCore( out var result ) )
+                if ( !this.TryExecuteCore( diagnosticAdder, out var result ) )
                 {
                     outputCompilation = null;
 
@@ -33,18 +34,18 @@ namespace Caravela.Framework.Impl.Pipeline
                     this.Context.ManifestResources.Add( resource );
                 }
 
-                var compileTimeAssemblyBuilder = this.CompileTimeAssemblyBuilder.AssertNotNull();
+                var compileTimeAssemblyBuilder = this.CompileTimeAssemblyLoader!.CompileTimeAssemblyBuilder.AssertNotNull();
 
                 if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
                     if ( compileTimeAssemblyBuilder.BuiltAssemblies.TryGetValue( this.Context.Compilation.AssemblyName!, out var compileTimeAssembly ) )
                     {
                         this.Context.ManifestResources.Add(
-                            new ResourceDescription( compileTimeAssemblyBuilder.ResourceName, () => compileTimeAssembly, true ) );
+                            new ResourceDescription( CompileTimeAssemblyBuilder.ResourceName, () => compileTimeAssembly, true ) );
                     }
                 }
 
-                outputCompilation = compileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
+                outputCompilation = CompileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
 
                 return true;
             }
@@ -52,7 +53,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {
-                    this.Context.ReportDiagnostic( diagnostic );
+                    diagnosticAdder.ReportDiagnostic( diagnostic );
                 }
 
                 outputCompilation = null;
@@ -61,7 +62,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             catch ( Exception exception ) when ( this.Context.HandleExceptions )
             {
-                this.HandleException( exception );
+                this.HandleException( exception, diagnosticAdder );
                 outputCompilation = null;
 
                 return false;

@@ -78,5 +78,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 location: location,
                 additionalLocations: additionalLocations );
         }
+
+        public DiagnosticDescriptor ToDiagnosticDescriptor() => new( this.Id, this.Title, this.MessageFormat, this.Category, this.Severity, true );
     }
 }

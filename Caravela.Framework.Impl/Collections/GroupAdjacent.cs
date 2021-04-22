@@ -378,6 +378,7 @@ namespace MoreLinq
             public TKey Key { get; }
 
             public IEnumerator<TElement> GetEnumerator() => this._members.GetEnumerator();
+
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
         }
     }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Caravela.Framework.Impl.Pipeline
 {
     internal sealed partial class AspectPipelineTransformer
     {
-        private class AspectPipelineContext : IAspectPipelineContext
+        private class AspectPipelineContext : IAspectPipelineContext, IDiagnosticAdder
         {
             private readonly TransformerContext _transformerContext;
 

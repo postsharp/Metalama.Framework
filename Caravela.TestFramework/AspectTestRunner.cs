@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,15 +27,14 @@ namespace Caravela.TestFramework
             var context = new AspectTestPipelineContext( testResult );
             var pipeline = new CompileTimeAspectPipeline( context );
 
-            if ( pipeline.TryExecute( out var resultCompilation ) )
+            if ( pipeline.TryExecute( context, out var resultCompilation ) )
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();
 
                 if ( testInput.Options.IncludeFinalDiagnostics )
                 {
-                    var finalDiagnostics = resultCompilation.GetDiagnostics();
-                    testResult.AddDiagnostics( finalDiagnostics );
+                    testResult.ReportDiagnostics( resultCompilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
                 }
 
                 testResult.SetTransformedTarget( syntaxRoot );

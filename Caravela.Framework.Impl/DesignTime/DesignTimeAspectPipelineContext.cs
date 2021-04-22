@@ -4,7 +4,6 @@
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
@@ -13,15 +12,11 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal class DesignTimeAspectPipelineContext : IAspectPipelineContext
     {
-        private readonly Action<Diagnostic>? _reportDiagnostic;
-
         public DesignTimeAspectPipelineContext(
             CSharpCompilation compilation,
             IBuildOptions buildOptions,
-            Action<Diagnostic>? reportDiagnostic,
             CancellationToken cancellationToken )
         {
-            this._reportDiagnostic = reportDiagnostic;
             this.BuildOptions = buildOptions;
             this.Compilation = compilation;
             this.CancellationToken = cancellationToken;
@@ -36,8 +31,6 @@ namespace Caravela.Framework.Impl.DesignTime
         public IBuildOptions BuildOptions { get; }
 
         public CancellationToken CancellationToken { get; }
-
-        public void ReportDiagnostic( Diagnostic diagnostic ) => this._reportDiagnostic?.Invoke( diagnostic );
 
         public bool HandleExceptions => true;
     }

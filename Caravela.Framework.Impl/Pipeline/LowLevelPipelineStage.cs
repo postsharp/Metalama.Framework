@@ -29,8 +29,10 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType ) ).ToImmutableArray<IAspectInstance>();
             var diagnostics = new DiagnosticSink();
+
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType, diagnostics ) )
+                .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
             {

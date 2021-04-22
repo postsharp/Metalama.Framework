@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -16,15 +17,15 @@ namespace Caravela.Framework.Tests.Integration.Templating
     {
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
+        private readonly IDiagnosticAdder _diagnosticAdder;
 
-        public TestTemplateCompiler( SemanticModel semanticModel )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
         {
             this._semanticModel = semanticModel;
+            this._diagnosticAdder = diagnosticAdder;
         }
 
         public bool HasError { get; private set; }
-
-        public List<Diagnostic> Diagnostics { get; } = new();
 
         private static bool IsTemplate( ISymbol symbol )
         {
@@ -57,7 +58,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
             catch ( InvalidUserCodeException e )
             {
-                this.Diagnostics.AddRange( e.Diagnostics );
+                this._diagnosticAdder.ReportDiagnostics( e.Diagnostics );
                 annotatedNode = null;
                 transformedNode = null;
 
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                         this._compileTimeCompilation,
                         node,
                         this._parent._semanticModel,
-                        this._parent.Diagnostics,
+                        this._parent._diagnosticAdder,
                         out var annotatedNode,
                         out var transformedNode ) )
                     {

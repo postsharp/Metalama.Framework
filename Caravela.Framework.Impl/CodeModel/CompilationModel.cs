@@ -230,7 +230,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
-        ISymbol? ISdkCodeElement.Symbol => throw new NotSupportedException();
+        ISymbol? ISdkCodeElement.Symbol => this.RoslynCompilation.Assembly;
 
         IAttributeList ICodeElement.Attributes => throw new NotSupportedException();
 

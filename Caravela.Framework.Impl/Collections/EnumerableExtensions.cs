@@ -15,6 +15,14 @@ namespace Caravela.Framework.Impl.Collections
         public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
             => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
 
+        public static void AddRange<T>( this IList<T> list, IEnumerable<T> items )
+        {
+            foreach ( var item in items )
+            {
+                list.Add( item );
+            }
+        }
+
         public static IEnumerable<T> SelectSelfAndAncestors<T>( this T item, Func<T, T?> getParent )
             where T : class
         {
