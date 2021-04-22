@@ -387,7 +387,7 @@ namespace Caravela.Framework.Impl.Templating
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
                 }
                 else if ( symbol.GetAttributes()
-                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
+                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -787,7 +787,7 @@ namespace Caravela.Framework.Impl.Templating
                     var annotatedExpression = (ExpressionSyntax) this.Visit( node.Left )!;
                     var transformedNode = node.WithLeft( annotatedExpression ).WithRight( annotatedType );
 
-                    return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression ! );
+                    return this.AnnotateCastExpression( transformedNode, annotatedType!, annotatedExpression! );
             }
 
             return base.VisitBinaryExpression( node );
@@ -929,7 +929,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // it means Expression is a Block
                 // TODO add more specific message, because only part of LanguageFeature is not supported
-		this.ReportUnsupportedLanguageFeature( node );
+                this.ReportUnsupportedLanguageFeature( node );
 
                 return base.VisitParenthesizedLambdaExpression( node );
             }
@@ -939,16 +939,16 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.ExpressionBody != null )
             {
-                var annotatedExpression = (ExpressionSyntax)this.Visit( node.ExpressionBody )!;
+                var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
                 var scope = annotatedExpression.GetScopeFromAnnotation();
 
-                return node.WithExpressionBody(annotatedExpression).AddScopeAnnotation( scope );
+                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( scope );
             }
             else
             {
                 // it means Expression is a Block
                 // TODO add more specific message, because only part of LanguageFeature is not supported
-		this.ReportUnsupportedLanguageFeature( node );
+                this.ReportUnsupportedLanguageFeature( node );
 
                 return base.VisitSimpleLambdaExpression( node );
             }

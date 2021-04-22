@@ -1,4 +1,0 @@
-// Compilation error. Code not generated.
-// Error CR0104 on `Value`: `The expression 'Value' is run-time but it is expected to be compile-time because the expression appears in a compile-time expression 'compileTime'.`
-
-;
