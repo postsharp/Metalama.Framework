@@ -19,6 +19,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         public Task Syntax( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
+        [FromDirectory( @"Templating\Pragma" )]
+        public Task Pragma( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
         [FromDirectory( @"Templating\LocalVariables" )]
         public Task LocalVariables( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 

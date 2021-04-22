@@ -1,15 +1,32 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
+using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
     [IntroduceSomeMethodAspect]
-    internal class Program
+    internal partial class Program
     {
+        [SuppressWarning("CS1998", "IDE0051")]
+        private static async Task MethodAsync()
+        {
+
+        }
+
         private static void Main()
         {
-            typeof( Program ).GetMethod( "SomeIntroducedMethod" )?.Invoke( null, null );
+            //Console.WriteLine( $"x={x}" );
+
+            SomeIntroducedMethod();
+            (new Program()).SomeOtherIntroducedMethod();
+
+           // IMethod m = null;
+            // m.Base.Invoke( null );
+
+            // TemplateContext.compileTime( 0 );
 
             MethodWithTwoAspects();
 
@@ -18,9 +35,7 @@ namespace Caravela.Framework.TestApp
             PrintArray();
 
             ThisAccess.Run();
-
-            new ClassWithMethods();
-
+            
             Cancel();
         }
 
@@ -70,17 +85,5 @@ namespace Caravela.Framework.TestApp
         private static void Cancellable2( CancellationToken ct1, CancellationToken ct2 ) { }
     }
 
-    [CountMethodsAspect]
-    internal class ClassWithMethods
-    {
-        public ClassWithMethods()
-        {
-            this.M1();
-            M2();
-        }
-
-        private void M1() { }
-
-        private static void M2() { }
-    }
+    
 }

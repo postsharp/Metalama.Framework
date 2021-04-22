@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -42,9 +43,6 @@ namespace Caravela.Framework.Impl.Pipeline
         protected IAspectPipelineContext Context { get; }
 
         // TODO: move to service provider?
-        private protected CompileTimeAssemblyBuilder? CompileTimeAssemblyBuilder { get; private set; }
-
-        // TODO: move to service provider?
         private protected CompileTimeAssemblyLoader? CompileTimeAssemblyLoader { get; private set; }
 
         protected AspectPipeline( IAspectPipelineContext context )
@@ -63,14 +61,14 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Handles an exception thrown in the pipeline.
         /// </summary>
         /// <param name="exception"></param>
-        protected void HandleException( Exception exception )
+        protected void HandleException( Exception exception, IDiagnosticAdder diagnosticAdder )
         {
             switch ( exception )
             {
                 case InvalidUserCodeException diagnosticsException:
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
                     {
-                        this.Context.ReportDiagnostic( diagnostic );
+                        diagnosticAdder.ReportDiagnostic( diagnostic );
                     }
 
                     break;
@@ -101,7 +99,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         Console.WriteLine( exception.ToString() );
 
-                        this.Context.ReportDiagnostic(
+                        diagnosticAdder.ReportDiagnostic(
                             GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
                     }
 
@@ -116,21 +114,27 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         /// <param name="pipelineStageResult"></param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecuteCore( [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
+        private protected bool TryExecuteCore( IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             var roslynCompilation = this.Context.Compilation;
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
             // Create dependencies.
-            this.CompileTimeAssemblyBuilder = new CompileTimeAssemblyBuilder( this.ServiceProvider, roslynCompilation, this.Context.ManifestResources );
-            this.CompileTimeAssemblyLoader = new CompileTimeAssemblyLoader( this.ServiceProvider, roslynCompilation, this.CompileTimeAssemblyBuilder );
-            this.CompileTimeAssemblyBuilder.CompileTimeAssemblyLoader = this.CompileTimeAssemblyLoader;
+            this.CompileTimeAssemblyLoader = CompileTimeAssemblyLoader.Create( this.ServiceProvider, roslynCompilation );
+
+            // Prepare the compile-time assembly.
+            if ( !this.CompileTimeAssemblyLoader.TryLoadCompileTimeAssembly( compilation.RoslynCompilation.Assembly, diagnosticAdder, out _ ) )
+            {
+                pipelineStageResult = null;
+
+                return false;
+            }
 
             // Create aspect types.
             var driverFactory = new AspectDriverFactory( compilation, this.Context.Plugins );
             var aspectTypeFactory = new AspectTypeFactory( compilation, driverFactory );
 
-            var aspectTypes = aspectTypeFactory.GetAspectTypes( GetAspectTypes( compilation ) ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetAspectTypes( GetAspectTypes( compilation ), diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
@@ -143,7 +147,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 new AttributeAspectOrderingSource( compilation ), new AspectLayerOrderingSource( aspectTypes )
             };
 
-            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, this.Context.ReportDiagnostic, out var sortedAspectLayers ) )
+            if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
             {
                 pipelineStageResult = null;
 
@@ -164,12 +168,11 @@ namespace Caravela.Framework.Impl.Pipeline
                 pipelineStageResult = stage.Execute( pipelineStageResult );
             }
 
-            var hasError = false;
+            var hasError = pipelineStageResult.Diagnostics.ReportedDiagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error );
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
-                this.Context.ReportDiagnostic( diagnostic );
-                hasError |= diagnostic.Severity >= DiagnosticSeverity.Error;
+                diagnosticAdder.ReportDiagnostic( diagnostic );
             }
 
             return !hasError;

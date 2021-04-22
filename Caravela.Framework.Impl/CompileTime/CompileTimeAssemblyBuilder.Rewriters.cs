@@ -14,9 +14,9 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             public ISymbolClassifier SymbolClassifier { get; }
 
-            protected Rewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
+            protected Rewriter( Compilation runTimeCompilation )
             {
-                this.SymbolClassifier = symbolClassifier;
+                this.SymbolClassifier = CompileTime.SymbolClassifier.GetInstance( runTimeCompilation );
                 this.RunTimeCompilation = runTimeCompilation;
             }
 

@@ -11,32 +11,22 @@ namespace Caravela.Framework.Impl.DesignTime
     [Generator]
     public class DesignTimeSourceGenerator : ISourceGenerator
     {
+        private bool _isEnabled;
+
         void ISourceGenerator.Execute( GeneratorExecutionContext context )
         {
-            if ( CaravelaCompilerInfo.IsActive ||
-                 context.Compilation is not CSharpCompilation compilation )
+            if ( !this._isEnabled || context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
 
-            if ( !DesignTimeAspectPipelineCache.TryGet( compilation, out var pipelineResult ) )
-            {
-                using DesignTimeAspectPipeline pipeline = new( new DesignTimeAspectPipelineContext(
-                                                                   compilation,
-                                                                   new BuildOptions( new AnalyzerBuildOptionsSource( context.AnalyzerConfigOptions ) ),
-                                                                   context.ReportDiagnostic,
-                                                                   context.CancellationToken ) );
+            // Execute the pipeline.
+            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+                compilation,
+                new AnalyzerBuildOptionsSource( context.AnalyzerConfigOptions ),
+                context.CancellationToken );
 
-                _ = pipeline.TryExecute( out pipelineResult );
-
-                DesignTimeAspectPipelineCache.Add( compilation, pipelineResult );
-            }
-
-            foreach ( var diagnostic in pipelineResult.Diagnostics.ReportedDiagnostics )
-            {
-                context.ReportDiagnostic( diagnostic );
-            }
-
+            // Add introduced syntax trees.
             if ( pipelineResult.AdditionalSyntaxTrees != null )
             {
                 foreach ( var additionalSyntaxTree in pipelineResult.AdditionalSyntaxTrees )
@@ -46,6 +36,9 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        void ISourceGenerator.Initialize( GeneratorInitializationContext context ) { }
+        void ISourceGenerator.Initialize( GeneratorInitializationContext context )
+        {
+            this._isEnabled = !CaravelaCompilerInfo.IsActive;
+        }
     }
 }
