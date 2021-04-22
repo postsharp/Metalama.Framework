@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
 #pragma warning disable CA1822 // Will be non-static.
         public string ResourceName => "Caravela.CompileTimeAssembly.dll";
-#pragma warning disable CA1822
+#pragma warning restore CA1822
 
         static CompileTimeAssemblyBuilder()
         {

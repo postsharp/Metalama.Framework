@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,6 +68,16 @@ namespace Caravela.Framework.Impl.CompileTime
 
                                     break;
 
+                                case IndexerDeclarationSyntax indexer:
+                                    members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
+
+                                    break;
+
+                                case PropertyDeclarationSyntax property:
+                                    members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+
+                                    break;
+
                                 case TypeDeclarationSyntax nestedType:
                                     members.Add( (MemberDeclarationSyntax) this.Visit( nestedType ).AssertNotNull() );
 
@@ -114,26 +125,77 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            // TODO: Properties.
-            private new IEnumerable<MethodDeclarationSyntax> VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            private IEnumerable<MemberDeclarationSyntax> VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
                 var propertySymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
                 if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
-                    var successGet =
-                        this._templateCompiler.TryCompile( this._compileTimeCompilation, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedGetNode );
+                    var success = true;
+                    SyntaxNode? transformedGetNode = null;
+                    SyntaxNode? transformedSetNode = null;
 
-                    var successSet =
-                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedSetNode );
+                    // Compile accessors into templates.
+                    if ( !propertySymbol.IsAbstract )
+                    {
+                        if ( node.AccessorList != null )
+                        {
+                            var getAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+                            var setAccessor = node.AccessorList.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
-                    var successSet =
-                        this._templateCompiler.TryCompile( this._compileTimeCompilation, node, this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ), this._diagnostics, out _, out var transformedSetNode );
+                            var propertyIdentifier = node switch
+                            {
+                                PropertyDeclarationSyntax property => property.Identifier.ValueText,
+                                IndexerDeclarationSyntax indexer => "Indexer",
+                                _ => throw new AssertionFailedException()
+                            };
 
-                    if ( transformedGetNode && transformedSetNode )
+                            var propertyParameters = node switch
+                            {
+                                PropertyDeclarationSyntax property => (SeparatedSyntaxList<ParameterSyntax>?) null,
+                                IndexerDeclarationSyntax indexer => indexer.ParameterList.Parameters,
+                                _ => throw new AssertionFailedException()
+                            };
+
+                            if ( getAccessor != null )
+                            {
+                                success = success &&
+                                    TemplateCompiler.TryCompile(
+                                        this._compileTimeCompilation,
+                                        RewriteAccessorToMethod( getAccessor, propertyIdentifier, node.Type, propertyParameters ),
+                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnostics,
+                                        out _,
+                                        out transformedGetNode );
+                            }
+
+                            if ( setAccessor != null )
+                            {
+                                success = success &&
+                                    TemplateCompiler.TryCompile(
+                                        this._compileTimeCompilation,
+                                        RewriteAccessorToMethod( setAccessor, propertyIdentifier, node.Type, propertyParameters ),
+                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnostics,
+                                        out _,
+                                        out transformedSetNode );
+                            }
+                        }
+                    }
+
+                    if ( success )
                     {
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
-                        yield return (MethodDeclarationSyntax) transformedNode.AssertNotNull();
+
+                        if ( transformedGetNode != null )
+                        {
+                            yield return (MethodDeclarationSyntax) transformedGetNode.AssertNotNull();
+                        }
+
+                        if ( transformedGetNode != null )
+                        {
+                            yield return (MethodDeclarationSyntax) transformedGetNode.AssertNotNull();
+                        }
                     }
                     else
                     {
@@ -142,7 +204,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
+                    yield return (MethodDeclarationSyntax) this.Visit( node ).AssertNotNull();
                 }
             }
 
@@ -171,6 +233,45 @@ namespace Caravela.Framework.Impl.CompileTime
                 else
                 {
                     return null;
+                }
+            }
+
+            private static MethodDeclarationSyntax RewriteAccessorToMethod( AccessorDeclarationSyntax node, string methodGroupName, TypeSyntax methodGroupReturnType, SeparatedSyntaxList<ParameterSyntax>? methodGroupParameters )
+            {
+                if ( UsesValueKeyword( node.Keyword ) )
+                {
+                    return
+                        MethodDeclaration(
+                            PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                            $"{node.Keyword.ValueText}_{methodGroupName}" )
+                        .WithParameterList(
+                            methodGroupParameters != null
+                            ? ParameterList( methodGroupParameters.Value.Add(
+                                Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) )
+                            : ParameterList(
+                                SingletonSeparatedList(
+                                    Parameter( List<AttributeListSyntax>(), TokenList(), methodGroupReturnType, Identifier( "value" ), null ) ) ) )
+                        .WithExpressionBody( node.ExpressionBody )
+                        .WithBody( node.Body )
+                        .WithSemicolonToken( node.SemicolonToken )
+                        .NormalizeWhitespace();
+                }
+                else
+                {
+                    return
+                        MethodDeclaration(
+                            methodGroupReturnType,
+                            $"{node.Keyword.ValueText}_{methodGroupName}" )
+                        .WithParameterList( methodGroupParameters != null ? ParameterList( methodGroupParameters.Value ) : ParameterList() )
+                        .WithExpressionBody( node.ExpressionBody )
+                        .WithBody( node.Body )
+                        .WithSemicolonToken( node.SemicolonToken )
+                        .NormalizeWhitespace();
+                }
+
+                static bool UsesValueKeyword( SyntaxToken keyword )
+                {
+                    return keyword.Kind() != SyntaxKind.GetAccessorDeclaration;
                 }
             }
 

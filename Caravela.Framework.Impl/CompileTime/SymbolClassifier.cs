@@ -40,6 +40,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 return this.IsTemplate( overriddenMethod! );
             }
 
+            // Look at the overridden property.
+            if ( symbol is IPropertySymbol { OverriddenProperty: { } overriddenProperty } )
+            {
+                return this.IsTemplate( overriddenProperty! );
+            }
+
             return false;
         }
 

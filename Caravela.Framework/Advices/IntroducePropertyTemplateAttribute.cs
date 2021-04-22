@@ -10,8 +10,8 @@ namespace Caravela.Framework.Advices
     /// <summary>
     /// Custom attribute that marks the target method as a template for <see cref="IIntroduceMethodAdvice"/>.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
-    public class IntroduceMethodTemplateAttribute : TemplateAttribute
+    [AttributeUsage( AttributeTargets.Property, Inherited = true )]
+    public class IntroducePropertyTemplateAttribute : TemplateAttribute
     {
         private Accessibility? _accessibility;
         private bool? _isVirtual;
@@ -21,19 +21,19 @@ namespace Caravela.Framework.Advices
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
+            get => this._accessibility ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetAccessibility )} to get nullable value." );
             set => this._accessibility = value;
         }
 
         public bool IsVirtual
         {
-            get => this._isVirtual ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
+            get => this._isVirtual ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetIsVirtual )} to get nullable value." );
             set => this._isVirtual = value;
         }
 
         public bool IsSealed
         {
-            get => this._isSealed ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
+            get => this._isSealed ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof( this.GetIsSealed )} to get nullable value." );
             set => this._isSealed = value;
         }
 

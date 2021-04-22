@@ -2,15 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using System;
-using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Advices
 {
     /// <summary>
-    /// Custom attribute that marks the target method as a template for <see cref="IOverrideMethodAdvice"/>.
+    /// Custom attribute that marks the target method as a template for <see cref="IOverrideMethodAdvice"/> and results in creation of the advice.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method, Inherited = true )]
-    public class OverridePropertyGetTemplateAttribute : TemplateAttribute
-    {
-    }
+    public class IntroducePropertyAttribute : IntroducePropertyTemplateAttribute, IAdviceAttribute<IIntroduceMethodAdvice> { }
 }

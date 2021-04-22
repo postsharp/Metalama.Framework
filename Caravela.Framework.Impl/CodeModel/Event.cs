@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? Raiser => this._symbol.RaiseMethod == null ? null : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
+        public IMethod? Raiser => this._symbol.RaiseMethod == null ? new PseudoAccessor(this, PseudoAccessorSemantic.Raise) : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;
 

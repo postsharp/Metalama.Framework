@@ -26,12 +26,11 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
-        // TODO: pseudo-accessors
         [Memo]
-        public IMethod? Getter => null;
+        public IMethod? Getter => new PseudoAccessor( this, PseudoAccessorSemantic.Get );
 
         [Memo]
-        public IMethod? Setter => null;
+        public IMethod? Setter => new PseudoAccessor( this, PseudoAccessorSemantic.Set );
 
         public dynamic Value
         {

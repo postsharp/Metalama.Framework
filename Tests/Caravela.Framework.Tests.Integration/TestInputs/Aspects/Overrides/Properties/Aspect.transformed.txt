@@ -1,0 +1,354 @@
+[TestOutput]
+internal class TargetClass
+{
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private int _instanceField__BackingField;
+
+    [Override]
+    private int _instanceField
+    {
+        get
+        {            
+            Console.WriteLine("This is the overridden getter.");
+            return _instanceField__BackingField;
+        }
+
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            _instanceField__BackingField = value;
+        }
+    }
+
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private int _initializerField__BackingField = 42;
+
+    [Override]
+    private int _initializerField
+    {
+        get
+        {            
+            Console.WriteLine("This is the overridden getter.");
+            return _instanceField__BackingField;
+        }
+
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            _instanceField__BackingField = value;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int _readOnlyField__BackingField;  
+    
+    [Override]
+    private int _readOnlyField
+    {
+        get 
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return _readOnlyField__BackingField;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int _initializerReadOnlyField__BackingField = 42;  
+    
+    [Override]
+    private int _initializerReadOnlyField
+    {
+        get 
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return _initializerReadOnlyField__BackingField;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private int PublicInstanceField__BackingField;
+
+    [Override]
+    public int PublicInstanceField
+    {
+        get
+        {            
+            Console.WriteLine("This is the overridden getter.");
+            return PublicInstanceField__BackingField;
+        }
+
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            PublicInstanceField__BackingField = value;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private static int PublicStaticField__BackingField;
+        
+    [Override]
+    public int PublicStaticField
+    {
+        get
+        {            
+            Console.WriteLine("This is the overridden getter.");
+            return PublicStaticField__BackingField;
+        }
+
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            PublicStaticField__BackingField = value;
+        }
+    }
+    
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int AutoProperty__BackingField;
+
+    [Override]
+    public int AutoProperty
+    {
+        get
+        {            
+            Console.WriteLine("This is the overridden getter.");
+            return AutoProperty__BackingField;
+        }
+
+        private set
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int AutoPropertyWithSetter__BackingField;
+
+    [Override]
+    public int AutoPropertyWithSetter
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return AutoPropertyWithSetter__BackingField;
+        }
+
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            AutoPropertyWithSetter__BackingField = value;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int AutoPropertyWithPrivateSetter__BackingField;
+
+    [Override]
+    public int AutoPropertyWithPrivateSetter
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return AutoPropertyWithPrivateSetter__BackingField;
+        }
+
+        private set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            AutoPropertyWithPrivateSetter__BackingField = value;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int AutoPropertyWithInitSetter__BackingField;
+
+    [Override]
+    public int AutoPropertyWithInitSetter
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return AutoPropertyWithInitSetter__BackingField;
+        }
+
+        init
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            AutoPropertyWithInitSetter__BackingField = value;
+        }
+    }
+    
+    [global::System.ComponentModel.BrowsableAttribute(false)]
+    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+    private readonly int AutoPropertyWithInitializer__BackingField = 42;
+
+    [Override]
+    public int AutoPropertyWithInitializer
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return AutoPropertyWithInitializer__BackingField;
+        }
+
+        init
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            AutoPropertyWithInitializer__BackingField = value;
+        }
+    }
+
+    [Override]
+    public int ExpressionProperty
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            return 42;
+        }
+    }
+
+    [Override]
+    public static int StaticProperty
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    public int InstanceProperty
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    public int InitProperty
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+
+        init
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    public int GetterProperty
+    {
+        get
+        {
+            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+    }
+
+    [Override]
+    public int SetterProperty
+    {
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    public int InitSetterProperty
+    {
+        init
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    protected int ProtectedProperty
+    {
+        get
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+        set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    public int DifferentAccessibilityProperty
+    {
+        get
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine("This is the original getter.");
+            return 42;
+        }
+        private set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    [Override]
+    protected int ExpressionBodiedProperty
+    {
+        get
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            return 42;
+        }
+        private set
+        {
+            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public TargetClass()
+    {
+        // No rewriting
+        this._readOnlyField__BackingField = 42;
+        this._initializerReadOnlyField__BackingField = 27;
+        this.AutoProperty__BackingField = 42;
+    }
+}
