@@ -13,6 +13,10 @@ namespace Caravela.Framework.Impl.Utilities
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString("x16");
 
         public static void Update( this XXH64 hash, string s ) => hash.Update( Encoding.UTF8.GetBytes( s ) );
+        
+        public static unsafe void Update<T>( this XXH64 hash, T value )
+            where T: unmanaged
+            => hash.Update( (byte*) &value, sizeof(T) );
     }
     
 }

@@ -6,6 +6,7 @@
     <PackageDescription>
       PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
     </PackageDescription>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

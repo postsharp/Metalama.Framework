@@ -27,11 +27,12 @@ namespace Caravela.Framework.Tests.UnitTests
             string? code,
             string? dependentCode = null,
             bool ignoreErrors = false,
-            IEnumerable<MetadataReference>? additionalReferences = null )
+            IEnumerable<MetadataReference>? additionalReferences = null,
+            string? name = null )
         {
-            static CSharpCompilation CreateEmptyCompilation()
+            CSharpCompilation CreateEmptyCompilation()
             {
-                return CSharpCompilation.Create( "test_" + Guid.NewGuid() )
+                return CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
                     .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }

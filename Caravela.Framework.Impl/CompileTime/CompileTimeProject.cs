@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly byte[]? _assemblyImage;
         private Assembly? _assembly;
-
+        
         public CompileTimeDomain Domain { get; }
 
         public AssemblyIdentity RunTimeIdentity { get; }
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             Compilation? compilation,
-            byte[]? assemblyImage )
+            byte[]? assemblyImage)
         {
             if ( compilation == null && references.Count == 0 )
             {
@@ -69,6 +69,8 @@ namespace Caravela.Framework.Impl.CompileTime
         public IEnumerable<CompileTimeProject> References { get; }
 
         public CompilationReference ToMetadataReference() => this.AssertNotEmpty()._compilation!.ToMetadataReference();
+
+        public ulong Hash => this.AssertNotEmpty()._manifest.Hash;
 
         public bool IsEmpty => this._compilation == null;
 
@@ -122,19 +124,36 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
 
+        private void LoadAssembly()
+        {
+            if ( this._assembly == null )
+            {
+                // We need to recursively load all dependent assemblies to prevent FileNotFoundException.
+
+                foreach ( var reference in this.References )
+                {
+                    if ( !reference.IsEmpty )
+                    {
+                        reference.LoadAssembly();
+                    }
+                }
+                
+                this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._assemblyImage! );
+            }
+        }
+
         private Assembly Assembly
         {
             get
             {
                 this.AssertNotEmpty();
 
-                if ( this._assembly == null )
-                {
-                    this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._assemblyImage! );
-                }
+                this.LoadAssembly();
 
                 return this._assembly;
             }
         }
+
+        public override string ToString() => this.RunTimeIdentity.ToString();
     }
 }

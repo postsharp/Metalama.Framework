@@ -17,12 +17,32 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public override string ToString() => this._domainId.ToString();
 
+        public CompileTimeDomain()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += this.ResolveAssemblyReference;
+        }
+
+        private  Assembly? ResolveAssemblyReference( object sender, ResolveEventArgs args )
+        {
+            var assemblyIdentity = new AssemblyName( args.Name ).ToAssemblyIdentity();
+
+            if ( this._assemblyCache.TryGetValue( assemblyIdentity, out var assembly ) )
+            {
+                return assembly;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, byte[] image )
             => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => Assembly.Load( image ) );
 
         public void Dispose()
         {
             // We should unload assemblies if we can, but this is a .NET Core feature only.
+            AppDomain.CurrentDomain.AssemblyResolve -= this.ResolveAssemblyReference;
         }
     }
 }
