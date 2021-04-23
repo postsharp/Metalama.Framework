@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -59,7 +60,7 @@ namespace Caravela.Framework.Impl.DesignTime
                             diagnosticAdder,
                             compilationModel,
                             ImmutableArray<object>.Empty,
-                            out this._cachedConfiguration ) )
+                            out configuration ) )
                         {
                             configuration = null;
                             return false;
@@ -68,10 +69,17 @@ namespace Caravela.Framework.Impl.DesignTime
                         // Update cache dependencies.
                         this._cacheDependencies.Clear();
 
-                        foreach ( var syntaxTree in this._cachedConfiguration.CompileTimeProject.SyntaxTrees )
+                        if ( configuration.CompileTimeProject != null )
                         {
-                            this._cacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
+                            foreach ( var syntaxTree in configuration.CompileTimeProject.SyntaxTrees )
+                            {
+                                this._cacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
+                            }
                         }
+
+                        this._cachedConfiguration = configuration;
+
+                        return true;
                     }
                 }
             }

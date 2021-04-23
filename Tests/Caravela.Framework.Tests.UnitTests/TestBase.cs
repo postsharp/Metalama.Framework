@@ -24,7 +24,20 @@ namespace Caravela.Framework.Tests.UnitTests
         private const bool _doCodeExecutionTests = true;
 
         public static CSharpCompilation CreateRoslynCompilation(
-            string? code,
+            string code,
+            string? dependentCode = null,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null,
+            string? name = null )
+            => CreateRoslynCompilation(
+                new Dictionary<string, string> { {Guid.NewGuid() + ".cs", code} },
+                dependentCode,
+                ignoreErrors,
+                additionalReferences,
+                name );
+        
+        public static CSharpCompilation CreateRoslynCompilation(
+            IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
             bool ignoreErrors = false,
             IEnumerable<MetadataReference>? additionalReferences = null,
@@ -50,7 +63,8 @@ namespace Caravela.Framework.Tests.UnitTests
 
             if ( code != null )
             {
-                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( code ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( 
+                    code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
             }
 
             if ( dependentCode != null )
@@ -84,7 +98,7 @@ namespace Caravela.Framework.Tests.UnitTests
             }
         }
 
-        internal static CompilationModel CreateCompilation( string? code, string? dependentCode = null )
+        internal static CompilationModel CreateCompilation( string code, string? dependentCode = null )
         {
             var roslynCompilation = CreateRoslynCompilation( code, dependentCode );
 

@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public virtual bool WriteUnhandledExceptionsToFile => true;
 
         private protected record PipelineConfiguration( ImmutableArray<PipelineStage> Stages, IReadOnlyList<INamedType> AspectNamedTypes, ImmutableArray<OrderedAspectLayer> Layers,
-                                                        CompileTimeProject CompileTimeProject,
+                                                        CompileTimeProject? CompileTimeProject,
                                                         CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
           
          private protected bool Initialize(IDiagnosticAdder diagnosticAdder, CompilationModel compilation, IEnumerable<object> plugIns, [NotNullWhen(true)] out PipelineConfiguration? configuration )
@@ -151,8 +151,10 @@ namespace Caravela.Framework.Impl.Pipeline
             return true;
 
         
-             IReadOnlyList<INamedType> GetAspectTypes(  CompileTimeProject compileTimeProject )
-                 => compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true )
+             IReadOnlyList<INamedType> GetAspectTypes(  CompileTimeProject? compileTimeProject )
+                 => compileTimeProject == null 
+                     ? ImmutableArray<INamedType>.Empty 
+                     : compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true )
                      .SelectMany( p => p.AspectTypes )
                      .Select( t => compilation.Factory.GetTypeByReflectionName( t ) )
                      .ToImmutableArray();
@@ -187,6 +189,14 @@ namespace Caravela.Framework.Impl.Pipeline
             PipelineConfiguration pipelineConfiguration,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
+            
+            // If there is no aspect in the compilation, don't execute the pipeline.
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectNamedTypes.Count == 0 )
+            {
+                pipelineStageResult = new PipelineStageResult( compilation.RoslynCompilation, Array.Empty<OrderedAspectLayer>() );
+
+                return true;
+            }
           
             var aspectSource = new CompilationAspectSource( compilation, pipelineConfiguration.AspectNamedTypes, pipelineConfiguration.CompileTimeAssemblyLoader );
             

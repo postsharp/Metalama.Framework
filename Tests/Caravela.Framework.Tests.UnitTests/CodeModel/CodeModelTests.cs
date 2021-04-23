@@ -461,7 +461,7 @@ class C
         [Fact]
         public void GetTypeByReflectionType()
         {
-            var compilation = CreateCompilation( null );
+            var compilation = CreateCompilation( "" );
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         private readonly IEnumerable<ITypeSymbol> _types;
 
-        protected PartialCompilationModel( CSharpCompilation roslynCompilation, IEnumerable<ITypeSymbol> types ) : base( roslynCompilation )
+        private PartialCompilationModel( CSharpCompilation roslynCompilation, IEnumerable<ITypeSymbol> types ) : base( roslynCompilation )
         {
             this._types = types;
         }

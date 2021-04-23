@@ -12,6 +12,7 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         private static readonly ConditionalWeakTable<object, DesignTimeAspectPipelineResult> _cache = new();
         private static readonly ConditionalWeakTable<object, object> _sync = new();
+        
 
         public static DesignTimeAspectPipelineResult GetPipelineResult(
             SemanticModel semanticModel,
@@ -57,6 +58,7 @@ namespace Caravela.Framework.Impl.DesignTime
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
         {
+            
             // ReSharper disable once InconsistentlySynchronizedField
 
             if ( !_cache.TryGetValue( compilation, out var result ) )
