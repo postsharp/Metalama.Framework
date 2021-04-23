@@ -9,12 +9,12 @@ namespace Caravela.Framework.Advices
     public enum ConflictBehavior
     {
         /// <summary>
-        /// Advice fails with a compilation error if the member already exists in the target declaration. Same as <see cref="Fail"/>.
+        /// The advice fails with a compilation error if the member already exists in the target declaration. Same as <see cref="Fail"/>.
         /// </summary>
         Default = Fail,
 
         /// <summary>
-        /// Advice fails with a compilation error if the member exists in the target declaration.
+        /// The advice fails with a compilation error if the member exists in the target declaration.
         /// </summary>
         Fail = 0,
 
@@ -33,8 +33,11 @@ namespace Caravela.Framework.Advices
         /// </summary>
         New = 3,
 
+        // TODO: What happens if the there is a conflict while merging members?
+
         /// <summary>
-        /// Advice introduces attempts to introduce template's members into the target type. For non-type members the behavior is the same as <see cref="Merge"/>.
+        /// If the member already exists, the advice attempts to merge the introduced type with the target type. For non-type advices the behavior is the same as <see cref="Ignore"/>.
+        /// Merging is done by introducing individual member of the template into the target type.
         /// </summary>
         Merge = 4
     }

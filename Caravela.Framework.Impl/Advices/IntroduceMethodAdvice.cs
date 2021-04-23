@@ -6,6 +6,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CodeModel.Builders;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,8 +42,11 @@ namespace Caravela.Framework.Impl.Advices
             this.LinkerOptions = linkerOptions;
 
             this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
+        }
 
-            this._methodBuilder.Accessibility = templateMethod.Accessibility;
+        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        {
+            this._methodBuilder.Accessibility = this.TemplateMethod.Accessibility;
 
             // Handle the introduction scope.
             switch ( this.Scope )
@@ -61,8 +65,10 @@ namespace Caravela.Framework.Impl.Advices
                     if ( this.TargetDeclaration.IsStatic && this.TargetDeclaration is IType )
                     {
                         // TODO: This should not be an exception.
-                        throw AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateException(
-                            (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) );
+                        diagnosticAdder.ReportDiagnostic(
+                            AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
+                                this.TargetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) ) );
                     }
 
                     this._methodBuilder.IsStatic = false;
@@ -83,28 +89,28 @@ namespace Caravela.Framework.Impl.Advices
                     throw new AssertionFailedException();
             }
 
-            this._methodBuilder.IsNew = templateMethod.IsNew;
-            this._methodBuilder.IsAbstract = templateMethod.IsAbstract;
-            this._methodBuilder.IsOverride = templateMethod.IsOverride;
-            this._methodBuilder.IsVirtual = templateMethod.IsVirtual;
-            this._methodBuilder.IsSealed = templateMethod.IsSealed;
-            this._methodBuilder.IsAsync = templateMethod.IsAsync;
+            this._methodBuilder.IsNew = this.TemplateMethod.IsNew;
+            this._methodBuilder.IsAbstract = this.TemplateMethod.IsAbstract;
+            this._methodBuilder.IsOverride = this.TemplateMethod.IsOverride;
+            this._methodBuilder.IsVirtual = this.TemplateMethod.IsVirtual;
+            this._methodBuilder.IsSealed = this.TemplateMethod.IsSealed;
+            this._methodBuilder.IsAsync = this.TemplateMethod.IsAsync;
 
             // Handle return type.
-            if ( templateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
+            if ( this.TemplateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
                 this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {
-                this._methodBuilder.ReturnParameter.ParameterType = templateMethod.ReturnParameter.ParameterType;
-                this._methodBuilder.ReturnParameter.RefKind = templateMethod.ReturnParameter.RefKind;
+                this._methodBuilder.ReturnParameter.ParameterType = this.TemplateMethod.ReturnParameter.ParameterType;
+                this._methodBuilder.ReturnParameter.RefKind = this.TemplateMethod.ReturnParameter.RefKind;
             }
 
-            CopyAttributes( templateMethod.ReturnParameter, this._methodBuilder.ReturnParameter );
+            CopyAttributes( this.TemplateMethod.ReturnParameter, this._methodBuilder.ReturnParameter );
 
-            foreach ( var templateParameter in templateMethod.Parameters )
+            foreach ( var templateParameter in this.TemplateMethod.Parameters )
             {
                 var parameterBuilder = this._methodBuilder.AddParameter(
                     templateParameter.Name,
@@ -115,7 +121,7 @@ namespace Caravela.Framework.Impl.Advices
                 CopyAttributes( templateParameter, parameterBuilder );
             }
 
-            foreach ( var templateGenericParameter in templateMethod.GenericParameters )
+            foreach ( var templateGenericParameter in this.TemplateMethod.GenericParameters )
             {
                 var genericParameterBuilder = this._methodBuilder.AddGenericParameter( templateGenericParameter.Name );
                 genericParameterBuilder.IsContravariant = templateGenericParameter.IsContravariant;
@@ -132,7 +138,7 @@ namespace Caravela.Framework.Impl.Advices
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
             }
 
-            CopyAttributes( templateMethod, this._methodBuilder );
+            CopyAttributes( this.TemplateMethod, this._methodBuilder );
 
             static void CopyAttributes( ICodeElement codeElement, ICodeElementBuilder builder )
             {

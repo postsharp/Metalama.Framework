@@ -73,25 +73,33 @@ namespace Caravela.Framework.Impl
                     ImmutableArray<IAspectSource>.Empty );
             }
 
-            var declarativeAdvices =
-                this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
+            var diagnosticSink = new DiagnosticSink( codeElement );
 
-            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
-
-            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
+            using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
-                aspectOfT.Initialize( aspectBuilder );
-            }
+                var declarativeAdvices =
+                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, codeElement, x.Attribute, x.Method ) );
 
-            return aspectBuilder.ToResult();
+                var adviceFactory = new AdviceFactory( this._compilation, diagnosticSink, this.AspectType, aspect );
+                var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory );
+
+                aspectOfT.Initialize( aspectBuilder );
+
+                return aspectBuilder.ToResult();
+            }
         }
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+        private static IAdvice CreateDeclarativeAdvice<T>(
+            AspectInstance aspect,
+            IDiagnosticAdder diagnosticAdder,
+            T codeElement,
+            IAttribute attribute,
+            IMethod templateMethod )
             where T : ICodeElement
         {
-            return attribute.CreateAdvice( aspect, codeElement, templateMethod );
+            return attribute.CreateAdvice( aspect, diagnosticAdder, codeElement, templateMethod );
         }
     }
 }
