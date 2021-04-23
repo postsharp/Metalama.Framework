@@ -44,8 +44,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
-            // TODO: How to handle ambiguous match (e.g. due to null argument values)?
-            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).Single();
+            /* We are interested in the fact that there is a matching ctor. 
+               If there are multiple we don't care at this point as we will generate code eventually and C# will resolve the correct one.
+               Of course this is a bit strange for the user, but currently it's not important.
+            */
+
+            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).FirstOrDefault();
+
+            if ( ctor == null )
+            {
+                throw new ArgumentException(
+                    $"No compatible constructor for attribute exists in type {type} for given parameters.",
+                    nameof(constructorArguments) );
+            }
 
             var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )
                 .ToList();
@@ -61,10 +72,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
-
-        // TODO: We may want to suppress diagnostics on introduced code elements, but the current design does not allow for that.
-        // A possible solution would have to return an IDiagnosticLocation that does not map to source code, but would be somehow
-        // understood by the aspect linker.
 
         public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
 

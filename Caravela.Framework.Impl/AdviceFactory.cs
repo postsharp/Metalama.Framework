@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -19,16 +20,18 @@ namespace Caravela.Framework.Impl
         private readonly CompilationModel _compilation;
         private readonly INamedType _aspectType;
         private readonly AspectInstance _aspect;
+        private readonly IDiagnosticAdder _diagnosticAdder;
 
         private readonly List<IAdvice> _advices = new();
 
         internal IReadOnlyList<IAdvice> Advices => this._advices;
 
-        public AdviceFactory( CompilationModel compilation, INamedType aspectType, AspectInstance aspect )
+        public AdviceFactory( CompilationModel compilation, IDiagnosticAdder diagnosticAdder, INamedType aspectType, AspectInstance aspect )
         {
             this._aspectType = aspectType;
             this._aspect = aspect;
             this._compilation = compilation;
+            this._diagnosticAdder = diagnosticAdder;
         }
 
         private IMethod GetTemplateMethod( string methodName, Type expectedAttributeType, string adviceName )
@@ -60,6 +63,7 @@ namespace Caravela.Framework.Impl
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, aspectLinkerOptions );
+            advice.Initialize( this._diagnosticAdder );
             this._advices.Add( advice );
 
             return advice;
@@ -75,6 +79,7 @@ namespace Caravela.Framework.Impl
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
 
             var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, scope, conflictBehavior, aspectLinkerOptions );
+            advice.Initialize( this._diagnosticAdder );
             this._advices.Add( advice );
 
             return advice;

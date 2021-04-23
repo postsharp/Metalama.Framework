@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     RefKind.None );
         }
 
-        // TODO: How to implement this?
+        // TODO: #(28532) Implement properly.
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             return this.Name;

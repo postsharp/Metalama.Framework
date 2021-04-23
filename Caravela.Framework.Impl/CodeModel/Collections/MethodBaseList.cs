@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
             else
             {
-                // TODO: There should be a generic context, which changes when descending to the base type.
+                // TODO: (#28475) There should be a generic context, which changes when descending to the base type.
 
                 // Descent into base types and collect methods with previously unseen signatures.
                 INamedType? currentType = namedType;

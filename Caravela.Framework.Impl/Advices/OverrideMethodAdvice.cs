@@ -4,6 +4,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 
 namespace Caravela.Framework.Impl.Advices
@@ -25,6 +26,8 @@ namespace Caravela.Framework.Impl.Advices
             this.TemplateMethod = templateMethod;
             this.LinkerOptions = linkerOptions;
         }
+
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {

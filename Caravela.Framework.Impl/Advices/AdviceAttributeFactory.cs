@@ -4,6 +4,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -12,7 +13,12 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>( this IAttribute attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
+        public static IAdvice CreateAdvice<T>(
+            this IAttribute attribute,
+            AspectInstance aspect,
+            IDiagnosticAdder diagnosticAdder,
+            T declaration,
+            ICodeElement templateMethod )
             where T : ICodeElement
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -64,6 +70,8 @@ namespace Caravela.Framework.Impl.Advices
                             scope,
                             conflictBehavior,
                             aspectLinkerOptions );
+
+                        advice.Initialize( diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {

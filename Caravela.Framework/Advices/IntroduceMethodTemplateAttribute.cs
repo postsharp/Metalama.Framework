@@ -21,19 +21,19 @@ namespace Caravela.Framework.Advices
 
         public Accessibility Accessibility
         {
-            get => this._accessibility ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            get => this._accessibility ?? throw new InvalidOperationException( "Accessibility was not set, use GetVisibility to get nullable value." );
             set => this._accessibility = value;
         }
 
         public bool IsVirtual
         {
-            get => this._isVirtual ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            get => this._isVirtual ?? throw new InvalidOperationException( "IsVirtual was not set, use GetIsVirtual to get nullable value." );
             set => this._isVirtual = value;
         }
 
         public bool IsSealed
         {
-            get => this._isSealed ?? throw new InvalidOperationException( "Visibility was not set, use GetVisibility to get nullable value." );
+            get => this._isSealed ?? throw new InvalidOperationException( "IsSealed was not set, use GetIsSealed to get nullable value." );
             set => this._isSealed = value;
         }
 
@@ -41,19 +41,10 @@ namespace Caravela.Framework.Advices
 
         public ConflictBehavior ConflictBehavior { get; set; }
 
-        public Accessibility? GetAccessibility()
-        {
-            return this._accessibility;
-        }
+        public Accessibility? GetAccessibility() => this._accessibility;
 
-        public bool? GetIsVirtual()
-        {
-            return this._isVirtual;
-        }
+        public bool? GetIsVirtual() => this._isVirtual;
 
-        public bool? GetIsSealed()
-        {
-            return this._isSealed;
-        }
+        public bool? GetIsSealed() => this._isSealed;
     }
 }
