@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Utilities;
+using K4os.Hash.xxHash;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -23,6 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly Random _random = new();
         private readonly CompileTimeDomain _domain;
+        private readonly Dictionary<ulong, CompileTimeProject> _cache = new Dictionary<ulong, CompileTimeProject>();
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
@@ -32,12 +34,42 @@ namespace Caravela.Framework.Impl.CompileTime
             this._domain = domain;
         }
 
+        private static ulong ComputeCacheHash(
+            Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree> compileTimeTrees,
+            IEnumerable<CompileTimeProject> referencedProjects )
+        {
+            XXH64 h = new();
+            h.Update( runTimeCompilation.AssemblyName! );
+
+            foreach ( var reference in referencedProjects )
+            {
+                h.Update( reference.RunTimeIdentity.Name );
+            }
+
+            foreach ( var syntaxTree in compileTimeTrees )
+            {
+                h.Update( syntaxTree.ToString() );
+            }
+
+            return h.Digest();
+        }
+
         private bool TryCreateCompileTimeCompilation(
             Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree> compileTimeTrees,
             IEnumerable<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
             out Compilation? compileTimeCompilation )
         {
+            // If there is no compile-time tree, there is no need to do anything.
+            if ( compileTimeTrees.Count == 0 )
+            {
+                compileTimeCompilation = null;
+
+                return true;
+            }
+            
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( runTimeCompilation.AssemblyName.AssertNotNull(), referencedProjects )
                 .AddSyntaxTrees(
                     SyntaxFactory.ParseSyntaxTree(
@@ -49,7 +81,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 compileTimeCompilation,
                 diagnosticSink );
 
-            var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitAllTrees( runTimeCompilation );
+            var modifiedRunTimeCompilation = produceCompileTimeCodeRewriter.VisitTrees( runTimeCompilation, compileTimeTrees );
 
             if ( !produceCompileTimeCodeRewriter.Success )
             {
@@ -65,7 +97,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( modifiedRunTimeCompilation.SyntaxTrees );
 
-            compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitAllTrees( compileTimeCompilation );
+            compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             return true;
         }
@@ -90,7 +122,10 @@ namespace Caravela.Framework.Impl.CompileTime
                         .Select( r => r.ToMetadataReference() ) );
         }
 
-        // this is not nearly as good as a GUID, but should be good enough for the purpose of preventing collisions within the same process
+        /// <summary>
+        /// Creates a 64-bit random version number.
+        /// </summary>
+        /// <returns></returns>
         private Version GetUniqueVersion()
         {
             lock ( this._random )
@@ -196,13 +231,50 @@ namespace Caravela.Framework.Impl.CompileTime
             return result.Success;
         }
 
+        internal IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(Compilation runTimeCompilation)
+        {
+            List<SyntaxTree> compileTimeTrees = new();
+            var classifier = SymbolClassifier.GetInstance( runTimeCompilation );
+            foreach ( var tree in runTimeCompilation.SyntaxTrees )
+            {
+                FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetSemanticModel( tree, true ), classifier );
+                visitor.Visit( tree.GetRoot(  ) );
+
+                if ( visitor.HasCompileTimeCode )
+                {
+                    compileTimeTrees.Add( tree );
+                }
+            }
+
+            return compileTimeTrees;
+        }
+
         internal bool TryCreateCompileTimeProject(
             Compilation runTimeCompilation,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
             out CompileTimeProject? project )
+            => this.TryCreateCompileTimeProject( runTimeCompilation, this.GetCompileTimeSyntaxTrees( runTimeCompilation ), referencedProjects, diagnosticSink, out project );
+
+        internal bool TryCreateCompileTimeProject(
+            Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree> compileTimeTrees,
+            IReadOnlyList<CompileTimeProject> referencedProjects,
+            IDiagnosticAdder diagnosticSink,
+            out CompileTimeProject? project )
         {
-            if ( !this.TryCreateCompileTimeCompilation( runTimeCompilation, referencedProjects, diagnosticSink, out var compileTimeCompilation ) )
+            // Check the in-process cache.
+            var cacheKey = ComputeCacheHash( runTimeCompilation, compileTimeTrees, referencedProjects );
+
+            if ( this._cache.TryGetValue( cacheKey, out project ) )
+            {
+                return true;
+            }
+            
+            // TODO: We may have a file system cache too. The embedded resource would stored.
+            
+            // Generate the C# compilation.
+            if ( !this.TryCreateCompileTimeCompilation( runTimeCompilation, compileTimeTrees, referencedProjects, diagnosticSink, out var compileTimeCompilation ) )
             {
                 project = null;
 
@@ -254,6 +326,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     manifest,
                     compileTimeCompilation,
                     compileTimeAssemblyStream.ToArray() );
+                
+                this._cache.Add( cacheKey, project );
 
                 return true;
             }
@@ -263,7 +337,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Prepares run-time assembly by making compile-time only methods throw <see cref="NotSupportedException"/>.
         /// </summary>
         public static CSharpCompilation PrepareRunTimeAssembly( CSharpCompilation compilation )
-            => new PrepareRunTimeAssemblyRewriter( compilation ).VisitAllTrees( compilation );
+            => new PrepareRunTimeAssemblyRewriter( compilation ).VisitTrees( compilation );
 
         public bool TryCompileDeserializedProject(
             CompileTimeProjectManifest manifest,

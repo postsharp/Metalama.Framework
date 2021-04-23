@@ -25,11 +25,11 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
+        private readonly CompileTimeDomain _domain = new();
+
         protected ServiceProvider ServiceProvider { get; } = new();
 
         private IReadOnlyList<OrderedAspectLayer>? _aspectLayers;
-
-        private readonly CompileTimeDomain _domain = new();
 
         /// <summary>
         /// Gets the list of stages of the pipeline. A stage is a group of transformations that do not require (within the group)
@@ -138,7 +138,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var driverFactory = new AspectDriverFactory( compilation, this.Context.Plugins );
             var aspectTypeFactory = new AspectTypeFactory( compilation, driverFactory );
 
-            var aspectNamedTypes = this.GetAspectTypes( compilation, compileTimeProject );
+            var aspectNamedTypes = GetAspectTypes( compilation, compileTimeProject );
             var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
@@ -184,14 +184,11 @@ namespace Caravela.Framework.Impl.Pipeline
             return !hasError;
         }
 
-        private IReadOnlyList<INamedType> GetAspectTypes( CompilationModel compilation, CompileTimeProject compileTimeProject )
-        {
-            return
-                compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true )
-                    .SelectMany( p => p.AspectTypes )
-                    .Select( t => compilation.Factory.GetTypeByReflectionName( t ) )
-                    .ToImmutableArray();
-        }
+        private static IReadOnlyList<INamedType> GetAspectTypes( CompilationModel compilation, CompileTimeProject compileTimeProject )
+            => compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true )
+                .SelectMany( p => p.AspectTypes )
+                .Select( t => compilation.Factory.GetTypeByReflectionName( t ) )
+                .ToImmutableArray();
 
         private static object GetGroupingKey( IAspectDriver driver )
             => driver switch

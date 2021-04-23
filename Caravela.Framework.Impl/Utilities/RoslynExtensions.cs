@@ -4,15 +4,18 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Utilities
 {
     public static class RoslynExtensions
     {
-        public static TCompilation ReplaceAllTrees<TCompilation>( this TCompilation compilation, Func<SyntaxTree, SyntaxTree?> replacer )
+        public static TCompilation ReplaceTrees<TCompilation>( this TCompilation compilation, Func<SyntaxTree, SyntaxTree?> replacer, IEnumerable<SyntaxTree>? trees = null )
             where TCompilation : Compilation
         {
-            foreach ( var tree in compilation.SyntaxTrees )
+            trees ??= compilation.SyntaxTrees;
+            
+            foreach ( var tree in trees )
             {
                 var newTree = replacer( tree );
 
@@ -29,14 +32,14 @@ namespace Caravela.Framework.Impl.Utilities
             return compilation;
         }
 
-        public static TCompilation VisitAllTrees<TCompilation>( this CSharpSyntaxRewriter rewriter, TCompilation compilation )
+        public static TCompilation VisitTrees<TCompilation>( this CSharpSyntaxRewriter rewriter, TCompilation compilation, IEnumerable<SyntaxTree>? trees = null )
             where TCompilation : Compilation
-            => compilation.ReplaceAllTrees(
+            => compilation.ReplaceTrees(
                 tree =>
                 {
                     var newRoot = rewriter.Visit( tree.GetRoot() );
 
                     return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
-                } );
+                }, trees );
     }
 }
