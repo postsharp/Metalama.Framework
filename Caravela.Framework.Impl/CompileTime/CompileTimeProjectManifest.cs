@@ -25,5 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public List<string>? AspectTypes { get; set; }
 
         public List<string>? References { get; set; }
+        
+        public ulong Hash { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
     internal partial class CompileTimeCompilationBuilder
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly Random _random = new();
+        private static long _nextVersionNumber;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new Dictionary<ulong, CompileTimeProject>();
 
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             foreach ( var reference in referencedProjects )
             {
-                h.Update( reference.RunTimeIdentity.Name );
+                h.Update( reference.Hash );
             }
 
             foreach ( var syntaxTree in compileTimeTrees )
@@ -123,22 +123,17 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         /// <summary>
-        /// Creates a 64-bit random version number.
+        /// Creates a 64-bit version number that is unique for the current AppDomain.
         /// </summary>
         /// <returns></returns>
         private Version GetUniqueVersion()
         {
-            lock ( this._random )
-            {
-                int GetVersionComponent() => this._random.Next( 0, ushort.MaxValue );
+            var longVersionNumber = Interlocked.Increment( ref _nextVersionNumber );
 
-                var major = GetVersionComponent();
-                var minor = GetVersionComponent();
-                var build = GetVersionComponent();
-                var revision = GetVersionComponent();
+            var minor = (short) (longVersionNumber & 0xffff);
+            var major = (short) ((longVersionNumber >> 16) & 0xffff);
 
-                return new Version( major, minor, build, revision );
-            }
+            return new Version( major, minor );
         }
 
         private bool TryEmit(
@@ -316,7 +311,8 @@ namespace Caravela.Framework.Impl.CompileTime
                         .GetTypes()
                         .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                         .Select( t => t.GetReflectionName() )
-                        .ToList()
+                        .ToList(),
+                    Hash = cacheKey
                 };
 
                 project = CompileTimeProject.Create(

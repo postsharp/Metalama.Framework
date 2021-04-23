@@ -187,7 +187,7 @@ class ReferencingClass
                 var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
 
                 var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, referencingCompilation );
-                loader.GetCompileTimeProject( referencingCompilation.Assembly );
+                _ = loader.GetCompileTimeProject( referencingCompilation.Assembly );
             }
             finally
             {
@@ -196,6 +196,66 @@ class ReferencingClass
                     File.Delete( referencedRunTimePath );
                 }
             }
+        }
+
+
+        [Fact]
+        public void UpdatedReference()
+        {
+            // This test verifies that one can create a project A v1.0 that references B v1.0, but it still works when B is updated to v1.1
+            // and A is not recompiled.
+            
+            
+            string GenerateVersionedCode(int version) => @"
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+public class VersionedClass
+{
+    public static int Version => $version;
+}
+".Replace( "$version", version.ToString() );
+
+            var classA = @"
+
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+class A
+{
+  public  static int Version => VersionedClass.Version;
+}
+";
+            
+            var classB = @"
+
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+class B
+{
+  public static int Version => VersionedClass.Version;
+}
+";
+
+            var guid = Guid.NewGuid();
+            var versionedCompilationV1 = CreateRoslynCompilation( GenerateVersionedCode(1), name:"test_Versioned_" + guid );
+            var versionedCompilationV2 = CreateRoslynCompilation( GenerateVersionedCode(2), name:"test_Versioned_" + guid );
+            var compilationA = CreateRoslynCompilation( classA, additionalReferences: new[]{ versionedCompilationV1.ToMetadataReference() }, name:"test_A_" + guid);
+            var compilationBV1 = CreateRoslynCompilation( classB, additionalReferences: new[]{ versionedCompilationV1.ToMetadataReference(), compilationA.ToMetadataReference( ) }, name:"test_B_" + guid);
+            var compilationBV2 = CreateRoslynCompilation( classB, additionalReferences: new[]{ versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference( ) }, name:"test_B_" + guid);
+
+            var domain = new CompileTimeDomain();
+            CompileTimeAssemblyLoader loaderV1 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationBV1 );
+            var projectV1 = loaderV1.GetCompileTimeProject( compilationBV1.Assembly );
+
+            Assert.Equal( 1, projectV1.GetType( "B" ).GetProperty( "Version" ).GetValue( null ) );
+            
+            
+            
+            CompileTimeAssemblyLoader loaderV2 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationBV2 );
+            var projectV2 = loaderV2.GetCompileTimeProject( compilationBV2.Assembly );
+            
+            Assert.Equal( 2, projectV2.GetType( "B" ).GetProperty( "Version" ).GetValue( null ) );
+
+            
         }
     }
 }
