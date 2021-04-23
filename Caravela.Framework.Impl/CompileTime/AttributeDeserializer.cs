@@ -46,13 +46,23 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute attributeInstance )
+        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             // TODO: this is insufficiently tested, especially the case with Type arguments.
             // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
 
             var constructorSymbol = attribute.Constructor.GetSymbol();
-            var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false ).AssertNotNull();
+            var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false );
+
+            if ( type == null )
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.CannotFindType.CreateDiagnostic( attribute.GetDiagnosticLocation(), constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
 
             return this.TryCreateAttribute( attribute, type, diagnosticAdder, out attributeInstance! );
         }
@@ -64,12 +74,30 @@ namespace Caravela.Framework.Impl.CompileTime
             [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             var constructorSymbol = attribute.Constructor.GetSymbol();
-            var constructor = type.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
+            var constructors = type.GetConstructors().Where( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) ).ToList();
 
-            if ( constructor == null )
+            if ( constructors.Count == 0 )
             {
-                throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.NoConstructor.CreateDiagnostic( attribute.GetDiagnosticLocation(), constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
             }
+            else if ( constructors.Count > 1 )
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.AmbiguousConstructor.CreateDiagnostic(
+                        attribute.GetDiagnosticLocation(),
+                        constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
+
+            var constructor = constructors[0];
 
             var parameters = new object?[attribute.ConstructorArguments.Count];
 
@@ -121,7 +149,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    throw new InvalidOperationException( $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
+                    diagnosticAdder.ReportDiagnostic(
+                        AttributeDeserializerDiagnostics.CannotFindMember.CreateDiagnostic(
+                            attribute.GetDiagnosticLocation(),
+                            (constructorSymbol.ContainingType, name) ) );
+
+                    attributeInstance = null;
+
+                    return false;
                 }
             }
 
@@ -261,7 +296,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             for ( var i = 0; i < reflectionParameters.Length; i++ )
             {
-                if ( reflectionParameters[i].ParameterType != this._compileTimeTypeResolver.GetCompileTimeType( roslynParameters[i].Type, true ) )
+                var compileTimeType = this._compileTimeTypeResolver.GetCompileTimeType( roslynParameters[i].Type, true );
+
+                if ( reflectionParameters[i].ParameterType != compileTimeType )
                 {
                     return false;
                 }

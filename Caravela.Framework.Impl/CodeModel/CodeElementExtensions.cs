@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="codeElement"></param>
         /// <returns></returns>
         public static IEnumerable<ICodeElement> GetContainedElements( this ICodeElement codeElement )
-            => new[] { codeElement }.SelectDescendants(
+            => codeElement.SelectManyRecursive(
                 child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,

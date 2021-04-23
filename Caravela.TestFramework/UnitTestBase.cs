@@ -132,7 +132,7 @@ namespace Caravela.TestFramework
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
-                // Update the obj\transformed file to the non-normalized expected text, so that future call to update_transformed.txt
+                // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
                 File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
             }

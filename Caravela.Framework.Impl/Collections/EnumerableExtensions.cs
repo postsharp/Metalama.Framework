@@ -23,65 +23,117 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
-        public static IEnumerable<T> SelectSelfAndAncestors<T>( this T item, Func<T, T?> getParent )
+        public static IEnumerable<T> SelectRecursive<T>( this T item, Func<T, T?> getNext, bool includeThis = false, bool throwOnDuplicate = true )
             where T : class
         {
             HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
 
-            for ( var i = item; i != null; i = getParent( i ) )
+            for ( var i = includeThis ? item : getNext( item ); i != null; i = getNext( i ) )
             {
                 if ( !list.Add( i ) )
                 {
-                    throw new AssertionFailedException( $"The item {i} of type {i.GetType().Name} has been visited twice." );
+                    // We are in a cycle.
+                    if ( throwOnDuplicate )
+                    {
+                        throw new AssertionFailedException( $"The item {i} of type {i.GetType().Name} has been visited twice." );
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
             return list;
         }
 
-        public static IEnumerable<T> SelectDescendants<T>( this IEnumerable<T> collection, Func<T, IEnumerable<T>?> getChildren )
+        public static IEnumerable<T> SelectManyRecursive<T>(
+            this T item,
+            Func<T, IEnumerable<T>?> getItems,
+            bool includeThis = false,
+            bool throwOnDuplicate = true )
             where T : class
         {
             var recursionCheck = 0;
 
-            HashSet<T> list = new( ReferenceEqualityComparer<T>.Instance );
+            HashSet<T> hashSet = new( ReferenceEqualityComparer<T>.Instance );
 
-            void PopulateDescendants( T? c )
+            if ( includeThis )
             {
-                recursionCheck++;
+                _ = hashSet.Add( item );
+            }
 
-                if ( recursionCheck > 64 )
+            VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+
+            return hashSet;
+        }
+
+        public static IEnumerable<T> SelectManyRecursive<T>(
+            this IEnumerable<T> collection,
+            Func<T, IEnumerable<T>?> getItems,
+            bool includeFirstLevel = false,
+            bool throwOnDuplicate = true )
+            where T : class
+        {
+            var recursionCheck = 0;
+
+            HashSet<T> hashSet = new( ReferenceEqualityComparer<T>.Instance );
+
+            if ( includeFirstLevel )
+            {
+                VisitMany( collection, getItems, hashSet, throwOnDuplicate, ref recursionCheck );
+            }
+            else
+            {
+                foreach ( var item in collection )
                 {
-                    throw new InvalidOperationException( "Too many levels of inheritance." );
+                    VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
                 }
+            }
 
-                if ( c != null )
+            return hashSet;
+        }
+
+        private static void VisitMany<T>(
+            IEnumerable<T>? collection,
+            Func<T, IEnumerable<T>?> getItems,
+            HashSet<T> hashSet,
+            bool throwOnDuplicate,
+            ref int recursionCheck )
+            where T : class
+        {
+            recursionCheck++;
+
+            if ( recursionCheck > 64 )
+            {
+                throw new InvalidOperationException( "Too many levels of inheritance." );
+            }
+
+            if ( collection == null )
+            {
+                return;
+            }
+
+            foreach ( var item in collection )
+            {
+                if ( !hashSet.Add( item ) )
                 {
-                    var children = getChildren( c );
+                    // We are in a cycle.
 
-                    if ( children != null )
+                    if ( throwOnDuplicate )
                     {
-                        foreach ( var child in children )
-                        {
-                            if ( !list.Add( child ) )
-                            {
-                                throw new AssertionFailedException( $"The item {child} of type {child.GetType().Name} has been visited twice." );
-                            }
-
-                            PopulateDescendants( child );
-                        }
+                        throw new AssertionFailedException( $"The item {item} of type {item.GetType().Name} has been visited twice." );
+                    }
+                    else
+                    {
+                        continue;
                     }
                 }
 
-                recursionCheck--;
+                VisitMany( getItems( item ), getItems, hashSet, throwOnDuplicate, ref recursionCheck );
             }
 
-            foreach ( var child in collection )
-            {
-                PopulateDescendants( child );
-            }
-
-            return list;
+            recursionCheck--;
         }
 
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>(

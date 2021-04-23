@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeCompilationBuilder
     {
         private abstract class Rewriter : CSharpSyntaxRewriter
         {

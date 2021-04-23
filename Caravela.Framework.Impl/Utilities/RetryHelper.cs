@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Utilities
                 catch ( Exception e ) when ( retryPredicate( e ) )
                 {
                     Thread.Sleep( TimeSpan.FromMilliseconds( delay ) );
-                    delay = delay * 1.2;
+                    delay *= 1.2;
                 }
             }
         }

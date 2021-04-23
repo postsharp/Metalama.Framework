@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             try
             {
-                if ( !this.TryExecuteCore( diagnosticAdder, out var result ) )
+                if ( !this.TryExecuteCore( diagnosticAdder, out var result, out var compileTimeProject ) )
                 {
                     outputCompilation = null;
 
@@ -34,18 +34,13 @@ namespace Caravela.Framework.Impl.Pipeline
                     this.Context.ManifestResources.Add( resource );
                 }
 
-                var compileTimeAssemblyBuilder = this.CompileTimeAssemblyLoader!.CompileTimeAssemblyBuilder.AssertNotNull();
-
                 if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    if ( compileTimeAssemblyBuilder.BuiltAssemblies.TryGetValue( this.Context.Compilation.AssemblyName!, out var compileTimeAssembly ) )
-                    {
-                        this.Context.ManifestResources.Add(
-                            new ResourceDescription( CompileTimeAssemblyBuilder.ResourceName, () => compileTimeAssembly, true ) );
-                    }
+                    this.Context.ManifestResources.Add(
+                        new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => compileTimeProject.Serialize(), true ) );
                 }
 
-                outputCompilation = CompileTimeAssemblyBuilder.PrepareRunTimeAssembly( result.Compilation );
+                outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.Compilation );
 
                 return true;
             }
@@ -72,7 +67,7 @@ namespace Caravela.Framework.Impl.Pipeline
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new CompileTimePipelineStage( parts, compileTimeAssemblyLoader, this );
+            => new CompileTimePipelineStage( parts, this );
 
         public override bool CanTransformCompilation => true;
     }

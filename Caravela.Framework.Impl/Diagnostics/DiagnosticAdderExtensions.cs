@@ -3,7 +3,6 @@
 
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using RoslynDiagnosticSeverity = Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {

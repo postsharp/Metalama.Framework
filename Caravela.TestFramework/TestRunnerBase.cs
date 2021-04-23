@@ -72,7 +72,7 @@ namespace Caravela.TestFramework
         /// <returns>A new project instance.</returns>
         public virtual Project CreateProject()
         {
-            var referenceAssemblies = ReferenceAssemblyLocator.GetReferenceAssemblies();
+            var referenceAssemblies = new ReferenceAssemblyLocator().SystemAssemblyPaths;
 
             var guid = Guid.NewGuid();
             var workspace1 = new AdhocWorkspace();

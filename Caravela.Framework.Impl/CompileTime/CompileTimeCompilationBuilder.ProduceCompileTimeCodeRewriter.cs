@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeCompilationBuilder
     {
         public static readonly SyntaxAnnotation HasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
 
@@ -25,7 +25,6 @@ namespace Caravela.Framework.Impl.CompileTime
             public bool FoundCompileTimeCode { get; private set; }
 
             public ProduceCompileTimeCodeRewriter(
-                ISymbolClassifier symbolClassifier,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IDiagnosticAdder diagnosticAdder )

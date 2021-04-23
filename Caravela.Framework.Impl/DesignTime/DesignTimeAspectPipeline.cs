@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.DesignTime
         public bool TryExecute( [NotNullWhen( true )] out DesignTimeAspectPipelineResult result )
         {
             DiagnosticList diagnosticList = new();
-            var success = this.TryExecuteCore( diagnosticList, out var pipelineResult );
+            var success = this.TryExecuteCore( diagnosticList, out var pipelineResult, out _ );
 
             result = new DesignTimeAspectPipelineResult(
                 pipelineResult?.AdditionalSyntaxTrees,
@@ -38,6 +38,6 @@ namespace Caravela.Framework.Impl.DesignTime
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
             CompileTimeAssemblyLoader compileTimeAssemblyLoader )
-            => new SourceGeneratorPipelineStage( parts, compileTimeAssemblyLoader, this );
+            => new SourceGeneratorPipelineStage( parts, this );
     }
 }

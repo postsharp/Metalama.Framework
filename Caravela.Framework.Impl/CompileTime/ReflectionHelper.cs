@@ -3,15 +3,18 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal static class ReflectionNameHelper
+    internal static class ReflectionHelper
     {
         private static bool IsRootNamespace( ISymbol symbol ) => symbol is INamespaceSymbol ns && ns.IsGlobalNamespace;
 
-        public static string GetReflectionName( ISymbol? s )
+        public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName ) => new( assemblyName.Name, assemblyName.Version );
+
+        public static string GetReflectionName( this ISymbol? s )
         {
             if ( s == null || IsRootNamespace( s ) )
             {

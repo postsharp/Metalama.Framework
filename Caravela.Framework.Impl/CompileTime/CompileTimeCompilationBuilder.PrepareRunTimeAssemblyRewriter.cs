@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeCompilationBuilder
     {
         private class PrepareRunTimeAssemblyRewriter : Rewriter
         {

@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Sdk;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -12,7 +14,7 @@ using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    public static class ReferenceAssemblyLocator
+    public class ReferenceAssemblyLocator
     {
         private static readonly string _project = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -28,7 +30,34 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-        public static IEnumerable<string> GetReferenceAssemblies()
+        public ImmutableArray<string> CaravelaAssemblyNames { get; } = ImmutableArray.Create(
+            "Caravela.Framework",
+            "Caravela.Framework.Sdk",
+            "Caravela.Framework.Impl" );
+
+        public ImmutableHashSet<string> StandardAssemblyNames { get; }
+
+        public ImmutableArray<string> SystemAssemblyPaths { get; }
+
+        public ImmutableArray<string> StandardAssemblyPaths { get; }
+
+        public ReferenceAssemblyLocator()
+        {
+            this.SystemAssemblyPaths = GetSystemAssemblyPaths().ToImmutableArray();
+            this.StandardAssemblyNames = this.CaravelaAssemblyNames.Concat( this.SystemAssemblyPaths ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            // the SDK assembly might not be loaded at this point, so make sure it is
+            _ = new AspectWeaverAttribute( null! );
+
+            var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
+                .Select( a => a.Location )
+                .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) );
+
+            this.StandardAssemblyPaths = this.SystemAssemblyPaths.Concat( caravelaPaths ).ToImmutableArray();
+        }
+
+        private static IEnumerable<string> GetSystemAssemblyPaths()
         {
             var hash = ComputeHash( _project );
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );

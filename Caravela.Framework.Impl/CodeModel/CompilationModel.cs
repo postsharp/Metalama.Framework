@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public CodeElementFactory Factory { get; }
 
-        private CompilationModel( CSharpCompilation roslynCompilation )
+        protected CompilationModel( CSharpCompilation roslynCompilation )
         {
             this.RoslynCompilation = roslynCompilation;
             this.ReflectionMapper = new ReflectionMapper( roslynCompilation );
@@ -56,8 +56,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this.Factory = new CodeElementFactory( this );
 
-            var assembly = new[] { roslynCompilation.Assembly };
-            var allCodeElements = assembly.Concat( assembly.SelectDescendants<ISymbol>( s => s.GetContainedSymbols() ) );
+            var allCodeElements = roslynCompilation.Assembly.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeThis: true );
 
             var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
 
@@ -87,7 +86,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var allNewCodeElements =
                 observableTransformations
                     .OfType<ICodeElement>()
-                    .SelectDescendants( codeElement => codeElement.GetContainedElements() );
+                    .SelectManyRecursive( codeElement => codeElement.GetContainedElements() );
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
@@ -107,16 +106,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public int Revision { get; }
 
+        protected virtual IEnumerable<ITypeSymbol> GetTypes() => this.RoslynCompilation.Assembly.GetTypes();
+
         [Memo]
         public INamedTypeList DeclaredTypes
             => new NamedTypeList(
-                this.RoslynCompilation.Assembly
-                    .GetTypes()
+                this.GetTypes()
                     .Select( t => new MemberLink<INamedType>( t ) ),
                 this );
-
-        [Memo]
-        public IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.Factory.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public IAttributeList Attributes
@@ -145,8 +142,6 @@ namespace Caravela.Framework.Impl.CodeModel
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
         ICompilation ICompilationElement.Compilation => this;
-
-        public IEnumerable<INamedType> GetAllAttributeTypes() => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
             => this._allAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );

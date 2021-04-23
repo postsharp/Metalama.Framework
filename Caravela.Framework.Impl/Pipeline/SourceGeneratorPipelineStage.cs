@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -25,9 +24,8 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public SourceGeneratorPipelineStage(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompileTimeAssemblyLoader assemblyLoader,
             IAspectPipelineProperties properties )
-            : base( aspectLayers, assemblyLoader, properties ) { }
+            : base( aspectLayers, properties ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )

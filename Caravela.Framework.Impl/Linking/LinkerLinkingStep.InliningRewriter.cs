@@ -313,7 +313,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    // The method does not have simple control flow - we should expect goto's and thus create a label.
+                    // The method does not have simple control flow - we should expect goto and thus create a label.
                     // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
                     return
                         Block(

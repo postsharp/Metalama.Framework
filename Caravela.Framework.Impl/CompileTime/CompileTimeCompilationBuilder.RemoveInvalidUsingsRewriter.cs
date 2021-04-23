@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal partial class CompileTimeAssemblyBuilder
+    internal partial class CompileTimeCompilationBuilder
     {
         internal class RemoveInvalidUsingRewriter : CSharpSyntaxRewriter
         {

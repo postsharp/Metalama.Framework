@@ -21,6 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
+            serviceProvider.AddService( new ReferenceAssemblyLocator() );
 
             return serviceProvider;
         }
@@ -51,7 +52,7 @@ namespace Foo
 }
 ";
 
-            var rewriter = new CompileTimeAssemblyBuilder.RemoveInvalidUsingRewriter( compilation );
+            var rewriter = new CompileTimeCompilationBuilder.RemoveInvalidUsingRewriter( compilation );
 
             var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
 
@@ -91,7 +92,7 @@ class A : Attribute
             var roslynCompilation = CreateRoslynCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
-            var loader = CompileTimeAssemblyLoader.Create( serviceProvider, roslynCompilation );
+            var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, roslynCompilation );
 
             if ( !loader.TryCreateAttributeInstance( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
@@ -127,9 +128,9 @@ class ReferencingClass
             var roslynCompilation = CreateRoslynCompilation( referencingCode, referencedCode );
 
             var serviceProvider = GetServiceProvider();
-            var loader = CompileTimeAssemblyLoader.Create( serviceProvider, roslynCompilation );
+            var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, roslynCompilation );
 
-            loader.LoadCompileTimeAssembly( roslynCompilation.Assembly );
+            loader.GetCompileTimeProject( roslynCompilation.Assembly );
         }
 
         [Fact]
@@ -158,8 +159,10 @@ class ReferencingClass
             var referencedCompilation = CreateRoslynCompilation( referencedCode );
             DiagnosticList diagnostics = new();
             var serviceProvider = GetServiceProvider();
-            var builder = new CompileTimeAssemblyBuilder( serviceProvider );
-            Assert.True( builder.TryEmitCompileTimeAssembly( referencedCompilation, diagnostics, out var referencedCompileTimeStream ) );
+            var builder = new CompileTimeCompilationBuilder( serviceProvider, new CompileTimeDomain() );
+
+            Assert.True(
+                builder.TryCreateCompileTimeProject( referencedCompilation, ArraySegment<CompileTimeProject>.Empty, diagnostics, out var compileTimeProject ) );
 
             var referencedRunTimePath = Path.GetTempFileName();
 
@@ -174,7 +177,7 @@ class ReferencingClass
                         null,
                         null,
                         null,
-                        new[] { new ResourceDescription( CompileTimeAssemblyBuilder.ResourceName, () => referencedCompileTimeStream!, true ) } );
+                        new[] { new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => compileTimeProject!.Serialize(), true ) } );
 
                     Assert.True( emitResult.Success );
                 }
@@ -183,8 +186,8 @@ class ReferencingClass
 
                 var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
 
-                var loader = CompileTimeAssemblyLoader.Create( serviceProvider, referencingCompilation );
-                loader.LoadCompileTimeAssembly( referencingCompilation.Assembly );
+                var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, referencingCompilation );
+                loader.GetCompileTimeProject( referencingCompilation.Assembly );
             }
             finally
             {

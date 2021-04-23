@@ -67,7 +67,7 @@ namespace Caravela.Framework.Impl.Serialization
                 return GetCSharpTypeName( type.GetElementType() ) + string.Join( "", arrayLength ).Replace( "+", "." );
             }
 
-            return type.FullName.Replace( "+", "." );
+            return type.FullName!.Replace( "+", "." );
         }
 
         private static string ToCSharpReservedWord( this Type type, bool fullName )
@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.Serialization
             var isArray = !t.IsGenericType && t.FullName.IndexOf( '`' ) >= 0;
             var genericType = t;
 
-            while ( genericType.IsNested && genericType.DeclaringType.GetGenericArguments().Length == t.GetGenericArguments().Length )
+            while ( genericType.IsNested && genericType.DeclaringType!.GetGenericArguments().Length == t.GetGenericArguments().Length )
             {
                 // Non generic class in a generic class is also considered in Type as being generic
 
@@ -135,7 +135,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( genericType.IsNested )
             {
-                var argumentsToPass = arguments.Take( genericType.DeclaringType.GetGenericArguments().Length )
+                var argumentsToPass = arguments.Take( genericType.DeclaringType!.GetGenericArguments().Length )
                     .ToArray(); // Only the innermost will return the actual object and only from the GetGenericArguments directly on the type, not on the on genericDefinition, and only when all parameters including of the innermost are set
 
                 arguments = arguments.Skip( argumentsToPass.Length ).ToArray();
