@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -46,12 +47,14 @@ namespace Caravela.Framework.Impl.Pipeline
                     continue;
                 }
 
+                /*
                 if ( !declaringType.IsPartial )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     // TODO: emit diagnostic.
                     continue;
                 }
+                */
 
                 var classDeclaration = SyntaxFactory.ClassDeclaration(
                     default,
@@ -94,7 +97,7 @@ namespace Caravela.Framework.Impl.Pipeline
                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
                 }
 
-                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );
+                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration.NormalizeWhitespace(), encoding: Encoding.UTF8 );
 
                 var syntaxTreeName = declaringType.FullName + ".cs";
 

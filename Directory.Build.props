@@ -75,6 +75,7 @@
                  Pack="false" />
     </ItemGroup>
 
+
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
     <Import Project="Caravela.Framework.Impl\build\Caravela.CompilerVisibleProperties.targets" />
 

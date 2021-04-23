@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
-            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
-                : base( symbolClassifier, runTimeCompilation )
+            public PrepareRunTimeAssemblyRewriter( Compilation runTimeCompilation )
+                : base( runTimeCompilation )
             {
                 this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
             }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Diagnostics
@@ -14,15 +15,22 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; }
 
-        public ImmutableDiagnosticList( ImmutableArray<Diagnostic> diagnostics, ImmutableArray<ScopedSuppression> suppressions )
+        public ImmutableDiagnosticList( ImmutableArray<Diagnostic>? diagnostics, ImmutableArray<ScopedSuppression>? suppressions )
         {
-            this.ReportedDiagnostics = diagnostics;
-            this.DiagnosticSuppressions = suppressions;
+            this.ReportedDiagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;
+            this.DiagnosticSuppressions = suppressions ?? ImmutableArray<ScopedSuppression>.Empty;
         }
 
         public ImmutableDiagnosticList Concat( in ImmutableDiagnosticList other )
             => new(
                 this.ReportedDiagnostics.AddRange( other.ReportedDiagnostics ),
                 this.DiagnosticSuppressions.AddRange( other.DiagnosticSuppressions ) );
+
+        public ImmutableDiagnosticList Concat( in IEnumerable<Diagnostic> other )
+            => new(
+                this.ReportedDiagnostics.AddRange( other ),
+                this.DiagnosticSuppressions );
+
+        public override string ToString() => $"Diagnostics={this.ReportedDiagnostics.Length}, Suppressions={this.DiagnosticSuppressions.Length}";
     }
 }

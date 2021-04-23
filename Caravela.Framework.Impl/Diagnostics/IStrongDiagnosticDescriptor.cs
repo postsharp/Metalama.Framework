@@ -17,5 +17,7 @@ namespace Caravela.Framework.Impl.Diagnostics
         string MessageFormat { get; }
 
         string Category { get; }
+
+        DiagnosticDescriptor ToDiagnosticDescriptor();
     }
 }

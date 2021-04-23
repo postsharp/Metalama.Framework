@@ -53,8 +53,6 @@ namespace Caravela.TestFramework
             {
                 var diagnostics = initialCompilation.GetDiagnostics();
 
-                result.AddDiagnostics( diagnostics );
-
                 if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
                 {
                     result.SetFailed( "The initial compilation failed." );

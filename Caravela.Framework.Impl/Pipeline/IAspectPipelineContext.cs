@@ -14,6 +14,8 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public interface IAspectPipelineContext
     {
+        // TODO: When called from a diagnostic suppressor, we don't have a way to report diagnostics.
+
         CancellationToken CancellationToken { get; }
 
         CSharpCompilation Compilation { get; }
@@ -23,9 +25,6 @@ namespace Caravela.Framework.Impl.Pipeline
         IList<ResourceDescription> ManifestResources { get; }
 
         IBuildOptions BuildOptions { get; }
-
-        // TODO: When called from a diagnostic suppressor, we don't have a way to report diagnostics.
-        void ReportDiagnostic( Diagnostic diagnostic );
 
         bool HandleExceptions { get; }
     }

@@ -145,9 +145,9 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         {
             var name = classification switch
             {
-                TextSpanClassification.Dynamic => FormatDefinitions.SpecialName,
-                TextSpanClassification.TemplateKeyword => FormatDefinitions.SpecialName,
-                TextSpanClassification.CompileTimeVariable => FormatDefinitions.SpecialName,
+                TextSpanClassification.Dynamic => FormatDefinitions.DynamicName,
+                TextSpanClassification.TemplateKeyword => FormatDefinitions.TemplateKeywordName,
+                TextSpanClassification.CompileTimeVariable => FormatDefinitions.CompileTimeVariableName,
                 TextSpanClassification.CompileTime => FormatDefinitions.CompileTimeName,
                 _ => null
             };

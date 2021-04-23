@@ -4,10 +4,12 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Attribute = System.Attribute;
@@ -27,11 +29,24 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeTypeResolver = compileTimeTypeResolver;
         }
 
-        public T CreateAttribute<T>( IAttribute attribute )
+        public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
-            => (T) this.CreateAttribute( attribute, typeof(T) );
+        {
+            if ( this.TryCreateAttribute( attribute, diagnosticAdder, out var untypedAttribute ) )
+            {
+                attributeInstance = (T) untypedAttribute;
 
-        public Attribute CreateAttribute( IAttribute attribute )
+                return true;
+            }
+            else
+            {
+                attributeInstance = null;
+
+                return false;
+            }
+        }
+
+        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute attributeInstance )
         {
             // TODO: this is insufficiently tested, especially the case with Type arguments.
             // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
@@ -39,10 +54,14 @@ namespace Caravela.Framework.Impl.CompileTime
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false ).AssertNotNull();
 
-            return this.CreateAttribute( attribute, type );
+            return this.TryCreateAttribute( attribute, type, diagnosticAdder, out attributeInstance! );
         }
 
-        private Attribute CreateAttribute( IAttribute attribute, Type type )
+        private bool TryCreateAttribute(
+            IAttribute attribute,
+            Type type,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             var constructorSymbol = attribute.Constructor.GetSymbol();
             var constructor = type.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
@@ -52,11 +71,26 @@ namespace Caravela.Framework.Impl.CompileTime
                 throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
             }
 
-            var parameters = attribute.ConstructorArguments.Select(
-                    ( a, i ) => this.TranslateAttributeArgument( a, constructor.GetParameters()[i].ParameterType ) )
-                .ToArray();
+            var parameters = new object?[attribute.ConstructorArguments.Count];
 
-            var result = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
+            for ( var i = 0; i < parameters.Length; i++ )
+            {
+                if ( !this.TryTranslateAttributeArgument(
+                    attribute,
+                    attribute.ConstructorArguments[i],
+                    constructor.GetParameters()[i].ParameterType,
+                    diagnosticAdder,
+                    out var translatedArg ) )
+                {
+                    attributeInstance = null;
+
+                    return false;
+                }
+
+                parameters[i] = translatedArg;
+            }
+
+            attributeInstance = (Attribute) constructor.Invoke( parameters ).AssertNotNull();
 
             foreach ( var (name, value) in attribute.NamedArguments )
             {
@@ -65,11 +99,25 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( (property = type.GetProperty( name )) != null )
                 {
-                    property.SetValue( result, this.TranslateAttributeArgument( value, property.PropertyType ) );
+                    if ( !this.TryTranslateAttributeArgument( attribute, value, property.PropertyType, diagnosticAdder, out var translatedValue ) )
+                    {
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
+                    property.SetValue( attributeInstance, translatedValue );
                 }
                 else if ( (field = type.GetField( name )) != null )
                 {
-                    field.SetValue( result, this.TranslateAttributeArgument( value, field.FieldType ) );
+                    if ( !this.TryTranslateAttributeArgument( attribute, value, field.FieldType, diagnosticAdder, out var translatedValue ) )
+                    {
+                        attributeInstance = null;
+
+                        return false;
+                    }
+
+                    field.SetValue( attributeInstance, translatedValue );
                 }
                 else
                 {
@@ -77,40 +125,71 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            return result;
+            return true;
         }
 
-        private object? TranslateAttributeArgument( TypedConstant typedConstant, Type targetType )
-            => this.TranslateAttributeArgument( typedConstant.Value, typedConstant.Type, targetType );
+        private bool TryTranslateAttributeArgument(
+            IAttribute attribute,
+            TypedConstant typedConstant,
+            Type targetType,
+            IDiagnosticAdder diagnosticAdder,
+            out object? translatedValue )
+            => this.TryTranslateAttributeArgument( attribute, typedConstant.Value, typedConstant.Type, targetType, diagnosticAdder, out translatedValue );
 
-        private object? TranslateAttributeArgument( object? value, IType sourceType, Type targetType )
+        private bool TryTranslateAttributeArgument(
+            IAttribute attribute,
+            object? value,
+            IType sourceType,
+            Type targetType,
+            IDiagnosticAdder diagnosticAdder,
+            out object? translatedValue )
         {
             if ( value == null )
             {
-                return null;
+                translatedValue = null;
+
+                return true;
+            }
+
+            void ReportInvalidTypeDiagnostic()
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.CannotReferenceCompileTimeOnly.CreateDiagnostic(
+                        attribute.GetDiagnosticLocation(),
+                        (value.GetType(), targetType) ) );
             }
 
             switch ( value )
             {
                 case TypedConstant typedConstant:
-                    return this.TranslateAttributeArgument( typedConstant, targetType );
+                    return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
 
                 case IType type:
                     if ( !targetType.IsAssignableFrom( typeof(Type) ) )
                     {
-                        throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
+                        ReportInvalidTypeDiagnostic();
+                        translatedValue = null;
+
+                        return false;
                     }
 
-                    return this._compileTimeTypeResolver.GetCompileTimeType( type.GetSymbol(), true );
+                    translatedValue = this._compileTimeTypeResolver.GetCompileTimeType( type.GetSymbol(), true );
+
+                    return true;
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
                     if ( !targetType.IsAssignableFrom( typeof(string) ) )
                     {
-                        throw new InvalidOperationException( $"System.Type cannot be assigned to {targetType}" );
+                        ReportInvalidTypeDiagnostic();
+                        translatedValue = null;
+
+                        return false;
                     }
 
-                    return str;
+                    translatedValue = str;
+
+                    return true;
 
                 case IEnumerable enumerable:
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
@@ -131,15 +210,24 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     foreach ( var item in list )
                     {
-                        array.SetValue( this.TranslateAttributeArgument( item, sourceType, elementType ), index );
+                        if ( !this.TryTranslateAttributeArgument( attribute, item, sourceType, elementType, diagnosticAdder, out var translatedItem ) )
+                        {
+                            ReportInvalidTypeDiagnostic();
+                            translatedValue = null;
+
+                            return false;
+                        }
+
+                        array.SetValue( translatedItem, index );
                         index++;
                     }
 
-                    return array;
+                    translatedValue = array;
+
+                    return true;
 
                 default:
-                    if ( sourceType is INamedType enumType && enumType.TypeKind == TypeKind.Enum
-                                                           && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
+                    if ( sourceType is INamedType { TypeKind: TypeKind.Enum } enumType && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
                     {
                         // Convert the underlying value of an enum to a strongly typed enum when we can.
                         var enumReflectionType = this._compileTimeTypeResolver.GetCompileTimeType( enumTypeSymbol, false );
@@ -152,10 +240,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
                     if ( value != null && !targetType.IsInstanceOfType( value ) )
                     {
-                        throw new InvalidOperationException( $"{value.GetType()} cannot be assigned to {targetType}" );
+                        ReportInvalidTypeDiagnostic();
+                        translatedValue = null;
+
+                        return false;
                     }
 
-                    return value;
+                    translatedValue = value;
+
+                    return true;
             }
         }
 

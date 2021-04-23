@@ -2,12 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -33,15 +32,14 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
 
-            List<Diagnostic> diagnostics = new();
+            DiagnosticList diagnostics = new();
 
             var templateCompilerSuccess = TemplateCompiler.TryAnnotate(
                 templateSyntaxRoot,
                 templateSemanticModel,
+                false,
                 diagnostics,
                 out var annotatedTemplateSyntax );
-
-            result.AddDiagnostics( diagnostics );
 
             if ( !templateCompilerSuccess )
             {

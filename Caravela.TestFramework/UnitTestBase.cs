@@ -112,6 +112,11 @@ namespace Caravela.TestFramework
 
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
 
+            // Get expectations.
+            Assert.True( File.Exists( expectedTransformedPath ), $"File {expectedTransformedPath} does not exist." );
+            var expectedNonNormalizedSourceText = await File.ReadAllTextAsync( expectedTransformedPath );
+            var expectedTransformedSourceText = NormalizeString( expectedNonNormalizedSourceText );
+
             // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,
@@ -120,15 +125,21 @@ namespace Caravela.TestFramework
                 Path.GetDirectoryName( relativeTestPath ) ?? "",
                 Path.GetFileNameWithoutExtension( relativeTestPath ) + ".transformed.txt" );
 
-            if ( !File.Exists( actualTransformedPath ) || NormalizeString( File.ReadAllText( actualTransformedPath ) ) != actualTransformedSourceText )
+            Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+
+            var storedTransformedSourceText = File.Exists( actualTransformedPath ) ? NormalizeString( File.ReadAllText( actualTransformedPath ) ) : null;
+
+            if ( expectedTransformedSourceText == actualTransformedSourceText
+                 && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
-                Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath ) );
+                // Update the obj\transformed file to the non-normalized expected text, so that future call to update_transformed.txt
+                // does not overwrite any whitespace change.
+                File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
+            }
+            else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedSourceText )
+            {
                 File.WriteAllText( actualTransformedPath, actualTransformedSourceText );
             }
-
-            // Compare with expectations.
-            Assert.True( File.Exists( expectedTransformedPath ), $"File {expectedTransformedPath} does not exist." );
-            var expectedTransformedSourceText = NormalizeString( await File.ReadAllTextAsync( expectedTransformedPath ) );
 
             Assert.Equal( expectedTransformedSourceText, actualTransformedSourceText );
         }

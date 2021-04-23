@@ -63,13 +63,14 @@ namespace Caravela.Framework.DesignTime.Vsix
                 }
             }
 
+
+            // Recursively look at projects references.
             foreach ( var reference in project.ProjectReferences )
             {
                 var referencedProject = project.Solution.GetProject( reference.ProjectId );
-                if ( referencedProject != null && IsOurReference( referencedProject.AssemblyName ) )
+
+                if ( referencedProject != null && TryGetReferencedVersion( referencedProject, out version ) )
                 {
-                    // Matching all is intentional here. We are in the scenario when a Caravela developer builds Caravela.
-                    version = DesignTimeEntryPointManager.MatchAllVersion;
                     return true;
                 }
             }
