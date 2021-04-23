@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.Collections;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -17,8 +18,9 @@ namespace Caravela.Framework.Impl.Pipeline
             var context = new AspectPipelineContext( transformerContext );
             using CompileTimeAspectPipeline pipeline = new( context );
 
-            if ( pipeline.TryExecute( context, out var compilation ) )
+            if ( pipeline.TryExecute( context, transformerContext.Compilation, out var compilation, out var additionalResources ) )
             {
+                transformerContext.ManifestResources.AddRange( additionalResources );
                 return compilation;
             }
 

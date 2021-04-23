@@ -2,9 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Microsoft.CodeAnalysis;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -16,20 +19,105 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class DesignTimeAspectPipeline : AspectPipeline
     {
-        public DesignTimeAspectPipeline( IAspectPipelineContext context ) : base( context ) { }
+        private readonly object configureSync = new();
+        private PipelineConfiguration? _cachedConfiguration;
+        
+        // Maps file names to source text on which we have a dependency.
+        private ConcurrentDictionary<string, SyntaxTree> _cacheDependencies = new();
+        public DesignTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions ) { }
 
-        public bool TryExecute( [NotNullWhen( true )] out DesignTimeAspectPipelineResult result )
+        public void OnSemanticModelUpdated( SemanticModel semanticModel )
+        {
+            if ( this._cachedConfiguration == null )
+            {
+                // The cache is empty, so there is nothing to invalidate.
+                return;
+            }
+            
+            var newSyntaxTree = semanticModel.SyntaxTree;
+
+            if ( this._cacheDependencies.TryGetValue( newSyntaxTree.FilePath, out var oldSyntaxTree ) )
+            {
+                if ( !newSyntaxTree.IsEquivalentTo( oldSyntaxTree ) )
+                {
+                    // We have a breaking change in our pipeline configuration.
+                    this._cachedConfiguration = null;
+                }
+            }
+        }
+
+        private bool TryGetConfiguration( CompilationModel compilationModel, IDiagnosticAdder diagnosticAdder,  [NotNullWhen(true)] out PipelineConfiguration? configuration )
+        {
+            // Build the pipeline configuration if we don't have a valid one.
+            if ( this._cachedConfiguration == null )
+            {
+                lock ( this.configureSync )
+                {
+                    if ( this._cachedConfiguration == null )
+                    {
+                        if ( !this.Initialize(
+                            diagnosticAdder,
+                            compilationModel,
+                            ImmutableArray<object>.Empty,
+                            out this._cachedConfiguration ) )
+                        {
+                            configuration = null;
+                            return false;
+                        }
+
+                        // Update cache dependencies.
+                        this._cacheDependencies.Clear();
+
+                        foreach ( var syntaxTree in this._cachedConfiguration.CompileTimeProject.SyntaxTrees )
+                        {
+                            this._cacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
+                        }
+                    }
+                }
+            }
+
+            configuration = this._cachedConfiguration;
+
+            return true;
+        }
+
+
+        public DesignTimeAspectPipelineResult AnalyzeCompilation( Compilation compilation ) 
+        {
+            
+            var compilationModel = CompilationModel.CreateInitialInstance( compilation );
+
+
+            return this.ExecuteCore( compilationModel );
+        }
+        
+        
+        
+        public DesignTimeAspectPipelineResult AnalyzeSemanticModel( SemanticModel semanticModel )
+        {
+            var compilationModel = PartialCompilationModel.CreateInitialInstance( semanticModel );
+                
+            return this.ExecuteCore( compilationModel );
+        }
+
+        private DesignTimeAspectPipelineResult ExecuteCore( CompilationModel compilation )
         {
             DiagnosticList diagnosticList = new();
-            var success = this.TryExecuteCore( diagnosticList, out var pipelineResult, out _ );
+            
+            if ( !this.TryGetConfiguration( compilation, diagnosticList, out var configuration ) )
+            {
+                return new DesignTimeAspectPipelineResult(
+                    false, null, new ImmutableDiagnosticList( diagnosticList ) );
+            }
+            
+            var success = this.TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
 
-            result = new DesignTimeAspectPipelineResult(
+            return new DesignTimeAspectPipelineResult(
+                success,
                 pipelineResult?.AdditionalSyntaxTrees,
                 new ImmutableDiagnosticList(
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );
-
-            return success;
         }
 
         public override bool CanTransformCompilation => false;

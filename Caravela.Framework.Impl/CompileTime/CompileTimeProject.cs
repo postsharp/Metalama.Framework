@@ -33,7 +33,8 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             Compilation? compilation,
-            byte[]? assemblyImage)
+            byte[]? assemblyImage,
+            IReadOnlyList<SyntaxTree>? syntaxTrees)
         {
             if ( compilation == null && references.Count == 0 )
             {
@@ -47,6 +48,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
             this.References = references;
+            this.SyntaxTrees = syntaxTrees;
         }
 
         public static CompileTimeProject Create(
@@ -55,18 +57,21 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest manifest,
             Compilation compilation,
-            byte[] assemblyImage )
-            => new( domain, identity, references, manifest, compilation, assemblyImage );
+            byte[] assemblyImage,
+            IReadOnlyList<SyntaxTree>? syntaxTrees )
+            => new( domain, identity, references, manifest, compilation, assemblyImage, syntaxTrees );
 
         public static CompileTimeProject CreateEmpty(
             CompileTimeDomain domain,
             AssemblyIdentity identity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, identity, references ?? Array.Empty<CompileTimeProject>(), null, null, null );
+            => new( domain, identity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, Array.Empty<SyntaxTree>() );
 
-        public IEnumerable<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes ?? Enumerable.Empty<string>();
+        public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes ?? (IReadOnlyList<string>) Array.Empty<string>();
+        public IReadOnlyList<CompileTimeProject> References { get; }
 
-        public IEnumerable<CompileTimeProject> References { get; }
+        public IReadOnlyList<SyntaxTree> SyntaxTrees { get; }
+        
 
         public CompilationReference ToMetadataReference() => this.AssertNotEmpty()._compilation!.ToMetadataReference();
 

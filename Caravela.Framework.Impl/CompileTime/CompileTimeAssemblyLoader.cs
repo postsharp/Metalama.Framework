@@ -355,7 +355,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return false;
             }
 
-            project = CompileTimeProject.Create( this._domain, assemblyIdentity, referenceProjects, manifest, compilation, memoryStream.ToArray() );
+            project = CompileTimeProject.Create( this._domain, assemblyIdentity, referenceProjects, manifest, compilation, memoryStream.ToArray(), null );
 
             return true;
         }

@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -321,7 +322,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     referencedProjects,
                     manifest,
                     compileTimeCompilation,
-                    compileTimeAssemblyStream.ToArray() );
+                    compileTimeAssemblyStream.ToArray(),
+                    compileTimeTrees );
                 
                 this._cache.Add( cacheKey, project );
 

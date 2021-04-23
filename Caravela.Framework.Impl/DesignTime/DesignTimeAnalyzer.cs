@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                compilation,
+                context.SemanticModel,
                 new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ),
                 context.CancellationToken );
 

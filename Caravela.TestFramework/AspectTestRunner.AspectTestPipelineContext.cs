@@ -4,11 +4,9 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 
 namespace Caravela.TestFramework
 {
@@ -25,18 +23,11 @@ namespace Caravela.TestFramework
                     throw new ArgumentOutOfRangeException( nameof(testResult), $"{nameof(TestResult.InitialCompilation)} should not be null." );
                 }
 
-                this.Compilation = (CSharpCompilation) testResult.InitialCompilation!;
                 this._testResult = testResult;
-                this.ManifestResources = new List<ResourceDescription>();
+                new List<ResourceDescription>();
             }
 
-            public CSharpCompilation Compilation { get; }
-
             ImmutableArray<object> IAspectPipelineContext.Plugins => ImmutableArray<object>.Empty;
-
-            public IList<ResourceDescription> ManifestResources { get; }
-
-            CancellationToken IAspectPipelineContext.CancellationToken => CancellationToken.None;
 
             IBuildOptions IAspectPipelineContext.BuildOptions { get; } = new TestBuildOptions();
 

@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 namespace Caravela.Framework.Impl.DesignTime
 {
     internal record DesignTimeAspectPipelineResult(
+        bool Success,
         IImmutableDictionary<string, SyntaxTree>? AdditionalSyntaxTrees,
         ImmutableDiagnosticList Diagnostics );
 }

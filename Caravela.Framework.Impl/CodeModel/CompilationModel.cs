@@ -21,9 +21,9 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class CompilationModel : ICompilation, ICodeElementInternal
     {
-        public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
+        public static CompilationModel CreateInitialInstance( Compilation roslynCompilation )
         {
-            return new( roslynCompilation );
+            return new( (CSharpCompilation) roslynCompilation );
         }
 
         internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedElements )
