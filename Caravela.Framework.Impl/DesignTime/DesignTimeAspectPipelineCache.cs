@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Sdk;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -26,9 +27,33 @@ namespace Caravela.Framework.Impl.DesignTime
                 // detaches. It makes a better debugging experience.
                 _attachDebuggerRequested = true;
 
-                if ( !Debugger.IsAttached )
+                if ( !Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase ) &&
+                     !Debugger.IsAttached )
                 {
                     Debugger.Launch();
+                }
+            }
+        }
+
+        private static void UpdateCache( object key, DesignTimeAspectPipelineResult value )
+        {
+            if ( _cache.TryGetValue( key, out var currentValue ) && currentValue == value)
+            {
+                return;
+            }
+
+            while ( true )
+            {
+                _cache.Remove( key );
+
+                try
+                {
+                    _cache.Add( key, value );
+                    return;
+                }
+                catch ( ArgumentException )
+                {
+                    
                 }
             }
         }
@@ -68,10 +93,12 @@ namespace Caravela.Framework.Impl.DesignTime
                         foreach ( var syntaxTree in compilation.SyntaxTrees )
                         {
                             var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
-                            _cache.Add( semanticModel, result );
+                            _ = _cache.Remove( semanticModel );
+                            UpdateCache( semanticModel, result );
                         }
 
-                        _cache.Add( compilation, result );
+                        
+                        UpdateCache( compilation, result );
                     }
                 }
             }

@@ -63,7 +63,7 @@ namespace Caravela.Framework.Sdk
                     }
 
                     // Add base types recursively.
-                    if (type.BaseType != null && !SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, type.BaseType.ContainingAssembly))
+                    if (type.BaseType != null && SymbolEqualityComparer.Default.Equals( type.ContainingAssembly, type.BaseType.ContainingAssembly))
                     {
                         AddTypeRecursive( type.BaseType );
                     }

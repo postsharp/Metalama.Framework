@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel
     {
         private readonly CompileTimeAssemblyLoader _loader;
 
-        public CompilationAspectSource( IReadOnlyList<INamedTypeSymbol> aspectTypes, CompileTimeAssemblyLoader loader )
+        public CompilationAspectSource( IReadOnlyList<AspectType> aspectTypes, CompileTimeAssemblyLoader loader )
         {
             this._loader = loader;
             this.AspectTypes = aspectTypes;
@@ -23,13 +23,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<INamedTypeSymbol> AspectTypes { get; }
+        public IEnumerable<AspectType> AspectTypes { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
         public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel compilation, AspectType aspectType, IDiagnosticAdder diagnosticAdder )
-            => compilation.GetAllAttributesOfType( compilation.Factory.GetNamedType( aspectType.TypeSymbol ) )
+            => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectType.FullName ) )
                 .Select(
                     attribute =>
                     {

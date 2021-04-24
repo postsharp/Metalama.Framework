@@ -15,22 +15,26 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class OverflowAspectSource : IAspectSource
     {
-        private readonly List<(IAspectSource Source, INamedTypeSymbol Type)> _aspectSources = new();
+        private readonly List<(IAspectSource Source, AspectType Type)> _aspectSources = new();
 
         public AspectSourcePriority Priority => AspectSourcePriority.Aggregate;
 
-        public IEnumerable<INamedTypeSymbol> AspectTypes => this._aspectSources.Select( a => a.Type ).Distinct();
+        public IEnumerable<AspectType> AspectTypes => this._aspectSources.Select( a => a.Type ).Distinct();
 
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
         public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel compilation, AspectType aspectType, IDiagnosticAdder diagnosticAdder )
-            => this._aspectSources
-                .Where( s => s.Type.Equals( aspectType.TypeSymbol ) )
+        {
+            var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectType.FullName );
+            
+            return this._aspectSources
+                .Where( s => s.Type.Equals( aspectTypeSymbol ) )
                 .Select( a => a.Source )
                 .Distinct()
                 .SelectMany( a => a.GetAspectInstances( compilation, aspectType, diagnosticAdder ) );
+        }
 
-        public void Add( IAspectSource aspectSource, INamedTypeSymbol aspectType )
+        public void Add( IAspectSource aspectSource, AspectType aspectType )
         {
             this._aspectSources.Add( (aspectSource, aspectType) );
         }

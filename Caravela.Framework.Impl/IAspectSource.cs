@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
     {
         AspectSourcePriority Priority { get; }
 
-        IEnumerable<INamedTypeSymbol> AspectTypes { get; }
+        IEnumerable<AspectType> AspectTypes { get; }
 
         IEnumerable<ICodeElement> GetExclusions( INamedType aspectType );
 

@@ -10,9 +10,9 @@ namespace Caravela.Framework.Sdk
     /// </summary>
     public interface IAspectType
     {
-        string Name { get; }
-
-        INamedTypeSymbol TypeSymbol { get; }
+        string FullName { get; }
+        
+        string DisplayName { get; }
 
         bool IsAbstract { get; }
     }

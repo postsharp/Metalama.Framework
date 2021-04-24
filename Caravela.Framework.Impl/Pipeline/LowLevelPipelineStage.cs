@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 newCompilation = context.Compilation;
 
                 diagnostics.ReportDiagnostic(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.TypeSymbol, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.DisplayName, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects

@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private protected record PipelineConfiguration(
             ImmutableArray<PipelineStage> Stages,
-            IReadOnlyList<INamedTypeSymbol> AspectNamedTypes,
+            IReadOnlyList<AspectType> AspectTypes,
             ImmutableArray<OrderedAspectLayer> Layers,
             CompileTimeProject? CompileTimeProject,
             CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
@@ -145,7 +145,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader ) )
                 .ToImmutableArray();
 
-            configuration = new PipelineConfiguration( stages, aspectNamedTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new PipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
 
@@ -183,7 +183,7 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             // If there is no aspect in the compilation, don't execute the pipeline.
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectNamedTypes.Count == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectTypes.Count == 0 )
             {
                 pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<OrderedAspectLayer>() );
 
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var aspectSource = new CompilationAspectSource(
-                pipelineConfiguration.AspectNamedTypes,
+                pipelineConfiguration.AspectTypes,
                 pipelineConfiguration.CompileTimeAssemblyLoader );
 
             pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );

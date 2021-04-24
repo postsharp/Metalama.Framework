@@ -20,18 +20,18 @@ namespace Caravela.Framework.Impl
     {
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
-
-        public string Name => this.TypeSymbol.MetadataName;
+        public string FullName { get; }
+        public string DisplayName { get; }
 
         public AspectType? BaseAspectType { get; }
 
         public IAspectDriver AspectDriver => this._aspectDriver.AssertNotNull();
 
         public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
+        
+        public Location? DiagnosticLocation { get; }
 
-        public INamedTypeSymbol TypeSymbol { get; }
-
-        public bool IsAbstract => this.TypeSymbol.IsAbstract;
+        public bool IsAbstract { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectType"/> class.
@@ -40,9 +40,12 @@ namespace Caravela.Framework.Impl
         /// <param name="aspectDriver">Can be null for testing.</param>
         private AspectType( INamedTypeSymbol aspectTypeSymbol, AspectType? baseAspectType, IAspectDriver? aspectDriver )
         {
-            this.TypeSymbol = aspectTypeSymbol;
+            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.DisplayName = aspectTypeSymbol.Name;
+            this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseAspectType = baseAspectType;
             this._aspectDriver = aspectDriver;
+            this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
         }
 
         public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new( aspect, target, this );
@@ -63,10 +66,10 @@ namespace Caravela.Framework.Impl
 
             // Add the parts defined in [ProvidesAspectLayers]. If it is not defined in the current type, look up in the base classes.
 
-            for ( var type = newAspectType; type != null; type = type.BaseAspectType )
+            for ( var type = aspectNamedType; type != null; type = type.BaseType )
             {
                 var aspectLayersAttributeData =
-                    type.TypeSymbol.GetAttributes().SingleOrDefault( a => a.AttributeClass.Is( typeof(ProvidesAspectLayersAttribute) ) );
+                    type.GetAttributes().SingleOrDefault( a => a.AttributeClass.Is( typeof(ProvidesAspectLayersAttribute) ) );
 
                 if ( aspectLayersAttributeData != null )
                 {

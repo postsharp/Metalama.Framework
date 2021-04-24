@@ -27,8 +27,8 @@ namespace Caravela.Framework.Impl
         public static readonly StrongDiagnosticDescriptor<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
             new( "CR0004", "Aspect has more than one weaver.", "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", _category, Error );
 
-        public static readonly StrongDiagnosticDescriptor<(INamedTypeSymbol WeaverType, string Exception)> ExceptionInWeaver =
-            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the aspect weaver '{0}': {1}", _category, Error );
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, string Exception)> ExceptionInWeaver =
+            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the weaver of aspect '{0}': {1}", _category, Error );
 
         public static readonly StrongDiagnosticDescriptor<(ICodeElement Member, int ArgumentsCount)> MemberRequiresNArguments =
             new( "CR0012", "Member requires number of arguments.", "Member '{0}' requires {1} arguments.", _category, Error );
@@ -62,14 +62,14 @@ namespace Caravela.Framework.Impl
             new( "CR0021", "A cycle was found in aspect ordering.",
                  "A cycle was found in the specifications of aspect ordering between the following aspect part: {0}.", _category, Error );
 
-        public static readonly StrongDiagnosticDescriptor<(ITypeSymbol ParentType, ITypeSymbol ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
+        public static readonly StrongDiagnosticDescriptor<(string ParentType, string ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
             "CR0022",
             "Cannot add an aspect to a previous step of the compilation pipeline.",
             "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<(ITypeSymbol AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
             "CR0023",
             "Cannot add an advice to a previous step of the compilation pipeline.",
             "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
