@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
@@ -14,7 +13,7 @@ namespace Caravela.Framework.TestApp
          //   Debugger.Launch();
             base.Initialize( aspectBuilder );
 
-            aspectBuilder.ReportDiagnostic( Diagnostics.Severity.Warning, "MY000", "Hello, world." );
+            aspectBuilder.ReportDiagnostic( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v3.", aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {

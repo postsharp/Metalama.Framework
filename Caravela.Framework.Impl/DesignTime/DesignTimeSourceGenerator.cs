@@ -24,9 +24,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                PartialCompilation.CreateComplete( compilation ),
-                new AnalyzerBuildOptionsSource( context.AnalyzerConfigOptions ),
-                ImmutableArray<object>.Empty, 
+                compilation,
+                new BuildOptions( context.AnalyzerConfigOptions ),
                 context.CancellationToken );
 
             // Add introduced syntax trees.

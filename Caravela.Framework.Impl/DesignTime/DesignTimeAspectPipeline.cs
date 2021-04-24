@@ -52,6 +52,7 @@ namespace Caravela.Framework.Impl.DesignTime
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
+         
             // Build the pipeline configuration if we don't have a valid one.
             if ( this._cachedConfiguration == null )
             {

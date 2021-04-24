@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 compilation,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
-                new BuildOptions( new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ), ImmutableArray<object>.Empty ),
+                new BuildOptions(  context.Options.AnalyzerConfigOptionsProvider  ),
                 context.CancellationToken );
         }
 
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                PartialCompilation.CreateComplete( compilation ),
+                compilation,
                 options,
                 cancellationToken );
 

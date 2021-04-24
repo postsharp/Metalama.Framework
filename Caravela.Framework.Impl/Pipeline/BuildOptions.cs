@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 
@@ -10,16 +11,25 @@ namespace Caravela.Framework.Impl.Pipeline
     /// Default implementation of <see cref="IBuildOptions"/>, based on a <see cref="IBuildOptionsSource"/>
     /// reading options passed by MSBuild.
     /// </summary>
-    public class BuildOptions : IBuildOptions
+    public partial class BuildOptions : IBuildOptions
     {
         private readonly string _defaultProjectId = Guid.NewGuid().ToString();
         private readonly IBuildOptionsSource _source;
 
-        public BuildOptions( IBuildOptionsSource source, ImmutableArray<object> plugIns )
+        public BuildOptions( IBuildOptionsSource source, ImmutableArray<object>? plugIns )
         {
             this._source = source;
-            this.PlugIns = plugIns;
+            this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
+        
+        public BuildOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null  ) : this( new OptionsAdapter( options ), plugIns )
+        {
+        }
+
+        public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null) : this( new OptionsAdapter( options ), plugIns)
+        {
+        }
+
 
         public bool CompileTimeAttachDebugger => this.GetBooleanOption( "DebugCaravela" );
 

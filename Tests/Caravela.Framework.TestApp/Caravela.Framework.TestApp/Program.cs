@@ -46,6 +46,7 @@ namespace Caravela.Framework.TestApp
             Console.WriteLine( "This is method with two aspects" );
         }
 
+
         [PrintDebugInfoAspect]
         private static void PrintDebugInfo() { }
 

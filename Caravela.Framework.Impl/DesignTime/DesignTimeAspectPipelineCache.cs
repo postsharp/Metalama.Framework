@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -12,9 +13,8 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    internal static class DesignTimeAspectPipelineCache
+    internal static partial class DesignTimeAspectPipelineCache
     {
-        private static readonly ConditionalWeakTable<object, DesignTimeAspectPipelineResult> _cache = new();
         private static readonly ConditionalWeakTable<object, object> _sync = new();
         private static readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelineCache = new();
         private static bool _attachDebuggerRequested;
@@ -35,41 +35,13 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private static void UpdateCache( object key, DesignTimeAspectPipelineResult value )
-        {
-            if ( _cache.TryGetValue( key, out var currentValue ) && currentValue == value)
-            {
-                return;
-            }
-
-            while ( true )
-            {
-                _cache.Remove( key );
-
-                try
-                {
-                    _cache.Add( key, value );
-                    return;
-                }
-                catch ( ArgumentException )
-                {
-                    
-                }
-            }
-        }
 
         private static DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
             => _pipelineCache.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
 
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
-            PartialCompilation compilation,
-            AnalyzerBuildOptionsSource buildOptionsSource,
-            ImmutableArray<object> plugIns,
-            CancellationToken cancellationToken )
-            => GetPipelineResult( compilation, new BuildOptions( buildOptionsSource, plugIns ), cancellationToken );
 
         public static DesignTimeAspectPipelineResult GetPipelineResult(
-            PartialCompilation compilation,
+            Compilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
         {
@@ -77,28 +49,53 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // ReSharper disable once InconsistentlySynchronizedField
 
-            if ( !_cache.TryGetValue( compilation, out var result ) )
+            if ( !ResultCache.TryGetValue( compilation, out var result ) )
             {
                 var lockable = _sync.GetOrCreateValue( compilation );
 
                 lock ( lockable )
                 {
-                    if ( !_cache.TryGetValue( compilation, out result ) )
+                    if ( !ResultCache.TryGetValue( compilation, out result ) )
                     {
                         var pipeline = GetOrCreatePipeline( buildOptions );
 
-                        result = pipeline.Execute( compilation );
+                        result = pipeline.Execute( PartialCompilation.CreateComplete( compilation ) );
 
-                        // Add the result to the cache for all semantic models.
-                        foreach ( var syntaxTree in compilation.SyntaxTrees )
-                        {
-                            var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
-                            _ = _cache.Remove( semanticModel );
-                            UpdateCache( semanticModel, result );
-                        }
+                        ResultCache.Update( compilation, result );
+                    }
+                }
+            }
 
-                        
-                        UpdateCache( compilation, result );
+            return result;
+        }
+        
+        public static DesignTimeAspectPipelineResult GetPipelineResult(
+            SemanticModel semanticModel,
+            BuildOptions buildOptions,
+            CancellationToken cancellationToken )
+        {
+            AttachDebugger( buildOptions );
+
+            // ReSharper disable once InconsistentlySynchronizedField
+
+            if ( !ResultCache.TryGetValue( semanticModel, out var result ) )
+            {
+                var lockable = _sync.GetOrCreateValue( semanticModel );
+
+                lock ( lockable )
+                {
+                    if ( !ResultCache.TryGetValue( semanticModel, out result ) )
+                    {
+                        var pipeline = GetOrCreatePipeline( buildOptions );
+
+
+                        // If Roslyn has requested an analysis of this semantic model, there is a chance that it has changed, therefore we should
+                        // consider invalidating the pipeline configuration cache.
+                        pipeline.OnSemanticModelUpdated( semanticModel );
+
+                        result = pipeline.Execute( PartialCompilation.CreatePartial( semanticModel ) );
+
+                        ResultCache.Update( semanticModel, result );
                     }
                 }
             }
