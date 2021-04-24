@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
             AppDomain.CurrentDomain.AssemblyResolve += this.ResolveAssemblyReference;
         }
 
-        private  Assembly? ResolveAssemblyReference( object sender, ResolveEventArgs args )
+        private Assembly? ResolveAssemblyReference( object sender, ResolveEventArgs args )
         {
             var assemblyIdentity = new AssemblyName( args.Name ).ToAssemblyIdentity();
 

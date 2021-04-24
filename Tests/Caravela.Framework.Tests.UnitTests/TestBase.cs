@@ -30,12 +30,12 @@ namespace Caravela.Framework.Tests.UnitTests
             IEnumerable<MetadataReference>? additionalReferences = null,
             string? name = null )
             => CreateRoslynCompilation(
-                new Dictionary<string, string> { {Guid.NewGuid() + ".cs", code} },
+                new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
                 dependentCode,
                 ignoreErrors,
                 additionalReferences,
                 name );
-        
+
         public static CSharpCompilation CreateRoslynCompilation(
             IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
@@ -63,8 +63,7 @@ namespace Caravela.Framework.Tests.UnitTests
 
             if ( code != null )
             {
-                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( 
-                    code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
+                mainRoslynCompilation = mainRoslynCompilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
             }
 
             if ( dependentCode != null )

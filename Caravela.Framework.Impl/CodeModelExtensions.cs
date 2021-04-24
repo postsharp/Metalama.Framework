@@ -5,9 +5,11 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
+using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 
 namespace Caravela.Framework.Impl
 {
+
     internal static class CodeModelExtensions
     {
         // TODO: should this be in the SDK?
@@ -39,6 +41,16 @@ namespace Caravela.Framework.Impl
             }
 
             throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
+        }
+
+        public static AttributeData GetAttributeData( this IAttribute attribute )
+        {
+            if ( attribute is Attribute attributeModel )
+            {
+                return attributeModel.AttributeData;
+            }
+
+            throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
         }
     }
 }

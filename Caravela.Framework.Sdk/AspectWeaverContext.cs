@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Sdk
 {
+
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
@@ -26,7 +27,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the input <see cref="CSharpCompilation"/>.
         /// </summary>
-        public CSharpCompilation Compilation { get; }
+        public PartialCompilation Compilation { get; }
 
         private readonly Action<Diagnostic> _addDiagnostic;
 
@@ -42,7 +43,7 @@ namespace Caravela.Framework.Sdk
         internal AspectWeaverContext(
             IAspectType aspectType,
             IReadOnlyList<IAspectInstance> aspectInstances,
-            CSharpCompilation compilation,
+            PartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )
         {

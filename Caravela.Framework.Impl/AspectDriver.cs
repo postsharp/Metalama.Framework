@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,23 +18,21 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriver : IAspectDriver
     {
-        private readonly CompilationModel _compilation;
-        private readonly IReadOnlyList<(IAttribute Attribute, IMethod Method)> _declarativeAdviceAttributes;
+        private readonly Compilation _compilation;
+        private readonly List<(AttributeData Attribute, ISymbol Member)> _declarativeAdviceAttributes;
 
-        public INamedType AspectType { get; }
+        public INamedTypeSymbol AspectType { get; }
 
-        public AspectDriver( INamedType aspectType, CompilationModel compilation )
+        public AspectDriver( INamedTypeSymbol aspectType, Compilation compilation )
         {
             this._compilation = compilation;
             this.AspectType = aspectType;
 
-            var iAdviceAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IAdviceAttribute) ).AssertNotNull();
-
-            this._declarativeAdviceAttributes =
-                (from method in aspectType.Methods
-                 from attribute in method.Attributes
-                 where attribute.Type.Is( iAdviceAttribute )
-                 select (attribute, method)).ToList();
+            this._declarativeAdviceAttributes = 
+                (from member in aspectType.GetMembers()
+                 from attribute in member.GetAttributes()
+                 where attribute.AttributeClass?.Is( typeof(IAdviceAttribute) ) ?? false
+                 select (attribute, member)).ToList();
         }
 
         internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
@@ -59,7 +58,7 @@ namespace Caravela.Framework.Impl
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this.AspectType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(IAspect<T>) );
+                var interfaceType = this._compilation.GetTypeByReflectionType( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
@@ -74,9 +73,14 @@ namespace Caravela.Framework.Impl
             }
 
             var declarativeAdvices =
-                this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Method ) );
+                this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Member ) );
 
-            var aspectBuilder = new AspectBuilder<T>( codeElement, declarativeAdvices, new AdviceFactory( this._compilation, this.AspectType, aspect ) );
+            var compilationModel = (CompilationModel) codeElement.Compilation;
+
+            var aspectBuilder = new AspectBuilder<T>(
+                codeElement,
+                declarativeAdvices,
+                new AdviceFactory( compilationModel, compilationModel.Factory.GetNamedType( this.AspectType ), aspect ) );
 
             using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {
@@ -88,10 +92,10 @@ namespace Caravela.Framework.Impl
 
         public const string OriginalMemberSuffix = "_Original";
 
-        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, IAttribute attribute, IMethod templateMethod )
+        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, AttributeData attribute, ISymbol templateMethod )
             where T : ICodeElement
         {
-            return attribute.CreateAdvice( aspect, codeElement, templateMethod );
+            return attribute.CreateAdvice( aspect, codeElement, ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
         }
     }
 }

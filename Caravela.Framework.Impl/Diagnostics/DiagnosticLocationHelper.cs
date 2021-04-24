@@ -16,13 +16,18 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         public static Location? GetLocation( this IDiagnosticLocation location ) => ((DiagnosticLocation) location).Location;
 
+        public static Location? GetLocation( this AttributeData attributeData )
+            => attributeData.ApplicationSyntaxReference == null
+                ? null
+                : Location.Create( attributeData.ApplicationSyntaxReference.SyntaxTree, attributeData.ApplicationSyntaxReference.Span );
+
         /// <summary>
         /// Gets the <see cref="Location"/> suitable to report a <see cref="Diagnostic"/> on
         /// a given <see cref="ISymbol"/> (typically the identifier).
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( ISymbol? symbol )
+        public static Location? GetDiagnosticLocation( this ISymbol? symbol )
         {
             if ( symbol == null )
             {

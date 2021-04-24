@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Compilation );
+            var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,

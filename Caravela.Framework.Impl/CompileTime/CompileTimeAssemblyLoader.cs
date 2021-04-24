@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -22,28 +21,30 @@ namespace Caravela.Framework.Impl.CompileTime
     internal sealed class CompileTimeAssemblyLoader : ICompileTimeTypeResolver
     {
         private readonly CompileTimeDomain _domain;
-        private readonly CSharpCompilation _compilation;
+        private readonly Compilation _compilation;
         private readonly CompileTimeCompilationBuilder _builder;
         private readonly Dictionary<string, (AssemblyIdentity Identity, CompileTimeProject? Project)> _projects = new();
-        private readonly AttributeDeserializer _attributeDeserializer;
+
+        public AttributeDeserializer AttributeDeserializer { get; }
+
         private readonly SystemTypeResolver _systemTypeResolver = new();
 
         private CompileTimeAssemblyLoader(
             CompileTimeDomain domain,
             IServiceProvider serviceProvider,
-            CSharpCompilation compilation )
+            Compilation compilation )
         {
             this._domain = domain;
             this._compilation = compilation;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
 
-            this._attributeDeserializer = new AttributeDeserializer( this );
+            this.AttributeDeserializer = new AttributeDeserializer( this );
         }
 
         public static CompileTimeAssemblyLoader Create(
             CompileTimeDomain domain,
             IServiceProvider serviceProvider,
-            CSharpCompilation compilation )
+            Compilation compilation )
         {
             CompileTimeAssemblyLoader loader = new( domain, serviceProvider, compilation );
 
@@ -62,11 +63,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return typeArguments;
-        }
-
-        public bool TryCreateAttributeInstance( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
-        {
-            return this._attributeDeserializer.TryCreateAttribute( attribute, diagnosticAdder, out attributeInstance );
         }
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock )

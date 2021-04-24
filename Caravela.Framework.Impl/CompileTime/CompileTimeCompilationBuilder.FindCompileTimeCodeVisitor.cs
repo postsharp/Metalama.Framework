@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     // No need to do anything more.
                     return;
                 }
-                
+
                 var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
                 if ( declaredSymbol != null && this._classifier.GetSymbolDeclarationScope( declaredSymbol ) != SymbolDeclarationScope.RunTimeOnly )

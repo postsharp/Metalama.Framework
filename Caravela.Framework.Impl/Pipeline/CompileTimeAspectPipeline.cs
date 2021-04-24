@@ -2,13 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -18,31 +17,36 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        private readonly IAspectPipelineContext _context;
-
-        public CompileTimeAspectPipeline( IAspectPipelineContext context ) : base( context.BuildOptions )
+        public CompileTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions )
         {
-            this._context = context;
+            if ( this.BuildOptions.CompileTimeAttachDebugger )
+            {
+                if ( !Debugger.IsAttached )
+                {
+                    Debugger.Launch();
+                }
+            }
         }
 
-        public bool TryExecute( IDiagnosticAdder diagnosticAdder,
-                                 Compilation compilation, 
-                                [NotNullWhen( true )] out Compilation? outputCompilation, 
-                                [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
+        public bool TryExecute(
+            IDiagnosticAdder diagnosticAdder,
+            Compilation compilation,
+            [NotNullWhen( true )] out Compilation? outputCompilation,
+            [NotNullWhen( true )] out IReadOnlyList<ResourceDescription>? additionalResources )
         {
             try
             {
-                var compilationModel = CompilationModel.CreateInitialInstance( compilation );
+                var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-                if ( !this.Initialize( diagnosticAdder, compilationModel, this._context.Plugins, out var configuration ) )
+                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, out var configuration ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
 
                     return false;
                 }
-                
-                if ( !this.TryExecuteCore( compilationModel, diagnosticAdder, configuration, out var result ) )
+
+                if ( !this.TryExecuteCore( partialCompilation, diagnosticAdder, configuration, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;
@@ -52,19 +56,19 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 // Add managed resources.
                 List<ResourceDescription> additionalResourcesBuilder = new();
-                
+
                 foreach ( var resource in result.Resources )
                 {
                     additionalResourcesBuilder.Add( resource );
                 }
 
-                if ( result.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
+                if ( result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
                     additionalResourcesBuilder.Add(
-                        new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => configuration.CompileTimeProject.Serialize(), true ) );
+                        new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => configuration.CompileTimeProject!.Serialize(), true ) );
                 }
 
-                outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.Compilation );
+                outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.PartialCompilation.Compilation );
                 additionalResources = additionalResourcesBuilder;
 
                 return true;
@@ -76,15 +80,6 @@ namespace Caravela.Framework.Impl.Pipeline
                     diagnosticAdder.ReportDiagnostic( diagnostic );
                 }
 
-                outputCompilation = null;
-                additionalResources = null;
-
-                return false;
-            }
-            catch ( Exception exception ) when ( this._context.HandleExceptions )
-            {
-                this.HandleException( exception, diagnosticAdder );
-                
                 outputCompilation = null;
                 additionalResources = null;
 

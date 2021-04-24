@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -15,16 +16,17 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            var context = new AspectPipelineContext( transformerContext );
-            using CompileTimeAspectPipeline pipeline = new( context );
+            using CompileTimeAspectPipeline pipeline = new( new BuildOptions( new AnalyzerBuildOptionsSource( transformerContext.GlobalOptions ), transformerContext.Plugins ) );
 
-            if ( pipeline.TryExecute( context, transformerContext.Compilation, out var compilation, out var additionalResources ) )
+            if ( pipeline.TryExecute( new DiagnosticAdder( transformerContext.ReportDiagnostic ), transformerContext.Compilation, out var compilation, out var additionalResources ) )
             {
                 transformerContext.ManifestResources.AddRange( additionalResources );
+
                 return compilation;
             }
-
+            
             return transformerContext.Compilation;
         }
+ 
     }
 }

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -64,8 +65,9 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                context.SemanticModel,
+                PartialCompilation.CreatePartial( context.SemanticModel ),
                 new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ),
+                ImmutableArray<object>.Empty, 
                 context.CancellationToken );
 
             // Report diagnostics.

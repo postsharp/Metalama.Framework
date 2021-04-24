@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,20 +11,20 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectTypeFactory
     {
-        private readonly CompilationModel _compilation;
+        private readonly Compilation _compilation;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        private readonly Dictionary<INamedType, AspectType> _aspectTypes = new();
+        private readonly Dictionary<INamedTypeSymbol, AspectType> _aspectTypes = new();
 
-        public AspectTypeFactory( CompilationModel compilation, AspectDriverFactory aspectDriverFactory )
+        public AspectTypeFactory( Compilation compilation, AspectDriverFactory aspectDriverFactory )
         {
             this._compilation = compilation;
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedType> attributeTypes, IDiagnosticAdder diagnosticAdder )
+        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedTypeSymbol> attributeTypes, IDiagnosticAdder diagnosticAdder )
         {
-            foreach ( var attributeType in attributeTypes.OrderBy( at => this._compilation.GetDepth( at ) ) )
+            foreach ( var attributeType in attributeTypes.OrderByInheritance() )
             {
                 AspectType? baseAspectType;
 

@@ -5,6 +5,4 @@
     <CaravelaExportAspects>true</CaravelaExportAspects>
   </PropertyGroup>
 
-  <Import Project="..\Caravela.Framework.TestApp\CaravelaReference.props"/>
-
 </Project>

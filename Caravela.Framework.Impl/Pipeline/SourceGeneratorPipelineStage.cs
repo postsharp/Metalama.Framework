@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             return new PipelineStageResult(
-                input.Compilation,
+                input.PartialCompilation,
                 input.AspectLayers,
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ),
                 Array.Empty<ResourceDescription>(),

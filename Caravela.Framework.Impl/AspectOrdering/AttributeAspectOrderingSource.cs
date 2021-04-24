@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -13,18 +12,16 @@ namespace Caravela.Framework.Impl.AspectOrdering
 {
     internal class AttributeAspectOrderingSource : IAspectOrderingSource
     {
-        private readonly CompilationModel _compilation;
+        private readonly Compilation _compilation;
 
-        public AttributeAspectOrderingSource( CompilationModel compilation )
+        public AttributeAspectOrderingSource( Compilation compilation )
         {
             this._compilation = compilation;
         }
 
         public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
         {
-            var attributeType = this._compilation.Factory.GetTypeByReflectionType( typeof(AspectOrderAttribute) ).GetSymbol();
-
-            var roslynCompilation = this._compilation.RoslynCompilation;
+            var roslynCompilation = this._compilation;
 
             // Get compile-time level attributes of the current assembly and all referenced assemblies.
             var attributes =
@@ -32,18 +29,13 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     .SelectMany( m => m.ReferencedAssemblySymbols )
                     .Concat( new[] { roslynCompilation.Assembly } )
                     .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                    .Where( a => SymbolEqualityComparer.Default.Equals( a.attribute.AttributeClass, attributeType ) );
+                    .Where( a => a.attribute.AttributeClass?.Is( typeof(AspectOrderAttribute) ) ?? false );
 
             return attributes.Select(
                     attribute =>
                     {
-                        var attributeData = new Attribute(
+                        if ( AttributeDeserializer.SystemTypes.TryCreateAttribute<AspectOrderAttribute>(
                             attribute.attribute,
-                            this._compilation,
-                            this._compilation.Factory.GetAssembly( attribute.assembly ) );
-
-                        if ( AttributeDeserializer.SystemTypesDeserializer.TryCreateAttribute<AspectOrderAttribute>(
-                            attributeData,
                             diagnosticAdder,
                             out var attributeInstance ) )
                         {

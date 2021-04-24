@@ -7,20 +7,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-
     internal class CompileTimeProject
     {
         private readonly Compilation? _compilation;
         private readonly CompileTimeProjectManifest? _manifest;
         private readonly byte[]? _assemblyImage;
         private Assembly? _assembly;
-        
+
         public CompileTimeDomain Domain { get; }
 
         public AssemblyIdentity RunTimeIdentity { get; }
@@ -34,7 +32,7 @@ namespace Caravela.Framework.Impl.CompileTime
             CompileTimeProjectManifest? manifest,
             Compilation? compilation,
             byte[]? assemblyImage,
-            IReadOnlyList<SyntaxTree>? syntaxTrees)
+            IReadOnlyList<SyntaxTree>? syntaxTrees )
         {
             if ( compilation == null && references.Count == 0 )
             {
@@ -48,7 +46,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
             this.References = references;
-            this.SyntaxTrees = syntaxTrees;
+            this.SyntaxTrees = syntaxTrees ?? Array.Empty<SyntaxTree>();
         }
 
         public static CompileTimeProject Create(
@@ -65,17 +63,17 @@ namespace Caravela.Framework.Impl.CompileTime
             CompileTimeDomain domain,
             AssemblyIdentity identity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, identity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, Array.Empty<SyntaxTree>() );
+            => new( domain, identity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
 
         public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes ?? (IReadOnlyList<string>) Array.Empty<string>();
+
         public IReadOnlyList<CompileTimeProject> References { get; }
 
         public IReadOnlyList<SyntaxTree> SyntaxTrees { get; }
-        
 
         public CompilationReference ToMetadataReference() => this.AssertNotEmpty()._compilation!.ToMetadataReference();
 
-        public ulong Hash => this.AssertNotEmpty()._manifest.Hash;
+        public ulong Hash => this.AssertNotEmpty()._manifest!.Hash;
 
         public bool IsEmpty => this._compilation == null;
 
@@ -142,7 +140,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         reference.LoadAssembly();
                     }
                 }
-                
+
                 this._assembly = this.Domain.GetOrLoadAssembly( this.CompileTimeIdentity!, this._assemblyImage! );
             }
         }
@@ -155,7 +153,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 this.LoadAssembly();
 
-                return this._assembly;
+                return this._assembly!;
             }
         }
 

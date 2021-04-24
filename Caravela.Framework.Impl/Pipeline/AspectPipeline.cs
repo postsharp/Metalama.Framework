@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
@@ -13,7 +12,6 @@ using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -25,22 +23,15 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
-        private readonly IBuildOptions _buildOptions;
+        public IBuildOptions BuildOptions { get; }
+
         private readonly CompileTimeDomain _domain = new();
 
         protected ServiceProvider ServiceProvider { get; } = new();
 
-
-
         protected AspectPipeline( IBuildOptions buildOptions )
         {
-            this._buildOptions = buildOptions;
-
-            if ( buildOptions.AttachDebugger )
-            {
-                Debugger.Launch();
-            }
-
+            this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
             this.ServiceProvider.AddService( new ReferenceAssemblyLocator() );
         }
@@ -65,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     if ( this.WriteUnhandledExceptionsToFile )
                     {
                         var guid = Guid.NewGuid();
-                        var crashReportDirectory = this._buildOptions.GetCrashReportDirectoryOrDefault();
+                        var crashReportDirectory = this.BuildOptions.GetCrashReportDirectoryOrDefault();
 
                         if ( string.IsNullOrWhiteSpace( crashReportDirectory ) )
                         {
@@ -97,27 +88,34 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public virtual bool WriteUnhandledExceptionsToFile => true;
 
-        private protected record PipelineConfiguration( ImmutableArray<PipelineStage> Stages, IReadOnlyList<INamedType> AspectNamedTypes, ImmutableArray<OrderedAspectLayer> Layers,
-                                                        CompileTimeProject? CompileTimeProject,
-                                                        CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
-          
-         private protected bool Initialize(IDiagnosticAdder diagnosticAdder, CompilationModel compilation, IEnumerable<object> plugIns, [NotNullWhen(true)] out PipelineConfiguration? configuration )
+        private protected record PipelineConfiguration(
+            ImmutableArray<PipelineStage> Stages,
+            IReadOnlyList<INamedTypeSymbol> AspectNamedTypes,
+            ImmutableArray<OrderedAspectLayer> Layers,
+            CompileTimeProject? CompileTimeProject,
+            CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
+
+        private protected bool TryInitialize(
+            IDiagnosticAdder diagnosticAdder,
+            PartialCompilation compilation,
+            [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
-              var roslynCompilation = compilation.RoslynCompilation;
-            
+            var roslynCompilation = compilation.Compilation;
+
             // Create dependencies.
             var loader = CompileTimeAssemblyLoader.Create( this._domain, this.ServiceProvider, roslynCompilation );
 
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProject( compilation.RoslynCompilation.Assembly, diagnosticAdder, out var compileTimeProject ) )
+            if ( !loader.TryGetCompileTimeProject( roslynCompilation.Assembly, diagnosticAdder, out var compileTimeProject ) )
             {
                 configuration = null;
+
                 return false;
             }
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation, plugIns.ToImmutableArray() );
-            var aspectTypeFactory = new AspectTypeFactory( compilation, driverFactory );
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, this.BuildOptions.PlugIns );
+            var aspectTypeFactory = new AspectTypeFactory( compilation.Compilation, driverFactory );
 
             var aspectNamedTypes = GetAspectTypes( compileTimeProject );
             var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes, diagnosticAdder ).ToImmutableArray();
@@ -130,12 +128,13 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectOrderSources = new IAspectOrderingSource[]
             {
-                new AttributeAspectOrderingSource( compilation ), new AspectLayerOrderingSource( aspectTypes )
+                new AttributeAspectOrderingSource( compilation.Compilation ), new AspectLayerOrderingSource( aspectTypes )
             };
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var sortedAspectLayers ) )
             {
                 configuration = null;
+
                 return false;
             }
 
@@ -146,37 +145,31 @@ namespace Caravela.Framework.Impl.Pipeline
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader ) )
                 .ToImmutableArray();
 
-            configuration = new( stages, aspectNamedTypes, sortedAspectLayers, compileTimeProject, loader );
+            configuration = new PipelineConfiguration( stages, aspectNamedTypes, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
 
-        
-             IReadOnlyList<INamedType> GetAspectTypes(  CompileTimeProject? compileTimeProject )
-                 => compileTimeProject == null 
-                     ? ImmutableArray<INamedType>.Empty 
-                     : compileTimeProject.SelectManyRecursive( p => p.References, includeThis: true )
-                     .SelectMany( p => p.AspectTypes )
-                     .Select( t => compilation.Factory.GetTypeByReflectionName( t ) )
-                     .ToImmutableArray();
+            IReadOnlyList<INamedTypeSymbol> GetAspectTypes( CompileTimeProject? compileTimeProject )
+                => compileTimeProject?.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false )
+                       .SelectMany( p => p.AspectTypes )
+                       .Select( t => compilation.Compilation.GetTypeByMetadataName( t ) )
+                       .WhereNotNull()
+                       .ToImmutableArray()
+                   ?? ImmutableArray<INamedTypeSymbol>.Empty;
 
-             static object GetGroupingKey( IAspectDriver driver )
-                 => driver switch
-                 {
-                     // weavers are not grouped together
-                     // Note: this requires that every AspectType has its own instance of IAspectWeaver
-                     IAspectWeaver weaver => weaver,
+            static object GetGroupingKey( IAspectDriver driver )
+                => driver switch
+                {
+                    // weavers are not grouped together
+                    // Note: this requires that every AspectType has its own instance of IAspectWeaver
+                    IAspectWeaver weaver => weaver,
 
-                     // AspectDrivers are grouped together
-                     AspectDriver => nameof(AspectDriver),
+                    // AspectDrivers are grouped together
+                    AspectDriver => nameof(AspectDriver),
 
-                     _ => throw new NotSupportedException()
-                 };
-
-             
-            
+                    _ => throw new NotSupportedException()
+                };
         }
-
-       
 
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
@@ -184,23 +177,24 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="pipelineStageResult"></param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
         private protected bool TryExecuteCore(
-            CompilationModel compilation,
+            PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             PipelineConfiguration pipelineConfiguration,
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
-            
             // If there is no aspect in the compilation, don't execute the pipeline.
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectNamedTypes.Count == 0 )
             {
-                pipelineStageResult = new PipelineStageResult( compilation.RoslynCompilation, Array.Empty<OrderedAspectLayer>() );
+                pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<OrderedAspectLayer>() );
 
                 return true;
             }
-          
-            var aspectSource = new CompilationAspectSource( compilation, pipelineConfiguration.AspectNamedTypes, pipelineConfiguration.CompileTimeAssemblyLoader );
-            
-            pipelineStageResult = new PipelineStageResult( compilation.RoslynCompilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
+
+            var aspectSource = new CompilationAspectSource(
+                pipelineConfiguration.AspectNamedTypes,
+                pipelineConfiguration.CompileTimeAssemblyLoader );
+
+            pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {

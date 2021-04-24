@@ -20,14 +20,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
-        private readonly CSharpCompilation _intermediateCompilation;
+        private readonly Compilation _intermediateCompilation;
         private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly Dictionary<ICodeElement, List<LinkerIntroducedMember>> _overrideMap;
         private readonly Dictionary<ISymbol, ICodeElement> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
-            CSharpCompilation intermediateCompilation,
+            Compilation intermediateCompilation,
             Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
             IReadOnlyList<LinkerIntroducedMember> introducedMembers )
         {

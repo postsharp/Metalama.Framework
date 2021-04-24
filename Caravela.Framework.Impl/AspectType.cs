@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -20,7 +21,7 @@ namespace Caravela.Framework.Impl
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
 
-        public string Name => this.Type.FullName;
+        public string Name => this.TypeSymbol.MetadataName;
 
         public AspectType? BaseAspectType { get; }
 
@@ -28,18 +29,18 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
 
-        public INamedType Type { get; }
+        public INamedTypeSymbol TypeSymbol { get; }
 
-        public bool IsAbstract => this.Type.IsAbstract;
+        public bool IsAbstract => this.TypeSymbol.IsAbstract;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectType"/> class.
         /// </summary>
-        /// <param name="aspectType"></param>
+        /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectType( INamedType aspectType, AspectType? baseAspectType, IAspectDriver? aspectDriver )
+        private AspectType( INamedTypeSymbol aspectTypeSymbol, AspectType? baseAspectType, IAspectDriver? aspectDriver )
         {
-            this.Type = aspectType;
+            this.TypeSymbol = aspectTypeSymbol;
             this.BaseAspectType = baseAspectType;
             this._aspectDriver = aspectDriver;
         }
@@ -47,7 +48,7 @@ namespace Caravela.Framework.Impl
         public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new( aspect, target, this );
 
         public static bool TryCreateAspectType(
-            INamedType aspectNamedType,
+            INamedTypeSymbol aspectNamedType,
             AspectType? baseAspectType,
             IAspectDriver? aspectDriver,
             IDiagnosticAdder diagnosticAdder,
@@ -61,16 +62,16 @@ namespace Caravela.Framework.Impl
             layersBuilder.Add( new AspectLayer( newAspectType, null ) );
 
             // Add the parts defined in [ProvidesAspectLayers]. If it is not defined in the current type, look up in the base classes.
-            var aspectLayersAttributeType = newAspectType.Type.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ProvidesAspectLayersAttribute) );
 
             for ( var type = newAspectType; type != null; type = type.BaseAspectType )
             {
-                var aspectLayersAttributeData = type.Type.Attributes.SingleOrDefault( a => a.Type.Is( aspectLayersAttributeType ) );
+                var aspectLayersAttributeData =
+                    type.TypeSymbol.GetAttributes().SingleOrDefault( a => a.AttributeClass.Is( typeof(ProvidesAspectLayersAttribute) ) );
 
                 if ( aspectLayersAttributeData != null )
                 {
                     // TODO: Using global state makes it impossible to test.
-                    if ( !AttributeDeserializer.SystemTypesDeserializer.TryCreateAttribute<ProvidesAspectLayersAttribute>(
+                    if ( !AttributeDeserializer.SystemTypes.TryCreateAttribute<ProvidesAspectLayersAttribute>(
                         aspectLayersAttributeData,
                         diagnosticAdder,
                         out var aspectLayersAttribute ) )

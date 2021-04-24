@@ -8,18 +8,37 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ReflectionMapper
     {
+        private static ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
         private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new();
 
-        public ReflectionMapper( Compilation compilation )
+        private ReflectionMapper( Compilation compilation )
         {
             this._compilation = compilation;
+        }
+
+        public static ReflectionMapper GetInstance( Compilation compilation )
+        {
+            if ( !_instances.TryGetValue( compilation, out var value ) )
+            {
+                lock ( _instances )
+                {
+                    if ( !_instances.TryGetValue( compilation, out value ) )
+                    {
+                        value = new ReflectionMapper( compilation );
+                        _instances.Add( compilation, value );
+                    }
+                }
+            }
+
+            return value;
         }
 
         public INamedTypeSymbol GetTypeSymbolByReflectionName( string reflectionName )

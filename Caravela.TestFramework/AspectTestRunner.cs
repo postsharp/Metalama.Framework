@@ -24,10 +24,9 @@ namespace Caravela.TestFramework
         {
             var testResult = await base.RunTestAsync( testInput );
 
-            var context = new AspectTestPipelineContext( testResult );
-            var pipeline = new CompileTimeAspectPipeline( context );
+            var pipeline = new CompileTimeAspectPipeline( new TestBuildOptions() );
 
-            if ( pipeline.TryExecute( context,testResult.InitialCompilation, out var resultCompilation, out _ ) )
+            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, out var resultCompilation, out _ ) )
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();

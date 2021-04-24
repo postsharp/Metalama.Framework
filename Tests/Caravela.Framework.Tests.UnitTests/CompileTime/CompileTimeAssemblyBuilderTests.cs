@@ -94,7 +94,7 @@ class A : Attribute
 
             var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, roslynCompilation );
 
-            if ( !loader.TryCreateAttributeInstance( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -254,11 +254,11 @@ class B
                 name: "test_B_" + guid );
 
             var domain = new CompileTimeDomain();
-            CompileTimeAssemblyLoader loaderV1 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB1 );
+            var loaderV1 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB1 );
             var project1 = loaderV1.GetCompileTimeProject( compilationB1.Assembly )!;
             ExecuteAssertions( project1, 1 );
 
-            CompileTimeAssemblyLoader loader2 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB2 );
+            var loader2 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB2 );
             var project2 = loader2.GetCompileTimeProject( compilationB2.Assembly )!;
 
             ExecuteAssertions( project2, 2 );
@@ -280,6 +280,33 @@ class B
 
                 Assert.Equal( expectedVersion, valueFromB );
             }
+        }
+
+        [Fact]
+        public void CanCreateCompileTimeProjectWithInvalidRunTimeCode()
+        {
+            // We need to be able to have a compile-time assembly even if there is an error in run-time-only code,
+            // otherwise the design-time experience is doomed to fail.
+
+            var code = @"
+
+using Caravela.Framework.Project;
+[CompileTime]
+class B
+{
+
+}
+
+class C 
+{
+    Intentionally Invalid
+}
+";
+
+            var domain = new CompileTimeDomain();
+            var compilation = CreateRoslynCompilation( code, ignoreErrors: true );
+            var loader = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilation );
+            Assert.NotNull( loader.GetCompileTimeProject( compilation.Assembly ) );
         }
     }
 }

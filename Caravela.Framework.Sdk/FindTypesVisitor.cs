@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
@@ -6,9 +6,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Impl.DesignTime
+namespace Caravela.Framework.Sdk
 {
-    internal partial class PartialCompilationModel
+
+    public abstract partial class PartialCompilation
     {
         private class FindTypesVisitor : CSharpSyntaxWalker
         {

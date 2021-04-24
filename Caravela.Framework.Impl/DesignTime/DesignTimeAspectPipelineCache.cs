@@ -2,7 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Pipeline;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Sdk;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
@@ -12,53 +15,41 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         private static readonly ConditionalWeakTable<object, DesignTimeAspectPipelineResult> _cache = new();
         private static readonly ConditionalWeakTable<object, object> _sync = new();
-        
+        private static readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelineCache = new();
+        private static bool _attachDebuggerRequested;
 
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
-            SemanticModel semanticModel,
-            AnalyzerBuildOptionsSource buildOptionsSource,
-            CancellationToken cancellationToken )
-            => GetPipelineResult( semanticModel, new BuildOptions( buildOptionsSource ), cancellationToken );
-
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
-            SemanticModel semanticModel,
-            BuildOptions buildOptions,
-            CancellationToken cancellationToken )
+        private static void AttachDebugger( BuildOptions buildOptions )
         {
-            // ReSharper disable once InconsistentlySynchronizedField
-
-            if ( !_cache.TryGetValue( semanticModel, out var result ) )
+            if ( buildOptions.DesignTimeAttachDebugger && !_attachDebuggerRequested )
             {
-                var lockable = _sync.GetOrCreateValue( semanticModel );
+                // We try to request to attach the debugger a single time, even if the user refuses or if the debugger gets
+                // detaches. It makes a better debugging experience.
+                _attachDebuggerRequested = true;
 
-                lock ( lockable )
+                if ( !Debugger.IsAttached )
                 {
-                    if ( !_cache.TryGetValue( semanticModel, out result ) )
-                    {
-                        using DesignTimeAspectPipeline pipeline = new( buildOptions );
-
-                        result = pipeline.AnalyzeSemanticModel( semanticModel );
-
-                        _cache.Add( semanticModel, result );
-                    }
+                    Debugger.Launch();
                 }
             }
-
-            return result;
         }
-        
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
-            Compilation compilation,
-            AnalyzerBuildOptionsSource buildOptionsSource,
-            CancellationToken cancellationToken )
-            => GetPipelineResult( compilation, new BuildOptions( buildOptionsSource ), cancellationToken );
+
+        private static DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
+            => _pipelineCache.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
 
         public static DesignTimeAspectPipelineResult GetPipelineResult(
-            Compilation compilation,
+            PartialCompilation compilation,
+            AnalyzerBuildOptionsSource buildOptionsSource,
+            ImmutableArray<object> plugIns,
+            CancellationToken cancellationToken )
+            => GetPipelineResult( compilation, new BuildOptions( buildOptionsSource, plugIns ), cancellationToken );
+
+        public static DesignTimeAspectPipelineResult GetPipelineResult(
+            PartialCompilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
         {
-            
+            AttachDebugger( buildOptions );
+
             // ReSharper disable once InconsistentlySynchronizedField
 
             if ( !_cache.TryGetValue( compilation, out var result ) )
@@ -69,14 +60,14 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     if ( !_cache.TryGetValue( compilation, out result ) )
                     {
-                        using DesignTimeAspectPipeline pipeline = new( buildOptions );
+                        var pipeline = GetOrCreatePipeline( buildOptions );
 
-                        result = pipeline.AnalyzeCompilation( compilation );
+                        result = pipeline.Execute( compilation );
 
                         // Add the result to the cache for all semantic models.
                         foreach ( var syntaxTree in compilation.SyntaxTrees )
                         {
-                            var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                            var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
                             _cache.Add( semanticModel, result );
                         }
 
@@ -87,6 +78,5 @@ namespace Caravela.Framework.Impl.DesignTime
 
             return result;
         }
-        
     }
 }

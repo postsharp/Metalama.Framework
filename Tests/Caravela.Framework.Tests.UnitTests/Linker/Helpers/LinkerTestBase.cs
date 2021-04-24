@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
+using Caravela.Framework.Sdk;
 using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -73,7 +74,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
 
             var linkerInput = new AspectLinkerInput(
-                inputCompilation,
+                PartialCompilation.CreateComplete( inputCompilation ),
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
                 rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
@@ -82,7 +83,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             return linkerInput;
         }
 
-        internal static CSharpCompilation GetCleanCompilation( CSharpCompilation compilation )
+        internal static PartialCompilation GetCleanCompilation( PartialCompilation compilation )
         {
             var cleanCompilation = compilation;
             var rewriter = new CleaningRewriter();

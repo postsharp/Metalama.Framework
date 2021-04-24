@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime;
+using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,34 +16,36 @@ namespace Caravela.Framework.Tests.UnitTests
         [Fact]
         public void CreatePartialCompilationModel()
         {
-            var code = new Dictionary<string,string>
-                { ["Class1.cs"] = "public class Class1 { }",
-                   ["Class2.cs"] = "public class Class2 { }", 
-                   ["Class3.cs"] = "public class Class3 : Class2 { }",
-                   ["Interface1.cs"] = "public interface Interface1 { }",
-                   ["Interface2.cs"] = "public interface Interface2 : Interface1 { }",
-                   ["Interface3.cs"] = "public interface Interface3 : Interface2 { }",
-                   ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }",
-                };
+            var code = new Dictionary<string, string>
+            {
+                ["Class1.cs"] = "public class Class1 { }",
+                ["Class2.cs"] = "public class Class2 { }",
+                ["Class3.cs"] = "public class Class3 : Class2 { }",
+                ["Interface1.cs"] = "public interface Interface1 { }",
+                ["Interface2.cs"] = "public interface Interface2 : Interface1 { }",
+                ["Interface3.cs"] = "public interface Interface3 : Interface2 { }",
+                ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
+            };
 
             var compilation = CreateRoslynCompilation( code );
-            
-            // Tests for Class1.
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class1.cs") );
-            var compilationModel1 = PartialCompilationModel.CreateInitialInstance( semanticModel1 );
-            Assert.Single(  compilationModel1.DeclaredTypes.Select( t => t.Name ), "Class1" );
 
+            // Tests for Class1.
+            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( semanticModel1 );
+            Assert.Single( compilationModel1.DeclaredTypes.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
-            var semanticModel3 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class3.cs") );
-            var compilationModel3 = PartialCompilationModel.CreateInitialInstance( semanticModel3 );
-            Assert.Equal( new[]{ "Class2", "Class3" }, compilationModel3.DeclaredTypes.Select( t => t.Name ).OrderBy( t=>t ) );
+            var semanticModel3 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" ) );
+            var compilationModel3 = CompilationModel.CreateInitialInstance( semanticModel3 );
+            Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
-            var semanticModel4 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class4.cs") );
-            var compilationModel4 = PartialCompilationModel.CreateInitialInstance( semanticModel4 );
-            Assert.Equal( new[]{ "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" }, compilationModel4.DeclaredTypes.Select( t => t.Name ).OrderBy( t=>t ) );
+            var semanticModel4 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" ) );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( semanticModel4 );
 
+            Assert.Equal(
+                new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
+                compilationModel4.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
         }
 
         [Fact]
@@ -49,21 +53,16 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
 
-            var code = new Dictionary<string,string>
-            { ["Class1.cs"] = "public class Class1 { }",
-                ["Class2.cs"] = "public class Class2 { }" 
-            };
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }", ["Class2.cs"] = "public class Class2 { }" };
 
             var compilation = CreateRoslynCompilation( code );
-            
+
             DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class1.cs") );
-            pipeline.AnalyzeSemanticModel( semanticModel1 );
-            
-            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class2.cs") );
-            pipeline.AnalyzeSemanticModel( semanticModel2 );
+            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel1 ) );
 
-
+            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel2 ) );
         }
 
         [Fact]
@@ -71,22 +70,22 @@ namespace Caravela.Framework.Tests.UnitTests
         {
             // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
 
-            var code = new Dictionary<string,string>
-            {   ["Aspect.cs"] = "public class Aspect : Caravela.Framework.Aspects.OverrideMethodAspect { public override dynamic OverrideMethod() { return null; } }",
+            var code = new Dictionary<string, string>
+            {
+                ["Aspect.cs"] =
+                    "public class Aspect : Caravela.Framework.Aspects.OverrideMethodAspect { public override dynamic OverrideMethod() { return null; } }",
                 ["Class1.cs"] = "public class Class1 { }",
-                ["Class2.cs"] = "public class Class2 { [Aspect]  void Method() {} }" 
+                ["Class2.cs"] = "public class Class2 { [Aspect]  void Method() {} }"
             };
 
             var compilation = CreateRoslynCompilation( code );
-            
+
             DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class1.cs") );
-            pipeline.AnalyzeSemanticModel( semanticModel1 );
-            
-            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single(t=>t.FilePath == "Class2.cs") );
-            pipeline.AnalyzeSemanticModel( semanticModel2 );
+            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel1 ) );
 
-
+            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" ) );
+            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel2 ) );
         }
     }
 }

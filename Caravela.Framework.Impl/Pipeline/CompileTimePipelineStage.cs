@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var linker = new AspectLinker(
                 new AspectLinkerInput(
-                    input.Compilation,
+                    input.PartialCompilation,
                     pipelineStepResult.Compilation,
                     pipelineStepResult.NonObservableTransformations,
                     input.AspectLayers,

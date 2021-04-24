@@ -4,15 +4,17 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>( this IAttribute attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
+        public static IAdvice CreateAdvice<T>( this AttributeData attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
             where T : ICodeElement
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -50,7 +52,7 @@ namespace Caravela.Framework.Impl.Advices
                 aspectLinkerOptions = AspectLinkerOptions.Create( forceNotInlineable );
             }
 
-            switch ( attribute.Type.Name )
+            switch ( attribute.AttributeClass?.Name )
             {
                 case nameof(IntroduceMethodAttribute):
                     {
@@ -92,7 +94,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
             }
 
-            throw new NotImplementedException( $"No implementation for advice attribute {attribute.Constructor.DeclaringType}." );
+            throw new NotImplementedException( $"No implementation for advice attribute {attribute.AttributeClass}." );
         }
     }
 }

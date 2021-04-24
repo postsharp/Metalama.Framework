@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -29,9 +29,13 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <inheritdoc/>
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
+            // TODO: it is suboptimal to get a CompilationModel here.
+            var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
+
             var diagnostics = new DiagnosticSink();
 
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType, diagnostics ) )
+            var aspectInstances = input.AspectSources
+                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectType, diagnostics ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
@@ -41,9 +45,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
+            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.PartialCompilation, diagnostics.ReportDiagnostic, resources.Add );
 
-            CSharpCompilation newCompilation;
+            PartialCompilation newCompilation;
 
             try
             {
@@ -54,7 +58,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 newCompilation = context.Compilation;
 
                 diagnostics.ReportDiagnostic(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.TypeSymbol, ex.ToDiagnosticString()) ) );
             }
 
             // TODO: update AspectCompilation.Aspects

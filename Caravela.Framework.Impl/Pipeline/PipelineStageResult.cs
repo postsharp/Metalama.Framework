@@ -3,8 +3,8 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the Roslyn compilation.
         /// </summary>
-        public CSharpCompilation Compilation { get; }
+        public PartialCompilation PartialCompilation { get; }
 
         /// <summary>
         /// Gets the set of diagnostics.
@@ -48,14 +48,14 @@ namespace Caravela.Framework.Impl.Pipeline
         public IReadOnlyList<OrderedAspectLayer> AspectLayers { get; }
 
         public PipelineStageResult(
-            CSharpCompilation compilation,
+            PartialCompilation compilation,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ImmutableDiagnosticList? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
             IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees = null )
         {
-            this.Compilation = compilation;
+            this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableDiagnosticList.Empty;
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
-                return new PipelineStageResult( this.Compilation, this.AspectLayers, this.Diagnostics.Concat( diagnostics ) );
+                return new PipelineStageResult( this.PartialCompilation, this.AspectLayers, this.Diagnostics.Concat( diagnostics ) );
             }
         }
     }

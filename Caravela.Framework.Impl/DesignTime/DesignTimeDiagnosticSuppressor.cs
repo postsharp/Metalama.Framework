@@ -43,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 compilation,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
-                new BuildOptions( new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ) ),
+                new BuildOptions( new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ), ImmutableArray<object>.Empty ),
                 context.CancellationToken );
         }
 
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         internal static void ReportSuppressions(
-            CSharpCompilation compilation,
+            Compilation compilation,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             BuildOptions options,
@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                compilation,
+                PartialCompilation.CreateComplete( compilation ),
                 options,
                 cancellationToken );
 

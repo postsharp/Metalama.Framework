@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
+using Microsoft.CodeAnalysis;
 using System;
 
 namespace Caravela.Framework.Impl
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl
 
         public static bool operator !=( AspectLayerId left, AspectLayerId right ) => !left.Equals( right );
 
-        public AspectLayerId( INamedType aspectType, string? layerName = null ) : this( aspectType.FullName, layerName ) { }
+        public AspectLayerId( INamedTypeSymbol aspectType, string? layerName = null ) : this( aspectType.MetadataName, layerName ) { }
 
         public AspectLayerId( AspectType aspectType, string? layerName = null ) : this( aspectType.Name, layerName ) { }
 

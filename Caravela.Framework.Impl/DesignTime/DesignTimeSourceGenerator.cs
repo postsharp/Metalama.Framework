@@ -3,8 +3,10 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -22,8 +24,9 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Execute the pipeline.
             var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                compilation,
+                PartialCompilation.CreateComplete( compilation ),
                 new AnalyzerBuildOptionsSource( context.AnalyzerConfigOptions ),
+                ImmutableArray<object>.Empty, 
                 context.CancellationToken );
 
             // Add introduced syntax trees.

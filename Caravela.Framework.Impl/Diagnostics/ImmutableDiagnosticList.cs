@@ -21,11 +21,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this.DiagnosticSuppressions = suppressions ?? ImmutableArray<ScopedSuppression>.Empty;
         }
 
-        internal ImmutableDiagnosticList( DiagnosticList diagnosticList ) : this( diagnosticList.ToImmutableArray(), null )
-        {
-            
-        }
-        
+        internal ImmutableDiagnosticList( DiagnosticList diagnosticList ) : this( diagnosticList.ToImmutableArray(), null ) { }
 
         public ImmutableDiagnosticList Concat( in ImmutableDiagnosticList other )
             => new(
