@@ -113,6 +113,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             var introductionRegistry = new LinkerIntroductionRegistry(
+                input.CompilationModel,
                 intermediateCompilation,
                 syntaxTreeMapping,
                 introducedMemberCollection.IntroducedMembers );

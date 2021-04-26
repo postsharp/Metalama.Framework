@@ -30,8 +30,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
             var diagnostics = new DiagnosticSink();
-
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( this._aspectType, diagnostics ) )
+            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( null, this._aspectType, diagnostics ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
