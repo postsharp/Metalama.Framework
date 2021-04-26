@@ -8,7 +8,5 @@ namespace Caravela.Framework.Advices
     /// <summary>
     /// Represents an advice that overrides the implementation of a method.
     /// </summary>
-    public interface IOverrideMethodAdvice : IAdvice<IMethod>
-    {
-    }
+    public interface IOverrideMethodAdvice : IAdvice<IMethod> { }
 }

@@ -1,32 +1,29 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Caravela.Framework.Tests.Integration.Annotation
 {
     internal class AnnotationUnitTestRunner : TestRunnerBase
     {
-        public AnnotationUnitTestRunner( string projectDirectory ) : base( projectDirectory )
-        {
-        }
+        public AnnotationUnitTestRunner( string projectDirectory ) : base( projectDirectory ) { }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
             var tree = CSharpSyntaxTree.ParseText( testInput.TestSource );
             TriviaAdder triviaAdder = new();
-            var testSourceRootWithAddedTrivias = triviaAdder.Visit( tree.GetRoot() );
-            var testSourceWithAddedTrivias = testSourceRootWithAddedTrivias!.ToFullString();
+            var testSourceRootWithAddedTrivia = triviaAdder.Visit( tree.GetRoot() );
+            var testSourceWithAddedTrivia = testSourceRootWithAddedTrivia!.ToFullString();
 
-            var testInputWithAddedTrivias = new TestInput( testInput.TestName, testSourceWithAddedTrivias );
+            var testInputWithAddedTrivia = new TestInput( testInput.TestName, testSourceWithAddedTrivia );
 
-            var result = await base.RunTestAsync( testInputWithAddedTrivias );
+            var result = await base.RunTestAsync( testInputWithAddedTrivia );
 
             if ( !result.Success )
             {
@@ -36,15 +33,19 @@ namespace Caravela.Framework.Tests.Integration.Annotation
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
 
-            var templateCompiler = new TemplateCompiler();
-            List<Diagnostic> diagnostics = new();
-            var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
+            DiagnosticList diagnostics = new();
 
-            result.AddDiagnostics( diagnostics );
+            var templateCompilerSuccess = TemplateCompiler.TryAnnotate(
+                templateSyntaxRoot,
+                templateSemanticModel,
+                false,
+                diagnostics,
+                out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
             {
                 result.SetFailed( "Template compiler failed." );
+
                 return result;
             }
 

@@ -15,7 +15,6 @@ namespace Caravela.Framework.Code
     /// generic type instances have the same number of items in <see cref="GenericParameters"/> and <see cref="GenericArguments"/>.
     /// </para>
     /// </remarks>
-    // ReSharper disable once PossibleInterfaceMemberAmbiguity
     public interface INamedType : IType, IMember
     {
         /// <summary>

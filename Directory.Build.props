@@ -1,79 +1,82 @@
 <Project>
-  
-  <Import Project="Versions.props"/>
-  <Import Project="Directories.props"/>
 
-  <PropertyGroup>
-    <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+    <Import Project="Versions.props" />
+    <Import Project="Directories.props" />
 
-  <!-- Properties of NuGet packages-->
-  <PropertyGroup>
-    <Authors>PostSharp Technologies</Authors>
-    <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
-    <PackageTags>PostSharp Caravela AOP</PackageTags>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageIcon>PostSharpIcon.png</PackageIcon>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-  </PropertyGroup>
+    <PropertyGroup>
+        <ContinuousIntegrationBuild Condition="'$(TEAMCITY_VERSION)'!=''">true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
-  <!-- Additional content of NuGet packages -->
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
-    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
-    <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
-  </ItemGroup>
+    <!-- Properties of NuGet packages-->
+    <PropertyGroup>
+        <Authors>PostSharp Technologies</Authors>
+        <PackageProjectUrl>https://github.com/postsharp/Caravela</PackageProjectUrl>
+        <PackageTags>PostSharp Caravela AOP</PackageTags>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageIcon>PostSharpIcon.png</PackageIcon>
+        <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    </PropertyGroup>
 
-  <!-- C# Compiler options-->
-  <PropertyGroup>
-      <LangVersion>latest</LangVersion>
-      <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <!-- Additional content of NuGet packages -->
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)PostSharpIcon.png" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
+    </ItemGroup>
 
-  <!-- Code quality and documentation -->
-  <PropertyGroup>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-    <!-- Disable XML doc warnings for now -->
-    <NoWarn>1591,1572,1573</NoWarn>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)'=='True'">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-  
-  <!-- Assembly metadata -->
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-      <_Parameter1>PackageVersion</_Parameter1>
-      <_Parameter2>$(Version)</_Parameter2>
-    </AssemblyAttribute>
-  </ItemGroup>
-  
-  <!-- Source Link  -->
-  <PropertyGroup>
-    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- C# Compiler options-->
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Code quality and documentation -->
+    <PropertyGroup>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+        <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+        <!-- Disable XML doc warnings for now -->
+        <NoWarn>1591,1572,1573</NoWarn>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(ContinuousIntegrationBuild)'=='True'">
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-    <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
-   
-  </PropertyGroup>
+    <!-- Assembly metadata -->
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>PackageVersion</_Parameter1>
+            <_Parameter2>$(Version)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All"/>
-    <!-- Beta version fixes issue with record parameter names -->
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333" Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All"/>
-    <Content Include="$(MSBuildThisFileDirectory)\stylecop.json"  Condition="'$(EnforceCodeStyleInBuild)'=='True'" Pack="false"/>
-  </ItemGroup>
+    <!-- Source Link  -->
+    <PropertyGroup>
+        <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-  <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
-  <Import Project="Caravela.Framework.Impl\build\Caravela.CompilerVisibleProperties.targets"/>
-  
+        <!-- Embed source files that are not tracked by the source control manager in the PDB -->
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
+        <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0" PrivateAssets="All" />
+        <!-- Beta version fixes issue with record parameter names -->
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.333"
+                          Condition="'$(EnforceCodeStyleInBuild)'=='True'" PrivateAssets="All" />
+        <Content Include="$(MSBuildThisFileDirectory)\stylecop.json" Condition="'$(EnforceCodeStyleInBuild)'=='True'"
+                 Pack="false" />
+    </ItemGroup>
+
+
+    <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
+    <Import Project="Caravela.Framework.Impl\build\Caravela.CompilerVisibleProperties.targets" />
+
 </Project>

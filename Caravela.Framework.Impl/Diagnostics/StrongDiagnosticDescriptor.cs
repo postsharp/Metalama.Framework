@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Diagnostics
 {
@@ -53,12 +53,12 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             if ( arguments == null )
             {
-                throw new ArgumentNullException( nameof( arguments ) );
+                throw new ArgumentNullException( nameof(arguments) );
             }
 
             object[] argumentArray;
 
-            if ( typeof( T ).Name.StartsWith( nameof( ValueTuple ), StringComparison.OrdinalIgnoreCase ) )
+            if ( typeof(T).Name.StartsWith( nameof(ValueTuple), StringComparison.OrdinalIgnoreCase ) )
             {
                 argumentArray = ValueTupleAdapter.ToArray( arguments );
             }
@@ -78,5 +78,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 location: location,
                 additionalLocations: additionalLocations );
         }
+
+        public DiagnosticDescriptor ToDiagnosticDescriptor() => new( this.Id, this.Title, this.MessageFormat, this.Category, this.Severity, true );
     }
 }

@@ -7,13 +7,11 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.CodeModel.Links
 {
-
     /// <summary>
     /// Contains factory methods for the generic <see cref="CodeElementLink{T}"/>.
     /// </summary>
     internal static class CodeElementLink
     {
-
         /// <summary>
         /// Asserts that a given symbol is compatible with a given <see cref="ICodeElement"/> interface.
         /// </summary>
@@ -24,11 +22,11 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             where T : ICodeElement
         {
             Invariant.Implies(
-                typeof( T ) == typeof( IConstructor ),
+                typeof(T) == typeof(IConstructor),
                 symbol.GetCodeElementKind() == CodeElementKind.Constructor );
 
             Invariant.Implies(
-                typeof( T ) == typeof( IMethod ),
+                typeof(T) == typeof(IMethod),
                 symbol.GetCodeElementKind() == CodeElementKind.Method );
 
             return symbol;
@@ -45,7 +43,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             where TCodeElement : class, ICodeElement
             where TBuilder : CodeElementBuilder
         {
-            return new CodeElementLink<TCodeElement>( builder );
+            return new( builder );
         }
 
         /// <summary>
@@ -55,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// <returns></returns>
         public static CodeElementLink<ICodeElement> FromBuilder( CodeElementBuilder builder )
         {
-            return new CodeElementLink<ICodeElement>( builder );
+            return new( builder );
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// <returns></returns>
         public static CodeElementLink<ICodeElement> FromSymbol( ISymbol symbol )
         {
-            return new CodeElementLink<ICodeElement>( symbol );
+            return new( symbol );
         }
 
         /// <summary>
@@ -77,14 +75,13 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         public static CodeElementLink<T> FromSymbol<T>( ISymbol symbol )
             where T : class, ICodeElement
         {
-            return new CodeElementLink<T>( symbol );
+            return new( symbol );
         }
 
         public static CodeElementLink<ICodeElement> ReturnParameter( IMethodSymbol methodSymbol )
             => new( methodSymbol, CodeElementSpecialKind.ReturnParameter );
 
-        internal static CodeElementLink<ICodeElement> Compilation()
-            => new( null, CodeElementSpecialKind.Compilation );
+        internal static CodeElementLink<ICodeElement> Compilation() => new( null, CodeElementSpecialKind.Compilation );
     }
 
     /// <summary>
@@ -102,7 +99,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
             if ( symbol != null )
             {
-                CodeElementLink.AssertValidType<T>( symbol );
+                symbol.AssertValidType<T>();
             }
 
             this.Target = symbol;
@@ -122,8 +119,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
 
         public object? Target { get; }
 
-        public T GetForCompilation( CompilationModel compilation ) =>
-            GetForCompilation( this.Target, compilation, this._kind );
+        public T GetForCompilation( CompilationModel compilation ) => GetForCompilation( this.Target, compilation, this._kind );
 
         internal static T GetForCompilation( object? link, CompilationModel compilation, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
             => link switch

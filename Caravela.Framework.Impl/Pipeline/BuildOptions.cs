@@ -24,18 +24,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
-        public bool WriteUnhandledExceptionsToFile => true;
-
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
             if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
             {
                 return flagValue;
             }
-            else
-            {
-                return defaultValue;
-            }
+
+            return defaultValue;
         }
 
         private string? GetStringOption( string name, string? defaultValue = null )
@@ -44,10 +40,8 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 return flagString;
             }
-            else
-            {
-                return defaultValue;
-            }
+
+            return defaultValue;
         }
     }
 }

@@ -1,16 +1,20 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
 {
     internal class LinkerIntroductionStepOutput
     {
-        public LinkerIntroductionStepOutput( ImmutableDiagnosticList diagnostics, CSharpCompilation intermediateCompilation, LinkerIntroductionRegistry introductionRegistry, IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
+        public LinkerIntroductionStepOutput(
+            ImmutableDiagnosticList diagnostics,
+            CSharpCompilation intermediateCompilation,
+            LinkerIntroductionRegistry introductionRegistry,
+            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
             this.Diagnostics = diagnostics;
             this.IntermediateCompilation = intermediateCompilation;

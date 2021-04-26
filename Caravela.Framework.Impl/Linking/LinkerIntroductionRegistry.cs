@@ -1,23 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
 {
-
     /// <summary>
     /// Stores information about introductions.
     /// </summary>
-    internal partial class LinkerIntroductionRegistry
+    internal class LinkerIntroductionRegistry
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
@@ -27,7 +26,11 @@ namespace Caravela.Framework.Impl.Linking
         private readonly Dictionary<ISymbol, ICodeElement> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
-        public LinkerIntroductionRegistry( CompilationModel finalCompilationModel, CSharpCompilation intermediateCompilation, Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap, IEnumerable<LinkerIntroducedMember> introducedMembers )
+        public LinkerIntroductionRegistry(
+            CompilationModel finalCompilationModel,
+            CSharpCompilation intermediateCompilation,
+            Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
+            IReadOnlyList<LinkerIntroducedMember> introducedMembers )
         {
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
@@ -147,6 +150,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             // TODO: This is not efficient.
             var overriddenMethods = new List<IMethodSymbol>();
+
             foreach ( var intermediateSyntaxTree in this._intermediateCompilation.SyntaxTrees )
             {
                 var semanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );

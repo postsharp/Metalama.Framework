@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -18,7 +18,10 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly CompileTimeAssemblyLoader _assemblyLoader;
         private readonly IReadOnlyList<OrderedAspectLayer> _aspectLayers;
 
-        protected HighLevelPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties ) : base( properties )
+        protected HighLevelPipelineStage(
+            IReadOnlyList<OrderedAspectLayer> aspectLayers,
+            CompileTimeAssemblyLoader assemblyLoader,
+            IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectLayers = aspectLayers;
             this._assemblyLoader = assemblyLoader;
@@ -28,10 +31,12 @@ namespace Caravela.Framework.Impl.Pipeline
         public override PipelineStageResult Execute( PipelineStageResult input )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.Compilation );
+
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
                 input.AspectSources.Concat( new CompilationAspectSource( compilation, this._assemblyLoader ) ) );
+
             pipelineStepsState.Execute();
 
             return this.GenerateCode( input, pipelineStepsState );

@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -67,8 +67,8 @@ namespace Caravela.Framework.Impl.Templating
 
         protected string GetIndentationWhitespace() => this._indentTriviaStack.Peek();
 
-        protected SyntaxTrivia[] GetIndentation( bool lineFeed = true ) =>
-            lineFeed
+        protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
+            => lineFeed
                 ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
                 : new[] { Whitespace( this.GetIndentationWhitespace() ) };
 
@@ -84,6 +84,7 @@ namespace Caravela.Framework.Impl.Templating
             where T : SyntaxNode
         {
             node = (T) this._indentRewriter.Visit( node )!;
+
             return node;
         }
 
@@ -96,59 +97,53 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
-            else
+
+            var transformedNode = this.Visit( node );
+
+            if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
             {
-                var transformedNode = this.Visit( node );
+                // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
+                // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
 
-                if ( this.GetTransformationKind( node! ) != TransformationKind.Transform )
+                switch ( transformedNode )
                 {
-                    // The previous call to Visit did not transform node (i.e. transformedNode == node) because the transformation
-                    // kind was not set to Transform. The next code tries to "fix" it by using some tricks, but this is not clean.
+                    case ExpressionSyntax expression:
+                        return this.TransformExpression( expression );
 
-                    switch ( transformedNode )
-                    {
-                        case ExpressionSyntax expression:
-                            return this.TransformExpression( expression );
+                    case ArgumentSyntax argument:
+                        return this.TransformArgument( argument );
 
-                        case ArgumentSyntax argument:
-                            return this.TransformArgument( argument );
-
-                        default:
-                            throw new AssertionFailedException();
-                    }
-                }
-                else
-                {
-                    return (ExpressionSyntax) transformedNode;
+                    default:
+                        throw new AssertionFailedException();
                 }
             }
+
+            return (ExpressionSyntax) transformedNode;
         }
 
-        protected ExpressionSyntax Transform( SyntaxKind kind ) =>
-            this.MetaSyntaxFactory.Kind( kind );
+        protected ExpressionSyntax Transform( SyntaxKind kind ) => this.MetaSyntaxFactory.Kind( kind );
 
         protected ExpressionSyntax Transform<T>( SeparatedSyntaxList<T> list )
             where T : SyntaxNode
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.GenericType( typeof( SeparatedSyntaxList<> ), this.MetaSyntaxFactory.Type( typeof( T ) ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.GenericType( typeof(SeparatedSyntaxList<>), this.MetaSyntaxFactory.Type( typeof(T) ) ) );
             }
-            else if ( list.Count == 1 )
+
+            if ( list.Count == 1 )
             {
                 return this.MetaSyntaxFactory.SingletonSeparatedList<T>( this.Transform( list[0] ) );
             }
-            else
-            {
-                return this.MetaSyntaxFactory.SeparatedList2<T>( list.Select( this.Transform ) );
-            }
+
+            return this.MetaSyntaxFactory.SeparatedList2<T>( list.Select( this.Transform ) );
         }
 
         protected ExpressionSyntax Transform( BracketedArgumentListSyntax? list )
         {
             if ( list == null )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( BracketedArgumentListSyntax ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(BracketedArgumentListSyntax) ) );
             }
 
             return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
@@ -162,7 +157,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxTokenList) ) );
             }
 
             // TODO: Using default.AddRange is not the right pattern.
@@ -170,8 +165,7 @@ namespace Caravela.Framework.Impl.Templating
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        DefaultExpression(
-                            this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) ),
+                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxTokenList) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
@@ -181,8 +175,7 @@ namespace Caravela.Framework.Impl.Templating
                                     this.MetaSyntaxFactory.ArrayType<SyntaxToken>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList(
-                                            list.Select( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.Select( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected ExpressionSyntax Transform<T>( SyntaxList<T> list )
@@ -190,13 +183,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxList<T>) ) );
             }
 
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) ),
+                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxList<T>) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
@@ -206,8 +199,7 @@ namespace Caravela.Framework.Impl.Templating
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList(
-                                            list.Select( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.Select( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )
@@ -215,7 +207,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( token.Kind() )
             {
                 case SyntaxKind.None:
-                    return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) );
+                    return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) );
 
                 case SyntaxKind.IdentifierToken:
                     return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( token.Text ) );
@@ -233,11 +225,10 @@ namespace Caravela.Framework.Impl.Templating
                 // No argument needed.
                 return this.MetaSyntaxFactory.Token( this.Transform( token.Kind() ) );
             }
-            else
-            {
-                // Argument needed.
 
-                /*
+            // Argument needed.
+
+            /*
                  * public static Microsoft.CodeAnalysis.SyntaxToken Token (
                  * Microsoft.CodeAnalysis.SyntaxTriviaList leading,
                  * Microsoft.CodeAnalysis.CSharp.SyntaxKind kind,
@@ -246,17 +237,16 @@ namespace Caravela.Framework.Impl.Templating
                  * Microsoft.CodeAnalysis.SyntaxTriviaList trailing);
                  */
 
-                return this.MetaSyntaxFactory.Token(
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
-                    this.Transform( token.Kind() ),
-                    SyntaxFactoryEx.LiteralExpression( token.Text ),
-                    SyntaxFactoryEx.LiteralExpression( token.ValueText ),
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
-            }
+            return this.MetaSyntaxFactory.Token(
+                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                this.Transform( token.Kind() ),
+                SyntaxFactoryEx.LiteralExpression( token.Text ),
+                SyntaxFactoryEx.LiteralExpression( token.ValueText ),
+                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        
+
         // Not static for uniformity with other methods.
         protected ExpressionSyntax Transform( bool value )
         {
@@ -273,9 +263,9 @@ namespace Caravela.Framework.Impl.Templating
             // This method does not change the behavior of the base method, but it allows for easier debugging
             // of InvalidCastException.
             var transformedNode = this.Visit( node );
+
             return (TNode?) transformedNode;
         }
 #endif
-
     }
 }

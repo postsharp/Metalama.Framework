@@ -1,25 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
+using Caravela.TestFramework;
+using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Caravela.Framework.DesignTime.Contracts;
-using Caravela.Framework.Impl.Templating;
-using Caravela.TestFramework;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
+
+// ReSharper disable StringLiteralTypo
 
 namespace Caravela.Framework.Tests.Integration.Highlighting
 {
     internal class HighlightingTestRunner : TestRunnerBase
     {
-        public HighlightingTestRunner( string projectDirectory ) : base( projectDirectory )
-        {
-        }
+        public HighlightingTestRunner( string projectDirectory ) : base( projectDirectory ) { }
 
         public override async Task<TestResult> RunTestAsync( TestInput testInput )
         {
@@ -33,15 +32,19 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
             var templateSyntaxRoot = (await result.TemplateDocument.GetSyntaxRootAsync())!;
             var templateSemanticModel = (await result.TemplateDocument.GetSemanticModelAsync())!;
 
-            var templateCompiler = new TemplateCompiler();
-            List<Diagnostic> diagnostics = new();
-            var templateCompilerSuccess = templateCompiler.TryAnnotate( templateSyntaxRoot, templateSemanticModel, diagnostics, out var annotatedTemplateSyntax );
+            DiagnosticList diagnostics = new();
 
-            result.AddDiagnostics( diagnostics );
+            var templateCompilerSuccess = TemplateCompiler.TryAnnotate(
+                templateSyntaxRoot,
+                templateSemanticModel,
+                false,
+                diagnostics,
+                out var annotatedTemplateSyntax );
 
             if ( !templateCompilerSuccess )
             {
                 result.SetFailed( "Template compiler failed." );
+
                 return result;
             }
 
@@ -65,12 +68,14 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                 var classifier = new TextSpanClassifier( sourceText );
                 classifier.Visit( result.AnnotatedTemplateSyntax );
 
-                using ( var textWriter = new StreamWriter( highlightedTemplatePath, false, Encoding.UTF8 ) )
+                await using ( var textWriter = new StreamWriter( highlightedTemplatePath, false, Encoding.UTF8 ) )
                 {
                     textWriter.WriteLine( "<html>" );
                     textWriter.WriteLine( "<head>" );
                     textWriter.WriteLine( "<style>" );
-                    textWriter.WriteLine( @"
+
+                    textWriter.WriteLine(
+                        @"
 .CompileTime {
     background-color: #E8F2FF;
 }
@@ -92,6 +97,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 .Default {
     background-color: lightcoral;
 }" );
+
                     textWriter.WriteLine( "</style>" );
                     textWriter.WriteLine( "</head>" );
                     textWriter.WriteLine( "<body><pre>" );
@@ -105,7 +111,9 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                             textWriter.Write( sourceText.GetSubText( new TextSpan( i, classifiedSpan.Span.Start - i ) ) );
                         }
 
-                        textWriter.Write( $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() ) + "</span>" );
+                        textWriter.Write(
+                            $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
+                                                                              + "</span>" );
 
                         i = classifiedSpan.Span.End;
                     }
@@ -119,7 +127,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                     textWriter.WriteLine();
                     textWriter.WriteLine( "Legend:" );
 
-                    foreach ( var classification in Enum.GetValues( typeof( TextSpanClassification ) ) )
+                    foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
                     {
                         textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
                     }

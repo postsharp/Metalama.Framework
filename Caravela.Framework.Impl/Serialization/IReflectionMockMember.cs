@@ -4,11 +4,10 @@
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 
-namespace Caravela.Framework.Impl.Serialization.Reflection
+namespace Caravela.Framework.Impl.Serialization
 {
     internal interface IReflectionMockMember : IReflectionMockCodeElement
     {
-
         ITypeSymbol? DeclaringTypeSymbol { get; }
     }
 }

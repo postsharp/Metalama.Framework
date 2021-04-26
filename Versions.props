@@ -1,26 +1,48 @@
 <Project>
 
-  <PropertyGroup>
-    
-    
-    <!-- TeamCity defines the environment variable VersionSuffix -->
-    <MainVersion>0.1.4</MainVersion>
-    <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">$(MainVersion)-dev-$(USERNAME)-$([System.IO.File]::GetLastWriteTime(`$(MSBuildThisFileDirectory).git\ORIG_HEAD`).ToString(`yyMMddhhmm`))</Version>
-    <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
+    <Import Project="LocalBuildId.props" Condition="Exists('LocalBuildId.props')" />
+
+    <PropertyGroup>
+        <MainVersion>0.1.4</MainVersion>
+    </PropertyGroup>
+
+    <!-- The version for the release build is set manually. -->
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
+    </PropertyGroup>
+
+    <!-- For TeamCity debug builds, the version number is based on the TeamCity build number. 
+         TeamCity is responsible for setting the VersionSuffix property -->
+    <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">
+        <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
+    </PropertyGroup>
+
+    <!-- For local builds, the LocalBuildId property must be defined before calling `dotnet pack` -->
+    <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">
+        <LocalBuildId Condition="'$(LocalBuildId)'==''">LocalBuildIdUndefined</LocalBuildId>
+        <Version Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</Version>
+    </PropertyGroup>
 
     <!-- Version of dependencies -->
-    <RoslynVersion>3.8.0</RoslynVersion>
-    <CaravelaCompilerVersion>3.8.7-preview</CaravelaCompilerVersion>
-    
-    <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
-    <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+    <PropertyGroup>
 
-  </PropertyGroup>
+        <RoslynVersion>3.8.0</RoslynVersion>
+        <CaravelaCompilerVersion>3.8.7-preview</CaravelaCompilerVersion>
+
+        <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
+        <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+
+    </PropertyGroup>
 
 
-  <Target Name="PrintVersion">
-    <Message Text="Version=$(Version)"/>
-  </Target>
+    <Target Name="PrintVersion">
+        <Message Text="Version=$(Version)" />
+    </Target>
+
+    <!-- Emits an error if `dotnet pack` is called in a local debug build, but Run CreateLocalPackages.ps1 has not been called. -->
+    <Target Name="ValidateVersion" BeforeTargets="Pack">
+        <Error Text="The LocalBuildId property is not defined. Run CreateLocalPackages.ps1"
+               Condition="'$(LocalBuildId)'=='LocalBuildIdUndefined'" />
+    </Target>
 
 </Project>

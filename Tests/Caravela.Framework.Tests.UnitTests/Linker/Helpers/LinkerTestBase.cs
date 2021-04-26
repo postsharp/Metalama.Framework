@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
@@ -15,11 +12,14 @@ using FakeItEasy;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 {
     // Aspect linker tests' source use [PseudoIntroduction] and [PseudoOverride] attributes, that cause the marked declaration to be removed
-    // and transformed into a pseudotransformation that serves as a linker input. This is mainly to avoid jumping through hoops to reproduce
+    // and transformed into a pseudo-transformation that serves as a linker input. This is mainly to avoid jumping through hoops to reproduce
     // linker-specific problems with the full pipeline.
     //
     // Aspect layer order is collected from proceeds and in the order incidence, if different order is required, one can use attributes on types to force an order:
@@ -57,20 +57,18 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             var rewriter = new TestRewriter();
 
             var inputCompilation = pseudoCompilation;
-            var syntaxTreeMap = new Dictionary<SyntaxTree, SyntaxTree>();
 
             foreach ( var pseudoSyntaxTree in pseudoCompilation.SyntaxTrees )
             {
                 var inputSyntaxTree = pseudoSyntaxTree.WithRootAndOptions( rewriter.Visit( pseudoSyntaxTree.GetRoot() ), pseudoSyntaxTree.Options );
                 inputCompilation = inputCompilation.ReplaceSyntaxTree( pseudoSyntaxTree, inputSyntaxTree );
-                syntaxTreeMap[pseudoSyntaxTree] = inputSyntaxTree;
             }
 
             CheckRoslynDiagnostics( inputCompilation );
 
             var initialCompilationModel = CompilationModel.CreateInitialInstance( inputCompilation );
 
-            FinalizeTransformationFakes( rewriter, inputCompilation, initialCompilationModel, syntaxTreeMap );
+            FinalizeTransformationFakes( rewriter, inputCompilation, initialCompilationModel );
 
             var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
 
@@ -79,7 +77,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
                 rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
-                ArraySegment<ScopedSuppression>.Empty);
+                ArraySegment<ScopedSuppression>.Empty );
 
             return linkerInput;
         }
@@ -98,10 +96,17 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             return cleanCompilation;
         }
 
-        private static void FinalizeTransformationFakes( TestRewriter rewriter, CSharpCompilation inputCompilation, CompilationModel initialCompilationModel, Dictionary<SyntaxTree, SyntaxTree> syntaxTreeMap )
+        private static void FinalizeTransformationFakes(
+            TestRewriter rewriter,
+            CSharpCompilation inputCompilation,
+            CompilationModel initialCompilationModel )
         {
             var nodeIdToCodeElement = new Dictionary<string, ICodeElement>();
-            var symbolToCodeElement = initialCompilationModel.GetContainedElements().Where( x => x is CodeElement ).ToDictionary( x => ((CodeElement) x).Symbol, x => x );
+
+            var symbolToCodeElement = initialCompilationModel.GetContainedElements()
+                .Where( x => x is CodeElement )
+                .ToDictionary( x => ((CodeElement) x).Symbol, x => x );
+
             var nodeIdToSyntaxNode = new Dictionary<string, SyntaxNode>();
             var syntaxNodeToSymbol = new Dictionary<SyntaxNode, ISymbol>();
 
@@ -147,10 +152,12 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     var symbolHelperSymbol = (IMethodSymbol) syntaxNodeToSymbol[symbolHelperNode];
 
                     var overridenMemberSymbol = containingSymbol.GetMembers()
-                        .Where( x =>
-                             x.Name == overriddenElementName
-                             && x is IMethodSymbol methodSymbol
-                             && methodSymbol.Parameters.Select( p => p.Type ).SequenceEqual( symbolHelperSymbol.Parameters.Select( p => p.Type ) ) )
+                        .Where(
+                            x =>
+                                x.Name == overriddenElementName
+                                && x is IMethodSymbol methodSymbol
+                                && methodSymbol.Parameters.Select( p => p.Type )
+                                    .SequenceEqual( symbolHelperSymbol.Parameters.Select( p => p.Type ) ) )
                         .Single();
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];
@@ -170,7 +177,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                     var symbolHelperElement = (IMethod) nodeIdToCodeElement[symbolHelperNodeId];
 
                     A.CallTo( () => observableTransformation.ContainingElement ).Returns( containingElement );
-                    A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPositionNode ).Returns( (MemberDeclarationSyntax) insertPositionNode );
+
+                    A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPositionNode )
+                        .Returns( (MemberDeclarationSyntax) insertPositionNode );
+
                     A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 
                     // TODO: This should be a deep copy of code elements to have a correct parent.

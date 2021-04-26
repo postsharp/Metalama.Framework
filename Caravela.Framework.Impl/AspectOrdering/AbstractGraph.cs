@@ -25,6 +25,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
         {
             var n = this._size;
             var vector = new int[n];
+
             for ( var i = 0; i < n; i++ )
             {
                 vector[i] = NotDiscovered;

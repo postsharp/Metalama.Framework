@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Concurrent;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Concurrent;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -17,7 +17,9 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class CodeElementFactory : ITypeFactory
     {
         private readonly CompilationModel _compilation;
-        private readonly ConcurrentDictionary<CodeElementLink<ICodeElement>, object> _cache = new( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
+
+        private readonly ConcurrentDictionary<CodeElementLink<ICodeElement>, object> _cache =
+            new( CodeElementLinkEqualityComparer<CodeElementLink<ICodeElement>>.Instance );
 
         public CodeElementFactory( CompilationModel compilation )
         {
@@ -31,17 +33,17 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
             var symbol = this._compilation.ReflectionMapper.GetTypeSymbolByReflectionName( reflectionName );
+
             return this.GetNamedType( symbol );
         }
 
-        public IType GetTypeByReflectionType( Type type )
-            => this.GetIType( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
+        public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._cache.GetOrAdd(
                 assemblySymbol.ToLink(),
-                l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly ) ?
-                    new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
+                l => !SymbolEqualityComparer.Default.Equals( l.Symbol, this._compilation.RoslynCompilation.Assembly )
+                    ? new ReferencedAssembly( (IAssemblySymbol) l.Symbol!, this._compilation )
                     : this._compilation );
 
         public IType GetIType( ITypeSymbol typeSymbol )
@@ -51,7 +53,9 @@ namespace Caravela.Framework.Impl.CodeModel
             => (NamedType) this._cache.GetOrAdd( typeSymbol.ToLink(), s => new NamedType( (INamedTypeSymbol) s.Symbol!, this._compilation ) );
 
         public IGenericParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (GenericParameter) this._cache.GetOrAdd( typeParameterSymbol.ToLink(), tp => new GenericParameter( (ITypeParameterSymbol) tp.Symbol!, this._compilation ) );
+            => (GenericParameter) this._cache.GetOrAdd(
+                typeParameterSymbol.ToLink(),
+                tp => new GenericParameter( (ITypeParameterSymbol) tp.Symbol!, this._compilation ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
             => (IMethod) this._cache.GetOrAdd( methodSymbol.ToLink(), ms => new Method( (IMethodSymbol) ms.Symbol!, this._compilation ) );
@@ -71,8 +75,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public IEvent GetEvent( IEventSymbol @event )
             => (IEvent) this._cache.GetOrAdd( @event.ToLink(), ms => new Event( (IEventSymbol) ms.Symbol!, this._compilation ) );
 
-        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default ) =>
-            symbol switch
+        internal ICodeElement GetCodeElement( ISymbol symbol, CodeElementSpecialKind kind = CodeElementSpecialKind.Default )
+            => symbol switch
             {
                 INamespaceSymbol => this._compilation,
                 INamedTypeSymbol namedType => this.GetNamedType( namedType ),
@@ -88,14 +92,14 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol parameter => this.GetParameter( parameter ),
                 IEventSymbol @event => this.GetEvent( @event ),
                 IAssemblySymbol assembly => this.GetAssembly( assembly ),
-                _ => throw new ArgumentException( nameof( symbol ) )
+                _ => throw new ArgumentException( nameof(symbol) )
             };
 
-        IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank ) =>
-            (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
+        IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank )
+            => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
-        IPointerType ITypeFactory.MakePointerType( IType pointedType ) =>
-            (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
+        IPointerType ITypeFactory.MakePointerType( IType pointedType )
+            => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
             => (IAttribute) this._cache.GetOrAdd(
@@ -124,7 +128,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         public IType GetIType( IType type )
@@ -133,15 +137,14 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return type;
             }
-            else if ( type is ITypeInternal typeInternal )
+
+            if ( type is ITypeInternal typeInternal )
             {
                 return this.GetIType( typeInternal.TypeSymbol.AssertNotNull() );
             }
-            else
-            {
-                // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-                return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
-            }
+
+            // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
+            return this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
         }
 
         public T GetCodeElement<T>( T codeElement )
@@ -151,11 +154,11 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return codeElement;
             }
-            else if ( codeElement is ICodeElementLink<ICodeElement> link)
+            else if ( codeElement is ICodeElementLink<ICodeElement> link )
             {
                 return (T) link.GetForCompilation( this._compilation );
             }
-            else if (codeElement is NamedType namedType)
+            else if ( codeElement is NamedType namedType )
             {
                 // TODO: This would not work after type introductions, but that would require more changes.
                 return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );

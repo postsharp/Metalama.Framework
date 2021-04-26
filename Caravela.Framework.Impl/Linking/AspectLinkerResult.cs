@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         public CSharpCompilation Compilation { get; }
 
         /// <summary>
-        /// Gets diagnostics produced when linking (templace expansion, inlining, etc.).
+        /// Gets diagnostics produced when linking (template expansion, inlining, etc.).
         /// </summary>
         public ImmutableDiagnosticList Diagnostics { get; }
 

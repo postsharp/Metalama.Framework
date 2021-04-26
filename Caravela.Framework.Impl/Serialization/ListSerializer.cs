@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections;
+using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -24,6 +24,7 @@ namespace Caravela.Framework.Impl.Serialization
             var argument = o.GetType().GetGenericArguments()[0];
 
             var lt = new List<ExpressionSyntax>();
+
             foreach ( var obj in (IEnumerable) o )
             {
                 ThrowIfStackTooDeep( obj );
@@ -37,12 +38,9 @@ namespace Caravela.Framework.Impl.Serialization
                                 IdentifierName( "System" ),
                                 IdentifierName( "Collections" ) ),
                             IdentifierName( "Generic" ) ),
-                        GenericName(
-                                Identifier( "List" ) )
+                        GenericName( Identifier( "List" ) )
                             .WithTypeArgumentList(
-                                TypeArgumentList(
-                                    SingletonSeparatedList(
-                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
+                                TypeArgumentList( SingletonSeparatedList( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( argument ) ) ) ) ) ) )
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,

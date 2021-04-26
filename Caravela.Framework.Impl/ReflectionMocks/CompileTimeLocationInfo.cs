@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Reflection;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
+using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -24,12 +24,12 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             this.Field = field;
         }
 
-        public static CompileTimeLocationInfo Create( IFieldOrPropertyInvocation fieldOrProperty ) =>
-            fieldOrProperty switch
+        public static CompileTimeLocationInfo Create( IFieldOrPropertyInvocation fieldOrProperty )
+            => fieldOrProperty switch
             {
                 Property property => new CompileTimeLocationInfo( property ),
                 Field field => new CompileTimeLocationInfo( field ),
-                _ => throw new ArgumentOutOfRangeException( nameof( fieldOrProperty ) )
+                _ => throw new ArgumentOutOfRangeException( nameof(fieldOrProperty) )
             };
     }
 }

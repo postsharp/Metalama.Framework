@@ -11,11 +11,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             private readonly TemplateAnnotator _parent;
             private readonly bool _initialValue;
+            private readonly string? _initialReason;
 
-            public ForceBuildTimeExpressionCookie( TemplateAnnotator parent, bool initialValue )
+            public ForceBuildTimeExpressionCookie( TemplateAnnotator parent )
             {
                 this._parent = parent;
-                this._initialValue = initialValue;
+                this._initialValue = parent._forceCompileTimeOnlyExpression;
+                this._initialReason = parent._forceCompileTimeOnlyExpressionReason;
             }
 
             public void Dispose()

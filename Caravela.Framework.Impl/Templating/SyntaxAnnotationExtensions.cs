@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -14,16 +14,20 @@ namespace Caravela.Framework.Impl.Templating
     {
         private const string _scopeAnnotationKind = "scope";
         private const string _proceedAnnotationKind = "proceed";
-        private const string _noindentAnnotationKind = "noindent";
+        private const string _noIndentAnnotationKind = "noIndent";
         private const string _colorAnnotationKind = "color";
         private const string _templateAnnotationKind = "template";
+        private const string _scopeMismatchKind = "scopeMismatch";
 
-        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildtime" );
-        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runtime" );
+        private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
+        private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
-        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noindentAnnotationKind );
+        private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
+        private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
 
-        private static readonly ImmutableList<string> _templateAnnotationKinds = SemanticAnnotationMap.AnnotationKinds.AddRange( new[] { _scopeAnnotationKind, _noindentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
+        private static readonly ImmutableList<string> _templateAnnotationKinds =
+            SemanticAnnotationMap.AnnotationKinds.AddRange(
+                new[] { _scopeAnnotationKind, _noIndentAnnotationKind, _proceedAnnotationKind, _colorAnnotationKind } );
 
         public static bool HasScopeAnnotation( this SyntaxNode node )
         {
@@ -33,64 +37,57 @@ namespace Caravela.Framework.Impl.Templating
         public static SymbolDeclarationScope GetScopeFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
+
             if ( annotation == null )
             {
                 return SymbolDeclarationScope.Default;
             }
-            else
+
+            switch ( annotation.Data )
             {
-                switch ( annotation.Data )
-                {
-                    case "buildtime":
-                        return SymbolDeclarationScope.CompileTimeOnly;
+                case "buildTime":
+                    return SymbolDeclarationScope.CompileTimeOnly;
 
-                    case "runtime":
-                        return SymbolDeclarationScope.RunTimeOnly;
+                case "runTime":
+                    return SymbolDeclarationScope.RunTimeOnly;
 
-                    default:
-                        throw new AssertionFailedException();
-                }
+                default:
+                    throw new AssertionFailedException();
             }
         }
 
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxNode node )
         {
             var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
+
             if ( annotation == null )
             {
                 return TextSpanClassification.Default;
             }
-            else
+
+            if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
             {
-                if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
-                {
-                    return color;
-                }
-                else
-                {
-                    return TextSpanClassification.Default;
-                }
+                return color;
             }
+
+            return TextSpanClassification.Default;
         }
 
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxToken node )
         {
             var annotation = node.GetAnnotations( _colorAnnotationKind ).SingleOrDefault();
+
             if ( annotation == null )
             {
                 return TextSpanClassification.Default;
             }
-            else
+
+            if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
             {
-                if ( Enum.TryParse( annotation.Data, out TextSpanClassification color ) )
-                {
-                    return color;
-                }
-                else
-                {
-                    return TextSpanClassification.Default;
-                }
+                return color;
             }
+
+            return TextSpanClassification.Default;
         }
 
         public static T AddColoringAnnotation<T>( this T node, TextSpanClassification color )
@@ -129,6 +126,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( existingScope != SymbolDeclarationScope.Default )
             {
                 Invariant.Assert( existingScope == scope );
+
                 return node;
             }
 
@@ -149,8 +147,13 @@ namespace Caravela.Framework.Impl.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _templateAnnotation );
 
-        public static bool IsTemplateFromAnnotation( this SyntaxNode node )
-            => node.HasAnnotation( _templateAnnotation );
+        public static bool IsTemplateFromAnnotation( this SyntaxNode node ) => node.HasAnnotation( _templateAnnotation );
+
+        public static T AddScopeMismatchAnnotation<T>( this T node )
+            where T : SyntaxNode
+            => node.WithAdditionalAnnotations( _scopeMismatchAnnotation );
+
+        public static bool HasScopeMismatchAnnotation( this SyntaxNode node ) => node.HasAnnotation( _scopeMismatchAnnotation );
 
         public static T WithScopeAnnotationFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode

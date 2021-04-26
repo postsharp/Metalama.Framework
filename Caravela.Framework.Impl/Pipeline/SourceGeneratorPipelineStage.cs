@@ -1,10 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
@@ -14,6 +10,11 @@ using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -22,10 +23,11 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal class SourceGeneratorPipelineStage : HighLevelPipelineStage
     {
-        public SourceGeneratorPipelineStage( IReadOnlyList<OrderedAspectLayer> aspectLayers, CompileTimeAssemblyLoader assemblyLoader, IAspectPipelineProperties properties )
-            : base( aspectLayers, assemblyLoader, properties )
-        {
-        }
+        public SourceGeneratorPipelineStage(
+            IReadOnlyList<OrderedAspectLayer> aspectLayers,
+            CompileTimeAssemblyLoader assemblyLoader,
+            IAspectPipelineProperties properties )
+            : base( aspectLayers, assemblyLoader, properties ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
@@ -39,18 +41,20 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var transformationGroup in transformations )
             {
-                if ( !(transformationGroup.DeclaringElement is INamedType declaringType) )
+                if ( transformationGroup.DeclaringElement is not INamedType declaringType )
                 {
                     // We only support introductions to types.
                     continue;
                 }
 
+                /*
                 if ( !declaringType.IsPartial )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     // TODO: emit diagnostic.
                     continue;
                 }
+                */
 
                 var classDeclaration = SyntaxFactory.ClassDeclaration(
                     default,
@@ -72,7 +76,9 @@ namespace Caravela.Framework.Impl.Pipeline
                                 new LinkerIntroductionNameProvider(),
                                 lexicalScopeFactory.GetLexicalScope( memberIntroduction ) );
 
-                            classDeclaration = classDeclaration.AddMembers( memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+                            classDeclaration = classDeclaration.AddMembers(
+                                memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );
+
                             break;
 
                         default:
@@ -84,7 +90,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( declaringType.Namespace != null )
                 {
-
                     topDeclaration = SyntaxFactory.NamespaceDeclaration(
                         SyntaxFactory.ParseName( declaringType.Namespace ),
                         default,
@@ -92,7 +97,7 @@ namespace Caravela.Framework.Impl.Pipeline
                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
                 }
 
-                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration );
+                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration.NormalizeWhitespace(), encoding: Encoding.UTF8 );
 
                 var syntaxTreeName = declaringType.FullName + ".cs";
 

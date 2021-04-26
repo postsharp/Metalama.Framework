@@ -1,29 +1,51 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     internal class SymbolClassifier : ISymbolClassifier
     {
+        private static readonly object _addSync = new();
+        private static readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
+
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
-        private readonly Dictionary<ISymbol, SymbolDeclarationScope> _cache = new( SymbolEqualityComparer.Default );
+        private readonly Dictionary<ISymbol, SymbolDeclarationScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
 
-        public SymbolClassifier( Compilation compilation )
+        private SymbolClassifier( Compilation compilation )
         {
             this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
-            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeOnlyAttribute ).FullName ).AssertNotNull();
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
+            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
+            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+        }
+
+        public static ISymbolClassifier GetInstance( Compilation compilation )
+        {
+            if ( !_instances.TryGetValue( compilation, out var value ) )
+            {
+                lock ( _addSync )
+                {
+                    if ( !_instances.TryGetValue( compilation, out value ) )
+                    {
+                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
+                        value = hasCaravelaReference ? new SymbolClassifier( compilation ) : NoCaravelaReferenceClassifier.Instance;
+                        _instances.Add( compilation, value );
+                    }
+                }
+            }
+
+            return value;
         }
 
         public bool IsTemplate( ISymbol symbol )
@@ -37,7 +59,7 @@ namespace Caravela.Framework.Impl.CompileTime
             // Look at the overriden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                return this.IsTemplate( overriddenMethod );
+                return this.IsTemplate( overriddenMethod! );
             }
 
             return false;
@@ -54,50 +76,63 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 return SymbolDeclarationScope.Default;
             }
-            else
-            {
-                return null;
-            }
+
+            return null;
         }
 
-        protected virtual SymbolDeclarationScope GetAssemblyScope( IAssemblySymbol? assembly )
+        protected virtual SymbolDeclarationScope? GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
-                return SymbolDeclarationScope.Default;
+                return null;
             }
 
             // TODO: be more strict with .NET Standard.
-            if ( assembly.Name != null &&
-                (assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase ) || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase )) )
+            if ( IsStandardLibrary( assembly ) )
             {
                 return SymbolDeclarationScope.Default;
             }
 
-            var scopeFromAttributes = assembly.GetAttributes().Concat( assembly.Modules.First().GetAttributes() )
-                .Select( this.GetAttributeScope ).FirstOrDefault( s => s != null );
+            var scopeFromAttributes = assembly.GetAttributes()
+                .Concat( assembly.Modules.First().GetAttributes() )
+                .Select( this.GetAttributeScope )
+                .FirstOrDefault( s => s != null );
+
             if ( scopeFromAttributes != null )
             {
                 return scopeFromAttributes.Value;
             }
 
-            // Any assembly that is not compile-time is run-time only.
-            // We also return RunTimeOnly for the current compilation because this method is called as a fallback to get the scope
-            // of a type. All compile-time types of the current compilation must be marked as compile-time using a custom attribute. 
-
-            return SymbolDeclarationScope.RunTimeOnly;
+            return null;
         }
+
+        private static bool IsStandardLibrary( IAssemblySymbol assembly )
+            => assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase )
+               || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase );
 
         public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
         {
-            SymbolDeclarationScope AddToCache( SymbolDeclarationScope scope )
+            var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
+
+            if ( scopeFromAssembly != null )
             {
-                this._cache[symbol] = scope;
+                return scopeFromAssembly.Value;
+            }
+
+            return this.GetScopeFromAttributes( symbol ) ?? SymbolDeclarationScope.RunTimeOnly;
+        }
+
+        private SymbolDeclarationScope? GetScopeFromAttributes( ISymbol symbol )
+        {
+            SymbolDeclarationScope? AddToCache( SymbolDeclarationScope? scope )
+            {
+                this._cacheFromAttributes[symbol] = scope;
+
                 return scope;
             }
 
             // From cache.
-            if ( this._cache.TryGetValue( symbol, out var scopeFromCache ) )
+            if ( this._cacheFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
             {
                 return scopeFromCache;
             }
@@ -106,7 +141,11 @@ namespace Caravela.Framework.Impl.CompileTime
             _ = AddToCache( SymbolDeclarationScope.Default );
 
             // From attributes.
-            var scopeFromAttributes = symbol.GetAttributes().Select( this.GetAttributeScope ).FirstOrDefault( s => s != null );
+            var scopeFromAttributes = symbol
+                .GetAttributes()
+                .Select( this.GetAttributeScope )
+                .FirstOrDefault( s => s != null );
+
             if ( scopeFromAttributes != null )
             {
                 return AddToCache( scopeFromAttributes.Value );
@@ -115,8 +154,9 @@ namespace Caravela.Framework.Impl.CompileTime
             // From overridden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                var scopeFromOverriddenMethod = this.GetSymbolDeclarationScope( overriddenMethod );
-                if ( scopeFromOverriddenMethod != SymbolDeclarationScope.Default )
+                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod! );
+
+                if ( scopeFromOverriddenMethod != null )
                 {
                     return AddToCache( scopeFromOverriddenMethod );
                 }
@@ -125,9 +165,9 @@ namespace Caravela.Framework.Impl.CompileTime
             // From declaring type.
             if ( symbol.ContainingType != null )
             {
-                var scopeFromContainingType = this.GetSymbolDeclarationScope( symbol.ContainingType );
+                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType );
 
-                if ( scopeFromContainingType != SymbolDeclarationScope.Default )
+                if ( scopeFromContainingType != null )
                 {
                     return AddToCache( scopeFromContainingType );
                 }
@@ -148,20 +188,20 @@ namespace Caravela.Framework.Impl.CompileTime
                             // From base type.
                             if ( type.BaseType != null )
                             {
-                                var scopeFromBaseType = this.GetSymbolDeclarationScope( type.BaseType );
+                                var scopeFromBaseType = this.GetScopeFromAttributes( type.BaseType );
 
-                                if ( scopeFromBaseType != SymbolDeclarationScope.Default )
+                                if ( scopeFromBaseType != null )
                                 {
                                     return AddToCache( scopeFromBaseType );
                                 }
                             }
 
                             // From interfaces.
-                            foreach ( var iface in type.AllInterfaces )
+                            foreach ( var @interface in type.AllInterfaces )
                             {
-                                var scopeFromInterface = this.GetSymbolDeclarationScope( iface );
+                                var scopeFromInterface = this.GetScopeFromAttributes( @interface );
 
-                                if ( scopeFromInterface != SymbolDeclarationScope.Default )
+                                if ( scopeFromInterface != null )
                                 {
                                     return AddToCache( scopeFromInterface );
                                 }
@@ -170,9 +210,9 @@ namespace Caravela.Framework.Impl.CompileTime
                             // From generic arguments.
                             foreach ( var genericArgument in namedType.TypeArguments )
                             {
-                                var scopeFromGenericArgument = this.GetSymbolDeclarationScope( genericArgument );
+                                var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
 
-                                if ( scopeFromGenericArgument != SymbolDeclarationScope.Default )
+                                if ( scopeFromGenericArgument != null )
                                 {
                                     return AddToCache( scopeFromGenericArgument );
                                 }
@@ -183,17 +223,21 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
 
                 case INamespaceSymbol:
-                    // Namespace can be either runtime, buildtime or both. We don't do more now but we may have TODO it based on assemblies defining the namespace.
+                    // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
                     return AddToCache( SymbolDeclarationScope.Default );
             }
 
-            var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
-            if ( scopeFromAssembly != SymbolDeclarationScope.Default )
-            {
-                return AddToCache( scopeFromAssembly );
-            }
+            return AddToCache( null );
+        }
 
-            return AddToCache( SymbolDeclarationScope.Default );
+        private class NoCaravelaReferenceClassifier : ISymbolClassifier
+        {
+            public static readonly NoCaravelaReferenceClassifier Instance = new();
+
+            public bool IsTemplate( ISymbol symbol ) => false;
+
+            public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
+                => IsStandardLibrary( symbol.ContainingAssembly ) ? SymbolDeclarationScope.Default : SymbolDeclarationScope.RunTimeOnly;
         }
     }
 }

@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -26,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IMethodList LocalFunctions => MethodList.Empty;
 
         [Memo]
-        public IParameterList Parameters =>
-            new ParameterList(
+        public IParameterList Parameters
+            => new ParameterList(
                 this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ),
                 this.Compilation );
 
@@ -42,8 +42,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType ReturnType => this.Compilation.Factory.GetIType( this.MethodBuilder.ReturnParameter.ParameterType );
 
         [Memo]
-        public IGenericParameterList GenericParameters =>
-            new GenericParameterList(
+        public IGenericParameterList GenericParameters
+            => new GenericParameterList(
                 this.MethodBuilder.GenericParameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IGenericParameter, GenericParameterBuilder> ),
                 this.Compilation );
 

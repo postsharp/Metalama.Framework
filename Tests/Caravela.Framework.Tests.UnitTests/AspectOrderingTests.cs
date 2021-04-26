@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Immutable;
-using System.Linq;
 using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.AspectOrdering;
-using Microsoft.CodeAnalysis;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
+using System.Collections.Immutable;
+using System.Linq;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests
@@ -16,22 +16,24 @@ namespace Caravela.Framework.Tests.UnitTests
         private static string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
             var compilation = CreateCompilation( code );
+            DiagnosticList diagnostics = new();
 
             var aspectTypeFactory = new AspectTypeFactory( compilation, new AspectDriverFactory( compilation, ImmutableArray<object>.Empty ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() );
-            var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes ).ToImmutableArray();
+            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() ).ToReadOnlyList();
+            var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[] { new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation ) };
-            var onDiagnostics = new Action<Diagnostic>( _ => throw new AssertionFailedException() );
 
             Assert.True(
                 AspectLayerSorter.TrySort(
                     allLayers,
                     dependencies,
-                    onDiagnostics,
+                    diagnostics,
                     out var sortedAspectLayers ) );
+
+            Assert.Empty( diagnostics );
 
             return string.Join(
                 ", ",

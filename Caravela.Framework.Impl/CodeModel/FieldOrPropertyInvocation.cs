@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -25,9 +25,7 @@ namespace Caravela.Framework.Impl.CodeModel
             set => throw new NotSupportedException();
         }
 
-        protected virtual void AssertNoArgument() 
-        {
-        }
+        protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreatePropertyExpression( RuntimeExpression? instance )
         {
@@ -57,8 +55,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return new DynamicMember( expression, this.Member.Type, false );
         }
-
-        public bool HasBase => true;
 
         public IPropertyInvocation Base => throw new NotImplementedException();
     }

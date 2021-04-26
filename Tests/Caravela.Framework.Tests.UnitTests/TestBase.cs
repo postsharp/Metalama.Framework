@@ -1,14 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Project;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Caravela.Framework.Impl.CodeModel;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Tests.UnitTests
 {
@@ -16,12 +18,16 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
-        /// resulting syntax tree actually compiles and results in valid IL. This is slow but neccessary during development, at least, since an incorrect syntax tree
+        /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
         /// can easily be produced.
         /// </summary>
         private const bool _doCodeExecutionTests = true;
 
-        public static CSharpCompilation CreateRoslynCompilation( string? code, string? dependentCode = null, bool ignoreErrors = false )
+        public static CSharpCompilation CreateRoslynCompilation(
+            string? code,
+            string? dependentCode = null,
+            bool ignoreErrors = false,
+            IEnumerable<MetadataReference>? additionalReferences = null )
         {
             static CSharpCompilation CreateEmptyCompilation()
             {
@@ -29,13 +35,14 @@ namespace Caravela.Framework.Tests.UnitTests
                     .WithOptions( new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }
-                            .Select( r => MetadataReference.CreateFromFile(
-                                Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
+                            .Select(
+                                r => MetadataReference.CreateFromFile(
+                                    Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                     .AddReferences(
-                        MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof( Project.CompileTimeAttribute ).Assembly.Location ) );
+                        MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
             }
 
             var mainRoslynCompilation = CreateEmptyCompilation();
@@ -51,6 +58,11 @@ namespace Caravela.Framework.Tests.UnitTests
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
 
+            if ( additionalReferences != null )
+            {
+                mainRoslynCompilation = mainRoslynCompilation.AddReferences( additionalReferences );
+            }
+
             if ( !ignoreErrors )
             {
                 CheckRoslynDiagnostics( mainRoslynCompilation );
@@ -62,6 +74,7 @@ namespace Caravela.Framework.Tests.UnitTests
         public static void CheckRoslynDiagnostics( CSharpCompilation mainRoslynCompilation )
         {
             var diagnostics = mainRoslynCompilation.GetDiagnostics();
+
             if ( diagnostics.Any( diag => diag.Severity >= DiagnosticSeverity.Error ) )
             {
                 var lines = diagnostics.Select( diag => diag.ToString() ).Prepend( "The given code produced errors:" );

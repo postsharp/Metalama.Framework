@@ -9,11 +9,11 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeAssemblyBuilder
     {
-        internal class RemoveInvalidUsingsRewriter : CSharpSyntaxRewriter
+        internal class RemoveInvalidUsingRewriter : CSharpSyntaxRewriter
         {
             private readonly Compilation _compileTimeCompilation;
 
-            public RemoveInvalidUsingsRewriter( Compilation compileTimeCompilation )
+            public RemoveInvalidUsingRewriter( Compilation compileTimeCompilation )
             {
                 this._compileTimeCompilation = compileTimeCompilation;
             }

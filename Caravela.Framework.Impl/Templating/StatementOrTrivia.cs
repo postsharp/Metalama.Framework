@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             this.Content = content;
         }
-        
+
         internal StatementOrTrivia( SyntaxTriviaList content )
         {
             this.Content = content;

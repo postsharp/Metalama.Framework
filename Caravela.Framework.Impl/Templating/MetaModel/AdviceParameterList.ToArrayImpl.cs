@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             public RuntimeExpression CreateExpression()
             {
                 var syntaxGenerator = this._parent.Compilation.SyntaxGenerator;
+
                 var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.TypeExpression( SpecialType.System_Object ),
                     this._parent._parameters.Select(
@@ -33,7 +34,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 return new RuntimeExpression(
                     array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( object[] ) ) );
+                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ) );
             }
         }
     }

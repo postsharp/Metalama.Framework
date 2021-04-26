@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 this.StatementListVariableName = statementListVariableName;
                 this._generatedSymbolNameLocals = generatedSymbolNameLocals;
-                this.Statements = new();
+                this.Statements = new List<StatementSyntax>();
             }
 
             /// <summary>
@@ -37,6 +37,7 @@ namespace Caravela.Framework.Impl.Templating
             public static MetaContext CreateForRunTimeBlock( MetaContext? parentContext, string statementListVariableName )
             {
                 var lexicalScope = parentContext?._generatedSymbolNameLocals ?? new Dictionary<ISymbol, SyntaxToken>();
+
                 return new MetaContext( statementListVariableName, lexicalScope );
             }
 
@@ -48,7 +49,7 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns></returns>
             public static MetaContext CreateHelperContext( MetaContext parentContext )
             {
-                return new MetaContext( parentContext.StatementListVariableName, parentContext._generatedSymbolNameLocals );
+                return new( parentContext.StatementListVariableName, parentContext._generatedSymbolNameLocals );
             }
 
             /// <summary>
@@ -59,7 +60,7 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns></returns>
             public static MetaContext CreateForBuildTimeBlock( MetaContext parentContext )
             {
-                // Build-time blocks are currenty without effect because the dictionary maps resolved symbols, and not symbol
+                // Build-time blocks are currently without effect because the dictionary maps resolved symbols, and not symbol
                 // names. Two declaration of variables with the same name are still different symbols, so we don't strictly
                 // need to split the dictionaries.
                 // However, we're keeping this method for completeness and clarity.

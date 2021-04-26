@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -14,6 +14,8 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public interface IAspectPipelineContext
     {
+        // TODO: When called from a diagnostic suppressor, we don't have a way to report diagnostics.
+
         CancellationToken CancellationToken { get; }
 
         CSharpCompilation Compilation { get; }
@@ -23,9 +25,6 @@ namespace Caravela.Framework.Impl.Pipeline
         IList<ResourceDescription> ManifestResources { get; }
 
         IBuildOptions BuildOptions { get; }
-
-        // TODO: When called from a diagnostic suppressor, we don't have a way to report diagnostics.
-        void ReportDiagnostic( Diagnostic diagnostic );
 
         bool HandleExceptions { get; }
     }

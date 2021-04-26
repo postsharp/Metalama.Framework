@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Impl.Serialization;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             var serializer = new DateTimeSerializer();
             var dt = dateTime;
-            Assert.Equal( "System.DateTime.FromBinary(" + dt.ToBinary().ToString() + "L)", serializer.Serialize( dt ).ToString() );
+            Assert.Equal( "System.DateTime.FromBinary(" + dt.ToBinary() + "L)", serializer.Serialize( dt ).ToString() );
         }
     }
 }

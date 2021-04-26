@@ -26,18 +26,12 @@ namespace Caravela.Framework.Impl.Collections
         private ValueCollection? _valueCollection;
 
         public SkipListIndexedDictionary()
-            : this( null, 0 )
-        {
-        }
+            : this( null, 0 ) { }
 
         internal SkipListIndexedDictionary( int seed )
-            : this( null, seed )
-        {
-        }
+            : this( null, seed ) { }
 
-        public SkipListIndexedDictionary( IComparer<TKey>? comparer ) : this( comparer, 0 )
-        {
-        }
+        public SkipListIndexedDictionary( IComparer<TKey>? comparer ) : this( comparer, 0 ) { }
 
         public SkipListIndexedDictionary( IComparer<TKey>? comparer, int seed )
         {
@@ -80,6 +74,7 @@ namespace Caravela.Framework.Impl.Collections
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex )
         {
             var i = arrayIndex;
+
             foreach ( var value in this )
             {
                 array[i] = value;
@@ -96,7 +91,6 @@ namespace Caravela.Framework.Impl.Collections
         /// <returns>True if value is found in the SkipList; false otherwise.</returns>
         public bool ContainsKey( TKey value )
         {
-
             var current = this._head;
 
             // first, determine the nodes that need to be updated at each level
@@ -105,11 +99,13 @@ namespace Caravela.Framework.Impl.Collections
                 while ( current.GetNeighbor( i ) != null )
                 {
                     var results = this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key!, value );
+
                     if ( results == 0 )
                     {
                         return true; // we found the item
                     }
-                    else if ( results < 0 )
+
+                    if ( results < 0 )
                     {
                         current = current.GetNeighbor( i )!.TargetNode; // move on to the next neighbor
                     }
@@ -147,12 +143,11 @@ namespace Caravela.Framework.Impl.Collections
                 if ( replace )
                 {
                     current.GetNeighbor( 0 )!.TargetNode.Value = value;
+
                     return -1;
                 }
-                else
-                {
-                    throw new ArgumentException( "An element with the same key already exists." );
-                }
+
+                throw new ArgumentException( "An element with the same key already exists." );
             }
 
             // create a new node
@@ -174,6 +169,7 @@ namespace Caravela.Framework.Impl.Collections
                 if ( i < newNode.Height )
                 {
                     var replacedLink = update.Node.GetNeighbor( i );
+
                     if ( replacedLink != null )
                     {
                         newNode.SetNeighbor( i, new NodeLink( replacedLink.TargetNode, 1 + replacedLink.Width - update.Distance ) );
@@ -202,7 +198,6 @@ namespace Caravela.Framework.Impl.Collections
             throw new NotImplementedException();
 
 #if FALSE
-            
             var updates = this.BuildUpdateTable(value, out _);
             var current = updates[0].Node.GetNeighbor(0);
 
@@ -257,13 +252,13 @@ namespace Caravela.Framework.Impl.Collections
             if ( this.TryFindNode( key, out var node, out _ ) )
             {
                 value = node.Value!;
+
                 return true;
             }
-            else
-            {
-                value = default;
-                return false;
-            }
+
+            value = default;
+
+            return false;
         }
 
         public bool TryGetClosestValue( TKey key, [NotNullWhen( true )] out TValue? value )
@@ -271,16 +266,16 @@ namespace Caravela.Framework.Impl.Collections
             if ( this.TryFindNode( key, out var node, out _, false ) )
             {
                 value = node.Value!;
+
                 return true;
             }
-            else
-            {
-                value = default;
-                return false;
-            }
+
+            value = default;
+
+            return false;
         }
 
-        public TValue this[TKey key]
+        public TValue this[ TKey key ]
         {
             get => this.Get( key );
 
@@ -293,10 +288,8 @@ namespace Caravela.Framework.Impl.Collections
             {
                 return node.Value;
             }
-            else
-            {
-                throw new KeyNotFoundException();
-            }
+
+            throw new KeyNotFoundException();
         }
 
         public void Set( TKey key, TValue value ) => this.AddOrUpdate( key, value, true );
@@ -338,6 +331,7 @@ namespace Caravela.Framework.Impl.Collections
             for ( var i = height - 1; i >= 0; i-- )
             {
                 var width = 0;
+
                 while ( current.GetNeighbor( i ) != null && this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key, key ) < 0 )
                 {
                     width += current.GetNeighbor( i )!.Width;
@@ -345,6 +339,7 @@ namespace Caravela.Framework.Impl.Collections
                 }
 
                 distanceFromHead += width;
+
                 for ( var j = height - 1; j > i; j-- )
                 {
                     updates[j].Distance += width;
@@ -384,6 +379,7 @@ namespace Caravela.Framework.Impl.Collections
             for ( var i = this._head.Height - 1; i >= 0; i-- )
             {
                 int comparisonResult;
+
                 while ( current.GetNeighbor( i ) != null && (comparisonResult = this._comparer.Compare( current.GetNeighbor( i )!.TargetNode.Key, key )) <= 0 )
                 {
                     position += current.GetNeighbor( i )!.Width;
@@ -393,6 +389,7 @@ namespace Caravela.Framework.Impl.Collections
                     {
                         node = current;
                         position -= 1;
+
                         return true;
                     }
                 }
@@ -402,15 +399,15 @@ namespace Caravela.Framework.Impl.Collections
             {
                 node = null;
                 position = -1;
+
                 return false;
             }
-            else
-            {
-                // We did not find the exact item, but we would one before.
-                node = current;
-                position--;
-                return true;
-            }
+
+            // We did not find the exact item, but we would one before.
+            node = current;
+            position--;
+
+            return true;
         }
 
         /// <summary>
@@ -426,12 +423,12 @@ namespace Caravela.Framework.Impl.Collections
             // copy the values from the skip list to array
             if ( array == null )
             {
-                throw new ArgumentNullException( nameof( array ) );
+                throw new ArgumentNullException( nameof(array) );
             }
 
             if ( index < 0 )
             {
-                throw new ArgumentOutOfRangeException( nameof( index ) );
+                throw new ArgumentOutOfRangeException( nameof(index) );
             }
 
             if ( index >= array.Length )
@@ -446,6 +443,7 @@ namespace Caravela.Framework.Impl.Collections
 
             var current = this._head.GetNeighbor( 0 );
             var i = 0;
+
             while ( current != null )
             {
                 array[i + index] = current.TargetNode.Key;
@@ -461,9 +459,11 @@ namespace Caravela.Framework.Impl.Collections
         {
             // enumerate through the skip list one element at a time
             var current = this._head.GetNeighbor( 0 );
+
             while ( current != null )
             {
                 yield return new KeyValuePair<TKey, TValue>( current.TargetNode.Key, current.TargetNode.Value );
+
                 current = current.TargetNode.GetNeighbor( 0 );
             }
         }
@@ -494,9 +494,9 @@ namespace Caravela.Framework.Impl.Collections
         {
             var current = this._head;
             var sb = new StringBuilder();
+
             while ( current != null )
             {
-
                 sb.Append( "[ " );
                 sb.Append( current );
                 sb.Append( "];  " );
@@ -520,10 +520,8 @@ namespace Caravela.Framework.Impl.Collections
             {
                 return index;
             }
-            else
-            {
-                return -1;
-            }
+
+            return -1;
         }
 
         public int IndexOf( KeyValuePair<TKey, TValue> item ) => this.IndexOf( item.Key );
@@ -536,14 +534,15 @@ namespace Caravela.Framework.Impl.Collections
         {
             if ( index < 0 || index >= this.Count )
             {
-                throw new ArgumentOutOfRangeException( nameof( index ) );
+                throw new ArgumentOutOfRangeException( nameof(index) );
             }
 
             var node = this.GetNodeByIndex( index );
+
             return new KeyValuePair<TKey, TValue>( node.Key, node.Value );
         }
 
-        public KeyValuePair<TKey, TValue> this[int index]
+        public KeyValuePair<TKey, TValue> this[ int index ]
         {
             get => this.GetAt( index );
             set => throw new NotSupportedException();
@@ -578,7 +577,7 @@ namespace Caravela.Framework.Impl.Collections
             {
                 if ( height <= 0 )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( height ) );
+                    throw new ArgumentOutOfRangeException( nameof(height) );
                 }
 
                 this.Neighbors = new NodeList( height );
@@ -590,15 +589,16 @@ namespace Caravela.Framework.Impl.Collections
 
             public TValue Value { get; set; }
 
-            private NodeList Neighbors { get; init; }
+            private NodeList Neighbors { get; }
 
             /// <summary>
             /// Increases the height of the SkipListNode by 1.
             /// </summary>
-            internal void IncrementHeight() =>
+            internal void IncrementHeight()
+                =>
 
-                // Increase height by 1
-                this.Neighbors.IncrementHeight();
+                    // Increase height by 1
+                    this.Neighbors.IncrementHeight();
 
             /*
             /// <summary>
@@ -630,6 +630,7 @@ namespace Caravela.Framework.Impl.Collections
                 var sb = new StringBuilder();
 
                 sb.AppendFormat( CultureInfo.InvariantCulture, "Key={{{0}}}, Height={{{1}}}, Nodes={{", this.Key, this.Height );
+
                 for ( var i = 0; i < this.Height; i++ )
                 {
                     if ( i != 0 )
@@ -650,6 +651,7 @@ namespace Caravela.Framework.Impl.Collections
                 }
 
                 sb.Append( '}' );
+
                 return sb.ToString();
             }
         }
@@ -673,7 +675,7 @@ namespace Caravela.Framework.Impl.Collections
                 {
                     if ( value == 0 )
                     {
-                        throw new ArgumentOutOfRangeException( nameof( value ) );
+                        throw new ArgumentOutOfRangeException( nameof(value) );
                     }
 
                     this._width = value;
@@ -689,12 +691,11 @@ namespace Caravela.Framework.Impl.Collections
         /// </summary>
         private sealed class NodeList : List<NodeLink?>
         {
-
             public NodeList( int height )
             {
                 if ( height <= 0 )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( height ) );
+                    throw new ArgumentOutOfRangeException( nameof(height) );
                 }
 
                 // Add the specified number of items
@@ -707,10 +708,11 @@ namespace Caravela.Framework.Impl.Collections
             /// <summary>
             /// Increases the size of the SkipListNodeList by one, adding a default SkipListNode.
             /// </summary>
-            internal void IncrementHeight() =>
+            internal void IncrementHeight()
+                =>
 
-                // add a dummy entry
-                this.Add( null );
+                    // add a dummy entry
+                    this.Add( null );
 
             /*
             /// <summary>
@@ -741,9 +743,11 @@ namespace Caravela.Framework.Impl.Collections
             {
                 // enumerate through the skip list one element at a time
                 var current = this._parent._head.GetNeighbor( 0 );
+
                 while ( current != null )
                 {
                     yield return current.TargetNode.Value;
+
                     current = current.TargetNode.GetNeighbor( 0 );
                 }
             }
@@ -753,6 +757,7 @@ namespace Caravela.Framework.Impl.Collections
             public void CopyTo( TValue[] array, int arrayIndex )
             {
                 var i = arrayIndex;
+
                 foreach ( var value in this )
                 {
                     array[i] = value;
@@ -762,7 +767,7 @@ namespace Caravela.Framework.Impl.Collections
 
             public int Count => this._parent.Count;
 
-            public TValue this[int index]
+            public TValue this[ int index ]
             {
                 get => this._parent[index].Value;
                 set => throw new NotSupportedException();

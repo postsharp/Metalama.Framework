@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Linq;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -17,6 +17,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         protected Advice ParentAdvice { get; }
 
         public bool IsSealed { get; set; }
+
+        public bool IsReadOnly { get; set; }
 
         public bool IsOverride { get; set; }
 
@@ -52,7 +54,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public abstract MemberDeclarationSyntax InsertPositionNode { get; }
 
         // TODO: This is temporary.
-        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree =>
-            ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
+        SyntaxTree ISyntaxTreeTransformation.TargetSyntaxTree => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.First().SyntaxTree;
     }
 }

@@ -12,11 +12,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void AddService<T>( T service )
             where T : notnull
-            => this._services.Add( typeof( T ), service );
+            => this._services.Add( typeof(T), service );
 
         public object? GetService( Type serviceType )
         {
             _ = this._services.TryGetValue( serviceType, out var instance );
+
             return instance;
         }
     }

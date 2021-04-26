@@ -14,8 +14,16 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             var serializer = new StringSerializer();
             Assert.Equal( "\"Hel\\0lo\\\"\"", serializer.Serialize( "Hel\0lo\"" ).NormalizeWhitespace().ToString() );
-            Assert.Equal( "\"Hello,\\n world!\"", serializer.Serialize( @"Hello,
- world!" ).NormalizeWhitespace().ToString().Replace( "\\r", "" ) );
+
+            Assert.Equal(
+                "\"Hello,\\n world!\"",
+                serializer.Serialize(
+                        @"Hello,
+ world!" )
+                    .NormalizeWhitespace()
+                    .ToString()
+                    .Replace( "\\r", "" ) );
+
             Assert.Equal( "\"Hello, world!\"", serializer.Serialize( $@"Hello, {"world"}!" ).NormalizeWhitespace().ToString() );
         }
     }

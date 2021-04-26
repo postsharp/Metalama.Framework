@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Linq;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -15,10 +15,10 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly INamedTypeSymbol? _aspectDriverSymbol;
 
-            public PrepareRunTimeAssemblyRewriter( ISymbolClassifier symbolClassifier, Compilation runTimeCompilation )
-                : base( symbolClassifier, runTimeCompilation )
+            public PrepareRunTimeAssemblyRewriter( Compilation runTimeCompilation )
+                : base( runTimeCompilation )
             {
-                this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
+                this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )

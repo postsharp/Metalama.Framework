@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
 using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
+using System;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
@@ -79,8 +79,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             var serializer = new ULongSerializer();
             Assert.Equal( "42UL", serializer.Serialize( 42 ).ToString() );
-            Assert.Equal( ulong.MaxValue.ToString() + "UL", serializer.Serialize( ulong.MaxValue ).ToString() );
-            Assert.Equal( ulong.MinValue.ToString() + "UL", serializer.Serialize( ulong.MinValue ).ToString() );
+            Assert.Equal( ulong.MaxValue + "UL", serializer.Serialize( ulong.MaxValue ).ToString() );
+            Assert.Equal( ulong.MinValue + "UL", serializer.Serialize( ulong.MinValue ).ToString() );
         }
 
         [Fact]
@@ -88,8 +88,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             var serializer = new UIntSerializer();
             Assert.Equal( "42U", serializer.Serialize( 42 ).ToString() );
-            Assert.Equal( uint.MaxValue.ToString() + "U", serializer.Serialize( uint.MaxValue ).ToString() );
-            Assert.Equal( uint.MinValue.ToString() + "U", serializer.Serialize( uint.MinValue ).ToString() );
+            Assert.Equal( uint.MaxValue + "U", serializer.Serialize( uint.MaxValue ).ToString() );
+            Assert.Equal( uint.MinValue + "U", serializer.Serialize( uint.MinValue ).ToString() );
         }
 
         [Fact]

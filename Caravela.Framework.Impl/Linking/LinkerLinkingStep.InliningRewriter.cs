@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
@@ -26,7 +26,12 @@ namespace Caravela.Framework.Impl.Linking
             private readonly string? _returnVariableName;
             private readonly int? _returnLabelId;
 
-            public InliningRewriter( LinkerAnalysisRegistry referenceRegistry, SemanticModel semanticModel, IMethodSymbol contextSymbol, string? returnVariableName = null, int? returnLabelId = null )
+            public InliningRewriter(
+                LinkerAnalysisRegistry referenceRegistry,
+                SemanticModel semanticModel,
+                IMethodSymbol contextSymbol,
+                string? returnVariableName = null,
+                int? returnLabelId = null )
             {
                 this._analysisRegistry = referenceRegistry;
                 this._semanticModel = semanticModel;
@@ -219,7 +224,11 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol.AssertNotNull();
 
                 // If the body is inlineable, inline it.
-                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation.AssertNotNull() );
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference(
+                    this._contextSymbol,
+                    calleeSymbol,
+                    annotation.AssertNotNull() );
+
                 if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // TODO: Inlineability also depends on parameters passed. 
@@ -234,7 +243,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return node.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
+                    return node.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, node.Expression, resolvedSymbol ), node.ArgumentList );
                 }
             }
 
@@ -253,7 +262,11 @@ namespace Caravela.Framework.Impl.Linking
                 var calleeSymbol = this._semanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
 
                 // We are on an assignment of a method return value to a variable.      
-                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference( this._contextSymbol, calleeSymbol, annotation.AssertNotNull() );
+                var resolvedSymbol = (IMethodSymbol) this._analysisRegistry.ResolveSymbolReference(
+                    this._contextSymbol,
+                    calleeSymbol,
+                    annotation.AssertNotNull() );
+
                 if ( this._analysisRegistry.IsBodyInlineable( resolvedSymbol ) )
                 {
                     // TODO: Inlineability also depends on parameters passed. 
@@ -264,12 +277,17 @@ namespace Caravela.Framework.Impl.Linking
                     //       This is satisfied for all proceed().
 
                     // Inline the method body.
-                    return this.GetInlinedMethodBody( resolvedSymbol, this.GetAssignmentVariableName( node.Left ) );
+                    return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
                 else
                 {
                     // Replace with invocation of the correct override.
-                    return node.Update( node.Left, node.OperatorToken, invocation.Update( this.ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ), invocation.ArgumentList ) );
+                    return node.Update(
+                        node.Left,
+                        node.OperatorToken,
+                        invocation.Update(
+                            ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                            invocation.ArgumentList ) );
                 }
             }
 
@@ -287,7 +305,8 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: Replace with unified annotation for prettification rewriter.
                 rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
 
-                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol ) || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
+                if ( this._analysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
+                     || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )
                 {
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;
@@ -298,9 +317,9 @@ namespace Caravela.Framework.Impl.Linking
                     // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
                     return
                         Block(
-                            rewrittenBlock.AssertNotNull(),
-                            LabeledStatement( this.GetReturnLabelName( labelId ), EmptyStatement() ) )
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                                rewrittenBlock.AssertNotNull(),
+                                LabeledStatement( GetReturnLabelName( labelId ), EmptyStatement() ) )
+                            .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                 }
             }
 
@@ -311,13 +330,16 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="expression">Call expression.</param>
             /// <param name="methodSymbol"></param>
             /// <returns></returns>
-            private ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
+            private static ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
                 var memberAccess = (MemberAccessExpressionSyntax) expression;
 
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
                 {
-                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
+                    return memberAccess.Update(
+                        memberAccess.Expression,
+                        memberAccess.OperatorToken,
+                        IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
                 }
                 else
                 {
@@ -330,6 +352,7 @@ namespace Caravela.Framework.Impl.Linking
                 // TODO: ref return etc.
 
                 var linkerAnnotation = node.Expression?.GetLinkerAnnotation();
+
                 if ( linkerAnnotation != null )
                 {
                     // This is an annotated invocation. By visiting the expression, we will either get a invocation or a block if the invocation target is inlineable.
@@ -369,15 +392,15 @@ namespace Caravela.Framework.Impl.Linking
                             {
                                 return
                                     Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( this._returnVariableName.AssertNotNull() ),
-                                                node.Expression ) ),
-                                        GotoStatement(
-                                            SyntaxKind.GotoStatement,
-                                            IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) ) )
-                                    .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                    IdentifierName( this._returnVariableName.AssertNotNull() ),
+                                                    node.Expression ) ),
+                                            GotoStatement(
+                                                SyntaxKind.GotoStatement,
+                                                IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) ) )
+                                        .WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
                             }
                         }
                         else
@@ -398,7 +421,7 @@ namespace Caravela.Framework.Impl.Linking
                                 return
                                     GotoStatement(
                                         SyntaxKind.GotoStatement,
-                                        IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                                        IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
                             }
                         }
                         else
@@ -407,7 +430,7 @@ namespace Caravela.Framework.Impl.Linking
                             return
                                 GotoStatement(
                                     SyntaxKind.GotoStatement,
-                                    IdentifierName( this.GetReturnLabelName( this._returnLabelId.Value ) ) );
+                                    IdentifierName( GetReturnLabelName( this._returnLabelId.Value ) ) );
                         }
                     }
                 }
@@ -424,7 +447,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private string GetAssignmentVariableName( ExpressionSyntax left )
+            private static string GetAssignmentVariableName( ExpressionSyntax left )
             {
                 switch ( left.Kind() )
                 {
@@ -439,7 +462,7 @@ namespace Caravela.Framework.Impl.Linking
             private int GetNextReturnLabelId() => (this._returnLabelId ?? 0) + 1;
 
             // TODO: Create more contextual return label names.
-            private string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
+            private static string GetReturnLabelName( int returnLabelId ) => $"__aspect_return_{returnLabelId}";
         }
     }
 }

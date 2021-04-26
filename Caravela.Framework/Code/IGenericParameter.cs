@@ -8,7 +8,6 @@ namespace Caravela.Framework.Code
     /// <summary>
     /// Represents a generic parameter of a method or type.
     /// </summary>
-    // ReSharper disable once PossibleInterfaceMemberAmbiguity
     public interface IGenericParameter : ICodeElement, IType
     {
         /// <summary>

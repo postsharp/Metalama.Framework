@@ -1,11 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
+using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
@@ -13,30 +9,38 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
-        private static readonly string[] vs = new[] { "IDE001" };
-        private static readonly string[] _supportedSuppressions = vs;
+        private static readonly string[] _vs = { "CS1998", "IDE0051" };
+        private static readonly string[] _supportedSuppressions = _vs;
 
-        private static ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
-            = ImmutableDictionary.Create<string, SuppressionDescriptor>( StringComparer.OrdinalIgnoreCase ).AddRange(
-                _supportedSuppressions.Select( id => new KeyValuePair<string, SuppressionDescriptor>(
-                    id, new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
+        private static readonly ImmutableDictionary<string, SuppressionDescriptor> _supportedSuppressionsDictionary
+            = ImmutableDictionary.Create<string, SuppressionDescriptor>( StringComparer.OrdinalIgnoreCase )
+                .AddRange(
+                    _supportedSuppressions.Select(
+                        id => new KeyValuePair<string, SuppressionDescriptor>(
+                            id,
+                            new SuppressionDescriptor( "Caravela." + id, id, "Caravela" ) ) ) );
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
         {
-            if ( Compiler.CaravelaCompilerInfo.IsActive ||
-                 context.Compilation is not CSharpCompilation )
+            if ( CaravelaCompilerInfo.IsActive ||
+                 context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
 
             ReportSuppressions(
-                (CSharpCompilation) context.Compilation,
+                compilation,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
                 new BuildOptions( new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ) ),
@@ -58,26 +62,21 @@ namespace Caravela.Framework.Impl.DesignTime
             BuildOptions options,
             CancellationToken cancellationToken )
         {
-            if ( !DesignTimeAspectPipelineCache.TryGet( compilation, out var pipelineResult ) )
-            {
-                using DesignTimeAspectPipeline pipeline = new( new DesignTimeAspectPipelineContext(
-                    compilation,
-                    options,
-                    null,
-                    cancellationToken ) );
+            // Execute the pipeline.
+            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+                compilation,
+                options,
+                cancellationToken );
 
-                _ = pipeline.TryExecute( out pipelineResult );
-
-                DesignTimeAspectPipelineCache.Add( compilation, pipelineResult );
-            }
-
+            // Report suppressions.
             if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
             {
                 var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
                     s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );
 
                 var groupedSuppressions = ImmutableMultiValueDictionary<ISymbol, ScopedSuppression>.Create(
-                    designTimeSuppressions, s => ((ISdkCodeElement) s.CodeElement).Symbol! );
+                    designTimeSuppressions,
+                    s => ((ISdkCodeElement) s.CodeElement).Symbol! );
 
                 foreach ( var diagnostic in reportedDiagnostics )
                 {
@@ -86,8 +85,12 @@ namespace Caravela.Framework.Impl.DesignTime
                         continue;
                     }
 
+#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
                     var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
-                    var symbol = semanticModel.GetEnclosingSymbol( diagnostic.Location.SourceSpan.Start );
+#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
+
+                    var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
 
                     if ( symbol == null )
                     {

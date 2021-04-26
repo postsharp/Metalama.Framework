@@ -5,7 +5,6 @@ using Caravela.Framework.Code;
 
 namespace Caravela.Framework.Diagnostics
 {
-
     /// <summary>
     /// Exposes a <see cref="DiagnosticLocation"/> property that determines the location of a user-code diagnostic.
     /// This interface is implemented by <see cref="ICodeElement"/>.

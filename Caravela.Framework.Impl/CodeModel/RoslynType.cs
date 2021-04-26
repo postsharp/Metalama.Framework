@@ -22,8 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Symbol = symbol;
         }
 
-        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) =>
-            this.Symbol.ToDisplayString( format.ToRoslyn() );
+        public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public abstract TypeKind TypeKind { get; }
 

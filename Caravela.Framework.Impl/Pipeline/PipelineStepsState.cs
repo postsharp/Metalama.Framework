@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
@@ -10,6 +8,8 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
     /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
     /// </summary>
-    internal class PipelineStepsState : IPipelineStepsResult
+    internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
     {
         private readonly SkipListIndexedDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
@@ -37,9 +37,9 @@ namespace Caravela.Framework.Impl.Pipeline
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
         public PipelineStepsState(
-            IEnumerable<OrderedAspectLayer> aspectLayers,
+            IReadOnlyList<OrderedAspectLayer> aspectLayers,
             CompilationModel inputCompilation,
-            IReadOnlyList<IAspectSource> inputAspectSources)
+            IReadOnlyList<IAspectSource> inputAspectSources )
         {
             this.Compilation = inputCompilation;
 
@@ -65,7 +65,6 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public void Execute()
         {
-
             using var enumerator = this._steps.GetEnumerator();
 
             while ( enumerator.MoveNext() )
@@ -78,6 +77,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )
         {
             var success = true;
+
             foreach ( var aspectSource in aspectSources )
             {
                 foreach ( var aspectType in aspectSource.AspectTypes )
@@ -91,14 +91,15 @@ namespace Caravela.Framework.Impl.Pipeline
                     }
                     else
                     {
-
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
                             this._diagnostics.ReportDiagnostic(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
                                     this._currentStep!.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                                     (this._currentStep.AspectLayer.AspectType.Type, aspectType) ) );
+
                             success = false;
+
                             continue;
                         }
 
@@ -125,6 +126,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     // Cannot add a step before the current one.
                     step = null;
+
                     return false;
                 }
             }
@@ -162,7 +164,9 @@ namespace Caravela.Framework.Impl.Pipeline
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
                             this._currentStep.AspectLayer.AspectType.Type.GetDiagnosticLocation(),
                             (this._currentStep.AspectLayer.AspectType.Type, advice.TargetDeclaration) ) );
+
                     success = false;
+
                     continue;
                 }
 
@@ -177,6 +181,7 @@ namespace Caravela.Framework.Impl.Pipeline
             foreach ( var aspectInstance in aspectInstances )
             {
                 var depth = this.Compilation.GetDepth( aspectInstance.CodeElement );
+
                 if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectType ), depth, true, out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
@@ -193,7 +198,9 @@ namespace Caravela.Framework.Impl.Pipeline
             this._diagnostics.SuppressDiagnostics( suppressions );
         }
 
-        public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations ) =>
-            this._nonObservableTransformations.AddRange( transformations );
+        public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
+            => this._nonObservableTransformations.AddRange( transformations );
+
+        public void ReportDiagnostic( Diagnostic diagnostic ) => this._diagnostics.ReportDiagnostic( diagnostic );
     }
 }

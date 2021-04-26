@@ -12,7 +12,10 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
     internal static class FormatDefinitions
     {
         public const string CompileTimeName = "Caravela/CompileTime";
-        public const string SpecialName = "Caravela/Special";
+        public const string DynamicName = "Caravela/Dynamic";
+        public const string TemplateKeywordName = "Caravela/TemplateKeyword";
+        public const string CompileTimeVariableName = "Caravela/CompileTimeVariable";
+        private const double _backgroundOpacity = 0.3;
 
 #pragma warning disable SA1401 // Fields should be private
 
@@ -21,8 +24,16 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         internal static ClassificationTypeDefinition? CompileTime;
 
         [Export( typeof( ClassificationTypeDefinition ) )]
-        [Name( SpecialName )]
-        internal static ClassificationTypeDefinition? Special;
+        [Name( CompileTimeVariableName )]
+        internal static ClassificationTypeDefinition? CompileTimeVariable;
+
+        [Export( typeof( ClassificationTypeDefinition ) )]
+        [Name( DynamicName )]
+        internal static ClassificationTypeDefinition? Dynamic;
+
+        [Export( typeof( ClassificationTypeDefinition ) )]
+        [Name( TemplateKeywordName )]
+        internal static ClassificationTypeDefinition? TemplateKeyword;
 
 #pragma warning restore SA1401 // Fields should be private
 
@@ -34,33 +45,67 @@ namespace Caravela.Framework.DesignTime.Vsix.Classifier
         private sealed class CompileTimeFormatDefinition : FormatDefinition
         {
             public CompileTimeFormatDefinition()
-                : base( $"Compile-Time Code", background: Colors.LightSteelBlue, backgroundOpacity: 0.5 )
+                : base( $"Compile-Time Code", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity )
             {
             }
         }
 
         [Export( typeof( EditorFormatDefinition ) )]
-        [Name( SpecialName )]
+        [Name( CompileTimeVariableName )]
         [UserVisible( true )]
-        [ClassificationType( ClassificationTypeNames = SpecialName )]
+        [ClassificationType( ClassificationTypeNames = CompileTimeVariableName )]
         [Order( Before = Priority.High )]
-        private sealed class SpecialFormatDefinition : FormatDefinition
+        private sealed class CompileTimeVariableFormatDefinition : FormatDefinition
         {
-            public SpecialFormatDefinition()
-                : base( $"Magic Template Code", background: Colors.Yellow )
+            public CompileTimeVariableFormatDefinition()
+                : base( $"Compile-Time Variable", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, isItalic: true )
             {
             }
         }
-        
+
+        [Export( typeof( EditorFormatDefinition ) )]
+        [Name( DynamicName )]
+        [UserVisible( true )]
+        [ClassificationType( ClassificationTypeNames = DynamicName )]
+        [Order( Before = Priority.High )]
+        private sealed class DynamicFormatDefinition : FormatDefinition
+        {
+            public DynamicFormatDefinition()
+                : base( $"Dynamic", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, foreground: Colors.Green )
+            {
+            }
+        }
+
+        [Export( typeof( EditorFormatDefinition ) )]
+        [Name( TemplateKeywordName )]
+        [UserVisible( true )]
+        [ClassificationType( ClassificationTypeNames = TemplateKeywordName )]
+        [Order( Before = Priority.High )]
+        private sealed class TemplateKeywordFormatDefinition : FormatDefinition
+        {
+            public TemplateKeywordFormatDefinition()
+                : base( $"Template keyword", background: Colors.LightSteelBlue, backgroundOpacity: _backgroundOpacity, foreground: Colors.Fuchsia )
+            {
+            }
+        }
+
         private abstract class FormatDefinition : ClassificationFormatDefinition
         {
 
-            protected FormatDefinition( string displayName,  Color? background = null, double? backgroundOpacity = null ) : base()
+            protected FormatDefinition( string displayName,  Color? background = null, double? backgroundOpacity = null, Color? foreground = null, bool? isItalic = false ) : base()
             {
-                // Foreground color and font weight is overwritten and I didn't find an order/priority that would prevent that.
+                // Foreground color and font weight is overwritten for method names and I didn't find an order/priority that would prevent that.
                 // Specifically, color/font for static symbols is overwritten.
 
-                this.ForegroundCustomizable = false;
+                if ( foreground != null )
+                {
+                    this.ForegroundCustomizable = true;
+                    this.ForegroundColor = foreground;
+                    this.ForegroundBrush = new SolidColorBrush( foreground.Value );
+                }
+
+                this.IsItalic = isItalic;
+
                 this.DisplayName = displayName;
                 this.BackgroundColor = background;
                 this.BackgroundOpacity = backgroundOpacity;

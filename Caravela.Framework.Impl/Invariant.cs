@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Collections;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #endif
@@ -66,10 +68,10 @@ namespace Caravela.Framework.Impl
         public static T AssertNotNull<T>( this T? obj )
             where T : class
         {
-#if DEBUG            
+#if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must no be not null." );
             }
 #endif
 
@@ -88,10 +90,10 @@ namespace Caravela.Framework.Impl
         public static T AssertNotNull<T>( this T? obj )
             where T : struct
         {
-#if DEBUG            
+#if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( $"The reference to {typeof( T ).Name} must no be not null." );
+                throw new AssertionFailedException( $"The reference to {typeof(T).Name} must no be not null." );
             }
 #endif
 
@@ -100,29 +102,34 @@ namespace Caravela.Framework.Impl
 
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif         
+#endif
         public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
             where T : class
         {
 #if DEBUG
             if ( items == null )
             {
-                throw new AssertionFailedException( $"The enumeration must no be not null." );
+                throw new AssertionFailedException( "The enumeration must no be not null." );
             }
 
             var i = 0;
-            foreach ( var item in items )
+
+            var list = items.ToReadOnlyList();
+
+            foreach ( var item in list )
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"The {i}-th {typeof( T ).Name} must no be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must no be not null." );
                 }
 
                 i++;
             }
-#endif
 
-            return items!;
+            return list!;
+#else
+       return items!;
+#endif
         }
     }
 }

@@ -3,10 +3,11 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Caravela.Framework.Impl.Templating
 {
+#pragma warning disable SA1118 // Allow multi-line parameters.
+
     internal static class TemplatingDiagnosticDescriptors
     {
         // Reserved range 100-199
@@ -49,8 +50,10 @@ namespace Caravela.Framework.Impl.Templating
         internal static readonly StrongDiagnosticDescriptor<string> SplitVariables
             = new(
                 "CR0105",
-                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
-                "Local variables {0} cannot be declared in the same declaration. Split them into different declarations; one for run-time variables, and one for compile-time variables",
+                "Build-time and run-time local variables cannot be mixed in the same declaration. Split them into different declarations; "
+                + "one for run-time variables, and one for compile-time variables",
+                "Local variables {0} cannot be declared in the same declaration. "
+                + "Split them into different declarations; one for run-time variables, and one for compile-time variables",
                 _category,
                 DiagnosticSeverity.Error );
 
@@ -69,10 +72,5 @@ namespace Caravela.Framework.Impl.Templating
                 "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 DiagnosticSeverity.Error );
-
-        public static Diagnostic CreateLanguageFeatureIsNotSupported( SyntaxNode node )
-        {
-            return LanguageFeatureIsNotSupported.CreateDiagnostic( node.GetLocation(), node.Kind().ToString() );
-        }
     }
 }
