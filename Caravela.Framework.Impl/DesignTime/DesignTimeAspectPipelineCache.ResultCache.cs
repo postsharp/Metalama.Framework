@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -149,11 +149,38 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 if ( _syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
                 {
-                    if ( !syntaxTree.GetText().ContentEquals( cachedResult.SyntaxTree.GetText() ) )
+                    // Check if the source text has changed.
+                    if ( syntaxTree != cachedResult.SyntaxTree )
                     {
-                        _ = _syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
+                        if ( !syntaxTree.GetText().ContentEquals( cachedResult.SyntaxTree.GetText() ) )
+                        {
+                            // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
+                            var changedSyntaxNodes =
+                                syntaxTree.GetChangedSpans( cachedResult.SyntaxTree ).Select( span => syntaxTree.GetRoot().FindNode( span ) );
+
+                            if ( changedSyntaxNodes.Any( x => !IsIrrelevantChange(x) ) )
+                            {
+                                _ = _syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
+
+                                return;
+                            }
+                        }
+
+                        // Update the syntax tree so the next comparison is less demanding.
+                        cachedResult.SyntaxTree = syntaxTree;
                     }
                 }
+
+
+                // Determines if a change in a node can possibly affect a change in symbols.
+                static bool IsIrrelevantChange( SyntaxNode node )
+                    => node.Parent switch
+                    {
+                        BaseMethodDeclarationSyntax method => node == method.Body || node == method.ExpressionBody,
+                        AccessorDeclarationSyntax accessor => node == accessor.Body || node == accessor.ExpressionBody,
+                        VariableDeclaratorSyntax field => node == field.Initializer?.Value,
+                        _ => node.Parent != null && IsIrrelevantChange( node.Parent )
+                    };
             }
 
             public static void Clear()

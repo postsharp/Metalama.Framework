@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal class SyntaxTreeResult
     {
-        public SyntaxTree SyntaxTree { get; }
+        public SyntaxTree SyntaxTree { get; set; }
 
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
