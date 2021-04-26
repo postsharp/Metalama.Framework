@@ -93,6 +93,7 @@ class A : Attribute
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
             var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, roslynCompilation );
+            Assert.True( loader.TryGenerateCompileTimeProject( compilation.RoslynCompilation, new DiagnosticList(), out _ ) );
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
@@ -130,7 +131,8 @@ class ReferencingClass
             var serviceProvider = GetServiceProvider();
             var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, roslynCompilation );
 
-            loader.GetCompileTimeProject( roslynCompilation.Assembly );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader.TryGenerateCompileTimeProject( roslynCompilation, diagnosticList, out _ ) );
         }
 
         [Fact]
@@ -187,7 +189,9 @@ class ReferencingClass
                 var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
 
                 var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, referencingCompilation );
-                _ = loader.GetCompileTimeProject( referencingCompilation.Assembly );
+                
+                DiagnosticList diagnosticList = new();
+                Assert.True( loader.TryGenerateCompileTimeProject( referencedCompilation, diagnosticList, out _ ) );
             }
             finally
             {
@@ -255,11 +259,12 @@ class B
 
             var domain = new CompileTimeDomain();
             var loaderV1 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB1 );
-            var project1 = loaderV1.GetCompileTimeProject( compilationB1.Assembly )!;
+            DiagnosticList diagnosticList = new();
+            Assert.True( loaderV1.TryGenerateCompileTimeProject( compilationB1, diagnosticList, out var project1 ) );
             ExecuteAssertions( project1, 1 );
 
             var loader2 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB2 );
-            var project2 = loader2.GetCompileTimeProject( compilationB2.Assembly )!;
+            Assert.True( loader2.TryGenerateCompileTimeProject( compilationB2, diagnosticList, out var project2 ) );
 
             ExecuteAssertions( project2, 2 );
 
@@ -306,7 +311,8 @@ class C
             var domain = new CompileTimeDomain();
             var compilation = CreateRoslynCompilation( code, ignoreErrors: true );
             var loader = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilation );
-            Assert.NotNull( loader.GetCompileTimeProject( compilation.Assembly ) );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader.TryGenerateCompileTimeProject( compilation, diagnosticList, out _ ) );
         }
     }
 }

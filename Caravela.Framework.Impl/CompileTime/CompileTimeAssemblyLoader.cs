@@ -21,7 +21,6 @@ namespace Caravela.Framework.Impl.CompileTime
     internal sealed class CompileTimeAssemblyLoader : ICompileTimeTypeResolver
     {
         private readonly CompileTimeDomain _domain;
-        private readonly Compilation _compilation;
         private readonly CompileTimeCompilationBuilder _builder;
         private readonly Dictionary<string, (AssemblyIdentity Identity, CompileTimeProject? Project)> _projects = new();
 
@@ -35,7 +34,6 @@ namespace Caravela.Framework.Impl.CompileTime
             Compilation compilation )
         {
             this._domain = domain;
-            this._compilation = compilation;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
 
             this.AttributeDeserializer = new AttributeDeserializer( this );
@@ -91,7 +89,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var assemblySymbol = typeSymbol.ContainingAssembly;
 
-            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol );
+            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity );
 
             var result = compileTimeProject?.GetType( typeSymbol.GetReflectionName() );
 
@@ -117,11 +115,11 @@ namespace Caravela.Framework.Impl.CompileTime
             return result;
         }
 
-        public CompileTimeProject? GetCompileTimeProject( IAssemblySymbol assemblySymbol )
+        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity assemblyIdentity )
         {
             DiagnosticList diagnostics = new();
 
-            if ( !this.TryGetCompileTimeProject( assemblySymbol, diagnostics, out var assembly ) )
+            if ( !this.TryGetCompileTimeProject( assemblyIdentity, out var assembly ) )
             {
                 throw new InvalidUserCodeException( "Cannot compile the compile-time project.", diagnostics.ToImmutableArray() );
             }
@@ -130,49 +128,24 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public bool TryGetCompileTimeProject(
-            IAssemblySymbol assemblySymbol,
-            IDiagnosticAdder diagnosticSink,
+            AssemblyIdentity assemblyIdentity,
             [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
-            // 
-
-            // Take the compile-time assembly of project references, if any.
-            if ( assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol )
+            if ( this._projects.TryGetValue( assemblyIdentity.Name, out var cached ) && cached.Identity == assemblyIdentity )
             {
-                return this.TryGetCompileTimeProject( sourceAssemblySymbol.Compilation, diagnosticSink, out compileTimeProject );
+                compileTimeProject = cached.Project;
+
+                return true;
             }
             else
             {
-                if ( this._compilation.GetMetadataReference( assemblySymbol ) is { } reference )
-                {
-                    switch ( reference )
-                    {
-                        case CompilationReference compilationReference:
-                            return this.TryGetCompileTimeProject( compilationReference.Compilation, diagnosticSink, out compileTimeProject );
+                compileTimeProject = null;
 
-                        case PortableExecutableReference peReference:
-                            if ( peReference.FilePath != null )
-                            {
-                                return this.TryGetCompileTimeProject( peReference.FilePath, diagnosticSink, out compileTimeProject );
-                            }
-                            else
-                            {
-                                break;
-                            }
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException( $"Could not find reference for assembly {assemblySymbol} in the current context." );
-                }
+                return false;
             }
-
-            compileTimeProject = null;
-
-            return false;
         }
 
-        private bool TryGetCompileTimeProject(
+        public bool TryGenerateCompileTimeProject(
             Compilation runTimeCompilation,
             IDiagnosticAdder diagnosticSink,
             out CompileTimeProject? compileTimeProject )
@@ -204,7 +177,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         break;
 
                     case CompilationReference compilationReference:
-                        success = this.TryGetCompileTimeProject( compilationReference.Compilation, diagnosticSink, out referencedProject );
+                        success = this.TryGenerateCompileTimeProject( compilationReference.Compilation, diagnosticSink, out referencedProject );
 
                         break;
 

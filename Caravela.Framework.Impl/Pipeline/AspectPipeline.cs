@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var loader = CompileTimeAssemblyLoader.Create( this._domain, this.ServiceProvider, roslynCompilation );
 
             // Prepare the compile-time assembly.
-            if ( !loader.TryGetCompileTimeProject( roslynCompilation.Assembly, diagnosticAdder, out var compileTimeProject ) )
+            if ( !loader.TryGenerateCompileTimeProject( roslynCompilation, diagnosticAdder, out var compileTimeProject ) )
             {
                 configuration = null;
 
