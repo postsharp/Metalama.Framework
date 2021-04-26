@@ -112,7 +112,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
-        /// <param name="pipelineStageResult"></param>
+        /// <param name="diagnosticAdder">Diagnostic adder.</param>
+        /// <param name="pipelineStageResult">Pipeline stage result.</param>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
         private protected bool TryExecuteCore( IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {

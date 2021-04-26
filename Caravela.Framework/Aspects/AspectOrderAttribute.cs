@@ -8,8 +8,11 @@ using System.Linq;
 namespace Caravela.Framework.Aspects
 {
     /// <summary>
-    /// Custom attribute that specifies the order of evaluation of aspects or aspect layers.
+    /// Custom attribute that specifies the order of run-time execution of aspects or aspect layers.
     /// </summary>
+    /// <remarks>
+    /// Note that, at compile-time, aspects are applied in the reverse order compared to the run-time execution order.
+    /// </remarks>
     [AttributeUsage( AttributeTargets.Assembly, AllowMultiple = true )]
     public class AspectOrderAttribute : Attribute
     {

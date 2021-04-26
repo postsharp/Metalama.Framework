@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +22,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( AspectType aspectType, IDiagnosticAdder diagnosticAdder )
+        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, AspectType aspectType, IDiagnosticAdder diagnosticAdder )
             => this._aspectSources
                 .Where( s => s.Type.Equals( aspectType.Type ) )
                 .Select( a => a.Source )
                 .Distinct()
-                .SelectMany( a => a.GetAspectInstances( aspectType, diagnosticAdder ) );
+                .SelectMany( a => a.GetAspectInstances( compilation, aspectType, diagnosticAdder ) );
 
         public void Add( IAspectSource aspectSource, INamedType aspectType )
         {

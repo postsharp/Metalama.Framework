@@ -4,7 +4,7 @@ using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOv
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-[assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
+[assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides
 {

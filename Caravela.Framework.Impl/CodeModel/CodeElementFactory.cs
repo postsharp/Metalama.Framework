@@ -116,6 +116,11 @@ namespace Caravela.Framework.Impl.CodeModel
                 CodeElementLink.FromBuilder( genericParameterBuilder ),
                 l => new BuiltGenericParameter( (GenericParameterBuilder) l.Target!, this._compilation ) );
 
+        internal IMethod GetMethod( MethodBuilder methodBuilder )
+            => (IMethod) this._cache.GetOrAdd(
+                CodeElementLink.FromBuilder( methodBuilder ),
+                l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilation ) );
+
         internal ICodeElement GetCodeElement( CodeElementBuilder builder )
             => builder switch
             {
@@ -149,10 +154,19 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 return codeElement;
             }
-
-            var link = (ICodeElementLink<ICodeElement>) codeElement;
-
-            return (T) link.GetForCompilation( this._compilation );
+            else if ( codeElement is ICodeElementLink<ICodeElement> link )
+            {
+                return (T) link.GetForCompilation( this._compilation );
+            }
+            else if ( codeElement is NamedType namedType )
+            {
+                // TODO: This would not work after type introductions, but that would require more changes.
+                return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
         }
 
         public IMethod GetMethod( IMethod attributeBuilderConstructor )
