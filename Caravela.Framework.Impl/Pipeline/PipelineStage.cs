@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Diagnostics;
+
 namespace Caravela.Framework.Impl.Pipeline
 {
     /// <summary>
@@ -23,7 +25,9 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>
         /// <param name="input">The inputs.</param>
+        /// <param name="diagnostics"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        public abstract PipelineStageResult Execute( PipelineStageResult input );
+        public abstract bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, out PipelineStageResult? result );
     }
 }

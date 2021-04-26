@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -64,5 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
+
+        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
     }
 }

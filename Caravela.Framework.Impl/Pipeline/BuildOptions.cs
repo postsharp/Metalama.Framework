@@ -21,15 +21,11 @@ namespace Caravela.Framework.Impl.Pipeline
             this._source = source;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
-        
-        public BuildOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null  ) : this( new OptionsAdapter( options ), plugIns )
-        {
-        }
 
-        public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null) : this( new OptionsAdapter( options ), plugIns)
-        {
-        }
+        public BuildOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
+            this( new OptionsAdapter( options ), plugIns ) { }
 
+        public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 
         public bool CompileTimeAttachDebugger => this.GetBooleanOption( "DebugCaravela" );
 
@@ -42,7 +38,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
-        
+
         public ImmutableArray<object> PlugIns { get; }
 
         private bool GetBooleanOption( string name, bool defaultValue = false )

@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel compilation, AspectType aspectType, IDiagnosticAdder diagnosticAdder )
         {
             var aspectTypeSymbol = compilation.RoslynCompilation.GetTypeByMetadataName( aspectType.FullName );
-            
+
             return this._aspectSources
                 .Where( s => s.Type.Equals( aspectTypeSymbol ) )
                 .Select( a => a.Source )

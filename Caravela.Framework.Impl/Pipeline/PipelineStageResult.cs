@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
         /// source generator API.
         /// </summary>
-        public IImmutableDictionary<string, SyntaxTree> AdditionalSyntaxTrees { get; }
+        public IReadOnlyList<IntroducedSyntaxTree> AdditionalSyntaxTrees { get; }
 
         /// <summary>
         /// Gets the list of ordered aspect parts.
@@ -53,14 +53,14 @@ namespace Caravela.Framework.Impl.Pipeline
             ImmutableDiagnosticList? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
-            IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees = null )
+            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
         {
             this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableDiagnosticList.Empty;
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
-            this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableDictionary<string, SyntaxTree>.Empty;
+            this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
         }
 
         public PipelineStageResult WithAdditionalDiagnostics( IReadOnlyList<Diagnostic> diagnostics )

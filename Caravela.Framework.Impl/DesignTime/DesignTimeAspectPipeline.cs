@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,14 +21,14 @@ namespace Caravela.Framework.Impl.DesignTime
     internal class DesignTimeAspectPipeline : AspectPipeline
     {
         // Maps file names to source text on which we have a dependency.
-        private readonly ConcurrentDictionary<string, SyntaxTree> _cacheDependencies = new();
+        private readonly ConcurrentDictionary<string, SyntaxTree> _configurationCacheDependencies = new();
 
         private readonly object _configureSync = new();
         private PipelineConfiguration? _cachedConfiguration;
 
         public DesignTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions ) { }
 
-        public void OnSemanticModelUpdated( SemanticModel semanticModel )
+        public void OnSyntaxTreeUpdated( SyntaxTree syntaxTree )
         {
             if ( this._cachedConfiguration == null )
             {
@@ -35,11 +36,9 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            var newSyntaxTree = semanticModel.SyntaxTree;
-
-            if ( this._cacheDependencies.TryGetValue( newSyntaxTree.FilePath, out var oldSyntaxTree ) )
+            if ( this._configurationCacheDependencies.TryGetValue( syntaxTree.FilePath, out var oldSyntaxTree ) )
             {
-                if ( !newSyntaxTree.IsEquivalentTo( oldSyntaxTree ) )
+                if ( !syntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
                 {
                     // We have a breaking change in our pipeline configuration.
                     this._cachedConfiguration = null;
@@ -52,7 +51,6 @@ namespace Caravela.Framework.Impl.DesignTime
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
-         
             // Build the pipeline configuration if we don't have a valid one.
             if ( this._cachedConfiguration == null )
             {
@@ -71,13 +69,13 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
 
                         // Update cache dependencies.
-                        this._cacheDependencies.Clear();
+                        this._configurationCacheDependencies.Clear();
 
                         if ( configuration.CompileTimeProject != null )
                         {
                             foreach ( var syntaxTree in configuration.CompileTimeProject.SyntaxTrees )
                             {
-                                this._cacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
+                                _ = this._configurationCacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
                             }
                         }
 
@@ -99,14 +97,19 @@ namespace Caravela.Framework.Impl.DesignTime
 
             if ( !this.TryGetConfiguration( compilation, diagnosticList, out var configuration ) )
             {
-                return new DesignTimeAspectPipelineResult( false, null, new ImmutableDiagnosticList( diagnosticList ) );
+                return new DesignTimeAspectPipelineResult(
+                    false,
+                    compilation.SyntaxTrees,
+                    ImmutableArray<IntroducedSyntaxTree>.Empty,
+                    new ImmutableDiagnosticList( diagnosticList ) );
             }
 
             var success = this.TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
 
             return new DesignTimeAspectPipelineResult(
                 success,
-                pipelineResult?.AdditionalSyntaxTrees,
+                compilation.SyntaxTrees,
+                pipelineResult?.AdditionalSyntaxTrees ?? Array.Empty<IntroducedSyntaxTree>(),
                 new ImmutableDiagnosticList(
                     diagnosticList.ToImmutableArray(),
                     pipelineResult?.Diagnostics.DiagnosticSuppressions ) );

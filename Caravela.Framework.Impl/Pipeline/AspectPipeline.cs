@@ -198,7 +198,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var stage in pipelineConfiguration.Stages )
             {
-                pipelineStageResult = stage.Execute( pipelineStageResult );
+                if ( !stage.TryExecute( pipelineStageResult!, diagnosticAdder, out var newStageResult ) )
+                {
+                    return false;
+                }
+                else
+                {
+                    pipelineStageResult = newStageResult;
+                }
             }
 
             var hasError = pipelineStageResult.Diagnostics.ReportedDiagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error );

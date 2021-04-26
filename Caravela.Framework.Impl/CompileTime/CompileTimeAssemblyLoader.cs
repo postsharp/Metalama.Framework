@@ -134,33 +134,36 @@ namespace Caravela.Framework.Impl.CompileTime
             IDiagnosticAdder diagnosticSink,
             [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
-            // Take the compile-time assembly of project references, if any.
+            // 
 
+            // Take the compile-time assembly of project references, if any.
             if ( assemblySymbol is ISourceAssemblySymbol sourceAssemblySymbol )
             {
                 return this.TryGetCompileTimeProject( sourceAssemblySymbol.Compilation, diagnosticSink, out compileTimeProject );
             }
             else
             {
-                if ( this._compilation.GetMetadataReference( assemblySymbol ) is not { } reference )
+                if ( this._compilation.GetMetadataReference( assemblySymbol ) is { } reference )
+                {
+                    switch ( reference )
+                    {
+                        case CompilationReference compilationReference:
+                            return this.TryGetCompileTimeProject( compilationReference.Compilation, diagnosticSink, out compileTimeProject );
+
+                        case PortableExecutableReference peReference:
+                            if ( peReference.FilePath != null )
+                            {
+                                return this.TryGetCompileTimeProject( peReference.FilePath, diagnosticSink, out compileTimeProject );
+                            }
+                            else
+                            {
+                                break;
+                            }
+                    }
+                }
+                else
                 {
                     throw new InvalidOperationException( $"Could not find reference for assembly {assemblySymbol} in the current context." );
-                }
-
-                switch ( reference )
-                {
-                    case CompilationReference compilationReference:
-                        return this.TryGetCompileTimeProject( compilationReference.Compilation, diagnosticSink, out compileTimeProject );
-
-                    case PortableExecutableReference peReference:
-                        if ( peReference.FilePath != null )
-                        {
-                            return this.TryGetCompileTimeProject( peReference.FilePath, diagnosticSink, out compileTimeProject );
-                        }
-                        else
-                        {
-                            break;
-                        }
                 }
             }
 

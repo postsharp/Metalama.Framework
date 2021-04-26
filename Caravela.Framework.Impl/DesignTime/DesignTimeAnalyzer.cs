@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -64,18 +63,25 @@ namespace Caravela.Framework.Impl.DesignTime
             var compilation = (CSharpCompilation) context.SemanticModel.Compilation;
 
             // Execute the pipeline.
-            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                context.SemanticModel,
+            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
+                context.SemanticModel.Compilation,
+                new[] { context.SemanticModel.SyntaxTree },
                 new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
-                context.CancellationToken );
+                context.CancellationToken,
+                true );
 
             // Report diagnostics.
-            DesignTimeDiagnosticHelper.ReportDiagnostics(
-                pipelineResult.Diagnostics.ReportedDiagnostics,
-                compilation,
-                context.ReportDiagnostic,
-                true,
-                context.SemanticModel.SyntaxTree );
+            var result = syntaxTreeResults.SingleOrDefault( r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
+
+            if ( result != null )
+            {
+                DesignTimeDiagnosticHelper.ReportDiagnostics(
+                    result.Diagnostics,
+                    compilation,
+                    context.ReportDiagnostic,
+                    true,
+                    context.SemanticModel.SyntaxTree );
+            }
         }
     }
 }

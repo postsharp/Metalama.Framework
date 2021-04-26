@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl

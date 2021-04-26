@@ -13,12 +13,13 @@ namespace Caravela.Framework.Impl.Diagnostics
 
     internal class DiagnosticAdder : IDiagnosticAdder
     {
-        private Action<Diagnostic> _action;
+        private readonly Action<Diagnostic> _action;
 
-        public DiagnosticAdder( Action<Diagnostic> action ) {
+        public DiagnosticAdder( Action<Diagnostic> action )
+        {
             this._action = action;
         }
 
-        public void ReportDiagnostic( Diagnostic diagnostic ) => this._action(diagnostic);
+        public void ReportDiagnostic( Diagnostic diagnostic ) => this._action( diagnostic );
     }
 }

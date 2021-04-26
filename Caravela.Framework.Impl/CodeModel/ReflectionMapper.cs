@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class ReflectionMapper
     {
-        private static ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
+        private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
         private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new();

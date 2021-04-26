@@ -26,7 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public static CompilationModel CreateInitialInstance( Compilation compilation ) => new( PartialCompilation.CreateComplete( compilation ) );
 
-        public static CompilationModel CreateInitialInstance( SemanticModel semanticModel ) => new( PartialCompilation.CreatePartial( semanticModel ) );
+        public static CompilationModel CreateInitialInstance( Compilation compilation, SyntaxTree syntaxTree )
+            => new( PartialCompilation.CreatePartial( compilation, syntaxTree ) );
 
         internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedElements )
         {
@@ -222,6 +223,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();
+
+        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
         {

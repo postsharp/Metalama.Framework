@@ -13,6 +13,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
+
             public bool HasCompileTimeCode { get; private set; }
 
             public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier )

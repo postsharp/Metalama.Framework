@@ -16,17 +16,20 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            using CompileTimeAspectPipeline pipeline = new( new BuildOptions( transformerContext.GlobalOptions , transformerContext.Plugins ) );
+            using CompileTimeAspectPipeline pipeline = new( new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ) );
 
-            if ( pipeline.TryExecute( new DiagnosticAdder( transformerContext.ReportDiagnostic ), transformerContext.Compilation, out var compilation, out var additionalResources ) )
+            if ( pipeline.TryExecute(
+                new DiagnosticAdder( transformerContext.ReportDiagnostic ),
+                transformerContext.Compilation,
+                out var compilation,
+                out var additionalResources ) )
             {
                 transformerContext.ManifestResources.AddRange( additionalResources );
 
                 return compilation;
             }
-            
+
             return transformerContext.Compilation;
         }
- 
     }
 }

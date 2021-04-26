@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                         default:
                             return codeElementKind.ToString().ToLowerInvariant();
                     }
-                    
+
                 case ISymbol symbol:
                     return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 

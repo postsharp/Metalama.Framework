@@ -20,7 +20,9 @@ namespace Caravela.Framework.Impl
     {
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
+
         public string FullName { get; }
+
         public string DisplayName { get; }
 
         public AspectType? BaseAspectType { get; }
@@ -28,7 +30,7 @@ namespace Caravela.Framework.Impl
         public IAspectDriver AspectDriver => this._aspectDriver.AssertNotNull();
 
         public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
-        
+
         public Location? DiagnosticLocation { get; }
 
         public bool IsAbstract { get; }

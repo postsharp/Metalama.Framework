@@ -19,7 +19,7 @@ namespace Caravela.TestFramework
         public virtual string? CrashReportDirectory => null;
 
         public string ProjectId => "test";
-        
+
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
     }
 }

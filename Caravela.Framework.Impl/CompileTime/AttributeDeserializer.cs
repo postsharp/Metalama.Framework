@@ -63,6 +63,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // Invalid syntax.
                 attributeInstance = null;
+
                 return false;
             }
 
@@ -93,6 +94,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // Invalid syntax? No need to report a diagnostic.
                 attributeInstance = null;
+
                 return false;
             }
 
@@ -191,7 +193,13 @@ namespace Caravela.Framework.Impl.CompileTime
             Type targetType,
             IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
-            => this.TryTranslateAttributeArgument( attribute, typedConstant.GetValueSafe(), typedConstant.Type, targetType, diagnosticAdder, out translatedValue );
+            => this.TryTranslateAttributeArgument(
+                attribute,
+                typedConstant.GetValueSafe(),
+                typedConstant.Type,
+                targetType,
+                diagnosticAdder,
+                out translatedValue );
 
         private bool TryTranslateAttributeArgument(
             AttributeData attribute,

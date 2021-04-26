@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Transformations;
@@ -11,7 +12,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
             DiagnosticSink diagnostics = new();
 
-            var additionalSyntaxTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTree>();
+            var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 
             LexicalScopeFactory lexicalScopeFactory = new( pipelineStepResult.Compilation );
 
@@ -54,6 +54,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 }
                 */
 
+                // Create a class.
                 var classDeclaration = SyntaxFactory.ClassDeclaration(
                     default,
                     SyntaxTokenList.Create( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) ),
@@ -63,6 +64,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     default,
                     default );
 
+                // Add members to the class.
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
                     switch ( transformation )
@@ -84,6 +86,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     }
                 }
 
+                // Add the class to a namespace.
                 SyntaxNode topDeclaration = classDeclaration;
 
                 if ( declaringType.Namespace != null )
@@ -95,11 +98,15 @@ namespace Caravela.Framework.Impl.Pipeline
                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>( classDeclaration ) );
                 }
 
-                var syntaxTree = SyntaxFactory.SyntaxTree( topDeclaration.NormalizeWhitespace(), encoding: Encoding.UTF8 );
+                // Choose the best syntax tree
+                var originalSyntaxTree = ((ICodeElementInternal) declaringType).DeclaringSyntaxReferences.Select( r => r.SyntaxTree )
+                    .OrderBy( s => s.FilePath.Length )
+                    .First();
 
+                var generatedSyntaxTree = SyntaxFactory.SyntaxTree( topDeclaration.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                additionalSyntaxTrees.Add( syntaxTreeName, syntaxTree );
+                additionalSyntaxTrees.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
             }
 
             return new PipelineStageResult(
@@ -108,7 +115,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 input.Diagnostics.Concat( pipelineStepResult.Diagnostics ),
                 Array.Empty<ResourceDescription>(),
                 input.AspectSources.Concat( pipelineStepResult.ExternalAspectSources ),
-                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ) );
+                input.AdditionalSyntaxTrees.Concat( additionalSyntaxTrees ) );
         }
     }
 }

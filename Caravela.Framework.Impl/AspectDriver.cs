@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl
             this._compilation = compilation;
             this.AspectType = aspectType;
 
-            this._declarativeAdviceAttributes = 
+            this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
                  where attribute.AttributeClass?.Is( typeof(IAdviceAttribute) ) ?? false

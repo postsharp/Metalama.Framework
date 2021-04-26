@@ -27,7 +27,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the input <see cref="CSharpCompilation"/>.
         /// </summary>
-        public PartialCompilation Compilation { get; }
+        public IPartialCompilation Compilation { get; }
 
         private readonly Action<Diagnostic> _addDiagnostic;
 
@@ -43,7 +43,7 @@ namespace Caravela.Framework.Sdk
         internal AspectWeaverContext(
             IAspectType aspectType,
             IReadOnlyList<IAspectInstance> aspectInstances,
-            PartialCompilation compilation,
+            IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )
         {

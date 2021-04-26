@@ -9,7 +9,6 @@ using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 
 namespace Caravela.Framework.Impl
 {
-
     internal static class CodeModelExtensions
     {
         // TODO: should this be in the SDK?

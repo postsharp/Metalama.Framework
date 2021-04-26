@@ -91,7 +91,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 var cleanSyntaxTree = syntaxTree.WithRootAndOptions( rewriter.Visit( syntaxTree.GetRoot() ).AssertNotNull(), syntaxTree.Options );
-                cleanCompilation = cleanCompilation.ReplaceSyntaxTree( syntaxTree, cleanSyntaxTree );
+                cleanCompilation = cleanCompilation.Update( new[] { (syntaxTree, cleanSyntaxTree) }, Enumerable.Empty<SyntaxTree>() );
             }
 
             return cleanCompilation;

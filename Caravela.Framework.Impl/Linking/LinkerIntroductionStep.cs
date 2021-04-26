@@ -99,18 +99,27 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateCompilation = input.InitialCompilation;
             Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, suppressionsByTarget, input.CompilationModel );
 
+            List<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees = new();
+
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
-                var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
+                var oldRoot = initialSyntaxTree.GetRoot();
+                var newRoot = addIntroducedElementsRewriter.Visit( oldRoot );
 
-                // Improve readability of intermediate compilation in debug builds.
-                newRoot = newRoot.NormalizeWhitespace();
+                if ( oldRoot != newRoot )
+                {
+                    // Improve readability of intermediate compilation in debug builds.
+                    newRoot = newRoot.NormalizeWhitespace();
 
-                var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
+                    var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
-                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                    syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
+                }
             }
+
+            intermediateCompilation = intermediateCompilation.Update(
+                syntaxTreeMapping.Select( p => (p.Key, p.Value) ),
+                Enumerable.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 intermediateCompilation.Compilation,

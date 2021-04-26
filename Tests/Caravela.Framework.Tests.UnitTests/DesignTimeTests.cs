@@ -30,18 +30,18 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateRoslynCompilation( code );
 
             // Tests for Class1.
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( semanticModel1 );
+            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( compilation, syntaxTree1 );
             Assert.Single( compilationModel1.DeclaredTypes.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
-            var semanticModel3 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" ) );
-            var compilationModel3 = CompilationModel.CreateInitialInstance( semanticModel3 );
+            var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
+            var compilationModel3 = CompilationModel.CreateInitialInstance( compilation, syntaxTree3 );
             Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.DeclaredTypes.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
-            var semanticModel4 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" ) );
-            var compilationModel4 = CompilationModel.CreateInitialInstance( semanticModel4 );
+            var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( compilation, semanticModel4 );
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
@@ -58,11 +58,11 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateRoslynCompilation( code );
 
             DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
-            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel1 ) );
+            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 
-            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" ) );
-            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel2 ) );
+            var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ) );
         }
 
         [Fact]
@@ -81,11 +81,11 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateRoslynCompilation( code );
 
             DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
-            var semanticModel1 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" ) );
-            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel1 ) );
+            var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 
-            var semanticModel2 = compilation.GetSemanticModel( compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" ) );
-            pipeline.Execute( PartialCompilation.CreatePartial( semanticModel2 ) );
+            var syntaxTree2 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
+            pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree2 ) );
         }
     }
 }

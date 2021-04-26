@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
@@ -13,7 +11,7 @@ namespace Caravela.Framework.TestApp
         [SuppressWarning("CS1998", "IDE0051")]
         private static async Task MethodAsync()
         {
-
+            
         }
 
         private static void Main()

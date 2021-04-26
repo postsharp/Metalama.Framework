@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Pipeline
         string? CrashReportDirectory { get; }
 
         string ProjectId { get; }
-        
+
         ImmutableArray<object> PlugIns { get; }
     }
 

@@ -6,16 +6,38 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.CodeModel
 {
-
-    public abstract partial class PartialCompilation
+    internal static class DependencyAnalysisHelper
     {
+        public static IEnumerable<SyntaxNode> FindDeclaredTypes( this SyntaxTree syntaxTree )
+        {
+            var visitor = new FindTypesVisitor();
+            visitor.Visit( syntaxTree.GetRoot() );
+
+            return visitor.Types;
+        }
+
         private class FindTypesVisitor : CSharpSyntaxWalker
         {
             public List<SyntaxNode> Types { get; } = new();
 
-            private void VisitType( SyntaxNode node ) => this.Types.Add( node );
+            private void VisitType( SyntaxNode node )
+            {
+                this.Types.Add( node );
+
+                // Also index nested types.
+                if ( node is TypeDeclarationSyntax typeDeclaration )
+                {
+                    foreach ( var child in typeDeclaration.Members )
+                    {
+                        if ( child is BaseTypeDeclarationSyntax )
+                        {
+                            this.VisitType( child );
+                        }
+                    }
+                }
+            }
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitType( node );
 

@@ -8,6 +8,6 @@ namespace Caravela.Framework.Sdk
     [CompileTime]
     public interface IAspectWeaver : IAspectDriver
     {
-        PartialCompilation Transform( AspectWeaverContext context );
+        IPartialCompilation Transform( AspectWeaverContext context );
     }
 }

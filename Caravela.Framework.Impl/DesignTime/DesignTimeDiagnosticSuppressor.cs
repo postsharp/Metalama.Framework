@@ -39,11 +39,18 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
+            var semanticModelBySemanticModel = context.ReportedDiagnostics
+                .GroupBy( d => d.Location.SourceTree )
+                .Where( g => g.Key != null )
+                .Select( group => (SemanticModel: context.GetSemanticModel( group.Key! ), Diagnostics: (IEnumerable<Diagnostic>) group) )
+                .ToList();
+
             ReportSuppressions(
                 compilation,
+                semanticModelBySemanticModel,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
-                new BuildOptions(  context.Options.AnalyzerConfigOptionsProvider  ),
+                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
                 context.CancellationToken );
         }
 
@@ -57,49 +64,58 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="cancellationToken"></param>
         internal static void ReportSuppressions(
             Compilation compilation,
+            List<(SemanticModel SemanticModel, IEnumerable<Diagnostic> Diagnostics)> semanticModelBySemanticModel,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             BuildOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
                 compilation,
                 options,
                 cancellationToken );
 
-            // Report suppressions.
-            if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
+            foreach ( var syntaxTreeResult in syntaxTreeResults )
             {
-                var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
-                    s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );
-
-                var groupedSuppressions = ImmutableMultiValueDictionary<ISymbol, ScopedSuppression>.Create(
-                    designTimeSuppressions,
-                    s => ((ISdkCodeElement) s.CodeElement).Symbol! );
-
-                foreach ( var diagnostic in reportedDiagnostics )
+                if ( syntaxTreeResult == null )
                 {
-                    if ( diagnostic.Location.SourceTree == null )
+                    continue;
+                }
+
+                // Report suppressions.
+                if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
+                {
+                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
+                        s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );
+
+                    var groupedSuppressions = ImmutableMultiValueDictionary<ISymbol, ScopedSuppression>.Create(
+                        designTimeSuppressions,
+                        s => ((ISdkCodeElement) s.CodeElement).Symbol! );
+
+                    foreach ( var diagnostic in reportedDiagnostics )
                     {
-                        continue;
-                    }
+                        if ( diagnostic.Location.SourceTree == null )
+                        {
+                            continue;
+                        }
 
 #pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-                    var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
+                        var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
 #pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
 
-                    var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
-                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
+                        var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                        var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
 
-                    if ( symbol == null )
-                    {
-                        continue;
-                    }
+                        if ( symbol == null )
+                        {
+                            continue;
+                        }
 
-                    if ( groupedSuppressions[symbol].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
-                    {
-                        reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
+                        if ( groupedSuppressions[symbol].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                        {
+                            reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
+                        }
                     }
                 }
             }

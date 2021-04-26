@@ -3,10 +3,8 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -23,17 +21,20 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             // Execute the pipeline.
-            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
                 compilation,
                 new BuildOptions( context.AnalyzerConfigOptions ),
                 context.CancellationToken );
 
             // Add introduced syntax trees.
-            if ( pipelineResult.AdditionalSyntaxTrees != null )
+            foreach ( var syntaxTreeResult in syntaxTreeResults )
             {
-                foreach ( var additionalSyntaxTree in pipelineResult.AdditionalSyntaxTrees )
+                if ( syntaxTreeResult != null )
                 {
-                    context.AddSource( additionalSyntaxTree.Key, additionalSyntaxTree.Value.GetText() );
+                    foreach ( var additionalSyntaxTree in syntaxTreeResult.Introductions )
+                    {
+                        context.AddSource( additionalSyntaxTree.Name, additionalSyntaxTree.GeneratedSyntaxTree.GetText() );
+                    }
                 }
             }
         }

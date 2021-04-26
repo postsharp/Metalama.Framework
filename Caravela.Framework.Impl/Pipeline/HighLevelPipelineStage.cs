@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using System.Collections.Generic;
 
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        public override PipelineStageResult Execute( PipelineStageResult input )
+        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, out PipelineStageResult? result )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
@@ -35,7 +36,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
             pipelineStepsState.Execute();
 
-            return this.GenerateCode( input, pipelineStepsState );
+            result = this.GenerateCode( input, pipelineStepsState );
+
+            return true;
         }
 
         /// <summary>

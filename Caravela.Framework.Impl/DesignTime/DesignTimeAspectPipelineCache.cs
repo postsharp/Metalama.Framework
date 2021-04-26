@@ -6,6 +6,7 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -15,7 +16,7 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal static partial class DesignTimeAspectPipelineCache
     {
-        private static readonly ConditionalWeakTable<object, object> _sync = new();
+        private static readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private static readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelineCache = new();
         private static bool _attachDebuggerRequested;
 
@@ -35,72 +36,76 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-
         private static DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
             => _pipelineCache.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
 
-
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
+        public static ImmutableArray<SyntaxTreeResult> GetPipelineResult(
             Compilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
+            => GetPipelineResult( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken, false );
+
+        public static ImmutableArray<SyntaxTreeResult> GetPipelineResult(
+            Compilation compilation,
+            IReadOnlyList<SyntaxTree> syntaxTrees,
+            BuildOptions buildOptions,
+            CancellationToken cancellationToken,
+            bool invalidateSyntaxTrees )
         {
             AttachDebugger( buildOptions );
 
-            // ReSharper disable once InconsistentlySynchronizedField
+            var pipeline = GetOrCreatePipeline( buildOptions );
 
-            if ( !ResultCache.TryGetValue( compilation, out var result ) )
+            // Invalidate the cache, if required.
+            if ( invalidateSyntaxTrees )
+            {
+                foreach ( var syntaxTree in syntaxTrees )
+                {
+                    pipeline.OnSyntaxTreeUpdated( syntaxTree );
+                    SyntaxTreeResultCache.OnSyntaxTreeUpdated( syntaxTree );
+                }
+            }
+
+            // Computes the set of semantic models that need to be processed.
+            List<SyntaxTree> uncachedSyntaxTrees = new();
+
+            foreach ( var syntaxTree in syntaxTrees )
+            {
+                if ( !SyntaxTreeResultCache.TryGetValue( syntaxTree, out _, true ) )
+                {
+                    uncachedSyntaxTrees.Add( syntaxTree );
+                }
+            }
+
+            // Execute the pipeline if required, and update the cache.
+            if ( uncachedSyntaxTrees.Count > 0 )
             {
                 var lockable = _sync.GetOrCreateValue( compilation );
 
                 lock ( lockable )
                 {
-                    if ( !ResultCache.TryGetValue( compilation, out result ) )
-                    {
-                        var pipeline = GetOrCreatePipeline( buildOptions );
+                    var partialCompilation = PartialCompilation.CreatePartial( compilation, uncachedSyntaxTrees );
+                    var result = pipeline.Execute( partialCompilation );
 
-                        result = pipeline.Execute( PartialCompilation.CreateComplete( compilation ) );
-
-                        ResultCache.Update( compilation, result );
-                    }
+                    SyntaxTreeResultCache.Update( compilation, result );
                 }
             }
 
-            return result;
-        }
-        
-        public static DesignTimeAspectPipelineResult GetPipelineResult(
-            SemanticModel semanticModel,
-            BuildOptions buildOptions,
-            CancellationToken cancellationToken )
-        {
-            AttachDebugger( buildOptions );
+            // Get the results from the cache. We don't need to check dependencies
+            var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
 
-            // ReSharper disable once InconsistentlySynchronizedField
-
-            if ( !ResultCache.TryGetValue( semanticModel, out var result ) )
+            foreach ( var syntaxTree in syntaxTrees )
             {
-                var lockable = _sync.GetOrCreateValue( semanticModel );
-
-                lock ( lockable )
+                // Get the result from the cache, but there is no need to validate dependencies because we've just dont it an
+                // instant ago and a data race and it is ok if the data race is won by the competing task.
+                
+                if ( SyntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
                 {
-                    if ( !ResultCache.TryGetValue( semanticModel, out result ) )
-                    {
-                        var pipeline = GetOrCreatePipeline( buildOptions );
-
-
-                        // If Roslyn has requested an analysis of this semantic model, there is a chance that it has changed, therefore we should
-                        // consider invalidating the pipeline configuration cache.
-                        pipeline.OnSemanticModelUpdated( semanticModel );
-
-                        result = pipeline.Execute( PartialCompilation.CreatePartial( semanticModel ) );
-
-                        ResultCache.Update( semanticModel, result );
-                    }
+                    resultArrayBuilder.Add( syntaxTreeResult );
                 }
             }
 
-            return result;
+            return resultArrayBuilder.ToImmutable();
         }
     }
 }
