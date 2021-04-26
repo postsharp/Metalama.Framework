@@ -28,8 +28,10 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public DesignTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions ) { }
 
-        public void OnSyntaxTreeUpdated( SyntaxTree syntaxTree )
+        public void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree, out bool isInvalidated )
         {
+            isInvalidated = false;
+            
             if ( this._cachedConfiguration == null )
             {
                 // The cache is empty, so there is nothing to invalidate.
@@ -42,6 +44,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     // We have a breaking change in our pipeline configuration.
                     this._cachedConfiguration = null;
+                    isInvalidated = true;
                 }
             }
         }

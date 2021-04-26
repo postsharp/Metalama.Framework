@@ -60,9 +60,15 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     if ( filePath != null )
                     {
-                        var builder = resultsByTree[filePath];
-                        builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
-                        builder.Diagnostics.Add( diagnostic );
+                        if ( resultsByTree.TryGetValue( filePath, out var builder ) )
+                        {
+                            builder.Diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
+                            builder.Diagnostics.Add( diagnostic );
+                        }
+                        else
+                        {
+                            // This can happen when a CS error is reported in the aspect. These errors can be ignored.
+                        }
                     }
                 }
 
@@ -74,8 +80,8 @@ namespace Caravela.Framework.Impl.DesignTime
                         if ( !string.IsNullOrEmpty( path ) )
                         {
                             var builder = resultsByTree[path!];
-                            builder.Suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
-                            builder.Suppressions.Add( suppression );
+                            builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
+                            builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
                         }
                     }
 
@@ -139,7 +145,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 }
             }
 
-            public static void OnSyntaxTreeUpdated( SyntaxTree syntaxTree )
+            public static void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree )
             {
                 if ( _syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
                 {
@@ -148,6 +154,11 @@ namespace Caravela.Framework.Impl.DesignTime
                         _ = _syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
                     }
                 }
+            }
+
+            public static void Clear()
+            {
+                _syntaxTreeCache.Clear();
             }
         }
     }

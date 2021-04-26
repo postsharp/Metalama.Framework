@@ -26,5 +26,11 @@ namespace Caravela.Framework.TestApp
         {
             
         }
+
+        [IntroduceMethod]
+        public void SomeOtherIntroducedMethod5()
+        {
+
+        }
     }
 }

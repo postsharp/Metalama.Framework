@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
 #pragma warning disable SA1401 // Fields should be private
             public ImmutableArray<Diagnostic>.Builder? Diagnostics;
-            public ImmutableArray<ScopedSuppression>.Builder? Suppressions;
+            public ImmutableArray<CacheableScopedSuppression>.Builder? Suppressions;
             public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
 #pragma warning restore SA1401 // Fields should be private
 

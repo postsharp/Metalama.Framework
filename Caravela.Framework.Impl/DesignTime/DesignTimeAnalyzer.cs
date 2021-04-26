@@ -67,8 +67,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 context.SemanticModel.Compilation,
                 new[] { context.SemanticModel.SyntaxTree },
                 new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
-                context.CancellationToken,
-                true );
+                context.CancellationToken );
 
             // Report diagnostics.
             var result = syntaxTreeResults.SingleOrDefault( r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );

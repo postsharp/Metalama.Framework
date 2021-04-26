@@ -261,12 +261,12 @@ class B
             var loaderV1 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB1 );
             DiagnosticList diagnosticList = new();
             Assert.True( loaderV1.TryGenerateCompileTimeProject( compilationB1, diagnosticList, out var project1 ) );
-            ExecuteAssertions( project1, 1 );
+            ExecuteAssertions( project1!, 1 );
 
             var loader2 = CompileTimeAssemblyLoader.Create( domain, GetServiceProvider(), compilationB2 );
             Assert.True( loader2.TryGenerateCompileTimeProject( compilationB2, diagnosticList, out var project2 ) );
 
-            ExecuteAssertions( project2, 2 );
+            ExecuteAssertions( project2!, 2 );
 
             void ExecuteAssertions( CompileTimeProject project, int expectedVersion )
             {

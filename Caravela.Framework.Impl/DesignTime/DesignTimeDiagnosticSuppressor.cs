@@ -39,15 +39,14 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            var semanticModelBySemanticModel = context.ReportedDiagnostics
-                .GroupBy( d => d.Location.SourceTree )
-                .Where( g => g.Key != null )
-                .Select( group => (SemanticModel: context.GetSemanticModel( group.Key! ), Diagnostics: (IEnumerable<Diagnostic>) group) )
+            var syntaxTrees = context.ReportedDiagnostics
+                .Select( d => d.Location.SourceTree )
+                .WhereNotNull()
                 .ToList();
 
             ReportSuppressions(
                 compilation,
-                semanticModelBySemanticModel,
+                syntaxTrees,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
                 new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
@@ -64,7 +63,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="cancellationToken"></param>
         internal static void ReportSuppressions(
             Compilation compilation,
-            List<(SemanticModel SemanticModel, IEnumerable<Diagnostic> Diagnostics)> semanticModelBySemanticModel,
+            IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             BuildOptions options,
@@ -73,6 +72,7 @@ namespace Caravela.Framework.Impl.DesignTime
             // Execute the pipeline.
             var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
                 compilation,
+                syntaxTrees,
                 options,
                 cancellationToken );
 
@@ -87,11 +87,10 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {
                     var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
-                        s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );
+                        s => _supportedSuppressions.Contains( s.Id ) );
 
-                    var groupedSuppressions = ImmutableMultiValueDictionary<ISymbol, ScopedSuppression>.Create(
-                        designTimeSuppressions,
-                        s => ((ISdkCodeElement) s.CodeElement).Symbol! );
+                    var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
+                        designTimeSuppressions, s => s.SymbolId );
 
                     foreach ( var diagnostic in reportedDiagnostics )
                     {
@@ -112,7 +111,9 @@ namespace Caravela.Framework.Impl.DesignTime
                             continue;
                         }
 
-                        if ( groupedSuppressions[symbol].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                        var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
+
+                        if ( groupedSuppressions[symbolId].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                         {
                             reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
                         }

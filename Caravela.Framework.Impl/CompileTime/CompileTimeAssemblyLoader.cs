@@ -129,7 +129,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public bool TryGetCompileTimeProject(
             AssemblyIdentity assemblyIdentity,
-            [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
+            out CompileTimeProject? compileTimeProject )
         {
             if ( this._projects.TryGetValue( assemblyIdentity.Name, out var cached ) && cached.Identity == assemblyIdentity )
             {

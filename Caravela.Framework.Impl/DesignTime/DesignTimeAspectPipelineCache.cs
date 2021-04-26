@@ -43,27 +43,31 @@ namespace Caravela.Framework.Impl.DesignTime
             Compilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
-            => GetPipelineResult( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken, false );
+            => GetPipelineResult( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
 
         public static ImmutableArray<SyntaxTreeResult> GetPipelineResult(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             BuildOptions buildOptions,
-            CancellationToken cancellationToken,
-            bool invalidateSyntaxTrees )
+            CancellationToken cancellationToken )
         {
             AttachDebugger( buildOptions );
 
             var pipeline = GetOrCreatePipeline( buildOptions );
 
             // Invalidate the cache, if required.
-            if ( invalidateSyntaxTrees )
+            foreach ( var syntaxTree in syntaxTrees )
             {
-                foreach ( var syntaxTree in syntaxTrees )
+                pipeline.OnSyntaxTreePossiblyChanged( syntaxTree, out var configurationInvalidated );
+
+                if ( configurationInvalidated )
                 {
-                    pipeline.OnSyntaxTreeUpdated( syntaxTree );
-                    SyntaxTreeResultCache.OnSyntaxTreeUpdated( syntaxTree );
+                    SyntaxTreeResultCache.Clear();
+
+                    break;
                 }
+                    
+                SyntaxTreeResultCache.OnSyntaxTreePossiblyChanged( syntaxTree );
             }
 
             // Computes the set of semantic models that need to be processed.
