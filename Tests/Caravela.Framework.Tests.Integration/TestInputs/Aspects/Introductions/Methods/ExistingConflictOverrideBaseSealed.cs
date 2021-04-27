@@ -3,6 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
+using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverrideBaseSealed
 {
@@ -16,7 +17,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
-            return 42;
+            return proceed();
         }
     }
 

@@ -3,6 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
+using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew
 {
@@ -15,91 +16,121 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassMethod()
         {
-            return 21;
+            return proceed();
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        public static int BaseClassMethod_Static()
+        {
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenBaseClassMethod()
         {
-            return 21;
+            return proceed();
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        public static int HiddenBaseClassMethod_Static()
+        {
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenBaseClassVirtualMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int HiddenVirtualBaseClassVirtualMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualSealedMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassVirtualOverridenMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassAbstractMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int BaseClassAbstractSealedMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassMethod()
         {
-            return 21;
+            return proceed();
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        public static int DerivedClassMethod_Static()
+        {
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassVirtualMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int DerivedClassVirtualSealedMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int ExistingMethod()
         {
-            return 21;
+            return proceed();
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        public static int ExistingMethod_Static()
+        {
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
         public int ExistingVirtualMethod()
         {
-            return 21;
+            return proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
-        public int NonExistingMethod()
+        public int NonExistentMethod()
         {
-            return 21;
+            return proceed();
+        }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.New)]
+        public static int NonExistentMethod_Static()
+        {
+            return proceed();
         }
     }
 
@@ -110,7 +141,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 42;
         }
 
+        public static int BaseClassMethod_Static()
+        {
+            return 42;
+        }
+
         public int HiddenBaseClassMethod()
+        {
+            return 42;
+        }
+
+        public static int HiddenBaseClassMethod_Static()
         {
             return 42;
         }
@@ -152,6 +193,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 33;
         }
 
+        public new static int HiddenBaseClassMethod_Static()
+        {
+            return 33;
+        }
+
         public new int HiddenBaseClassVirtualMethod()
         {
             return 33;
@@ -187,6 +233,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             return 33;
         }
 
+        public static int DerivedClassMethod_Static()
+        {
+            return 33;
+        }
+
         public virtual int DerivedClassVirtualMethod()
         {
             return 33;
@@ -203,6 +254,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
     internal class TargetClass : DerivedClass
     {
         public int ExistingMethod()
+        {
+            return 27;
+        }
+
+        public static int ExistingMethod_Static()
         {
             return 27;
         }

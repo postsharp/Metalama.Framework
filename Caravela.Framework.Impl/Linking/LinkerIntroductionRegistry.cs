@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Linking
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
             this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
-            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Instance );
+            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Default );
 
             foreach ( var introducedMember in introducedMembers )
             {

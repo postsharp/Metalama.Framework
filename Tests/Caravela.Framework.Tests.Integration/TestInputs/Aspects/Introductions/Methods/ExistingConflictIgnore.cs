@@ -18,6 +18,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
             Console.WriteLine("This is introduced method.");
             return 42;
         }
+
+        [IntroduceMethod(ConflictBehavior = ConflictBehavior.Ignore)]
+        public static int ExistingMethod_Static()
+        {
+            Console.WriteLine("This is introduced static method.");
+            return 42;
+        }
     }
 
     [TestOutput]
@@ -25,6 +32,11 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
     internal class TargetClass
     {
         public int ExistingMethod()
+        {
+            return 13;
+        }
+
+        public static int ExistingMethod_Static()
         {
             return 13;
         }

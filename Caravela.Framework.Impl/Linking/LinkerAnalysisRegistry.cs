@@ -2,12 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Linking
@@ -96,7 +98,9 @@ namespace Caravela.Framework.Impl.Linking
             }
             else
             {
-                throw new NotSupportedException();
+                // Base methods are not inlineable.
+
+                return false;
             }
         }
 
@@ -146,7 +150,6 @@ namespace Caravela.Framework.Impl.Linking
         {
             // TODO: Other things than methods.
             var overrides = this._introductionRegistry.GetOverridesForSymbol( (IMethodSymbol) referencedSymbol );
-
             var indexedLayers = this._orderedAspectLayers.Select( ( o, i ) => (o.AspectLayerId, Index: i) ).ToReadOnlyList();
             var annotationLayerIndex = indexedLayers.Single( x => x.AspectLayerId == referenceAnnotation.AspectLayer ).Index;
 
@@ -162,10 +165,45 @@ namespace Caravela.Framework.Impl.Linking
 
             if ( previousLayerOverride == null )
             {
+                if ( referencedSymbol is IMethodSymbol methodSymbol )
+                {
+                    if ( methodSymbol.OverriddenMethod != null )
+                    {
+                        return methodSymbol.OverriddenMethod;
+                    }
+                    else if (TryGetHiddenSymbol(methodSymbol, out var hiddenSymbol))
+                    {
+                        return hiddenSymbol;
+                    }
+                }
+
                 return referencedSymbol;
             }
 
             return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
+        }
+
+        private static bool TryGetHiddenSymbol( ISymbol methodSymbol, [NotNullWhen(true)] out ISymbol? hiddenSymbol )
+        {
+            var currentType = methodSymbol.ContainingType.BaseType;
+
+            while (currentType != null)
+            {
+                // TODO: Optimize - lookup by name first instead of equating all members.
+                foreach ( var member in currentType.GetMembers() )
+                {
+                    if (StructuralSymbolComparer.Signature.Equals(methodSymbol, member))
+                    {
+                        hiddenSymbol = (IMethodSymbol) member;
+                        return true;
+                    }
+                }
+
+                currentType = currentType.BaseType;
+            }
+
+            hiddenSymbol = null;
+            return false;
         }
 
         /// <summary>
@@ -175,6 +213,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <returns><c>True</c> if the body has simple control flow, otherwise <c>false</c>.</returns>
         public bool HasSimpleReturnControlFlow( IMethodSymbol methodSymbol )
         {
+            // TODO: This will go away and will be replaced by using Roslyn's control flow analysis.
             if ( !this._methodBodyInfos.TryGetValue( methodSymbol, out var result ) )
             {
                 return false;

@@ -201,7 +201,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 templateInstance,
                 targetMethod,
                 compilation,
-                new LinkerOverrideProceedImpl( default, targetMethod ),
+                new LinkerOverrideProceedImpl( default, targetMethod, LinkerAnnotationOrder.Default ),
                 lexicalScope,
                 diagnostics );
         }

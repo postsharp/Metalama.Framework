@@ -22,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
+        public IMethod? OverriddenMethod { get; set; }
+
         public AspectLinkerOptions? LinkerOptions { get; }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
@@ -131,7 +133,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
-        public IMethod? OverriddenMethod => throw new NotImplementedException();
     }
 }
