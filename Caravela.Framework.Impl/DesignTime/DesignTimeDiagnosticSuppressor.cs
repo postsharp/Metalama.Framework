@@ -63,13 +63,13 @@ namespace Caravela.Framework.Impl.DesignTime
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 compilation,
                 syntaxTrees,
                 options,
                 cancellationToken );
 
-            foreach ( var syntaxTreeResult in syntaxTreeResults )
+            foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
             {
                 if ( syntaxTreeResult == null )
                 {

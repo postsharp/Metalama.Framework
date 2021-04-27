@@ -14,19 +14,25 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    internal static partial class DesignTimeAspectPipelineCache
+    internal record DesignTimeResults ( ImmutableArray<DesignTimeSyntaxTreeResult> SyntaxTreeResults );
+    
+    internal partial class DesignTimeAspectPipelineCache
     {
-        private static readonly ConditionalWeakTable<Compilation, object> _sync = new();
-        private static readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelineCache = new();
-        private static bool _attachDebuggerRequested;
+        private readonly ConditionalWeakTable<Compilation, object> _sync = new();
+        private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
+        private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
+        private bool _attachDebuggerRequested;
 
-        private static void AttachDebugger( BuildOptions buildOptions )
+        public static DesignTimeAspectPipelineCache Instance { get; } = new();
+    
+
+        private void AttachDebugger( BuildOptions buildOptions )
         {
-            if ( buildOptions.DesignTimeAttachDebugger && !_attachDebuggerRequested )
+            if ( buildOptions.DesignTimeAttachDebugger && !this._attachDebuggerRequested )
             {
                 // We try to request to attach the debugger a single time, even if the user refuses or if the debugger gets
                 // detaches. It makes a better debugging experience.
-                _attachDebuggerRequested = true;
+                this._attachDebuggerRequested = true;
 
                 if ( !Process.GetCurrentProcess().ProcessName.Equals( "devenv", StringComparison.OrdinalIgnoreCase ) &&
                      !Debugger.IsAttached )
@@ -36,24 +42,24 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        private static DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
-            => _pipelineCache.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
+        private DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
+            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
 
-        public static ImmutableArray<SyntaxTreeResult> GetPipelineResult(
+        public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
-            => GetPipelineResult( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
+            => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
 
-        public static ImmutableArray<SyntaxTreeResult> GetPipelineResult(
+        public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
         {
-            AttachDebugger( buildOptions );
+            this.AttachDebugger( buildOptions );
 
-            var pipeline = GetOrCreatePipeline( buildOptions );
+            var pipeline = this.GetOrCreatePipeline( buildOptions );
 
             // Invalidate the cache, if required.
             foreach ( var syntaxTree in syntaxTrees )
@@ -62,12 +68,12 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 if ( configurationInvalidated )
                 {
-                    SyntaxTreeResultCache.Clear();
+                    this._syntaxTreeResultCache.Clear();
 
                     break;
                 }
 
-                SyntaxTreeResultCache.OnSyntaxTreePossiblyChanged( syntaxTree );
+                this._syntaxTreeResultCache.OnSyntaxTreePossiblyChanged( syntaxTree );
             }
 
             // Computes the set of semantic models that need to be processed.
@@ -75,7 +81,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var syntaxTree in syntaxTrees )
             {
-                if ( !SyntaxTreeResultCache.TryGetValue( syntaxTree, out _, true ) )
+                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _, true ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
                 }
@@ -84,32 +90,32 @@ namespace Caravela.Framework.Impl.DesignTime
             // Execute the pipeline if required, and update the cache.
             if ( uncachedSyntaxTrees.Count > 0 )
             {
-                var lockable = _sync.GetOrCreateValue( compilation );
+                var lockable = this._sync.GetOrCreateValue( compilation );
 
                 lock ( lockable )
                 {
                     var partialCompilation = PartialCompilation.CreatePartial( compilation, uncachedSyntaxTrees );
                     var result = pipeline.Execute( partialCompilation );
 
-                    SyntaxTreeResultCache.Update( compilation, result );
+                    this._syntaxTreeResultCache.Update( compilation, result );
                 }
             }
 
             // Get the results from the cache. We don't need to check dependencies
-            var resultArrayBuilder = ImmutableArray.CreateBuilder<SyntaxTreeResult>( syntaxTrees.Count );
+            var resultArrayBuilder = ImmutableArray.CreateBuilder<DesignTimeSyntaxTreeResult>( syntaxTrees.Count );
 
             foreach ( var syntaxTree in syntaxTrees )
             {
                 // Get the result from the cache, but there is no need to validate dependencies because we've just dont it an
                 // instant ago and a data race and it is ok if the data race is won by the competing task.
 
-                if ( SyntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
+                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
                 {
                     resultArrayBuilder.Add( syntaxTreeResult );
                 }
             }
 
-            return resultArrayBuilder.ToImmutable();
+            return new DesignTimeResults( resultArrayBuilder.ToImmutable() );
         }
     }
 }

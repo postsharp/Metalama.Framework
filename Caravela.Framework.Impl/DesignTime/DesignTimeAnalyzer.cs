@@ -63,14 +63,14 @@ namespace Caravela.Framework.Impl.DesignTime
             var compilation = (CSharpCompilation) context.SemanticModel.Compilation;
 
             // Execute the pipeline.
-            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 context.SemanticModel.Compilation,
                 new[] { context.SemanticModel.SyntaxTree },
                 new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
                 context.CancellationToken );
 
             // Report diagnostics.
-            var result = syntaxTreeResults.SingleOrDefault( r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
+            var result = syntaxTreeResults.SyntaxTreeResults.SingleOrDefault( r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
 
             if ( result != null )
             {

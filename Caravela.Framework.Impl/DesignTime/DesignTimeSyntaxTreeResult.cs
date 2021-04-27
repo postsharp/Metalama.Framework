@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    internal class SyntaxTreeResult
+    internal class DesignTimeSyntaxTreeResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         public ImmutableArray<string> Dependencies { get; }
 
-        public SyntaxTreeResult(
+        public DesignTimeSyntaxTreeResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,

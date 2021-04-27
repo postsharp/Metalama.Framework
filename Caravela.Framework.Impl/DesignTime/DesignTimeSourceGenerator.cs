@@ -21,13 +21,13 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             // Execute the pipeline.
-            var syntaxTreeResults = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 compilation,
                 new BuildOptions( context.AnalyzerConfigOptions ),
                 context.CancellationToken );
 
             // Add introduced syntax trees.
-            foreach ( var syntaxTreeResult in syntaxTreeResults )
+            foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
             {
                 if ( syntaxTreeResult != null )
                 {
