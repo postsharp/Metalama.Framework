@@ -8,13 +8,26 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Collections
 {
+    /// <summary>
+    /// Provides extension methods to the <see cref="IEnumerable{T}"/> and similar interfaces.
+    /// </summary>
     public static class EnumerableExtensions
     {
+        /// <summary>
+        /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
+        /// only if needed.
+        /// </summary>
         public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection is IReadOnlyList<T> list ? list : collection.ToList();
 
+        /// <summary>
+        /// Converts an <see cref="IEnumerable"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
+        /// only if needed.
         public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
             => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
 
+        /// <summary>
+        /// Appends a set of items to a list.
+        /// </summary>
         public static void AddRange<T>( this IList<T> list, IEnumerable<T> items )
         {
             foreach ( var item in items )
@@ -23,6 +36,15 @@ namespace Caravela.Framework.Impl.Collections
             }
         }
 
+        /// <summary>
+        /// Selects all values in a linked list. This is typically used to select all ancestors of a tree node. This method returns distinct nodes only.
+        /// </summary>
+        /// <param name="item">The initial item.</param>
+        /// <param name="getNext">A function that gets the next item in the list.</param>
+        /// <param name="includeThis">A value indicating whether <paramref name="item"/> itself should be included in the result set.</param>
+        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IEnumerable<T> SelectRecursive<T>( this T item, Func<T, T?> getNext, bool includeThis = false, bool throwOnDuplicate = true )
             where T : class
         {
@@ -47,6 +69,15 @@ namespace Caravela.Framework.Impl.Collections
             return list;
         }
 
+        /// <summary>
+        /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
+        /// </summary>
+        /// <param name="item">The initial item.</param>
+        /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
+        /// <param name="includeThis">A value indicating whether <paramref name="item"/> itself should be included in the result set.</param>
+        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IEnumerable<T> SelectManyRecursive<T>(
             this T item,
             Func<T, IEnumerable<T>?> getItems,
@@ -68,6 +99,15 @@ namespace Caravela.Framework.Impl.Collections
             return hashSet;
         }
 
+        /// <summary>
+        /// Selects the closure of a graph. This is typically used to select all descendants of a tree node.  This method returns distinct nodes only.
+        /// </summary>
+        /// <param name="collection">The initial collection of items.</param>
+        /// <param name="getItems">A function that returns the set of all nodes connected to a given node.</param>
+        /// <param name="includeFirstLevel">A value indicating whether the items of <paramref name="collection"/> itself should be included in the result set.</param>
+        /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public static IEnumerable<T> SelectManyRecursive<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
@@ -136,11 +176,17 @@ namespace Caravela.Framework.Impl.Collections
             recursionCheck--;
         }
 
+        /// <summary>
+        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from an collection of <see cref="KeyValuePair{TKey,TValue}"/>.
+        /// </summary>
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TKey, TValue>(
             this IEnumerable<KeyValuePair<TKey, TValue>> enumerable )
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, p => p.Key, p => p.Value );
 
+        /// <summary>
+        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection, with a different value type than the input item type.
+        /// </summary>
         public static ImmutableMultiValueDictionary<TKey, TValue> ToMultiValueDictionary<TItem, TKey, TValue>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
@@ -149,6 +195,9 @@ namespace Caravela.Framework.Impl.Collections
             where TKey : notnull
             => ImmutableMultiValueDictionary<TKey, TValue>.Create( enumerable, getKey, getValue, keyComparer );
 
+        /// <summary>
+        /// Builds an <see cref="ImmutableMultiValueDictionary{TKey,TValue}"/> from a collection.
+        /// </summary>
         public static ImmutableMultiValueDictionary<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
