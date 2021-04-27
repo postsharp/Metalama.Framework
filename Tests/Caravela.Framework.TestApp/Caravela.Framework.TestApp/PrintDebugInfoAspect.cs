@@ -13,7 +13,7 @@ namespace Caravela.Framework.TestApp
          //   Debugger.Launch();
             base.Initialize( aspectBuilder );
 
-            aspectBuilder.ReportDiagnostic( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v4.", aspectBuilder.TargetDeclaration );
+            aspectBuilder.ReportDiagnostic( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v5.", aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {

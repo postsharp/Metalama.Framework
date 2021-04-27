@@ -5,7 +5,7 @@ using Caravela.Framework.TestApp.Aspects;
 
 namespace Caravela.Framework.TestApp
 {
-    [IntroduceSomeMethodAspect]
+    [IntroduceSomeMethodAspect("Foo", "Bar")]
     internal partial class Program
     {
         [SuppressWarning("CS1998", "IDE0051")]
@@ -18,7 +18,7 @@ namespace Caravela.Framework.TestApp
         {
             //Console.WriteLine( $"x={x}" );
 
-            SomeIntroducedMethod();
+            Foo();
             (new Program()).SomeOtherIntroducedMethod();
 
            // IMethod m = null;
@@ -36,7 +36,7 @@ namespace Caravela.Framework.TestApp
             
             Cancel();
         }
-
+        
         [SwallowExceptionsAspect]
         [PrintDebugInfoAspect]
         public static void MethodWithTwoAspects()
@@ -44,6 +44,11 @@ namespace Caravela.Framework.TestApp
             Console.WriteLine( "This is method with two aspects" );
         }
 
+        [PrintDebugInfoAspect]
+        public static void SomeOtherMethod()
+        {
+
+        }
 
         [PrintDebugInfoAspect]
         private static void PrintDebugInfo() { }
