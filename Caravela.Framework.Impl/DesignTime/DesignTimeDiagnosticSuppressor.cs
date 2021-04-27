@@ -15,6 +15,9 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Our implementation of <see cref="DiagnosticSuppressor"/>.
+    /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
@@ -54,7 +57,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// A testable overload of <see cref="ReportSuppressions(SuppressionAnalysisContext)"/>.
         /// </summary>
-        internal static void ReportSuppressions(
+        private static void ReportSuppressions(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,

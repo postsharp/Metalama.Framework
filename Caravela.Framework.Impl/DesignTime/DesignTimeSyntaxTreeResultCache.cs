@@ -27,10 +27,9 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// Updates cache with a <see cref="DesignTimeAspectPipelineResult"/> that includes results for several syntax trees.
         /// </summary>
-        /// <param name="results"></param>
         public void Update( Compilation compilation, DesignTimeAspectPipelineResult results )
         {
-            var resultsByTree = this.SplitResultsByTree( compilation, results );
+            var resultsByTree = SplitResultsByTree( compilation, results );
 
             foreach ( var result in resultsByTree )
             {
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         /// <param name="results"></param>
         /// <returns></returns>
-        private IEnumerable<DesignTimeSyntaxTreeResult> SplitResultsByTree( Compilation compilation, DesignTimeAspectPipelineResult results )
+        private static IEnumerable<DesignTimeSyntaxTreeResult> SplitResultsByTree( Compilation compilation, DesignTimeAspectPipelineResult results )
         {
             var resultsByTree = results
                 .InputSyntaxTrees

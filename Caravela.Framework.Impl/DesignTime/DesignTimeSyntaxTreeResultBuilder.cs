@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Builds a <see cref="DesignTimeSyntaxTreeResult"/>.
+    /// </summary>
     internal sealed class DesignTimeSyntaxTreeResultBuilder
     {
         private readonly SyntaxTree _syntaxTree;

@@ -7,6 +7,10 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Represents the content of <see cref="DesignTimeAspectPipelineResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
+    /// This class is compilation-independent and cacheable.
+    /// </summary>
     internal class DesignTimeSyntaxTreeResult
     {
         /// <summary>

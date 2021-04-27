@@ -15,8 +15,15 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     public partial class DesignTimeAnalyzer
     {
+        /// <summary>
+        /// Performs the analysis that are not performed by the pipeline: essentially validates that run-time code does not
+        /// reference compile-time-only code, and run the template compiler.
+        /// </summary>
         private class Visitor : CSharpSyntaxWalker, IDiagnosticAdder
         {
+            // TODO: These analysis should probably be moved elsewhere and performed in the pipeline.
+            // There seems to be no reason any more to run the template analysis here instead of in the pipeline.
+            
             private readonly SemanticModelAnalysisContext _context;
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );

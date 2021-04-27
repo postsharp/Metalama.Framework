@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     return false;
                 }
 
-                if ( !this.TryExecuteCore( partialCompilation, diagnosticAdder, configuration, out var result ) )
+                if ( !TryExecuteCore( partialCompilation, diagnosticAdder, configuration, out var result ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;

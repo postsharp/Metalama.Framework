@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Caravela.Framework.Sdk
+namespace Caravela.Framework.Impl.CodeModel
 {
     public abstract partial class PartialCompilation
     {

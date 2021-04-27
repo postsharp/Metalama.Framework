@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.DesignTime;
-using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
 using System.Collections.Generic;
 using System.Linq;

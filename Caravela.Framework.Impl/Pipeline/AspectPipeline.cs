@@ -175,7 +175,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="PipelineStageResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        private protected bool TryExecuteCore(
+        private protected static bool TryExecuteCore(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             PipelineConfiguration pipelineConfiguration,

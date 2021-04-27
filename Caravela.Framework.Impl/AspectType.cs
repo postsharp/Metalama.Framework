@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl
             for ( var type = aspectNamedType; type != null; type = type.BaseType )
             {
                 var aspectLayersAttributeData =
-                    type.GetAttributes().SingleOrDefault( a => a.AttributeClass.Is( typeof(ProvidesAspectLayersAttribute) ) );
+                    type.GetAttributes().SingleOrDefault( a => a.AttributeClass?.Is( typeof(ProvidesAspectLayersAttribute) ) ?? false );
 
                 if ( aspectLayersAttributeData != null )
                 {

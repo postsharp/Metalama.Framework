@@ -2,10 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -16,7 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace Caravela.Framework.Impl.DesignTime
 {
     /// <summary>
-    /// The main entry point of Caravela when called from a Roslyn source generator.
+    /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
     internal class DesignTimeAspectPipeline : AspectPipeline
     {
@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     new ImmutableDiagnosticList( diagnosticList ) );
             }
 
-            var success = this.TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
+            var success = TryExecuteCore( compilation, diagnosticList, configuration, out var pipelineResult );
 
             return new DesignTimeAspectPipelineResult(
                 success,

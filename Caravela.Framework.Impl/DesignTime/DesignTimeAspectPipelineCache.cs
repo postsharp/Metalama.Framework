@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -14,18 +14,26 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-    internal record DesignTimeResults ( ImmutableArray<DesignTimeSyntaxTreeResult> SyntaxTreeResults );
-    
-    internal partial class DesignTimeAspectPipelineCache
+    /// <summary>
+    /// Caches the <see cref="DesignTimeAspectPipeline"/> (so they can be reused between projects) and the
+    /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
+    /// cache invalidation methods as appropriate.
+    /// </summary>
+    internal class DesignTimeAspectPipelineCache
     {
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
         private bool _attachDebuggerRequested;
 
+        /// <summary>
+        /// Gets the unique instance of this class.
+        /// </summary>
         public static DesignTimeAspectPipelineCache Instance { get; } = new();
-    
 
+        /// <summary>
+        /// Attaches the debugger to the current process if requested.
+        /// </summary>
         private void AttachDebugger( BuildOptions buildOptions )
         {
             if ( buildOptions.DesignTimeAttachDebugger && !this._attachDebuggerRequested )
@@ -42,15 +50,26 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
+        /// <summary>
+        /// Gets the pipeline for a given project, and creates it if necessary.
+        /// </summary>
+        /// <param name="buildOptions"></param>
+        /// <returns></returns>
         private DesignTimeAspectPipeline GetOrCreatePipeline( BuildOptions buildOptions )
             => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions ) );
 
+        /// <summary>
+        /// Gets the design-time results for a whole compilation.
+        /// </summary>
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             BuildOptions buildOptions,
             CancellationToken cancellationToken )
             => this.GetDesignTimeResults( compilation, compilation.SyntaxTrees.ToImmutableArray(), buildOptions, cancellationToken );
 
+        /// <summary>
+        /// Gets the design-time results for a set of syntax trees.
+        /// </summary>
         public DesignTimeResults GetDesignTimeResults(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
