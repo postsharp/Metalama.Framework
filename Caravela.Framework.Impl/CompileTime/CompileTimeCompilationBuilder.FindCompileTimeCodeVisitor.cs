@@ -9,6 +9,9 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+        /// <summary>
+        /// Determines if a syntax tree has compile-time code. The result is exposed in the <see cref="HasCompileTimeCode"/> property.
+        /// </summary>
         private class FindCompileTimeCodeVisitor : CSharpSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;

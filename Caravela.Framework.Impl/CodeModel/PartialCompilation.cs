@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
-    
     /// <summary>
     /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
     /// to specific syntax trees.
@@ -32,7 +31,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract IEnumerable<ITypeSymbol> Types { get; }
 
         /// <summary>
-        /// Determines if the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
+        /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
         public abstract bool IsPartial { get; }
 
@@ -79,16 +78,17 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         IPartialCompilation IPartialCompilation.UpdateSyntaxTrees(
-            IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-            IEnumerable<SyntaxTree> addedTrees )
+            IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
+            IReadOnlyList<SyntaxTree> addedTrees )
             => this.UpdateSyntaxTrees( replacedTrees, addedTrees );
 
         /// <summary>
         ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
         /// representing the modified object.
         /// </summary>
-        public abstract PartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees );
-
+        public abstract PartialCompilation UpdateSyntaxTrees(
+            IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
+            IReadOnlyList<SyntaxTree> addedTrees );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.

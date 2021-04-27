@@ -11,6 +11,10 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+        /// <summary>
+        /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
+        /// by a <c>throw new NotSupportedException()</c>.
+        /// </summary>
         private class PrepareRunTimeAssemblyRewriter : Rewriter
         {
             private readonly INamedTypeSymbol? _aspectDriverSymbol;

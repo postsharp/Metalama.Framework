@@ -69,7 +69,8 @@ namespace Caravela.Framework.Impl.DesignTime
                 context.CancellationToken );
 
             // Report diagnostics from the pipeline.
-            var result = syntaxTreeResults.SyntaxTreeResults.SingleOrDefault( r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
+            var result = syntaxTreeResults.SyntaxTreeResults.SingleOrDefault(
+                r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
 
             if ( result != null )
             {

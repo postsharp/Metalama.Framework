@@ -12,7 +12,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public partial class AspectTestRunner : TestRunnerBase
+    public class AspectTestRunner : TestRunnerBase
     {
         public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory ) { }
 

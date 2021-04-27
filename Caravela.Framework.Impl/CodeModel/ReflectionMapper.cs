@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return symbol;
         }
-        
+
         /// <summary>
         /// Gets a <see cref="ITypeSymbol"/> given a reflection <see cref="Type"/>.
         /// </summary>
@@ -115,6 +115,5 @@ namespace Caravela.Framework.Impl.CodeModel
 
             return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
         }
-
     }
 }

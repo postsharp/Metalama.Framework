@@ -123,7 +123,7 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <inheritdoc/>
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+            CompileTimeProjectLoader compileTimeProjectLoader )
             => new SourceGeneratorPipelineStage( parts, this );
     }
 }

@@ -89,7 +89,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private protected override HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+            CompileTimeProjectLoader compileTimeProjectLoader )
             => new CompileTimePipelineStage( parts, this );
 
         public override bool CanTransformCompilation => true;

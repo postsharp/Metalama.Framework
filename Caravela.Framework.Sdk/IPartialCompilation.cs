@@ -23,7 +23,7 @@ namespace Caravela.Framework.Sdk
         IReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
 
         /// <summary>
-        /// Determines if the current <see cref="IPartialCompilation"/> is actually partial, or represents a complete compilation.
+        /// Gets a value indicating whether the current <see cref="IPartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
         bool IsPartial { get; }
 
@@ -31,6 +31,6 @@ namespace Caravela.Framework.Sdk
         ///  Adds and replaces syntax trees of the current <see cref="IPartialCompilation"/> and returns a new <see cref="IPartialCompilation"/>
         /// representing the modified object.
         /// </summary>
-        public IPartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacements, IEnumerable<SyntaxTree> addedTrees );
+        public IPartialCompilation UpdateSyntaxTrees( IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacements, IReadOnlyList<SyntaxTree> addedTrees );
     }
 }

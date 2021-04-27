@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
-            this.ServiceProvider.AddService( new ReferenceAssemblyLocator() );
+            this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.Pipeline
             IReadOnlyList<AspectClassMetadata> AspectTypes,
             ImmutableArray<OrderedAspectLayer> Layers,
             CompileTimeProject? CompileTimeProject,
-            CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
+            CompileTimeProjectLoader CompileTimeProjectLoader );
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
@@ -103,7 +103,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var roslynCompilation = compilation.Compilation;
 
             // Create dependencies.
-            var loader = CompileTimeAssemblyLoader.Create( this._domain, this.ServiceProvider, roslynCompilation );
+            var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
             if ( !loader.TryGenerateCompileTimeProject( roslynCompilation, diagnosticAdder, out var compileTimeProject ) )
@@ -115,10 +115,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
             // Create aspect types.
             var driverFactory = new AspectDriverFactory( compilation.Compilation, this.BuildOptions.PlugIns );
-            var aspectTypeFactory = new AspectTypeFactory( compilation.Compilation, driverFactory );
+            var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
 
-            var aspectNamedTypes = GetAspectTypes( compileTimeProject );
-            var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes, diagnosticAdder ).ToImmutableArray();
+            var aspectNamedTypes = GetAspectTypes();
+            var aspectTypes = aspectTypeFactory.GetAspectClassMetadatas( aspectNamedTypes, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             return true;
 
-            IReadOnlyList<INamedTypeSymbol> GetAspectTypes( CompileTimeProject? compileTimeProject )
+            IReadOnlyList<INamedTypeSymbol> GetAspectTypes()
                 => compileTimeProject?.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false )
                        .SelectMany( p => p.AspectTypes )
                        .Select( t => compilation.Compilation.GetTypeByMetadataName( t ) )
@@ -191,7 +191,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var aspectSource = new CompilationAspectSource(
                 pipelineConfiguration.AspectTypes,
-                pipelineConfiguration.CompileTimeAssemblyLoader );
+                pipelineConfiguration.CompileTimeProjectLoader );
 
             pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
 
@@ -221,16 +221,16 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Creates an instance of <see cref="HighLevelPipelineStage"/>.
         /// </summary>
         /// <param name="parts"></param>
-        /// <param name="compileTimeAssemblyLoader"></param>
+        /// <param name="compileTimeProjectLoader"></param>
         /// <returns></returns>
         private protected abstract HighLevelPipelineStage CreateStage(
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeAssemblyLoader compileTimeAssemblyLoader );
+            CompileTimeProjectLoader compileTimeProjectLoader );
 
         private PipelineStage CreateStage(
             object groupKey,
             IReadOnlyList<OrderedAspectLayer> parts,
-            CompileTimeAssemblyLoader compileTimeAssemblyLoader )
+            CompileTimeProjectLoader compileTimeProjectLoader )
         {
             switch ( groupKey )
             {
@@ -242,7 +242,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 case nameof(AspectDriver):
 
-                    return this.CreateStage( parts, compileTimeAssemblyLoader );
+                    return this.CreateStage( parts, compileTimeProjectLoader );
 
                 default:
 

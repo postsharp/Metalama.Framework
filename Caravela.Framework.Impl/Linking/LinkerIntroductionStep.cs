@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -99,8 +100,6 @@ namespace Caravela.Framework.Impl.Linking
             var intermediateCompilation = input.InitialCompilation;
             Rewriter addIntroducedElementsRewriter = new( introducedMemberCollection, suppressionsByTarget, input.CompilationModel );
 
-            List<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees = new();
-
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
                 var oldRoot = initialSyntaxTree.GetRoot();
@@ -118,8 +117,8 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
-                syntaxTreeMapping.Select( p => (p.Key, p.Value) ),
-                Enumerable.Empty<SyntaxTree>() );
+                syntaxTreeMapping.Select( p => (p.Key, p.Value) ).ToList(),
+                Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 intermediateCompilation.Compilation,

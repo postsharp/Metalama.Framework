@@ -22,6 +22,7 @@ namespace Caravela.Framework.Impl.Collections
         /// <summary>
         /// Converts an <see cref="IEnumerable"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
         /// only if needed.
+        /// </summary>
         public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
             => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
 

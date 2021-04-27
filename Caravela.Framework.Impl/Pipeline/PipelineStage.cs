@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -28,6 +29,6 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <param name="diagnostics"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public abstract bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, out PipelineStageResult? result );
+        public abstract bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result );
     }
 }

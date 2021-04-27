@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -25,7 +26,7 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, out PipelineStageResult? result )
+        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
         {
             var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 

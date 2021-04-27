@@ -20,6 +20,9 @@ namespace Caravela.Framework.Impl
         /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect
         /// type is being processed, not before.
         /// </summary>
-        IEnumerable<AspectInstance> GetAspectInstances( CompilationModel compilation, AspectClassMetadata aspectClassMetadata, IDiagnosticAdder diagnosticAdder );
+        IEnumerable<AspectInstance> GetAspectInstances(
+            CompilationModel compilation,
+            AspectClassMetadata aspectClassMetadata,
+            IDiagnosticAdder diagnosticAdder );
     }
 }

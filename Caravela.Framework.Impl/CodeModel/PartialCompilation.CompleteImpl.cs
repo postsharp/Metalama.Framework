@@ -22,9 +22,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override IEnumerable<ITypeSymbol> Types => this.Compilation.Assembly.GetTypes();
 
-            public override bool IsPartial { get; }
+            public override bool IsPartial => false;
 
-            public override PartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees )
+            public override PartialCompilation UpdateSyntaxTrees(
+                IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
+                IReadOnlyList<SyntaxTree> addedTrees )
             {
                 var compilation = this.Compilation;
 

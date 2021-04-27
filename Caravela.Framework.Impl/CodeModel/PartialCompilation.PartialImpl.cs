@@ -35,13 +35,11 @@ namespace Caravela.Framework.Impl.CodeModel
             public override bool IsPartial => false;
 
             public override PartialCompilation UpdateSyntaxTrees(
-                IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-                IEnumerable<SyntaxTree> addedTrees )
+                IReadOnlyList<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
+                IReadOnlyList<SyntaxTree> addedTrees )
             {
                 var compilation = this.Compilation;
                 var syntaxTrees = this._syntaxTrees;
-
-                var replacedTreeEnumerator = replacedTrees.GetEnumerator();
 
                 foreach ( var replacement in replacedTrees )
                 {
@@ -50,7 +48,6 @@ namespace Caravela.Framework.Impl.CodeModel
                         throw new KeyNotFoundException();
                     }
 
-                    replacedTreeEnumerator.MoveNext();
                     compilation = compilation.ReplaceSyntaxTree( replacement.OldTree, replacement.NewTree );
                     syntaxTrees = syntaxTrees.Remove( replacement.OldTree ).Add( replacement.NewTree );
                 }

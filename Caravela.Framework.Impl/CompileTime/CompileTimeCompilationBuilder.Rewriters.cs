@@ -10,6 +10,9 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+        /// <summary>
+        /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
+        /// </summary>
         private abstract class Rewriter : CSharpSyntaxRewriter
         {
             public ISymbolClassifier SymbolClassifier { get; }

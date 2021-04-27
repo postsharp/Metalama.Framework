@@ -13,10 +13,13 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-        public static readonly SyntaxAnnotation HasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
-
+        /// <summary>
+        /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
+        /// and removes run-time-only sub trees.
+        /// </summary>
         private sealed class ProduceCompileTimeCodeRewriter : Rewriter
         {
+            private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "hasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
             private readonly IDiagnosticAdder _diagnosticAdder;
 
@@ -79,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             }
                         }
 
-                        return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
+                        return (T) node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
 
@@ -118,9 +121,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var transformedNode = (NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!;
 
-                if ( transformedNode.Members.Any( m => m.HasAnnotation( HasCompileTimeCodeAnnotation ) ) )
+                if ( transformedNode.Members.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
+                    return transformedNode.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {
@@ -132,9 +135,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 var transformedNode = (CompilationUnitSyntax) base.VisitCompilationUnit( node )!;
 
-                if ( transformedNode.Members.Any( m => m.HasAnnotation( HasCompileTimeCodeAnnotation ) ) )
+                if ( transformedNode.Members.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return transformedNode.WithAdditionalAnnotations( HasCompileTimeCodeAnnotation );
+                    return transformedNode.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {

@@ -180,17 +180,15 @@ namespace Caravela.Framework.Impl.DesignTime
                                     case SyntaxKind.MultiLineCommentTrivia:
                                     case SyntaxKind.SingleLineCommentTrivia:
                                         // Editing a comment does not change the semantics.
-                                        if ( change.NewText != null && (change.NewText.Contains( "//" ) || change.NewText.Contains( "/*" ) ) )
+                                        if ( change.NewText != null && (change.NewText.Contains( "//" ) || change.NewText.Contains( "/*" )) )
                                         {
                                             // This may be an edit that comments out some syntax. Fallback to node analysis.
                                             break;
                                         }
-                                        
+
                                         continue;
 
-                                    default:
-                                        // Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
-                                        break;
+                                    // Default: Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
                                 }
                             }
 

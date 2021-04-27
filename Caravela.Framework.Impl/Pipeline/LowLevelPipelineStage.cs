@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -20,14 +21,15 @@ namespace Caravela.Framework.Impl.Pipeline
         private readonly IAspectWeaver _aspectWeaver;
         private readonly AspectClassMetadata _aspectClassMetadata;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClassMetadata aspectClassMetadata, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClassMetadata aspectClassMetadata, IAspectPipelineProperties properties ) : base(
+            properties )
         {
             this._aspectWeaver = aspectWeaver;
             this._aspectClassMetadata = aspectClassMetadata;
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, out PipelineStageResult? result )
+        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
         {
             // TODO: it is suboptimal to get a CompilationModel here.
             var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
@@ -45,7 +47,12 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectClassMetadata, aspectInstances, input.PartialCompilation, diagnostics.ReportDiagnostic, resources.Add );
+            var context = new AspectWeaverContext(
+                this._aspectClassMetadata,
+                aspectInstances,
+                input.PartialCompilation,
+                diagnostics.ReportDiagnostic,
+                resources.Add );
 
             PartialCompilation newCompilation;
 

@@ -12,7 +12,6 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal readonly struct CacheableScopedSuppression
     {
-        
         /// <summary>
         /// Gets the diagnostic identifier.
         /// </summary>

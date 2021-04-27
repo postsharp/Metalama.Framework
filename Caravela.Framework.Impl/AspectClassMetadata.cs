@@ -44,7 +44,6 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
 
-        /// <inheritdoc />
         public Location? DiagnosticLocation { get; }
 
         /// <inheritdoc />

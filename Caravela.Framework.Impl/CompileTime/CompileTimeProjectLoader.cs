@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -18,20 +17,23 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal sealed class CompileTimeAssemblyLoader : ICompileTimeTypeResolver
+    /// <summary>
+    /// This class is responsible to cache and load compile-time projects. The caller must first call
+    /// the <see cref="TryGenerateCompileTimeProject"/> for each project with which the loader will be used.
+    /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
+    /// class.
+    /// </summary>
+    internal sealed class CompileTimeProjectLoader : ICompileTimeTypeResolver
     {
         private readonly CompileTimeDomain _domain;
         private readonly CompileTimeCompilationBuilder _builder;
-        private readonly Dictionary<string, (AssemblyIdentity Identity, CompileTimeProject? Project)> _projects = new();
+        private readonly Dictionary<string, (AssemblyIdentity RunTimeIdentity, CompileTimeProject? Project)> _projects = new();
 
         public AttributeDeserializer AttributeDeserializer { get; }
 
         private readonly SystemTypeResolver _systemTypeResolver = new();
 
-        private CompileTimeAssemblyLoader(
-            CompileTimeDomain domain,
-            IServiceProvider serviceProvider,
-            Compilation compilation )
+        private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider )
         {
             this._domain = domain;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
@@ -39,12 +41,14 @@ namespace Caravela.Framework.Impl.CompileTime
             this.AttributeDeserializer = new AttributeDeserializer( this );
         }
 
-        public static CompileTimeAssemblyLoader Create(
+        /// <summary>
+        /// Returns a new <see cref="CompileTimeProjectLoader"/>.
+        /// </summary>
+        public static CompileTimeProjectLoader Create(
             CompileTimeDomain domain,
-            IServiceProvider serviceProvider,
-            Compilation compilation )
+            IServiceProvider serviceProvider )
         {
-            CompileTimeAssemblyLoader loader = new( domain, serviceProvider, compilation );
+            CompileTimeProjectLoader loader = new( domain, serviceProvider );
 
             return loader;
         }
@@ -63,6 +67,13 @@ namespace Caravela.Framework.Impl.CompileTime
             return typeArguments;
         }
 
+        /// <summary>
+        /// Gets a compile-time reflection <see cref="Type"/> given its Roslyn symbol.
+        /// </summary>
+        /// <param name="typeSymbol"></param>
+        /// <param name="fallbackToMock">Determines whether a <see cref="CompileTimeType"/> must be returned
+        /// when a compile-time does not exist.</param>
+        /// <returns></returns>
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock )
         {
             // Check if the type is a .NET system one.
@@ -115,23 +126,26 @@ namespace Caravela.Framework.Impl.CompileTime
             return result;
         }
 
-        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity assemblyIdentity )
+        /// <summary>
+        /// Gets the <see cref="CompileTimeProject"/> for a given <see cref="AssemblyIdentity"/>,
+        /// or <c>null</c> if it does not exist. 
+        /// </summary>
+        public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity )
         {
-            DiagnosticList diagnostics = new();
-
-            if ( !this.TryGetCompileTimeProject( assemblyIdentity, out var assembly ) )
-            {
-                throw new InvalidUserCodeException( "Cannot compile the compile-time project.", diagnostics.ToImmutableArray() );
-            }
+            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity, out var assembly );
 
             return assembly;
         }
 
+        /// <summary>
+        /// Tries to get the <see cref="CompileTimeProject"/> given its <see cref="AssemblyIdentity"/>.
+        /// </summary>
         public bool TryGetCompileTimeProject(
-            AssemblyIdentity assemblyIdentity,
+            AssemblyIdentity runTimeAssemblyIdentity,
             out CompileTimeProject? compileTimeProject )
         {
-            if ( this._projects.TryGetValue( assemblyIdentity.Name, out var cached ) && cached.Identity == assemblyIdentity )
+            if ( this._projects.TryGetValue( runTimeAssemblyIdentity.Name, out var cached )
+                 && cached.RunTimeIdentity == runTimeAssemblyIdentity )
             {
                 compileTimeProject = cached.Project;
 
@@ -145,6 +159,30 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
+        /// <summary>
+        /// Tries to get the <see cref="CompileTimeProject"/> given the non-qualified assembly name.
+        /// </summary>
+        public bool TryGetCompileTimeProject( string referenceName, out CompileTimeProject? project )
+        {
+            if ( !this._projects.TryGetValue( referenceName, out var cached ) )
+            {
+                project = null;
+
+                return false;
+            }
+            else
+            {
+                project = cached.Project;
+
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Generates a <see cref="CompileTimeProject"/> for a given run-time <see cref="Compilation"/>.
+        /// Referenced projects are loaded or generated as necessary. Note that other methods of this class do not
+        /// generate projects, they will only ones that have been generated or loaded by this method.
+        /// </summary>
         public bool TryGenerateCompileTimeProject(
             Compilation runTimeCompilation,
             IDiagnosticAdder diagnosticSink,
@@ -152,7 +190,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             if ( this._projects.TryGetValue( runTimeCompilation.AssemblyName.AssertNotNull(), out var cached ) )
             {
-                if ( cached.Identity != runTimeCompilation.Assembly.Identity )
+                if ( cached.RunTimeIdentity != runTimeCompilation.Assembly.Identity )
                 {
                     throw new AssertionFailedException();
                 }
@@ -221,7 +259,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( this._projects.TryGetValue( assemblyIdentity.Name, out var cached ) )
             {
-                if ( cached.Identity != assemblyIdentity )
+                if ( cached.RunTimeIdentity != assemblyIdentity )
                 {
                     throw new AssertionFailedException();
                 }
@@ -315,6 +353,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             if ( !this._builder.TryCompileDeserializedProject(
+                assemblyIdentity.Name,
                 manifest,
                 syntaxTrees,
                 referenceProjects,
@@ -330,22 +369,6 @@ namespace Caravela.Framework.Impl.CompileTime
             project = CompileTimeProject.Create( this._domain, assemblyIdentity, referenceProjects, manifest, compilation, memoryStream.ToArray(), null );
 
             return true;
-        }
-
-        public bool TryGetCompileTimeProject( string referenceName, out CompileTimeProject? project )
-        {
-            if ( !this._projects.TryGetValue( referenceName, out var cached ) )
-            {
-                project = null;
-
-                return false;
-            }
-            else
-            {
-                project = cached.Project;
-
-                return true;
-            }
         }
     }
 }

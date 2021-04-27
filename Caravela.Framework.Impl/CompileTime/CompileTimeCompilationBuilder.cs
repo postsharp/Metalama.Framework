@@ -19,10 +19,12 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
+    /// <summary>
+    /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
+    /// </summary>
     internal partial class CompileTimeCompilationBuilder
     {
         private readonly IServiceProvider _serviceProvider;
-        private static long _nextVersionNumber;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
 
@@ -59,6 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeTrees,
             IEnumerable<CompileTimeProject> referencedProjects,
+            ulong hash,
             IDiagnosticAdder diagnosticSink,
             out Compilation? compileTimeCompilation )
         {
@@ -70,11 +73,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( runTimeCompilation.AssemblyName.AssertNotNull(), referencedProjects )
-                .AddSyntaxTrees(
-                    SyntaxFactory.ParseSyntaxTree(
-                        $"[assembly: System.Reflection.AssemblyVersion(\"{GetUniqueVersion()}\")]",
-                        CSharpParseOptions.Default ) );
+            var assemblyName = $"{runTimeCompilation.AssemblyName.AssertNotNull()}_{hash:x16}";
+            compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
@@ -127,20 +127,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     referencedProjects
                         .Where( r => !r.IsEmpty )
                         .Select( r => r.ToMetadataReference() ) );
-        }
-
-        /// <summary>
-        /// Creates a 64-bit version number that is unique for the current AppDomain.
-        /// </summary>
-        /// <returns></returns>
-        private static Version GetUniqueVersion()
-        {
-            var longVersionNumber = Interlocked.Increment( ref _nextVersionNumber );
-
-            var minor = (short) (longVersionNumber & 0xffff);
-            var major = (short) ((longVersionNumber >> 16) & 0xffff);
-
-            return new Version( major, minor );
         }
 
         private bool TryEmit(
@@ -233,7 +219,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return result.Success;
         }
 
-        internal static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation runTimeCompilation )
+        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation runTimeCompilation )
         {
             List<SyntaxTree> compileTimeTrees = new();
             var classifier = SymbolClassifier.GetInstance( runTimeCompilation );
@@ -252,6 +238,9 @@ namespace Caravela.Framework.Impl.CompileTime
             return compileTimeTrees;
         }
 
+        /// <summary>
+        /// Tries to create a compile-time <see cref="Compilation"/> given a run-time <see cref="Compilation"/>.
+        /// </summary>
         internal bool TryCreateCompileTimeProject(
             Compilation runTimeCompilation,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -264,7 +253,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 diagnosticSink,
                 out project );
 
-        internal bool TryCreateCompileTimeProject(
+        private bool TryCreateCompileTimeProject(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> compileTimeTrees,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -272,9 +261,9 @@ namespace Caravela.Framework.Impl.CompileTime
             out CompileTimeProject? project )
         {
             // Check the in-process cache.
-            var cacheKey = ComputeCacheHash( runTimeCompilation, compileTimeTrees, referencedProjects );
+            var hash = ComputeCacheHash( runTimeCompilation, compileTimeTrees, referencedProjects );
 
-            if ( this._cache.TryGetValue( cacheKey, out project ) )
+            if ( this._cache.TryGetValue( hash, out project ) )
             {
                 return true;
             }
@@ -286,6 +275,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 runTimeCompilation,
                 compileTimeTrees,
                 referencedProjects,
+                hash,
                 diagnosticSink,
                 out var compileTimeCompilation ) )
             {
@@ -322,15 +312,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var manifest = new CompileTimeProjectManifest
                 {
-                    AssemblyName = compileTimeCompilation.Assembly.Identity.Name,
-                    Version = compileTimeCompilation.Assembly.Identity.Version,
                     References = referencedProjects.Select( r => r.RunTimeIdentity.Name ).ToList(),
                     AspectTypes = compileTimeCompilation.Assembly
                         .GetTypes()
                         .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                         .Select( t => t.GetReflectionName() )
                         .ToList(),
-                    Hash = cacheKey
+                    Hash = hash
                 };
 
                 project = CompileTimeProject.Create(
@@ -342,7 +330,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     compileTimeAssemblyStream.ToArray(),
                     compileTimeTrees );
 
-                this._cache.Add( cacheKey, project );
+                this._cache.Add( hash, project );
 
                 return true;
             }
@@ -354,7 +342,11 @@ namespace Caravela.Framework.Impl.CompileTime
         public static Compilation PrepareRunTimeAssembly( Compilation compilation )
             => new PrepareRunTimeAssemblyRewriter( compilation ).VisitTrees( compilation );
 
+        /// <summary>
+        /// Tries to compile (to a binary image) a project given its manifest and syntax trees. 
+        /// </summary>
         public bool TryCompileDeserializedProject(
+            string assemblyName,
             CompileTimeProjectManifest manifest,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -362,7 +354,7 @@ namespace Caravela.Framework.Impl.CompileTime
             out Compilation compilation,
             out MemoryStream memoryStream )
         {
-            compilation = this.CreateEmptyCompileTimeCompilation( manifest.AssemblyName.AssertNotNull(), referencedProjects )
+            compilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
             return this.TryEmit( compilation, diagnosticAdder, out memoryStream );

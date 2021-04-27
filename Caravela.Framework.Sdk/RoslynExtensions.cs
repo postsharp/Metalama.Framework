@@ -81,9 +81,9 @@ namespace Caravela.Framework.Sdk
             }
         }
 
-        public static IEnumerable<INamedTypeSymbol> OrderByInheritance( this IEnumerable<INamedTypeSymbol> types )
+        public static IEnumerable<INamedTypeSymbol> OrderByInheritance( this IReadOnlyList<INamedTypeSymbol> types )
         {
-            var dictionary = types.ToDictionary( t => t, t => false );
+            var dictionary = types.ToDictionary( t => t, _ => false );
             List<INamedTypeSymbol> result = new();
 
             void VisitType( INamedTypeSymbol type )
@@ -91,7 +91,6 @@ namespace Caravela.Framework.Sdk
                 if ( !dictionary.TryGetValue( type, out var visited ) )
                 {
                     // The type is not in the input.
-                    return;
                 }
                 else if ( visited )
                 {

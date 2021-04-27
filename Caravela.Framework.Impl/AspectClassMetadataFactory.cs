@@ -9,20 +9,24 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-    internal class AspectTypeFactory
+    /// <summary>
+    /// Creates <see cref="AspectClassMetadata"/>.
+    /// </summary>
+    internal class AspectClassMetadataFactory
     {
-        private readonly Compilation _compilation;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
         private readonly Dictionary<INamedTypeSymbol, AspectClassMetadata> _aspectTypes = new();
 
-        public AspectTypeFactory( Compilation compilation, AspectDriverFactory aspectDriverFactory )
+        public AspectClassMetadataFactory( AspectDriverFactory aspectDriverFactory )
         {
-            this._compilation = compilation;
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public IEnumerable<AspectClassMetadata> GetAspectTypes( IReadOnlyList<INamedTypeSymbol> attributeTypes, IDiagnosticAdder diagnosticAdder )
+        /// <summary>
+        /// Creates a list of <see cref="AspectClassMetadata"/> given input list of aspect types.
+        /// </summary>
+        public IEnumerable<AspectClassMetadata> GetAspectClassMetadatas( IReadOnlyList<INamedTypeSymbol> attributeTypes, IDiagnosticAdder diagnosticAdder )
         {
             foreach ( var attributeType in attributeTypes.OrderByInheritance() )
             {

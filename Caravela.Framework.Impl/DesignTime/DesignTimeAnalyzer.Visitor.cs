@@ -23,10 +23,14 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             // TODO: These analysis should probably be moved elsewhere and performed in the pipeline.
             // There seems to be no reason any more to run the template analysis here instead of in the pipeline.
-            
-            private readonly SemanticModelAnalysisContext _context;
+
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
+            
+#pragma warning disable IDE0044 // To prevent protective copy of the readonly struct.
+            private SemanticModelAnalysisContext _context;
+#pragma warning restore IDE0044
+            
             private SymbolDeclarationScope? _currentDeclarationScope;
             private ISymbol? _currentDeclaration;
 

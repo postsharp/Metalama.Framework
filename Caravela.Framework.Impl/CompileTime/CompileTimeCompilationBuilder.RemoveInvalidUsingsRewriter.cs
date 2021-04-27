@@ -9,6 +9,10 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+        /// <summary>
+        /// Removes invalid <c>using</c> statements from a compile-time syntax tree. Such using statements
+        /// are typically run-time-only.
+        /// </summary>
         internal class RemoveInvalidUsingRewriter : CSharpSyntaxRewriter
         {
             private readonly Compilation _compileTimeCompilation;

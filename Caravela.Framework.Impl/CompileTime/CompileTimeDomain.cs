@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, byte[] image )
             => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => Assembly.Load( image ) );
-        
+
         public override string ToString() => this._domainId.ToString();
 
         public void Dispose()

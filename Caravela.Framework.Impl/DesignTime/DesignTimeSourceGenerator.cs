@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
                 }
             }
-            
+
             // We don't report diagnostics because it seems to be without effect.
             // All diagnostics are reported by the analyzer.
         }
