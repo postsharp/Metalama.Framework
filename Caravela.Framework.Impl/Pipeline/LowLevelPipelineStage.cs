@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.Pipeline
             if ( !aspectInstances.Any() )
             {
                 result = input;
+
                 return true;
             }
 
@@ -58,6 +59,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.DisplayName, ex.ToDiagnosticString()) ) );
 
                 result = null;
+
                 return false;
             }
 

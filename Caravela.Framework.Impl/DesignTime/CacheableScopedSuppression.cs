@@ -9,6 +9,7 @@ namespace Caravela.Framework.Impl.DesignTime
     internal readonly struct CacheableScopedSuppression
     {
         public string Id { get; }
+
         public string SymbolId { get; }
 
         public CacheableScopedSuppression( in ScopedSuppression suppression )

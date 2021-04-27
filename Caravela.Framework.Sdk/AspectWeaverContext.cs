@@ -8,7 +8,6 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Sdk
 {
-
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>

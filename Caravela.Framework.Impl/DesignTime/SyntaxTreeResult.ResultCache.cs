@@ -10,12 +10,12 @@ namespace Caravela.Framework.Impl.DesignTime
     internal class SyntaxTreeResult
     {
         /// <summary>
-        /// Get <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
+        /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
         /// </summary>
         public SyntaxTree SyntaxTree { get; }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> that was last used to diff the original <see cref="SyntaxTree"/> with
+        /// Gets or sets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> that was last used to diff the original <see cref="SyntaxTree"/> with
         /// the current one. 
         /// </summary>
         public SyntaxTree LastComparedSyntaxTree { get; set; }
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.DesignTime
         public ImmutableArray<CacheableScopedSuppression> Suppressions { get; }
 
         public ImmutableArray<IntroducedSyntaxTree> Introductions { get; }
-        
+
         /// <summary>
         /// Gets the list of syntax trees (identified by FilePath) on which the current
         /// syntax tree is dependent. 
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Impl.DesignTime
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,
             ImmutableArray<IntroducedSyntaxTree>? introductions,
-            ImmutableArray<string>? dependencies)
+            ImmutableArray<string>? dependencies )
         {
             this.SyntaxTree = this.LastComparedSyntaxTree = syntaxTree;
             this.Diagnostics = diagnostics ?? ImmutableArray<Diagnostic>.Empty;

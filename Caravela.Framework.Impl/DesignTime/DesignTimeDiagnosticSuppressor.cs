@@ -3,9 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -56,11 +54,6 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <summary>
         /// A testable overload of <see cref="ReportSuppressions(SuppressionAnalysisContext)"/>.
         /// </summary>
-        /// <param name="compilation"></param>
-        /// <param name="reportedDiagnostics"></param>
-        /// <param name="reportSuppression"></param>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
         internal static void ReportSuppressions(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
@@ -86,11 +79,11 @@ namespace Caravela.Framework.Impl.DesignTime
                 // Report suppressions.
                 if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
                 {
-                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where(
-                        s => _supportedSuppressions.Contains( s.Id ) );
+                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where( s => _supportedSuppressions.Contains( s.Id ) );
 
                     var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
-                        designTimeSuppressions, s => s.SymbolId );
+                        designTimeSuppressions,
+                        s => s.SymbolId );
 
                     foreach ( var diagnostic in reportedDiagnostics )
                     {

@@ -53,6 +53,13 @@ namespace Caravela.Framework.Impl
         private AspectInstanceResult EvaluateAspect<T>( T codeElement, AspectInstance aspect )
             where T : class, ICodeElement
         {
+            static AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
+                => new(
+                    false,
+                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
+                    ImmutableArray<IAdvice>.Empty,
+                    ImmutableArray<IAspectSource>.Empty );
+
             if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
@@ -65,11 +72,7 @@ namespace Caravela.Framework.Impl
                         codeElement.GetDiagnosticLocation(),
                         (this.AspectType, codeElement.ElementKind, codeElement, interfaceType) );
 
-                return new AspectInstanceResult(
-                    false,
-                    new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
-                    ImmutableArray<IAdvice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty );
+                return CreateResultForError( diagnostic );
             }
 
             var declarativeAdvices =
@@ -84,7 +87,27 @@ namespace Caravela.Framework.Impl
 
             using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
             {
-                aspectOfT.Initialize( aspectBuilder );
+                try
+                {
+                    aspectOfT.Initialize( aspectBuilder );
+                }
+                catch ( InvalidUserCodeException e )
+                {
+                    return
+                        new AspectInstanceResult(
+                            false,
+                            new ImmutableDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
+                            ImmutableArray<IAdvice>.Empty,
+                            ImmutableArray<IAspectSource>.Empty );
+                }
+                catch ( Exception e )
+                {
+                    var diagnostic = GeneralDiagnosticDescriptors.ExceptionInUserCode.CreateDiagnostic(
+                        codeElement.GetDiagnosticLocation(),
+                        (this.AspectType, e.GetType().Name, e) );
+
+                    return CreateResultForError( diagnostic );
+                }
             }
 
             return aspectBuilder.ToResult();

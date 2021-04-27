@@ -189,7 +189,7 @@ class ReferencingClass
                 var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
 
                 var loader = CompileTimeAssemblyLoader.Create( new CompileTimeDomain(), serviceProvider, referencingCompilation );
-                
+
                 DiagnosticList diagnosticList = new();
                 Assert.True( loader.TryGenerateCompileTimeProject( referencedCompilation, diagnosticList, out _ ) );
             }

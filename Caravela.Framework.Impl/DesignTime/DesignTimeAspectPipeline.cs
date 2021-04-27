@@ -31,7 +31,7 @@ namespace Caravela.Framework.Impl.DesignTime
         public void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree, out bool isInvalidated )
         {
             isInvalidated = false;
-            
+
             if ( this._cachedConfiguration == null )
             {
                 // The cache is empty, so there is nothing to invalidate.

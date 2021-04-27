@@ -4,6 +4,7 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,10 +14,8 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
-
     internal static partial class DesignTimeAspectPipelineCache
     {
-
         /// <summary>
         /// Caches the pipeline results for each syntax tree.
         /// </summary>
@@ -116,7 +115,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     builder.Introductions.Add( introduction );
                 }
 
-                return resultsByTree.Select( b => b.Value.ToImmutable(compilation) );
+                return resultsByTree.Select( b => b.Value.ToImmutable( compilation ) );
             }
 
             public static bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out SyntaxTreeResult? result, bool validateDependencies )
@@ -139,7 +138,7 @@ namespace Caravela.Framework.Impl.DesignTime
                                 _ = _syntaxTreeCache.TryRemove( syntaxTree.FilePath, out _ );
                             }
                         }
-                        
+
                         // TODO: Implement a better cache invalidation algorithm so that cache validation is less expensive.
                     }
 
@@ -152,27 +151,65 @@ namespace Caravela.Framework.Impl.DesignTime
                 if ( _syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
                 {
                     // Check if the source text has changed.
-                    if ( syntaxTree != cachedResult.SyntaxTree )
+                    if ( syntaxTree != cachedResult.LastComparedSyntaxTree )
                     {
-                        if ( !syntaxTree.GetText().ContentEquals( cachedResult.SyntaxTree.GetText() ) )
+                        if ( !syntaxTree.GetText().ContentEquals( cachedResult.LastComparedSyntaxTree.GetText() ) )
                         {
-                            // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
-                            var changedSyntaxNodes =
-                                syntaxTree.GetChangedSpans( cachedResult.SyntaxTree ).Select( span => syntaxTree.GetRoot().FindNode( span ) );
+                            var syntaxRoot = syntaxTree.GetRoot();
 
-                            if ( changedSyntaxNodes.Any( x => !IsIrrelevantChange(x) ) )
+                            // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
+                            foreach ( var change in syntaxTree.GetChanges( cachedResult.LastComparedSyntaxTree ) )
                             {
+                                var changedSpan = change.Span;
+
+                                // If we are inserting a space, ignore it.
+                                if ( changedSpan.Length == 0 && string.IsNullOrWhiteSpace( change.NewText ) )
+                                {
+                                    continue;
+                                }
+
+                                // If we are editing a comment, ignore it.
+                                var changedTrivia = syntaxRoot.FindTrivia( changedSpan.Start );
+
+                                var triviaKind = changedTrivia.Kind();
+
+                                if ( triviaKind != SyntaxKind.None && changedTrivia.Span.Contains( changedSpan ) )
+                                {
+                                    switch ( triviaKind )
+                                    {
+                                        case SyntaxKind.XmlComment:
+                                        case SyntaxKind.SingleLineDocumentationCommentTrivia:
+                                        case SyntaxKind.MultiLineDocumentationCommentTrivia:
+                                        case SyntaxKind.MultiLineCommentTrivia:
+                                        case SyntaxKind.SingleLineCommentTrivia:
+                                            // Editing a comment does not change the semantics.
+                                            continue;
+
+                                        default:
+                                            // Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
+                                            break;
+                                    }
+                                }
+
+                                // If the change is in a method body or other expression, ignore it.
+                                var changedNode = syntaxRoot.FindNode( changedSpan );
+
+                                if ( IsIrrelevantChange( changedNode ) )
+                                {
+                                    continue;
+                                }
+
+                                // If we are here, it means that we have a relevant change.
                                 _ = _syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
 
                                 return;
                             }
                         }
 
-                        // Update the syntax tree so the next comparison is less demanding.
+                        // If we are here, it means that there was no relevant change. Update the syntax tree so the next comparison is less demanding.
                         cachedResult.LastComparedSyntaxTree = syntaxTree;
                     }
                 }
-
 
                 // Determines if a change in a node can possibly affect a change in symbols.
                 static bool IsIrrelevantChange( SyntaxNode node )

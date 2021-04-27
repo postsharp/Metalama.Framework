@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -62,11 +61,11 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
 
                     Location newLocation;
-                    
+
                     // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
                     var oldToken = oldNode.FindToken( diagnostic.Location.SourceSpan.Start );
                     var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
-                    
+
                     if ( newToken.Kind() == SyntaxKind.None )
                     {
                         // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.

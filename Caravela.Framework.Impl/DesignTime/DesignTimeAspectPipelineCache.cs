@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     break;
                 }
-                    
+
                 SyntaxTreeResultCache.OnSyntaxTreePossiblyChanged( syntaxTree );
             }
 
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 // Get the result from the cache, but there is no need to validate dependencies because we've just dont it an
                 // instant ago and a data race and it is ok if the data race is won by the competing task.
-                
+
                 if ( SyntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
                 {
                     resultArrayBuilder.Add( syntaxTreeResult );

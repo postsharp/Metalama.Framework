@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl
@@ -88,6 +89,13 @@ namespace Caravela.Framework.Impl
             "CR0024",
             "The aspect type must have exactly one method of a given name otherwise it cannot be used as a dynamic advice.",
             "The type '{0}' must have exactly one method named '{1}'.",
+            _category,
+            Error );
+
+        public static readonly StrongDiagnosticDescriptor<(INamedTypeSymbol AspectType, string ExceptionType, Exception Exception)> ExceptionInUserCode = new(
+            "CR0025",
+            "The aspect has thrown an exception.",
+            "The aspect '{0}' has thrown an exception of the '{1}': {2}",
             _category,
             Error );
     }
