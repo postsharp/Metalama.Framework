@@ -76,10 +76,9 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
                     result.Diagnostics,
-                    compilation,
+                    context.SemanticModel.SyntaxTree,
                     context.ReportDiagnostic,
-                    true,
-                    context.SemanticModel.SyntaxTree );
+                    true );
             }
         }
     }

@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -13,17 +15,11 @@ namespace Caravela.Framework.Impl.DesignTime
     {
         public static void ReportDiagnostics(
             IEnumerable<Diagnostic> diagnostics,
-            Compilation compilation,
+            SyntaxTree newSyntaxTree,
             Action<Diagnostic> reportDiagnostic,
-            bool wrapUnknownDiagnostics,
-            SyntaxTree? syntaxTree = null )
+            bool wrapUnknownDiagnostics )
         {
-            var selectedDiagnostics = diagnostics;
-
-            if ( syntaxTree != null )
-            {
-                selectedDiagnostics = selectedDiagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTree.FilePath );
-            }
+            var selectedDiagnostics = diagnostics.Where( d => d.Location.SourceTree?.FilePath == newSyntaxTree.FilePath );
 
             foreach ( var diagnostic in selectedDiagnostics )
             {
@@ -48,34 +44,118 @@ namespace Caravela.Framework.Impl.DesignTime
                     designTimeDiagnostic = descriptor.CreateDiagnostic( diagnostic.Location, (diagnostic.Id, diagnostic.GetMessage()) );
                 }
 
-                if ( designTimeDiagnostic.Location.SourceTree == null || compilation.ContainsSyntaxTree( designTimeDiagnostic.Location.SourceTree ) )
+                var originalSourceTree = designTimeDiagnostic.Location.SourceTree;
+
+                if ( originalSourceTree == null || originalSourceTree == newSyntaxTree )
                 {
                     reportDiagnostic( designTimeDiagnostic );
                 }
                 else
                 {
-                    var originalSyntaxTree =
-                        compilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == designTimeDiagnostic.Location.SourceTree.FilePath );
+                    // Find the node in the new syntax tree corresponding to the node in the old syntax tree.
+                    var oldNode = originalSourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
 
-                    if ( originalSyntaxTree != null )
+                    if ( !TryFindOldNodeInNewTree( oldNode, newSyntaxTree, out var newNode ) )
                     {
-                        var newLocation = originalSyntaxTree.GetLocation( diagnostic.Location.SourceSpan );
-
-                        var relocatedDiagnostic =
-                            Diagnostic.Create(
-                                designTimeDiagnostic.Id,
-                                designTimeDiagnostic.Descriptor.Category,
-                                new NonLocalizedString( diagnostic.GetMessage() ),
-                                designTimeDiagnostic.Severity,
-                                designTimeDiagnostic.DefaultSeverity,
-                                true,
-                                diagnostic.WarningLevel,
-                                location: newLocation );
-
-                        reportDiagnostic( relocatedDiagnostic );
+                        // We could not find the old node in the new tree. This should not happen if cache invalidation is correct.
+                        continue;
                     }
+
+                    Location newLocation;
+                    
+                    // Find the token in the new syntax tree corresponding to the token in the old syntax tree.
+                    var oldToken = oldNode.FindToken( diagnostic.Location.SourceSpan.Start );
+                    var newToken = newNode.ChildTokens().SingleOrDefault( t => t.Text == oldToken.Text );
+                    
+                    if ( newToken.Kind() == SyntaxKind.None )
+                    {
+                        // We could not find the old token in the new tree. This should not happen if cache invalidation is correct.
+                        continue;
+                    }
+
+                    if ( newToken.Span.Length == diagnostic.Location.SourceSpan.Length )
+                    {
+                        // The diagnostic was reported to the exact token we found, so we can report it precisely.
+                        newLocation = newToken.GetLocation();
+                    }
+                    else
+                    {
+                        // The diagnostic was reported on the syntax node we found, but not to an exact token. Report the
+                        // diagnostic to the whole node instead.
+                        newLocation = newNode.GetLocation();
+                    }
+
+                    var relocatedDiagnostic =
+                        Diagnostic.Create(
+                            designTimeDiagnostic.Id,
+                            designTimeDiagnostic.Descriptor.Category,
+                            new NonLocalizedString( diagnostic.GetMessage() ),
+                            designTimeDiagnostic.Severity,
+                            designTimeDiagnostic.DefaultSeverity,
+                            true,
+                            diagnostic.WarningLevel,
+                            location: newLocation );
+
+                    reportDiagnostic( relocatedDiagnostic );
                 }
             }
+        }
+
+        private static bool TryFindOldNodeInNewTree( SyntaxNode oldNode, SyntaxTree newTree, out SyntaxNode newNode )
+        {
+            // Create a stack with the position of each ancestor node with respect to its parent.
+            // We only position ourselves with respect to other nodes of the same kind, as we want to be less sensitive to changes in the new
+            // syntax tree.
+
+            Stack<(SyntaxKind Kind, int Position)> stack = new();
+
+            for ( var oldNodeCursor = oldNode; oldNodeCursor?.Parent != null; oldNodeCursor = oldNodeCursor.Parent )
+            {
+                var syntaxKind = oldNodeCursor.Kind();
+                var childrenOfSameKind = oldNodeCursor.Parent.ChildNodes().Where( n => n.Kind() == syntaxKind );
+
+                var index = 0;
+
+                foreach ( var childOfSameKind in childrenOfSameKind )
+                {
+                    if ( childOfSameKind == oldNodeCursor )
+                    {
+                        stack.Push( (syntaxKind, index) );
+                        index = -1;
+
+                        break;
+                    }
+
+                    index++;
+                }
+
+                if ( index != -1 )
+                {
+                    // We should have found ourselves in the parent node.
+                    throw new AssertionFailedException();
+                }
+            }
+
+            // Navigate the inverted stack from the new root.
+            newNode = newTree.GetRoot();
+
+            while ( stack.Count > 0 )
+            {
+                var slice = stack.Pop();
+                var childrenOfSameKind = newNode.ChildNodes().Where( n => n.Kind() == slice.Kind );
+                var childAtPosition = childrenOfSameKind.ElementAtOrDefault( slice.Position );
+
+                if ( childAtPosition == null )
+                {
+                    return false;
+                }
+                else
+                {
+                    newNode = childAtPosition;
+                }
+            }
+
+            return true;
         }
     }
 }

@@ -136,9 +136,11 @@ namespace Caravela.Framework.Impl.DesignTime
                             {
                                 // The dependency is not present, which means that it has been invalidated.
                                 // Remove also the current item.
-                                _syntaxTreeCache.TryRemove( syntaxTree.FilePath, out _ );
+                                _ = _syntaxTreeCache.TryRemove( syntaxTree.FilePath, out _ );
                             }
                         }
+                        
+                        // TODO: Implement a better cache invalidation algorithm so that cache validation is less expensive.
                     }
 
                     return true;
@@ -167,7 +169,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         }
 
                         // Update the syntax tree so the next comparison is less demanding.
-                        cachedResult.SyntaxTree = syntaxTree;
+                        cachedResult.LastComparedSyntaxTree = syntaxTree;
                     }
                 }
 
