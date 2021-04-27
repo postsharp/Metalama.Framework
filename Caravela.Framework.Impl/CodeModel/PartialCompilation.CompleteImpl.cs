@@ -10,6 +10,9 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     public abstract partial class PartialCompilation
     {
+        /// <summary>
+        /// Represents a complete compilation, containing all syntax trees.
+        /// </summary>
         private class CompleteImpl : PartialCompilation
         {
             public CompleteImpl( Compilation compilation ) : base( compilation ) { }
@@ -21,7 +24,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override bool IsPartial { get; }
 
-            public override PartialCompilation Update( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees )
+            public override PartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees )
             {
                 var compilation = this.Compilation;
 

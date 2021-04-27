@@ -95,8 +95,8 @@ namespace Caravela.Framework.Impl.Pipeline
                         {
                             this._diagnostics.ReportDiagnostic(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
-                                    this._currentStep!.AspectLayer.AspectType.DiagnosticLocation,
-                                    (this._currentStep.AspectLayer.AspectType.DisplayName, aspectType.DisplayName) ) );
+                                    this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
+                                    (this._currentStep.AspectLayer.AspectClass.DisplayName, aspectType.DisplayName) ) );
 
                             success = false;
 
@@ -162,8 +162,8 @@ namespace Caravela.Framework.Impl.Pipeline
                 {
                     this._diagnostics.ReportDiagnostic(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
-                            this._currentStep.AspectLayer.AspectType.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectType.DisplayName, advice.TargetDeclaration) ) );
+                            this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
+                            (this._currentStep.AspectLayer.AspectClass.DisplayName, advice.TargetDeclaration) ) );
 
                     success = false;
 
@@ -182,7 +182,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 var depth = this.Compilation.GetDepth( aspectInstance.CodeElement );
 
-                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectType ), depth, true, out var step ) )
+                if ( !this.TryGetOrAddStep( new AspectLayerId( aspectInstance.AspectClass ), depth, true, out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
                     throw new AssertionFailedException();

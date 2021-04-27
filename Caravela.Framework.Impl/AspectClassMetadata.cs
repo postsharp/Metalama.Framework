@@ -15,53 +15,77 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
-    // TODO: Consider having an abstract base for simple testing.
-    internal class AspectType : IAspectType
+    /// <summary>
+    /// Represents the metadata of an aspect class. This class is compilation-independent. 
+    /// </summary>
+    internal class AspectClassMetadata : IAspectClassMetadata
     {
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
 
+        /// <inheritdoc />
         public string FullName { get; }
 
+        /// <inheritdoc />
         public string DisplayName { get; }
 
-        public AspectType? BaseAspectType { get; }
+        /// <summary>
+        /// Gets metadata of the base aspect class.
+        /// </summary>
+        public AspectClassMetadata? BaseClass { get; }
 
+        /// <summary>
+        /// Gets the aspect driver of the current class, responsible for executing the aspect.
+        /// </summary>
         public IAspectDriver AspectDriver => this._aspectDriver.AssertNotNull();
 
+        /// <summary>
+        /// Gets the list of layers of the current aspect.
+        /// </summary>
         public IReadOnlyList<AspectLayer> Layers => this._layers.AssertNotNull();
 
+        /// <inheritdoc />
         public Location? DiagnosticLocation { get; }
 
+        /// <inheritdoc />
         public bool IsAbstract { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AspectType"/> class.
+        /// Initializes a new instance of the <see cref="AspectClassMetadata"/> class.
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectType( INamedTypeSymbol aspectTypeSymbol, AspectType? baseAspectType, IAspectDriver? aspectDriver )
+        private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver )
         {
             this.FullName = aspectTypeSymbol.GetReflectionName();
             this.DisplayName = aspectTypeSymbol.Name;
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
-            this.BaseAspectType = baseAspectType;
+            this.BaseClass = baseClass;
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
         }
 
+        /// <summary>
+        /// Creates a new  <see cref="AspectInstance"/>.
+        /// </summary>
+        /// <param name="aspect">The instance of the aspect class.</param>
+        /// <param name="target">The declaration on which the aspect was applied.</param>
+        /// <returns></returns>
         public AspectInstance CreateAspectInstance( IAspect aspect, ICodeElement target ) => new( aspect, target, this );
 
-        public static bool TryCreateAspectType(
+        /// <summary>
+        /// Creates an instance of the <see cref="AspectClassMetadata"/> class.
+        /// </summary>
+        public static bool TryCreate(
             INamedTypeSymbol aspectNamedType,
-            AspectType? baseAspectType,
+            AspectClassMetadata? baseAspectType,
             IAspectDriver? aspectDriver,
             IDiagnosticAdder diagnosticAdder,
-            [NotNullWhen( true )] out AspectType? aspectType )
+            [NotNullWhen( true )] out AspectClassMetadata? aspectClassMetadata )
         {
             var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
 
-            var newAspectType = new AspectType( aspectNamedType, baseAspectType, aspectDriver );
+            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver );
 
             // Add the default part.
             layersBuilder.Add( new AspectLayer( newAspectType, null ) );
@@ -81,7 +105,7 @@ namespace Caravela.Framework.Impl
                         diagnosticAdder,
                         out var aspectLayersAttribute ) )
                     {
-                        aspectType = null;
+                        aspectClassMetadata = null;
 
                         return false;
                     }
@@ -94,7 +118,7 @@ namespace Caravela.Framework.Impl
 
             newAspectType._layers = layersBuilder.ToImmutable();
 
-            aspectType = newAspectType;
+            aspectClassMetadata = newAspectType;
 
             return true;
         }

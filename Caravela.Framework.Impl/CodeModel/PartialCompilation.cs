@@ -9,14 +9,31 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    
+    /// <summary>
+    /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
+    /// to specific syntax trees.
+    /// </summary>
     public abstract partial class PartialCompilation : IPartialCompilation
     {
+        /// <summary>
+        /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
+        /// </summary>
         public Compilation Compilation { get; }
 
+        /// <summary>
+        /// Gets the list of syntax trees in the current subset.
+        /// </summary>
         public abstract IReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
 
+        /// <summary>
+        /// Gets the types declared in the current subset.
+        /// </summary>
         public abstract IEnumerable<ITypeSymbol> Types { get; }
 
+        /// <summary>
+        /// Determines if the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
+        /// </summary>
         public abstract bool IsPartial { get; }
 
         private PartialCompilation( Compilation compilation )
@@ -24,18 +41,20 @@ namespace Caravela.Framework.Impl.CodeModel
             this.Compilation = compilation;
         }
 
+        /// <summary>
+        /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
+        /// </summary>
         public static PartialCompilation CreateComplete( Compilation compilation ) => new CompleteImpl( compilation );
 
+        /// <summary>
+        /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
+        /// </summary>
         public static PartialCompilation CreatePartial( Compilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
             => new PartialImpl( compilation, syntaxTrees.ToImmutableHashSet() );
 
-        public abstract PartialCompilation Update( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees );
-
-        IPartialCompilation IPartialCompilation.UpdateSyntaxTrees(
-            IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
-            IEnumerable<SyntaxTree> addedTrees )
-            => this.Update( replacedTrees, addedTrees );
-
+        /// <summary>
+        /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
+        /// </summary>
         public static PartialCompilation CreatePartial( Compilation compilation, SyntaxTree syntaxTree )
         {
             var syntaxTrees = new[] { syntaxTree };
@@ -44,6 +63,9 @@ namespace Caravela.Framework.Impl.CodeModel
             return new PartialImpl( compilation, closure.Trees.ToImmutableHashSet(), closure.Types.ToImmutableArray() );
         }
 
+        /// <summary>
+        /// Creates a <see cref="PartialCompilation"/> for a given subset of syntax trees and its closure.
+        /// </summary>
         public static PartialCompilation CreatePartial( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             if ( syntaxTrees.Count == 0 )
@@ -56,6 +78,21 @@ namespace Caravela.Framework.Impl.CodeModel
             return new PartialImpl( compilation, closure.Trees.ToImmutableHashSet(), closure.Types.ToImmutableArray() );
         }
 
+        IPartialCompilation IPartialCompilation.UpdateSyntaxTrees(
+            IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
+            IEnumerable<SyntaxTree> addedTrees )
+            => this.UpdateSyntaxTrees( replacedTrees, addedTrees );
+
+        /// <summary>
+        ///  Adds and replaces syntax trees of the current <see cref="PartialCompilation"/> and returns a new <see cref="PartialCompilation"/>
+        /// representing the modified object.
+        /// </summary>
+        public abstract PartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees, IEnumerable<SyntaxTree> addedTrees );
+
+
+        /// <summary>
+        /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
+        /// </summary>
         private static (HashSet<ITypeSymbol> Types, HashSet<SyntaxTree> Trees ) GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;

@@ -117,7 +117,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            intermediateCompilation = intermediateCompilation.Update(
+            intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
                 syntaxTreeMapping.Select( p => (p.Key, p.Value) ),
                 Enumerable.Empty<SyntaxTree>() );
 

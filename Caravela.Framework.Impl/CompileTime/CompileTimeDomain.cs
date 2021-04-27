@@ -9,13 +9,17 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
+    /// <summary>
+    /// Tracks compile-time assemblies belonging to the same domain and implements CLR assembly resolution.
+    /// The number of <see cref="CompileTimeDomain"/> in an <see cref="AppDomain"/>
+    /// depends on the scenario: typically one per project at compile time, one per <see cref="AppDomain"/> at design time, and one per test
+    /// at testing time.
+    /// </summary>
     internal class CompileTimeDomain : IDisposable
     {
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
-
-        public override string ToString() => this._domainId.ToString();
 
         public CompileTimeDomain()
         {
@@ -36,8 +40,13 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
+        /// <summary>
+        /// Gets an assembly given its <see cref="AssemblyIdentity"/> and image, or loads it.
+        /// </summary>
         public Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, byte[] image )
             => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => Assembly.Load( image ) );
+        
+        public override string ToString() => this._domainId.ToString();
 
         public void Dispose()
         {

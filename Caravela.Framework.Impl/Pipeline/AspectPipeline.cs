@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         private protected record PipelineConfiguration(
             ImmutableArray<PipelineStage> Stages,
-            IReadOnlyList<AspectType> AspectTypes,
+            IReadOnlyList<AspectClassMetadata> AspectTypes,
             ImmutableArray<OrderedAspectLayer> Layers,
             CompileTimeProject? CompileTimeProject,
             CompileTimeAssemblyLoader CompileTimeAssemblyLoader );
@@ -141,7 +141,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var aspectLayers = sortedAspectLayers.ToImmutableArray();
 
             var stages = aspectLayers
-                .GroupAdjacent( x => GetGroupingKey( x.AspectType.AspectDriver ) )
+                .GroupAdjacent( x => GetGroupingKey( x.AspectClass.AspectDriver ) )
                 .Select( g => this.CreateStage( g.Key, g.ToImmutableArray(), loader ) )
                 .ToImmutableArray();
 
@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                     var partData = parts.Single();
 
-                    return new LowLevelPipelineStage( weaver, partData.AspectType, this );
+                    return new LowLevelPipelineStage( weaver, partData.AspectClass, this );
 
                 case nameof(AspectDriver):
 

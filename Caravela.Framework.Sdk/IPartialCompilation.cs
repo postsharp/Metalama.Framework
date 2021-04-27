@@ -6,14 +6,31 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Sdk
 {
+    /// <summary>
+    /// Represents a subset of a Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>. The subset is limited
+    /// to specific syntax trees.
+    /// </summary>
     public interface IPartialCompilation
     {
+        /// <summary>
+        /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
+        /// </summary>
         Compilation Compilation { get; }
 
+        /// <summary>
+        /// Gets the list of syntax trees in the current subset.
+        /// </summary>
         IReadOnlyCollection<SyntaxTree> SyntaxTrees { get; }
 
+        /// <summary>
+        /// Determines if the current <see cref="IPartialCompilation"/> is actually partial, or represents a complete compilation.
+        /// </summary>
         bool IsPartial { get; }
 
+        /// <summary>
+        ///  Adds and replaces syntax trees of the current <see cref="IPartialCompilation"/> and returns a new <see cref="IPartialCompilation"/>
+        /// representing the modified object.
+        /// </summary>
         public IPartialCompilation UpdateSyntaxTrees( IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacements, IEnumerable<SyntaxTree> addedTrees );
     }
 }

@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
 
         public AspectLayerId( INamedTypeSymbol aspectType, string? layerName = null ) : this( aspectType.MetadataName, layerName ) { }
 
-        public AspectLayerId( AspectType aspectType, string? layerName = null ) : this( aspectType.FullName, layerName ) { }
+        public AspectLayerId( AspectClassMetadata aspectClassMetadata, string? layerName = null ) : this( aspectClassMetadata.FullName, layerName ) { }
 
         public AspectLayerId( string aspectName, string? layerName = null )
         {

@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl
         private readonly Compilation _compilation;
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        private readonly Dictionary<INamedTypeSymbol, AspectType> _aspectTypes = new();
+        private readonly Dictionary<INamedTypeSymbol, AspectClassMetadata> _aspectTypes = new();
 
         public AspectTypeFactory( Compilation compilation, AspectDriverFactory aspectDriverFactory )
         {
@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl
             this._aspectDriverFactory = aspectDriverFactory;
         }
 
-        public IEnumerable<AspectType> GetAspectTypes( IReadOnlyList<INamedTypeSymbol> attributeTypes, IDiagnosticAdder diagnosticAdder )
+        public IEnumerable<AspectClassMetadata> GetAspectTypes( IReadOnlyList<INamedTypeSymbol> attributeTypes, IDiagnosticAdder diagnosticAdder )
         {
             foreach ( var attributeType in attributeTypes.OrderByInheritance() )
             {
-                AspectType? baseAspectType;
+                AspectClassMetadata? baseAspectType;
 
                 if ( attributeType.BaseType != null )
                 {
@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl
                 {
                     var aspectDriver = this._aspectDriverFactory.GetAspectDriver( attributeType );
 
-                    if ( AspectType.TryCreateAspectType( attributeType, baseAspectType, aspectDriver, diagnosticAdder, out aspectType ) )
+                    if ( AspectClassMetadata.TryCreate( attributeType, baseAspectType, aspectDriver, diagnosticAdder, out aspectType ) )
                     {
                         this._aspectTypes.Add( attributeType, aspectType );
                     }

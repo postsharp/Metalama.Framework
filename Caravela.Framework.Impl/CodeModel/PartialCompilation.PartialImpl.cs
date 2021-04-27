@@ -10,6 +10,9 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     public abstract partial class PartialCompilation
     {
+        /// <summary>
+        /// Represents a partial compilation, containing a subset of syntax trees.
+        /// </summary>
         private class PartialImpl : PartialCompilation
         {
             private readonly ImmutableArray<ITypeSymbol>? _types;
@@ -31,7 +34,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             public override bool IsPartial => false;
 
-            public override PartialCompilation Update(
+            public override PartialCompilation UpdateSyntaxTrees(
                 IEnumerable<(SyntaxTree OldTree, SyntaxTree NewTree)> replacedTrees,
                 IEnumerable<SyntaxTree> addedTrees )
             {

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the type of aspects that must be handled.
         /// </summary>
-        public IAspectType AspectType { get; }
+        public IAspectClassMetadata AspectClass { get; }
 
         /// <summary>
         /// Gets the set of aspect instances that must be weaved.
@@ -40,13 +40,13 @@ namespace Caravela.Framework.Sdk
         public void AddManifestResource( ResourceDescription resource ) => this._addManifestResource( resource );
 
         internal AspectWeaverContext(
-            IAspectType aspectType,
+            IAspectClassMetadata aspectClassMetadata,
             IReadOnlyList<IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             Action<ResourceDescription> addManifestResource )
         {
-            this.AspectType = aspectType;
+            this.AspectClass = aspectClassMetadata;
             this.AspectInstances = aspectInstances;
             this.Compilation = compilation;
             this._addDiagnostic = addDiagnostic;

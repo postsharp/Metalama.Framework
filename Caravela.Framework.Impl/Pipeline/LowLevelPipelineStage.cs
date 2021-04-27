@@ -18,12 +18,12 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly AspectType _aspectType;
+        private readonly AspectClassMetadata _aspectClassMetadata;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectType aspectType, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClassMetadata aspectClassMetadata, IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectWeaver = aspectWeaver;
-            this._aspectType = aspectType;
+            this._aspectClassMetadata = aspectClassMetadata;
         }
 
         /// <inheritdoc/>
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var aspectInstances = input.AspectSources
-                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectType, diagnostics ) )
+                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClassMetadata, diagnostics ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.PartialCompilation, diagnostics.ReportDiagnostic, resources.Add );
+            var context = new AspectWeaverContext( this._aspectClassMetadata, aspectInstances, input.PartialCompilation, diagnostics.ReportDiagnostic, resources.Add );
 
             PartialCompilation newCompilation;
 
@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
             catch ( Exception ex )
             {
                 diagnostics.ReportDiagnostic(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.DisplayName, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClassMetadata.DisplayName, ex.ToDiagnosticString()) ) );
 
                 result = null;
 

@@ -16,6 +16,9 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl
 {
+    /// <summary>
+    /// Executes aspects.
+    /// </summary>
     internal class AspectDriver : IAspectDriver
     {
         private readonly Compilation _compilation;
@@ -35,7 +38,7 @@ namespace Caravela.Framework.Impl
                  select (attribute, member)).ToList();
         }
 
-        internal AspectInstanceResult EvaluateAspect( AspectInstance aspectInstance )
+        internal AspectInstanceResult ExecuteAspect( AspectInstance aspectInstance )
         {
             return aspectInstance.CodeElement switch
             {
@@ -113,12 +116,8 @@ namespace Caravela.Framework.Impl
             return aspectBuilder.ToResult();
         }
 
-        public const string OriginalMemberSuffix = "_Original";
-
         private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, AttributeData attribute, ISymbol templateMethod )
             where T : ICodeElement
-        {
-            return attribute.CreateAdvice( aspect, codeElement, ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
-        }
+            => attribute.CreateAdvice( aspect, codeElement, ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
     }
 }
