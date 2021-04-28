@@ -14,7 +14,6 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
 #pragma warning disable SA1201 // Elements should appear in the correct order
 #pragma warning disable SA1402
-#pragma warning disable SA1403
 
     public class ObjectSerializersTests
     {

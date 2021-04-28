@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -12,15 +12,14 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Attribute = System.Attribute;
-using TypedConstant = Caravela.Framework.Code.TypedConstant;
-using TypeKind = Caravela.Framework.Code.TypeKind;
+using TypedConstant = Microsoft.CodeAnalysis.TypedConstant;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
     internal class AttributeDeserializer
     {
-        public static AttributeDeserializer SystemTypesDeserializer { get; } = new( new SystemTypeResolver() );
+        public static AttributeDeserializer SystemTypes { get; } = new( new SystemTypeResolver() );
 
         private readonly ICompileTimeTypeResolver _compileTimeTypeResolver;
 
@@ -30,6 +29,13 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         public bool TryCreateAttribute<T>( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
+            where T : Attribute
+            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+
+        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
+            => this.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out attributeInstance );
+
+        public bool TryCreateAttribute<T>( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out T? attributeInstance )
             where T : Attribute
         {
             if ( this.TryCreateAttribute( attribute, diagnosticAdder, out var untypedAttribute ) )
@@ -46,32 +52,78 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-        public bool TryCreateAttribute( IAttribute attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute attributeInstance )
+        public bool TryCreateAttribute( AttributeData attribute, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out Attribute? attributeInstance )
         {
             // TODO: this is insufficiently tested, especially the case with Type arguments.
             // TODO: Exception handling and recovery should be better. Don't throw an exception but return false and emit a diagnostic.
 
-            var constructorSymbol = attribute.Constructor.GetSymbol();
-            var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false ).AssertNotNull();
+            var constructorSymbol = attribute.AttributeConstructor;
+
+            if ( constructorSymbol == null )
+            {
+                // Invalid syntax.
+                attributeInstance = null;
+
+                return false;
+            }
+
+            var type = this._compileTimeTypeResolver.GetCompileTimeType( constructorSymbol.ContainingType, false );
+
+            if ( type == null )
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.CannotFindType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
 
             return this.TryCreateAttribute( attribute, type, diagnosticAdder, out attributeInstance! );
         }
 
         private bool TryCreateAttribute(
-            IAttribute attribute,
+            AttributeData attribute,
             Type type,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out Attribute? attributeInstance )
         {
-            var constructorSymbol = attribute.Constructor.GetSymbol();
-            var constructor = type.GetConstructors().Single( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) );
+            var constructorSymbol = attribute.AttributeConstructor;
 
-            if ( constructor == null )
+            if ( constructorSymbol == null )
             {
-                throw new InvalidOperationException( $"Could not load type {constructorSymbol.ContainingType}." );
+                // Invalid syntax? No need to report a diagnostic.
+                attributeInstance = null;
+
+                return false;
             }
 
-            var parameters = new object?[attribute.ConstructorArguments.Count];
+            var constructors = type.GetConstructors().Where( c => this.ParametersMatch( c.GetParameters(), constructorSymbol.Parameters ) ).ToList();
+
+            if ( constructors.Count == 0 )
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.NoConstructor.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
+            else if ( constructors.Count > 1 )
+            {
+                diagnosticAdder.ReportDiagnostic(
+                    AttributeDeserializerDiagnostics.AmbiguousConstructor.CreateDiagnostic(
+                        attribute.GetLocation(),
+                        constructorSymbol.ContainingType ) );
+
+                attributeInstance = null;
+
+                return false;
+            }
+
+            var constructor = constructors[0];
+
+            var parameters = new object?[attribute.ConstructorArguments.Length];
 
             for ( var i = 0; i < parameters.Length; i++ )
             {
@@ -121,7 +173,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    throw new InvalidOperationException( $"Cannot find a field or property {name} in type {constructor.DeclaringType!.Name}" );
+                    diagnosticAdder.ReportDiagnostic(
+                        AttributeDeserializerDiagnostics.CannotFindMember.CreateDiagnostic(
+                            attribute.GetLocation(),
+                            (constructorSymbol.ContainingType, name) ) );
+
+                    attributeInstance = null;
+
+                    return false;
                 }
             }
 
@@ -129,17 +188,23 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
         private bool TryTranslateAttributeArgument(
-            IAttribute attribute,
+            AttributeData attribute,
             TypedConstant typedConstant,
             Type targetType,
             IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
-            => this.TryTranslateAttributeArgument( attribute, typedConstant.Value, typedConstant.Type, targetType, diagnosticAdder, out translatedValue );
+            => this.TryTranslateAttributeArgument(
+                attribute,
+                typedConstant.GetValueSafe(),
+                typedConstant.Type,
+                targetType,
+                diagnosticAdder,
+                out translatedValue );
 
         private bool TryTranslateAttributeArgument(
-            IAttribute attribute,
+            AttributeData attribute,
             object? value,
-            IType sourceType,
+            ITypeSymbol? sourceType,
             Type targetType,
             IDiagnosticAdder diagnosticAdder,
             out object? translatedValue )
@@ -155,7 +220,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 diagnosticAdder.ReportDiagnostic(
                     AttributeDeserializerDiagnostics.CannotReferenceCompileTimeOnly.CreateDiagnostic(
-                        attribute.GetDiagnosticLocation(),
+                        attribute.GetLocation(),
                         (value.GetType(), targetType) ) );
             }
 
@@ -164,7 +229,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 case TypedConstant typedConstant:
                     return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
 
-                case IType type:
+                case ITypeSymbol type:
                     if ( !targetType.IsAssignableFrom( typeof(Type) ) )
                     {
                         ReportInvalidTypeDiagnostic();
@@ -173,7 +238,7 @@ namespace Caravela.Framework.Impl.CompileTime
                         return false;
                     }
 
-                    translatedValue = this._compileTimeTypeResolver.GetCompileTimeType( type.GetSymbol(), true );
+                    translatedValue = this._compileTimeTypeResolver.GetCompileTimeType( type, true );
 
                     return true;
 
@@ -227,10 +292,10 @@ namespace Caravela.Framework.Impl.CompileTime
                     return true;
 
                 default:
-                    if ( sourceType is INamedType { TypeKind: TypeKind.Enum } enumType && ((ITypeInternal) enumType).TypeSymbol is { } enumTypeSymbol )
+                    if ( sourceType is INamedTypeSymbol { TypeKind: TypeKind.Enum } enumType )
                     {
                         // Convert the underlying value of an enum to a strongly typed enum when we can.
-                        var enumReflectionType = this._compileTimeTypeResolver.GetCompileTimeType( enumTypeSymbol, false );
+                        var enumReflectionType = this._compileTimeTypeResolver.GetCompileTimeType( enumType, false );
 
                         if ( enumReflectionType != null )
                         {
@@ -261,7 +326,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
             for ( var i = 0; i < reflectionParameters.Length; i++ )
             {
-                if ( reflectionParameters[i].ParameterType != this._compileTimeTypeResolver.GetCompileTimeType( roslynParameters[i].Type, true ) )
+                var compileTimeType = this._compileTimeTypeResolver.GetCompileTimeType( roslynParameters[i].Type, true );
+
+                if ( reflectionParameters[i].ParameterType != compileTimeType )
                 {
                     return false;
                 }

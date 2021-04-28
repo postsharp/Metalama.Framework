@@ -34,4 +34,3 @@ internal class TargetClass
         int y = 0;
     }
 }
-

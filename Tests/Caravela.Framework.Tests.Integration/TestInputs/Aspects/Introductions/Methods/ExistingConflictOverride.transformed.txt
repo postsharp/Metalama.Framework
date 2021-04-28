@@ -29,12 +29,12 @@ internal class TargetClass : BaseClass
     public global::System.Int32 NonExistingMethod()
     {
         global::System.Console.WriteLine("This is introduced method.");
-        return default;
+        return default(global::System.Int32);
     }
 
     public static global::System.Int32 NonExistingMethod_Static()
     {
         global::System.Console.WriteLine("This is introduced method.");
-        return default;
+        return default(global::System.Int32);
     }
 }

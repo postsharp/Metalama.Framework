@@ -23,15 +23,15 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public ICodeElement CodeElement { get; }
 
-        public AspectType AspectType { get; }
+        public AspectClassMetadata AspectClass { get; }
 
-        IAspectType IAspectInstance.AspectType => this.AspectType;
+        IAspectClassMetadata IAspectInstance.AspectClass => this.AspectClass;
 
-        internal AspectInstance( IAspect aspect, ICodeElement codeElement, AspectType aspectType )
+        internal AspectInstance( IAspect aspect, ICodeElement codeElement, AspectClassMetadata aspectClassMetadata )
         {
             this.Aspect = aspect;
             this.CodeElement = codeElement;
-            this.AspectType = aspectType;
+            this.AspectClass = aspectClassMetadata;
         }
 
         public MethodInfo? GetTemplateMethod( string methodName )

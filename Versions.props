@@ -8,19 +8,19 @@
 
     <!-- The version for the release build is set manually. -->
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <Version Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</Version>
+        <CaravelaVersion Condition="'$(Configuration)'=='Release'">$(MainVersion)-preview</CaravelaVersion>
     </PropertyGroup>
 
     <!-- For TeamCity debug builds, the version number is based on the TeamCity build number. 
          TeamCity is responsible for setting the VersionSuffix property -->
     <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">
-        <Version Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</Version>
+        <CaravelaVersion Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'!=''">$(MainVersion)-build-$(VersionSuffix)</CaravelaVersion>
     </PropertyGroup>
 
     <!-- For local builds, the LocalBuildId property must be defined before calling `dotnet pack` -->
     <PropertyGroup Condition="'$(Configuration)'=='Debug' AND '$(VersionSuffix)'==''">
         <LocalBuildId Condition="'$(LocalBuildId)'==''">LocalBuildIdUndefined</LocalBuildId>
-        <Version Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</Version>
+        <CaravelaVersion Condition="'$(Configuration)'=='Debug' AND '$(LocalBuildIdUndefined)'==''">$(MainVersion)-dev-$(USERNAME)-$(LocalBuildId)</CaravelaVersion>
     </PropertyGroup>
 
     <!-- Version of dependencies -->
@@ -28,15 +28,19 @@
 
         <RoslynVersion>3.8.0</RoslynVersion>
         <CaravelaCompilerVersion>3.8.7-preview</CaravelaCompilerVersion>
+        <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
+        <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
 
         <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
         <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>
+
+        <Version>$(CaravelaVersion)</Version>
 
     </PropertyGroup>
 
 
     <Target Name="PrintVersion">
-        <Message Text="Version=$(Version)" />
+        <Message Text="CaravelaVersion=$(CaravelaVersion)" />
     </Target>
 
     <!-- Emits an error if `dotnet pack` is called in a local debug build, but Run CreateLocalPackages.ps1 has not been called. -->

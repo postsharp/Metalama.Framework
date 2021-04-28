@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
 namespace Caravela.Framework.Impl
@@ -18,16 +19,17 @@ namespace Caravela.Framework.Impl
             new( "CR0001", "Unexpected exception in Caravela.", "Unexpected exception occurred in Caravela: {0} Exception details are in {1}.", _category,
                  Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, CodeElementKind CodeElementKind, ICodeElement CodeElement, IType InterfaceType)>
+        public static readonly StrongDiagnosticDescriptor<(ITypeSymbol AspectType, CodeElementKind CodeElementKind, ICodeElement CodeElement, ITypeSymbol
+                InterfaceType)>
             AspectAppliedToIncorrectElement =
                 new( "CR0003", "Aspect applied to incorrect kind of element.",
                      "Aspect '{0}' cannot be applied to {1} '{2}', because this aspect does not implement the '{3}' interface.", _category, Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
+        public static readonly StrongDiagnosticDescriptor<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
             new( "CR0004", "Aspect has more than one weaver.", "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", _category, Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType WeaverType, string Exception)> ExceptionInWeaver =
-            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the aspect weaver '{0}': {1}", _category, Error );
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, string Exception)> ExceptionInWeaver =
+            new( "CR0006", "Exception in aspect weaver.", "Exception occurred while executing the weaver of aspect '{0}': {1}", _category, Error );
 
         public static readonly StrongDiagnosticDescriptor<(ICodeElement Member, int ArgumentsCount)> MemberRequiresNArguments =
             new( "CR0012", "Member requires number of arguments.", "Member '{0}' requires {1} arguments.", _category, Error );
@@ -61,14 +63,14 @@ namespace Caravela.Framework.Impl
             new( "CR0021", "A cycle was found in aspect ordering.",
                  "A cycle was found in the specifications of aspect ordering between the following aspect part: {0}.", _category, Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType ParentType, IType ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
+        public static readonly StrongDiagnosticDescriptor<(string ParentType, string ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
             "CR0022",
             "Cannot add an aspect to a previous step of the compilation pipeline.",
             "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
             _category,
             Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Target)> CannotAddAdviceToPreviousPipelineStep = new(
             "CR0023",
             "Cannot add an advice to a previous step of the compilation pipeline.",
             "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
@@ -89,5 +91,27 @@ namespace Caravela.Framework.Impl
             "The type '{0}' must have exactly one method named '{1}'.",
             _category,
             Error );
+
+        public static readonly StrongDiagnosticDescriptor<(INamedTypeSymbol AspectType, string ExceptionType, Exception Exception)> ExceptionInUserCode = new(
+            "CR0025",
+            "The aspect has thrown an exception.",
+            "The aspect '{0}' has thrown an exception of the '{1}': {2}",
+            _category,
+            Error );
+
+        public static readonly StrongDiagnosticDescriptor<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
+            "CR0026",
+            "Cannot find an assembly required by the compile-time assembly.",
+            "The assembly '{0}' required at compile-time cannot be found.",
+            _category,
+            Error );
+
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElementBuilder MemberBuilder, INamedType AttributeType)>
+            CompatibleAttributeConstructorDoesNotExist = new(
+                "CR0027",
+                "Compatible attribute constructor does not exist.",
+                "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
+                _category,
+                Error );
     }
 }

@@ -96,8 +96,8 @@ namespace Caravela.TestFramework
 
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
-            static string GetTextUnderDiagnostic( Diagnostic diagnostic )
-                => diagnostic.Location!.SourceTree!.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            static string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+                => diagnostic.Location!.SourceTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
 
             // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
             // passed to this method.

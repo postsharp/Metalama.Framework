@@ -7,12 +7,12 @@ namespace Caravela.Framework.Impl.AspectOrdering
 {
     internal class AspectLayer : IEquatable<AspectLayerId>
     {
-        private readonly AspectType? _aspectType;
+        private readonly AspectClassMetadata? _aspectClassMetadata;
 
-        public AspectLayer( AspectType aspectType, string? layerName )
+        public AspectLayer( AspectClassMetadata aspectClassMetadata, string? layerName )
         {
-            this._aspectType = aspectType;
-            this.AspectLayerId = new AspectLayerId( aspectType, layerName );
+            this._aspectClassMetadata = aspectClassMetadata;
+            this.AspectLayerId = new AspectLayerId( aspectClassMetadata, layerName );
         }
 
         // Constructor for testing only.
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
             this.AspectLayerId = new AspectLayerId( aspectTypeName, layerName );
         }
 
-        public AspectType AspectType => this._aspectType.AssertNotNull();
+        public AspectClassMetadata AspectClass => this._aspectClassMetadata.AssertNotNull();
 
         public AspectLayerId AspectLayerId { get; }
 

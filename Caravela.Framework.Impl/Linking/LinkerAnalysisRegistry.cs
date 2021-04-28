@@ -2,12 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Aspects;
-using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -171,7 +169,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         return methodSymbol.OverriddenMethod;
                     }
-                    else if (TryGetHiddenSymbol(methodSymbol, out var hiddenSymbol))
+                    else if ( TryGetHiddenSymbol( methodSymbol, out var hiddenSymbol ) )
                     {
                         return hiddenSymbol;
                     }
@@ -183,18 +181,19 @@ namespace Caravela.Framework.Impl.Linking
             return this._introductionRegistry.GetSymbolForIntroducedMember( previousLayerOverride );
         }
 
-        private static bool TryGetHiddenSymbol( ISymbol methodSymbol, [NotNullWhen(true)] out ISymbol? hiddenSymbol )
+        private static bool TryGetHiddenSymbol( ISymbol methodSymbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {
             var currentType = methodSymbol.ContainingType.BaseType;
 
-            while (currentType != null)
+            while ( currentType != null )
             {
                 // TODO: Optimize - lookup by name first instead of equating all members.
                 foreach ( var member in currentType.GetMembers() )
                 {
-                    if (StructuralSymbolComparer.Signature.Equals(methodSymbol, member))
+                    if ( StructuralSymbolComparer.Signature.Equals( methodSymbol, member ) )
                     {
                         hiddenSymbol = (IMethodSymbol) member;
+
                         return true;
                     }
                 }
@@ -203,6 +202,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             hiddenSymbol = null;
+
             return false;
         }
 

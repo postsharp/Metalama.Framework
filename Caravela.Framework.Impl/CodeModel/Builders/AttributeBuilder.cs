@@ -11,7 +11,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( ICodeElement containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments )
+        public AttributeBuilder( CodeElementBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+            containingElement.ParentAdvice )
         {
             this.ContainingElement = containingElement;
             this.ConstructorArguments = constructorArguments;

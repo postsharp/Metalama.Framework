@@ -13,16 +13,14 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal class StructuralSymbolComparer : IEqualityComparer<ISymbol>
     {
-        // TODO: At this point the default display string seems to be enough for comparison.
-
-        public static readonly StructuralSymbolComparer Default = 
-            new (
+        public static readonly StructuralSymbolComparer Default =
+            new(
                 StructuralSymbolComparerOptions.ContainingElement |
                 StructuralSymbolComparerOptions.Name |
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers
-                );
+            );
 
         public static readonly StructuralSymbolComparer Signature =
             new(
@@ -30,7 +28,7 @@ namespace Caravela.Framework.Impl.Linking
                 StructuralSymbolComparerOptions.GenericParameterCount |
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers
-                );
+            );
 
         private readonly StructuralSymbolComparerOptions _options;
 
@@ -49,7 +47,7 @@ namespace Caravela.Framework.Impl.Linking
 
             switch ( (x, y) )
             {
-                case (IMethodSymbol methodX, IMethodSymbol methodY ):
+                case (IMethodSymbol methodX, IMethodSymbol methodY):
                     if ( !MethodEquals( methodX, methodY, this._options ) )
                     {
                         return false;
@@ -57,30 +55,34 @@ namespace Caravela.Framework.Impl.Linking
 
                     break;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     if ( !NamedTypeEquals( namedTypeX, namedTypeY, this._options ) )
                     {
                         return false;
                     }
+
                     break;
 
-                case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY ):
+                case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
                     if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
                     {
                         return false;
                     }
 
                     break;
+
                 default:
                     throw new NotImplementedException( $"{x.Kind}" );
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingElement ) && !ContainingElementEquals( x.ContainingSymbol, y.ContainingSymbol ) )
+            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingElement )
+                 && !ContainingElementEquals( x.ContainingSymbol, y.ContainingSymbol ) )
             {
                 return false;
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingAssembly ) && !ContainingModuleEquals( x.ContainingModule, y.ContainingModule ) )
+            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingAssembly )
+                 && !ContainingModuleEquals( x.ContainingModule, y.ContainingModule ) )
             {
                 return false;
             }
@@ -95,7 +97,8 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.GenericParameterCount ) && namedTypeX.TypeParameters.Length != namedTypeY.TypeParameters.Length )
+            if ( options.HasFlag( StructuralSymbolComparerOptions.GenericParameterCount )
+                 && namedTypeX.TypeParameters.Length != namedTypeY.TypeParameters.Length )
             {
                 return false;
             }
@@ -117,7 +120,7 @@ namespace Caravela.Framework.Impl.Linking
 
         private static bool MethodEquals( IMethodSymbol methodX, IMethodSymbol methodY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name) && !StringComparer.Ordinal.Equals( methodX.Name, methodY.Name ) )
+            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( methodX.Name, methodY.Name ) )
             {
                 return false;
             }
@@ -127,8 +130,8 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            if ( (options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers )) 
-                && methodX.Parameters.Length != methodY.Parameters.Length )
+            if ( (options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ))
+                 && methodX.Parameters.Length != methodY.Parameters.Length )
             {
                 return false;
             }
@@ -163,16 +166,16 @@ namespace Caravela.Framework.Impl.Linking
 
             switch ( (typeX, typeY) )
             {
-                case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY ):
+                case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
                     return StringComparer.Ordinal.Equals( typeParamX.Name, typeParamY.Name )
-                        && typeParamX.TypeParameterKind == typeParamY.TypeParameterKind;
+                           && typeParamX.TypeParameterKind == typeParamY.TypeParameterKind;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     return NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type );
 
-                case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY ):
+                case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
                     return arrayTypeX.Rank == arrayTypeY.Rank
-                        && TypeEquals( arrayTypeX.ElementType, arrayTypeY.ElementType );
+                           && TypeEquals( arrayTypeX.ElementType, arrayTypeY.ElementType );
 
                 default:
                     throw new NotImplementedException( $"{typeX.Kind}" );
@@ -193,29 +196,33 @@ namespace Caravela.Framework.Impl.Linking
 
                 switch ( (currentX, currentY) )
                 {
-                    case (IMethodSymbol methodX, IMethodSymbol methodY ):
+                    case (IMethodSymbol methodX, IMethodSymbol methodY):
                         if ( !MethodEquals( methodX, methodY, StructuralSymbolComparerOptions.MethodSignature ) )
                         {
                             return false;
                         }
 
                         break;
-                    case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY ):
+
+                    case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                         if ( !NamedTypeEquals( namedTypeX, namedTypeY, StructuralSymbolComparerOptions.Type ) )
                         {
                             return false;
                         }
 
                         break;
-                    case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY ):
+
+                    case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
                         if ( !StringComparer.Ordinal.Equals( namespaceX.Name, namespaceY.Name ) )
                         {
                             return false;
                         }
 
                         break;
-                    case (IModuleSymbol _, IModuleSymbol _ ):
+
+                    case (IModuleSymbol _, IModuleSymbol _):
                         return true;
+
                     default:
                         throw new NotImplementedException( $"{currentX.Kind}" );
                 }
@@ -232,9 +239,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 StringComparer.Ordinal.Equals( moduleX.Name, moduleY.Name )
-                && StringComparer.Ordinal.Equals( moduleX.ContainingAssembly.Name, moduleY.ContainingAssembly.Name )
-                && Enumerable.SequenceEqual( moduleX.ContainingAssembly.Identity.PublicKey, moduleY.ContainingAssembly.Identity.PublicKey )
-                && EqualityComparer<Version>.Default.Equals( moduleX.ContainingAssembly.Identity.Version, moduleY.ContainingAssembly.Identity.Version );
+                && EqualityComparer<AssemblyIdentity>.Default.Equals( moduleX.ContainingAssembly.Identity, moduleY.ContainingAssembly.Identity );
         }
 
         public int GetHashCode( ISymbol symbol )
@@ -243,7 +248,7 @@ namespace Caravela.Framework.Impl.Linking
             return GetHashCode( symbol, this._options );
         }
 
-        private static int GetHashCode(ISymbol symbol, StructuralSymbolComparerOptions options)
+        private static int GetHashCode( ISymbol symbol, StructuralSymbolComparerOptions options )
         {
             var h = 701_142_619; // Random prime.
 
@@ -270,7 +275,8 @@ namespace Caravela.Framework.Impl.Linking
                         h = HashCode.Combine( h, method.Name );
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes )
+                         || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
                         h = HashCode.Combine( h, method.Parameters.Length );
 
@@ -298,8 +304,10 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     break;
+
                 case IModuleSymbol _:
                     break;
+
                 case ITypeParameterSymbol typeParameter:
                     if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
                     {
@@ -307,8 +315,10 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     break;
+
                 case IArrayTypeSymbol arrayType:
-                    h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralSymbolComparerOptions.Type));
+                    h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralSymbolComparerOptions.Type ) );
+
                     break;
 
                 default:
@@ -325,17 +335,19 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         case INamedTypeSymbol namedType:
                             h = HashCode.Combine( h, namedType.Name, namedType.TypeParameters.Length );
+
                             break;
 
                         case INamespaceSymbol @namespace:
                             h = HashCode.Combine( h, @namespace.Name );
+
                             break;
 
                         case IMethodSymbol method:
                             h = HashCode.Combine( h, method.Name, method.TypeParameters.Length, method.Parameters.Length );
 
                             // This runs only if the original symbol was a local function.
-                            foreach (var parameter in method.Parameters)
+                            foreach ( var parameter in method.Parameters )
                             {
                                 h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralSymbolComparerOptions.Type ) );
                             }

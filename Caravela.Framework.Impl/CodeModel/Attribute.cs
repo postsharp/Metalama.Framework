@@ -16,15 +16,16 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class Attribute : IAttribute, IHasDiagnosticLocation
     {
-        private readonly AttributeData _data;
         private readonly CompilationModel _compilation;
 
         public Attribute( AttributeData data, CompilationModel compilation, ICodeElement containingElement )
         {
-            this._data = data;
+            this.AttributeData = data;
             this._compilation = compilation;
             this.ContainingElement = containingElement;
         }
+
+        public AttributeData AttributeData { get; }
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
@@ -37,18 +38,18 @@ namespace Caravela.Framework.Impl.CodeModel
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
-        public INamedType Type => this._compilation.Factory.GetNamedType( this._data.AttributeClass.AssertNotNull() );
+        public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
 
         [Memo]
-        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this._data.AttributeConstructor.AssertNotNull() );
+        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
         [Memo]
-        public IReadOnlyList<TypedConstant> ConstructorArguments => this._data.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
         public INamedArgumentList NamedArguments
             => new NamedArgumentsList(
-                this._data.NamedArguments
+                this.AttributeData.NamedArguments
                     .Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) ) );
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
@@ -68,7 +69,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public bool Equals( ICodeElement other ) => throw new NotImplementedException();
 
-        public override string ToString() => this._data.ToString();
+        public override string ToString() => this.AttributeData.ToString();
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
@@ -76,6 +77,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation.ToDiagnosticLocation();
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this._data );
+        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.AttributeData );
     }
 }

@@ -1,20 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Utilities;
+using Caravela.Framework.Sdk;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    public static class ReferenceAssemblyLocator
+    /// <summary>
+    /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
+    /// This is achieved by creating an MSBuild project and restoring it.
+    /// </summary>
+    public class ReferenceAssemblyLocator
     {
-        private static readonly string _project = $@"
+        private static readonly string _projectText = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -28,10 +33,78 @@ namespace Caravela.Framework.Impl.CompileTime
   </Target>
 </Project>";
 
-        public static IEnumerable<string> GetReferenceAssemblies()
+        private static readonly string _projectHash;
+
+        private static ReferenceAssemblyLocator? _instance;
+
+        static ReferenceAssemblyLocator()
         {
-            var hash = ComputeHash( _project );
-            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", hash, "TempProject" );
+            _projectHash = HashUtilities.HashString( _projectText );
+        }
+
+        public static ReferenceAssemblyLocator GetInstance()
+        {
+            // We don't initialize the instance from the static constructor because the constructor is non-trivial
+            // and can fail, and it is difficult to debug an exception that occurs in a static constructor.
+            _instance ??= new ReferenceAssemblyLocator();
+
+            return _instance;
+        }
+
+        /// <summary>
+        /// Gets the name (without path and extension) of Caravela assemblies.
+        /// </summary>
+        public ImmutableArray<string> CaravelaAssemblyNames { get; } = ImmutableArray.Create(
+            "Caravela.Framework",
+            "Caravela.Framework.Sdk",
+            "Caravela.Framework.Impl" );
+
+        /// <summary>
+        /// Gets the name (without path and extension) of all standard assemblies, including Caravela, Roslyn and .NET standard.
+        /// </summary>
+        public ImmutableHashSet<string> StandardAssemblyNames { get; }
+
+        /// <summary>
+        /// Gets the full path of system assemblies (.NET Standard and Roslyn). 
+        /// </summary>
+        public ImmutableArray<string> SystemAssemblyPaths { get; }
+
+        /// <summary>
+        /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
+        /// </summary>
+        public ImmutableHashSet<string> SystemAssemblyNames { get; }
+
+        /// <summary>
+        /// Gets the full path of all standard assemblies, including Caravela, Roslyn and .NET standard.
+        /// </summary>
+        public ImmutableArray<string> StandardAssemblyPaths { get; }
+
+        private ReferenceAssemblyLocator()
+        {
+            this.SystemAssemblyPaths = GetSystemAssemblyPaths().ToImmutableArray();
+
+            this.SystemAssemblyNames = this.SystemAssemblyPaths
+                .Select( Path.GetFileNameWithoutExtension )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this.StandardAssemblyNames = this.CaravelaAssemblyNames
+                .Concat( this.SystemAssemblyPaths )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            // the SDK assembly might not be loaded at this point, so make sure it is
+            _ = new AspectWeaverAttribute( null! );
+
+            var caravelaPaths = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => !a.IsDynamic ) // accessing Location of dynamic assemblies throws
+                .Select( a => a.Location )
+                .Where( path => this.CaravelaAssemblyNames.Contains( Path.GetFileNameWithoutExtension( path ) ) );
+
+            this.StandardAssemblyPaths = this.SystemAssemblyPaths.Concat( caravelaPaths ).ToImmutableArray();
+        }
+
+        private static IEnumerable<string> GetSystemAssemblyPaths()
+        {
+            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", _projectHash, "TempProject" );
 
             var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
@@ -47,7 +120,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             Directory.CreateDirectory( tempProjectDirectory );
 
-            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _project );
+            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _projectText );
 
             var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
             {
@@ -70,16 +143,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );
-        }
-
-        private static string ComputeHash( string input )
-        {
-#pragma warning disable CA5350
-            using var sha1 = SHA1.Create();
-#pragma warning restore CA5350
-            var hash = sha1.ComputeHash( Encoding.UTF8.GetBytes( input ) );
-
-            return BitConverter.ToString( hash ).Replace( "-", "" );
         }
     }
 }

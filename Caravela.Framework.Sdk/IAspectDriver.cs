@@ -3,5 +3,12 @@
 
 namespace Caravela.Framework.Sdk
 {
+    /// <summary>
+    /// Aspect drivers are responsible for executing aspects.
+    /// </summary>
+    /// <remarks>
+    /// There are low-level aspect drivers, which should implement <see cref="IAspectWeaver"/>, and a high-level aspect driver implemented
+    /// by Caravela. These two families of drivers don't share any semantic. This interface exists for clarity and type safety only.
+    /// </remarks>
     public interface IAspectDriver { }
 }

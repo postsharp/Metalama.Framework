@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -71,6 +73,7 @@ namespace Caravela.Framework.Impl.Linking
             var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
+            var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
@@ -84,7 +87,12 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ) );
+                var introductionContext = new MemberIntroductionContext(
+                    diagnostics,
+                    nameProvider,
+                    lexicalScopeHelper.GetLexicalScope( memberIntroduction ),
+                    syntaxFactory );
+
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );
@@ -101,20 +109,27 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
-                var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
+                var oldRoot = initialSyntaxTree.GetRoot();
+                var newRoot = addIntroducedElementsRewriter.Visit( oldRoot );
 
-                // Improve readability of intermediate compilation in debug builds.
-                newRoot = newRoot.NormalizeWhitespace();
+                if ( oldRoot != newRoot )
+                {
+                    // Improve readability of intermediate compilation in debug builds.
+                    newRoot = newRoot.NormalizeWhitespace();
 
-                var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
+                    var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
-                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                    syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
+                }
             }
+
+            intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
+                syntaxTreeMapping.Select( p => (p.Key, p.Value) ).ToList(),
+                Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,
-                intermediateCompilation,
+                intermediateCompilation.Compilation,
                 syntaxTreeMapping,
                 introducedMemberCollection.IntroducedMembers );
 

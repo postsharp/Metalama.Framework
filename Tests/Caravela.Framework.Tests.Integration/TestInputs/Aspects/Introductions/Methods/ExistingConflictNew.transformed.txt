@@ -94,11 +94,11 @@ internal class TargetClass : DerivedClass
 
     public global::System.Int32 NonExistentMethod()
     {
-        return default;
+        return default(global::System.Int32);
     }
 
     public static global::System.Int32 NonExistentMethod_Static()
     {
-        return default;
+        return default(global::System.Int32);
     }
 }

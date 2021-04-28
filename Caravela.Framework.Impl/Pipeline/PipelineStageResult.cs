@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// <summary>
         /// Gets the Roslyn compilation.
         /// </summary>
-        public CSharpCompilation Compilation { get; }
+        public PartialCompilation PartialCompilation { get; }
 
         /// <summary>
         /// Gets the set of diagnostics.
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl.Pipeline
         /// Gets the list of syntax trees to be added to the compilation (typically in a source generation scenario). The key is the "hint name" in the
         /// source generator API.
         /// </summary>
-        public IImmutableDictionary<string, SyntaxTree> AdditionalSyntaxTrees { get; }
+        public IReadOnlyList<IntroducedSyntaxTree> AdditionalSyntaxTrees { get; }
 
         /// <summary>
         /// Gets the list of ordered aspect parts.
@@ -48,19 +48,19 @@ namespace Caravela.Framework.Impl.Pipeline
         public IReadOnlyList<OrderedAspectLayer> AspectLayers { get; }
 
         public PipelineStageResult(
-            CSharpCompilation compilation,
+            PartialCompilation compilation,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ImmutableDiagnosticList? diagnostics = null,
             IReadOnlyList<ResourceDescription>? resources = null,
             IReadOnlyList<IAspectSource>? aspectSources = null,
-            IImmutableDictionary<string, SyntaxTree>? additionalSyntaxTrees = null )
+            IReadOnlyList<IntroducedSyntaxTree>? additionalSyntaxTrees = null )
         {
-            this.Compilation = compilation;
+            this.PartialCompilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableDiagnosticList.Empty;
             this.Resources = resources ?? Array.Empty<ResourceDescription>();
             this.AspectSources = aspectSources ?? Array.Empty<IAspectSource>();
             this.AspectLayers = aspectLayers;
-            this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableDictionary<string, SyntaxTree>.Empty;
+            this.AdditionalSyntaxTrees = additionalSyntaxTrees ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
         }
 
         public PipelineStageResult WithAdditionalDiagnostics( IReadOnlyList<Diagnostic> diagnostics )
@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
             else
             {
-                return new PipelineStageResult( this.Compilation, this.AspectLayers, this.Diagnostics.Concat( diagnostics ) );
+                return new PipelineStageResult( this.PartialCompilation, this.AspectLayers, this.Diagnostics.Concat( diagnostics ) );
             }
         }
     }

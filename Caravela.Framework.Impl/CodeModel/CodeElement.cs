@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -46,7 +47,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
-        public Location? DiagnosticLocation => DiagnosticLocationHelper.GetDiagnosticLocation( this.Symbol );
+        public Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
 
         public IReadOnlyList<ISymbol> LookupSymbols()
         {
@@ -64,5 +65,7 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         IDiagnosticLocation? IDiagnosticScope.DiagnosticLocation => this.DiagnosticLocation?.ToDiagnosticLocation();
+
+        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
     }
 }
