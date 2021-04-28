@@ -27,6 +27,7 @@ namespace Caravela.Framework.Impl.Linking
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
+            CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
             Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
             IReadOnlyList<LinkerIntroducedMember> introducedMembers )
@@ -34,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
-            this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>();
+            this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
             this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Instance );
 
             foreach ( var introducedMember in introducedMembers )

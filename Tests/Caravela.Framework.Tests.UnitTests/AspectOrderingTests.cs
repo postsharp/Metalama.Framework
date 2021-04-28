@@ -89,7 +89,7 @@ class Aspect2 {}
             var code = @"
 using Caravela.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect3), typeof(Aspect1), typeof(Aspect2) ) ]
+[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 
 class Aspect3{}
 
@@ -108,7 +108,7 @@ class Aspect2 {}
             var code = @"
 using Caravela.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
 
 [ProvidesAspectLayersAttribute(""Layer1"")]
 class Aspect1 {}
@@ -127,7 +127,7 @@ class Aspect2 {}
             var code = @"
 using Caravela.Framework.Aspects;
 
-[assembly: AspectOrder( ""Aspect1"", ""Aspect2"" ) ]
+[assembly: AspectOrder( ""Aspect2"", ""Aspect1"" ) ]
 
 [ProvidesAspectLayersAttribute(""Layer1"")]
 class Aspect1 {}

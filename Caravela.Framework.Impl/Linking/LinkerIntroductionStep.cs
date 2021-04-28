@@ -121,7 +121,8 @@ namespace Caravela.Framework.Impl.Linking
                 Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
-                intermediateCompilation.Compilation,
+                input.CompilationModel,
+                intermediateCompilation,
                 syntaxTreeMapping,
                 introducedMemberCollection.IntroducedMembers );
 
