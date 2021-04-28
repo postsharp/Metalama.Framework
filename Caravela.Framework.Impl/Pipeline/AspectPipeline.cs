@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// <summary>
     /// The base class for the main process of Caravela.
     /// </summary>
-    public abstract class AspectPipeline : IDisposable, IAspectPipelineProperties
+    public abstract partial class AspectPipeline : IDisposable, IAspectPipelineProperties
     {
         public IBuildOptions BuildOptions { get; }
 
@@ -87,13 +87,6 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public virtual bool WriteUnhandledExceptionsToFile => true;
-
-        private protected record PipelineConfiguration(
-            ImmutableArray<PipelineStage> Stages,
-            IReadOnlyList<AspectClassMetadata> AspectTypes,
-            ImmutableArray<OrderedAspectLayer> Layers,
-            CompileTimeProject? CompileTimeProject,
-            CompileTimeProjectLoader CompileTimeProjectLoader );
 
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
@@ -182,7 +175,7 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineStageResult? pipelineStageResult )
         {
             // If there is no aspect in the compilation, don't execute the pipeline.
-            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectTypes.Count == 0 )
+            if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.AspectClasses.Count == 0 )
             {
                 pipelineStageResult = new PipelineStageResult( compilation, Array.Empty<OrderedAspectLayer>() );
 
@@ -190,7 +183,7 @@ namespace Caravela.Framework.Impl.Pipeline
             }
 
             var aspectSource = new CompilationAspectSource(
-                pipelineConfiguration.AspectTypes,
+                pipelineConfiguration.AspectClasses,
                 pipelineConfiguration.CompileTimeProjectLoader );
 
             pipelineStageResult = new PipelineStageResult( compilation, pipelineConfiguration.Layers, aspectSources: new[] { aspectSource } );
