@@ -312,7 +312,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 var manifest = new CompileTimeProjectManifest
                 {
-                    References = referencedProjects.Select( r => r.RunTimeIdentity.Name ).ToList(),
+                    References = referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                     AspectTypes = compileTimeCompilation.Assembly
                         .GetTypes()
                         .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )

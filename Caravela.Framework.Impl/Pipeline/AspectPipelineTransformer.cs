@@ -3,6 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
@@ -16,7 +17,9 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            using CompileTimeAspectPipeline pipeline = new( new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ) );
+            using CompileTimeAspectPipeline pipeline = new(
+                new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ),
+                new CompilationAssemblyLocator( transformerContext.Compilation ) );
 
             if ( pipeline.TryExecute(
                 new DiagnosticAdder( transformerContext.ReportDiagnostic ),
@@ -28,8 +31,11 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 return compilation;
             }
-
-            return transformerContext.Compilation;
+            else
+            {
+                // The pipeline failed.
+                return transformerContext.Compilation;
+            }
         }
     }
 }

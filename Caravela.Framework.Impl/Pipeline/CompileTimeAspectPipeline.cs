@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions )
+        public CompileTimeAspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null ) : base( buildOptions, assemblyLocator )
         {
             if ( this.BuildOptions.CompileTimeAttachDebugger )
             {
@@ -64,8 +64,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( result.PartialCompilation.Compilation.Options.OutputKind == OutputKind.DynamicallyLinkedLibrary )
                 {
-                    additionalResourcesBuilder.Add(
-                        new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => configuration.CompileTimeProject!.Serialize(), true ) );
+                    additionalResourcesBuilder.Add( configuration.CompileTimeProject!.ToResource() );
                 }
 
                 outputCompilation = CompileTimeCompilationBuilder.PrepareRunTimeAssembly( result.PartialCompilation.Compilation );

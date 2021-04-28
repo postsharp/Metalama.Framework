@@ -202,7 +202,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 templateInstance,
                 targetMethod,
                 compilation,
-                new LinkerOverrideProceedImpl( default, targetMethod, LinkerAnnotationOrder.Default ),
+                new LinkerOverrideProceedImpl( default, targetMethod, LinkerAnnotationOrder.Default, ReflectionMapper.GetInstance( compilation.RoslynCompilation ) ),
                 lexicalScope,
                 diagnostics );
         }

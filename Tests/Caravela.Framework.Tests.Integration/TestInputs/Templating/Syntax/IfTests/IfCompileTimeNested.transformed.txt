@@ -1,6 +1,6 @@
 {
     global::System.Console.WriteLine(42);
-    __Void result;
+    global::Caravela.Framework.Aspects.__Void result;
     result = this.Method(aBc);
     return;
 }

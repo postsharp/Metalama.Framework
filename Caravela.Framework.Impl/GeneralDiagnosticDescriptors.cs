@@ -99,9 +99,16 @@ namespace Caravela.Framework.Impl
             _category,
             Error );
 
+        public static readonly StrongDiagnosticDescriptor<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
+            "CR0026",
+            "Cannot find an assembly required by the compile-time assembly.",
+            "The assembly '{0}' required at compile-time cannot be found.",
+            _category,
+            Error );
+
         public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElementBuilder MemberBuilder, INamedType AttributeType)>
             CompatibleAttributeConstructorDoesNotExist = new(
-                "CR0026",
+                "CR0027",
                 "Compatible attribute constructor does not exist.",
                 "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 _category,
