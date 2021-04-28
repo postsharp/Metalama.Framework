@@ -12,7 +12,6 @@ using Xunit;
 using Xunit.Abstractions;
 
 // ReSharper disable RedundantTypeArgumentsOfMethod
-#pragma warning disable SA1117 // Parameters should be on same line or separate lines
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {

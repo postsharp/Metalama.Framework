@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
 
                     // Increment the usage count.
-                    var symbolInfo = input.IntermediateCompilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
+                    var symbolInfo = input.IntermediateCompilation.Compilation.GetSemanticModel( syntaxTree ).GetSymbolInfo( referencingNode );
 
                     if ( symbolInfo.Symbol == null )
                     {

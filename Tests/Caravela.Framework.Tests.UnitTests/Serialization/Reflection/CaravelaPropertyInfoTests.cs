@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Serialization;
@@ -114,8 +115,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target { public string this[int target] {get{return default;}} }";
             var compilation = CreateCompilation( code );
-            var referencedTypes = compilation.DeclaredAndReferencedTypes;
-            var stringType = referencedTypes.Single( t => t.Name == "String" );
+            var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
             var serialized = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( (Property) property ) ).ToString();

@@ -9,9 +9,9 @@ namespace Caravela.Framework.Impl.AspectOrdering
 {
     internal class AspectLayerOrderingSource : IAspectOrderingSource
     {
-        private readonly IReadOnlyList<AspectType> _aspectTypes;
+        private readonly IReadOnlyList<AspectClassMetadata> _aspectTypes;
 
-        public AspectLayerOrderingSource( IReadOnlyList<AspectType> aspectTypes )
+        public AspectLayerOrderingSource( IReadOnlyList<AspectClassMetadata> aspectTypes )
         {
             this._aspectTypes = aspectTypes;
         }

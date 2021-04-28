@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 
@@ -52,6 +53,9 @@ namespace Caravela.Framework.Impl.Diagnostics
                         default:
                             return codeElementKind.ToString().ToLowerInvariant();
                     }
+
+                case ISymbol symbol:
+                    return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 
                 case IFormattable formattable:
                     return formattable.ToString( format, CultureInfo.CurrentCulture );

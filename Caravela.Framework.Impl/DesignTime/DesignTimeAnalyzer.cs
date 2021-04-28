@@ -7,13 +7,15 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
+    /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public partial class DesignTimeAnalyzer : DiagnosticAnalyzer
     {
@@ -55,26 +57,29 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
+            // Execute the analysis that are not performed in the pipeline.
             Visitor visitor = new( context );
             visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
 
-            // -
-
-            var compilation = (CSharpCompilation) context.SemanticModel.Compilation;
-
             // Execute the pipeline.
-            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
-                compilation,
-                new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ),
+            var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                context.SemanticModel.Compilation,
+                new[] { context.SemanticModel.SyntaxTree },
+                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
                 context.CancellationToken );
 
-            // Report diagnostics.
-            DesignTimeDiagnosticHelper.ReportDiagnostics(
-                pipelineResult.Diagnostics.ReportedDiagnostics,
-                compilation,
-                context.ReportDiagnostic,
-                true,
-                context.SemanticModel.SyntaxTree );
+            // Report diagnostics from the pipeline.
+            var result = syntaxTreeResults.SyntaxTreeResults.SingleOrDefault(
+                r => r != null && r.SyntaxTree.FilePath == context.SemanticModel.SyntaxTree.FilePath );
+
+            if ( result != null )
+            {
+                DesignTimeDiagnosticHelper.ReportDiagnostics(
+                    result.Diagnostics,
+                    context.SemanticModel.SyntaxTree,
+                    context.ReportDiagnostic,
+                    true );
+            }
         }
     }
 }

@@ -653,6 +653,12 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
+            if ( node.Body == null )
+            {
+                // Not supported or incomplete syntax.
+                return node;
+            }
+
             this.Indent( 3 );
 
             // Generates a template method.
@@ -660,11 +666,6 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
             // TODO: also compile templates for properties and so on.
-
-            if ( node.Body == null )
-            {
-                throw new NotImplementedException( "Expression-bodied templates are not supported." );
-            }
 
             var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
 

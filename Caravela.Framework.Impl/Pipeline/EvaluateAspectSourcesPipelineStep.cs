@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Pipeline
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {
             pipelineStepsState.AddAspectInstances(
-                this._aspectSources.SelectMany( s => s.GetAspectInstances( this.AspectLayer.AspectType, pipelineStepsState ) ) );
+                this._aspectSources.SelectMany( s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState ) ) );
 
             return compilation;
         }

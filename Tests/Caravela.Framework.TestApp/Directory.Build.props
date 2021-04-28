@@ -1,0 +1,46 @@
+﻿<Project InitialTargets="ValidateVersion">
+
+  <!-- Imports Directory.Build.props of the upper directory. Use this code in any non-root Directory.Build.* even if the file does not exit. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)../`))')" />
+
+
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DebugCaravelaDesignTime>true</DebugCaravelaDesignTime>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
+
+    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Analyzer Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" />
+    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Analyzer Include="$(PkgCaravela_CodeAnalysis_Workspaces_Lightweight_Common)\lib\netstandard2.0\Caravela.CodeAnalysis.Workspaces.Lightweight.dll" />
+
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Analyzer Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" />
+
+    <PackageReference Include="K4os.Hash.xxHash" Version="1.0.6" />
+    <Analyzer Include="C:\Users\GaelFraiteur\.nuget\packages\k4os.hash.xxhash\1.0.6\lib\netstandard2.0\K4os.Hash.xxHash.dll" />
+
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+    <Analyzer Include="C:\Users\GaelFraiteur\.nuget\packages\newtonsoft.json\13.0.1\lib\netstandard2.0\Newtonsoft.Json.dll" />
+
+    <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
+
+  </ItemGroup>
+
+  <Import Project="..\..\Caravela.Framework.Impl\build\Caravela.Framework.targets" />
+
+
+  <!-- Internal NuGet reposority source -->
+  <PropertyGroup>
+    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)..\..\artifacts\bin\$(Configuration)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+
+  <Target Name="ValidateVersion">
+    <Error Text="The CaravelaVersion property is not defined. Check that Directory.Build.props have been properly imported." Condition="'$(CaravelaVersion)'==''"/>
+  </Target>
+
+</Project>

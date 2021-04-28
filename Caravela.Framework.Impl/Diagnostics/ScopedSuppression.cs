@@ -19,5 +19,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this.Id = id;
             this.CodeElement = codeElement;
         }
+
+        public override string ToString() => $"{this.Id} in {this.CodeElement}";
     }
 }

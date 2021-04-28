@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {
-            var aspectDriver = (AspectDriver) this.AspectLayer.AspectType.AspectDriver;
+            var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
 
-            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.EvaluateAspect( ai ) ).ToImmutableArray();
+            var aspectInstanceResults = this._aspectInstances.Select( ai => aspectDriver.ExecuteAspect( ai ) ).ToImmutableArray();
             var success = aspectInstanceResults.All( ar => ar.Success );
             var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
             var diagnosticSuppressions = aspectInstanceResults.SelectMany( air => air.Diagnostics.DiagnosticSuppressions );

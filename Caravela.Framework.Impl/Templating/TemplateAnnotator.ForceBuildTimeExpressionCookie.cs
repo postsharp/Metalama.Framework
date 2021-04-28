@@ -23,6 +23,7 @@ namespace Caravela.Framework.Impl.Templating
             public void Dispose()
             {
                 this._parent._forceCompileTimeOnlyExpression = this._initialValue;
+                this._parent._forceCompileTimeOnlyExpressionReason = this._initialReason;
             }
         }
     }

@@ -20,21 +20,22 @@ namespace Caravela.Framework.Impl.Linking
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
-        private readonly CSharpCompilation _intermediateCompilation;
+        private readonly Compilation _intermediateCompilation;
         private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly Dictionary<ICodeElement, List<LinkerIntroducedMember>> _overrideMap;
         private readonly Dictionary<ISymbol, ICodeElement> _overrideTargetsByOriginalSymbolName;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
-            CSharpCompilation intermediateCompilation,
+            CompilationModel finalCompilationModel,
+            Compilation intermediateCompilation,
             Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
             IReadOnlyList<LinkerIntroducedMember> introducedMembers )
         {
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
-            this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>();
+            this._overrideMap = new Dictionary<ICodeElement, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
             this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, ICodeElement>( StructuralSymbolComparer.Instance );
 
             foreach ( var introducedMember in introducedMembers )

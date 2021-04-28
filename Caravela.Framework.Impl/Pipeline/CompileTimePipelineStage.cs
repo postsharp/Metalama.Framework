@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel.Builders;
-using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Linking;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +16,15 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public CompileTimePipelineStage(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompileTimeAssemblyLoader assemblyLoader,
             IAspectPipelineProperties properties )
-            : base( aspectLayers, assemblyLoader, properties ) { }
+            : base( aspectLayers, properties ) { }
 
         /// <inheritdoc/>
         protected override PipelineStageResult GenerateCode( PipelineStageResult input, IPipelineStepsResult pipelineStepResult )
         {
             var linker = new AspectLinker(
                 new AspectLinkerInput(
-                    input.Compilation,
+                    input.PartialCompilation,
                     pipelineStepResult.Compilation,
                     pipelineStepResult.NonObservableTransformations,
                     input.AspectLayers,

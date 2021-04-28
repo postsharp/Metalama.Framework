@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System.Collections.Immutable;
 using System.IO;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -12,9 +13,14 @@ namespace Caravela.Framework.Impl.Pipeline
     public interface IBuildOptions
     {
         /// <summary>
-        /// Gets a value indicating whether the debugger should be attached to the process.
+        /// Gets a value indicating whether the debugger should be attached to the process at compile time.
         /// </summary>
-        bool AttachDebugger { get; }
+        bool CompileTimeAttachDebugger { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the debugger should be attached to the process at design time.
+        /// </summary>
+        bool DesignTimeAttachDebugger { get; }
 
         /// <summary>
         /// Gets a value indicating whether the produced PDB file should map to transformed code. When <c>false</c>, it will
@@ -34,6 +40,10 @@ namespace Caravela.Framework.Impl.Pipeline
         /// to get a non-null value.
         /// </summary>
         string? CrashReportDirectory { get; }
+
+        string ProjectId { get; }
+
+        ImmutableArray<object> PlugIns { get; }
     }
 
     internal static class BuildOptionsExtensions

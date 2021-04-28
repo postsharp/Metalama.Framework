@@ -6,6 +6,7 @@ using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using RefKind = Microsoft.CodeAnalysis.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
@@ -50,5 +51,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public abstract ISymbol? Symbol { get; }
 
         public abstract CodeElementLink<ICodeElement> ToLink();
+
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((ICodeElementInternal) this.DeclaringMember).DeclaringSyntaxReferences;
     }
 }

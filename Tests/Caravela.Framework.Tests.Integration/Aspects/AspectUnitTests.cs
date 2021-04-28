@@ -13,6 +13,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         public AspectUnitTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
+        [FromDirectory( @"Aspects\Order" )]
+        public Task Order( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
         [FromDirectory( @"Aspects\Introductions\Methods" )]
         public Task Introductions( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
