@@ -169,9 +169,14 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public IMethod GetMethod( IMethod attributeBuilderConstructor )
+        public IMethod GetMethod( IMethod method )
         {
-            throw new NotImplementedException();
+            return this.GetCodeElement( method );
+        }
+
+        public IConstructor GetConstructor( IConstructor attributeBuilderConstructor )
+        {
+            return this.GetCodeElement( attributeBuilderConstructor );
         }
 
         public IParameter GetReturnParameter( IMethodSymbol method )

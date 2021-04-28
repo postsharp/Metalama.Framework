@@ -25,4 +25,8 @@
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
 </Project>

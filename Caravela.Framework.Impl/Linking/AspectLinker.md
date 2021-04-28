@@ -36,3 +36,32 @@ Linker unit tests are facilitated by a set of rewriters, which based on the inpu
 This is mainly intended to bypass aspect framework and template engine, to test linker-specific scenarios in a very concise manner.
 
 It currently takes a form of unit tests, but may be in the future adapted to the regular integration test format (even though it is not necessary).
+
+## Handling of introduced methods
+
+```
+class Base
+{
+    int Foo()
+    {
+    }
+}
+
+class Derived
+{
+    int new Foo() // Introduced by Aspect1
+    {
+        return default;
+    }
+
+    public int __Foo__Override__Aspect1()
+    {
+        return Foo(); // Linker annotation.
+    }
+
+    public int __Foo__Override__Aspect2()
+    {
+        return Foo(); // Linker annotation.
+    }
+}
+```

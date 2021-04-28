@@ -18,12 +18,14 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IMethod _originalDeclaration;
         private readonly AspectLayerId _aspectLayerId;
+        private readonly LinkerAnnotationOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration, ISyntaxFactory syntaxFactory )
+        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
             this._originalDeclaration = overridenDeclaration;
+            this._order = order;
             this._syntaxFactory = syntaxFactory;
         }
 
@@ -79,145 +81,9 @@ namespace Caravela.Framework.Impl.Linking
                         : IdentifierName( this._originalDeclaration.Name ),
                     ArgumentList( SeparatedList( this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
-            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, LinkerAnnotationOrder.Default ) );
+            invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
 
             return invocation;
         }
-
-        // The following commented logic should move to the aspect linker.
-
-        /*
-        StatementSyntax IProceedImpl.CreateAssignStatement( string returnLocalVariableName )
-        {
-            
-            
-            if ( this._method.Body == null )
-            {
-                throw new NotImplementedException( "Expression-bodied methods not implemented." );
-            }
-
-            var methodBody = this._method.Body!;
-
-            var returnCounter = new CountReturnStatements();
-            returnCounter.Visit( methodBody );
-            if ( returnCounter.Count == 0 )
-            {
-                return methodBody;
-            }
-            else if ( returnCounter.Count == 1 && this.IsLastStatement( returnCounter.LastReturnStatement! ) )
-            {
-                // There is a single return statement at the end. We don't need to generate the label and the goto.
-
-                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, null );
-
-                return (BlockSyntax) rewriter.Visit( methodBody );
-            }
-            else
-            {
-                var rewriter = new ReturnToAssignmentRewriter( returnLocalVariableName, "__continue" );
-
-                var body = (BlockSyntax) rewriter.Visit( methodBody );
-
-                return Block(
-                    body,
-                    LabeledStatement( "__continue", EmptyStatement() ) );
-            }
-            
-        }
-
-        private bool IsLastStatement( SyntaxNode node )
-        {
-            if ( this._method.Body == null )
-            {
-                throw new NotImplementedException( "Expression-bodied methods not implemented." );
-            }
-
-            var methodBody = this._method.Body!;
-
-            if ( node.Parent == methodBody )
-            {
-                // Termination of the loop.
-                return true;
-            }
-            else
-            {
-                if ( node.Parent is BlockSyntax parentBlock && parentBlock.Statements.Last() == node )
-                {
-                    return this.IsLastStatement( parentBlock );
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        StatementSyntax IProceedImpl.CreateReturnStatement()
-        {
-            if ( this._method.Body == null )
-            {
-                throw new NotImplementedException( "Expression-bodied methods not implemented." );
-            }
-
-            return this._method.Body!;
-        }
-
-        private class CountReturnStatements : CSharpSyntaxWalker
-        {
-            public int Count { get; private set; }
-
-            public ReturnStatementSyntax? LastReturnStatement { get; private set; }
-
-            public override void VisitReturnStatement( ReturnStatementSyntax node )
-            {
-                this.Count++;
-                this.LastReturnStatement = node;
-                base.VisitReturnStatement( node );
-            }
-        }
-
-        private class ReturnToAssignmentRewriter : CSharpSyntaxRewriter
-        {
-            private readonly string _returnValueName;
-            private readonly string? _returnLabelName;
-
-            public ReturnToAssignmentRewriter( string returnValueName, string? returnLabelName )
-            {
-                this._returnValueName = returnValueName;
-                this._returnLabelName = returnLabelName;
-            }
-
-            public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
-            {
-                if ( node.Expression != null )
-                {
-                    var assignment = ExpressionStatement( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( this._returnValueName ), node.Expression ) );
-
-                    if ( this._returnLabelName != null )
-                    {
-                        return Block(
-                            assignment,
-                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
-                    }
-                    else
-                    {
-                        return assignment;
-                    }
-                }
-                else
-                {
-                    if ( this._returnLabelName != null )
-                    {
-                        return Block(
-                            GotoStatement( SyntaxKind.GotoStatement, IdentifierName( this._returnLabelName ) ) );
-                    }
-                    else
-                    {
-                        return EmptyStatement();
-                    }
-                }
-            }
-        }
-        */
     }
 }

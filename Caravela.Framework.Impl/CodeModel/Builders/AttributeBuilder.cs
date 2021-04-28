@@ -11,7 +11,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class AttributeBuilder : CodeElementBuilder, IAttributeBuilder, IObservableTransformation
     {
-        public AttributeBuilder( ICodeElement containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments )
+        public AttributeBuilder( CodeElementBuilder containingElement, IConstructor constructor, IReadOnlyList<TypedConstant> constructorArguments ) : base(
+            containingElement.ParentAdvice )
         {
             this.ContainingElement = containingElement;
             this.ConstructorArguments = constructorArguments;
@@ -20,7 +21,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public NamedArgumentsList NamedArguments { get; } = new();
 
-        public void AddNamedArgument( string name, object? value ) => throw new NotImplementedException();
+        public void AddNamedArgument( string name, object? value )
+        {
+            if ( value != null )
+            {
+                var type = this.Compilation.Factory.GetTypeByReflectionType( value.GetType() );
+                this.NamedArguments.Add( new KeyValuePair<string, TypedConstant>( name, new TypedConstant( type, value ) ) );
+            }
+            else
+            {
+                this.NamedArguments.Add( new KeyValuePair<string, TypedConstant>( name, TypedConstant.Null ) );
+            }
+        }
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => throw new NotImplementedException();
 

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
     {
         public static AttributeList Empty { get; } = new();
 
-        public AttributeList( IEnumerable<AttributeLink> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation ) { }
+        public AttributeList( ICodeElement containingElement, IEnumerable<AttributeLink> sourceItems ) : base( containingElement, sourceItems ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeList"/> class that contains no element.

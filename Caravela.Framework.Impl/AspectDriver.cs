@@ -78,18 +78,17 @@ namespace Caravela.Framework.Impl
                 return CreateResultForError( diagnostic );
             }
 
-            var declarativeAdvices =
-                this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, codeElement, x.Attribute, x.Member ) );
+            var diagnosticSink = new DiagnosticSink( codeElement );
 
-            var compilationModel = (CompilationModel) codeElement.Compilation;
-
-            var aspectBuilder = new AspectBuilder<T>(
-                codeElement,
-                declarativeAdvices,
-                new AdviceFactory( compilationModel, compilationModel.Factory.GetNamedType( this.AspectType ), aspect ) );
-
-            using ( DiagnosticContext.WithDefaultLocation( aspectBuilder.DefaultScope?.DiagnosticLocation ) )
+            using ( DiagnosticContext.WithDefaultLocation( diagnosticSink.DefaultScope?.DiagnosticLocation ) )
             {
+                var declarativeAdvices =
+                    this._declarativeAdviceAttributes.Select( x => CreateDeclarativeAdvice( aspect, diagnosticSink, codeElement, x.Attribute, x.Member ) );
+
+                var compilationModel = (CompilationModel) codeElement.Compilation;
+                var adviceFactory = new AdviceFactory( compilationModel, diagnosticSink, compilationModel.Factory.GetNamedType( this.AspectType ), aspect );
+                var aspectBuilder = new AspectBuilder<T>( codeElement, diagnosticSink, declarativeAdvices, adviceFactory );
+
                 try
                 {
                     aspectOfT.Initialize( aspectBuilder );
@@ -111,13 +110,22 @@ namespace Caravela.Framework.Impl
 
                     return CreateResultForError( diagnostic );
                 }
-            }
 
-            return aspectBuilder.ToResult();
+                return aspectBuilder.ToResult();
+            }
         }
 
-        private static IAdvice CreateDeclarativeAdvice<T>( AspectInstance aspect, T codeElement, AttributeData attribute, ISymbol templateMethod )
+        private static IAdvice CreateDeclarativeAdvice<T>(
+            AspectInstance aspect,
+            IDiagnosticAdder diagnosticAdder,
+            T codeElement,
+            AttributeData attribute,
+            ISymbol templateMethod )
             where T : ICodeElement
-            => attribute.CreateAdvice( aspect, codeElement, ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
+            => attribute.CreateAdvice(
+                aspect,
+                diagnosticAdder,
+                codeElement,
+                ((CompilationModel) codeElement.Compilation).Factory.GetCodeElement( templateMethod ) );
     }
 }

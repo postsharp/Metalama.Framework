@@ -38,10 +38,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
-        public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass! );
+        public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
 
         [Memo]
-        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor! );
+        public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
         [Memo]
         public IReadOnlyList<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();

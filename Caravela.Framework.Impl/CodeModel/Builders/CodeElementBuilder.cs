@@ -3,11 +3,14 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -19,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// </summary>
     internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
     {
+        internal Advice ParentAdvice { get; }
+
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
         public abstract ICodeElement? ContainingElement { get; }
@@ -33,11 +38,39 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
 
-        public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
-
         public bool IsFrozen { get; private set; }
 
-        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments ) => throw new NotImplementedException();
+        public CodeElementBuilder( Advice parentAdvice )
+        {
+            this.ParentAdvice = parentAdvice;
+        }
+
+        // TODO: How to implement this?
+        public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            return "CodeElementBuilder";
+        }
+
+        public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
+        {
+            /* We are interested in the fact that there is a matching ctor. 
+               If there are multiple we don't care at this point as we will generate code eventually and C# will resolve the correct one.
+               Of course this is a bit strange for the user, but currently it's not important.
+            */
+
+            var ctor = type.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).FirstOrDefault();
+
+            if ( ctor == null )
+            {
+                throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
+                    (this.ParentAdvice.Aspect.AspectClass.DisplayName, this, type) );
+            }
+
+            var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )
+                .ToList();
+
+            return new AttributeBuilder( this, ctor, ctorArguments );
+        }
 
         public void RemoveAttributes( INamedType type ) => throw new NotImplementedException();
 
@@ -47,10 +80,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public IDiagnosticLocation? DiagnosticLocation => this.ContainingElement?.DiagnosticLocation;
-
-        // TODO: We may want to suppress diagnostics on introduced code elements, but the current design does not allow for that.
-        // A possible solution would have to return an IDiagnosticLocation that does not map to source code, but would be somehow
-        // understood by the aspect linker.
 
         public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this );
 

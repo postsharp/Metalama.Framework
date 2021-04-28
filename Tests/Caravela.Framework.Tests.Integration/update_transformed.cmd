@@ -1,3 +1,4 @@
 @ECHO OFF
+SET mypath=%~dp0
 REM Copy actual transformed test outputs from obj\transformed to TestInputs and overwrite existing files.
-XCOPY obj\transformed\*.transformed.txt .\TestInputs\ /S /Y /F
+XCOPY %mypath:~0,-1%\obj\transformed\*.transformed.txt %mypath:~0,-1%\TestInputs\ /S /Y /F

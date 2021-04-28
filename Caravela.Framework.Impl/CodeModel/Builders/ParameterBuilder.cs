@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         private readonly string? _name;
 
-        public RefKind RefKind { get; }
+        public RefKind RefKind { get; set; }
 
         public IType ParameterType { get; set; }
 
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMember DeclaringMember { get; }
 
-        public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind )
+        public ParameterBuilder( MethodBuilder containingMethod, int index, string? name, IType type, RefKind refKind ) : base( containingMethod.ParentAdvice )
         {
             this.DeclaringMember = containingMethod;
             this.Index = index;
@@ -38,9 +38,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             this.RefKind = refKind;
         }
 
+        // TODO: How to implement this?
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
-            throw new NotImplementedException();
+            return this.Name;
         }
 
         internal ParameterSyntax ToDeclarationSyntax()

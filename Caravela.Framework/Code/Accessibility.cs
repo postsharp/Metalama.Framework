@@ -4,10 +4,11 @@
 namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Accessibility of types and members for instance <see cref="Private"/> or <see cref="Public"/>.
+    /// Accessibility of types and members, for instance <see cref="Private"/> or <see cref="Public"/>.
     /// </summary>
     public enum Accessibility
     {
+        // TODO: This uses IL values, shouldn't it correspond to C#?
         Private,
         ProtectedOrInternal,
         Protected,

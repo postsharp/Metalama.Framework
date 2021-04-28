@@ -56,31 +56,30 @@ namespace Caravela.Framework.Impl.CodeModel
             => this.GenericArguments.Any( ga => ga is IGenericParameter ) || (this.ContainingElement as INamedType)?.IsOpenGeneric == true;
 
         [Memo]
-        public INamedTypeList NestedTypes
-            => new NamedTypeList( this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>( t ) ), this.Compilation );
+        public INamedTypeList NestedTypes => new NamedTypeList( this, this.TypeSymbol.GetTypeMembers().Select( t => new MemberLink<INamedType>( t ) ) );
 
         [Memo]
         public IPropertyList Properties
             => new PropertyList(
+                this,
                 this.TypeSymbol.GetMembers()
                     .Select(
                         m => m switch
                         {
                             IPropertySymbol p => new MemberLink<IProperty>( p ),
                             _ => default
-                        } ),
-                this.Compilation );
+                        } ) );
 
         public IFieldList Fields
             => new FieldList(
+                this,
                 this.TypeSymbol.GetMembers()
                     .Select(
                         m => m switch
                         {
                             IFieldSymbol p => new MemberLink<IField>( p ),
                             _ => default
-                        } ),
-                this.Compilation );
+                        } ) );
 
         [Memo]
         public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
@@ -88,15 +87,16 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IEventList Events
             => new EventList(
+                this,
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IEventSymbol>()
-                    .Select( e => new MemberLink<IEvent>( e ) ),
-                this.Compilation );
+                    .Select( e => new MemberLink<IEvent>( e ) ) );
 
         [Memo]
         public IMethodList Methods
             => new MethodList(
+                this,
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IMethodSymbol>()
@@ -105,18 +105,17 @@ namespace Caravela.Framework.Impl.CodeModel
                     .Concat(
                         this.Compilation.GetObservableTransformationsOnElement( this )
                             .OfType<MethodBuilder>()
-                            .Select( m => new MemberLink<IMethod>( m ) ) ),
-                this.Compilation );
+                            .Select( m => new MemberLink<IMethod>( m ) ) ) );
 
         [Memo]
         public IConstructorList Constructors
             => new ConstructorList(
+                this,
                 this.TypeSymbol
                     .GetMembers()
                     .OfType<IMethodSymbol>()
                     .Where( m => m.MethodKind == MethodKind.Constructor )
-                    .Select( m => new MemberLink<IConstructor>( m ) ),
-                this.Compilation );
+                    .Select( m => new MemberLink<IConstructor>( m ) ) );
 
         [Memo]
         public IConstructor? StaticConstructor
@@ -145,9 +144,9 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
+                this,
                 this.TypeSymbol.TypeParameters
-                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ),
-                this.Compilation );
+                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();
@@ -184,7 +183,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedType WithGenericArguments( params IType[] genericArguments )
             => this.Compilation.Factory.GetNamedType( this.TypeSymbol.Construct( genericArguments.Select( a => a.GetSymbol() ).ToArray() ) );
 
-        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Is( this, other );
+        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
         public override string ToString() => this.TypeSymbol.ToString();
     }
