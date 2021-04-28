@@ -3,9 +3,10 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -15,31 +16,30 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     internal abstract class HighLevelPipelineStage : PipelineStage
     {
-        private readonly CompileTimeAssemblyLoader _assemblyLoader;
         private readonly IReadOnlyList<OrderedAspectLayer> _aspectLayers;
 
         protected HighLevelPipelineStage(
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompileTimeAssemblyLoader assemblyLoader,
             IAspectPipelineProperties properties ) : base( properties )
         {
             this._aspectLayers = aspectLayers;
-            this._assemblyLoader = assemblyLoader;
         }
 
         /// <inheritdoc/>
-        public override PipelineStageResult Execute( PipelineStageResult input )
+        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
         {
-            var compilation = CompilationModel.CreateInitialInstance( input.Compilation );
+            var compilation = CompilationModel.CreateInitialInstance( input.PartialCompilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,
                 compilation,
-                input.AspectSources.Concat( new CompilationAspectSource( compilation, this._assemblyLoader ) ) );
+                input.AspectSources );
 
             pipelineStepsState.Execute();
 
-            return this.GenerateCode( input, pipelineStepsState );
+            result = this.GenerateCode( input, pipelineStepsState );
+
+            return true;
         }
 
         /// <summary>

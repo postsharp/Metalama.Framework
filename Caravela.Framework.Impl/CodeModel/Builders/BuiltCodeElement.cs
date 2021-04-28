@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -52,5 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         ISymbol? ISdkCodeElement.Symbol => null;
 
         public CodeElementLink<ICodeElement> ToLink() => CodeElementLink.FromBuilder( this.Builder );
+
+        public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
     }
 }

@@ -7,7 +7,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
     {
         public int Order { get; }
 
-        public OrderedAspectLayer( int order, AspectLayer aspectLayer ) : base( aspectLayer.AspectType, aspectLayer.LayerName )
+        public OrderedAspectLayer( int order, AspectLayer aspectLayer ) : base( aspectLayer.AspectClass, aspectLayer.LayerName )
         {
             this.Order = order;
         }

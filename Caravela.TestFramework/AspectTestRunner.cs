@@ -12,7 +12,7 @@ namespace Caravela.TestFramework
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public partial class AspectTestRunner : TestRunnerBase
+    public class AspectTestRunner : TestRunnerBase
     {
         public AspectTestRunner( string? projectDirectory = null ) : base( projectDirectory ) { }
 
@@ -24,10 +24,9 @@ namespace Caravela.TestFramework
         {
             var testResult = await base.RunTestAsync( testInput );
 
-            var context = new AspectTestPipelineContext( testResult );
-            var pipeline = new CompileTimeAspectPipeline( context );
+            var pipeline = new CompileTimeAspectPipeline( new TestBuildOptions() );
 
-            if ( pipeline.TryExecute( context, out var resultCompilation ) )
+            if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, out var resultCompilation, out _ ) )
             {
                 testResult.ResultCompilation = resultCompilation;
                 var syntaxRoot = resultCompilation.SyntaxTrees.Single().GetRoot();

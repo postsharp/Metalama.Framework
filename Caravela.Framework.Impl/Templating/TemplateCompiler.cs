@@ -18,7 +18,6 @@ namespace Caravela.Framework.Impl.Templating
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
-            bool reportDiagnosticsToInitialCompilation,
             [NotNullWhen( true )] out SemanticAnnotationMap? symbolAnnotationMap,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
@@ -65,7 +64,7 @@ namespace Caravela.Framework.Impl.Templating
             IDiagnosticAdder diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
-            return TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, reportDiagnosticsToInitialCompilation, out _, out annotatedSyntaxRoot );
+            return TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
         }
 
         public static bool TryCompile(
@@ -76,7 +75,7 @@ namespace Caravela.Framework.Impl.Templating
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
             [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
         {
-            if ( !TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, false, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
+            if ( !TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out var symbolAnnotationMap, out annotatedSyntaxRoot ) )
             {
                 transformedSyntaxRoot = null;
 

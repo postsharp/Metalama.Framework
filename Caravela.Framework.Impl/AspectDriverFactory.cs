@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Code;
-using Caravela.Framework.Impl.CodeModel;
+using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
@@ -12,10 +12,10 @@ namespace Caravela.Framework.Impl
 {
     internal class AspectDriverFactory
     {
-        private readonly CompilationModel _compilation;
+        private readonly Compilation _compilation;
         private readonly ILookup<string, IAspectWeaver> _weaverTypes;
 
-        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins )
+        public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins )
         {
             this._compilation = compilation;
 
@@ -23,9 +23,9 @@ namespace Caravela.Framework.Impl
                 .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
         }
 
-        public IAspectDriver GetAspectDriver( INamedType type )
+        public IAspectDriver GetAspectDriver( INamedTypeSymbol type )
         {
-            var weavers = this._weaverTypes[type.FullName].ToList();
+            var weavers = this._weaverTypes[type.GetReflectionName()].ToList();
 
             if ( weavers.Count > 1 )
             {

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Advices
         {
             this.Aspect = aspect;
             this.TargetDeclaration = targetDeclaration;
-            this.AspectLayerId = new AspectLayerId( this.Aspect.AspectType, this.LayerName );
+            this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, this.LayerName );
         }
 
         public abstract AdviceResult ToResult( ICompilation compilation );

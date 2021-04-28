@@ -1,0 +1,30 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.CodeAnalysis.Diagnostics;
+
+namespace Caravela.Framework.Impl.Pipeline
+{
+    public partial class BuildOptions
+    {
+        /// <summary>
+        /// An implementation of <see cref="IBuildOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
+        /// </summary>
+        private class OptionsAdapter : IBuildOptionsSource
+        {
+            private readonly AnalyzerConfigOptions _options;
+
+            public OptionsAdapter( AnalyzerConfigOptionsProvider options )
+            {
+                this._options = options.GlobalOptions;
+            }
+
+            public OptionsAdapter( AnalyzerConfigOptions options )
+            {
+                this._options = options;
+            }
+
+            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( name, out value );
+        }
+    }
+}

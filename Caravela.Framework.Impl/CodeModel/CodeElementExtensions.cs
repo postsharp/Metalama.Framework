@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Templating.MetaModel;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -53,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <param name="codeElement"></param>
         /// <returns></returns>
         public static IEnumerable<ICodeElement> GetContainedElements( this ICodeElement codeElement )
-            => new[] { codeElement }.SelectDescendants(
+            => codeElement.SelectManyRecursive(
                 child => child switch
                 {
                     ICompilation compilation => compilation.DeclaredTypes,

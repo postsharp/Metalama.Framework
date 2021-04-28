@@ -17,11 +17,11 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         private class LinkingRewriter : CSharpSyntaxRewriter
         {
-            private readonly CSharpCompilation _intermediateCompilation;
+            private readonly Compilation _intermediateCompilation;
             private readonly LinkerAnalysisRegistry _referenceRegistry;
 
             public LinkingRewriter(
-                CSharpCompilation intermediateCompilation,
+                Compilation intermediateCompilation,
                 LinkerAnalysisRegistry referenceRegistry )
             {
                 this._intermediateCompilation = intermediateCompilation;

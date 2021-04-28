@@ -80,7 +80,7 @@ namespace Caravela.AspectWorkbench.Views
             this._viewModel.TestText = this.sourceTextBox.Text;
 
             // Alternatively set the UpdateSourceTrigger property of the TextBox binding to PropertyChanged.
-            this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty ).UpdateSource();
+            this.expectedOutputTextBox.GetBindingExpression( TextBox.TextProperty )!.UpdateSource();
         }
 
         private void NewButton_Click( object sender, RoutedEventArgs e )

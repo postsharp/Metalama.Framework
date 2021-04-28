@@ -88,8 +88,7 @@ namespace Caravela.TestFramework
             Assert.True( result.Success, result.ErrorMessage );
         }
 
-        // ReSharper disable once ConstantConditionalAccessQualifier
-        public static string? NormalizeString( string? s ) => s?.Trim()?.Replace( "\r", "" );
+        public static string? NormalizeString( string? s ) => s?.Trim().Replace( "\r", "" );
 
         /// <summary>
         /// Runs the template test with the given path of the source file and asserts that the result of the code transformation matches the expected result.
@@ -132,7 +131,7 @@ namespace Caravela.TestFramework
             if ( expectedTransformedSourceText == actualTransformedSourceText
                  && storedTransformedSourceText != expectedNonNormalizedSourceText )
             {
-                // Update the obj\transformed file to the non-normalized expected text, so that future call to update_transformed.txt
+                // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
                 // does not overwrite any whitespace change.
                 File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
             }

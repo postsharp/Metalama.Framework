@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl
 
             var method = methods.Single();
 
-            if ( !method.SelectSelfAndAncestors( m => m.OverriddenMethod )
+            if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
                 .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
             {

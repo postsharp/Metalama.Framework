@@ -5,6 +5,10 @@
         <PackageReference Update="Caravela.Framework.Sdk" PrivateAssets="none" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <CaravelaProjectId>$(AssemblyName)_$(Configuration)_$(TargetFramework)</CaravelaProjectId>
+    </PropertyGroup>
+
     <Import Project="Caravela.CompilerVisibleProperties.targets"
             Condition="'$(CaravelaCompilerVisiblePropertiesTargetsImported)'==''" />
 

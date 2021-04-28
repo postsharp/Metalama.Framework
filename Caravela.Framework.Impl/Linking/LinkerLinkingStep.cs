@@ -1,6 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+
 namespace Caravela.Framework.Impl.Linking
 {
     // Linking step does two things:
@@ -31,20 +35,23 @@ namespace Caravela.Framework.Impl.Linking
     {
         public static AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
         {
-            var finalCompilation = input.IntermediateCompilation;
-            var rewriter = new LinkingRewriter( input.IntermediateCompilation, input.AnalysisRegistry );
+            var finalCompilation = input.IntermediateCompilation.Compilation;
+            var rewriter = new LinkingRewriter( input.IntermediateCompilation.Compilation, input.AnalysisRegistry );
 
-            foreach ( var syntaxTree in finalCompilation.SyntaxTrees )
+            List<SyntaxTree> newTrees = new();
+
+            foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
                 // Run the linking rewriter for this tree.
                 var newRoot = rewriter.Visit( syntaxTree.GetRoot() );
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( newRoot, syntaxTree.Options );
 
+                newTrees.Add( newSyntaxTree );
                 finalCompilation = finalCompilation.ReplaceSyntaxTree( syntaxTree, newSyntaxTree );
             }
 
-            return new AspectLinkerResult( finalCompilation, input.Diagnostics );
+            return new AspectLinkerResult( PartialCompilation.CreatePartial( finalCompilation, newTrees ), input.Diagnostics );
         }
     }
 }

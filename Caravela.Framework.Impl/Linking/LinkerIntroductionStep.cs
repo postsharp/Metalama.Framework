@@ -5,6 +5,7 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -101,20 +102,27 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var initialSyntaxTree in input.InitialCompilation.SyntaxTrees )
             {
-                var newRoot = addIntroducedElementsRewriter.Visit( initialSyntaxTree.GetRoot() );
+                var oldRoot = initialSyntaxTree.GetRoot();
+                var newRoot = addIntroducedElementsRewriter.Visit( oldRoot );
 
-                // Improve readability of intermediate compilation in debug builds.
-                newRoot = newRoot.NormalizeWhitespace();
+                if ( oldRoot != newRoot )
+                {
+                    // Improve readability of intermediate compilation in debug builds.
+                    newRoot = newRoot.NormalizeWhitespace();
 
-                var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
+                    var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
-                intermediateCompilation = intermediateCompilation.ReplaceSyntaxTree( initialSyntaxTree, intermediateSyntaxTree );
+                    syntaxTreeMapping.Add( initialSyntaxTree, intermediateSyntaxTree );
+                }
             }
+
+            intermediateCompilation = intermediateCompilation.UpdateSyntaxTrees(
+                syntaxTreeMapping.Select( p => (p.Key, p.Value) ).ToList(),
+                Array.Empty<SyntaxTree>() );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,
-                intermediateCompilation,
+                intermediateCompilation.Compilation,
                 syntaxTreeMapping,
                 introducedMemberCollection.IntroducedMembers );
 

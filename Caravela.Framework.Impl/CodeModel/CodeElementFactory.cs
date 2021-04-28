@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
-            var symbol = this._compilation.ReflectionMapper.GetTypeSymbolByReflectionName( reflectionName );
+            var symbol = this._compilation.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName );
 
             return this.GetNamedType( symbol );
         }
