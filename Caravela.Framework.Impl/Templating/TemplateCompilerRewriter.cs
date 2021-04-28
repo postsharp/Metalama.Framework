@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax
+                           || parent is SwitchSectionSyntax 
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -388,6 +388,19 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.TransformArgument( node );
             }
+        }
+
+        protected override ExpressionSyntax TransformSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        {
+            if (node.ExpressionBody != null)
+            {
+                foreach(var n in node.ExpressionBody.ChildNodes())
+                {
+                    continue;
+                }
+            }
+
+            return base.TransformSimpleLambdaExpression( node );
         }
 
         /// <summary>

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// This is typically the case for symbols of system libraries and
         /// aspects, or any declaration marked with <see cref="CompileTimeAttribute"/>.
         /// </summary>
-        Default,
+        Both,
 
         /// <summary>
         /// The symbol can be only used at run time only. This is the case for any symbol that is
@@ -30,6 +30,13 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Caravela, which is marked by <see cref="CompileTimeOnlyAttribute"/>.
         /// The node including all children nodes must be evaluated at compile time.
         /// </summary>
-        CompileTimeOnly
+        CompileTimeOnly,
+
+        /// <summary>
+        /// Using of the symbol is unknown yet. It can be used both at compile time or at run time.
+        /// This is typically for lambda expressions. The node is evaluated as unknown if at least one children is unknown
+        /// doesn't depends on other children.
+        /// </summary>
+        Unknown
     }
 }

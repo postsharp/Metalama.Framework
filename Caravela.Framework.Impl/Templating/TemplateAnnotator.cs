@@ -128,7 +128,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( symbol == null )
             {
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
@@ -149,7 +149,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Until we support template parameters and local functions, all parameters are parameters
                 // of expression lambdas, which are default-scoped.
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             // Aspect members are processed as compile-time-only by the template compiler even if some members can also
@@ -189,7 +189,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node == null )
             {
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             // If the node is dynamic, it is run-time only.
@@ -212,7 +212,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                     else
                     {
-                        return SymbolDeclarationScope.Default;
+                        return SymbolDeclarationScope.Both;
                     }
 
                 case NullableTypeSyntax nullableType:
@@ -241,22 +241,27 @@ namespace Caravela.Framework.Impl.Templating
         private static SymbolDeclarationScope GetCombinedScope( IEnumerable<SymbolDeclarationScope> scopes )
         {
             var compileTimeOnlyCount = 0;
+            var runtimeCount = 0;
 
             foreach ( var scope in scopes )
             {
                 switch ( scope )
                 {
                     case SymbolDeclarationScope.RunTimeOnly:
-                        return SymbolDeclarationScope.RunTimeOnly;
+                        runtimeCount++;
+                        break;
 
                     case SymbolDeclarationScope.CompileTimeOnly:
                         compileTimeOnlyCount++;
-
                         break;
+                    
+                    // Unknown is "greedy" it means all can be use at runtime or compile time
+                    case SymbolDeclarationScope.Unknown:
+                        return SymbolDeclarationScope.Unknown;
                 }
             }
 
-            return compileTimeOnlyCount > 0 ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Default;
+            return runtimeCount > 0 ? SymbolDeclarationScope.RunTimeOnly : compileTimeOnlyCount > 0 ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Both;
         }
 
         /// <summary>
@@ -606,7 +611,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
+                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Both ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -795,11 +800,11 @@ namespace Caravela.Framework.Impl.Templating
 
         private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
         {
-            var combinedScope = this.GetNodeScope( annotatedType ) == SymbolDeclarationScope.Default
+            var combinedScope = this.GetNodeScope( annotatedType ) == SymbolDeclarationScope.Both
                 ? this.GetNodeScope( annotatedExpression )
                 : this.GetCombinedScope( annotatedExpression );
 
-            if ( combinedScope != SymbolDeclarationScope.Default )
+            if ( combinedScope != SymbolDeclarationScope.Both )
             {
                 return transformedCastNode.AddScopeAnnotation( combinedScope );
             }
@@ -877,7 +882,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Default ) )
+                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Both ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -921,9 +926,9 @@ namespace Caravela.Framework.Impl.Templating
             if ( node.ExpressionBody != null )
             {
                 var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
-                var scope = annotatedExpression.GetScopeFromAnnotation();
+                //var scope = annotatedExpression.GetScopeFromAnnotation();
 
-                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( scope );
+                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
             {
@@ -939,10 +944,11 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.ExpressionBody != null )
             {
-                var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
-                var scope = annotatedExpression.GetScopeFromAnnotation();
 
-                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( scope );
+                var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
+                //var scope = annotatedExpression.GetScopeFromAnnotation();
+
+                return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
             {
@@ -1086,7 +1092,7 @@ namespace Caravela.Framework.Impl.Templating
                 existingScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
-            if ( existingScope != SymbolDeclarationScope.Default && existingScope != requiredScope )
+            if ( existingScope != SymbolDeclarationScope.Both && existingScope != requiredScope )
             {
                 // Don't emit an error if any descendant node already has an error because this creates redundant messages.
                 if ( !node.DescendantNodes().Any( n => n.HasScopeMismatchAnnotation() ) )
