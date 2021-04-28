@@ -18,11 +18,13 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IMethod _originalDeclaration;
         private readonly AspectLayerId _aspectLayerId;
+        private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration )
+        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration, ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
             this._originalDeclaration = overridenDeclaration;
+            this._syntaxFactory = syntaxFactory;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
@@ -31,7 +33,7 @@ namespace Caravela.Framework.Impl.Linking
             {
                 // TODO: Add the namespace.
 #pragma warning disable CS0618 // Type or member is obsolete
-                return IdentifierName( nameof(__Void) );
+                return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
 #pragma warning restore CS0618 // Type or member is obsolete
             }
 

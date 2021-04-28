@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
@@ -72,6 +73,7 @@ namespace Caravela.Framework.Impl.Linking
             var lexicalScopeHelper = new LexicalScopeFactory( input.CompilationModel );
             var introducedMemberCollection = new IntroducedMemberCollection();
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
+            var syntaxFactory = ReflectionMapper.GetInstance( input.CompilationModel.RoslynCompilation );
 
             // TODO: Merge observable and non-observable transformations so that the order is preserved.
             //       Maybe have all transformations already together in the input?
@@ -85,7 +87,7 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ) );
+                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), syntaxFactory );
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );

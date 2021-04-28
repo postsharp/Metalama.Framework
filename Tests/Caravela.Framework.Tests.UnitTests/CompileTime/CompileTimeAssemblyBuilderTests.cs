@@ -9,6 +9,7 @@ using Caravela.Framework.Impl.Pipeline;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class CompileTimeAssemblyBuilderTests : TestBase
     {
-        private static IServiceProvider GetServiceProvider()
+        private static ServiceProvider GetServiceProvider()
         {
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
@@ -140,11 +141,20 @@ class ReferencingClass
         {
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.
 
-            var referencedCode = @"
+            var indirectlyReferencedCode = @"
 using Caravela.Framework.Project;
 [assembly: CompileTime]
 public class ReferencedClass
 {
+}
+";
+
+            var directlyReferencedCode = @"
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+public class MiddleClass
+{
+  ReferencedClass c;
 }
 ";
 
@@ -154,50 +164,69 @@ using Caravela.Framework.Project;
 [assembly: CompileTime]
 class ReferencingClass
 {
-  ReferencedClass c;
+  MiddleClass d;
 }
 ";
 
-            var referencedCompilation = CreateRoslynCompilation( referencedCode );
-            DiagnosticList diagnostics = new();
-            var serviceProvider = GetServiceProvider();
-            var builder = new CompileTimeCompilationBuilder( serviceProvider, new CompileTimeDomain() );
+            List<string> tempFiles = new();
 
-            Assert.True(
-                builder.TryCreateCompileTimeProject( referencedCompilation, ArraySegment<CompileTimeProject>.Empty, diagnostics, out var compileTimeProject ) );
-
-            var referencedRunTimePath = Path.GetTempFileName();
+            PortableExecutableReference indirectlyReferenced;
 
             try
             {
-                // We must create the dll on disk to emulate the path taken by real code.
+                var serviceProvider = GetServiceProvider();
+                var testAssemblyLocator = new TestAssemblyLocator();
+                serviceProvider.AddService<IAssemblyLocator>( testAssemblyLocator );
 
-                using ( var referenceRunTimeStream = File.Create( referencedRunTimePath ) )
+                PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
-                    var emitResult = referencedCompilation.Emit(
-                        referenceRunTimeStream,
-                        null,
-                        null,
-                        null,
-                        new[] { new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => compileTimeProject!.Serialize(), true ) } );
+                    // For this test, we need a different loader every time, because we simulate a series command-line calls,
+                    // one for each project.
+                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
 
-                    Assert.True( emitResult.Success );
+                    var compilation = CreateRoslynCompilation( code, additionalReferences: references );
+                    DiagnosticList diagnostics = new();
+
+                    Assert.True(
+                        loader.TryGenerateCompileTimeProject(
+                            compilation,
+                            diagnostics,
+                            out var compileTimeProject ) );
+
+                    var runTimePath = Path.GetTempFileName();
+                    tempFiles.Add( runTimePath );
+
+                    // We must create the dll on disk to emulate the path taken by real code.
+                    using ( var runTimeStream = File.Create( runTimePath ) )
+                    {
+                        var emitResult = compilation.Emit(
+                            runTimeStream,
+                            null,
+                            null,
+                            null,
+                            new[] { compileTimeProject.ToResource() } );
+
+                        Assert.True( emitResult.Success );
+                    }
+
+                    var referenceToSelf = MetadataReference.CreateFromFile( runTimePath );
+                    testAssemblyLocator.Files.Add( compilation.Assembly.Identity, referenceToSelf );
+
+                    return referenceToSelf;
                 }
 
-                var reference = MetadataReference.CreateFromFile( referencedRunTimePath );
-
-                var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
-
-                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
-
-                DiagnosticList diagnosticList = new();
-                Assert.True( loader.TryGenerateCompileTimeProject( referencingCompilation, diagnosticList, out _ ) );
+                indirectlyReferenced = CompileProject( indirectlyReferencedCode );
+                var directlyReferenced = CompileProject( directlyReferencedCode, indirectlyReferenced );
+                _ = CompileProject( referencingCode, directlyReferenced );
             }
             finally
             {
-                if ( File.Exists( referencedRunTimePath ) )
+                foreach ( var path in tempFiles )
                 {
-                    File.Delete( referencedRunTimePath );
+                    if ( File.Exists( path ) )
+                    {
+                        File.Delete( path );
+                    }
                 }
             }
         }
@@ -314,5 +343,13 @@ class C
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGenerateCompileTimeProject( compilation, diagnosticList, out _ ) );
         }
+    }
+
+    internal class TestAssemblyLocator : IAssemblyLocator
+    {
+        public Dictionary<AssemblyIdentity, MetadataReference> Files { get; } = new();
+
+        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, out MetadataReference? reference )
+            => this.Files.TryGetValue( assemblyIdentity, out reference );
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -8,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -27,16 +29,19 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private readonly CompileTimeDomain _domain;
         private readonly CompileTimeCompilationBuilder _builder;
-        private readonly Dictionary<string, (AssemblyIdentity RunTimeIdentity, CompileTimeProject? Project)> _projects = new();
+        private readonly IAssemblyLocator? _runTimeAssemblyLocator;
+        private readonly SystemTypeResolver _systemTypeResolver = new();
+
+        // Maps the identity of the run-time project to the compile-time project.
+        private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _projects = new();
 
         public AttributeDeserializer AttributeDeserializer { get; }
-
-        private readonly SystemTypeResolver _systemTypeResolver = new();
 
         private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider )
         {
             this._domain = domain;
             this._builder = new CompileTimeCompilationBuilder( serviceProvider, domain );
+            this._runTimeAssemblyLocator = serviceProvider.GetOptionalService<IAssemblyLocator>();
 
             this.AttributeDeserializer = new AttributeDeserializer( this );
         }
@@ -132,7 +137,9 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity )
         {
-            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity, out var assembly );
+            // This method is a smell and should probably not exist.
+            
+            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity,  NullDiagnosticAdder.Instance, out var assembly );
 
             return assembly;
         }
@@ -142,41 +149,33 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public bool TryGetCompileTimeProject(
             AssemblyIdentity runTimeAssemblyIdentity,
+            IDiagnosticAdder diagnosticAdder,
             out CompileTimeProject? compileTimeProject )
         {
-            if ( this._projects.TryGetValue( runTimeAssemblyIdentity.Name, out var cached )
-                 && cached.RunTimeIdentity == runTimeAssemblyIdentity )
+            if ( this._projects.TryGetValue( runTimeAssemblyIdentity, out compileTimeProject ) )
             {
-                compileTimeProject = cached.Project;
-
                 return true;
             }
             else
             {
-                compileTimeProject = null;
+                MetadataReference? metadataReference = null;
 
-                return false;
+                if ( this._runTimeAssemblyLocator?.TryFindAssembly( runTimeAssemblyIdentity, out metadataReference ) != true )
+                {
+                    diagnosticAdder.ReportDiagnostic(
+                        GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateDiagnostic(
+                            Location.None,
+                            runTimeAssemblyIdentity ) );
+
+                    compileTimeProject = null;
+
+                    return false;
+                }
+
+                return this.TryGetCompileTimeProject( metadataReference!, diagnosticAdder, out compileTimeProject );
             }
         }
 
-        /// <summary>
-        /// Tries to get the <see cref="CompileTimeProject"/> given the non-qualified assembly name.
-        /// </summary>
-        public bool TryGetCompileTimeProject( string referenceName, out CompileTimeProject? project )
-        {
-            if ( !this._projects.TryGetValue( referenceName, out var cached ) )
-            {
-                project = null;
-
-                return false;
-            }
-            else
-            {
-                project = cached.Project;
-
-                return true;
-            }
-        }
 
         /// <summary>
         /// Generates a <see cref="CompileTimeProject"/> for a given run-time <see cref="Compilation"/>.
@@ -188,15 +187,8 @@ namespace Caravela.Framework.Impl.CompileTime
             IDiagnosticAdder diagnosticSink,
             out CompileTimeProject? compileTimeProject )
         {
-            if ( this._projects.TryGetValue( runTimeCompilation.AssemblyName.AssertNotNull(), out var cached ) )
+            if ( this._projects.TryGetValue( runTimeCompilation.Assembly.Identity, out compileTimeProject ) )
             {
-                if ( cached.RunTimeIdentity != runTimeCompilation.Assembly.Identity )
-                {
-                    throw new AssertionFailedException();
-                }
-
-                compileTimeProject = cached.Project;
-
                 return true;
             }
 
@@ -204,26 +196,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             foreach ( var reference in runTimeCompilation.References )
             {
-                bool success;
-                CompileTimeProject? referencedProject;
-
-                switch ( reference )
-                {
-                    case PortableExecutableReference { FilePath: { } filePath }:
-                        success = this.TryGetCompileTimeProject( filePath!, diagnosticSink, out referencedProject );
-
-                        break;
-
-                    case CompilationReference compilationReference:
-                        success = this.TryGenerateCompileTimeProject( compilationReference.Compilation, diagnosticSink, out referencedProject );
-
-                        break;
-
-                    default:
-                        throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
-                }
-
-                if ( success )
+                if ( this.TryGetCompileTimeProject( reference, diagnosticSink, out var referencedProject ) )
                 {
                     if ( referencedProject != null )
                     {
@@ -245,9 +218,26 @@ namespace Caravela.Framework.Impl.CompileTime
                 return false;
             }
 
-            this._projects.Add( runTimeCompilation.AssemblyName!, (runTimeCompilation.Assembly.Identity, compileTimeProject) );
+            this._projects.Add( runTimeCompilation.Assembly.Identity, compileTimeProject );
 
             return true;
+        }
+
+        private bool TryGetCompileTimeProject( MetadataReference reference, IDiagnosticAdder diagnosticSink, out CompileTimeProject? referencedProject )
+        {
+            switch (reference)
+            {
+                case PortableExecutableReference { FilePath: { } filePath }:
+                    return this.TryGetCompileTimeProject( filePath!, diagnosticSink, out referencedProject );
+
+
+                case CompilationReference compilationReference:
+                    return this.TryGenerateCompileTimeProject( compilationReference.Compilation, diagnosticSink, out referencedProject );
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
+            }
+
         }
 
         private bool TryGetCompileTimeProject(
@@ -257,15 +247,17 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
-            if ( this._projects.TryGetValue( assemblyIdentity.Name, out var cached ) )
+            // If the assembly is a standard one, there is no need to analyze.
+            if ( ReferenceAssemblyLocator.GetInstance().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
             {
-                if ( cached.RunTimeIdentity != assemblyIdentity )
-                {
-                    throw new AssertionFailedException();
-                }
+                compileTimeProject = null;
 
-                compileTimeProject = cached.Project;
+                return true;
+            }
 
+            // Look in our cache.
+            if ( this._projects.TryGetValue( assemblyIdentity, out compileTimeProject ) )
+            {
                 return true;
             }
 
@@ -301,18 +293,18 @@ namespace Caravela.Framework.Impl.CompileTime
                 return false;
             }
 
-            this._projects.Add( assemblyIdentity.Name, (assemblyIdentity, compileTimeProject) );
+            this._projects.Add( assemblyIdentity, compileTimeProject );
 
             return true;
         }
 
         private bool TryDeserializeCompileTimeProject(
             AssemblyIdentity assemblyIdentity,
-            Stream stream,
+            Stream resourceStream,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out CompileTimeProject? project )
         {
-            using var archive = new ZipArchive( stream, ZipArchiveMode.Read, true, Encoding.UTF8 );
+            using var archive = new ZipArchive( resourceStream, ZipArchiveMode.Read, true, Encoding.UTF8 );
 
             // Read manifest.
             var manifestEntry = archive.GetEntry( "manifest.json" ).AssertNotNull();
@@ -336,12 +328,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( manifest.References != null )
             {
-                foreach ( var referenceName in manifest.References )
+                foreach ( var referenceSerializedIdentity in manifest.References )
                 {
-                    if ( !this.TryGetCompileTimeProject( referenceName, out var referenceProject ) )
+                    var referenceAssemblyIdentity = new AssemblyName( referenceSerializedIdentity ).ToAssemblyIdentity();
+                    
+                    if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity,  diagnosticAdder, out var referenceProject ) )
                     {
                         project = null;
-
                         return false;
                     }
 
