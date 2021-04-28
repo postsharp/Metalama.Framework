@@ -13,8 +13,6 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         private List<Diagnostic>? _list;
 
-        public DiagnosticList() { }
-
         private List<Diagnostic> GetList() => this._list ??= new List<Diagnostic>();
 
         public void ReportDiagnostic( Diagnostic diagnostic ) => this.GetList().Add( diagnostic );

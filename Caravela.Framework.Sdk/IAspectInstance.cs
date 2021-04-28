@@ -24,6 +24,6 @@ namespace Caravela.Framework.Sdk
         /// <summary>
         /// Gets the aspect type.
         /// </summary>
-        IAspectType AspectType { get; }
+        IAspectClassMetadata AspectClass { get; }
     }
 }

@@ -1,13 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -18,51 +19,66 @@ namespace Caravela.Framework.Impl.Pipeline
     internal sealed class LowLevelPipelineStage : PipelineStage
     {
         private readonly IAspectWeaver _aspectWeaver;
-        private readonly AspectType _aspectType;
+        private readonly AspectClassMetadata _aspectClassMetadata;
 
-        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectType aspectType, IAspectPipelineProperties properties ) : base( properties )
+        public LowLevelPipelineStage( IAspectWeaver aspectWeaver, AspectClassMetadata aspectClassMetadata, IAspectPipelineProperties properties ) : base(
+            properties )
         {
             this._aspectWeaver = aspectWeaver;
-            this._aspectType = aspectType;
+            this._aspectClassMetadata = aspectClassMetadata;
         }
 
         /// <inheritdoc/>
-        public override PipelineStageResult Execute( PipelineStageResult input )
+        public override bool TryExecute( PipelineStageResult input, IDiagnosticAdder diagnostics, [NotNullWhen( true )] out PipelineStageResult? result )
         {
-            var diagnostics = new DiagnosticSink();
-            var aspectInstances = input.AspectSources.SelectMany( s => s.GetAspectInstances( null, this._aspectType, diagnostics ) )
+            // TODO: it is suboptimal to get a CompilationModel here.
+            var compilationModel = CompilationModel.CreateInitialInstance( input.PartialCompilation );
+
+            var aspectInstances = input.AspectSources
+                .SelectMany( s => s.GetAspectInstances( compilationModel, this._aspectClassMetadata, diagnostics ) )
                 .ToImmutableArray<IAspectInstance>();
 
             if ( !aspectInstances.Any() )
             {
-                return input;
+                result = input;
+
+                return true;
             }
 
             var resources = new List<ResourceDescription>();
 
-            var context = new AspectWeaverContext( this._aspectType, aspectInstances, input.Compilation, diagnostics.ReportDiagnostic, resources.Add );
+            var context = new AspectWeaverContext(
+                this._aspectClassMetadata,
+                aspectInstances,
+                input.PartialCompilation,
+                diagnostics.ReportDiagnostic,
+                resources.Add );
 
-            CSharpCompilation newCompilation;
+            PartialCompilation newCompilation;
 
             try
             {
-                newCompilation = this._aspectWeaver.Transform( context );
+                newCompilation = (PartialCompilation) this._aspectWeaver.Transform( context );
             }
             catch ( Exception ex )
             {
-                newCompilation = context.Compilation;
-
                 diagnostics.ReportDiagnostic(
-                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectType.Type, ex.ToDiagnosticString()) ) );
+                    GeneralDiagnosticDescriptors.ExceptionInWeaver.CreateDiagnostic( null, (this._aspectClassMetadata.DisplayName, ex.ToDiagnosticString()) ) );
+
+                result = null;
+
+                return false;
             }
 
             // TODO: update AspectCompilation.Aspects
-            return new PipelineStageResult(
+            result = new PipelineStageResult(
                 newCompilation,
                 input.AspectLayers,
-                input.Diagnostics.Concat( diagnostics.ToImmutable() ),
+                input.Diagnostics,
                 input.Resources.Concat( resources ).ToList(),
                 input.AspectSources );
+
+            return true;
         }
     }
 }

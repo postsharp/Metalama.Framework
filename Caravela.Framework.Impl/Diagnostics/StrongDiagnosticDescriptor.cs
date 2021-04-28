@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     /// A strongly typed <see cref="DiagnosticDescriptor"/>.
     /// </summary>
     /// <typeparam name="T">Type of arguments: a single type if there is a single argument, or a named tuple type.</typeparam>
-    internal partial class StrongDiagnosticDescriptor<T> : IStrongDiagnosticDescriptor
+    internal class StrongDiagnosticDescriptor<T> : IStrongDiagnosticDescriptor
     {
         public StrongDiagnosticDescriptor( string id, string title, string messageFormat, string category, DiagnosticSeverity severity )
         {

@@ -18,13 +18,16 @@ namespace Caravela.Framework.Tests.UnitTests
             var compilation = CreateCompilation( code );
             DiagnosticList diagnostics = new();
 
-            var aspectTypeFactory = new AspectTypeFactory( compilation, new AspectDriverFactory( compilation, ImmutableArray<object>.Empty ) );
+            var aspectTypeFactory = new AspectClassMetadataFactory( new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single() ).ToReadOnlyList();
-            var aspectTypes = aspectTypeFactory.GetAspectTypes( aspectNamedTypes, diagnostics ).ToImmutableArray();
+            var aspectNamedTypes = aspectNames.Select( name => compilation.DeclaredTypes.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
+            var aspectTypes = aspectTypeFactory.GetAspectClassMetadatas( aspectNamedTypes, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
-            var dependencies = new IAspectOrderingSource[] { new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation ) };
+            var dependencies = new IAspectOrderingSource[]
+            {
+                new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( compilation.RoslynCompilation )
+            };
 
             Assert.True(
                 AspectLayerSorter.TrySort(

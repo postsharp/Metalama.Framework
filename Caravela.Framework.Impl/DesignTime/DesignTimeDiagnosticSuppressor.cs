@@ -3,9 +3,7 @@
 
 using Caravela.Compiler;
 using Caravela.Framework.Impl.Collections;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -17,6 +15,9 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Our implementation of <see cref="DiagnosticSuppressor"/>.
+    /// </summary>
     [DiagnosticAnalyzer( LanguageNames.CSharp )]
     public class DesignTimeDiagnosticSuppressor : DiagnosticSuppressor
     {
@@ -39,67 +40,79 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
+            var syntaxTrees = context.ReportedDiagnostics
+                .Select( d => d.Location.SourceTree )
+                .WhereNotNull()
+                .ToList();
+
             ReportSuppressions(
                 compilation,
+                syntaxTrees,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
-                new BuildOptions( new AnalyzerBuildOptionsSource( context.Options.AnalyzerConfigOptionsProvider ) ),
+                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
                 context.CancellationToken );
         }
 
         /// <summary>
         /// A testable overload of <see cref="ReportSuppressions(SuppressionAnalysisContext)"/>.
         /// </summary>
-        /// <param name="compilation"></param>
-        /// <param name="reportedDiagnostics"></param>
-        /// <param name="reportSuppression"></param>
-        /// <param name="options"></param>
-        /// <param name="cancellationToken"></param>
-        internal static void ReportSuppressions(
-            CSharpCompilation compilation,
+        private static void ReportSuppressions(
+            Compilation compilation,
+            IReadOnlyList<SyntaxTree> syntaxTrees,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             BuildOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.
-            var pipelineResult = DesignTimeAspectPipelineCache.GetPipelineResult(
+            var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 compilation,
+                syntaxTrees,
                 options,
                 cancellationToken );
 
-            // Report suppressions.
-            if ( !pipelineResult.Diagnostics.DiagnosticSuppressions.IsDefaultOrEmpty )
+            foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
             {
-                var designTimeSuppressions = pipelineResult.Diagnostics.DiagnosticSuppressions.Where(
-                    s => _supportedSuppressions.Contains( s.Id ) && ((ISdkCodeElement) s.CodeElement).Symbol != null );
-
-                var groupedSuppressions = ImmutableMultiValueDictionary<ISymbol, ScopedSuppression>.Create(
-                    designTimeSuppressions,
-                    s => ((ISdkCodeElement) s.CodeElement).Symbol! );
-
-                foreach ( var diagnostic in reportedDiagnostics )
+                if ( syntaxTreeResult == null )
                 {
-                    if ( diagnostic.Location.SourceTree == null )
+                    continue;
+                }
+
+                // Report suppressions.
+                if ( !syntaxTreeResult.Suppressions.IsDefaultOrEmpty )
+                {
+                    var designTimeSuppressions = syntaxTreeResult.Suppressions.Where( s => _supportedSuppressions.Contains( s.Id ) );
+
+                    var groupedSuppressions = ImmutableMultiValueDictionary<string, CacheableScopedSuppression>.Create(
+                        designTimeSuppressions,
+                        s => s.SymbolId );
+
+                    foreach ( var diagnostic in reportedDiagnostics )
                     {
-                        continue;
-                    }
+                        if ( diagnostic.Location.SourceTree == null )
+                        {
+                            continue;
+                        }
 
 #pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-                    var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
+                        var semanticModel = compilation.GetSemanticModel( diagnostic.Location.SourceTree );
 #pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
 
-                    var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
-                    var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
+                        var diagnosticNode = diagnostic.Location.SourceTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                        var symbol = semanticModel.GetDeclaredSymbol( diagnosticNode );
 
-                    if ( symbol == null )
-                    {
-                        continue;
-                    }
+                        if ( symbol == null )
+                        {
+                            continue;
+                        }
 
-                    if ( groupedSuppressions[symbol].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
-                    {
-                        reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
+                        var symbolId = symbol.GetDocumentationCommentId().AssertNotNull();
+
+                        if ( groupedSuppressions[symbolId].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                        {
+                            reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
+                        }
                     }
                 }
             }

@@ -13,7 +13,7 @@ namespace Caravela.Framework.Impl
 
         private const string _category = "Caravela.Advices";
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
                 "CRA0001",
                 "Cannot introduce member into a type because it already exists.",
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
             CannotIntroduceOverrideOfSealed = new(
                 "CRA0002",
                 "Cannot introduce member into a type because it is sealed in a base class.",
@@ -29,15 +29,16 @@ namespace Caravela.Framework.Impl
                 _category,
                 Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Member, ICodeElement TargetType, ICodeElement DeclaringType)>
             CannotIntroduceWithDifferentStaticity = new(
                 "CRA0003",
                 "Cannot introduce member into a type because it is sealed in a base class.",
-                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and it's IsStatic flag is opposite of the introduced member.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and it's IsStatic flag is opposite of the introduced member."
+               ,
                 _category,
                 Error );
 
-        public static readonly StrongDiagnosticDescriptor<(IType AspectType, ICodeElement Member, ICodeElement TargetType)>
+        public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Member, ICodeElement TargetType)>
             CannotIntroduceInstanceMemberIntoStaticType = new(
                 "CRA0003",
                 "Cannot introduce instance member into a static type.",

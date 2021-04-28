@@ -4,14 +4,16 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    internal class SymbolClassifier : ISymbolClassifier
+    /// <summary>
+    /// The main implementation of <see cref="ISymbolClassifier"/>.
+    /// </summary>
+    internal sealed partial class SymbolClassifier : ISymbolClassifier
     {
         private static readonly object _addSync = new();
         private static readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
@@ -21,6 +23,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly INamedTypeSymbol _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol _templateAttribute;
         private readonly Dictionary<ISymbol, SymbolDeclarationScope?> _cacheFromAttributes = new( SymbolEqualityComparer.Default );
+        private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
         private SymbolClassifier( Compilation compilation )
         {
@@ -28,10 +31,15 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
             this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
             this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+            this._referenceAssemblyLocator = ReferenceAssemblyLocator.GetInstance();
         }
 
+        /// <summary>
+        /// Gets an implementation of <see cref="ISymbolClassifier"/> for a given <see cref="Compilation"/>.
+        /// </summary>
         public static ISymbolClassifier GetInstance( Compilation compilation )
         {
+            // ReSharper disable once InconsistentlySynchronizedField
             if ( !_instances.TryGetValue( compilation, out var value ) )
             {
                 lock ( _addSync )
@@ -39,7 +47,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     if ( !_instances.TryGetValue( compilation, out value ) )
                     {
                         var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
-                        value = hasCaravelaReference ? new SymbolClassifier( compilation ) : NoCaravelaReferenceClassifier.Instance;
+                        value = hasCaravelaReference ? new SymbolClassifier( compilation ) : VanillaClassifier.GetInstance();
                         _instances.Add( compilation, value );
                     }
                 }
@@ -65,7 +73,7 @@ namespace Caravela.Framework.Impl.CompileTime
             return false;
         }
 
-        protected virtual SymbolDeclarationScope? GetAttributeScope( AttributeData attribute )
+        private SymbolDeclarationScope? GetAttributeScope( AttributeData attribute )
         {
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
             {
@@ -80,16 +88,16 @@ namespace Caravela.Framework.Impl.CompileTime
             return null;
         }
 
-        protected virtual SymbolDeclarationScope? GetAssemblyScope( IAssemblySymbol? assembly )
+        private SymbolDeclarationScope? GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
                 return null;
             }
 
-            // TODO: be more strict with .NET Standard.
-            if ( IsStandardLibrary( assembly ) )
+            if ( this._referenceAssemblyLocator.SystemAssemblyNames.Contains( assembly.Name ) )
             {
+                // .NET Standard, Roslyn, ...
                 return SymbolDeclarationScope.Default;
             }
 
@@ -105,10 +113,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return null;
         }
-
-        private static bool IsStandardLibrary( IAssemblySymbol assembly )
-            => assembly.Name.StartsWith( "System", StringComparison.OrdinalIgnoreCase )
-               || assembly.Name.Equals( "netstandard", StringComparison.OrdinalIgnoreCase );
 
         public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
         {
@@ -228,16 +232,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return AddToCache( null );
-        }
-
-        private class NoCaravelaReferenceClassifier : ISymbolClassifier
-        {
-            public static readonly NoCaravelaReferenceClassifier Instance = new();
-
-            public bool IsTemplate( ISymbol symbol ) => false;
-
-            public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
-                => IsStandardLibrary( symbol.ContainingAssembly ) ? SymbolDeclarationScope.Default : SymbolDeclarationScope.RunTimeOnly;
         }
     }
 }

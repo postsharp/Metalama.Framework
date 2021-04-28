@@ -12,38 +12,32 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class CompilationAspectSource : IAspectSource
     {
-        private readonly CompilationModel _initialCompilation;
-        private readonly CompileTimeAssemblyLoader _loader;
+        private readonly CompileTimeProjectLoader _loader;
 
-        public CompilationAspectSource( CompilationModel initialCompilation, CompileTimeAssemblyLoader loader )
+        public CompilationAspectSource( IReadOnlyList<AspectClassMetadata> aspectTypes, CompileTimeProjectLoader loader )
         {
-            this._initialCompilation = initialCompilation;
             this._loader = loader;
+            this.AspectTypes = aspectTypes;
         }
 
         public AspectSourcePriority Priority => AspectSourcePriority.FromAttribute;
 
-        public IEnumerable<INamedType> AspectTypes
-        {
-            get
-            {
-                var aspectType = this._initialCompilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
-
-                return this._initialCompilation.GetAllAttributeTypes().Where( t => t.Is( aspectType ) && t.TypeKind == TypeKind.Class );
-            }
-        }
+        public IEnumerable<AspectClassMetadata> AspectTypes { get; }
 
         // TODO: implement aspect exclusion based on ExcludeAspectAttribute
         public IEnumerable<ICodeElement> GetExclusions( INamedType aspectType ) => Enumerable.Empty<ICodeElement>();
 
-        public IEnumerable<AspectInstance> GetAspectInstances( CompilationModel? compilation, AspectType aspectType, IDiagnosticAdder diagnosticAdder )
-            => (compilation ?? this._initialCompilation).GetAllAttributesOfType( aspectType.Type )
+        public IEnumerable<AspectInstance> GetAspectInstances(
+            CompilationModel compilation,
+            AspectClassMetadata aspectClassMetadata,
+            IDiagnosticAdder diagnosticAdder )
+            => compilation.GetAllAttributesOfType( compilation.Factory.GetTypeByReflectionName( aspectClassMetadata.FullName ) )
                 .Select(
                     attribute =>
                     {
-                        if ( this._loader.TryCreateAttributeInstance( attribute, diagnosticAdder, out var attributeInstance ) )
+                        if ( this._loader.AttributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var attributeInstance ) )
                         {
-                            return aspectType.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingElement.AssertNotNull() );
+                            return aspectClassMetadata.CreateAspectInstance( (IAspect) attributeInstance, attribute.ContainingElement.AssertNotNull() );
                         }
                         else
                         {

@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
+using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
 
 namespace Caravela.Framework.Impl
 {
@@ -41,16 +42,14 @@ namespace Caravela.Framework.Impl
             throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
         }
 
-        public static IMethodSymbol GetSymbol( this IConstructor method )
+        public static AttributeData GetAttributeData( this IAttribute attribute )
         {
-            if ( method is Constructor sourceConstructor )
+            if ( attribute is Attribute attributeModel )
             {
-                return (IMethodSymbol) sourceConstructor.Symbol;
+                return attributeModel.AttributeData;
             }
-            else
-            {
-                throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
-            }
+
+            throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
         }
     }
 }

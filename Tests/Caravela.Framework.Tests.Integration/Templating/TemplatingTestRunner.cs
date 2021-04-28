@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
 using Caravela.Framework.Impl.Templating;
+using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -187,7 +188,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
                 .Single();
 
-            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees[0] );
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees.First() );
             var roslynTargetMethodSymbol = semanticModel.GetDeclaredSymbol( roslynTargetMethod );
 
             if ( roslynTargetMethodSymbol == null )

@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using System;
 using System.Collections.Generic;
@@ -21,10 +20,14 @@ namespace Caravela.Framework.Impl.CodeModel
 {
     internal class CompilationModel : ICompilation, ICodeElementInternal
     {
-        public static CompilationModel CreateInitialInstance( CSharpCompilation roslynCompilation )
-        {
-            return new( roslynCompilation );
-        }
+        public PartialCompilation PartialCompilation { get; }
+
+        public static CompilationModel CreateInitialInstance( PartialCompilation compilation ) => new( compilation );
+
+        public static CompilationModel CreateInitialInstance( Compilation compilation ) => new( PartialCompilation.CreateComplete( compilation ) );
+
+        public static CompilationModel CreateInitialInstance( Compilation compilation, SyntaxTree syntaxTree )
+            => new( PartialCompilation.CreatePartial( compilation, syntaxTree ) );
 
         internal static CompilationModel CreateRevisedInstance( CompilationModel prototype, IReadOnlyList<IObservableTransformation> introducedElements )
         {
@@ -39,16 +42,19 @@ namespace Caravela.Framework.Impl.CodeModel
         internal ReflectionMapper ReflectionMapper { get; }
 
         private readonly ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation> _transformations;
-        private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allAttributesByType;
+
+        // This collection index all attributes on types and members, but not attributes on the assembly and the module.
+        private readonly ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink> _allMemberAttributesByType;
+
         private ImmutableDictionary<CodeElementLink<ICodeElement>, int> _depthsCache = ImmutableDictionary.Create<CodeElementLink<ICodeElement>, int>();
 
         public CodeElementFactory Factory { get; }
 
-        private CompilationModel( CSharpCompilation roslynCompilation )
+        protected CompilationModel( PartialCompilation partialCompilation )
         {
-            this.RoslynCompilation = roslynCompilation;
-            this.ReflectionMapper = new ReflectionMapper( roslynCompilation );
-            this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, roslynCompilation );
+            this.PartialCompilation = partialCompilation;
+            this.ReflectionMapper = ReflectionMapper.GetInstance( this.RoslynCompilation );
+            this.InvariantComparer = new CodeElementEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
 
             this._transformations = ImmutableMultiValueDictionary<CodeElementLink<ICodeElement>, IObservableTransformation>
                 .Empty
@@ -56,12 +62,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
             this.Factory = new CodeElementFactory( this );
 
-            var assembly = new[] { roslynCompilation.Assembly };
-            var allCodeElements = assembly.Concat( assembly.SelectDescendants<ISymbol>( s => s.GetContainedSymbols() ) );
+            // TODO: Move this to a virtual/lazy method because this should not be done for a partial model.
+
+            var allCodeElements = this.PartialCompilation.Types.SelectManyRecursive<ISymbol>( s => s.GetContainedSymbols(), includeFirstLevel: true );
 
             var allAttributes = allCodeElements.SelectMany( c => c.GetAllAttributes() );
 
-            this._allAttributesByType = ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink>
+            this._allMemberAttributesByType = ImmutableMultiValueDictionary<CodeElementLink<INamedType>, AttributeLink>
                 .Create( allAttributes, a => a.AttributeType, CodeElementLinkEqualityComparer<CodeElementLink<INamedType>>.Instance );
         }
 
@@ -73,7 +80,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             this.Revision = prototype.Revision + 1;
-            this.RoslynCompilation = prototype.RoslynCompilation;
+            this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
             this.InvariantComparer = prototype.InvariantComparer;
 
@@ -87,7 +94,7 @@ namespace Caravela.Framework.Impl.CodeModel
             var allNewCodeElements =
                 observableTransformations
                     .OfType<ICodeElement>()
-                    .SelectDescendants( codeElement => codeElement.GetContainedElements() );
+                    .SelectManyRecursive( codeElement => codeElement.GetContainedElements() );
 
             var allAttributes =
                 allNewCodeElements.SelectMany( c => c.Attributes )
@@ -100,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
             this._depthsCache = prototype._depthsCache;
 
-            this._allAttributesByType = prototype._allAttributesByType.AddRange( allAttributes, a => a.AttributeType );
+            this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
         }
 
         internal CSharpSyntaxGenerator SyntaxGenerator { get; } = new();
@@ -111,12 +118,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public INamedTypeList DeclaredTypes
             => new NamedTypeList(
                 this,
-                this.RoslynCompilation.Assembly
-                    .GetTypes()
+                this.PartialCompilation.Types
                     .Select( t => new MemberLink<INamedType>( t ) ) );
-
-        [Memo]
-        public IReadOnlyList<INamedType> DeclaredAndReferencedTypes => this.RoslynCompilation.GetTypes().Select( this.Factory.GetNamedType ).ToImmutableArray();
 
         [Memo]
         public IAttributeList Attributes
@@ -130,7 +133,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.RoslynCompilation.AssemblyName ?? "<Anonymous>";
 
-        public CSharpCompilation RoslynCompilation { get; }
+        public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
         ITypeFactory ICompilation.TypeFactory => this.Factory;
 
@@ -146,10 +149,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         ICompilation ICompilationElement.Compilation => this;
 
-        public IEnumerable<INamedType> GetAllAttributeTypes() => this._allAttributesByType.Keys.Select( t => t.GetForCompilation( this ) );
-
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );
+            => this._allMemberAttributesByType[type.ToLink()].Select( a => a.GetForCompilation( this ) );
 
         internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( ICodeElement codeElement )
             => this._transformations[codeElement.ToLink()];
@@ -222,6 +223,8 @@ namespace Caravela.Framework.Impl.CodeModel
         }
 
         CodeElementLink<ICodeElement> ICodeElementInternal.ToLink() => CodeElementLink.Compilation();
+
+        ImmutableArray<SyntaxReference> ICodeElementInternal.DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
         string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context )
         {

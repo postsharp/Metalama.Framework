@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Advices
                         diagnosticAdder.ReportDiagnostic(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration) ) );
+                                (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration) ) );
                     }
 
                     this._methodBuilder.IsStatic = false;
@@ -178,7 +178,7 @@ namespace Caravela.Framework.Impl.Advices
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.ConflictBehavior )
@@ -189,7 +189,7 @@ namespace Caravela.Framework.Impl.Advices
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateDiagnostic(
                                     this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
 
                     case ConflictBehavior.Merge:
                     case ConflictBehavior.Ignore:
@@ -226,7 +226,8 @@ namespace Caravela.Framework.Impl.Advices
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateDiagnostic(
                                         this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectType.Type, this._methodBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                        (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration,
+                                         existingDeclaration.DeclaringType) ) );
                         }
                         else
                         {

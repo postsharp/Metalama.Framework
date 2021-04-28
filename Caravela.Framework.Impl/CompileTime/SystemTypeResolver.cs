@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 return null;
             }
 
-            var typeName = ReflectionNameHelper.GetReflectionName( typeSymbol );
+            var typeName = typeSymbol.GetReflectionName();
 
             if ( typeSymbol.ContainingAssembly != null )
             {

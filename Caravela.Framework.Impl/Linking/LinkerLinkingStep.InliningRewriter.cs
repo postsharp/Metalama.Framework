@@ -314,7 +314,7 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    // The method does not have simple control flow - we should expect goto's and thus create a label.
+                    // The method does not have simple control flow - we should expect goto and thus create a label.
                     // TODO: The label should be on the next statement, not on empty statement (but that needs to be done after block flattening).
                     return
                         Block(
@@ -348,7 +348,10 @@ namespace Caravela.Framework.Impl.Linking
                         // TODO: Do this properly.
                         if ( originalSymbol.IsStatic )
                         {
-                            return memberAccess.Update( (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ), memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                            return memberAccess.Update(
+                                (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ),
+                                memberAccess.OperatorToken,
+                                IdentifierName( methodSymbol.Name ) );
                         }
                         else
                         {
@@ -360,9 +363,9 @@ namespace Caravela.Framework.Impl.Linking
                         return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
                     }
                 }
-                else if (expression is IdentifierNameSyntax _)
+                else if ( expression is IdentifierNameSyntax _ )
                 {
-                    if (!originalSymbol.IsStatic)
+                    if ( !originalSymbol.IsStatic )
                     {
                         throw new AssertionFailedException();
                     }

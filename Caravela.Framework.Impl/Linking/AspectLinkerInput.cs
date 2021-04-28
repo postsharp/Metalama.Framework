@@ -5,7 +5,6 @@ using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
@@ -18,7 +17,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the input compilation.
         /// </summary>
-        public CSharpCompilation InitialCompilation { get; }
+        public PartialCompilation InitialCompilation { get; }
 
         /// <summary>
         /// Gets the input compilation model, modified by all aspects.
@@ -38,7 +37,7 @@ namespace Caravela.Framework.Impl.Linking
         public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
 
         public AspectLinkerInput(
-            CSharpCompilation initialCompilation,
+            PartialCompilation initialCompilation,
             CompilationModel compilationModel,
             IReadOnlyList<INonObservableTransformation> nonObservableTransformations,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,

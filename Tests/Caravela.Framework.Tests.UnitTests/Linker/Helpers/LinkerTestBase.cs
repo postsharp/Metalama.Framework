@@ -73,7 +73,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             var inputCompilationModel = CompilationModel.CreateRevisedInstance( initialCompilationModel, rewriter.ObservableTransformations );
 
             var linkerInput = new AspectLinkerInput(
-                inputCompilation,
+                PartialCompilation.CreateComplete( inputCompilation ),
                 inputCompilationModel,
                 rewriter.NonObservableTransformations,
                 rewriter.OrderedAspectLayers.Select( ( al, i ) => new OrderedAspectLayer( i, al.AspectName, al.LayerName ) ).ToArray(),
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             return linkerInput;
         }
 
-        internal static CSharpCompilation GetCleanCompilation( CSharpCompilation compilation )
+        internal static PartialCompilation GetCleanCompilation( PartialCompilation compilation )
         {
             var cleanCompilation = compilation;
             var rewriter = new CleaningRewriter();
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 var cleanSyntaxTree = syntaxTree.WithRootAndOptions( rewriter.Visit( syntaxTree.GetRoot() ).AssertNotNull(), syntaxTree.Options );
-                cleanCompilation = cleanCompilation.ReplaceSyntaxTree( syntaxTree, cleanSyntaxTree );
+                cleanCompilation = cleanCompilation.UpdateSyntaxTrees( new[] { (syntaxTree, cleanSyntaxTree) }, Array.Empty<SyntaxTree>() );
             }
 
             return cleanCompilation;

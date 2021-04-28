@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.AspectOrdering;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Linking
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Linking
     {
         public LinkerIntroductionStepOutput(
             ImmutableDiagnosticList diagnostics,
-            CSharpCompilation intermediateCompilation,
+            PartialCompilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers )
         {
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Gets the intermediate compilation.
         /// </summary>
-        public CSharpCompilation IntermediateCompilation { get; }
+        public PartialCompilation IntermediateCompilation { get; }
 
         /// <summary>
         /// Gets the introduction registry.

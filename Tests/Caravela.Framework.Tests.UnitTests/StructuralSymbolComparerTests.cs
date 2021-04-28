@@ -50,6 +50,7 @@ namespace C
 
 namespace D {}
 ";
+
             var comparer = new StructuralSymbolComparer( StructuralSymbolComparerOptions.Name );
 
             var compilation = CreateRoslynCompilation( code );
@@ -63,7 +64,7 @@ namespace D {}
             var typeABar = typeA.GetMembers()[1];
             var typeABarInt = typeA.GetMembers()[2];
             var typeAQuz = typeA.GetMembers()[3];
-            var typeAQuzT= typeA.GetMembers()[4];
+            var typeAQuzT = typeA.GetMembers()[4];
             var typeBFooInt = typeB.GetMembers()[0];
             var typeBBarT = typeB.GetMembers()[1];
             var typeBQuzInt = typeB.GetMembers()[2];

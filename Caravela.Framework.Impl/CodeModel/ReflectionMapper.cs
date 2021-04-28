@@ -8,31 +8,76 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
+    /// <summary>
+    /// Maps System.Reflection objects to Roslyn symbols.
+    /// </summary>
     internal class ReflectionMapper
     {
+        private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
         private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new();
 
-        public ReflectionMapper( Compilation compilation )
+        private ReflectionMapper( Compilation compilation )
         {
             this._compilation = compilation;
         }
 
-        public INamedTypeSymbol GetTypeSymbolByReflectionName( string reflectionName )
+        /// <summary>
+        /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
+        /// </summary>
+        public static ReflectionMapper GetInstance( Compilation compilation )
         {
-            var symbol = this._compilation.GetTypeByMetadataName( reflectionName );
+            // ReSharper disable once InconsistentlySynchronizedField
+            if ( !_instances.TryGetValue( compilation, out var value ) )
+            {
+                lock ( _instances )
+                {
+                    if ( !_instances.TryGetValue( compilation, out value ) )
+                    {
+                        value = new ReflectionMapper( compilation );
+                        _instances.Add( compilation, value );
+                    }
+                }
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="INamedTypeSymbol"/> by metadata name.
+        /// </summary>
+        /// <param name="metadataName"></param>
+        public INamedTypeSymbol GetNamedTypeSymbolByMetadataName( string metadataName )
+        {
+            var symbol = this._compilation.GetTypeByMetadataName( metadataName );
 
             if ( symbol == null )
             {
-                throw GeneralDiagnosticDescriptors.CannotFindType.CreateException( reflectionName );
+                throw GeneralDiagnosticDescriptors.CannotFindType.CreateException( metadataName );
             }
 
             return symbol;
         }
+
+        /// <summary>
+        /// Gets a <see cref="ITypeSymbol"/> given a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public ITypeSymbol GetTypeSymbol( Type type ) => this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
+
+        /// <summary>
+        /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public NameSyntax GetTypeNameSyntax( Type type )
+            => this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
@@ -62,18 +107,13 @@ namespace Caravela.Framework.Impl.CodeModel
 
             if ( type.IsConstructedGenericType )
             {
-                var genericDefinition = this.GetTypeSymbolByReflectionName( type.GetGenericTypeDefinition().FullName );
+                var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName );
                 var genericArguments = type.GenericTypeArguments.Select( this.GetTypeSymbol ).ToArray();
 
                 return genericDefinition.Construct( genericArguments! );
             }
 
-            return this.GetTypeSymbolByReflectionName( type.FullName.AssertNotNull() );
+            return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
         }
-
-        public ITypeSymbol GetTypeSymbol( Type type ) => this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
-
-        public NameSyntax GetTypeNameSyntax( Type type )
-            => this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
     }
 }

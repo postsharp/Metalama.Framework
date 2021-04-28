@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
+using Caravela.Framework.Impl.Collections;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Pipeline
@@ -10,15 +12,20 @@ namespace Caravela.Framework.Impl.Pipeline
     /// The main compile-time entry point of Caravela. An implementation of Caravela.Compiler's <see cref="ISourceTransformer"/>.
     /// </summary>
     [Transformer]
-    internal sealed partial class AspectPipelineTransformer : ISourceTransformer
+    internal sealed class AspectPipelineTransformer : ISourceTransformer
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            var context = new AspectPipelineContext( transformerContext );
-            using CompileTimeAspectPipeline pipeline = new( context );
+            using CompileTimeAspectPipeline pipeline = new( new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ) );
 
-            if ( pipeline.TryExecute( context, out var compilation ) )
+            if ( pipeline.TryExecute(
+                new DiagnosticAdder( transformerContext.ReportDiagnostic ),
+                transformerContext.Compilation,
+                out var compilation,
+                out var additionalResources ) )
             {
+                transformerContext.ManifestResources.AddRange( additionalResources );
+
                 return compilation;
             }
 

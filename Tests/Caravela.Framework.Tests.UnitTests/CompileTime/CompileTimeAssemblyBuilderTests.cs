@@ -21,6 +21,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         {
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
+            serviceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
 
             return serviceProvider;
         }
@@ -51,7 +52,7 @@ namespace Foo
 }
 ";
 
-            var rewriter = new CompileTimeAssemblyBuilder.RemoveInvalidUsingRewriter( compilation );
+            var rewriter = new CompileTimeCompilationBuilder.RemoveInvalidUsingRewriter( compilation );
 
             var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
 
@@ -91,9 +92,10 @@ class A : Attribute
             var roslynCompilation = CreateRoslynCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
-            var loader = CompileTimeAssemblyLoader.Create( serviceProvider, roslynCompilation );
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            Assert.True( loader.TryGenerateCompileTimeProject( compilation.RoslynCompilation, new DiagnosticList(), out _ ) );
 
-            if ( !loader.TryCreateAttributeInstance( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -127,9 +129,10 @@ class ReferencingClass
             var roslynCompilation = CreateRoslynCompilation( referencingCode, referencedCode );
 
             var serviceProvider = GetServiceProvider();
-            var loader = CompileTimeAssemblyLoader.Create( serviceProvider, roslynCompilation );
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
 
-            loader.LoadCompileTimeAssembly( roslynCompilation.Assembly );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader.TryGenerateCompileTimeProject( roslynCompilation, diagnosticList, out _ ) );
         }
 
         [Fact]
@@ -158,8 +161,10 @@ class ReferencingClass
             var referencedCompilation = CreateRoslynCompilation( referencedCode );
             DiagnosticList diagnostics = new();
             var serviceProvider = GetServiceProvider();
-            var builder = new CompileTimeAssemblyBuilder( serviceProvider );
-            Assert.True( builder.TryEmitCompileTimeAssembly( referencedCompilation, diagnostics, out var referencedCompileTimeStream ) );
+            var builder = new CompileTimeCompilationBuilder( serviceProvider, new CompileTimeDomain() );
+
+            Assert.True(
+                builder.TryCreateCompileTimeProject( referencedCompilation, ArraySegment<CompileTimeProject>.Empty, diagnostics, out var compileTimeProject ) );
 
             var referencedRunTimePath = Path.GetTempFileName();
 
@@ -174,7 +179,7 @@ class ReferencingClass
                         null,
                         null,
                         null,
-                        new[] { new ResourceDescription( CompileTimeAssemblyBuilder.ResourceName, () => referencedCompileTimeStream!, true ) } );
+                        new[] { new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, () => compileTimeProject!.Serialize(), true ) } );
 
                     Assert.True( emitResult.Success );
                 }
@@ -183,8 +188,10 @@ class ReferencingClass
 
                 var referencingCompilation = CreateRoslynCompilation( referencingCode, additionalReferences: new[] { reference } );
 
-                var loader = CompileTimeAssemblyLoader.Create( serviceProvider, referencingCompilation );
-                loader.LoadCompileTimeAssembly( referencingCompilation.Assembly );
+                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+
+                DiagnosticList diagnosticList = new();
+                Assert.True( loader.TryGenerateCompileTimeProject( referencingCompilation, diagnosticList, out _ ) );
             }
             finally
             {
@@ -193,6 +200,119 @@ class ReferencingClass
                     File.Delete( referencedRunTimePath );
                 }
             }
+        }
+
+        [Fact]
+        public void UpdatedReference()
+        {
+            // This test verifies that one can create a project A v1.0 that references B v1.0, but it still works when B is updated to v1.1
+            // and A is not recompiled.
+
+            string GenerateVersionedCode( int version )
+                => @"
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+public class VersionedClass
+{
+    public static int Version => $version;
+}
+".Replace( "$version", version.ToString() );
+
+            var classA = @"
+
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+class A
+{
+  public  static int Version => VersionedClass.Version;
+}
+";
+
+            var classB = @"
+
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+class B
+{
+  public static int Version => VersionedClass.Version;
+}
+";
+
+            var guid = Guid.NewGuid();
+            var versionedCompilationV1 = CreateRoslynCompilation( GenerateVersionedCode( 1 ), name: "test_Versioned_" + guid );
+            var versionedCompilationV2 = CreateRoslynCompilation( GenerateVersionedCode( 2 ), name: "test_Versioned_" + guid );
+
+            var compilationA = CreateRoslynCompilation(
+                classA,
+                additionalReferences: new[] { versionedCompilationV1.ToMetadataReference() },
+                name: "test_A_" + guid );
+
+            var compilationB1 = CreateRoslynCompilation(
+                classB,
+                additionalReferences: new[] { versionedCompilationV1.ToMetadataReference(), compilationA.ToMetadataReference() },
+                name: "test_B_" + guid );
+
+            var compilationB2 = CreateRoslynCompilation(
+                classB,
+                additionalReferences: new[] { versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference() },
+                name: "test_B_" + guid );
+
+            var domain = new CompileTimeDomain();
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loaderV1.TryGenerateCompileTimeProject( compilationB1, diagnosticList, out var project1 ) );
+            ExecuteAssertions( project1!, 1 );
+
+            var loader2 = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
+            Assert.True( loader2.TryGenerateCompileTimeProject( compilationB2, diagnosticList, out var project2 ) );
+
+            ExecuteAssertions( project2!, 2 );
+
+            void ExecuteAssertions( CompileTimeProject project, int expectedVersion )
+            {
+                var valueFromA = project.References
+                    .Single( p => p.RunTimeIdentity.Name == compilationA.AssemblyName )
+                    .GetType( "A" )!
+                    .GetProperty( "Version" )!
+                    .GetValue( null );
+
+                Assert.Equal( expectedVersion, valueFromA );
+
+                var valueFromB = project
+                    .GetType( "B" )!
+                    .GetProperty( "Version" )!
+                    .GetValue( null );
+
+                Assert.Equal( expectedVersion, valueFromB );
+            }
+        }
+
+        [Fact]
+        public void CanCreateCompileTimeProjectWithInvalidRunTimeCode()
+        {
+            // We need to be able to have a compile-time assembly even if there is an error in run-time-only code,
+            // otherwise the design-time experience is doomed to fail.
+
+            var code = @"
+
+using Caravela.Framework.Project;
+[CompileTime]
+class B
+{
+
+}
+
+class C 
+{
+    Intentionally Invalid
+}
+";
+
+            var domain = new CompileTimeDomain();
+            var compilation = CreateRoslynCompilation( code, ignoreErrors: true );
+            var loader = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
+            DiagnosticList diagnosticList = new();
+            Assert.True( loader.TryGenerateCompileTimeProject( compilation, diagnosticList, out _ ) );
         }
     }
 }
