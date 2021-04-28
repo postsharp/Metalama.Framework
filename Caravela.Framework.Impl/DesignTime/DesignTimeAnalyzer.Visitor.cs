@@ -26,11 +26,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
-            
+
 #pragma warning disable IDE0044 // To prevent protective copy of the readonly struct.
             private SemanticModelAnalysisContext _context;
 #pragma warning restore IDE0044
-            
+
             private SymbolDeclarationScope? _currentDeclarationScope;
             private ISymbol? _currentDeclaration;
 

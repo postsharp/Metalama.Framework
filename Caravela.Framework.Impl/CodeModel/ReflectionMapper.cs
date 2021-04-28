@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CodeModel
     /// <summary>
     /// Maps System.Reflection objects to Roslyn symbols.
     /// </summary>
-    internal class ReflectionMapper
+    internal class ReflectionMapper : ISyntaxFactory
     {
         private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly Compilation _compilation;

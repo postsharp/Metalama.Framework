@@ -133,7 +133,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
         /// </summary>
         /// <returns></returns>
-        public MemoryStream Serialize()
+        private MemoryStream Serialize()
         {
             this.AssertNotEmpty();
 
@@ -170,6 +170,12 @@ namespace Caravela.Framework.Impl.CompileTime
 
             return stream;
         }
+
+        /// <summary>
+        /// Returns a managed resource that contains the serialized project.
+        /// </summary>
+        /// <returns></returns>
+        public ResourceDescription ToResource() => new( CompileTimeCompilationBuilder.ResourceName, this.Serialize, true );
 
         /// <summary>
         /// Gets a compile-time reflection <see cref="Type"/> defined in the current project.

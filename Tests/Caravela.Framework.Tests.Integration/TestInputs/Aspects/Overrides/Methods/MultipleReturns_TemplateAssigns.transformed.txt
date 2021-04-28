@@ -5,7 +5,7 @@ internal class TargetClass
     public void TargetMethod_Void_TwoReturns(int x)
     {
         global::System.Console.WriteLine("Begin override.");
-        __Void result;
+        global::Caravela.Framework.Aspects.__Void result;
         while (x > 0)
         {
             if (x == 42)

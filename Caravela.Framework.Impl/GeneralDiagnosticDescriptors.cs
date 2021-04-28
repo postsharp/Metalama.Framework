@@ -98,5 +98,12 @@ namespace Caravela.Framework.Impl
             "The aspect '{0}' has thrown an exception of the '{1}': {2}",
             _category,
             Error );
+
+        public static readonly StrongDiagnosticDescriptor<AssemblyIdentity> CannotFindCompileTimeAssembly = new(
+            "CR0026",
+            "Cannot find an assembly required by the compile-time assembly.",
+            "The assembly '{0}' required at compile-time cannot be found.",
+            _category,
+            Error );
     }
 }
