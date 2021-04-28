@@ -5,7 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using static Microsoft.CodeAnalysis.DiagnosticSeverity;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceDiagnosticDescriptors
     {
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Impl
 
         public static readonly StrongDiagnosticDescriptor<(string AspectType, ICodeElement Member, ICodeElement TargetType)>
             CannotIntroduceInstanceMemberIntoStaticType = new(
-                "CRA0003",
+                "CRA0004",
                 "Cannot introduce instance member into a static type.",
                 "The aspect '{0}' cannot introduce instance member '{1}' into a type '{2}' because it is static.",
                 _category,

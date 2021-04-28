@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMember DeclaringMember { get; }
 
-        public ParameterBuilder( IMethod containingMethod, int index, string? name, IType type, RefKind refKind )
+        public ParameterBuilder( MethodBuilder containingMethod, int index, string? name, IType type, RefKind refKind ) : base( containingMethod.ParentAdvice )
         {
             this.DeclaringMember = containingMethod;
             this.Index = index;

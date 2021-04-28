@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
@@ -21,6 +22,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     /// </summary>
     internal abstract class CodeElementBuilder : ICodeElementBuilder, ICodeElementInternal
     {
+        internal Advice ParentAdvice { get; }
+
         public CodeOrigin Origin => CodeOrigin.Aspect;
 
         public abstract ICodeElement? ContainingElement { get; }
@@ -35,13 +38,18 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingElement?.Compilation ?? throw new AssertionFailedException();
 
+        public bool IsFrozen { get; private set; }
+
+        public CodeElementBuilder( Advice parentAdvice )
+        {
+            this.ParentAdvice = parentAdvice;
+        }
+
         // TODO: How to implement this?
         public virtual string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
             return "CodeElementBuilder";
         }
-
-        public bool IsFrozen { get; private set; }
 
         public IAttributeBuilder AddAttribute( INamedType type, params object?[] constructorArguments )
         {
@@ -54,9 +62,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             if ( ctor == null )
             {
-                throw new ArgumentException(
-                    $"No compatible constructor for attribute exists in type {type} for given parameters.",
-                    nameof(constructorArguments) );
+                throw GeneralDiagnosticDescriptors.CompatibleAttributeConstructorDoesNotExist.CreateException(
+                    (this.ParentAdvice.Aspect.AspectClass.DisplayName, this, type) );
             }
 
             var ctorArguments = constructorArguments.Select( ( _, i ) => new TypedConstant( ctor.Parameters[i].ParameterType, constructorArguments[i] ) )

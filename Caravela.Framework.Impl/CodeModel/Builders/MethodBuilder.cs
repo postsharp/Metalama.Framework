@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -103,6 +102,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
 
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
@@ -116,9 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         ? new[]
                         {
                             ReturnStatement(
-                                LiteralExpression(
-                                    SyntaxKind.DefaultLiteralExpression,
-                                    Token( SyntaxKind.DefaultKeyword ) ) )
+                                DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
                         }
                         : null );
 

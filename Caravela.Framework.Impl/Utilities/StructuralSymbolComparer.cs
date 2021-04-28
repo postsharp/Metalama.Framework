@@ -13,8 +13,6 @@ namespace Caravela.Framework.Impl.Linking
     /// </summary>
     internal class StructuralSymbolComparer : IEqualityComparer<ISymbol>
     {
-        // TODO: At this point the default display string seems to be enough for comparison.
-
         public static readonly StructuralSymbolComparer Default =
             new(
                 StructuralSymbolComparerOptions.ContainingElement |
@@ -241,9 +239,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 StringComparer.Ordinal.Equals( moduleX.Name, moduleY.Name )
-                && StringComparer.Ordinal.Equals( moduleX.ContainingAssembly.Name, moduleY.ContainingAssembly.Name )
-                && Enumerable.SequenceEqual( moduleX.ContainingAssembly.Identity.PublicKey, moduleY.ContainingAssembly.Identity.PublicKey )
-                && EqualityComparer<Version>.Default.Equals( moduleX.ContainingAssembly.Identity.Version, moduleY.ContainingAssembly.Identity.Version );
+                && EqualityComparer<AssemblyIdentity>.Default.Equals( moduleX.ContainingAssembly.Identity, moduleY.ContainingAssembly.Identity );
         }
 
         public int GetHashCode( ISymbol symbol )

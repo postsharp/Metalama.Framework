@@ -4,16 +4,16 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
-namespace Caravela.Framework.Impl
+namespace Caravela.Framework.Impl.Advices
 {
     internal class AdviceFactory : IAdviceFactory
     {
@@ -60,11 +60,22 @@ namespace Caravela.Framework.Impl
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
         {
+            var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, aspectLinkerOptions );
-            advice.Initialize( this._diagnosticAdder );
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
+
+            if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            {
+                // Report any errors
+                throw new InvalidUserCodeException(
+                    "Errors have occured while creating advice.",
+                    diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
+            }
+
+            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
 
             return advice;
         }
@@ -76,11 +87,21 @@ namespace Caravela.Framework.Impl
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
+            var diagnosticList = new DiagnosticList();
             var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
 
             var advice = new IntroduceMethodAdvice( this._aspect, targetType, templateMethod, scope, conflictBehavior, aspectLinkerOptions );
-            advice.Initialize( this._diagnosticAdder );
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
+
+            if ( diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+            {
+                throw new InvalidUserCodeException(
+                    "Errors have occured while creating advice.",
+                    diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
+            }
+
+            this._diagnosticAdder.ReportDiagnostics( diagnosticList );
 
             return advice;
         }
