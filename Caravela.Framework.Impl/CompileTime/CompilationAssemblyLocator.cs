@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -16,22 +19,16 @@ namespace Caravela.Framework.Impl.CompileTime
             this._compilation = compilation;
         }
 
-        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity,  [NotNullWhen(true)] out MetadataReference? reference )
+        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, [NotNullWhen( true )] out MetadataReference? reference )
         {
             reference = this._compilation.References.FirstOrDefault(
-                r =>
-                {
-                    var symbol = this._compilation.GetAssemblyOrModuleSymbol( r ) as IAssemblySymbol;
+                r => this._compilation.GetAssemblyOrModuleSymbol( r ) is IAssemblySymbol assemblySymbol &&
+                     assemblySymbol.Identity == assemblyIdentity );
 
-                    return symbol != null && symbol.Identity == assemblyIdentity;
-
-                } );
-            
             // TODO: This implementation looks for exact matches only. More testing is required with assembly binding redirections.
             // However, this is should be tested from MSBuild.
 
             return reference != null;
-
         }
     }
 }

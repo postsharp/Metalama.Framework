@@ -32,9 +32,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
             {
                 // TODO: Add the namespace.
-#pragma warning disable CS0618 // Type or member is obsolete
                 return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
-#pragma warning restore CS0618 // Type or member is obsolete
             }
 
             // TODO: Introduced types?

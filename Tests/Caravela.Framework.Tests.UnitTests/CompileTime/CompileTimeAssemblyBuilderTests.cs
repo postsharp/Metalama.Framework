@@ -204,7 +204,7 @@ class ReferencingClass
                             null,
                             null,
                             null,
-                            new[] { compileTimeProject.ToResource() } );
+                            new[] { compileTimeProject!.ToResource() } );
 
                         Assert.True( emitResult.Success );
                     }
@@ -343,13 +343,5 @@ class C
             DiagnosticList diagnosticList = new();
             Assert.True( loader.TryGenerateCompileTimeProject( compilation, diagnosticList, out _ ) );
         }
-    }
-
-    internal class TestAssemblyLocator : IAssemblyLocator
-    {
-        public Dictionary<AssemblyIdentity, MetadataReference> Files { get; } = new();
-
-        public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, out MetadataReference? reference )
-            => this.Files.TryGetValue( assemblyIdentity, out reference );
     }
 }

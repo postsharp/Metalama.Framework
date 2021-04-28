@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl
 
             return service;
         }
-        
+
         public static T? GetOptionalService<T>( this IServiceProvider serviceProvider )
             where T : class
             => (T?) serviceProvider.GetService( typeof(T) );

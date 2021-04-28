@@ -175,8 +175,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Returns a managed resource that contains the serialized project.
         /// </summary>
         /// <returns></returns>
-        public ResourceDescription ToResource() => new ResourceDescription( CompileTimeCompilationBuilder.ResourceName, this.Serialize, true );
-        
+        public ResourceDescription ToResource() => new( CompileTimeCompilationBuilder.ResourceName, this.Serialize, true );
 
         /// <summary>
         /// Gets a compile-time reflection <see cref="Type"/> defined in the current project.

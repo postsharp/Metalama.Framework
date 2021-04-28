@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             {
                 this._errors++;
             }
-            
+
             this._action( diagnostic );
         }
 

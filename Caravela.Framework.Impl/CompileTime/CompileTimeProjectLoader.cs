@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
@@ -9,7 +8,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -33,7 +31,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly SystemTypeResolver _systemTypeResolver = new();
 
         // Maps the identity of the run-time project to the compile-time project.
-        private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _projects = new();
+        private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
 
         public AttributeDeserializer AttributeDeserializer { get; }
 
@@ -138,8 +136,8 @@ namespace Caravela.Framework.Impl.CompileTime
         public CompileTimeProject? GetCompileTimeProject( AssemblyIdentity runTimeAssemblyIdentity )
         {
             // This method is a smell and should probably not exist.
-            
-            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity,  NullDiagnosticAdder.Instance, out var assembly );
+
+            _ = this.TryGetCompileTimeProject( runTimeAssemblyIdentity, NullDiagnosticAdder.Instance, out var assembly );
 
             return assembly;
         }
@@ -175,7 +173,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 return this.TryGetCompileTimeProject( metadataReference!, diagnosticAdder, out compileTimeProject );
             }
         }
-
 
         /// <summary>
         /// Generates a <see cref="CompileTimeProject"/> for a given run-time <see cref="Compilation"/>.
@@ -225,11 +222,10 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private bool TryGetCompileTimeProject( MetadataReference reference, IDiagnosticAdder diagnosticSink, out CompileTimeProject? referencedProject )
         {
-            switch (reference)
+            switch ( reference )
             {
                 case PortableExecutableReference { FilePath: { } filePath }:
                     return this.TryGetCompileTimeProject( filePath!, diagnosticSink, out referencedProject );
-
 
                 case CompilationReference compilationReference:
                     return this.TryGenerateCompileTimeProject( compilationReference.Compilation, diagnosticSink, out referencedProject );
@@ -237,7 +233,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 default:
                     throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
             }
-
         }
 
         private bool TryGetCompileTimeProject(
@@ -331,10 +326,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 foreach ( var referenceSerializedIdentity in manifest.References )
                 {
                     var referenceAssemblyIdentity = new AssemblyName( referenceSerializedIdentity ).ToAssemblyIdentity();
-                    
-                    if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity,  diagnosticAdder, out var referenceProject ) )
+
+                    if ( !this.TryGetCompileTimeProject( referenceAssemblyIdentity, diagnosticAdder, out var referenceProject ) )
                     {
                         project = null;
+
                         return false;
                     }
 

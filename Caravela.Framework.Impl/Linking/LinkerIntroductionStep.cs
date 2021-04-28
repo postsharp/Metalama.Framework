@@ -87,7 +87,12 @@ namespace Caravela.Framework.Impl.Linking
             // Visit all introductions, respect aspect part ordering.
             foreach ( var memberIntroduction in allTransformations.OfType<IMemberIntroduction>() )
             {
-                var introductionContext = new MemberIntroductionContext( diagnostics, nameProvider, lexicalScopeHelper.GetLexicalScope( memberIntroduction ), syntaxFactory );
+                var introductionContext = new MemberIntroductionContext(
+                    diagnostics,
+                    nameProvider,
+                    lexicalScopeHelper.GetLexicalScope( memberIntroduction ),
+                    syntaxFactory );
+
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                 introducedMemberCollection.Add( memberIntroduction, introducedMembers );

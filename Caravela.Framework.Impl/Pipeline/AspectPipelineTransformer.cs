@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public Compilation Execute( TransformerContext transformerContext )
         {
-            using CompileTimeAspectPipeline pipeline = new( 
+            using CompileTimeAspectPipeline pipeline = new(
                 new BuildOptions( transformerContext.GlobalOptions, transformerContext.Plugins ),
                 new CompilationAssemblyLocator( transformerContext.Compilation ) );
 
@@ -34,10 +34,8 @@ namespace Caravela.Framework.Impl.Pipeline
             else
             {
                 // The pipeline failed.
-                return transformerContext.Compilation;    
+                return transformerContext.Compilation;
             }
         }
     }
-    
-    
 }
