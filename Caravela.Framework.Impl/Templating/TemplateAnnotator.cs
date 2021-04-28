@@ -33,20 +33,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private readonly ISymbolClassifier _symbolScopeClassifier;
 
-        /// <summary>
-        /// Specifies that the current node is guarded by a conditional statement where the condition is a runtime-only
-        /// expression.
-        /// </summary>
-        private bool _isRuntimeConditionalBlock;
-
-        private SymbolDeclarationScope _breakOrContinueScope;
-
-        /// <summary>
-        /// Specifies that the current expression is obliged to be compile-time-only.
-        /// </summary>
-        private bool _forceCompileTimeOnlyExpression;
-
-        private string? _forceCompileTimeOnlyExpressionReason;
+        private ScopeContext _currentScopeContext;
 
         private ISymbol? _currentTemplateMember;
 
@@ -58,6 +45,7 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolScopeClassifier = SymbolClassifier.GetInstance( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            this._currentScopeContext = ScopeContext.CreateHelperScope( SymbolDeclarationScope.Both );
         }
 
         public bool Success { get; private set; } = true;
@@ -149,7 +137,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // Until we support template parameters and local functions, all parameters are parameters
                 // of expression lambdas, which are default-scoped.
-                return SymbolDeclarationScope.Both;
+                return SymbolDeclarationScope.Unknown;
             }
 
             // Aspect members are processed as compile-time-only by the template compiler even if some members can also
@@ -264,37 +252,10 @@ namespace Caravela.Framework.Impl.Templating
             return runtimeCount > 0 ? SymbolDeclarationScope.RunTimeOnly : compileTimeOnlyCount > 0 ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Both;
         }
 
-        /// <summary>
-        /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
-        /// Local variables modified within such branch cannot be compile-time.
-        /// </summary>
-        /// <returns>A cookie to dispose at the end.</returns>
-        private ConditionalBranchCookie EnterRuntimeConditionalBlock()
+        private ScopeContextCookie WithScopeContext(ScopeContext scopeContext)
         {
-            var cookie = new ConditionalBranchCookie( this, this._isRuntimeConditionalBlock );
-            this._isRuntimeConditionalBlock = true;
-
-            return cookie;
-        }
-
-        /// <summary>
-        /// Enters an expression branch that must be compile-time because the parent must be
-        /// compile-time.
-        /// </summary>
-        /// <returns>A cookie to dispose at the end.</returns>
-        private ForceBuildTimeExpressionCookie EnterForceCompileTimeExpression( string reason )
-        {
-            var cookie = new ForceBuildTimeExpressionCookie( this );
-            this._forceCompileTimeOnlyExpression = true;
-            this._forceCompileTimeOnlyExpressionReason = reason;
-
-            return cookie;
-        }
-
-        private BreakOrContinueScopeCookie EnterBreakOrContinueScope( SymbolDeclarationScope scope )
-        {
-            var cookie = new BreakOrContinueScopeCookie( this, this._breakOrContinueScope );
-            this._breakOrContinueScope = scope;
+            var cookie = new ScopeContextCookie( this, this._currentScopeContext );
+            this._currentScopeContext = scopeContext;
 
             return cookie;
         }
@@ -314,7 +275,7 @@ namespace Caravela.Framework.Impl.Templating
             // Adds annotations to the children node.
             var transformedNode = base.Visit( node );
 
-            if ( this._forceCompileTimeOnlyExpression )
+            if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
                 if ( transformedNode.GetScopeFromAnnotation() == SymbolDeclarationScope.RunTimeOnly ||
                      this.IsDynamic( transformedNode ) )
@@ -325,7 +286,7 @@ namespace Caravela.Framework.Impl.Templating
                         transformedNode,
                         SymbolDeclarationScope.RunTimeOnly,
                         SymbolDeclarationScope.CompileTimeOnly,
-                        this._forceCompileTimeOnlyExpressionReason! );
+                        this._currentScopeContext.ForceCompileTimeOnlyExpressionReason! );
 
                     return transformedNode.AddScopeMismatchAnnotation();
                 }
@@ -417,7 +378,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 // If the member is compile-time (because of rules on the symbol), the expression on the left MUST be compile-time.
 
-                using ( this.EnterForceCompileTimeExpression( $"a compile-time-only member '${node.Name}'" ) )
+                using ( this.WithScopeContext( ScopeContext.CreateForceCompileTimeExpression( $"a compile-time-only member '${node.Name}'" ) ) )
                 {
                     var transformedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
 
@@ -461,7 +422,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                     else
                     {
-                        using ( this.EnterForceCompileTimeExpression( $"a compile-time expression '{node.Expression}'" ) )
+                        using ( this.WithScopeContext( ScopeContext.CreateForceCompileTimeExpression( $"a compile-time expression '{node.Expression}'" ) ) )
                         {
                             transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
                         }
@@ -543,7 +504,7 @@ namespace Caravela.Framework.Impl.Templating
 
             // We have an if statement where the condition is a runtime expression. Any variable assignment
             // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-            using ( this.EnterRuntimeConditionalBlock() )
+            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
             {
                 var annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 var annotatedElse = (ElseClauseSyntax) this.Visit( node.Else )!;
@@ -556,12 +517,12 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
         {
-            return base.VisitBreakStatement( node )!.AddScopeAnnotation( this._breakOrContinueScope );
+            return base.VisitBreakStatement( node )!.AddScopeAnnotation( this._currentScopeContext.CurrentScope );
         }
 
         public override SyntaxNode? VisitContinueStatement( ContinueStatementSyntax node )
         {
-            return base.VisitContinueStatement( node )!.AddScopeAnnotation( this._breakOrContinueScope );
+            return base.VisitContinueStatement( node )!.AddScopeAnnotation( this._currentScopeContext.CurrentScope );
         }
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
@@ -583,7 +544,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                using ( this.WithScopeContext( ScopeContext.CreateHelperScope( SymbolDeclarationScope.CompileTimeOnly ) ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -607,11 +568,11 @@ namespace Caravela.Framework.Impl.Templating
 
             // Run-time loop.
 
-            using ( this.EnterRuntimeConditionalBlock() )
+            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
             {
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Both ) )
+                using ( this.WithScopeContext( ScopeContext.CreateHelperScope( SymbolDeclarationScope.Both ) ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -645,7 +606,7 @@ namespace Caravela.Framework.Impl.Templating
 
             SymbolDeclarationScope localScope;
 
-            if ( this._forceCompileTimeOnlyExpression )
+            if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
                 localScope = SymbolDeclarationScope.CompileTimeOnly;
             }
@@ -688,7 +649,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.GetNodeScope( transformedType ) == SymbolDeclarationScope.CompileTimeOnly )
             {
-                using ( this.EnterForceCompileTimeExpression( $"a local variable of compile-time-only type '{node.Type}'" ) )
+                using ( this.WithScopeContext( ScopeContext.CreateForceCompileTimeExpression( $"a local variable of compile-time-only type '{node.Type}'" ) ) )
                 {
                     var transformedVariableDeclaration = (VariableDeclarationSyntax) base.VisitVariableDeclaration( node )!;
 
@@ -756,7 +717,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var transformedNode = (AssignmentExpressionSyntax) base.VisitAssignmentExpression( node )!;
 
-            if ( this._isRuntimeConditionalBlock )
+            if ( this._currentScopeContext.IsRuntimeConditionalBlock )
             {
                 return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
             }
@@ -836,7 +797,7 @@ namespace Caravela.Framework.Impl.Templating
 
             StatementSyntax transformedStatement;
 
-            using ( this.EnterRuntimeConditionalBlock() )
+            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
             {
                 transformedStatement = (StatementSyntax) this.Visit( node.Statement )!;
             }
@@ -866,7 +827,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
+                using ( this.WithScopeContext( ScopeContext.CreateHelperScope( SymbolDeclarationScope.CompileTimeOnly ) ) )
                 {
                     annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
                 }
@@ -878,14 +839,11 @@ namespace Caravela.Framework.Impl.Templating
             // We have an while statement where the condition is a runtime expression. Any variable assignment
             // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
 
-            using ( this.EnterRuntimeConditionalBlock() )
+            using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
             {
                 StatementSyntax annotatedStatement;
 
-                using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.Both ) )
-                {
-                    annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
-                }
+                annotatedStatement = (StatementSyntax) this.Visit( node.Statement )!;
 
                 var result = node.Update( node.WhileKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement );
 
@@ -926,8 +884,6 @@ namespace Caravela.Framework.Impl.Templating
             if ( node.ExpressionBody != null )
             {
                 var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
-                //var scope = annotatedExpression.GetScopeFromAnnotation();
-
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
@@ -944,10 +900,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( node.ExpressionBody != null )
             {
-
                 var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
-                //var scope = annotatedExpression.GetScopeFromAnnotation();
-
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
@@ -1016,26 +969,27 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
             var expressionScope = annotatedExpression.GetScopeFromAnnotation();
 
-            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( annotatedExpression ) )
+            if ( (expressionScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( annotatedExpression )) 
+                || expressionScope != SymbolDeclarationScope.CompileTimeOnly )
             {
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
             }
 
+            var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
+
+            for ( var i = 0; i < node.Sections.Count; i++ )
+            {
+                var section = node.Sections[i];
+                this.RequireScope( section, expressionScope );
+
+                using ( this.WithScopeContext( ScopeContext.CreateHelperScope( expressionScope, isRuntimeConditionalBlock: expressionScope == SymbolDeclarationScope.RunTimeOnly ) ) )
+                {
+                    transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
+                }
+            }
+
             if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
-
-                for ( var i = 0; i < node.Sections.Count; i++ )
-                {
-                    var section = node.Sections[i];
-                    this.RequireScope( section, SymbolDeclarationScope.CompileTimeOnly );
-
-                    using ( this.EnterBreakOrContinueScope( SymbolDeclarationScope.CompileTimeOnly ) )
-                    {
-                        transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
-                    }
-                }
-
                 return node.Update(
                         node.SwitchKeyword,
                         node.OpenParenToken,
@@ -1048,21 +1002,6 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                var transformedSections = new SwitchSectionSyntax[node.Sections.Count];
-
-                for ( var i = 0; i < node.Sections.Count; i++ )
-                {
-                    var section = node.Sections[i];
-                    this.RequireScope( section, expressionScope );
-
-                    using ( this.EnterRuntimeConditionalBlock() )
-                    {
-                        using ( this.EnterBreakOrContinueScope( expressionScope ) )
-                        {
-                            transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
-                        }
-                    }
-                }
 
                 return node.Update(
                     node.SwitchKeyword,

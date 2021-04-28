@@ -15,8 +15,6 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWit
             list.Add(1);
             list.Add(2);
             list.Add(5);
-            
-            Console.WriteLine(target.Parameters.Count);
 
             var p = list.Where(a => a > target.Parameters.Count).Count();
             Console.WriteLine(p);

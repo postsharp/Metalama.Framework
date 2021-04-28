@@ -923,6 +923,11 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        public override SyntaxNode VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        {
+            return base.VisitSimpleLambdaExpression( node );
+        }
+
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
         {
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
