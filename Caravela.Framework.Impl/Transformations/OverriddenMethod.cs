@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     this.OverriddenDeclaration,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverrideProceedImpl( this.Advice.AspectLayerId, this.OverriddenDeclaration ),
+                    new LinkerOverrideProceedImpl( this.Advice.AspectLayerId, this.OverriddenDeclaration, LinkerAnnotationOrder.Default ),
                     context.LexicalScope,
                     context.DiagnosticSink );
 

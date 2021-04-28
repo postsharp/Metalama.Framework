@@ -3,6 +3,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -332,18 +333,61 @@ namespace Caravela.Framework.Impl.Linking
             /// <returns></returns>
             private static ExpressionSyntax ReplaceCallTarget( IMethodSymbol originalSymbol, ExpressionSyntax expression, IMethodSymbol methodSymbol )
             {
-                var memberAccess = (MemberAccessExpressionSyntax) expression;
-
-                if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
+                if ( expression is MemberAccessExpressionSyntax memberAccess )
                 {
-                    return memberAccess.Update(
-                        memberAccess.Expression,
-                        memberAccess.OperatorToken,
-                        IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
+                    if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
+                    {
+                        return memberAccess.Update(
+                            memberAccess.Expression,
+                            memberAccess.OperatorToken,
+                            IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) ) );
+                    }
+                    else if ( StructuralSymbolComparer.Signature.Equals( originalSymbol, methodSymbol ) )
+                    {
+                        // HACK: Presumes that same signature means base method call.
+                        // TODO: Do this properly.
+                        if ( originalSymbol.IsStatic )
+                        {
+                            return memberAccess.Update( (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ), memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                        }
+                        else
+                        {
+                            return memberAccess.Update( BaseExpression(), memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                        }
+                    }
+                    else
+                    {
+                        return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                    }
+                }
+                else if (expression is IdentifierNameSyntax _)
+                {
+                    if (!originalSymbol.IsStatic)
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    if ( SymbolEqualityComparer.Default.Equals( originalSymbol, methodSymbol ) )
+                    {
+                        return IdentifierName( LinkingRewriter.GetOriginalBodyMethodName( methodSymbol.Name ) );
+                    }
+                    else if ( StructuralSymbolComparer.Signature.Equals( originalSymbol, methodSymbol ) )
+                    {
+                        // HACK: Presumes that same signature means base method call.
+                        // TODO: Do this properly.
+                        return MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( methodSymbol.ContainingType ),
+                            IdentifierName( methodSymbol.Name ) );
+                    }
+                    else
+                    {
+                        return IdentifierName( methodSymbol.Name );
+                    }
                 }
                 else
                 {
-                    return memberAccess.Update( memberAccess.Expression, memberAccess.OperatorToken, IdentifierName( methodSymbol.Name ) );
+                    throw new AssertionFailedException();
                 }
             }
 

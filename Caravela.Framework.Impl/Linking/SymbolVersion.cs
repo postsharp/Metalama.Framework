@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             return
                 this.AspectLayer == other.AspectLayer
-                && StructuralSymbolComparer.Instance.Equals( this.Symbol, other.Symbol );
+                && StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol );
         }
 
         public override bool Equals( object obj )
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Linking
 
         public override int GetHashCode()
         {
-            return StructuralSymbolComparer.Instance.GetHashCode( this.Symbol ) ^ (this.AspectLayer?.GetHashCode() ?? 0);
+            return StructuralSymbolComparer.Default.GetHashCode( this.Symbol ) ^ (this.AspectLayer?.GetHashCode() ?? 0);
         }
 
         public static bool operator ==( SymbolVersion left, SymbolVersion right )

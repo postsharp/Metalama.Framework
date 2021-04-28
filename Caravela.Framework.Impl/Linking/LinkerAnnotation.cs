@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
         /// <summary>
         /// Calls the semantic in the original order, before any transformation.
         /// </summary>
-        Original
+        Original,
     }
 
     /// <summary>

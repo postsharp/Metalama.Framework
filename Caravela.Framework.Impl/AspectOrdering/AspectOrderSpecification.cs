@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.AspectOrdering
 {
@@ -17,7 +18,12 @@ namespace Caravela.Framework.Impl.AspectOrdering
 
         public AspectOrderSpecification( AspectOrderAttribute attribute, Location? location )
         {
-            this.OrderedLayers = attribute.OrderedAspectLayers;
+            var attributeOrderedLayers = attribute.OrderedAspectLayers.ToList();
+
+            // User order of layers is opposite of internal order.
+            attributeOrderedLayers.Reverse();
+
+            this.OrderedLayers = attributeOrderedLayers;
             this.DiagnosticLocation = location;
         }
 
