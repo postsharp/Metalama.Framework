@@ -15,11 +15,6 @@ namespace Caravela.Framework.Impl.Pipeline
         /// when the user code change. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
         /// the order of layers.
         /// </summary>
-        /// <param name="Stages"></param>
-        /// <param name="AspectClasses"></param>
-        /// <param name="Layers"></param>
-        /// <param name="CompileTimeProject"></param>
-        /// <param name="CompileTimeProjectLoader"></param>
         private protected record PipelineConfiguration(
             ImmutableArray<PipelineStage> Stages,
             IReadOnlyList<AspectClassMetadata> AspectClasses,
