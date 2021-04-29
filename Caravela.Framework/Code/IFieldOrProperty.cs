@@ -42,6 +42,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         IFieldOrPropertyInvocation Base { get; }
         
+        /// <summary>
+        /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.
+        /// </summary>
+        /// <returns>A <see cref="FieldOrPropertyInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         FieldOrPropertyInfo ToFieldOrPropertyInfo();
     }

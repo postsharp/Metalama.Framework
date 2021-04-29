@@ -19,6 +19,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         TypeKind TypeKind { get; }
         
+        /// <summary>
+        /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
+        /// </summary>
+        /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         Type ToType();
     }

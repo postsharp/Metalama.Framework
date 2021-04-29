@@ -26,6 +26,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         MethodKind MethodKind { get; }
 
+        /// <summary>
+        /// Gets a <see cref="MethodBase"/> that represents the current method or constructor at run time.
+        /// </summary>
+        /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
          MethodBase ToMethodBase();
     }

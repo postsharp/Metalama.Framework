@@ -59,7 +59,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         IMethod? OverriddenMethod { get; }
 
-
+        /// <summary>
+        /// Gets a <see cref="MethodInfo"/> that represents the current method at run time.
+        /// </summary>
+        /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         MethodInfo ToMethodInfo();
     }

@@ -48,7 +48,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         IMember DeclaringMember { get; }
 
-        
+        /// <summary>
+        /// Gets a <see cref="ParameterInfo"/> that represents the current parameter at run time.
+        /// </summary>
+        /// <returns>A <see cref="ParameterInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         ParameterInfo ToParameterInfo();
     }

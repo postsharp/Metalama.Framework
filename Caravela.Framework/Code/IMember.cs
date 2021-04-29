@@ -62,7 +62,11 @@ namespace Caravela.Framework.Code
         /// within a type (which should not happen in C#).
         /// </summary>
         INamedType DeclaringType { get; }
-        
+ 
+        /// <summary>
+        /// Gets a <see cref="MemberInfo"/> that represents the current member at run time.
+        /// </summary>
+        /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         MemberInfo ToMemberInfo();
     }
