@@ -126,10 +126,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             var existingScope = node.GetScopeFromAnnotation();
-            if (existingScope == SymbolDeclarationScope.Unknown )
-            {
-                return node;
-            }
 
             if ( existingScope != SymbolDeclarationScope.Both )
             {

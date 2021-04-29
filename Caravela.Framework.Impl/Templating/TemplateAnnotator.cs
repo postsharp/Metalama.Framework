@@ -138,7 +138,7 @@ namespace Caravela.Framework.Impl.Templating
             else if ( symbol is IParameterSymbol )
             {
                 // Until we support template parameters and local functions, all parameters are parameters
-                // of expression lambdas, which are default-scoped.
+                // of expression lambdas, which are of unknown scope.
                 return SymbolDeclarationScope.Unknown;
             }
 
@@ -251,7 +251,18 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            return runtimeCount > 0 ? SymbolDeclarationScope.RunTimeOnly : compileTimeOnlyCount > 0 ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.Both;
+            if ( runtimeCount > 0 )
+            {
+                return SymbolDeclarationScope.RunTimeOnly;
+            }
+            else if (compileTimeOnlyCount > 0)
+            {
+                return SymbolDeclarationScope.CompileTimeOnly;
+            }
+            else
+            {
+                return SymbolDeclarationScope.Both;
+            }
         }
 
         private ScopeContextCookie WithScopeContext(ScopeContext scopeContext)
@@ -293,7 +304,12 @@ namespace Caravela.Framework.Impl.Templating
                     return transformedNode.AddScopeMismatchAnnotation();
                 }
 
-                return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                // the current expression can be anotated as unknown (f.e. parameters of lambda expression)
+                // that means it can be used as compile time and it doesn't need to be annotated as compileTime.
+                if ( transformedNode.GetScopeFromAnnotation() != SymbolDeclarationScope.Unknown )
+                {
+                    return transformedNode.AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
+                }
             }
 
             if ( transformedNode.HasScopeAnnotation() )

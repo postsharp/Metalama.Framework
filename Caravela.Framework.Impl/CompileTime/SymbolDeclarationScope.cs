@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         /// <summary>
         /// Using of the symbol is unknown yet. It can be used both at compile time or at run time.
-        /// This is typically for lambda expressions. The node is evaluated as unknown if at least one children is unknown
+        /// This is typically for parameters of lambda expressions. The node is evaluated as unknown if at least one children is unknown
         /// doesn't depends on other children.
         /// </summary>
         Unknown
