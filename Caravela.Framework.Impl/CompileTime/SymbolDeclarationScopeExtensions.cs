@@ -20,7 +20,8 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 SymbolDeclarationScope.RunTimeOnly => "run-time",
                 SymbolDeclarationScope.CompileTimeOnly => "compile-time",
-                SymbolDeclarationScope.Both => "default",
+                SymbolDeclarationScope.Both => "both",
+                SymbolDeclarationScope.Unknown => "unknown",
                 _ => throw new ArgumentOutOfRangeException( nameof(scope) )
             };
     }

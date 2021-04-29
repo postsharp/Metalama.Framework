@@ -45,6 +45,8 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolScopeClassifier = SymbolClassifier.GetInstance( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+
+            // add default values of scope
             this._currentScopeContext = ScopeContext.CreateHelperScope( SymbolDeclarationScope.Both );
         }
 
@@ -158,8 +160,8 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private bool IsTemplateMember( ISymbol symbol )
             => this._currentTemplateMember != null
-               && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember )
-                   || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
+               && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember ) 
+                    || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
 
         /// <summary>
         /// Determines if a node is of <c>dynamic</c> type.

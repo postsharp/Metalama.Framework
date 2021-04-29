@@ -339,11 +339,7 @@ namespace Caravela.Framework.Impl.Templating
             // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
             var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
 
-            var isDeclaredWithinTemplate = this.IsDeclaredWithinTemplate( identifierSymbol! );
-
-            // TODO: Perhaps the following condition is bad because the members or fields of the Aspect class
-            // that are called in the Template method should also be renamed.
-            if ( isDeclaredWithinTemplate )
+            if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
             {
                 if ( this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
@@ -388,19 +384,6 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return base.TransformArgument( node );
             }
-        }
-
-        protected override ExpressionSyntax TransformSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-        {
-            if (node.ExpressionBody != null)
-            {
-                foreach(var n in node.ExpressionBody.ChildNodes())
-                {
-                    continue;
-                }
-            }
-
-            return base.TransformSimpleLambdaExpression( node );
         }
 
         /// <summary>
@@ -921,11 +904,6 @@ namespace Caravela.Framework.Impl.Templating
 
                 return transformedInterpolation;
             }
-        }
-
-        public override SyntaxNode VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-        {
-            return base.VisitSimpleLambdaExpression( node );
         }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
