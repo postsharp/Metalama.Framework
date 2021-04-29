@@ -9,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Compile
         [TestTemplate]
         dynamic Template()
         {
-            Func<int, int> action = x => x + compileTime(1);
+            Func<int, int> action = compileTime(new  Func<int, int> (x => x + 1));
         
             var result = compileTime(1);
 
