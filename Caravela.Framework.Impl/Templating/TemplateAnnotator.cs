@@ -1123,5 +1123,13 @@ namespace Caravela.Framework.Impl.Templating
 
             return transformedNode.WithScopeAnnotationFrom( transformedNode.ElementType );
         }
+
+        public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
+        {
+            var annnotated = (BlockSyntax)this.Visit( node.Block )!;
+            this.RequireScope( annnotated, SymbolDeclarationScope.RunTimeOnly, "a 'try' statement" );
+
+            return node.WithBlock( annnotated )!.AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
+        }
     }
 }
