@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
+using System.Reflection;
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -30,5 +33,8 @@ namespace Caravela.Framework.Code
         /// as with a normal method.
         /// </summary>
         IMethod? Raiser { get; }
+        
+        [return: RunTimeOnly]
+        EventInfo ToEventInfo();
     }
 }

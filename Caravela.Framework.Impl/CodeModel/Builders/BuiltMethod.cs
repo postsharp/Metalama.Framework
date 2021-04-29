@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -32,6 +33,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 this.MethodBuilder.Parameters.AsBuilderList.Select( CodeElementLink.FromBuilder<IParameter, ParameterBuilder> ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
+
+        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+
+        System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
         public dynamic Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
 

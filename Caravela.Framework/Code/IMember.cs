@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
+using System.Reflection;
+
 namespace Caravela.Framework.Code
 {
     /// <summary>
@@ -59,5 +62,8 @@ namespace Caravela.Framework.Code
         /// within a type (which should not happen in C#).
         /// </summary>
         INamedType DeclaringType { get; }
+        
+        [return: RunTimeOnly]
+        MemberInfo ToMemberInfo();
     }
 }

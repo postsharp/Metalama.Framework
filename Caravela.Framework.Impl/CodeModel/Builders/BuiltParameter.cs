@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -31,5 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         [Memo]
         public IMember DeclaringMember => this.Compilation.Factory.GetCodeElement( this.ParameterBuilder.DeclaringMember );
+
+        public ParameterInfo ToParameterInfo() => throw new System.NotImplementedException();
+
     }
 }

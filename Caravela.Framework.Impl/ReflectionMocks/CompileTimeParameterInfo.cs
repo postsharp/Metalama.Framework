@@ -11,12 +11,12 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     {
         public IParameterSymbol ParameterSymbol { get; }
 
-        public ICodeElement ContainingMember { get; }
+        public ICodeElement DeclaringMember { get; }
 
-        public CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement containingMember )
+        public CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
         {
             this.ParameterSymbol = parameterSymbol;
-            this.ContainingMember = containingMember;
+            this.DeclaringMember = declaringMember;
         }
 
         ISymbol IReflectionMockCodeElement.Symbol => this.ParameterSymbol;

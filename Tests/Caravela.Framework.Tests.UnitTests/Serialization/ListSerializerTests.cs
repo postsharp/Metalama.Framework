@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         public ListSerializerTests()
         {
-            var os = new ObjectSerializers();
+            var os = new SyntaxSerializationService();
             this._serializer = new ListSerializer( os );
         }
 

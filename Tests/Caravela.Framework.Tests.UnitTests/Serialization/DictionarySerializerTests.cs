@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         public DictionarySerializerTests()
         {
-            this._serializer = new DictionarySerializer( new ObjectSerializers() );
+            this._serializer = new DictionarySerializer( new SyntaxSerializationService() );
         }
 
         [Fact]

@@ -16,15 +16,15 @@ namespace Caravela.Framework.Impl.Serialization
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class
     /// to support additional types.
     /// </summary>
-    internal class ObjectSerializers
+    internal class SyntaxSerializationService
     {
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new();
         private readonly ArraySerializer _arraySerializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ObjectSerializers"/> class.
+        /// Initializes a new instance of the <see cref="SyntaxSerializationService"/> class.
         /// </summary>
-        public ObjectSerializers()
+        public SyntaxSerializationService()
         {
             // Arrays, enums
             this._arraySerializer = new ArraySerializer( this );
@@ -68,8 +68,8 @@ namespace Caravela.Framework.Impl.Serialization
             this.RegisterSerializer( typeof(CompileTimeConstructorInfo), new CaravelaConstructorInfoSerializer( typeSerializer ) );
             this.RegisterSerializer( typeof(CompileTimeEventInfo), new CaravelaEventInfoSerializer( typeSerializer ) );
             this.RegisterSerializer( typeof(CompileTimeParameterInfo), new CaravelaParameterInfoSerializer( methodInfoSerializer ) );
-            this.RegisterSerializer( typeof(CaravelaReturnParameterInfoSerializer), new CaravelaReturnParameterInfoSerializer( methodInfoSerializer ) );
-            this.RegisterSerializer( typeof(CompileTimeLocationInfo), new CaravelaLocationInfoSerializer( this ) );
+            this.RegisterSerializer( typeof(CompileTimeReturnParameterInfo), new CaravelaReturnParameterInfoSerializer( methodInfoSerializer ) );
+            this.RegisterSerializer( typeof(CompileTimeFieldOrPropertyInfo), new CaravelaLocationInfoSerializer( this ) );
         }
 
         /// <summary>
@@ -83,7 +83,36 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="serializer">A new serializer that supports that type.</param>
         public void RegisterSerializer( Type type, ObjectSerializer serializer )
         {
-            this._serializers.TryAdd( type, serializer );
+            this._serializers[type] = serializer;
+        }
+
+        public ObjectSerializer? GetSerializer( object o  )
+        {
+            switch (o)
+            {
+                case Enum:
+                    return EnumSerializer.Instance;
+
+                case Array:
+                    return this._arraySerializer;
+                
+                default:
+                    var t = o.GetType();
+                    Type mainType;
+
+                    if ( t.IsGenericType )
+                    {
+                        mainType = t.GetGenericTypeDefinition();
+                    }
+                    else
+                    {
+                        mainType = t;
+                    }
+
+                    _ = this._serializers.TryGetValue( mainType, out var serializer );
+
+                    return serializer;
+            }
         }
 
         /// <summary>
@@ -92,38 +121,18 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="o">An object to serialize.</param>
         /// <returns>An expression that would create the object.</returns>
         /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
-        public ExpressionSyntax SerializeToRoslynCreationExpression( object? o )
+        public ExpressionSyntax Serialize( object? o )
         {
             if ( o == null )
             {
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
-            if ( o is Enum e )
-            {
-                return EnumSerializer.Serialize( e );
-            }
+            var serializer = this.GetSerializer( o );
 
-            if ( o is Array a )
+            if ( serializer == null )
             {
-                return this._arraySerializer.Serialize( a );
-            }
-
-            var t = o.GetType();
-            Type mainType;
-
-            if ( t.IsGenericType )
-            {
-                mainType = t.GetGenericTypeDefinition();
-            }
-            else
-            {
-                mainType = t;
-            }
-
-            if ( !this._serializers.TryGetValue( mainType, out var serializer ) )
-            {
-                throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( mainType );
+                throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( o.GetType() );
             }
 
             return serializer.SerializeObject( o );

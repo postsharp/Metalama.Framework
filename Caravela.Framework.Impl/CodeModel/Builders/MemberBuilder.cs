@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Accessibility = Caravela.Framework.Code.Accessibility;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -25,6 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAsync { get; set; }
 
         public INamedType DeclaringType { get; }
+
+        public MemberInfo ToMemberInfo() => throw new System.NotImplementedException();
 
         public Accessibility Accessibility { get; set; }
 

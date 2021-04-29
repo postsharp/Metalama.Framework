@@ -12,11 +12,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaStateMachineTests : ReflectionTestBase
     {
-        private readonly ObjectSerializers _objectSerializers;
+        private readonly SyntaxSerializationService _objectSerializers;
 
         public CaravelaStateMachineTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._objectSerializers = new ObjectSerializers();
+            this._objectSerializers = new SyntaxSerializationService();
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var serialized = this._objectSerializers.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
@@ -40,7 +40,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var serialized = this._objectSerializers.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 

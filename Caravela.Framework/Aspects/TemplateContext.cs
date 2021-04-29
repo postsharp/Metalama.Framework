@@ -54,6 +54,9 @@ namespace Caravela.Framework.Aspects
         [return: NotNullIfNotNull( "expression" )]
         public static T? compileTime<T>( T? expression ) => expression;
 
+        [TemplateKeyword]
+        public static T? runTime<T>( T? expression ) => expression;
+
         // Calls to pragma are purely syntactic, they are never executed. They are interpreted by the template compiler.
         [TemplateKeyword]
         public static ITemplateContextPragma pragma => null!;

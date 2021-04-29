@@ -37,6 +37,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
         [Theory]
         [FromDirectory( @"Templating\NamespaceExpansion" )]
         public Task NamespaceExpansion( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+        
+        [Theory]
+        [FromDirectory( @"Templating\Dynamic" )]
+        public Task Dynamic( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
         [FromDirectory( @"Templating\UnsupportedSyntax" )]

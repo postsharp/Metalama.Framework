@@ -13,11 +13,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaGenericsTests : ReflectionTestBase
     {
-        private readonly ObjectSerializers _objectSerializers;
+        private readonly SyntaxSerializationService _objectSerializers;
 
         public CaravelaGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._objectSerializers = new ObjectSerializers();
+            this._objectSerializers = new SyntaxSerializationService();
         }
 
         [Fact]
@@ -25,8 +25,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
-                    CompileTimeLocationInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
+            var serialized = this._objectSerializers.Serialize(
+                    CompileTimeFieldOrPropertyInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var serialized = this._objectSerializers.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
@@ -72,14 +72,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
 
             var serialized = this._objectSerializers
-                .SerializeToRoslynCreationExpression(
+                .Serialize(
                     CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
 
             var serialized2 = this._objectSerializers
-                .SerializeToRoslynCreationExpression( CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ) ) )
+                .Serialize( CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ) ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized2, info => Assert.Equal( "Target`1[T1]", info.ToString() ) );
@@ -90,14 +90,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var serialized = this._objectSerializers.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
 
-            var serialized2 = this._objectSerializers.SerializeToRoslynCreationExpression(
+            var serialized2 = this._objectSerializers.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 

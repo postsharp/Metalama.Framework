@@ -1,0 +1,4 @@
+{
+    var x = new System.Collections.Generic.List<System.String> { "a", "b", "c", "d" };
+    return default;
+}

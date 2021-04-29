@@ -31,6 +31,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         TypeKind IType.TypeKind => TypeKind.GenericParameter;
 
+        public Type ToType() => throw new NotImplementedException();
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public override ICodeElement? ContainingElement { get; }

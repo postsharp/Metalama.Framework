@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -20,7 +23,16 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo o )
         {
-            var methodBaseExpression = this._methodInfoSerializer.Serialize( new CompileTimeMethodInfo( o.Method ) );
+            ExpressionSyntax? methodBaseExpression;
+            switch ( o.DeclaringMember )
+            {
+                case Method method:
+                    methodBaseExpression = this._methodInfoSerializer.Serialize( new CompileTimeMethodInfo( method ) );
+                    break;
+                
+                default:
+                    throw new NotImplementedException();
+            }
 
             return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,

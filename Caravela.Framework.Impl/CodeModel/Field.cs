@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -47,8 +49,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IFieldOrPropertyInvocation Base => this.Invocation.Base;
 
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
+
+        public override MemberInfo ToMemberInfo() => new CompileTimeFieldOrPropertyInfo(this  );
     }
 }

@@ -17,13 +17,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class GreatGenericsTests : ReflectionTestBase
     {
-        private readonly ObjectSerializers _serializers;
+        private readonly SyntaxSerializationService _serializers;
         private readonly string _code;
         private readonly IEnumerable<INamedType> _topLevelTypes;
 
         public GreatGenericsTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._serializers = new ObjectSerializers();
+            this._serializers = new SyntaxSerializationService();
 
             this._code = @"
 class Origin<T1> { 
@@ -172,7 +172,7 @@ class User {
         {
             this.TestExpression<Type>(
                 context,
-                this._serializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( type ) ).ToString(),
+                this._serializers.Serialize( CompileTimeType.Create( type ) ).ToString(),
                 withResult,
                 expectedCode );
         }
@@ -181,7 +181,7 @@ class User {
         {
             this.TestExpression<MethodInfo>(
                 context,
-                this._serializers.SerializeToRoslynCreationExpression( CompileTimeMethodInfo.Create( method ) ).ToString(),
+                this._serializers.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
@@ -190,7 +190,7 @@ class User {
         {
             this.TestExpression<ConstructorInfo>(
                 context,
-                this._serializers.SerializeToRoslynCreationExpression( CompileTimeConstructorInfo.Create( method ) ).ToString(),
+                this._serializers.Serialize( CompileTimeConstructorInfo.Create( method ) ).ToString(),
                 withResult,
                 expectedCode );
         }
@@ -200,7 +200,7 @@ class User {
             this.TestExpression<T>(
                 context,
                 CaravelaPropertyInfoTests.StripLocationInfo(
-                    this._serializers.SerializeToRoslynCreationExpression( CompileTimeLocationInfo.Create( property ) ).ToString() ),
+                    this._serializers.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
                 withResult,
                 expectedCode );
         }
@@ -209,7 +209,7 @@ class User {
         {
             this.TestExpression<EventInfo>(
                 context,
-                this._serializers.SerializeToRoslynCreationExpression( CompileTimeEventInfo.Create( @event ) ).ToString(),
+                this._serializers.Serialize( CompileTimeEventInfo.Create( @event ) ).ToString(),
                 withResult,
                 expectedCode );
         }

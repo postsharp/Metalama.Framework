@@ -10,7 +10,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public class NullableSerializerTests
     {
-        private readonly ObjectSerializers _serializers = new();
+        private readonly SyntaxSerializationService _serializers = new();
 
         [Fact]
         public void TestPrimitiveNullables()
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization<T>( string expected, T? o )
         {
-            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

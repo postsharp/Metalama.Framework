@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace Caravela.Framework.Impl.Serialization
 {
     /// <summary>
-    /// An object serializer can be registered with <see cref="ObjectSerializers"/> to serialize objects of a specific type into Roslyn creation expressions.
+    /// An object serializer can be registered with <see cref="SyntaxSerializationService"/> to serialize objects of a specific type into Roslyn creation expressions.
     /// </summary>
     internal abstract class ObjectSerializer
     {

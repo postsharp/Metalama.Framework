@@ -60,7 +60,6 @@ namespace Caravela.Framework.Impl.Templating
         public static bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
-            bool reportDiagnosticsToInitialCompilation,
             IDiagnosticAdder diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {

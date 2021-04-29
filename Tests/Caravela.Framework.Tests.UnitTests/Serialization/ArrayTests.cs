@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
     public class ArrayTests
     {
-        private readonly ObjectSerializers _serializers = new();
+        private readonly SyntaxSerializationService _serializers = new();
 
         [Fact]
         public void TestBasicArray()
@@ -48,7 +48,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization( string expected, object o )
         {
-            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

@@ -3,8 +3,10 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
 using TypeKind = Caravela.Framework.Code.TypeKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -26,6 +28,8 @@ namespace Caravela.Framework.Impl.CodeModel
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
         public abstract TypeKind TypeKind { get; }
+
+        public Type ToType() => new CompileTimeType( this.Symbol );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

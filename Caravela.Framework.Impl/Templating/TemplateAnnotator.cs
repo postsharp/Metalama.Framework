@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Aspects;
 using Caravela.Framework.DesignTime.Contracts;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Project;
@@ -15,6 +17,72 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
 {
+    internal class TemplateMemberClassifier
+    {
+        private readonly SemanticAnnotationMap _semanticAnnotationMap;
+        private readonly ITypeSymbol _templateContextType;
+
+        public TemplateMemberClassifier(
+            Compilation compilation,
+            SemanticAnnotationMap semanticAnnotationMap )
+        {
+            this._semanticAnnotationMap = semanticAnnotationMap;
+
+            var reflectionMapper = ReflectionMapper.GetInstance( compilation );
+            this._templateContextType = reflectionMapper.GetTypeSymbol( typeof(TemplateContext) );
+        }
+
+        public bool IsRunTimeMethod( ISymbol symbol )
+            => symbol.Name == nameof(TemplateContext.runTime) &&
+               // TODO: symbol comparison does not work here.
+               symbol.ContainingType.GetDocumentationCommentId() == this._templateContextType.GetDocumentationCommentId();
+
+        public bool IsRunTimeMethod( SyntaxNode node )
+            => this._semanticAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
+
+        /// <summary>
+        /// Determines if a node is of <c>dynamic</c> type.
+        /// </summary>
+        /// <param name="originalNode"></param>
+        /// <returns></returns>
+        public bool ReturnsRunTimeOnlyValue( SyntaxNode originalNode )
+        {
+            if ( this._semanticAnnotationMap.GetExpressionType( originalNode ) is IDynamicTypeSymbol )
+            {
+                return true;
+            }
+            else
+            {
+                if ( originalNode is InvocationExpressionSyntax invocation
+                     && this._semanticAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol method )
+                {
+                    return method.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(RunTimeOnlyAttribute));
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines if a symbol represents a call to <c>proceed()</c>.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public bool IsProceed( SyntaxNode node )
+        {
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+            if ( symbol == null )
+            {
+                return false;
+            }
+
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
+        }
+    }
+
     // ReSharper disable TailRecursiveCall
 
     /// <summary>
@@ -25,6 +93,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private TemplateMemberClassifier _templateMemberClassifier;
 
         /// <summary>
         /// Scope of local variables.
@@ -58,6 +127,9 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolScopeClassifier = SymbolClassifier.GetInstance( compilation );
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+
+            var reflectionMapper = ReflectionMapper.GetInstance( compilation );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compilation, semanticAnnotationMap );
         }
 
         public bool Success { get; private set; } = true;
@@ -146,6 +218,13 @@ namespace Caravela.Framework.Impl.Templating
                 return SymbolDeclarationScope.RunTimeOnly;
             }
 
+            // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
+            // return is run-time-only.
+            if ( this._templateMemberClassifier.IsRunTimeMethod( symbol ) )
+            {
+                return SymbolDeclarationScope.RunTimeOnly;
+            }
+
             // Aspect members are processed as compile-time-only by the template compiler even if some members can also
             // be called from run-time code.
             if ( this.IsTemplateMember( symbol ) )
@@ -168,13 +247,6 @@ namespace Caravela.Framework.Impl.Templating
                    || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
 
         /// <summary>
-        /// Determines if a node is of <c>dynamic</c> type.
-        /// </summary>
-        /// <param name="originalNode"></param>
-        /// <returns></returns>
-        private bool IsDynamic( SyntaxNode originalNode ) => this._semanticAnnotationMap.GetExpressionType( originalNode ) is IDynamicTypeSymbol;
-
-        /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.
         /// </summary>
         /// <param name="node"></param>
@@ -187,7 +259,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // If the node is dynamic, it is run-time only.
-            if ( this.IsDynamic( node ) )
+            if ( this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node ) )
             {
                 return SymbolDeclarationScope.RunTimeOnly;
             }
@@ -306,7 +378,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._forceCompileTimeOnlyExpression )
             {
                 if ( transformedNode.GetScopeFromAnnotation() == SymbolDeclarationScope.RunTimeOnly ||
-                     this.IsDynamic( transformedNode ) )
+                     this._templateMemberClassifier.ReturnsRunTimeOnlyValue( transformedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
@@ -386,7 +458,7 @@ namespace Caravela.Framework.Impl.Templating
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
-                          (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) && this.IsDynamic( node ) )
+                          (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) && this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node ) )
                 {
                     // Annotate dynamic members differently for syntax coloring.
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
@@ -478,6 +550,11 @@ namespace Caravela.Framework.Impl.Templating
                 transformedArgumentList = transformedArgumentList.WithOpenParenToken( node.ArgumentList.OpenParenToken );
                 transformedArgumentList = transformedArgumentList.WithCloseParenToken( node.ArgumentList.CloseParenToken );
                 updatedInvocation = node.Update( transformedExpression, transformedArgumentList );
+
+                if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
+                {
+                    updatedInvocation = updatedInvocation.AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
+                }
             }
 
             updatedInvocation = updatedInvocation.WithTriviaFrom( node );
@@ -980,7 +1057,7 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
             var expressionScope = annotatedExpression.GetScopeFromAnnotation();
 
-            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( annotatedExpression ) )
+            if ( expressionScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.ReturnsRunTimeOnlyValue( annotatedExpression ) )
             {
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
             }
@@ -1051,7 +1128,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private void RequireScope( SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason )
         {
-            if ( existingScope == SymbolDeclarationScope.CompileTimeOnly && this.IsDynamic( node ) )
+            if ( existingScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node ) )
             {
                 existingScope = SymbolDeclarationScope.RunTimeOnly;
             }

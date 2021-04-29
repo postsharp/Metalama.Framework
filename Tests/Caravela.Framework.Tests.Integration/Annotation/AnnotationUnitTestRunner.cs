@@ -38,7 +38,6 @@ namespace Caravela.Framework.Tests.Integration.Annotation
             var templateCompilerSuccess = TemplateCompiler.TryAnnotate(
                 templateSyntaxRoot,
                 templateSemanticModel,
-                false,
                 diagnostics,
                 out var annotatedTemplateSyntax );
 

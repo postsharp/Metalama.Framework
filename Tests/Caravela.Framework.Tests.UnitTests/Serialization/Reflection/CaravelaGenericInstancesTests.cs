@@ -13,11 +13,11 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaGenericInstancesTests : ReflectionTestBase
     {
-        private readonly ObjectSerializers _objectSerializers;
+        private readonly SyntaxSerializationService _objectSerializers;
 
         public CaravelaGenericInstancesTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._objectSerializers = new ObjectSerializers();
+            this._objectSerializers = new SyntaxSerializationService();
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Fields;
 
-            var serialized = this._objectSerializers.SerializeToRoslynCreationExpression( CompileTimeType.Create( allProperties.Single().Type ) )
+            var serialized = this._objectSerializers.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );

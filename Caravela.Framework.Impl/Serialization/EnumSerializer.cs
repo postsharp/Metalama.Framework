@@ -9,10 +9,16 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal static class EnumSerializer
+    internal class EnumSerializer : ObjectSerializer
     {
         private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
+        public static EnumSerializer Instance { get; } = new();
+
+        private EnumSerializer() { }
+
+        public override ExpressionSyntax SerializeObject( object o ) => Serialize( (Enum) o );
+        
         public static ExpressionSyntax Serialize( Enum o )
         {
             var enumType = o.GetType();
@@ -37,5 +43,7 @@ namespace Caravela.Framework.Impl.Serialization
                         SyntaxKind.NumericLiteralExpression,
                         literal ) ) );
         }
+
+        
     }
 }

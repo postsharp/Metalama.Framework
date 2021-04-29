@@ -12,9 +12,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class ListSerializer : ObjectSerializer
     {
-        private readonly ObjectSerializers _serializers;
+        private readonly SyntaxSerializationService _serializers;
 
-        public ListSerializer( ObjectSerializers serializers )
+        public ListSerializer( SyntaxSerializationService serializers )
         {
             this._serializers = serializers;
         }
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
             foreach ( var obj in (IEnumerable) o )
             {
                 ThrowIfStackTooDeep( obj );
-                lt.Add( this._serializers.SerializeToRoslynCreationExpression( obj ) );
+                lt.Add( this._serializers.Serialize( obj ) );
             }
 
             return ObjectCreationExpression(

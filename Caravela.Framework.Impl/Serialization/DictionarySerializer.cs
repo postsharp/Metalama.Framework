@@ -13,9 +13,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DictionarySerializer : ObjectSerializer
     {
-        private readonly ObjectSerializers _serializers;
+        private readonly SyntaxSerializationService _serializers;
 
-        public DictionarySerializer( ObjectSerializers serializers )
+        public DictionarySerializer( SyntaxSerializationService serializers )
         {
             this._serializers = serializers;
         }
@@ -133,9 +133,9 @@ namespace Caravela.Framework.Impl.Serialization
                         SeparatedList<ExpressionSyntax>(
                             new SyntaxNodeOrToken[]
                             {
-                                this._serializers.SerializeToRoslynCreationExpression( key ),
+                                this._serializers.Serialize( key ),
                                 Token( SyntaxKind.CommaToken ),
-                                this._serializers.SerializeToRoslynCreationExpression( value )
+                                this._serializers.Serialize( value )
                             } ) ) );
             }
 

@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         public CaravelaPropertyInfoTests( ITestOutputHelper helper ) : base( helper )
         {
-            this._caravelaLocationInfoSerializer = new CaravelaLocationInfoSerializer( new ObjectSerializers() );
+            this._caravelaLocationInfoSerializer = new CaravelaLocationInfoSerializer( new SyntaxSerializationService() );
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( (Property) property ) ).ToString();
+            var serialized = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeFieldOrPropertyInfo( (Property) property ) ).ToString();
 
             this.AssertEqual(
                 @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new System.Type[]{System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
@@ -142,7 +142,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
-            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( property ) ).ToString();
+            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
 
             return actual;
         }
@@ -157,7 +157,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeLocationInfo( property ) ).ToString();
+            var actual = this._caravelaLocationInfoSerializer.Serialize( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
 
             return actual;
         }

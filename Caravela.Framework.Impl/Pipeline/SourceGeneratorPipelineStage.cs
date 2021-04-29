@@ -76,7 +76,8 @@ namespace Caravela.Framework.Impl.Pipeline
                                 diagnostics,
                                 new LinkerIntroductionNameProvider(),
                                 lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
-                                syntaxFactory );
+                                syntaxFactory,
+                                this.PipelineProperties.ServiceProvider);
 
                             classDeclaration = classDeclaration.AddMembers(
                                 memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );

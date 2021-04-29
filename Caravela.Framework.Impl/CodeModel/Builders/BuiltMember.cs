@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Links;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -34,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public bool IsAsync => this.MemberBuilder.IsAsync;
 
         public INamedType DeclaringType => this.Compilation.Factory.GetCodeElement( this.MemberBuilder.DeclaringType );
+
+        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         IMember ICodeElementLink<IMember>.GetForCompilation( CompilationModel compilation ) => (IMember) this.GetForCompilation( compilation );
 

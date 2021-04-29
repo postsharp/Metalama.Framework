@@ -10,11 +10,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class ArraySerializer
+    internal class ArraySerializer : ObjectSerializer
     {
-        private readonly ObjectSerializers _serializers;
+        private readonly SyntaxSerializationService _serializers;
 
-        public ArraySerializer( ObjectSerializers serializers )
+        public ArraySerializer( SyntaxSerializationService serializers )
         {
             this._serializers = serializers;
         }
@@ -33,7 +33,7 @@ namespace Caravela.Framework.Impl.Serialization
             foreach ( var o in array )
             {
                 ObjectSerializer.ThrowIfStackTooDeep( o );
-                lt.Add( this._serializers.SerializeToRoslynCreationExpression( o ) );
+                lt.Add( this._serializers.Serialize( o ) );
             }
 
             return ArrayCreationExpression(
@@ -45,5 +45,7 @@ namespace Caravela.Framework.Impl.Serialization
                         SeparatedList( lt ) ) )
                 .NormalizeWhitespace();
         }
+
+        public override ExpressionSyntax SerializeObject( object o ) => this.Serialize( (Array) o );
     }
 }

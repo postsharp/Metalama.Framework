@@ -7,10 +7,12 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
+    
     internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CompileTimeParameterInfo>
     {
         private readonly CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;
@@ -22,7 +24,7 @@ namespace Caravela.Framework.Impl.Serialization
 
         public override ExpressionSyntax Serialize( CompileTimeParameterInfo o )
         {
-            var container = o.ContainingMember;
+            var container = o.DeclaringMember;
             var containerAsMember = container as IMember;
             var method = containerAsMember as Method;
             var property = containerAsMember as Property;

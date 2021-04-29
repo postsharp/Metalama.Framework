@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
             this._compilation = compilation;
         }
 
-        public ObjectSerializers Serializers { get; } = new();
+        public SyntaxSerializationService Serializers { get; } = new();
 
         private Compilation RoslynCompilation => this._compilation.RoslynCompilation;
 

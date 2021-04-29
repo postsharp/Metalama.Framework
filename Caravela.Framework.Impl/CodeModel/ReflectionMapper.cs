@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <returns></returns>
         public NameSyntax GetTypeNameSyntax( Type type )
             => this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
-
+        
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
             if ( type is CompileTimeType compileTimeType )

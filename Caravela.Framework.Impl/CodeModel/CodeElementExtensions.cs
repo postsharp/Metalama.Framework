@@ -221,7 +221,7 @@ namespace Caravela.Framework.Impl.CodeModel
         {
             if ( value.IsAssigned )
             {
-                return compilation.Factory.Serializers.SerializeToRoslynCreationExpression( value.Value );
+                return compilation.Factory.Serializers.Serialize( value.Value );
             }
 
             return null;

@@ -5,6 +5,7 @@ using Caravela.Framework.Impl;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Caravela.TestFramework;
@@ -32,6 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
 
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
+        private SyntaxSerializationService _syntaxSerializationService = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -167,7 +169,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             return result;
         }
 
-        private static TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
+        private  TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -208,7 +210,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
                     LinkerAnnotationOrder.Default,
                     ReflectionMapper.GetInstance( compilation.RoslynCompilation ) ),
                 lexicalScope,
-                diagnostics );
+                diagnostics,
+                this._syntaxSerializationService);
         }
     }
 }

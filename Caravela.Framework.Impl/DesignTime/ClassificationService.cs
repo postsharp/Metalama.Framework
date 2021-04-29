@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             var diagnostics = new DiagnosticList();
 
-            _ = TemplateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, false, diagnostics, out var annotatedSyntaxRoot );
+            _ = TemplateCompiler.TryAnnotate( semanticModel.SyntaxTree.GetRoot(), semanticModel, diagnostics, out var annotatedSyntaxRoot );
 
             if ( annotatedSyntaxRoot != null )
             {

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -42,6 +43,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public INamedType DeclaringType => this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType );
+
+        public abstract MemberInfo ToMemberInfo();
 
         protected Member( CompilationModel compilation ) : base( compilation ) { }
 

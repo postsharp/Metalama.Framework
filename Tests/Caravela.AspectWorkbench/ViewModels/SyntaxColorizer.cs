@@ -115,15 +115,21 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             foreach ( var range in ranges )
             {
-                Color foreground, background;
-                FontWeight fontWeight;
+                Color foreground = Colors.Black, background;
+                var fontWeight = FontWeights.Normal;
+                var fontStyle = FontStyles.Normal;
+
                 var category = compileTimeSpans?.GetCategory( range.TextSpan ) ?? TextSpanClassification.Default;
 
                 // Choose foreground.
                 switch ( category )
                 {
-                    case TextSpanClassification.TemplateKeyword:
                     case TextSpanClassification.CompileTimeVariable:
+                        fontStyle = FontStyles.Italic;
+
+                        break;
+
+                    case TextSpanClassification.TemplateKeyword:
                     case TextSpanClassification.Dynamic:
                         foreground = Colors.Fuchsia;
                         fontWeight = FontWeights.Heavy;
@@ -142,7 +148,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         }
 
                         fontWeight = FontWeights.Normal;
-
+                        
                         break;
                 }
 
@@ -168,7 +174,8 @@ namespace Caravela.AspectWorkbench.ViewModels
                     Foreground = new SolidColorBrush( foreground ),
                     Background = new SolidColorBrush( background ),
                     ToolTip = range.ClassificationType,
-                    FontWeight = fontWeight
+                    FontWeight = fontWeight,
+                    FontStyle = fontStyle
                 };
 
                 ToolTipService.SetShowOnDisabled( run, true );

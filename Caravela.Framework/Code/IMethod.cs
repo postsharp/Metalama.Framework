@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Caravela.Framework.Code
 {
@@ -56,5 +58,9 @@ namespace Caravela.Framework.Code
         /// Gets the base method that is overridden by the current method.
         /// </summary>
         IMethod? OverriddenMethod { get; }
+
+
+        [return: RunTimeOnly]
+        MethodInfo ToMethodInfo();
     }
 }

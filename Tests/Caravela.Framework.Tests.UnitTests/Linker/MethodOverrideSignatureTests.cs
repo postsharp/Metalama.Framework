@@ -38,7 +38,7 @@ class T
 ";
 
             var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( this.ServiceProvider,linkerInput );
             var result = linker.ToResult();
 
             var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
@@ -73,7 +73,7 @@ class T
 ";
 
             var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( this.ServiceProvider,linkerInput );
             var result = linker.ToResult();
 
             var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
@@ -110,7 +110,7 @@ class T
 ";
 
             var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( this.ServiceProvider,linkerInput );
             var result = linker.ToResult();
 
             var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();
@@ -147,7 +147,7 @@ class T
 ";
 
             var linkerInput = CreateLinkerInput( code );
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( this.ServiceProvider,linkerInput );
             var result = linker.ToResult();
 
             var transformedText = GetCleanCompilation( result.Compilation ).SyntaxTrees.Single().GetNormalizedText();

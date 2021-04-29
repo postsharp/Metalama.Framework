@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
     public class ObjectSerializersTests
     {
-        private readonly ObjectSerializers _serializers = new();
+        private readonly SyntaxSerializationService _serializers = new();
 
         [Fact]
         public void TestInt()
@@ -52,14 +52,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 {
                     var o = new List<object>();
                     o.Add( o );
-                    this._serializers.SerializeToRoslynCreationExpression( o );
+                    this._serializers.Serialize( o );
                 } );
         }
 
         [Fact]
         public void TestUnsupportedAnonymousType()
         {
-            Assert.Throws<InvalidUserCodeException>( () => this._serializers.SerializeToRoslynCreationExpression( new { A = "F" } ) );
+            Assert.Throws<InvalidUserCodeException>( () => this._serializers.Serialize( new { A = "F" } ) );
         }
 
         [Fact]
@@ -70,7 +70,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
 
         private void AssertSerialization<T>( string expected, T? o )
         {
-            var creationExpression = this._serializers.SerializeToRoslynCreationExpression( o ).NormalizeWhitespace().ToString();
+            var creationExpression = this._serializers.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
 

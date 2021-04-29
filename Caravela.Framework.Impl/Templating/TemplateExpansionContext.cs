@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,13 +25,15 @@ namespace Caravela.Framework.Impl.Templating
             ICompilation compilation,
             IProceedImpl proceedImpl,
             TemplateExpansionLexicalScope lexicalScope,
-            DiagnosticSink diagnosticSink )
+            DiagnosticSink diagnosticSink,
+            SyntaxSerializationService syntaxSerializationService )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
             this.Compilation = compilation;
             this.ProceedImplementation = proceedImpl;
             this.DiagnosticSink = diagnosticSink;
+            this.SyntaxSerializationService = syntaxSerializationService;
             this.LexicalScope = lexicalScope;
             Invariant.Assert( diagnosticSink.DefaultScope != null );
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
@@ -43,6 +46,8 @@ namespace Caravela.Framework.Impl.Templating
         public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
+        
+        public SyntaxSerializationService SyntaxSerializationService { get; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {

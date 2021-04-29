@@ -88,7 +88,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
                 {
-                    _ = TemplateCompiler.TryAnnotate( node, this._context.SemanticModel, true, this, out _ );
+                    _ = TemplateCompiler.TryAnnotate( node, this._context.SemanticModel, this, out _ );
                 }
                 else
                 {
