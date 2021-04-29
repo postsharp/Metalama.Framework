@@ -11,12 +11,38 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
     {
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
-            var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+            {
+                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+                advice.Builder.Name = "IntroducedMethod_Parameters";
+                advice.Builder.AddParameter("x", typeof(int));
+                advice.Builder.AddParameter("y", typeof(int));
+            }
 
-            advice.Builder.Name = "IntroducedMethod";
-            advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
-            advice.Builder.AddParameter("x", typeof(int));
-            advice.Builder.AddParameter("y", typeof(int));
+            {
+                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+                advice.Builder.Name = "IntroducedMethod_ReturnType";
+                advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
+            }
+
+            {
+                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+                advice.Builder.Name = "IntroducedMethod_Accessibility";
+                advice.Builder.Accessibility = Accessibility.Private;
+            }
+
+            {
+                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+                advice.Builder.Name = "IntroducedMethod_IsStatic";
+                advice.Builder.IsStatic = true;
+            }
+
+            {
+                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
+                advice.Builder.Name = "IntroducedMethod_IsVirtual";
+                advice.Builder.IsVirtual = true;
+            }
+
+            // TODO: Other members.
         }
 
         [IntroduceMethodTemplate]

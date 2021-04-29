@@ -1,0 +1,4 @@
+// Compilation error. Code not generated.
+// Error CRA0002 on `TargetClass`: `The aspect 'IntroductionAttribute' cannot introduce member 'ExistingMethod' into type 'TargetClass' because it is already defined in type 'DerivedClass' and is sealed.`
+
+;

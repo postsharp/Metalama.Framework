@@ -7,9 +7,26 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl
 {
-    internal record AspectInstanceResult(
-        bool Success,
-        ImmutableDiagnosticList Diagnostics,
-        IReadOnlyList<IAdvice> Advices,
-        IReadOnlyList<IAspectSource> AspectSources );
+    internal class AspectInstanceResult
+    {
+        public bool Success { get; }
+
+        public ImmutableDiagnosticList Diagnostics { get; }
+
+        public IReadOnlyList<IAdvice> Advices { get; }
+
+        public IReadOnlyList<IAspectSource> AspectSources { get; }
+
+        public AspectInstanceResult(
+            bool success,
+            ImmutableDiagnosticList diagnostics,
+            IReadOnlyList<IAdvice> advices,
+            IReadOnlyList<IAspectSource> aspectSources )
+        {
+            this.Success = success;
+            this.Diagnostics = diagnostics;
+            this.Advices = advices;
+            this.AspectSources = aspectSources;
+        }
+    }
 }

@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public List<string>? AspectTypes { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of all project references (specified by name) of the compile-time project.
+        /// Gets or sets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
         public List<string>? References { get; set; }
 

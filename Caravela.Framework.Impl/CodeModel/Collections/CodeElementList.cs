@@ -14,12 +14,15 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
         where TCodeElement : class, ICodeElement
         where TSource : ICodeElementLink<TCodeElement>
     {
-        private readonly CompilationModel? _compilation;
         private volatile TCodeElement?[]? _targetItems;
+
+        internal ICodeElement? ContainingElement { get; }
 
         protected ImmutableArray<TSource> SourceItems { get; }
 
-        protected CodeElementList( IEnumerable<TSource> sourceItems, CompilationModel compilation )
+        public CompilationModel Compilation => (CompilationModel) this.ContainingElement.AssertNotNull().Compilation;
+
+        protected CodeElementList( ICodeElement? containingElement, IEnumerable<TSource> sourceItems )
         {
             ImmutableArray<TSource>.Builder? builder;
             bool canMoveToImmutable;
@@ -45,7 +48,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
             }
 
             this.SourceItems = canMoveToImmutable ? builder.MoveToImmutable() : builder.ToImmutable();
-            this._compilation = compilation;
+            this.ContainingElement = containingElement;
         }
 
         /// <summary>
@@ -84,7 +87,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
                 if ( targetItem == null )
                 {
-                    targetItem = this.SourceItems[index].GetForCompilation( this._compilation! );
+                    targetItem = this.SourceItems[index].GetForCompilation( this.Compilation );
                     _ = Interlocked.CompareExchange( ref targetItems[index], targetItem, null );
                 }
 

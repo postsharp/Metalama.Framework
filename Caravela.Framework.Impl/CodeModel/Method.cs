@@ -32,8 +32,8 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IGenericParameterList GenericParameters
             => new GenericParameterList(
-                this.MethodSymbol.TypeParameters.Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ),
-                this.Compilation );
+                this,
+                this.MethodSymbol.TypeParameters.Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
 
         public override CodeElementKind ElementKind => CodeElementKind.Method;
 

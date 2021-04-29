@@ -9,6 +9,6 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 {
     internal class EventList : MemberList<IEvent, MemberLink<IEvent>>, IEventList
     {
-        public EventList( IEnumerable<MemberLink<IEvent>> sourceItems, CompilationModel compilation ) : base( sourceItems, compilation ) { }
+        public EventList( NamedType containingElement, IEnumerable<MemberLink<IEvent>> sourceItems ) : base( containingElement, sourceItems ) { }
     }
 }

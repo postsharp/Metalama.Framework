@@ -32,6 +32,7 @@ namespace Caravela.Framework.Impl.Pipeline
         {
             var transformations = pipelineStepResult.Compilation.GetAllObservableTransformations();
             DiagnosticSink diagnostics = new();
+            var syntaxFactory = ReflectionMapper.GetInstance( input.PartialCompilation.Compilation );
 
             var additionalSyntaxTrees = new List<IntroducedSyntaxTree>();
 
@@ -74,7 +75,8 @@ namespace Caravela.Framework.Impl.Pipeline
                             var introductionContext = new MemberIntroductionContext(
                                 diagnostics,
                                 new LinkerIntroductionNameProvider(),
-                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ) );
+                                lexicalScopeFactory.GetLexicalScope( memberIntroduction ),
+                                syntaxFactory );
 
                             classDeclaration = classDeclaration.AddMembers(
                                 memberIntroduction.GetIntroducedMembers( introductionContext ).Select( m => m.Syntax ).ToArray() );

@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the full path of system assemblies (.NET Standard and Roslyn). 
         /// </summary>
         public ImmutableArray<string> SystemAssemblyPaths { get; }
-        
+
         /// <summary>
         /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
         /// </summary>
@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.CompileTime
             this.SystemAssemblyNames = this.SystemAssemblyPaths
                 .Select( Path.GetFileNameWithoutExtension )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-            
+
             this.StandardAssemblyNames = this.CaravelaAssemblyNames
                 .Concat( this.SystemAssemblyPaths )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );

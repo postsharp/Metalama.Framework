@@ -14,8 +14,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal abstract class MemberBuilder : CodeElementBuilder, IMemberBuilder, IMemberIntroduction, IObservableTransformation
     {
-        protected Advice ParentAdvice { get; }
-
         public bool IsSealed { get; set; }
 
         public bool IsReadOnly { get; set; }
@@ -42,9 +40,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public sealed override ICodeElement? ContainingElement => this.DeclaringType;
 #pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
-        public MemberBuilder( Advice parentAdvice, INamedType declaringType, string name )
+        public MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
         {
-            this.ParentAdvice = parentAdvice;
             this.DeclaringType = declaringType;
             this.Name = name;
         }

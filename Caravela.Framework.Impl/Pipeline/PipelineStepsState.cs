@@ -34,6 +34,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public ImmutableDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
 
+        public IDiagnosticAdder DiagnosticAdder => this._diagnostics;
+
         public IReadOnlyList<IAspectSource> ExternalAspectSources => new[] { this._overflowAspectSource };
 
         public PipelineStepsState(

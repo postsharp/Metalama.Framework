@@ -37,15 +37,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => CodeElementKind.GenericParameter;
 
-        public GenericParameterBuilder( IMethod containingMethod, IGenericParameter template )
+        public GenericParameterBuilder( MethodBuilder containingMethod, IGenericParameter template ) : base( containingMethod.ParentAdvice )
         {
             this.ContainingElement = containingMethod;
             this._template = template;
         }
 
+        // TODO: How to implement this?
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         {
-            throw new NotImplementedException();
+            return this.Name;
         }
     }
 }

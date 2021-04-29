@@ -26,20 +26,20 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethodList LocalFunctions
             => new MethodList(
+                this,
                 this.MethodSymbol.DeclaringSyntaxReferences
                     .Select( r => r.GetSyntax() )
                     /* don't descend into nested local functions */
                     .SelectMany( n => n.DescendantNodes( c => c == n || c is not LocalFunctionStatementSyntax ) )
                     .OfType<LocalFunctionStatementSyntax>()
                     .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
-                    .Select( s => new MemberLink<IMethod>( s ) ),
-                this.Compilation );
+                    .Select( s => new MemberLink<IMethod>( s ) ) );
 
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
-                this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>( p ) ),
-                this.Compilation );
+                this,
+                this.MethodSymbol.Parameters.Select( p => CodeElementLink.FromSymbol<IParameter>( p ) ) );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

@@ -4,6 +4,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -14,7 +15,12 @@ namespace Caravela.Framework.Impl.Advices
 {
     internal static class AdviceAttributeFactory
     {
-        public static IAdvice CreateAdvice<T>( this AttributeData attribute, AspectInstance aspect, T declaration, ICodeElement templateMethod )
+        public static IAdvice CreateAdvice<T>(
+            this AttributeData attribute,
+            AspectInstance aspect,
+            IDiagnosticAdder diagnosticAdder,
+            T declaration,
+            ICodeElement templateMethod )
             where T : ICodeElement
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -56,21 +62,22 @@ namespace Caravela.Framework.Impl.Advices
             {
                 case nameof(IntroduceMethodAttribute):
                     {
-                        var advice = new IntroduceMethodAdvice( aspect, (INamedType) declaration, (IMethod) templateMethod, aspectLinkerOptions );
+                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
+
+                        var advice = new IntroduceMethodAdvice(
+                            aspect,
+                            (INamedType) declaration,
+                            (IMethod) templateMethod,
+                            scope,
+                            conflictBehavior,
+                            aspectLinkerOptions );
+
+                        advice.Initialize( diagnosticAdder );
 
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
                             advice.Builder.Name = name;
-                        }
-
-                        if ( TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out _ ) )
-                        {
-                            // TODO: handle scope.
-                        }
-
-                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsStatic), out var isStatic ) )
-                        {
-                            advice.Builder.IsStatic = isStatic;
                         }
 
                         if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
@@ -83,9 +90,9 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Visibility), out var visibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
                         {
-                            advice.Builder.Accessibility = visibility;
+                            advice.Builder.Accessibility = accessibility;
                         }
 
                         advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;

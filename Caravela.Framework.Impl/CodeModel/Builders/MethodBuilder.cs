@@ -6,7 +6,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -21,6 +20,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public ParameterBuilderList Parameters { get; } = new();
 
         public GenericParameterBuilderList GenericParameters { get; } = new();
+
+        public IMethod? OverriddenMethod { get; set; }
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
@@ -92,11 +93,16 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                     RefKind.None );
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        // TODO: #(28532) Implement properly.
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        {
+            return this.Name;
+        }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
 
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
@@ -110,9 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         ? new[]
                         {
                             ReturnStatement(
-                                LiteralExpression(
-                                    SyntaxKind.DefaultLiteralExpression,
-                                    Token( SyntaxKind.DefaultKeyword ) ) )
+                                DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ) ) )
                         }
                         : null );
 
@@ -127,7 +131,5 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         dynamic IMethodInvocation.Invoke( dynamic? instance, params dynamic[] args ) => throw new NotImplementedException();
-
-        public IMethod? OverriddenMethod => throw new NotImplementedException();
     }
 }

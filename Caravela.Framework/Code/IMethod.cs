@@ -48,10 +48,13 @@ namespace Caravela.Framework.Code
         bool HasBase { get; }
 
         /// <summary>
-        /// Gets an object that allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
+        /// Gets an object that allows invocation of the base method (<see langword="base" /> if the method was introduced by the current aspect).
         /// </summary>
         IMethodInvocation Base { get; }
 
+        /// <summary>
+        /// Gets the base method that is overridden by the current method.
+        /// </summary>
         IMethod? OverriddenMethod { get; }
     }
 }

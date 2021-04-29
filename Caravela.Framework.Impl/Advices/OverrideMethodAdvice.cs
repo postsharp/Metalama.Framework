@@ -4,9 +4,8 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -28,13 +27,11 @@ namespace Caravela.Framework.Impl.Advices
             this.LinkerOptions = linkerOptions;
         }
 
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+
         public override AdviceResult ToResult( ICompilation compilation )
         {
-            return new(
-                ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray<IObservableTransformation>.Empty,
-                ImmutableArray.Create<INonObservableTransformation>(
-                    new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.TemplateMethod, this.LinkerOptions ) );
         }
     }
 }

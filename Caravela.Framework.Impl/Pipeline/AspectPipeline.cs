@@ -29,11 +29,16 @@ namespace Caravela.Framework.Impl.Pipeline
 
         protected ServiceProvider ServiceProvider { get; } = new();
 
-        protected AspectPipeline( IBuildOptions buildOptions )
+        protected AspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null )
         {
             this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
             this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
+
+            if ( assemblyLocator != null )
+            {
+                this.ServiceProvider.AddService( assemblyLocator );
+            }
         }
 
         /// <summary>

@@ -23,6 +23,11 @@ namespace Caravela.Framework.Aspects
             this.ForceNotInlineable = forceNotInlineable;
         }
 
+        /// <summary>
+        /// Creates linker options.
+        /// </summary>
+        /// <param name="forceNotInlineable">Forces the result of the advice not to be inlineable by the aspect linker.</param>
+        /// <returns>AspecTLinkerOptions object.</returns>
         public static AspectLinkerOptions Create( bool forceNotInlineable ) => new( forceNotInlineable );
     }
 }

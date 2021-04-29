@@ -151,7 +151,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                         writer.WriteLine( $"\t\t\tArgument(this.Transform({FindProperty( parameters[i] )})).WithLeadingTrivia(this.GetIndentation())," );
                     }
 
-                    writer.WriteLine( "\t\t\t})));" );
+                    writer.WriteLine( "\t\t\t}))).NormalizeWhitespace();" );
                 }
 
                 writer.WriteLine( "\t\t\tthis.Unindent();" );
@@ -314,7 +314,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                             writer.WriteLine( $"\t\t\t\t.AddArguments( @{paramsParameter.Name}.Select( p => SyntaxFactory.Argument( p ) ).ToArray() )" );
                         }
 
-                        writer.WriteLine( ");" );
+                        writer.WriteLine( ").NormalizeWhitespace();" );
                         writer.WriteLine();
                     }
 
