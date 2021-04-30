@@ -1,5 +1,5 @@
 // Compilation error. Code not generated.
-// Error CR0104 on `b = compileTime(42);`: `The expression 'b = compileTime(42);' is compile-time but it is expected to be run-time because the expression appears in a 'catch' statement.`
+// Error CR0104 on `var x = compileTime(42);`: `The expression 'var x = compileTime(42);' is compile-time but it is expected to be run-time because the expression appears in a 'catch' statement.`
 // Error CR0104 on `b = 100 / a;`: `The expression 'b = 100 / a;' is compile-time but it is expected to be run-time because the expression appears in a 'try' statement.`
 
 ;

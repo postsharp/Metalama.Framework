@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))
             {
-                b = compileTime(42);
+                var x = compileTime(42);
             }
 
             Console.WriteLine(b);
