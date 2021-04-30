@@ -60,7 +60,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <param name="value">A compile-time value.</param>
         /// <typeparam name="T"></typeparam>
-        /// <returns>A value that is structurally equivalent to the compile-time <see cref="value"/>.</returns>
+        /// <returns>A value that is structurally equivalent to the compile-time <paramref name="value"/>.</returns>
         [TemplateKeyword]
         public static T? runTime<T>( T? value ) => value;
 

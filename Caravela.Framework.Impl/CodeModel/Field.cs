@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IFieldOrPropertyInvocation Base => this.Invocation.Base;
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => new CompileTimeFieldOrPropertyInfo( this );
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 

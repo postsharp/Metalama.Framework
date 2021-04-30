@@ -112,7 +112,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
             var properties = stringType.Properties;
             var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = this.Serialize( new CompileTimeFieldOrPropertyInfo( (Property) property ) ).ToString();
+            var serialized = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
 
             this.AssertEqual(
                 @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).GetProperty(""Chars"", global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Char"")), new global::System.Type[]{global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))}))",
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
-            var actual = this.Serialize<FieldOrPropertyInfo>( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
+            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = this.Serialize<FieldOrPropertyInfo>( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
+            var actual = this.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
 
             return actual;
         }

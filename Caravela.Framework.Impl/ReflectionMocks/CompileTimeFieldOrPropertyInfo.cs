@@ -11,16 +11,18 @@ namespace Caravela.Framework.Impl.ReflectionMocks
     {
         public IFieldOrProperty FieldOrProperty { get; }
 
-        public CompileTimeFieldOrPropertyInfo( IFieldOrProperty fieldOrProperty )
+        private CompileTimeFieldOrPropertyInfo( IFieldOrProperty fieldOrProperty )
         {
             this.FieldOrProperty = fieldOrProperty;
         }
 
-        public static CompileTimeFieldOrPropertyInfo Create( IFieldOrPropertyInvocation fieldOrProperty )
+        public static FieldOrPropertyInfo Create( IFieldOrProperty fieldOrProperty ) => new CompileTimeFieldOrPropertyInfo( fieldOrProperty );
+
+        public static FieldOrPropertyInfo Create( IFieldOrPropertyInvocation fieldOrProperty )
             => fieldOrProperty switch
             {
-                Property property => new CompileTimeFieldOrPropertyInfo( property ),
-                Field field => new CompileTimeFieldOrPropertyInfo( field ),
+                Property property => Create( property ),
+                Field field => Create( field ),
                 _ => throw new ArgumentOutOfRangeException( nameof(fieldOrProperty) )
             };
     }
