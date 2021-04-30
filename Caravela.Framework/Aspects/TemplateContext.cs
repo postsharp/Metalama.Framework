@@ -44,7 +44,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Coerces an <paramref name="expression"/> to be interpreted at compile time. This is typically used
-        /// to coerce expressions that can be either run-time or compile-time. Since ambiguous expressions are
+        /// to coerce expressions that can be either run-time or compile-time, such as a literal. Since ambiguous expressions are
         /// interpreted as run-time by default, this method allows to change that behavior.
         /// </summary>
         /// <param name="expression">An expression.</param>
@@ -54,8 +54,15 @@ namespace Caravela.Framework.Aspects
         [return: NotNullIfNotNull( "expression" )]
         public static T? compileTime<T>( T? expression ) => expression;
 
+        /// <summary>
+        /// Converts a compile-value into run-time value by serializing the compile-time value into a some syntax that will
+        /// evaluate, at run time, to the same value as at compile time.
+        /// </summary>
+        /// <param name="value">A compile-time value.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>A value that is structurally equivalent to the compile-time <see cref="value"/>.</returns>
         [TemplateKeyword]
-        public static T? runTime<T>( T? expression ) => expression;
+        public static T? runTime<T>( T? value ) => value;
 
         // Calls to pragma are purely syntactic, they are never executed. They are interpreted by the template compiler.
         [TemplateKeyword]

@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-// TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsStatement
 {
     [CompileTime]
