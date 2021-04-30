@@ -33,7 +33,7 @@ namespace Caravela.Framework.Code
         /// as with a normal method.
         /// </summary>
         IMethod? Raiser { get; }
-        
+
         [return: RunTimeOnly]
         EventInfo ToEventInfo();
     }

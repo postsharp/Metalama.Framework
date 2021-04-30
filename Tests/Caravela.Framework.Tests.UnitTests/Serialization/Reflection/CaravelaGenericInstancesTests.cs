@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +12,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaGenericInstancesTests : ReflectionTestBase
     {
-        private readonly SyntaxSerializationService _objectSerializers;
-
-        public CaravelaGenericInstancesTests( ITestOutputHelper helper ) : base( helper )
-        {
-            this._objectSerializers = new SyntaxSerializationService();
-        }
+        public CaravelaGenericInstancesTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void TestListString()
@@ -26,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.List<string> Target; } }",
                 typeof(List<string>),
-                @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.List`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")))" );
+                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.List`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")))" );
         }
 
         [Fact]
@@ -35,7 +29,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.Dictionary<string[],int?> Target; } }",
                 typeof(Dictionary<string[], int?>),
-                @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.Dictionary`2"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).MakeArrayType(), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Nullable`1"")).MakeGenericType(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))))" );
+                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.Dictionary`2"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).MakeArrayType(), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Nullable`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))))" );
         }
 
         private void AssertFieldType( string code, Type expectedType, string expected )
@@ -45,7 +39,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Fields;
 
-            var serialized = this._objectSerializers.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
+            var serialized = this.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );

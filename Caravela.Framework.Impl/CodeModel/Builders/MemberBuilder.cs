@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -27,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public INamedType DeclaringType { get; }
 
-        public MemberInfo ToMemberInfo() => throw new System.NotImplementedException();
+        public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         public Accessibility Accessibility { get; set; }
 

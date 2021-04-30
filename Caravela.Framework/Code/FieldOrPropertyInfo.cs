@@ -4,10 +4,10 @@
 using System;
 using System.Reflection;
 
-namespace Caravela.Framework
+namespace Caravela.Framework.Code
 {
     /// <summary>
-    /// Represents a field or a property. Only one of the properties of this class is ever used.
+    /// Represents a reflection <see cref="FieldInfo"/> or a <see cref="PropertyInfo"/>. 
     /// </summary>
     public class FieldOrPropertyInfo : MemberInfo
     {
@@ -45,24 +45,22 @@ namespace Caravela.Framework
             this._underlyingMemberInfo = propertyInfo;
         }
 
-        /// <summary>
-        /// Compile-time constructor.
-        /// </summary>
-        private protected FieldOrPropertyInfo()
-        {
-            
-        }
+        // Compile-time constructor.
+        private protected FieldOrPropertyInfo() { }
 
         public override object[] GetCustomAttributes( bool inherit ) => this.UnderlyingMemberInfo.GetCustomAttributes( inherit );
 
-        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => this.UnderlyingMemberInfo.GetCustomAttributes( attributeType, inherit );
+        public override object[] GetCustomAttributes( Type attributeType, bool inherit )
+            => this.UnderlyingMemberInfo.GetCustomAttributes( attributeType, inherit );
 
         public override bool IsDefined( Type attributeType, bool inherit ) => this.UnderlyingMemberInfo.IsDefined( attributeType, inherit );
 
         public override Type DeclaringType => this.UnderlyingMemberInfo.DeclaringType;
-        
+
         public override MemberTypes MemberType => this.UnderlyingMemberInfo.MemberType;
+
         public override string Name => this.UnderlyingMemberInfo.Name;
+
         public override Type ReflectedType => this.UnderlyingMemberInfo.ReflectedType;
 
         public object? GetValue( object? obj )
@@ -71,32 +69,32 @@ namespace Caravela.Framework
             {
                 case FieldInfo fieldInfo:
                     return fieldInfo.GetValue( obj );
-                
+
                 case PropertyInfo propertyInfo:
                     return propertyInfo.GetValue( obj );
-                
+
                 default:
                     throw new InvalidOperationException();
             }
         }
-        
+
         public void SetValue( object? obj, object? value )
         {
             switch ( this.UnderlyingMemberInfo )
             {
                 case FieldInfo fieldInfo:
                     fieldInfo.SetValue( obj, value );
+
                     break;
-                
+
                 case PropertyInfo propertyInfo:
                     propertyInfo.SetValue( obj, value );
+
                     break;
-                
+
                 default:
                     throw new InvalidOperationException();
             }
         }
     }
-
-    
 }

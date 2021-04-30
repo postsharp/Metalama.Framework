@@ -12,7 +12,4 @@ namespace Caravela.Framework.Project
     /// </summary>
     [AttributeUsage( AttributeTargets.All )]
     public class CompileTimeOnlyAttribute : Attribute { }
-
-    [AttributeUsage( AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-    public class RunTimeOnlyAttribute : Attribute { }
 }

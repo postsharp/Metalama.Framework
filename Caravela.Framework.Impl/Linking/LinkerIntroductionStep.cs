@@ -64,7 +64,8 @@ namespace Caravela.Framework.Impl.Linking
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public LinkerIntroductionStep( IServiceProvider serviceProvider ) {
+        public LinkerIntroductionStep( IServiceProvider serviceProvider )
+        {
             this._serviceProvider = serviceProvider;
         }
 
@@ -94,7 +95,7 @@ namespace Caravela.Framework.Impl.Linking
                     nameProvider,
                     lexicalScopeHelper.GetLexicalScope( memberIntroduction ),
                     syntaxFactory,
-                    this._serviceProvider);
+                    this._serviceProvider );
 
                 var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 

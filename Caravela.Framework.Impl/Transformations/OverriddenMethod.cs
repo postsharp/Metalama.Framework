@@ -63,7 +63,8 @@ namespace Caravela.Framework.Impl.Transformations
                         context.SyntaxFactory ),
                     context.LexicalScope,
                     context.DiagnosticSink,
-                    context.ServiceProvider.GetService<SyntaxSerializationService>(  ));
+                    context.ServiceProvider.GetService<SyntaxSerializationService>(),
+                    (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
                 var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
 

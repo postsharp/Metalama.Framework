@@ -6,7 +6,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -30,15 +29,15 @@ namespace Caravela.Framework.Impl.Templating
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
+        private readonly TemplateMemberClassifier _templateMemberClassifier;
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-        private readonly TemplateMemberClassifier _templateMemberClassifier;
-
+        
         public TemplateCompilerRewriter(
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IDiagnosticAdder diagnosticAdder) : base( compileTimeCompilation )
+            IDiagnosticAdder diagnosticAdder ) : base( compileTimeCompilation )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
@@ -158,7 +157,6 @@ namespace Caravela.Framework.Impl.Templating
 
             return TransformationKind.Transform;
         }
-
 
         /// <summary>
         /// Determines if the node is a pragma and returns the kind of pragma, if any.
@@ -464,10 +462,11 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 default:
-                    return InvocationExpression( 
-                        this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Deserialize),
-                                     this.MetaSyntaxFactory.Type( type )  ),
-                                     ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                    return InvocationExpression(
+                        this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
+                            nameof(TemplateSyntaxFactory.Serialize),
+                            this.MetaSyntaxFactory.Type( type ) ),
+                        ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
             }
         }
 
@@ -507,25 +506,26 @@ namespace Caravela.Framework.Impl.Templating
             // return null in case of pragma. In this case, the ExpressionStatement must return null too.
             // In the default implementation, such case would result in an exception.
 
-            if ( this.GetTransformationKind( node ) == TransformationKind.Transform || this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node.Expression ) )
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform
+                 || this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node.Expression ) )
             {
                 return this.TransformExpressionStatement( node );
             }
             else
             {
-                    var transformedExpression = this.Visit( node.Expression );
+                var transformedExpression = this.Visit( node.Expression );
 
-                    if ( transformedExpression == null )
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                           return node.Update(
-                            this.VisitList( node.AttributeLists ),
-                            (ExpressionSyntax) transformedExpression!,
-                            this.VisitToken( node.SemicolonToken ) );
-                    }
+                if ( transformedExpression == null )
+                {
+                    return null;
+                }
+                else
+                {
+                    return node.Update(
+                        this.VisitList( node.AttributeLists ),
+                        (ExpressionSyntax) transformedExpression!,
+                        this.VisitToken( node.SemicolonToken ) );
+                }
             }
         }
 

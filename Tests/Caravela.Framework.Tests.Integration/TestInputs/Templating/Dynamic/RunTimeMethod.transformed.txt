@@ -1,4 +1,4 @@
 {
-    var x = new System.Collections.Generic.List<System.String> { "a", "b", "c", "d" };
+    var x = new global::System.Collections.Generic.List<global::System.String> { "a", "b", "c", "d" };
     return default;
 }

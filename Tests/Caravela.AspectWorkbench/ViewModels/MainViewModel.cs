@@ -135,6 +135,7 @@ namespace Caravela.AspectWorkbench.ViewModels
             {
                 var errorsDocument = new FlowDocument();
                 errorsDocument.Blocks.Add( new Paragraph( new Run( e.ToString() ) { Foreground = Brushes.Red } ) );
+                this.ErrorsDocument = errorsDocument;
             }
         }
 

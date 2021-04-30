@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
@@ -56,6 +55,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => new PropertyInvocation( this ).Base;
 
+        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 

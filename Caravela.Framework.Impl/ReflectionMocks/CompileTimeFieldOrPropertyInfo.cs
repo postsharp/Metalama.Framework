@@ -4,7 +4,6 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using System;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
@@ -16,7 +15,6 @@ namespace Caravela.Framework.Impl.ReflectionMocks
         {
             this.FieldOrProperty = fieldOrProperty;
         }
-
 
         public static CompileTimeFieldOrPropertyInfo Create( IFieldOrPropertyInvocation fieldOrProperty )
             => fieldOrProperty switch

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.RunTimeMethod
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             var list = compileTime(new List<string>());
             list.Add("a");

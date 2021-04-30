@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,19 +10,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CaravelaEventInfoSerializer : TypedObjectSerializer<CompileTimeEventInfo>
+    internal class CompileTimeEventInfoSerializer : TypedObjectSerializer<CompileTimeEventInfo>
     {
-        private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
-
-        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer )
-        {
-            this._caravelaTypeSerializer = caravelaTypeSerializer;
-        }
-
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo o )
+        public override ExpressionSyntax Serialize( CompileTimeEventInfo o, ISyntaxFactory syntaxFactory )
         {
             var eventName = o.Symbol.Name;
-            var typeCreation = this._caravelaTypeSerializer.Serialize( CompileTimeType.Create( o.ContainingType ) );
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( o.ContainingType ), syntaxFactory );
 
             return InvocationExpression(
                     MemberAccessExpression(
@@ -31,5 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
                 .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

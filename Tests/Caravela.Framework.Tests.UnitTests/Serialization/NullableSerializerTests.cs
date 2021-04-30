@@ -1,17 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Serialization;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
-    public class NullableSerializerTests
+    public class NullableSerializerTests : SerializerTestsBase
     {
-        private readonly SyntaxSerializationService _serializers = new();
-
         [Fact]
         public void TestPrimitiveNullables()
         {
@@ -23,12 +20,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         public void TestListOfNullables()
         {
             var list = new List<float?> { 5, null };
-            this.AssertSerialization( "new System.Collections.Generic.List<System.Nullable<System.Single>>{5F, null}", list );
+            this.AssertSerialization( "new global::System.Collections.Generic.List<global::System.Single?>{5F, null}", list );
         }
 
         private void AssertSerialization<T>( string expected, T? o )
         {
-            var creationExpression = this._serializers.Serialize( o ).NormalizeWhitespace().ToString();
+            var creationExpression = this.Serialize( o ).NormalizeWhitespace().ToString();
             Assert.Equal( expected, creationExpression );
         }
     }

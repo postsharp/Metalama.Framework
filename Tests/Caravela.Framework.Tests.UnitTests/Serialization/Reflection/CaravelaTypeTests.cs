@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System;
 using System.Linq;
 using Xunit;
@@ -17,8 +16,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestType()
         {
             var code = "class Target {  }";
-            var serialized = SerializeType( code );
-            this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
+            var serialized = this.SerializeType( code );
+            this.AssertEqual( @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target""))", serialized );
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
         }
@@ -27,8 +26,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestGenericType()
         {
             var code = "class Target<TKey,TValue> {  }";
-            var serialized = SerializeType( code );
-            this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
+            var serialized = this.SerializeType( code );
+            this.AssertEqual( @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`2""))", serialized );
 
             TestExpression<Type>(
                 code,
@@ -44,10 +43,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestArrayType()
         {
             var code = "class Target { int[] Property { get; set; } }";
-            var serialized = SerializeTypeOfProperty( code );
+            var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(
-                @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()",
+                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType()",
                 serialized );
 
             TestExpression<Type>(
@@ -64,10 +63,10 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestMultidimensionalArrayType()
         {
             var code = "class Target { int[,] Property { get; set; } }";
-            var serialized = SerializeTypeOfProperty( code );
+            var serialized = this.SerializeTypeOfProperty( code );
 
             this.AssertEqual(
-                @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType(2)",
+                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32"")).MakeArrayType(2)",
                 serialized );
 
             TestExpression<Type>(
@@ -82,20 +81,20 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 
         // Types other than named types and array types are not implemented.
 
-        private static string SerializeType( string code )
+        private string SerializeType( string code )
         {
             var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" );
-            var actual = new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
+            var actual = this.Serialize( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }
 
-        private static string SerializeTypeOfProperty( string code )
+        private string SerializeTypeOfProperty( string code )
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" ).Type;
-            var actual = new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
+            var actual = this.Serialize( CompileTimeType.Create( single ) ).ToString();
 
             return actual;
         }

@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.CodeModel
         private static readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
         private readonly Compilation _compilation;
         private readonly ConcurrentDictionary<Type, ITypeSymbol> _symbolCache = new();
-        private readonly ConcurrentDictionary<Type, NameSyntax> _syntaxCache = new();
+        private readonly ConcurrentDictionary<Type, TypeSyntax> _syntaxCache = new();
 
         private ReflectionMapper( Compilation compilation )
         {
@@ -69,16 +69,26 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public ITypeSymbol GetTypeSymbol( Type type ) => this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
+        public ITypeSymbol GetTypeSymbol( Type type )
+        {
+            switch ( type )
+            {
+                case CompileTimeType compileTimeType:
+                    return compileTimeType.TypeSymbol;
+                
+                default:
+                    return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
+            }
+        }
 
         /// <summary>
         /// Gets a fully-qualified <see cref="NameSyntax"/> for a given reflection <see cref="Type"/>.
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public NameSyntax GetTypeNameSyntax( Type type )
-            => this._syntaxCache.GetOrAdd( type, t => (NameSyntax) CSharpSyntaxGenerator.Instance.NameExpression( this.GetTypeSymbol( t ) ) );
-        
+        public TypeSyntax GetTypeSyntax( Type type )
+            => this._syntaxCache.GetOrAdd( type, t => (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( this.GetTypeSymbol( t ) ) );
+
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
             if ( type is CompileTimeType compileTimeType )
@@ -105,15 +115,48 @@ namespace Caravela.Framework.Impl.CodeModel
                 return this._compilation.CreatePointerTypeSymbol( pointedToType );
             }
 
-            if ( type.IsConstructedGenericType )
+            return this.GetNamedTypeSymbol( type, type.GenericTypeArguments );
+        }
+
+        private INamedTypeSymbol GetNamedTypeSymbol( Type type, Type[] genericArguments )
+        {
+            if ( type.DeclaringType != null )
+            {
+                // In case of nested type, we need to determine the arity from the name. This info is otherwise not exposed.
+                var indexOfQuote = type.Name.IndexOf( '`' );
+
+                var arity = 0;
+
+                if ( indexOfQuote >= 0 )
+                {
+                    var arityString = type.Name.Substring( indexOfQuote + 1 );
+                    arity = int.Parse( arityString );
+                }
+
+                var declaringTypeGenericArguments = genericArguments.Take( genericArguments.Length - arity ).ToArray();
+                var nestedTypeGenericArguments = genericArguments.Skip( declaringTypeGenericArguments.Length ).ToArray();
+
+                var declaringTypeSymbol = this.GetNamedTypeSymbol( type.DeclaringType, declaringTypeGenericArguments );
+                var nestedSymbol = declaringTypeSymbol.GetTypeMembers().Single( s => s.MetadataName == type.Name );
+
+                if ( nestedTypeGenericArguments.Length > 0 )
+                {
+                    nestedSymbol = nestedSymbol.Construct( nestedTypeGenericArguments.Select( this.GetTypeSymbol ).ToArray() );
+                }
+
+                return nestedSymbol;
+            }
+            else if ( genericArguments.Length > 0 )
             {
                 var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName );
-                var genericArguments = type.GenericTypeArguments.Select( this.GetTypeSymbol ).ToArray();
+                var genericArgumentSymbols = genericArguments.Select( this.GetTypeSymbol ).ToArray();
 
-                return genericDefinition.Construct( genericArguments! );
+                return genericDefinition.Construct( genericArgumentSymbols! );
             }
-
-            return this.GetNamedTypeSymbolByMetadataName( type.FullName.AssertNotNull() );
+            else
+            {
+                return this.GetNamedTypeSymbolByMetadataName( type.FullName );
+            }
         }
     }
 }

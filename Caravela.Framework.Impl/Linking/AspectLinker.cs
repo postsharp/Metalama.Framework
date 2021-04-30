@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.Linking
         public AspectLinkerResult ToResult()
         {
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
-            var introductionStepOutput = new LinkerIntroductionStep( this._serviceProvider).Execute( this._input );
+            var introductionStepOutput = new LinkerIntroductionStep( this._serviceProvider ).Execute( this._input );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
             var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );

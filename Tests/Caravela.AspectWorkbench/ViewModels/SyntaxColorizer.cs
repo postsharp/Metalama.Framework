@@ -148,7 +148,7 @@ namespace Caravela.AspectWorkbench.ViewModels
                         }
 
                         fontWeight = FontWeights.Normal;
-                        
+
                         break;
                 }
 

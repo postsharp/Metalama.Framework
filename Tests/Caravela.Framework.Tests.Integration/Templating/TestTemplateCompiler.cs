@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
         private readonly IDiagnosticAdder _diagnosticAdder;
-        
+
         public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
         {
             this._semanticModel = semanticModel;

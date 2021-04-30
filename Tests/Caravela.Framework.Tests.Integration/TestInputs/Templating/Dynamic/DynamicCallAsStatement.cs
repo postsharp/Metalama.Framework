@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
     class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        dynamic? Template()
         {
             target.Method.Invoke( target.This, 0 );
             _ = target.Method.Invoke( target.This, 1 );

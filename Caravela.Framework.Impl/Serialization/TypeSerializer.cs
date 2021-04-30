@@ -2,24 +2,23 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Compiler;
-using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CaravelaTypeSerializer : TypedObjectSerializer<CompileTimeType>
+    internal class TypeSerializer : TypedObjectSerializer<Type>
     {
-        public override ExpressionSyntax Serialize( CompileTimeType o )
-        {
-            return this.CreateTypeCreationExpressionFromSymbolRecursive( o.TypeSymbol );
-        }
+        public override ExpressionSyntax Serialize( Type o, ISyntaxFactory syntaxFactory ) 
+            => this.SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( o ), syntaxFactory );
 
-        public ExpressionSyntax CreateTypeCreationExpressionFromSymbolRecursive( ITypeSymbol symbol )
+        public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ISyntaxFactory syntaxFactory )
         {
             if ( symbol.TypeKind == TypeKind.Array )
             {
@@ -29,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
                     ? new ArgumentSyntax[0]
                     : new[] { Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( arraySymbol.Rank ) ) ) };
 
-                var innerTypeCreation = this.CreateTypeCreationExpressionFromSymbolRecursive( arraySymbol.ElementType );
+                var innerTypeCreation = this.SerializeTypeSymbolRecursive( arraySymbol.ElementType, syntaxFactory );
 
                 return InvocationExpression(
                         MemberAccessExpression(
@@ -46,15 +45,15 @@ namespace Caravela.Framework.Impl.Serialization
 
                 if ( typeParameterSymbol.DeclaringMethod is { } method )
                 {
-                    declaringExpression = CaravelaMethodInfoSerializer.CreateMethodBase(
-                        this,
+                    declaringExpression = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
                         method.OriginalDefinition,
-                        method.ContainingType.TypeParameters.Any() ? method.ContainingType : null );
+                        method.ContainingType.TypeParameters.Any() ? method.ContainingType : null,
+                        syntaxFactory );
                 }
                 else
                 {
                     var type = typeParameterSymbol.DeclaringType!.OriginalDefinition;
-                    declaringExpression = this.CreateTypeCreationExpressionFromSymbolRecursive( type );
+                    declaringExpression = this.SerializeTypeSymbolRecursive( type, syntaxFactory );
                 }
 
                 // expr.GetGenericArguments()[ordinal]
@@ -87,23 +86,23 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     foreach ( var typeSymbol in layer.TypeArguments )
                     {
-                        arguments.Add( this.CreateTypeCreationExpressionFromSymbolRecursive( typeSymbol ) );
+                        arguments.Add( this.SerializeTypeSymbolRecursive( typeSymbol, syntaxFactory ) );
                     }
                 }
 
                 return InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            CreateTypeCreationExpressionFromSymbolLeaf( basicType ),
+                            SerializeTypeFromSymbolLeaf( basicType, syntaxFactory ),
                             IdentifierName( "MakeGenericType" ) ) )
                     .AddArgumentListArguments( arguments.Select( arg => Argument( arg ) ).ToArray() )
                     .NormalizeWhitespace();
             }
 
-            return CreateTypeCreationExpressionFromSymbolLeaf( symbol );
+            return SerializeTypeFromSymbolLeaf( symbol, syntaxFactory );
         }
 
-        private static ExpressionSyntax CreateTypeCreationExpressionFromSymbolLeaf( ITypeSymbol typeSymbol )
+        private static ExpressionSyntax SerializeTypeFromSymbolLeaf( ITypeSymbol typeSymbol, ISyntaxFactory syntaxFactory )
         {
             var documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
             var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), documentationId );
@@ -111,13 +110,12 @@ namespace Caravela.Framework.Impl.Serialization
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName( "System" ),
-                            IdentifierName( "Type" ) ),
+                        syntaxFactory.GetTypeSyntax( typeof(Type) ),
                         IdentifierName( "GetTypeFromHandle" ) ) )
                 .AddArgumentListArguments( Argument( token ) )
                 .NormalizeWhitespace();
         }
+
+        public TypeSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

@@ -121,7 +121,6 @@ namespace Caravela.Framework.Impl.Templating
 
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
 
-        public static ExpressionSyntax Deserialize<T>( object? o ) => ExpansionContext.SyntaxSerializationService.Serialize( o );
-
+        public static ExpressionSyntax Serialize<T>( T? o ) => ExpansionContext.SyntaxSerializationService.Serialize( o, ExpansionContext.SyntaxFactory );
     }
 }

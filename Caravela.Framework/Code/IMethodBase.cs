@@ -31,6 +31,6 @@ namespace Caravela.Framework.Code
         /// </summary>
         /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
-         MethodBase ToMethodBase();
+        MethodBase ToMethodBase();
     }
 }

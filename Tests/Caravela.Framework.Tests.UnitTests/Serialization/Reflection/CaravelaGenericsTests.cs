@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -13,24 +12,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaGenericsTests : ReflectionTestBase
     {
-        private readonly SyntaxSerializationService _objectSerializers;
-
-        public CaravelaGenericsTests( ITestOutputHelper helper ) : base( helper )
-        {
-            this._objectSerializers = new SyntaxSerializationService();
-        }
+        public CaravelaGenericsTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void FieldInNestedType()
         {
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
-            var serialized = this._objectSerializers.Serialize(
+            var serialized = this.Serialize(
                     CompileTimeFieldOrPropertyInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(
-                @"new Caravela.Framework.LocationInfo(System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", System.Reflection.BindingFlags.DeclaredOnly | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance))",
+                @"new global::Caravela.Framework.Code.FieldOrPropertyInfo(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1.Nested`1"")).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             TestExpression<FieldInfo>(
@@ -48,12 +42,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<TKey> : Origin<int, TKey> { TKey ReturnSelf() { return default(TKey); } } class Origin<TA, TB> { }";
 
-            var serialized = this._objectSerializers.Serialize(
+            var serialized = this.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(
-                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle)",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1"")).TypeHandle))",
                 serialized );
 
             TestExpression<MethodInfo>(
@@ -71,14 +65,13 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<T1> { } class User<T2> : Target<T2> { }";
 
-            var serialized = this._objectSerializers
-                .Serialize(
-                    CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType! ) )
+            var serialized = this
+                .Serialize( CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
 
-            var serialized2 = this._objectSerializers
+            var serialized2 = this
                 .Serialize( CompileTimeType.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ) ) )
                 .ToString();
 
@@ -90,14 +83,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<int, T> { }";
 
-            var serialized = this._objectSerializers.Serialize(
+            var serialized = this.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
 
-            var serialized2 = this._objectSerializers.Serialize(
+            var serialized2 = this.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code2 ).DeclaredTypes.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 

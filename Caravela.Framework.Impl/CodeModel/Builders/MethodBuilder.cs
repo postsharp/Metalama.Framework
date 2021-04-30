@@ -107,8 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
-            var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
-
+            
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
                     this.Name,

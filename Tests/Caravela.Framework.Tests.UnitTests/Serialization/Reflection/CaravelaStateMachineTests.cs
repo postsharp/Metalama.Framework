@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -12,24 +11,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
 {
     public class CaravelaStateMachineTests : ReflectionTestBase
     {
-        private readonly SyntaxSerializationService _objectSerializers;
-
-        public CaravelaStateMachineTests( ITestOutputHelper helper ) : base( helper )
-        {
-            this._objectSerializers = new SyntaxSerializationService();
-        }
+        public CaravelaStateMachineTests( ITestOutputHelper helper ) : base( helper ) { }
 
         [Fact]
         public void TestEnumerable()
         {
             var code = "class Target { public static System.Collections.Generic.IEnumerable<int> Method() { yield return 2; } }";
 
-            var serialized = this._objectSerializers.Serialize(
+            var serialized = this.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(
-                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}""))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}"")))",
                 serialized );
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
@@ -40,12 +34,12 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target { public static async void Method() { await System.Threading.Tasks.Task.Delay(1); } }";
 
-            var serialized = this._objectSerializers.Serialize(
+            var serialized = this.Serialize(
                     CompileTimeMethodInfo.Create( CreateCompilation( code ).DeclaredTypes.Single( t => t.Name == "Target" ).Methods.First() ) )
                 .ToString();
 
             this.AssertEqual(
-                @"System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method""))",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method"")))",
                 serialized );
 
             TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );

@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Caravela.Framework.Tests.UnitTests.Serialization
+namespace Caravela.Framework.Tests.UnitTests.Serialization.Assets
 {
     public class CustomComparer<T> : IEqualityComparer<T>
     {

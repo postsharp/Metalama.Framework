@@ -1,0 +1,58 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Caravela.Framework.Code;
+using Caravela.Framework.Sdk;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Globalization;
+using System.Reflection;
+
+namespace Caravela.Framework.Impl.ReflectionMocks
+{
+    internal class CompileTimePropertyInfo : PropertyInfo, IReflectionMockCodeElement
+    {
+        public CompileTimePropertyInfo( IProperty property )
+        {
+            this.Property = property;
+        }
+
+        public IProperty Property { get; }
+
+        public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override bool IsDefined( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override Type DeclaringType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override Type ReflectedType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override MethodInfo[] GetAccessors( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override MethodInfo GetGetMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override ParameterInfo[] GetIndexParameters() => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override MethodInfo GetSetMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override object GetValue( object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override void SetValue( object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture )
+            => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override PropertyAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override bool CanRead => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override bool CanWrite => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public override Type PropertyType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+
+        public ISymbol Symbol => this.Property.GetSymbol().AssertNotNull();
+    }
+}

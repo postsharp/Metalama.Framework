@@ -41,7 +41,7 @@ namespace Caravela.Framework.Code
         /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
         IFieldOrPropertyInvocation Base { get; }
-        
+
         /// <summary>
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.
         /// </summary>

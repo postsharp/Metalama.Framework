@@ -60,6 +60,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
             this.ServiceProvider = new ServiceProvider();
             this.ServiceProvider.AddService( new SyntaxSerializationService() );
         }
+
         internal static AspectLinkerInput CreateLinkerInput( string code )
         {
             var pseudoCompilation = CreateRoslynCompilation( code, ignoreErrors: true );

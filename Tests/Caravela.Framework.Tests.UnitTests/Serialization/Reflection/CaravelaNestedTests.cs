@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Serialization;
 using System;
 using System.Linq;
 using Xunit;
@@ -17,18 +16,21 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         public void TestType()
         {
             var code = "class Target { class Sub { }  }";
-            var serialized = SerializeType( code );
-            this.AssertEqual( @"System.Type.GetTypeFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target.Sub""))", serialized );
+            var serialized = this.SerializeType( code );
+
+            this.AssertEqual(
+                @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target.Sub""))",
+                serialized );
 
             TestExpression<Type>( code, serialized, info => Assert.Equal( "Sub", info.Name ) );
         }
 
-        private static string SerializeType( string code )
+        private string SerializeType( string code )
         {
             var compilation = CreateCompilation( code );
             IType single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
 
-            return new CaravelaTypeSerializer().Serialize( CompileTimeType.Create( single ) ).ToString();
+            return this.Serialize( CompileTimeType.Create( single ) ).ToString();
         }
 
         public CaravelaNestedTests( ITestOutputHelper helper ) : base( helper ) { }

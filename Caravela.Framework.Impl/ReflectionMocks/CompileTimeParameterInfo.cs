@@ -15,8 +15,8 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
         {
-            this.ParameterSymbol = parameterSymbol;
-            this.DeclaringMember = declaringMember;
+            this.ParameterSymbol = parameterSymbol.AssertNotNull();
+            this.DeclaringMember = declaringMember.AssertNotNull();
         }
 
         ISymbol IReflectionMockCodeElement.Symbol => this.ParameterSymbol;

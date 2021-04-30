@@ -7,35 +7,28 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    
-    internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CompileTimeParameterInfo>
+    internal class CompileTimeParameterInfoSerializer : TypedObjectSerializer<CompileTimeParameterInfo>
     {
-        private readonly CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;
-
-        public CaravelaParameterInfoSerializer( CaravelaMethodInfoSerializer caravelaMethodInfoSerializer )
-        {
-            this._caravelaMethodInfoSerializer = caravelaMethodInfoSerializer;
-        }
-
-        public override ExpressionSyntax Serialize( CompileTimeParameterInfo o )
+        public override ExpressionSyntax Serialize( CompileTimeParameterInfo o, ISyntaxFactory syntaxFactory )
         {
             var container = o.DeclaringMember;
             var containerAsMember = container as IMember;
-            var method = containerAsMember as Method;
+            var method = containerAsMember as IMethodBase;
             var property = containerAsMember as Property;
             var ordinal = o.ParameterSymbol.Ordinal;
 
             if ( method == null && property != null )
             {
-                method = property.Setter as Method;
+                method = (property.Getter ?? property.Setter)!;
             }
 
-            var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CompileTimeMethodInfo( method! ) );
+            var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase( 
+                (IReflectionMockMember) method!.ToMethodBase(),
+                syntaxFactory );
 
             return ElementAccessExpression(
                     InvocationExpression(
@@ -52,5 +45,7 @@ namespace Caravela.Framework.Impl.Serialization
                                     Literal( ordinal ) ) ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

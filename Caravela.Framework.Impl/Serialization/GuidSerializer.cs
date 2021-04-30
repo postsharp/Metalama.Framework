@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class GuidSerializer : TypedObjectSerializer<Guid>
     {
-        public override ExpressionSyntax Serialize( Guid o )
+        public override ExpressionSyntax Serialize( Guid o, ISyntaxFactory syntaxFactory )
         {
             var b = o.ToByteArray();
 
@@ -27,10 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
             var j = b[14];
             var k = b[15];
 
-            return ObjectCreationExpression(
-                    QualifiedName(
-                        IdentifierName( "System" ),
-                        IdentifierName( "Guid" ) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(Guid) ) )
                 .AddArgumentListArguments(
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
@@ -45,5 +43,7 @@ namespace Caravela.Framework.Impl.Serialization
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public GuidSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

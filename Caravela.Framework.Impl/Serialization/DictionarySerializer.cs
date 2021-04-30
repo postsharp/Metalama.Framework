@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,42 +14,20 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class DictionarySerializer : ObjectSerializer
     {
-        private readonly SyntaxSerializationService _serializers;
-
-        public DictionarySerializer( SyntaxSerializationService serializers )
-        {
-            this._serializers = serializers;
-        }
+        public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
         // ReSharper disable once UnusedParameter.Local
         // This method is used so that the C# compiler resolves the generic parameters from 'dynamic'.
         private static object GetDefaultComparer<TK, TV>( Dictionary<TK, TV> dictionary ) => EqualityComparer<TK>.Default;
 
-        public override ExpressionSyntax SerializeObject( object o )
+        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
         {
-            var dictionaryType = o.GetType();
+            var dictionaryType = obj.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];
-            var valueType = dictionaryType.GetGenericArguments()[1];
+            
+            var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
 
-            var creationExpression = ObjectCreationExpression(
-                QualifiedName(
-                    QualifiedName(
-                        QualifiedName(
-                            IdentifierName( "System" ),
-                            IdentifierName( "Collections" ) ),
-                        IdentifierName( "Generic" ) ),
-                    GenericName( Identifier( "Dictionary" ) )
-                        .WithTypeArgumentList(
-                            TypeArgumentList(
-                                SeparatedList<TypeSyntax>(
-                                    new SyntaxNodeOrToken[]
-                                    {
-                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( keyType ) ),
-                                        Token( SyntaxKind.CommaToken ),
-                                        ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( valueType ) )
-                                    } ) ) ) ) );
-
-            dynamic dictionary = o;
+            dynamic dictionary = obj;
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;
 
@@ -102,10 +81,7 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     var comparerExpression = MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                IdentifierName( "System" ),
-                                IdentifierName( "StringComparer" ) ),
+                            syntaxFactory.GetTypeSyntax( typeof(StringComparer) ),
                             IdentifierName( comparerName ) )
                         .NormalizeWhitespace();
 
@@ -119,11 +95,11 @@ namespace Caravela.Framework.Impl.Serialization
             }
 
             var lt = new List<InitializerExpressionSyntax>();
-            var nonGenericDictionary = (IDictionary) o;
+            var nonGenericDictionary = (IDictionary) obj;
 
             foreach ( var key in nonGenericDictionary.Keys )
             {
-                ThrowIfStackTooDeep( o );
+                ThrowIfStackTooDeep( obj );
 
                 var value = nonGenericDictionary[key];
 
@@ -133,9 +109,7 @@ namespace Caravela.Framework.Impl.Serialization
                         SeparatedList<ExpressionSyntax>(
                             new SyntaxNodeOrToken[]
                             {
-                                this._serializers.Serialize( key ),
-                                Token( SyntaxKind.CommaToken ),
-                                this._serializers.Serialize( value )
+                                this.Service.Serialize( key, syntaxFactory ), Token( SyntaxKind.CommaToken ), this.Service.Serialize( value, syntaxFactory )
                             } ) ) );
             }
 

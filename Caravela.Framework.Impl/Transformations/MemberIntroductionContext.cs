@@ -11,6 +11,7 @@ namespace Caravela.Framework.Impl.Transformations
     internal sealed class MemberIntroductionContext
     {
         public IServiceProvider ServiceProvider { get; }
+
         public DiagnosticSink DiagnosticSink { get; }
 
         public IntroductionNameProvider IntroductionNameProvider { get; }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,14 +12,9 @@ namespace Caravela.Framework.Impl.Serialization
 {
     internal class CultureInfoSerializer : TypedObjectSerializer<CultureInfo>
     {
-        public override ExpressionSyntax Serialize( CultureInfo o )
+        public override ExpressionSyntax Serialize( CultureInfo o, ISyntaxFactory syntaxFactory )
         {
-            return ObjectCreationExpression(
-                    QualifiedName(
-                        QualifiedName(
-                            IdentifierName( "System" ),
-                            IdentifierName( "Globalization" ) ),
-                        IdentifierName( "CultureInfo" ) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(CultureInfo) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(
@@ -27,5 +23,7 @@ namespace Caravela.Framework.Impl.Serialization
                     Argument( LiteralExpression( o.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) )
                 .NormalizeWhitespace();
         }
+
+        public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

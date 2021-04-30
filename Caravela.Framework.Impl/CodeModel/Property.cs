@@ -72,6 +72,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => this.Base;
 
+        public PropertyInfo ToPropertyInfo() => new CompileTimePropertyInfo( this );
+
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => new CompileTimeFieldOrPropertyInfo( this );
 
         public IPropertyInvocation Base => this.Invocation.Base;

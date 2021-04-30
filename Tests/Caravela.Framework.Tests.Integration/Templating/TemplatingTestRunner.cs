@@ -33,7 +33,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private static string GeneratedDirectoryPath => Path.Combine( Environment.CurrentDirectory, "generated" );
 
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
-        private SyntaxSerializationService _syntaxSerializationService = new();
+        private readonly SyntaxSerializationService _syntaxSerializationService = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
@@ -156,7 +156,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 var driver = new TemplateDriver( templateMethod );
 
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) result.InitialCompilation );
-                var expansionContext = CreateTemplateExpansionContext( assembly, compilationModel );
+                var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel );
 
                 var output = driver.ExpandDeclaration( expansionContext );
                 result.SetTransformedTarget( output );
@@ -169,7 +169,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             return result;
         }
 
-        private  TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
+        private TemplateExpansionContext CreateTemplateExpansionContext( Assembly assembly, CompilationModel compilation )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -200,6 +200,8 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             var lexicalScope = new TemplateExpansionLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
 
+            var syntaxFactory = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
+
             return new TemplateExpansionContext(
                 templateInstance,
                 targetMethod,
@@ -208,10 +210,11 @@ namespace Caravela.Framework.Tests.Integration.Templating
                     default,
                     targetMethod,
                     LinkerAnnotationOrder.Default,
-                    ReflectionMapper.GetInstance( compilation.RoslynCompilation ) ),
+                    syntaxFactory ),
                 lexicalScope,
                 diagnostics,
-                this._syntaxSerializationService);
+                this._syntaxSerializationService,
+                syntaxFactory );
         }
     }
 }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -26,7 +27,8 @@ namespace Caravela.Framework.Impl.Templating
             IProceedImpl proceedImpl,
             TemplateExpansionLexicalScope lexicalScope,
             DiagnosticSink diagnosticSink,
-            SyntaxSerializationService syntaxSerializationService )
+            SyntaxSerializationService syntaxSerializationService,
+            ISyntaxFactory syntaxFactory )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
@@ -34,6 +36,7 @@ namespace Caravela.Framework.Impl.Templating
             this.ProceedImplementation = proceedImpl;
             this.DiagnosticSink = diagnosticSink;
             this.SyntaxSerializationService = syntaxSerializationService;
+            this.SyntaxFactory = syntaxFactory;
             this.LexicalScope = lexicalScope;
             Invariant.Assert( diagnosticSink.DefaultScope != null );
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
@@ -46,8 +49,10 @@ namespace Caravela.Framework.Impl.Templating
         public IProceedImpl ProceedImplementation { get; }
 
         public ICompilation Compilation { get; }
-        
+
         public SyntaxSerializationService SyntaxSerializationService { get; }
+
+        public ISyntaxFactory SyntaxFactory { get; }
 
         public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
         {
