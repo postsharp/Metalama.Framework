@@ -9,8 +9,7 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         public static bool IsRunTime( this SymbolDeclarationScope scope ) => scope is SymbolDeclarationScope.Both or SymbolDeclarationScope.RunTimeOnly;
 
-        public static bool IsCompileTime( this SymbolDeclarationScope scope )
-            => scope is SymbolDeclarationScope.Both or SymbolDeclarationScope.CompileTimeOnly;
+        public static bool IsCompileTime( this SymbolDeclarationScope scope ) => scope is SymbolDeclarationScope.Both or SymbolDeclarationScope.CompileTimeOnly;
 
         public static SymbolDeclarationScope ReplaceDefault( this SymbolDeclarationScope scope, SymbolDeclarationScope defaultScope )
             => scope == SymbolDeclarationScope.Both ? defaultScope : scope;

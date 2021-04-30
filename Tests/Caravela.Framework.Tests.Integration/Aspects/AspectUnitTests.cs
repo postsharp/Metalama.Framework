@@ -29,6 +29,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects
         public Task Samples( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 
         [Theory]
+        [FromDirectory( @"Aspects\CodeModel" )]
+        public Task CodeModel( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
+
+        [Theory]
         [FromDirectory( @"Aspects\Applying" )]
         public Task Applying( string testName ) => this.AssertTransformedSourceEqualAsync( testName );
 

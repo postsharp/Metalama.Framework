@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,11 +10,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class GuidSerializer : TypedObjectSerializer<Guid>
+    internal class GuidSerializer : ObjectSerializer<Guid>
     {
-        public override ExpressionSyntax Serialize( Guid o )
+        public override ExpressionSyntax Serialize( Guid obj, ISyntaxFactory syntaxFactory )
         {
-            var b = o.ToByteArray();
+            var b = obj.ToByteArray();
 
             var a = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
             var b2 = (short) ((b[5] << 8) | b[4]);
@@ -27,10 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
             var j = b[14];
             var k = b[15];
 
-            return ObjectCreationExpression(
-                    QualifiedName(
-                        IdentifierName( "System" ),
-                        IdentifierName( "Guid" ) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(Guid) ) )
                 .AddArgumentListArguments(
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
@@ -45,5 +43,7 @@ namespace Caravela.Framework.Impl.Serialization
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public GuidSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl.Linking
             if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
             {
                 // TODO: Add the namespace.
-                return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
+                return this._syntaxFactory.GetTypeSyntax( typeof(__Void) );
             }
 
             // TODO: Introduced types?

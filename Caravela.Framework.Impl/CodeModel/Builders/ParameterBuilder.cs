@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -28,6 +29,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
         public IMember DeclaringMember { get; }
+
+        public ParameterInfo ToRunTimeReflection() => throw new NotImplementedException();
+
+        public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
         public ParameterBuilder( MethodBuilder containingMethod, int index, string? name, IType type, RefKind refKind ) : base( containingMethod.ParentAdvice )
         {

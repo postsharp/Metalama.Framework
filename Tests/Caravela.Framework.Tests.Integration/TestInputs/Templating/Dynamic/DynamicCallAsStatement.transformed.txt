@@ -1,0 +1,5 @@
+{
+    this.Method(0);
+    _ = this.Method(1);
+    return default;
+}

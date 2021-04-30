@@ -1,27 +1,24 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CaravelaEventInfoSerializer : TypedObjectSerializer<CompileTimeEventInfo>
+    internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo>
     {
-        private readonly CaravelaTypeSerializer _caravelaTypeSerializer;
-
-        public CaravelaEventInfoSerializer( CaravelaTypeSerializer caravelaTypeSerializer )
+        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, ISyntaxFactory syntaxFactory )
         {
-            this._caravelaTypeSerializer = caravelaTypeSerializer;
-        }
-
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo o )
-        {
-            var eventName = o.Symbol.Name;
-            var typeCreation = this._caravelaTypeSerializer.Serialize( CompileTimeType.Create( o.ContainingType ) );
+            var eventName = obj.Symbol.Name;
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( obj.ContainingType ), syntaxFactory );
 
             return InvocationExpression(
                     MemberAccessExpression(
@@ -31,5 +28,9 @@ namespace Caravela.Framework.Impl.Serialization
                 .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
     }
 }

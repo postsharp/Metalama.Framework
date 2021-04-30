@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,17 +11,14 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class ArraySerializer
+    internal class ArraySerializer : ObjectSerializer
     {
-        private readonly ObjectSerializers _serializers;
+        public ArraySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
-        public ArraySerializer( ObjectSerializers serializers )
+        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
         {
-            this._serializers = serializers;
-        }
+            var array = (Array) obj;
 
-        public ExpressionSyntax Serialize( Array array )
-        {
             var elementType = array.GetType().GetElementType()!;
 
             if ( array.Rank > 1 )
@@ -32,12 +30,12 @@ namespace Caravela.Framework.Impl.Serialization
 
             foreach ( var o in array )
             {
-                ObjectSerializer.ThrowIfStackTooDeep( o );
-                lt.Add( this._serializers.SerializeToRoslynCreationExpression( o ) );
+                ThrowIfStackTooDeep( o );
+                lt.Add( this.Service.Serialize( o, syntaxFactory ) );
             }
 
             return ArrayCreationExpression(
-                    ArrayType( ParseTypeName( TypeNameUtility.ToCSharpQualifiedName( elementType ) ) )
+                    ArrayType( syntaxFactory.GetTypeSyntax( elementType ) )
                         .WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
                 .WithInitializer(
                     InitializerExpression(
@@ -45,5 +43,9 @@ namespace Caravela.Framework.Impl.Serialization
                         SeparatedList( lt ) ) )
                 .NormalizeWhitespace();
         }
+
+        public override Type InputType => typeof(Array);
+
+        public override Type OutputType => throw new NotSupportedException();
     }
 }

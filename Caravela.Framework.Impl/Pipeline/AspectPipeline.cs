@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using MoreLinq;
@@ -29,11 +30,14 @@ namespace Caravela.Framework.Impl.Pipeline
 
         protected ServiceProvider ServiceProvider { get; } = new();
 
+        IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
+
         protected AspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null )
         {
             this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
             this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
+            this.ServiceProvider.AddService( new SyntaxSerializationService() );
 
             if ( assemblyLocator != null )
             {

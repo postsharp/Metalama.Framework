@@ -4,8 +4,10 @@
 // ReSharper disable RedundantUsingDirective
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -24,11 +26,13 @@ namespace Caravela.Framework.Impl.Templating
     /// Compiles the source code of a template, annotated with <see cref="TemplateAnnotator"/>,
     /// to an executable template.
     /// </summary>
-    internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter
+    internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
+        private readonly TemplateMemberClassifier _templateMemberClassifier;
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
@@ -36,16 +40,20 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateCompilerRewriter(
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IDiagnosticAdder diagnosticAdder ) : base( compileTimeCompilation )
+            IDiagnosticAdder diagnosticAdder,
+            IServiceProvider serviceProvider ) : base( compileTimeCompilation )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
+            this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, semanticAnnotationMap );
         }
 
         public bool Success { get; private set; } = true;
 
-        private void ReportDiagnostic( Diagnostic diagnostic )
+        public void ReportDiagnostic( Diagnostic diagnostic )
         {
             this._diagnosticAdder.ReportDiagnostic( diagnostic );
 
@@ -147,30 +155,13 @@ namespace Caravela.Framework.Impl.Templating
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax 
+                           || parent is SwitchSectionSyntax
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
             }
 
             return TransformationKind.Transform;
-        }
-
-        /// <summary>
-        /// Determines if a symbol represents a call to <c>proceed()</c>.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        private bool IsProceed( SyntaxNode node )
-        {
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
-
-            if ( symbol == null )
-            {
-                return false;
-            }
-
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
         }
 
         /// <summary>
@@ -272,7 +263,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-                if ( this.IsDeclaredWithinTemplate(identifierSymbol!) )
+                if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
                 {
                     if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
                     {
@@ -311,17 +302,18 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private bool IsDeclaredWithinTemplate(ISymbol symbol)
+        private bool IsDeclaredWithinTemplate( ISymbol symbol )
         {
-            if (symbol == null)
+            if ( symbol == null )
             {
                 return false;
             }
             else
-            { 
+            {
                 // Symbol is Declared in Template if ContainsSymbol is Template method or if ContainsSymbol
                 // is child level of Template method f.e. local function etc.
-                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol ) || this.IsDeclaredWithinTemplate(symbol.ContainingSymbol);
+                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol )
+                       || this.IsDeclaredWithinTemplate( symbol.ContainingSymbol );
             }
         }
 
@@ -440,7 +432,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( type.Name )
             {
                 case "dynamic":
-                    if ( this.IsProceed( expression ) )
+                    if ( this._templateMemberClassifier.IsProceed( expression ) )
                     {
                         this.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic(
@@ -489,12 +481,20 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 default:
-                    // TODO: don't throw an exception, but add a diagnostic and continue (return the expression). This requires Radka's PR to be merged.
-                    // TODO: pluggable syntax serializers must be called here.
-                    throw new InvalidUserCodeException(
-                        TemplatingDiagnosticDescriptors.CannotConvertBuildTime.CreateDiagnostic(
-                            this._semanticAnnotationMap.GetLocation( expression ),
-                            (expression.ToString(), type) ) );
+                    // Try to find a serializer for this type.
+                    if ( this._serializableTypes.IsSerializable( type, this._semanticAnnotationMap.GetLocation( expression ), this ) )
+                    {
+                        return InvocationExpression(
+                            this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
+                                nameof(TemplateSyntaxFactory.Serialize),
+                                this.MetaSyntaxFactory.Type( type ) ),
+                            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                    }
+                    else
+                    {
+                        // We don't have a valid tree, but let the compilation continue.
+                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
+                    }
             }
         }
 
@@ -534,23 +534,26 @@ namespace Caravela.Framework.Impl.Templating
             // return null in case of pragma. In this case, the ExpressionStatement must return null too.
             // In the default implementation, such case would result in an exception.
 
-            switch ( this.GetTransformationKind( node ) )
+            if ( this.GetTransformationKind( node ) == TransformationKind.Transform
+                 || this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node.Expression ) )
             {
-                case TransformationKind.Transform:
-                    return this.TransformExpressionStatement( node );
+                return this.TransformExpressionStatement( node );
+            }
+            else
+            {
+                var transformedExpression = this.Visit( node.Expression );
 
-                default:
-                    var transformedExpression = this.Visit( node.Expression );
-
-                    if ( transformedExpression == null )
-                    {
-                        return null;
-                    }
-
+                if ( transformedExpression == null )
+                {
+                    return null;
+                }
+                else
+                {
                     return node.Update(
                         this.VisitList( node.AttributeLists ),
                         (ExpressionSyntax) transformedExpression!,
                         this.VisitToken( node.SemicolonToken ) );
+                }
             }
         }
 
@@ -572,11 +575,17 @@ namespace Caravela.Framework.Impl.Templating
                                 a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
             }
 
-            if ( this.IsProceed( node.Expression ) )
+            if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
+                // We cannot call proceed in an unsupported statement.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
 
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
+            }
+            else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
+            {
+                // Replace `runtime(x)` to `x`.
+                return this.TransformExpression( node.ArgumentList.Arguments[0].Expression );
             }
             else if ( this.TryGetPragma( node.Expression, out var pragmaKind ) )
             {
@@ -994,7 +1003,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var proceedAssignments =
                 node.Declaration.Variables
-                    .Where( n => n.Initializer != null && this.IsProceed( n.Initializer.Value ) )
+                    .Where( n => n.Initializer != null && this._templateMemberClassifier.IsProceed( n.Initializer.Value ) )
                     .ToList();
 
             if ( proceedAssignments.Count == 0 )
@@ -1053,7 +1062,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
-            if ( node.Expression != null && this.IsProceed( node.Expression ) )
+            if ( node.Expression != null && this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
                 var expressionType = this._semanticAnnotationMap.GetExpressionType( node.Expression );
 

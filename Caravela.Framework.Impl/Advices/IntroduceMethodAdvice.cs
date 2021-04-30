@@ -62,7 +62,7 @@ namespace Caravela.Framework.Impl.Advices
                     }
 
                 case IntroductionScope.Instance:
-                    if ( this.TargetDeclaration.IsStatic && this.TargetDeclaration is IType )
+                    if ( this.TargetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
                         diagnosticAdder.ReportDiagnostic(

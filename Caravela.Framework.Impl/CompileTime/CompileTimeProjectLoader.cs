@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 if ( fallbackToMock )
                 {
-                    result = new CompileTimeType( typeSymbol );
+                    result = CompileTimeType.Create( typeSymbol );
                 }
                 else
                 {

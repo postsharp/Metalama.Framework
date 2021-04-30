@@ -33,6 +33,13 @@ namespace Caravela.Framework.Impl.Templating
                     this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
                     SyntaxFactory.IdentifierName( name ) );
 
+            public MemberAccessExpressionSyntax GenericTemplateSyntaxFactoryMember( string name, params TypeSyntax[] genericParameters )
+                => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
+                    SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
+                        .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
+
             /// <summary>
             /// Generates a call to the <see cref="TemplateSyntaxFactory.GetUniqueIdentifier"/> method.
             /// </summary>

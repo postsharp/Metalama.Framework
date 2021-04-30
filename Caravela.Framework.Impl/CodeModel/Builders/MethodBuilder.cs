@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
@@ -22,6 +23,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
         public IMethod? OverriddenMethod { get; set; }
+
+        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
@@ -71,6 +74,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
 
+        System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
+
         IMethod IMethod.WithGenericArguments( params IType[] genericArguments ) => throw new NotImplementedException();
 
         bool IMethod.HasBase => throw new NotImplementedException();
@@ -102,7 +107,6 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
-            var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
 
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(

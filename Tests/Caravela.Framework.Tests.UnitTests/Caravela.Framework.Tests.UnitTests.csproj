@@ -15,6 +15,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
     <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,10 +24,6 @@
     <ProjectReference Include="..\..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\..\Caravela.Framework\Caravela.Framework.csproj" />
     <ProjectReference Include="..\..\Caravela.TestFramework\Caravela.TestFramework.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utilities\" />
   </ItemGroup>
 
 </Project>

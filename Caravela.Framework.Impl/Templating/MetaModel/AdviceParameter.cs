@@ -6,6 +6,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
@@ -25,6 +26,8 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public bool IsParams => this._parameter.IsParams;
 
         public IMember DeclaringMember => this._parameter.DeclaringMember;
+
+        public ParameterInfo ToParameterInfo() => this._parameter.ToParameterInfo();
 
         public IType ParameterType => this._parameter.ParameterType;
 

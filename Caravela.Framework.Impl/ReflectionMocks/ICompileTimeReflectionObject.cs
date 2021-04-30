@@ -5,8 +5,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal interface IReflectionMockCodeElement
+    internal interface ICompileTimeReflectionObject
     {
+        // TODO: We won't have a symbol for introduced members.
         ISymbol Symbol { get; }
     }
 }

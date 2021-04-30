@@ -5,14 +5,22 @@ using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    public static class TemplateCompiler
+    public class TemplateCompiler
     {
         public const string TemplateMethodSuffix = "_Template";
+
+        private readonly IServiceProvider _serviceProvider;
+
+        public TemplateCompiler( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         private static bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
@@ -60,14 +68,13 @@ namespace Caravela.Framework.Impl.Templating
         public static bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
-            bool reportDiagnosticsToInitialCompilation,
             IDiagnosticAdder diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot )
         {
             return TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, out _, out annotatedSyntaxRoot );
         }
 
-        public static bool TryCompile(
+        public bool TryCompile(
             Compilation compileTimeCompilation,
             MethodDeclarationSyntax sourceSyntaxRoot,
             SemanticModel semanticModel,
@@ -83,7 +90,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, symbolAnnotationMap, diagnostics );
+            var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, symbolAnnotationMap, diagnostics, this._serviceProvider );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;

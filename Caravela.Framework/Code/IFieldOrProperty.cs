@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Project;
+
 #pragma warning disable SA1623 // Property summary documentation should match accessors
 
 namespace Caravela.Framework.Code
@@ -39,5 +41,12 @@ namespace Caravela.Framework.Code
         /// Allows invocation of the base method (<see langword="null" /> if the method was introduced by the current aspect).
         /// </summary>
         IFieldOrPropertyInvocation Base { get; }
+
+        /// <summary>
+        /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.
+        /// </summary>
+        /// <returns>A <see cref="FieldOrPropertyInfo"/> that can be used only in run-time code.</returns>
+        [return: RunTimeOnly]
+        FieldOrPropertyInfo ToFieldOrPropertyInfo();
     }
 }

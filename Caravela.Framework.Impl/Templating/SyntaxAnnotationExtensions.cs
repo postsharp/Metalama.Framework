@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
-        private static readonly SyntaxAnnotation _uknownAnnotation = new( _scopeAnnotationKind, "unknown" );
+        private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, "unknown" );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Templating
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
                 case SymbolDeclarationScope.Unknown:
-                    return node.WithAdditionalAnnotations( _uknownAnnotation );
+                    return node.WithAdditionalAnnotations( _unknownAnnotation );
 
                 default:
                     return node;

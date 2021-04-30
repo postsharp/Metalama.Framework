@@ -1,0 +1,4 @@
+// Compilation error. Code not generated.
+// Error CR0200 on `target.Method`: `Cannot serialize the compile-time value of type 'IMethod' to a run-time value because this type is not serializable.`
+
+;

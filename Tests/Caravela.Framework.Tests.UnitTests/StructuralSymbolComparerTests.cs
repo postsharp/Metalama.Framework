@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Impl.Linking;
+using Caravela.Framework.Impl.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
-namespace Caravela.Framework.Tests.UnitTests.Utilities
+namespace Caravela.Framework.Tests.UnitTests
 {
     public class StructuralSymbolComparerTests : TestBase
     {
@@ -58,7 +58,7 @@ namespace D {}
             var typeA = globalNamespaceMembers[0];
             var typeB = globalNamespaceMembers[1];
             var namespaceC = globalNamespaceMembers[2];
-            var typeCB = namespaceC.GetMembers().Single();
+            var typeCb = namespaceC.GetMembers().Single();
             var namespaceD = globalNamespaceMembers[3];
             var typeAFoo = typeA.GetMembers()[0];
             var typeABar = typeA.GetMembers()[1];
@@ -74,7 +74,7 @@ namespace D {}
 
             // Types
             NotEqual( comparer, typeA, typeB );
-            Equal( comparer, typeB, typeCB );
+            Equal( comparer, typeB, typeCb );
 
             // Methods
             NotEqual( comparer, typeAFoo, typeABar );

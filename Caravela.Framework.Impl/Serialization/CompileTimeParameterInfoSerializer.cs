@@ -7,33 +7,29 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CaravelaParameterInfoSerializer : TypedObjectSerializer<CompileTimeParameterInfo>
+    internal class CompileTimeParameterInfoSerializer : ObjectSerializer<CompileTimeParameterInfo, ParameterInfo>
     {
-        private readonly CaravelaMethodInfoSerializer _caravelaMethodInfoSerializer;
-
-        public CaravelaParameterInfoSerializer( CaravelaMethodInfoSerializer caravelaMethodInfoSerializer )
+        public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, ISyntaxFactory syntaxFactory )
         {
-            this._caravelaMethodInfoSerializer = caravelaMethodInfoSerializer;
-        }
-
-        public override ExpressionSyntax Serialize( CompileTimeParameterInfo o )
-        {
-            var container = o.ContainingMember;
+            var container = obj.DeclaringMember;
             var containerAsMember = container as IMember;
-            var method = containerAsMember as Method;
+            var method = containerAsMember as IMethodBase;
             var property = containerAsMember as Property;
-            var ordinal = o.ParameterSymbol.Ordinal;
+            var ordinal = obj.ParameterSymbol.Ordinal;
 
             if ( method == null && property != null )
             {
-                method = property.Setter as Method;
+                method = (property.Getter ?? property.Setter)!;
             }
 
-            var retrieveMethodBase = this._caravelaMethodInfoSerializer.Serialize( new CompileTimeMethodInfo( method! ) );
+            var retrieveMethodBase = this.Service.CompileTimeMethodInfoSerializer.SerializeMethodBase(
+                (ICompileTimeReflectionMember) method!.ToMethodBase(),
+                syntaxFactory );
 
             return ElementAccessExpression(
                     InvocationExpression(
@@ -50,5 +46,7 @@ namespace Caravela.Framework.Impl.Serialization
                                     Literal( ordinal ) ) ) ) ) )
                 .NormalizeWhitespace();
         }
+
+        public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }

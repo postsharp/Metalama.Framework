@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
@@ -15,6 +17,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public Member DeclaringMember => (Member) this.Compilation.Factory.GetCodeElement( this.ParameterSymbol.ContainingSymbol );
+
+        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingElement );
 
         IMember IParameter.DeclaringMember => this.DeclaringMember;
 

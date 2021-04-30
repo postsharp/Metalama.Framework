@@ -7,6 +7,7 @@ using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Reflection;
 using RefKind = Caravela.Framework.Code.RefKind;
 
 namespace Caravela.Framework.Impl.CodeModel
@@ -54,6 +55,10 @@ namespace Caravela.Framework.Impl.CodeModel
 
         IFieldOrPropertyInvocation IFieldOrProperty.Base => new PropertyInvocation( this ).Base;
 
+        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
+
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+
         public IPropertyInvocation Base => throw new NotImplementedException();
 
         RefKind IProperty.RefKind => RefKind.None;
@@ -69,6 +74,8 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
+
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
         dynamic IPropertyInvocation.GetIndexerValue( dynamic? instance, params dynamic[] args ) => this.Invocation.GetIndexerValue( instance, args );
 

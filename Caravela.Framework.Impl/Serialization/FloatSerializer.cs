@@ -1,16 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class FloatSerializer : TypedObjectSerializer<float>
+    internal class FloatSerializer : ObjectSerializer<float>
     {
-        public override ExpressionSyntax Serialize( float o )
+        public override ExpressionSyntax Serialize( float obj, ISyntaxFactory syntaxFactory )
         {
-            if ( float.IsPositiveInfinity( o ) )
+            if ( float.IsPositiveInfinity( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -18,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "PositiveInfinity" ) );
             }
 
-            if ( float.IsNegativeInfinity( o ) )
+            if ( float.IsNegativeInfinity( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -26,7 +27,7 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "NegativeInfinity" ) );
             }
 
-            if ( float.IsNaN( o ) )
+            if ( float.IsNaN( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -34,7 +35,9 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "NaN" ) );
             }
 
-            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( o ) );
+            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }
+
+        public FloatSerializer( SyntaxSerializationService service ) : base( service ) { }
     }
 }
