@@ -13,6 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         {
             try
             {
+                Console.WriteLine(target.Parameters.Count);
                 return proceed();
             }
             catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))

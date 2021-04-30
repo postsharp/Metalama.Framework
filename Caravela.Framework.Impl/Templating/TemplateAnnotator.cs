@@ -1041,6 +1041,14 @@ namespace Caravela.Framework.Impl.Templating
 
         private void RequireScope( SyntaxNode node, SymbolDeclarationScope requiredScope, string reason )
             => this.RequireScope( node, this.GetNodeScope( node ), requiredScope, reason );
+        
+        private void RequireScope( BlockSyntax node, SymbolDeclarationScope requiredScope, string reason )
+        {
+            foreach ( var statement in node.Statements )
+            {
+                this.RequireScope( statement, requiredScope, reason );
+            }
+        }
 
         private void RequireScope( SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason )
         {
@@ -1126,10 +1134,26 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
         {
-            var annnotated = (BlockSyntax)this.Visit( node.Block )!;
-            this.RequireScope( annnotated, SymbolDeclarationScope.RunTimeOnly, "a 'try' statement" );
+            var annotatedBlock = (BlockSyntax) this.Visit( node.Block )!;
+            this.RequireScope( annotatedBlock, SymbolDeclarationScope.RunTimeOnly, "a 'try' statement" );
 
-            return node.WithBlock( annnotated )!.AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
+            var annotatedCatches = new CatchClauseSyntax[node.Catches.Count];
+            for ( var i = 0; i < node.Catches.Count; i++ )
+            {
+                var @catch = node.Catches[i];
+                var annotatedCatch = (CatchClauseSyntax) this.Visit( @catch )!;
+                this.RequireScope( annotatedCatch.Block, SymbolDeclarationScope.RunTimeOnly, "a 'catch' statement" );
+                annotatedCatches[i] = annotatedCatch;
+            }
+
+            FinallyClauseSyntax? annotatedFinally = null;
+            if ( node.Finally != null )
+            {
+                annotatedFinally = (FinallyClauseSyntax) this.Visit( node.Finally )!;
+                this.RequireScope( annotatedFinally.Block, SymbolDeclarationScope.RunTimeOnly, "a 'finally' statement" );
+            }
+
+            return node.WithBlock( annotatedBlock ).WithCatches(List(annotatedCatches)).WithFinally(annotatedFinally!).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
     }
 }
