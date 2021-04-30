@@ -132,7 +132,7 @@ class Expression
 #pragma warning disable CS0162 // Unreachable code detected
 
 // ReSharper disable HeuristicUnreachableCode
-            
+
             if ( _doCodeExecutionTests )
             {
                 var t = (T) ExecuteExpression( context, expression )!;

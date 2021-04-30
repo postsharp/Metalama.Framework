@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
-        
+
         public override MemberInfo ToMemberInfo() => new CompileTimeFieldOrPropertyInfo( this );
     }
 }

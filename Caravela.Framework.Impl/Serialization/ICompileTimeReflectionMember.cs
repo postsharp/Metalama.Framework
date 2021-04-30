@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal interface IReflectionMockMember : IReflectionMockCodeElement
+    internal interface ICompileTimeReflectionMember : ICompileTimeReflectionObject
     {
         ITypeSymbol? DeclaringTypeSymbol { get; }
     }

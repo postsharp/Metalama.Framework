@@ -3,7 +3,9 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Serialization;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Tests.UnitTests.Serialization
 {
@@ -19,7 +21,14 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         {
             // We need a syntax factory for an arbitrary compilation, but at least with standard references.
             // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
-            this.SyntaxFactory = ReflectionMapper.GetInstance( CreateRoslynCompilation( "/* No code is necessary, only references */" ) );
+            this.SyntaxFactory = ReflectionMapper.GetInstance(
+                CreateRoslynCompilation(
+                    "/* No code is necessary, only references */",
+                    additionalReferences: new[]
+                    {
+                        MetadataReference.CreateFromFile( typeof(ICompileTimeReflectionMember).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof(Queue<>).Assembly.Location )
+                    } ) );
 
             this.SerializationService = new SyntaxSerializationService();
         }

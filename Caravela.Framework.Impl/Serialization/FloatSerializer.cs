@@ -7,11 +7,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class FloatSerializer : TypedObjectSerializer<float>
+    internal class FloatSerializer : ObjectSerializer<float>
     {
-        public override ExpressionSyntax Serialize( float o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( float obj, ISyntaxFactory syntaxFactory )
         {
-            if ( float.IsPositiveInfinity( o ) )
+            if ( float.IsPositiveInfinity( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "PositiveInfinity" ) );
             }
 
-            if ( float.IsNegativeInfinity( o ) )
+            if ( float.IsNegativeInfinity( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "NegativeInfinity" ) );
             }
 
-            if ( float.IsNaN( o ) )
+            if ( float.IsNaN( obj ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.Serialization
                     SyntaxFactory.IdentifierName( "NaN" ) );
             }
 
-            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( o ) );
+            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }
 
         public FloatSerializer( SyntaxSerializationService service ) : base( service ) { }

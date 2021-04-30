@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.Advices
                 "CRA0003",
                 "Cannot introduce member into a type because it is sealed in a base class.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and " +
-                " its IsStatic flag is opposite of the introduced member.",
+                "its IsStatic flag is opposite of the introduced member.",
                 _category,
                 Error );
 

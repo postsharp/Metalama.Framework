@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract TypeKind TypeKind { get; }
 
-        public Type ToType() => new CompileTimeType( this.Symbol );
+        public Type ToType() => CompileTimeType.Create( this.Symbol );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

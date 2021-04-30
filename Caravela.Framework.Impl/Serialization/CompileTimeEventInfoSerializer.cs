@@ -6,16 +6,19 @@ using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimeEventInfoSerializer : TypedObjectSerializer<CompileTimeEventInfo>
+    internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, ISyntaxFactory syntaxFactory )
         {
-            var eventName = o.Symbol.Name;
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( o.ContainingType ), syntaxFactory );
+            var eventName = obj.Symbol.Name;
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( obj.ContainingType ), syntaxFactory );
 
             return InvocationExpression(
                     MemberAccessExpression(
@@ -27,5 +30,7 @@ namespace Caravela.Framework.Impl.Serialization
         }
 
         public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
     }
 }

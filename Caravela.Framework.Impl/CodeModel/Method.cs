@@ -78,7 +78,7 @@ namespace Caravela.Framework.Impl.CodeModel
             }
         }
 
-        public MethodInfo ToMethodInfo() => new CompileTimeMethodInfo( this );
+        public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
     }

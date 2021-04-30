@@ -5,8 +5,10 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -31,6 +33,14 @@ namespace Caravela.Framework.Impl.Serialization
                 .NormalizeWhitespace();
         }
 
+        public override Type InputType => typeof(IEnumerable<>);
+
+        public override Type OutputType => typeof(List<>);
+
+        public override int Priority => 1;
+
         public ListSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>) );
     }
 }

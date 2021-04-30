@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public abstract IMember DeclaringMember { get; }
 
-        public ParameterInfo ToParameterInfo() => new CompileTimeReturnParameterInfo( this );
+        public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 

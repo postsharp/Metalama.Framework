@@ -13,10 +13,10 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class TypeSerializer : TypedObjectSerializer<Type>
+    internal class TypeSerializer : ObjectSerializer<Type>
     {
-        public override ExpressionSyntax Serialize( Type o, ISyntaxFactory syntaxFactory ) 
-            => this.SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( o ), syntaxFactory );
+        public override ExpressionSyntax Serialize( Type obj, ISyntaxFactory syntaxFactory )
+            => this.SerializeTypeSymbolRecursive( syntaxFactory.GetTypeSymbol( obj ), syntaxFactory );
 
         public ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, ISyntaxFactory syntaxFactory )
         {

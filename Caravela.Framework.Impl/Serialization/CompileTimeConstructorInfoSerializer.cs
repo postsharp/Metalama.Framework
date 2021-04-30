@@ -9,13 +9,13 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimeConstructorInfoSerializer : CompileTimeMethodInfoSerializer
+    internal class CompileTimeConstructorInfoSerializer : CaravelaMethodBaseSerializer<CompileTimeConstructorInfo, ConstructorInfo>
     {
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, ISyntaxFactory syntaxFactory )
             => SyntaxFactory.ParenthesizedExpression(
                 SyntaxFactory.CastExpression(
                     syntaxFactory.GetTypeSyntax( typeof(ConstructorInfo) ),
-                    this.SerializeMethodBase( (CompileTimeConstructorInfo) obj, syntaxFactory ) ) );
+                    this.SerializeMethodBase( obj, syntaxFactory ) ) );
 
         public CompileTimeConstructorInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }

@@ -136,7 +136,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
             var property = (Property) single;
-            var actual = this.Serialize( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
+            var actual = this.Serialize<FieldOrPropertyInfo>( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
 
             return actual;
         }
@@ -153,7 +153,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = this.Serialize( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
+            var actual = this.Serialize<FieldOrPropertyInfo>( new CompileTimeFieldOrPropertyInfo( property ) ).ToString();
 
             return actual;
         }

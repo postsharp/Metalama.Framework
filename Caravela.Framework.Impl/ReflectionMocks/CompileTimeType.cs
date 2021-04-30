@@ -11,19 +11,18 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeType : Type, IReflectionMockCodeElement
+    internal class CompileTimeType : Type, ICompileTimeReflectionObject
     {
         public ITypeSymbol TypeSymbol { get; }
 
-        public CompileTimeType( ITypeSymbol typeSymbol )
+        private CompileTimeType( ITypeSymbol typeSymbol )
         {
             this.TypeSymbol = typeSymbol;
         }
 
-        public static CompileTimeType Create( IType type )
-        {
-            return new( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
-        }
+        public static Type Create( ITypeSymbol typeSymbol ) => new CompileTimeType( typeSymbol );
+
+        public static Type Create( IType type ) => Create( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
 
         public override string Namespace => this.TypeSymbol.ContainingNamespace.GetReflectionName();
 
@@ -31,7 +30,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public override string FullName => this.TypeSymbol.GetReflectionName();
 
-        ISymbol IReflectionMockCodeElement.Symbol => this.TypeSymbol;
+        ISymbol ICompileTimeReflectionObject.Symbol => this.TypeSymbol;
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

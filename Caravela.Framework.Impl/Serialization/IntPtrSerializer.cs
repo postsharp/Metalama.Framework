@@ -8,16 +8,16 @@ using System;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class IntPtrSerializer : TypedObjectSerializer<IntPtr>
+    internal class IntPtrSerializer : ObjectSerializer<IntPtr>
     {
-        public override ExpressionSyntax Serialize( IntPtr o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( IntPtr obj, ISyntaxFactory syntaxFactory )
         {
             return SyntaxFactory.ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(IntPtr) ) )
                 .AddArgumentListArguments(
                     SyntaxFactory.Argument(
                         SyntaxFactory.LiteralExpression(
                             SyntaxKind.NumericLiteralExpression,
-                            SyntaxFactory.Literal( o.ToInt64() ) ) ) );
+                            SyntaxFactory.Literal( obj.ToInt64() ) ) ) );
         }
 
         public IntPtrSerializer( SyntaxSerializationService service ) : base( service ) { }

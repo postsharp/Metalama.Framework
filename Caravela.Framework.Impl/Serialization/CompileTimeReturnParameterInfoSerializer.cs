@@ -7,20 +7,21 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimeReturnParameterInfoSerializer : TypedObjectSerializer<CompileTimeReturnParameterInfo>
+    internal class CompileTimeReturnParameterInfoSerializer : ObjectSerializer<CompileTimeReturnParameterInfo, ParameterInfo>
     {
-        public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeReturnParameterInfo obj, ISyntaxFactory syntaxFactory )
         {
             ExpressionSyntax? methodBaseExpression;
 
-            switch ( o.DeclaringMember )
+            switch ( obj.DeclaringMember )
             {
                 case Method method:
-                    methodBaseExpression = this.Service.CompileTimeMethodInfoSerializer.Serialize( new CompileTimeMethodInfo( method ), syntaxFactory );
+                    methodBaseExpression = this.Service.CompileTimeMethodInfoSerializer.Serialize( CompileTimeMethodInfo.Create( method ), syntaxFactory );
 
                     break;
 

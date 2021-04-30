@@ -26,8 +26,8 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public override bool IsAsync => false;
 
-        public ConstructorInfo ToConstructorInfo() => new CompileTimeConstructorInfo( this );
+        public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
-        public override System.Reflection.MethodBase ToMethodBase() => new CompileTimeConstructorInfo( this );
+        public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
     }
 }

@@ -9,16 +9,18 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimePropertyInfoSerializer : TypedObjectSerializer<CompileTimePropertyInfo>
+    internal class CompileTimePropertyInfoSerializer : ObjectSerializer<CompileTimePropertyInfo, PropertyInfo>
     {
         public CompileTimePropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ExpressionSyntax Serialize( CompileTimePropertyInfo o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimePropertyInfo obj, ISyntaxFactory syntaxFactory )
         {
-            var property = o.Property;
+            var property = obj.Property;
 
             return this.SerializeProperty( property, syntaxFactory );
         }
@@ -79,5 +81,7 @@ namespace Caravela.Framework.Impl.Serialization
                     ;
             }
         }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
     }
 }

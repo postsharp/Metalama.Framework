@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Fields.Single( m => m.Name == "Field" );
-            var actual = this.Serialize( new CompileTimeFieldOrPropertyInfo( (Field) single ) ).ToString();
+            var actual = this.Serialize<FieldOrPropertyInfo>( new CompileTimeFieldOrPropertyInfo( (Field) single ) ).ToString();
 
             return actual;
         }

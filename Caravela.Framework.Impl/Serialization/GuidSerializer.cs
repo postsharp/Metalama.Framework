@@ -10,11 +10,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class GuidSerializer : TypedObjectSerializer<Guid>
+    internal class GuidSerializer : ObjectSerializer<Guid>
     {
-        public override ExpressionSyntax Serialize( Guid o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( Guid obj, ISyntaxFactory syntaxFactory )
         {
-            var b = o.ToByteArray();
+            var b = obj.ToByteArray();
 
             var a = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
             var b2 = (short) ((b[5] << 8) | b[4]);

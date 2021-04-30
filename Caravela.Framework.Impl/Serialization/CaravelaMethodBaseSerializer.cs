@@ -6,15 +6,20 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
+using System.Reflection;
 using MethodBase = System.Reflection.MethodBase;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal abstract class CaravelaMethodBaseSerializer : ObjectSerializer
+    internal abstract class CaravelaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
+        where TInput : MethodBase, TOutput
+        where TOutput : MethodBase
     {
         public CaravelaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        internal ExpressionSyntax SerializeMethodBase( IReflectionMockMember method, ISyntaxFactory syntaxFactory )
+        internal ExpressionSyntax SerializeMethodBase( ICompileTimeReflectionMember method, ISyntaxFactory syntaxFactory )
             => this.SerializeMethodBase( (IMethodSymbol) method.Symbol, method.DeclaringTypeSymbol, syntaxFactory );
 
         internal ExpressionSyntax SerializeMethodBase(
@@ -59,5 +64,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             return typeHandle;
         }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }
 }

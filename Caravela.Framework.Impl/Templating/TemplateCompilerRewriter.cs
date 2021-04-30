@@ -4,8 +4,10 @@
 // ReSharper disable RedundantUsingDirective
 
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -24,30 +26,34 @@ namespace Caravela.Framework.Impl.Templating
     /// Compiles the source code of a template, annotated with <see cref="TemplateAnnotator"/>,
     /// to an executable template.
     /// </summary>
-    internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter
+    internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDiagnosticAdder
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
-        
+
         public TemplateCompilerRewriter(
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
-            IDiagnosticAdder diagnosticAdder ) : base( compileTimeCompilation )
+            IDiagnosticAdder diagnosticAdder,
+            IServiceProvider serviceProvider ) : base( compileTimeCompilation )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
+            var syntaxSerializationService = serviceProvider.GetService<SyntaxSerializationService>();
+            this._serializableTypes = syntaxSerializationService.GetSerializableTypes( ReflectionMapper.GetInstance( compileTimeCompilation ) );
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( compileTimeCompilation, semanticAnnotationMap );
         }
 
         public bool Success { get; private set; } = true;
 
-        private void ReportDiagnostic( Diagnostic diagnostic )
+        public void ReportDiagnostic( Diagnostic diagnostic )
         {
             this._diagnosticAdder.ReportDiagnostic( diagnostic );
 
@@ -462,11 +468,20 @@ namespace Caravela.Framework.Impl.Templating
                             Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateReferenceId( type ) ) ) ) );
 
                 default:
-                    return InvocationExpression(
-                        this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
-                            nameof(TemplateSyntaxFactory.Serialize),
-                            this.MetaSyntaxFactory.Type( type ) ),
-                        ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                    // Try to find a serializer for this type.
+                    if ( this._serializableTypes.IsSerializable( type, this._semanticAnnotationMap.GetLocation( expression ), this ) )
+                    {
+                        return InvocationExpression(
+                            this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
+                                nameof(TemplateSyntaxFactory.Serialize),
+                                this.MetaSyntaxFactory.Type( type ) ),
+                            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+                    }
+                    else
+                    {
+                        // We don't have a valid tree, but let the compilation continue.
+                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
+                    }
             }
         }
 

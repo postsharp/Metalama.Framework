@@ -10,12 +10,14 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimePropertyInfo : PropertyInfo, IReflectionMockCodeElement
+    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject
     {
-        public CompileTimePropertyInfo( IProperty property )
+        private CompileTimePropertyInfo( IProperty property )
         {
             this.Property = property;
         }
+
+        public static PropertyInfo Create( IProperty property ) => new CompileTimePropertyInfo( property );
 
         public IProperty Property { get; }
 

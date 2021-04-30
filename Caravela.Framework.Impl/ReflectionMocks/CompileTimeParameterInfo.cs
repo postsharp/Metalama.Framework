@@ -7,18 +7,21 @@ using System.Reflection;
 
 namespace Caravela.Framework.Impl.ReflectionMocks
 {
-    internal class CompileTimeParameterInfo : ParameterInfo, IReflectionMockCodeElement
+    internal class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject
     {
         public IParameterSymbol ParameterSymbol { get; }
 
         public ICodeElement DeclaringMember { get; }
 
-        public CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
+        private CompileTimeParameterInfo( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
         {
             this.ParameterSymbol = parameterSymbol.AssertNotNull();
             this.DeclaringMember = declaringMember.AssertNotNull();
         }
 
-        ISymbol IReflectionMockCodeElement.Symbol => this.ParameterSymbol;
+        public static ParameterInfo Create( IParameterSymbol parameterSymbol, ICodeElement declaringMember )
+            => new CompileTimeParameterInfo( parameterSymbol, declaringMember );
+
+        ISymbol ICompileTimeReflectionObject.Symbol => this.ParameterSymbol;
     }
 }

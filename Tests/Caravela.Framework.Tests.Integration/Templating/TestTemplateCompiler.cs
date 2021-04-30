@@ -20,6 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
         private readonly IDiagnosticAdder _diagnosticAdder;
+        private readonly TemplateCompiler _templateCompiler;
 
         public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder )
         {
@@ -27,6 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             this._diagnosticAdder = diagnosticAdder;
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService( new SyntaxSerializationService() );
+            this._templateCompiler = new TemplateCompiler( serviceProvider );
         }
 
         public bool HasError { get; private set; }
@@ -85,7 +87,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             {
                 if ( this._parent.IsTemplate( node ) )
                 {
-                    if ( !TemplateCompiler.TryCompile(
+                    if ( !this._parent._templateCompiler.TryCompile(
                         this._compileTimeCompilation,
                         node,
                         this._parent._semanticModel,

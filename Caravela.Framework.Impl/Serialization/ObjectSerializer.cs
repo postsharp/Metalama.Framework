@@ -2,9 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Diagnostics;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -29,8 +29,6 @@ namespace Caravela.Framework.Impl.Serialization
         /// <returns>An expression that creates such an object.</returns>
         public abstract ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory );
 
-        public virtual bool CanSerializeType( ITypeSymbol type, Location diagnosticLocation, IDiagnosticAdder diagnosticAdder ) => true;
-
         /// <summary>
         /// Throws a <see cref="InvalidUserCodeException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
         /// </summary>
@@ -45,5 +43,15 @@ namespace Caravela.Framework.Impl.Serialization
                 throw SerializationDiagnosticDescriptors.CycleInSerialization.CreateException( obj.GetType() );
             }
         }
+
+        public abstract Type InputType { get; }
+
+        public abstract Type OutputType { get; }
+
+        public virtual ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray<Type>.Empty;
+
+        public ImmutableArray<Type> AllSupportedTypes => this.AdditionalSupportedTypes.Add( this.InputType ).Add( this.OutputType );
+
+        public virtual int Priority => 0;
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Tests.UnitTests.Serialization.Assets;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -43,19 +44,19 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 { "global::System.Int64?", typeof(long?) },
                 { "global::System.Guid?", typeof(Guid?) },
                 { "global::System.Collections.Generic.List<global::System.String>", typeof(List<string>) },
-                { "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Guid>", typeof(Dictionary<string, Guid>) },
-                { "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Guid>[]", typeof(Dictionary<string, Guid>[]) },
-                { "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Guid?>", typeof(Dictionary<string, Guid?>) },
+                { "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid>", typeof(Dictionary<string, Guid>) },
+                { "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid>[]", typeof(Dictionary<string, Guid>[]) },
+                { "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid?>", typeof(Dictionary<string, Guid?>) },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Nullable<global::System.Guid>>>",
+                    "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid?>>",
                     typeof(Dictionary<string, Dictionary<string, Guid?>>)
                 },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Nullable<global::System.Guid>>>[]",
+                    "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid?>>[]",
                     typeof(Dictionary<string, Dictionary<string, Guid?>>[])
                 },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Nullable<global::System.Guid>>>[][]",
+                    "global::System.Collections.Generic.Dictionary<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Guid?>>[][]",
                     typeof(Dictionary<string, Dictionary<string, Guid?>>[][])
                 },
                 { "global::System.Int32[]", typeof(int[]) },
@@ -63,22 +64,25 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                 { "global::System.Int32[][][]", typeof(int[][][]) },
                 { "global::System.Int32[][][][]", typeof(int[][][][]) },
                 { "global::System.Int32[][][][][]", typeof(int[][][][][]) },
-                { "global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass", typeof(TestClass) },
-                { "global::System.Collections.Generic.List<global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass>", typeof(List<TestClass>) },
+                { "global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass", typeof(TestClass) },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass, global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass>",
+                    "global::System.Collections.Generic.List<global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
+                    typeof(List<TestClass>)
+                },
+                {
+                    "global::System.Collections.Generic.Dictionary<global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
                     typeof(Dictionary<TestClass, TestClass>)
                 },
                 {
-                    "global::System.Collections.Generic.Dictionary<global::System.String, global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass>",
+                    "global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>",
                     typeof(Dictionary<string, TestClass>)
                 },
                 {
-                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String, global::Caravela.Framework.Tests.UnitTests.Serialization.TestClass>>",
+                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.Assets.TestClass>>",
                     typeof(List<Dictionary<string, TestClass>>)
                 },
                 {
-                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String, global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>>>",
+                    "global::System.Collections.Generic.List<global::System.Collections.Generic.Dictionary<global::System.String,global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String>>>",
                     typeof(List<Dictionary<string, GenericTestClass<string>>>)
                 },
                 {
@@ -90,15 +94,15 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
                     typeof(GenericTestClass<string>.SecondSubType)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String, global::System.Int32>.SecondSubType",
+                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Int32>.SecondSubType",
                     typeof(GenericTestClass<string, int>.SecondSubType)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>>.SecondSubType<global::System.String>",
+                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::System.String>",
                     typeof(GenericTestClass<string, Dictionary<string, int>>.SecondSubType<string>)
                 },
                 {
-                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>>.SecondSubType<global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String, global::System.Collections.Generic.Dictionary<global::System.String, global::System.Int32>>>",
+                    "global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>.SecondSubType<global::Caravela.Framework.Tests.UnitTests.Serialization.GenericTestClass<global::System.String,global::System.Collections.Generic.Dictionary<global::System.String,global::System.Int32>>>",
                     typeof(GenericTestClass<string, Dictionary<string, int>>.SecondSubType<GenericTestClass<string, Dictionary<string, int>>>)
                 }
             };

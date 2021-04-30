@@ -45,7 +45,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
-        public Type ToType() => new CompileTimeType( this.TypeSymbol );
+        public Type ToType() => CompileTimeType.Create( this.TypeSymbol );
 
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 

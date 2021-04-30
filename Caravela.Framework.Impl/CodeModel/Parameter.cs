@@ -18,7 +18,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public Member DeclaringMember => (Member) this.Compilation.Factory.GetCodeElement( this.ParameterSymbol.ContainingSymbol );
 
-        public ParameterInfo ToParameterInfo() => new CompileTimeParameterInfo( this.ParameterSymbol, this.ContainingElement );
+        public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this.ParameterSymbol, this.ContainingElement );
 
         IMember IParameter.DeclaringMember => this.DeclaringMember;
 

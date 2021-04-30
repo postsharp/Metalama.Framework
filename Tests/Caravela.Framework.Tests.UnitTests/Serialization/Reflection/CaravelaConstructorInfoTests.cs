@@ -83,7 +83,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var methods = type.Constructors;
             var single = methods.Single();
             var p = (single as Constructor)!;
-            var actual = this.Serialize( new CompileTimeConstructorInfo( p ) ).ToString();
+            var actual = this.Serialize( CompileTimeConstructorInfo.Create( p ) ).ToString();
 
             return actual;
         }

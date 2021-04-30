@@ -8,11 +8,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class IntSerializer : TypedObjectSerializer<int>
+    internal class IntSerializer : ObjectSerializer<int>
     {
-        public override ExpressionSyntax Serialize( int o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( int obj, ISyntaxFactory syntaxFactory )
         {
-            return LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( o ) );
+            return LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( obj ) );
         }
 
         public IntSerializer( SyntaxSerializationService service ) : base( service ) { }

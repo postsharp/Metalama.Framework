@@ -9,9 +9,14 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 {
     internal class CompileTimeReturnParameterInfo : ParameterInfo
     {
-        public CompileTimeReturnParameterInfo( ReturnParameter returnParameter )
+        private CompileTimeReturnParameterInfo( ReturnParameter returnParameter )
         {
             this.DeclaringMember = returnParameter.DeclaringMember;
+        }
+
+        public static ParameterInfo Create( ReturnParameter returnParameter )
+        {
+            return new CompileTimeReturnParameterInfo( returnParameter );
         }
 
         public IMember DeclaringMember { get; }

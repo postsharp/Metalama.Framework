@@ -145,7 +145,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var serialized = this.SerializeIndexerParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.set_Item(System.Int32,System.Int32)"")).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.get_Item(System.Int32)~System.Int32"")).GetParameters()[0]",
                 serialized );
 
             TestExpression<ParameterInfo>(
@@ -167,7 +167,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingElement ) )
                     .ToString();
 
             return actual;
@@ -184,7 +184,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var parameter = (Parameter) single;
 
             var actual =
-                this.Serialize( new CompileTimeParameterInfo( parameter.ParameterSymbol, parameter.ContainingElement ) )
+                this.Serialize( CompileTimeParameterInfo.Create( parameter.ParameterSymbol, parameter.ContainingElement ) )
                     .ToString();
 
             return actual;
@@ -196,7 +196,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" ).ReturnParameter!;
             var p = (MethodReturnParameter) single;
 
-            var actual = this.Serialize( new CompileTimeReturnParameterInfo( p ) )
+            var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
 
             return actual;
@@ -208,7 +208,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Properties.Single( m => m.Name == "Property" ).Getter!.ReturnParameter!;
             var p = (MethodReturnParameter) single;
 
-            var actual = this.Serialize( new CompileTimeReturnParameterInfo( p ) )
+            var actual = this.Serialize( CompileTimeReturnParameterInfo.Create( p ) )
                 .ToString();
 
             return actual;

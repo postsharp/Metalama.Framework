@@ -75,7 +75,7 @@ namespace Caravela.Framework.Impl.CodeModel
             {
                 case CompileTimeType compileTimeType:
                     return compileTimeType.TypeSymbol;
-                
+
                 default:
                     return this._symbolCache.GetOrAdd( type, this.GetTypeSymbolCore );
             }
@@ -91,6 +91,11 @@ namespace Caravela.Framework.Impl.CodeModel
 
         private ITypeSymbol GetTypeSymbolCore( Type type )
         {
+            if ( type.IsGenericParameter )
+            {
+                return this.GetNamedTypeSymbol( type.DeclaringType, Array.Empty<Type>() ).TypeParameters[type.GenericParameterPosition];
+            }
+
             if ( type is CompileTimeType compileTimeType )
             {
                 return compileTimeType.TypeSymbol;

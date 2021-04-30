@@ -10,11 +10,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class DateTimeOffsetSerializer : TypedObjectSerializer<DateTimeOffset>
+    internal class DateTimeOffsetSerializer : ObjectSerializer<DateTimeOffset>
     {
-        public override ExpressionSyntax Serialize( DateTimeOffset o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( DateTimeOffset obj, ISyntaxFactory syntaxFactory )
         {
-            var isoTime = o.ToString( "o" );
+            var isoTime = obj.ToString( "o" );
 
             return InvocationExpression(
                     MemberAccessExpression(

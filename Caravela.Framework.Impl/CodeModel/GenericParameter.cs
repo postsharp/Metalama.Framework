@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public TypeKind TypeKind => TypeKind.GenericParameter;
 
-        public Type ToType() => new CompileTimeType( this._typeSymbol );
+        public Type ToType() => CompileTimeType.Create( this._typeSymbol );
 
         public string Name => this._typeSymbol.Name;
 

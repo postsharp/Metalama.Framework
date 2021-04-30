@@ -10,16 +10,16 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class TimeSpanSerializer : TypedObjectSerializer<TimeSpan>
+    internal class TimeSpanSerializer : ObjectSerializer<TimeSpan>
     {
-        public override ExpressionSyntax Serialize( TimeSpan o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( TimeSpan obj, ISyntaxFactory syntaxFactory )
         {
             return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(TimeSpan) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(
                             SyntaxKind.NumericLiteralExpression,
-                            Literal( o.Ticks ) ) ) )
+                            Literal( obj.Ticks ) ) ) )
                 .NormalizeWhitespace();
         }
 

@@ -2,13 +2,14 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.ReflectionMocks;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -19,7 +20,11 @@ namespace Caravela.Framework.Impl.Serialization
     /// </summary>
     internal class SyntaxSerializationService
     {
-        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializers = new();
+        // Set of serializers indexed by the real implementation type they are able to handle (e.g. CompileTimeMethodInfo). 
+        private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializerByInputType = new();
+
+        // Set of serializers indexed by the contract type they are able to handle. (e.g. MethodInfo). Used for compile-time validation.
+        private readonly ConcurrentDictionary<Type, Type> _supportedContractTypes = new();
         private readonly ArraySerializer _arraySerializer;
         private readonly EnumSerializer _enumSerializer;
 
@@ -33,54 +38,54 @@ namespace Caravela.Framework.Impl.Serialization
             this._enumSerializer = new EnumSerializer( this );
 
             // Primitive types
-            this.RegisterSerializer( typeof(char), new CharSerializer( this ) );
-            this.RegisterSerializer( typeof(bool), new BoolSerializer( this ) );
-            this.RegisterSerializer( typeof(byte), new ByteSerializer( this ) );
-            this.RegisterSerializer( typeof(sbyte), new SByteSerializer( this ) );
-            this.RegisterSerializer( typeof(ushort), new UShortSerializer( this ) );
-            this.RegisterSerializer( typeof(short), new ShortSerializer( this ) );
-            this.RegisterSerializer( typeof(uint), new UIntSerializer( this ) );
-            this.RegisterSerializer( typeof(int), new IntSerializer( this ) );
-            this.RegisterSerializer( typeof(ulong), new ULongSerializer( this ) );
-            this.RegisterSerializer( typeof(long), new LongSerializer( this ) );
-            this.RegisterSerializer( typeof(float), new FloatSerializer( this ) );
-            this.RegisterSerializer( typeof(double), new DoubleSerializer( this ) );
-            this.RegisterSerializer( typeof(decimal), new DecimalSerializer( this ) );
-            this.RegisterSerializer( typeof(UIntPtr), new UIntPtrSerializer( this ) );
-            this.RegisterSerializer( typeof(IntPtr), new IntPtrSerializer( this ) );
+            this.RegisterSerializer( new CharSerializer( this ) );
+            this.RegisterSerializer( new BoolSerializer( this ) );
+            this.RegisterSerializer( new ByteSerializer( this ) );
+            this.RegisterSerializer( new SByteSerializer( this ) );
+            this.RegisterSerializer( new UShortSerializer( this ) );
+            this.RegisterSerializer( new ShortSerializer( this ) );
+            this.RegisterSerializer( new UIntSerializer( this ) );
+            this.RegisterSerializer( new IntSerializer( this ) );
+            this.RegisterSerializer( new ULongSerializer( this ) );
+            this.RegisterSerializer( new LongSerializer( this ) );
+            this.RegisterSerializer( new FloatSerializer( this ) );
+            this.RegisterSerializer( new DoubleSerializer( this ) );
+            this.RegisterSerializer( new DecimalSerializer( this ) );
+            this.RegisterSerializer( new UIntPtrSerializer( this ) );
+            this.RegisterSerializer( new IntPtrSerializer( this ) );
 
             // String
-            this.RegisterSerializer( typeof(string), new StringSerializer( this ) );
+            this.RegisterSerializer( new StringSerializer( this ) );
 
             // Known simple system types
-            this.RegisterSerializer( typeof(DateTime), new DateTimeSerializer( this ) );
-            this.RegisterSerializer( typeof(Guid), new GuidSerializer( this ) );
-            this.RegisterSerializer( typeof(TimeSpan), new TimeSpanSerializer( this ) );
-            this.RegisterSerializer( typeof(DateTimeOffset), new DateTimeOffsetSerializer( this ) );
-            this.RegisterSerializer( typeof(CultureInfo), new CultureInfoSerializer( this ) );
+            this.RegisterSerializer( new DateTimeSerializer( this ) );
+            this.RegisterSerializer( new GuidSerializer( this ) );
+            this.RegisterSerializer( new TimeSpanSerializer( this ) );
+            this.RegisterSerializer( new DateTimeOffsetSerializer( this ) );
+            this.RegisterSerializer( new CultureInfoSerializer( this ) );
 
             // Collections
-            this.RegisterSerializer( typeof(List<>), new ListSerializer( this ) );
-            this.RegisterSerializer( typeof(Dictionary<,>), new DictionarySerializer( this ) );
+            this.RegisterSerializer( new ListSerializer( this ) );
+            this.RegisterSerializer( new DictionarySerializer( this ) );
 
             // Reflection types
             this.TypeSerializer = new TypeSerializer( this );
             this.CompileTimeMethodInfoSerializer = new CompileTimeMethodInfoSerializer( this );
             this.CompileTimePropertyInfoSerializer = new CompileTimePropertyInfoSerializer( this );
-            this.RegisterSerializer( typeof(CompileTimeType), this.TypeSerializer );
-            this.RegisterSerializer( typeof(CompileTimeMethodInfo), this.CompileTimeMethodInfoSerializer );
-            this.RegisterSerializer( typeof(CompileTimePropertyInfo), this.CompileTimePropertyInfoSerializer );
-            this.RegisterSerializer( typeof(CompileTimeConstructorInfo), new CompileTimeConstructorInfoSerializer( this ) );
-            this.RegisterSerializer( typeof(CompileTimeEventInfo), new CompileTimeEventInfoSerializer( this ) );
-            this.RegisterSerializer( typeof(CompileTimeParameterInfo), new CompileTimeParameterInfoSerializer( this ) );
-            this.RegisterSerializer( typeof(CompileTimeReturnParameterInfo), new CompileTimeReturnParameterInfoSerializer( this ) );
-            this.RegisterSerializer( typeof(CompileTimeFieldOrPropertyInfo), new CompileTimeFieldOrPropertyInfoSerializer( this ) );
+            this.RegisterSerializer( this.TypeSerializer );
+            this.RegisterSerializer( this.CompileTimeMethodInfoSerializer );
+            this.RegisterSerializer( this.CompileTimePropertyInfoSerializer );
+            this.RegisterSerializer( new CompileTimeConstructorInfoSerializer( this ) );
+            this.RegisterSerializer( new CompileTimeEventInfoSerializer( this ) );
+            this.RegisterSerializer( new CompileTimeParameterInfoSerializer( this ) );
+            this.RegisterSerializer( new CompileTimeReturnParameterInfoSerializer( this ) );
+            this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
         }
 
         internal TypeSerializer TypeSerializer { get; }
 
         internal CompileTimeMethodInfoSerializer CompileTimeMethodInfoSerializer { get; }
-        
+
         internal CompileTimePropertyInfoSerializer CompileTimePropertyInfoSerializer { get; }
 
         /// <summary>
@@ -90,56 +95,122 @@ namespace Caravela.Framework.Impl.Serialization
         /// For generic types, register the type without generic arguments, for example "List&lt;&gt;" rather than "List&lt;int&gt;". The serializer will handle
         /// lists of any element.
         /// </remarks>
-        /// <param name="implementationType">The specific type that this serializer supports. It will be called for all objects that are of this type exactly.</param>
         /// <param name="serializer">A new serializer that supports that type.</param>
-        public void RegisterSerializer( Type implementationType, ObjectSerializer serializer )
+        public void RegisterSerializer( ObjectSerializer serializer )
         {
-            this.RegisterSerializer( implementationType, implementationType, serializer );
+            _ = this._serializerByInputType.TryAdd( serializer.InputType, serializer );
+
+            foreach ( var inputType in serializer.AllSupportedTypes )
+            {
+                this._supportedContractTypes.TryAdd( inputType, inputType );
+            }
         }
 
         /// <summary>
-        /// Registers an additional serializer. See Remarks for generics.
+        /// Returns the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This result can be used to
+        /// determine the possibility to serialize a type when the template is compiled. It may return false positives.
         /// </summary>
-        /// <remarks>
-        /// For generic types, register the type without generic arguments, for example "List&lt;&gt;" rather than "List&lt;int&gt;". The serializer will handle
-        /// lists of any element.
-        /// </remarks>
-        /// <param name="contractType"></param>
-        /// <param name="implementationType">The specific type that this serializer supports. It will be called for all objects that are of this type exactly.</param>
-        /// <param name="serializer">A new serializer that supports that type.</param>
-        public void RegisterSerializer( Type contractType, Type implementationType, ObjectSerializer serializer )
-        {
-            this._serializers[implementationType] = serializer;
-        }
+        public SerializableTypes GetSerializableTypes( ISyntaxFactory syntaxFactory )
+            => new( this._supportedContractTypes.Keys.Distinct().Select( syntaxFactory.GetTypeSymbol ).ToImmutableHashSet() );
 
-        public ObjectSerializer? GetSerializer( object o )
+        public bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {
-            switch ( o )
+            switch ( obj )
             {
+                case null:
+                    throw new ArgumentNullException( nameof(obj) );
+
                 case Enum:
-                    return this._enumSerializer;
+                    serializer = this._enumSerializer;
+
+                    return true;
 
                 case Array:
-                    return this._arraySerializer;
+                    serializer = this._arraySerializer;
+
+                    return true;
 
                 default:
-                    var t = o.GetType();
-                    Type mainType;
-
-                    if ( t.IsGenericType )
-                    {
-                        mainType = t.GetGenericTypeDefinition();
-                    }
-                    else
-                    {
-                        mainType = t;
-                    }
-
-                    _ = this._serializers.TryGetValue( mainType, out var serializer );
-
-                    return serializer;
+                    return this.TryGetSerializer( obj.GetType(), typeof(T), out serializer );
             }
         }
+
+        private bool TryGetSerializer( Type concreteType, Type contractType, [NotNullWhen( true )] out ObjectSerializer? serializer )
+        {
+            Type concreteTypeDeclaration = GetRealType( concreteType ), contractTypeDeclaration = GetRealType( contractType );
+
+            if ( this._serializerByInputType.TryGetValue( concreteTypeDeclaration, out serializer )
+                 && ValidateContractType( contractTypeDeclaration, serializer ) )
+            {
+                return true;
+            }
+            else if ( concreteTypeDeclaration.BaseType != null && this.TryGetSerializer(
+                concreteTypeDeclaration.BaseType,
+                contractTypeDeclaration,
+                out serializer ) )
+            {
+                return true;
+            }
+            else
+            {
+                List<ObjectSerializer>? serializers = null;
+
+                foreach ( var interfaceImplementation in concreteTypeDeclaration.GetInterfaces() )
+                {
+                    if ( this.TryGetSerializer( interfaceImplementation, contractTypeDeclaration, out var interfaceSerializer ) )
+                    {
+                        serializers ??= new List<ObjectSerializer>();
+                        serializers.Add( interfaceSerializer );
+                    }
+                }
+
+                switch ( serializers?.Count )
+                {
+                    case 0:
+                    case null:
+                        break;
+
+                    case 1:
+                        serializer = serializers[0];
+
+                        return true;
+
+                    default:
+                        serializer = serializers.OrderBy( s => s.Priority ).First();
+
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static Type GetRealType( Type contractType )
+        {
+            Type contractTypeDeclaration;
+
+            if ( contractType.IsGenericType )
+            {
+                if ( contractType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+                {
+                    contractTypeDeclaration = contractType.GenericTypeArguments[0];
+                }
+                else
+                {
+                    contractTypeDeclaration = contractType.GetGenericTypeDefinition();
+                }
+
+                // TODO: Check that the output type arguments are compatible with the contract type arguments.
+            }
+            else
+            {
+                contractTypeDeclaration = contractType;
+            }
+
+            return contractTypeDeclaration;
+        }
+
+        private static bool ValidateContractType( Type contractType, ObjectSerializer serializer ) => contractType.IsAssignableFrom( serializer.OutputType );
 
         /// <summary>
         /// Serializes an object into a Roslyn expression that would create it. For example, serializes a list containing "4" and "8" into <c>new System.Collections.Generic.List&lt;System.Int32&gt;{4, 8}</c>.
@@ -148,16 +219,14 @@ namespace Caravela.Framework.Impl.Serialization
         /// <param name="syntaxFactory"></param>
         /// <returns>An expression that would create the object.</returns>
         /// <exception cref="InvalidUserCodeException">When the object cannot be serialized, for example if it's of an unsupported type.</exception>
-        public ExpressionSyntax Serialize( object? o, ISyntaxFactory syntaxFactory )
+        public ExpressionSyntax Serialize<T>( T? o, ISyntaxFactory syntaxFactory )
         {
             if ( o == null )
             {
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
 
-            var serializer = this.GetSerializer( o );
-
-            if ( serializer == null )
+            if ( !this.TryGetSerializer( o, out var serializer ) )
             {
                 throw SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateException( o.GetType() );
             }

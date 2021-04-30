@@ -9,14 +9,14 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimeMethodInfoSerializer : CaravelaMethodBaseSerializer
+    internal class CompileTimeMethodInfoSerializer : CaravelaMethodBaseSerializer<CompileTimeMethodInfo, MethodInfo>
     {
         public CompileTimeMethodInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ExpressionSyntax Serialize( object obj, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeMethodInfo obj, ISyntaxFactory syntaxFactory )
             => ParenthesizedExpression(
                 CastExpression(
                     syntaxFactory.GetTypeSyntax( typeof(MethodInfo) ),
-                    this.SerializeMethodBase( (CompileTimeMethodInfo) obj, syntaxFactory ) ) );
+                    this.SerializeMethodBase( obj, syntaxFactory ) ) );
     }
 }

@@ -9,9 +9,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class DateTimeSerializer : TypedObjectSerializer<DateTime>
+    internal class DateTimeSerializer : ObjectSerializer<DateTime>
     {
-        public override ExpressionSyntax Serialize( DateTime o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( DateTime obj, ISyntaxFactory syntaxFactory )
         {
             return InvocationExpression(
                     MemberAccessExpression(
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.Serialization
                     Argument(
                         LiteralExpression(
                             SyntaxKind.NumericLiteralExpression,
-                            Literal( o.ToBinary() ) ) ) );
+                            Literal( obj.ToBinary() ) ) ) );
         }
 
         public DateTimeSerializer( SyntaxSerializationService service ) : base( service ) { }

@@ -7,11 +7,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class SByteSerializer : TypedObjectSerializer<sbyte>
+    internal class SByteSerializer : ObjectSerializer<sbyte>
     {
-        public override ExpressionSyntax Serialize( sbyte o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( sbyte obj, ISyntaxFactory syntaxFactory )
         {
-            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( o ) );
+            return SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( obj ) );
         }
 
         public SByteSerializer( SyntaxSerializationService service ) : base( service ) { }

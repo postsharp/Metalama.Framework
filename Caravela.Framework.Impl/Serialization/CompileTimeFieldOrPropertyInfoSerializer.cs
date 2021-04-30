@@ -8,21 +8,24 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Immutable;
+using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodBase = Caravela.Framework.Impl.CodeModel.MethodBase;
 
 namespace Caravela.Framework.Impl.Serialization
 {
-    internal class CompileTimeFieldOrPropertyInfoSerializer : TypedObjectSerializer<CompileTimeFieldOrPropertyInfo>
+    internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyInfo, FieldOrPropertyInfo>
     {
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
         // binding flags for private indexers, and that overload is complicated.
 
-        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo o, ISyntaxFactory syntaxFactory )
+        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, ISyntaxFactory syntaxFactory )
         {
             ExpressionSyntax propertyInfo;
             var allBindingFlags = SyntaxUtility.CreateBindingFlags( syntaxFactory );
 
-            switch ( o.FieldOrProperty )
+            switch ( obj.FieldOrProperty )
             {
                 case IProperty property:
                     {
@@ -61,5 +64,7 @@ namespace Caravela.Framework.Impl.Serialization
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }
 }

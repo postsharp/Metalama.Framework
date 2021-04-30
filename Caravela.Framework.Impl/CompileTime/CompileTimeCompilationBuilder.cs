@@ -4,6 +4,7 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Impl.Utilities;
 using Caravela.Framework.Sdk;
 using K4os.Hash.xxHash;
@@ -27,6 +28,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
+        private readonly TemplateCompiler _templateCompiler;
 
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
@@ -34,6 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             this._serviceProvider = serviceProvider;
             this._domain = domain;
+            this._templateCompiler = new TemplateCompiler( serviceProvider );
         }
 
         private static ulong ComputeCacheHash(
@@ -79,7 +82,8 @@ namespace Caravela.Framework.Impl.CompileTime
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
                 runTimeCompilation,
                 compileTimeCompilation,
-                diagnosticSink );
+                diagnosticSink,
+                this._templateCompiler );
 
             var modifiedSyntaxTrees =
                 compileTimeTrees.Select(

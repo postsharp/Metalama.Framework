@@ -58,7 +58,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var compilation = CreateCompilation( code );
             var single = compilation.DeclaredTypes.Single( t => t.Name == "Target" ).Methods.Single( m => m.Name == "Method" );
             var method = (Method) single;
-            var actual = this.Serialize( new CompileTimeMethodInfo( method ) ).ToString();
+            var actual = this.Serialize( CompileTimeMethodInfo.Create( method ) ).ToString();
 
             return actual;
         }

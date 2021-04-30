@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Serialization
@@ -24,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
         {
             var dictionaryType = obj.GetType();
             var keyType = dictionaryType.GetGenericArguments()[0];
-            
+
             var creationExpression = ObjectCreationExpression( syntaxFactory.GetTypeSyntax( dictionaryType ) );
 
             dynamic dictionary = obj;
@@ -121,5 +122,11 @@ namespace Caravela.Framework.Impl.Serialization
 
             return creationExpression;
         }
+
+        public override Type InputType => typeof(IReadOnlyDictionary<,>);
+
+        public override Type OutputType => typeof(Dictionary<,>);
+
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }
 }

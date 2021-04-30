@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.ReflectionMocks;
 using System;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
-            var serialized = this.Serialize(
+            var serialized = this.Serialize<FieldOrPropertyInfo>(
                     CompileTimeFieldOrPropertyInfo.Create( CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
