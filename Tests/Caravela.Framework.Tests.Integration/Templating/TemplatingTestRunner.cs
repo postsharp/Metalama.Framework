@@ -135,6 +135,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !emitResult.Success )
             {
+                result.ReportDiagnostics( emitResult.Diagnostics );
                 result.SetFailed( "The final template compilation failed." );
 
                 return result;

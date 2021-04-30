@@ -37,9 +37,9 @@ class C : IAspect
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            AssertScope( type, SymbolDeclarationScope.Default );
-            AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.Default );
-            AssertScope( type.Methods.OfName( "M" ).Single(), SymbolDeclarationScope.Default );
+            AssertScope( type, SymbolDeclarationScope.Both );
+            AssertScope( type.Fields.OfName( "F" ).Single(), SymbolDeclarationScope.Both );
+            AssertScope( type.Methods.OfName( "M" ).Single(), SymbolDeclarationScope.Both );
             AssertScope( type.Methods.OfName( "Template" ).Single(), SymbolDeclarationScope.CompileTimeOnly );
         }
 
@@ -83,7 +83,7 @@ class C
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
-            AssertScope( type, SymbolDeclarationScope.Default );
+            AssertScope( type, SymbolDeclarationScope.Both );
         }
 
         [Fact]
@@ -122,7 +122,7 @@ class C
 ";
 
             var compilation = CreateCompilation( code );
-            AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), SymbolDeclarationScope.Default );
+            AssertScope( compilation.DeclaredTypes.OfName( "C" ).Single(), SymbolDeclarationScope.Both );
         }
     }
 }

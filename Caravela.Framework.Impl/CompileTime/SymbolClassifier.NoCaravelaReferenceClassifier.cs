@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
                 => this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
-                    ? SymbolDeclarationScope.Default
+                    ? SymbolDeclarationScope.Both
                     : SymbolDeclarationScope.RunTimeOnly;
         }
     }

@@ -3,7 +3,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
-namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.SimpleLambdaNotSupported
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileSimpleLambda2
 {
     [CompileTime]
     class Aspect
@@ -11,17 +11,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Simp
         [TestTemplate]
         dynamic Template()
         {
-            Action<object> action =
-            p =>
-            {
-                Console.WriteLine(p.ToString());
-            };
+            Action<object> action = a => Console.WriteLine(a.ToString());
 
-            dynamic result = proceed();
+            var result = compileTime(1);
 
             action(result);
 
-            return result;
+            return proceed();
         }
     }
 

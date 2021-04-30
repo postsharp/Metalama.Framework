@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     var scope = this._classifier.GetSymbolDeclarationScope( declaredSymbol );
 
-                    if ( scope != SymbolDeclarationScope.Default )
+                    if ( scope != SymbolDeclarationScope.Both )
                     {
                         var context = new ScopeCookie( this );
                         this._currentDeclarationScope = scope;

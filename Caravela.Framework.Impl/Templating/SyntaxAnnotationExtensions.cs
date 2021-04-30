@@ -21,6 +21,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
+        private static readonly SyntaxAnnotation _uknownAnnotation = new( _scopeAnnotationKind, "unknown" );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
@@ -40,7 +41,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( annotation == null )
             {
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             switch ( annotation.Data )
@@ -50,6 +51,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 case "runTime":
                     return SymbolDeclarationScope.RunTimeOnly;
+
+                case "unknown":
+                    return SymbolDeclarationScope.Unknown;
 
                 default:
                     throw new AssertionFailedException();
@@ -116,14 +120,14 @@ namespace Caravela.Framework.Impl.Templating
         public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )
             where T : SyntaxNode
         {
-            if ( scope == SymbolDeclarationScope.Default )
+            if ( scope == SymbolDeclarationScope.Both )
             {
                 return node;
             }
 
             var existingScope = node.GetScopeFromAnnotation();
 
-            if ( existingScope != SymbolDeclarationScope.Default )
+            if ( existingScope != SymbolDeclarationScope.Both )
             {
                 Invariant.Assert( existingScope == scope );
 
@@ -137,6 +141,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SymbolDeclarationScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
+
+                case SymbolDeclarationScope.Unknown:
+                    return node.WithAdditionalAnnotations( _uknownAnnotation );
 
                 default:
                     return node;
