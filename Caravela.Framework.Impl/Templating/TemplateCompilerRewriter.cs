@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax
+                           || parent is SwitchSectionSyntax 
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -252,6 +252,7 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax Transform( SyntaxToken token )
         {
+            // Following renaming of local variables cannot be apply for TupleElement  
             if ( token.Kind() == SyntaxKind.IdentifierToken && token.Parent != null && token.Parent is not TupleElementSyntax )
             {
                 // Transforms identifier declarations (local variables and local functions). Local identifiers must have
@@ -262,7 +263,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-                if ( identifierSymbol != null )
+                if ( this.IsDeclaredWithinTemplate(identifierSymbol!) )
                 {
                     if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
                     {
@@ -301,6 +302,20 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
+        private bool IsDeclaredWithinTemplate(ISymbol symbol)
+        {
+            if (symbol == null)
+            {
+                return false;
+            }
+            else
+            { 
+                // Symbol is Declared in Template if ContainsSymbol is Template method or if ContainsSymbol
+                // is child level of Template method f.e. local function etc.
+                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol ) || this.IsDeclaredWithinTemplate(symbol.ContainingSymbol);
+            }
+        }
+
         private ExpressionSyntax TransformIdentifierToken( IdentifierNameSyntax node )
         {
             if ( node.Identifier.Text == "dynamic" )
@@ -315,10 +330,7 @@ namespace Caravela.Framework.Impl.Templating
             // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
             var identifierSymbol = this._semanticAnnotationMap.GetSymbol( node );
 
-            var isDeclaredWithinTemplate =
-                identifierSymbol != null && SymbolEqualityComparer.Default.Equals( identifierSymbol.ContainingSymbol, this._rootTemplateSymbol );
-
-            if ( isDeclaredWithinTemplate )
+            if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
             {
                 if ( this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {

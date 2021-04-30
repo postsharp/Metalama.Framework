@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             return null;
@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( this._referenceAssemblyLocator.SystemAssemblyNames.Contains( assembly.Name ) )
             {
                 // .NET Standard, Roslyn, ...
-                return SymbolDeclarationScope.Default;
+                return SymbolDeclarationScope.Both;
             }
 
             var scopeFromAttributes = assembly.GetAttributes()
@@ -142,7 +142,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
-            _ = AddToCache( SymbolDeclarationScope.Default );
+            _ = AddToCache( SymbolDeclarationScope.Both );
 
             // From attributes.
             var scopeFromAttributes = symbol
@@ -228,7 +228,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case INamespaceSymbol:
                     // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
-                    return AddToCache( SymbolDeclarationScope.Default );
+                    return AddToCache( SymbolDeclarationScope.Both );
             }
 
             return AddToCache( null );

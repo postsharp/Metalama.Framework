@@ -8,12 +8,12 @@ namespace Caravela.Framework.Impl.Templating
 {
     internal partial class TemplateAnnotator
     {
-        private readonly struct BreakOrContinueScopeCookie : IDisposable
+        private readonly struct ScopeContextCookie : IDisposable
         {
             private readonly TemplateAnnotator _parent;
-            private readonly SymbolDeclarationScope _initialValue;
+            private readonly ScopeContext _initialValue;
 
-            public BreakOrContinueScopeCookie( TemplateAnnotator parent, SymbolDeclarationScope initialValue )
+            public ScopeContextCookie( TemplateAnnotator parent, ScopeContext initialValue)
             {
                 this._parent = parent;
                 this._initialValue = initialValue;
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.Templating
 
             public void Dispose()
             {
-                this._parent._breakOrContinueScope = this._initialValue;
+                this._parent._currentScopeContext = this._initialValue;
             }
         }
     }
