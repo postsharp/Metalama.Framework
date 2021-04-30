@@ -49,12 +49,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public IFieldOrPropertyInvocation Base => this.Invocation.Base;
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => new CompileTimeFieldOrPropertyInfo( this );
 
         public override bool IsReadOnly => this._symbol.IsReadOnly;
 
         public override bool IsAsync => false;
 
-        public override MemberInfo ToMemberInfo() => new CompileTimeFieldOrPropertyInfo( this );
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
     }
 }

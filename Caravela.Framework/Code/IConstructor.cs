@@ -11,6 +11,10 @@ namespace Caravela.Framework.Code
     /// </summary>
     public interface IConstructor : IMethodBase
     {
+        /// <summary>
+        /// Gets a <see cref="ConstructorInfo"/> that represents the current constructor at run time.
+        /// </summary>
+        /// <returns>A <see cref="ConstructorInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         ConstructorInfo ToConstructorInfo();
     }

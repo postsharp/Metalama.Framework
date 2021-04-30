@@ -34,6 +34,10 @@ namespace Caravela.Framework.Code
         /// </summary>
         IMethod? Raiser { get; }
 
+        /// <summary>
+        /// Gets an <see cref="EventInfo"/> that represents the current event at run time.
+        /// </summary>
+        /// <returns>An <see cref="EventInfo"/> that can be used only in run-time code.</returns>
         [return: RunTimeOnly]
         EventInfo ToEventInfo();
     }

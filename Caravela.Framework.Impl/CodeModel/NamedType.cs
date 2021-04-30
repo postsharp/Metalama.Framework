@@ -47,12 +47,12 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public Type ToType() => CompileTimeType.Create( this.TypeSymbol );
 
+        public override MemberInfo ToMemberInfo() => this.ToType();
+
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public override bool IsAsync => false;
-
-        public override MemberInfo ToMemberInfo() => this.ToType();
-
+        
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
