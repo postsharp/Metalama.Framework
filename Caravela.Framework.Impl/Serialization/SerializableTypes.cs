@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Serialization
         public bool IsSerializable( ITypeSymbol type, Location? diagnosticLocation = null, IDiagnosticAdder? diagnosticAdder = null )
         {
             var id = type.GetDocumentationCommentId().AssertNotNull();
-            
+
             if ( this._serializableTypes.Contains( id ) )
             {
                 return true;

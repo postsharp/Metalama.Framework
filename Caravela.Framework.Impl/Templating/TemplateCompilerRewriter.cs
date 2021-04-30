@@ -155,7 +155,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
-                           || parent is SwitchSectionSyntax 
+                           || parent is SwitchSectionSyntax
                         ? TransformationKind.Transform
                         : TransformationKind.None;
                 }
@@ -263,7 +263,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 var identifierSymbol = this._semanticAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-                if ( this.IsDeclaredWithinTemplate(identifierSymbol!) )
+                if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
                 {
                     if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
                     {
@@ -302,17 +302,18 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private bool IsDeclaredWithinTemplate(ISymbol symbol)
+        private bool IsDeclaredWithinTemplate( ISymbol symbol )
         {
-            if (symbol == null)
+            if ( symbol == null )
             {
                 return false;
             }
             else
-            { 
+            {
                 // Symbol is Declared in Template if ContainsSymbol is Template method or if ContainsSymbol
                 // is child level of Template method f.e. local function etc.
-                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol ) || this.IsDeclaredWithinTemplate(symbol.ContainingSymbol);
+                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol )
+                       || this.IsDeclaredWithinTemplate( symbol.ContainingSymbol );
             }
         }
 

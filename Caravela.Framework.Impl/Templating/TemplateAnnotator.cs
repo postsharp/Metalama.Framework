@@ -143,7 +143,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return SymbolDeclarationScope.RunTimeOnly;
             }
-            
+
             if ( symbol is IParameterSymbol )
             {
                 // Until we support template parameters and local functions, all parameters are parameters
@@ -169,8 +169,8 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         private bool IsTemplateMember( ISymbol symbol )
             => this._currentTemplateMember != null
-               && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember ) 
-                    || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
+               && (SymbolEqualityComparer.Default.Equals( symbol, this._currentTemplateMember )
+                   || (symbol.ContainingSymbol != null && SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._currentTemplateMember )));
 
         /// <summary>
         /// Gets the scope of a <see cref="SyntaxNode"/>.
@@ -241,12 +241,14 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     case SymbolDeclarationScope.RunTimeOnly:
                         runtimeCount++;
+
                         break;
 
                     case SymbolDeclarationScope.CompileTimeOnly:
                         compileTimeOnlyCount++;
+
                         break;
-                    
+
                     // Unknown is "greedy" it means all can be use at runtime or compile time
                     case SymbolDeclarationScope.Unknown:
                         return SymbolDeclarationScope.Unknown;
@@ -257,7 +259,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return SymbolDeclarationScope.RunTimeOnly;
             }
-            else if (compileTimeOnlyCount > 0)
+            else if ( compileTimeOnlyCount > 0 )
             {
                 return SymbolDeclarationScope.CompileTimeOnly;
             }
@@ -267,7 +269,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private ScopeContextCookie WithScopeContext(ScopeContext scopeContext)
+        private ScopeContextCookie WithScopeContext( ScopeContext scopeContext )
         {
             var cookie = new ScopeContextCookie( this, this._currentScopeContext );
             this._currentScopeContext = scopeContext;
@@ -306,7 +308,7 @@ namespace Caravela.Framework.Impl.Templating
                     return transformedNode.AddScopeMismatchAnnotation();
                 }
 
-                // the current expression can be anotated as unknown (f.e. parameters of lambda expression)
+                // the current expression can be annotated as unknown (f.e. parameters of lambda expression)
                 // that means it can be used as compile time and it doesn't need to be annotated as compileTime.
                 if ( transformedNode.GetScopeFromAnnotation() != SymbolDeclarationScope.Unknown )
                 {
@@ -373,7 +375,7 @@ namespace Caravela.Framework.Impl.Templating
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
                 }
                 else if ( symbol.GetAttributes()
-                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) ) )
+                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
                 {
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
@@ -910,6 +912,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( node.ExpressionBody != null )
             {
                 var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
+
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
@@ -927,6 +930,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( node.ExpressionBody != null )
             {
                 var annotatedExpression = (ExpressionSyntax) this.Visit( node.ExpressionBody )!;
+
                 return node.WithExpressionBody( annotatedExpression ).AddScopeAnnotation( SymbolDeclarationScope.Unknown );
             }
             else
@@ -995,7 +999,7 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedExpression = (ExpressionSyntax) this.Visit( node.Expression )!;
             var expressionScope = annotatedExpression.GetScopeFromAnnotation();
 
-            if ( (expressionScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.ReturnsRunTimeOnlyValue( annotatedExpression ) )
+            if ( (expressionScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.ReturnsRunTimeOnlyValue( annotatedExpression ))
                  || expressionScope != SymbolDeclarationScope.CompileTimeOnly )
             {
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
@@ -1008,7 +1012,8 @@ namespace Caravela.Framework.Impl.Templating
                 var section = node.Sections[i];
                 this.RequireScope( section, expressionScope );
 
-                using ( this.WithScopeContext( ScopeContext.CreateHelperScope( expressionScope, isRuntimeConditionalBlock: expressionScope == SymbolDeclarationScope.RunTimeOnly ) ) )
+                using ( this.WithScopeContext(
+                    ScopeContext.CreateHelperScope( expressionScope, isRuntimeConditionalBlock: expressionScope == SymbolDeclarationScope.RunTimeOnly ) ) )
                 {
                     transformedSections[i] = (SwitchSectionSyntax) this.Visit( section )!.AddScopeAnnotation( expressionScope );
                 }
@@ -1028,7 +1033,6 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-
                 return node.Update(
                     node.SwitchKeyword,
                     node.OpenParenToken,

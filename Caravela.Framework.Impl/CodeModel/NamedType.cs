@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
         public override bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
         public override bool IsAsync => false;
-        
+
         public bool HasDefaultConstructor
             => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
                (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
