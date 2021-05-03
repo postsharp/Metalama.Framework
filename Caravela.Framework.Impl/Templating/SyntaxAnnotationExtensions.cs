@@ -131,7 +131,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( scope == SymbolDeclarationScope.Both )
             {
                 Invariant.Assert( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Both );
-                
+
                 // There is nothing to do because the default scope is Both.
                 return node;
             }

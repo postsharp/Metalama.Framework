@@ -1,3 +1,5 @@
+#pragma warning disable CS0162
+
 using System;
 using System.IO;
 using Caravela.TestFramework;
