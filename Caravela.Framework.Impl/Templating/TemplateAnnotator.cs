@@ -651,7 +651,7 @@ namespace Caravela.Framework.Impl.Templating
             var scope = this.GetNodeScope( transformedExpression );
 
             var context = scope == SymbolDeclarationScope.CompileTimeOnly
-                ? this.CreateCompileTimeExpressionScope( $"pattern of a compile-time '{node.Expression}'" )
+                ? this.CreateCompileTimeExpressionScope( $"pattern on the compile-time expression '{node.Expression}'" )
                 : null;
 
             PatternSyntax transformedPattern;
@@ -659,6 +659,11 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithScopeContext( context ) )
             {
                 transformedPattern = this.Visit( node.Pattern )!;
+            }
+
+            if ( scope == SymbolDeclarationScope.RunTimeOnly )
+            {
+                this.RequireScope( transformedPattern, SymbolDeclarationScope.RunTimeOnly, $"pattern on the run-time expression '{node.Expression}'" );
             }
 
             return node.Update( transformedExpression, node.IsKeyword, transformedPattern ).AddScopeAnnotation( scope );

@@ -1,4 +1,2 @@
 // Compilation error. Code not generated.
 // Error CR0104 on `target.Compilation`: `The expression 'target.Compilation' is compile-time but it is expected to be run-time because the expression appears in a 'lock' statement.`
-
-;

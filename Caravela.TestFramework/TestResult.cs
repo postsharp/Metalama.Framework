@@ -128,6 +128,7 @@ namespace Caravela.TestFramework
             }
 
             // Format the output code.
+
             var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
             var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
 
@@ -145,8 +146,14 @@ namespace Caravela.TestFramework
             this.Success = false;
             this.ErrorMessage = reason;
 
+            var emptyStatement =
+                SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+                    .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
+            
             this.SetTransformedTarget(
-                SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
+                emptyStatement
+                    .WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
         }
     }
 }
