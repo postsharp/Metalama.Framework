@@ -39,6 +39,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
 
+            // no annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
             {
                 return SymbolDeclarationScope.Both;
@@ -120,6 +121,7 @@ namespace Caravela.Framework.Impl.Templating
         public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )
             where T : SyntaxNode
         {
+            // we never annotated as both scope it is default value of node
             if ( scope == SymbolDeclarationScope.Both )
             {
                 return node;

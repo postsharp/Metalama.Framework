@@ -1,4 +1,15 @@
 {
-    a = 4;
-    return a;
+    try
+    {
+    }
+    catch
+    {
+        2 = 3;
+    }
+    finally
+    {
+        2 = 4;
+    }
+
+    return this.Method(a);
 }

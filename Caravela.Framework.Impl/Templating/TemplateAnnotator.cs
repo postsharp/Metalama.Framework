@@ -1053,6 +1053,14 @@ namespace Caravela.Framework.Impl.Templating
 
         private void RequireScope( SyntaxNode node, SymbolDeclarationScope requiredScope, string reason )
             => this.RequireScope( node, this.GetNodeScope( node ), requiredScope, reason );
+        
+        private void RequireScope( BlockSyntax node, SymbolDeclarationScope requiredScope, string reason )
+        {
+            foreach ( var statement in node.Statements )
+            {
+                this.RequireScope( statement, requiredScope, reason );
+            }
+        }
 
         private void RequireScope( SyntaxNode node, SymbolDeclarationScope existingScope, SymbolDeclarationScope requiredScope, string reason )
         {
@@ -1134,6 +1142,33 @@ namespace Caravela.Framework.Impl.Templating
             var transformedNode = (NullableTypeSyntax) base.VisitNullableType( node )!;
 
             return transformedNode.WithScopeAnnotationFrom( transformedNode.ElementType );
+        }
+
+        public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
+        {
+            var annotatedBlock = (BlockSyntax) this.Visit( node.Block )!;
+
+            var annotatedCatches = new CatchClauseSyntax[node.Catches.Count];
+            for ( var i = 0; i < node.Catches.Count; i++ )
+            {
+                var @catch = node.Catches[i];
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
+                {
+                    var annotatedCatch = (CatchClauseSyntax) this.Visit( @catch )!;
+                    annotatedCatches[i] = annotatedCatch;
+                }
+            }
+
+            FinallyClauseSyntax? annotatedFinally = null;
+            if ( node.Finally != null )
+            {
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
+                {
+                    annotatedFinally = (FinallyClauseSyntax) this.Visit( node.Finally )!;
+                }
+            }
+
+            return node.WithBlock( annotatedBlock ).WithCatches(List(annotatedCatches)).WithFinally(annotatedFinally!).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
     }
 }
