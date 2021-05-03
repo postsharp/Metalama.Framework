@@ -1,3 +1,4 @@
+using System;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
@@ -10,6 +11,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLoc
         {
             lock (target.This)
             {
+                var x = target.Parameters.Count;
+                Console.WriteLine(x);
                 return proceed();
             }
         }

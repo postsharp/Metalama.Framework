@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -19,12 +21,25 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         private class MetaContext
         {
-            private readonly Dictionary<ISymbol, SyntaxToken> _generatedSymbolNameLocals;
+            // Maps a local template symbol to an identifier in the generated code.
+            private readonly Dictionary<ISymbol, SyntaxToken> _generatedCodeSymbolNameLocals;
 
-            private MetaContext( string statementListVariableName, Dictionary<ISymbol, SyntaxToken> generatedSymbolNameLocals )
+            // Maps a local template symbol to an identifier in the template code.
+            private readonly Dictionary<ISymbol, SyntaxToken> _templateCodeSymbolNameLocals;
+
+            // List of unique symbols generated in the template code.
+            private readonly TemplateLexicalScope _templateUniqueNames;
+
+            private MetaContext(
+                string statementListVariableName,
+                Dictionary<ISymbol, SyntaxToken> generatedCodeSymbolNameLocals,
+                Dictionary<ISymbol, SyntaxToken> templateCodeSymbolNameLocals,
+                TemplateLexicalScope templateUniqueNames )
             {
                 this.StatementListVariableName = statementListVariableName;
-                this._generatedSymbolNameLocals = generatedSymbolNameLocals;
+                this._generatedCodeSymbolNameLocals = generatedCodeSymbolNameLocals;
+                this._templateCodeSymbolNameLocals = templateCodeSymbolNameLocals;
+                this._templateUniqueNames = templateUniqueNames;
                 this.Statements = new List<StatementSyntax>();
             }
 
@@ -36,9 +51,15 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns></returns>
             public static MetaContext CreateForRunTimeBlock( MetaContext? parentContext, string statementListVariableName )
             {
-                var lexicalScope = parentContext?._generatedSymbolNameLocals ?? new Dictionary<ISymbol, SyntaxToken>();
+                var generatedCodeSymbolNameLocals = parentContext?._generatedCodeSymbolNameLocals
+                                                    ?? new Dictionary<ISymbol, SyntaxToken>( SymbolEqualityComparer.Default );
 
-                return new MetaContext( statementListVariableName, lexicalScope );
+                var templateCodeSymbolNameLocals =
+                    parentContext?._templateCodeSymbolNameLocals ?? new Dictionary<ISymbol, SyntaxToken>( SymbolEqualityComparer.Default );
+
+                var templateLexicalScope = parentContext?._templateUniqueNames ?? new TemplateLexicalScope( Enumerable.Empty<ISymbol>() );
+
+                return new MetaContext( statementListVariableName, generatedCodeSymbolNameLocals, templateCodeSymbolNameLocals, templateLexicalScope );
             }
 
             /// <summary>
@@ -49,7 +70,11 @@ namespace Caravela.Framework.Impl.Templating
             /// <returns></returns>
             public static MetaContext CreateHelperContext( MetaContext parentContext )
             {
-                return new( parentContext.StatementListVariableName, parentContext._generatedSymbolNameLocals );
+                return new(
+                    parentContext.StatementListVariableName,
+                    parentContext._generatedCodeSymbolNameLocals,
+                    parentContext._templateCodeSymbolNameLocals,
+                    parentContext._templateUniqueNames );
             }
 
             /// <summary>
@@ -65,9 +90,13 @@ namespace Caravela.Framework.Impl.Templating
                 // need to split the dictionaries.
                 // However, we're keeping this method for completeness and clarity.
 
-                var lexicalScope = new Dictionary<ISymbol, SyntaxToken>( parentContext._generatedSymbolNameLocals );
+                var lexicalScope = new Dictionary<ISymbol, SyntaxToken>( parentContext._generatedCodeSymbolNameLocals );
 
-                return new MetaContext( parentContext.StatementListVariableName, lexicalScope );
+                return new MetaContext(
+                    parentContext.StatementListVariableName,
+                    lexicalScope,
+                    parentContext._templateCodeSymbolNameLocals,
+                    parentContext._templateUniqueNames );
             }
 
             /// <summary>
@@ -88,8 +117,8 @@ namespace Caravela.Framework.Impl.Templating
             /// <param name="symbol"></param>
             /// <param name="templateVariableName"></param>
             /// <returns></returns>
-            public bool TryGetGeneratedSymbolLocal( ISymbol symbol, out SyntaxToken templateVariableName )
-                => this._generatedSymbolNameLocals.TryGetValue( symbol, out templateVariableName );
+            public bool TryGetRunTimeSymbolLocal( ISymbol symbol, out SyntaxToken templateVariableName )
+                => this._generatedCodeSymbolNameLocals.TryGetValue( symbol, out templateVariableName );
 
             /// <summary>
             /// Maps a local template symbol (typically a local variable or a local function of the source template) to
@@ -97,9 +126,25 @@ namespace Caravela.Framework.Impl.Templating
             /// </summary>
             /// <param name="identifierSymbol"></param>
             /// <param name="templateVariableName"></param>
-            public void AddGeneratedSymbolLocal( ISymbol identifierSymbol, SyntaxToken templateVariableName )
+            public void AddRunTimeSymbolLocal( ISymbol identifierSymbol, SyntaxToken templateVariableName )
             {
-                this._generatedSymbolNameLocals.Add( identifierSymbol, templateVariableName );
+                this._generatedCodeSymbolNameLocals.Add( identifierSymbol, templateVariableName );
+            }
+
+            public SyntaxToken GetTemplateVariableName( ISymbol symbol )
+            {
+                if ( this._templateCodeSymbolNameLocals.TryGetValue( symbol, out var value ) )
+                {
+                    return value;
+                }
+                else
+                {
+                    var name = this._templateUniqueNames.GetUniqueIdentifier( symbol.Name + "Name" );
+                    value = SyntaxFactory.Identifier( name );
+                    this._templateCodeSymbolNameLocals.Add( symbol, value );
+
+                    return value;
+                }
             }
         }
     }

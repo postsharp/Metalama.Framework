@@ -105,31 +105,26 @@ namespace Caravela.Framework.Impl.Templating
         /// adds this code to the list of statements of the current <see cref="MetaContext"/>, and returns the identifier of
         /// the compiled template that contains the run-time symbol name.
         /// </summary>
-        /// <param name="buildTimeIdentifier">The name of the identifier in the source template, used as a hint to generate a run-time identifier.</param>
+        /// <param name="symbol">The symbol in the source template.</param>
         /// <returns>The identifier of the compiled template that contains the run-time symbol name.</returns>
-        private IdentifierNameSyntax ReserveRunTimeSymbolName( SyntaxToken buildTimeIdentifier )
+        private IdentifierNameSyntax ReserveRunTimeSymbolName( ISymbol symbol )
         {
-            if ( buildTimeIdentifier.IsMissing )
-            {
-                throw new AssertionFailedException();
-            }
+            var metaVariableIdentifier = this._currentMetaContext!.GetTemplateVariableName( symbol );
 
-            var metaVariableName = "__" + buildTimeIdentifier.Text;
-
-            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( buildTimeIdentifier.Text );
+            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( symbol.Name );
 
             var localDeclaration =
                 LocalDeclarationStatement(
                         VariableDeclaration( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) )
                             .WithVariables(
                                 SingletonSeparatedList(
-                                    VariableDeclarator( Identifier( metaVariableName ) )
+                                    VariableDeclarator( metaVariableIdentifier )
                                         .WithInitializer( EqualsValueClause( callGetUniqueIdentifier ) ) ) ) )
                     .NormalizeWhitespace();
 
             this._currentMetaContext!.Statements.Add( localDeclaration );
 
-            return IdentifierName( metaVariableName );
+            return IdentifierName( metaVariableIdentifier );
         }
 
         /// <summary>
@@ -265,10 +260,10 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
                 {
-                    if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
+                    if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out _ ) )
                     {
-                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( token ).Identifier;
-                        this._currentMetaContext.AddGeneratedSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
+                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
+                        this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
 
                         return IdentifierName( declaredSymbolNameLocal.Text );
                     }
@@ -333,7 +328,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
             {
-                if ( this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
+                if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
@@ -343,6 +338,11 @@ namespace Caravela.Framework.Impl.Templating
                     // Identifier definitions should be processed by Transform(SyntaxToken).
 
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
+                            this._semanticAnnotationMap.GetLocation( node ),
+                            node.Identifier.Text ) );
+
                     this.Success = false;
                 }
             }

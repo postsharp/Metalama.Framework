@@ -22,6 +22,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.CompileTi
             {
                 return proceed();
             }
+            
+            using ( DisposableClass c = null )
+            {
+            }
         }
     }
 

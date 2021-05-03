@@ -11,6 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
+        var x = compileTime(0);
             try
             {
                 Console.WriteLine("try");
@@ -20,14 +21,19 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch
             {
-                Console.WriteLine("exception");
+                Console.WriteLine("exception " + x);
                 throw;
             }
             finally
             {
                 Console.WriteLine("finally");
             }
+            
+            Console.WriteLine(x);
+            
         }
+        
+        
     }
 
     class TargetCode

@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
@@ -117,9 +118,15 @@ namespace Caravela.Framework.Impl.Templating
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
         }
 
-        public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )
+        [return: NotNullIfNotNull( "node" )]
+        public static T? AddScopeAnnotation<T>( this T? node, SymbolDeclarationScope scope )
             where T : SyntaxNode
         {
+            if ( node == null )
+            {
+                return null;
+            }
+
             if ( scope == SymbolDeclarationScope.Both )
             {
                 return node;

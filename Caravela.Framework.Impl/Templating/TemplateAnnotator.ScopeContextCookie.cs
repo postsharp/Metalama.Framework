@@ -9,7 +9,7 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly struct ScopeContextCookie : IDisposable
         {
-            private readonly TemplateAnnotator _parent;
+            private readonly TemplateAnnotator? _parent;
             private readonly ScopeContext _initialValue;
 
             public ScopeContextCookie( TemplateAnnotator parent, ScopeContext initialValue )
@@ -20,7 +20,10 @@ namespace Caravela.Framework.Impl.Templating
 
             public void Dispose()
             {
-                this._parent._currentScopeContext = this._initialValue;
+                if ( this._parent != null )
+                {
+                    this._parent._currentScopeContext = this._initialValue;
+                }
             }
         }
     }

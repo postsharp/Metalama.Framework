@@ -199,7 +199,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 throw new InvalidOperationException( "The symbol of the target method was not found." );
             }
 
-            var lexicalScope = new TemplateExpansionLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
+            var lexicalScope = new TemplateLexicalScope( ((CodeElement) targetMethod).LookupSymbols() );
 
             var syntaxFactory = ReflectionMapper.GetInstance( compilation.RoslynCompilation );
 

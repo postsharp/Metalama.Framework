@@ -149,9 +149,11 @@ namespace Caravela.Framework.Impl.Templating
             return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
         }
 
-        protected ExpressionSyntax Transform( ArgumentListSyntax list ) => this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
+        protected ExpressionSyntax Transform( ArgumentListSyntax? list )
+            => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ArgumentList( this.Transform( list.Arguments ) );
 
-        protected ExpressionSyntax Transform( ParameterListSyntax list ) => this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
+        protected ExpressionSyntax Transform( ParameterListSyntax? list )
+            => list == null ? LiteralExpression( SyntaxKind.NullLiteralExpression ) : this.MetaSyntaxFactory.ParameterList( this.Transform( list.Parameters ) );
 
         protected ExpressionSyntax Transform( SyntaxTokenList list )
         {

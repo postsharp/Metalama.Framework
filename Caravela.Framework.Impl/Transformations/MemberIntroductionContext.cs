@@ -16,14 +16,14 @@ namespace Caravela.Framework.Impl.Transformations
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
-        public TemplateExpansionLexicalScope LexicalScope { get; }
+        public TemplateLexicalScope LexicalScope { get; }
 
         public ISyntaxFactory SyntaxFactory { get; }
 
         public MemberIntroductionContext(
             DiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
-            TemplateExpansionLexicalScope lexicalScope,
+            TemplateLexicalScope lexicalScope,
             ISyntaxFactory syntaxFactory,
             IServiceProvider serviceProvider )
         {
