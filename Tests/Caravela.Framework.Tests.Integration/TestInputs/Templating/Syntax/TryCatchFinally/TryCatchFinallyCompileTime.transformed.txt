@@ -4,11 +4,11 @@
     }
     catch
     {
-        2 = 3;
+        global::System.Console.WriteLine(1);
     }
     finally
     {
-        2 = 4;
+        global::System.Console.WriteLine(1);
     }
 
     return this.Method(a);
