@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
                 n = 4;
             }
 
-            target.Parameters[0].Value = n;
+            //target.Parameters[0].Value = n;
             return proceed();
         }
     }

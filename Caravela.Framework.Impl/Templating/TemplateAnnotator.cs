@@ -1135,22 +1135,25 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
         {
             var annotatedBlock = (BlockSyntax) this.Visit( node.Block )!;
-            this.RequireScope( annotatedBlock, SymbolDeclarationScope.RunTimeOnly, "a 'try' statement" );
 
             var annotatedCatches = new CatchClauseSyntax[node.Catches.Count];
             for ( var i = 0; i < node.Catches.Count; i++ )
             {
                 var @catch = node.Catches[i];
-                var annotatedCatch = (CatchClauseSyntax) this.Visit( @catch )!;
-                this.RequireScope( annotatedCatch.Block, SymbolDeclarationScope.RunTimeOnly, "a 'catch' statement" );
-                annotatedCatches[i] = annotatedCatch;
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
+                {
+                    var annotatedCatch = (CatchClauseSyntax) this.Visit( @catch )!;
+                    annotatedCatches[i] = annotatedCatch;
+                }
             }
 
             FinallyClauseSyntax? annotatedFinally = null;
             if ( node.Finally != null )
             {
-                annotatedFinally = (FinallyClauseSyntax) this.Visit( node.Finally )!;
-                this.RequireScope( annotatedFinally.Block, SymbolDeclarationScope.RunTimeOnly, "a 'finally' statement" );
+                using ( this.WithScopeContext( ScopeContext.CreateRuntimeConditionalBlock() ) )
+                {
+                    annotatedFinally = (FinallyClauseSyntax) this.Visit( node.Finally )!;
+                }
             }
 
             return node.WithBlock( annotatedBlock ).WithCatches(List(annotatedCatches)).WithFinally(annotatedFinally!).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
