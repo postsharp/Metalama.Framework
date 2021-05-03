@@ -3,7 +3,7 @@ using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterRunTime
+namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterCompileTimeWhen
 {
     [CompileTime]
     class Aspect
@@ -11,12 +11,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
+            var ctString = compileTime("DivideByZero");
             try
             {
-                Console.WriteLine(target.Parameters.Count);
-                return proceed();
+                return 1;
             }
-            catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))
+            catch (Exception e) when (e.GetType().Name.Contains(ctString))
             {
                 return -1;
             }

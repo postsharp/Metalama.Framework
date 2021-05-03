@@ -15,11 +15,17 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             int b = 0;
             try
             {
-                b = 100 / a;
+                pragma.Comment("comment");
+                Console.WriteLine(a);
+                
+                var x = 100 / 1;
+                var y = x / a;
+                
             }
-            catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))
+            catch(Exception e) when (e.GetType().Name.Contains("DivideByZero"))
             {
-                b = 42;
+                pragma.Comment("comment");
+                b =  1;
             }
 
             Console.WriteLine(b);
