@@ -13,12 +13,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Type
         [TestTemplate]
         dynamic Template()
         {
-            string s = compileTime(typeof(string).FullName);
-            Console.WriteLine(s);
+            var rt = runTime(typeof(string));
+            var ct = typeof(string);
+            Console.WriteLine("rt=" + rt);
+            Console.WriteLine("ct=" + ct);
 
             if (target.Parameters[0].ParameterType.Is(typeof(string)))
             {
-                Console.WriteLine(typeof(string).FullName);
+            
             }
 
             Console.WriteLine(typeof(MyClass1).FullName);

@@ -7,8 +7,11 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -20,11 +23,20 @@ namespace Caravela.Framework.Impl.CompileTime
         private static readonly object _addSync = new();
         private static readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
 
-        static Dictionary<string, SymbolDeclarationScope> _wellKnownRunTimeTypes = new()
-        {
-//            { "System.Exception", SymbolDeclarationScope.RunTimeOnly },
-            { "System.Console", SymbolDeclarationScope.RunTimeOnly }
-        };
+        /// <summary>
+        /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
+        /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
+        /// </summary>
+        private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes = 
+            new (Type Type,SymbolDeclarationScope Scope, bool MembersOnly )[] 
+            {
+                ( typeof(Console), SymbolDeclarationScope.RunTimeOnly, false ),
+                ( typeof(Process), SymbolDeclarationScope.RunTimeOnly, false ),
+                ( typeof(Thread), SymbolDeclarationScope.RunTimeOnly, false ),
+                ( typeof(AppDomain), SymbolDeclarationScope.RunTimeOnly, false ),
+                ( typeof(MemberInfo), SymbolDeclarationScope.RunTimeOnly, true ),
+                ( typeof(ParameterInfo), SymbolDeclarationScope.RunTimeOnly, true ),
+            }.ToDictionary( t => t.Type.FullName, t => (t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
@@ -125,7 +137,7 @@ namespace Caravela.Framework.Impl.CompileTime
         public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
         {
             // From well-known types.
-            if ( TryGetWellKnownScope( symbol, out var scopeFromWellKnown ) )
+            if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
             {
                 return scopeFromWellKnown;
             }
@@ -250,7 +262,7 @@ namespace Caravela.Framework.Impl.CompileTime
         }
 
 
-        private static bool TryGetWellKnownScope( ISymbol symbol, out SymbolDeclarationScope scope )
+        private static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out SymbolDeclarationScope scope )
         {
             scope = SymbolDeclarationScope.Unknown;
                 
@@ -260,21 +272,24 @@ namespace Caravela.Framework.Impl.CompileTime
                     return false;
                 
                 case INamedTypeSymbol namedType:
-                    if ( namedType.GetReflectionName() is { } name && _wellKnownRunTimeTypes.TryGetValue( name, out scope ) )
+                    if ( namedType.GetReflectionName() is { } name &&
+                         _wellKnownRunTimeTypes.TryGetValue( name, out var config ) &&
+                         (!config.MembersOnly || isMember) )
                     {
+                        scope = config.Scope;
                         return true;
                     }
                     else if ( namedType.BaseType != null )
                     {
-                        return TryGetWellKnownScope( namedType.BaseType, out scope );
+                        return TryGetWellKnownScope( namedType.BaseType, isMember, out scope );
                     }
                     else
                     {
                         return false;
                     }
 
-                case IMethodSymbol { ContainingType: { } namedType }:
-                    return TryGetWellKnownScope( namedType, out scope );
+                case { ContainingType: { } namedType }:
+                    return TryGetWellKnownScope( namedType, true, out scope );
 
                 default:
                     return false;

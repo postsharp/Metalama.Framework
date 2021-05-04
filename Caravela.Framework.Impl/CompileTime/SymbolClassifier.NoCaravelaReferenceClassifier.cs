@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
             {
-                if ( TryGetWellKnownScope( symbol, out var scopeFromWellKnown ) )
+                if ( TryGetWellKnownScope( symbol,false, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;
                 }

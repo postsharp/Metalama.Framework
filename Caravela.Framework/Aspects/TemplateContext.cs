@@ -40,6 +40,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [Proceed]
+        [return: RunTimeOnly]
         public static dynamic proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>

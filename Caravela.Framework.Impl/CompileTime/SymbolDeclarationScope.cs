@@ -37,6 +37,9 @@ namespace Caravela.Framework.Impl.CompileTime
         /// This is typically for parameters of lambda expressions. The node is evaluated as unknown if at least one children is unknown
         /// doesn't depends on other children.
         /// </summary>
-        Unknown
+        Unknown,
+        Dynamic
     }
+
+
 }

@@ -11,8 +11,17 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static bool IsCompileTime( this SymbolDeclarationScope scope ) => scope is SymbolDeclarationScope.Both or SymbolDeclarationScope.CompileTimeOnly;
 
+        public static bool MustBeTransformed( this SymbolDeclarationScope scope )
+            => scope.ReplaceDefault( SymbolDeclarationScope.RunTimeOnly ) == SymbolDeclarationScope.RunTimeOnly;
+
+        public static SymbolDeclarationScope DynamicToRunTimeOnly( this SymbolDeclarationScope scope )
+            => scope == SymbolDeclarationScope.Dynamic ? SymbolDeclarationScope.RunTimeOnly : scope;
+        
+        public static SymbolDeclarationScope DynamicToCompileTimeOnly( this SymbolDeclarationScope scope )
+            => scope == SymbolDeclarationScope.Dynamic ? SymbolDeclarationScope.CompileTimeOnly : scope;
+
         public static SymbolDeclarationScope ReplaceDefault( this SymbolDeclarationScope scope, SymbolDeclarationScope defaultScope )
-            => scope == SymbolDeclarationScope.Both ? defaultScope : scope;
+            => scope == SymbolDeclarationScope.Both || scope == SymbolDeclarationScope.Unknown ? defaultScope : scope;
 
         public static string ToDisplayString( this SymbolDeclarationScope scope )
             => scope switch
@@ -21,6 +30,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 SymbolDeclarationScope.CompileTimeOnly => "compile-time",
                 SymbolDeclarationScope.Both => "both",
                 SymbolDeclarationScope.Unknown => "unknown",
+                
+                // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.
                 _ => throw new ArgumentOutOfRangeException( nameof(scope) )
             };
     }

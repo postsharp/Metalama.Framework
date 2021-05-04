@@ -5906,7 +5906,7 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @refKindKeyword ), 
 				SyntaxFactory.Argument( @expression )}))).NormalizeWhitespace();
 
-		public InvocationExpressionSyntax Argument(ExpressionSyntax @expression)
+		public InvocationExpressionSyntax Argument(ExpressionSyntax? @expression)
 			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Argument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression )}))).NormalizeWhitespace();
 

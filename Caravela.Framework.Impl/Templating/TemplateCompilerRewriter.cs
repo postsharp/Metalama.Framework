@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( !node.GetScopeFromAnnotation().MustBeTransformed() )
             {
                 return TransformationKind.None;
             }
@@ -147,7 +147,7 @@ namespace Caravela.Framework.Impl.Templating
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                if ( !parent.GetScopeFromAnnotation().MustBeTransformed() )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                            || parent is SwitchSectionSyntax
@@ -355,7 +355,8 @@ namespace Caravela.Framework.Impl.Templating
             // The base implementation is very verbose, so we use this one:
             if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                var transformedArgument = this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) );
+                var transformedExpression = this.Transform( node.Expression )!;
+                var transformedArgument = this.MetaSyntaxFactory.Argument( transformedExpression );
 
                 if ( node.NameColon != null )
                 {
@@ -404,6 +405,21 @@ namespace Caravela.Framework.Impl.Templating
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
                     return expression;
+
+                case SyntaxKind.IdentifierName:
+                    {
+                        var identifierName = (IdentifierNameSyntax) expression;
+
+                        if ( identifierName.IsVar )
+                        {
+                            return this.TransformIdentifierName( (IdentifierNameSyntax) expression );
+                        }
+                        
+                        break;
+                    }
+                
+                case SyntaxKind.SimpleLambdaExpression:
+                    break;
             }
 
             var type = this._semanticAnnotationMap.GetExpressionType( expression )!;
@@ -535,7 +551,7 @@ namespace Caravela.Framework.Impl.Templating
             // In the default implementation, such case would result in an exception.
 
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform
-                 || this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node.Expression ) )
+                 || this._templateMemberClassifier.IsDynamic( node.Expression ) )
             {
                 return this.TransformExpressionStatement( node );
             }
