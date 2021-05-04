@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         static Dictionary<string, SymbolDeclarationScope> _wellKnownRunTimeTypes = new()
         {
-            { "System.Exception", SymbolDeclarationScope.RunTimeOnly },
+//            { "System.Exception", SymbolDeclarationScope.RunTimeOnly },
             { "System.Console", SymbolDeclarationScope.RunTimeOnly }
         };
 
@@ -256,6 +256,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 
             switch ( symbol )
             {
+                case IErrorTypeSymbol:
+                    return false;
+                
                 case INamedTypeSymbol namedType:
                     if ( namedType.GetReflectionName() is { } name && _wellKnownRunTimeTypes.TryGetValue( name, out scope ) )
                     {

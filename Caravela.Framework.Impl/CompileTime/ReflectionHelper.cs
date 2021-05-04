@@ -21,6 +21,12 @@ namespace Caravela.Framework.Impl.CompileTime
                 return string.Empty;
             }
 
+            if ( s is IErrorTypeSymbol )
+            {
+                throw new ArgumentOutOfRangeException( nameof(s), "Cannot get the name of an error symbol." );
+            }
+
+
             var sb = new StringBuilder();
 
             bool TryFormat( ISymbol symbol )
@@ -75,7 +81,8 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         case ITypeSymbol type when type.IsAnonymousType:
                             return false;
-
+                        
+                      
                         default:
                             throw new NotImplementedException( $"Don't know how to get the reflection name of '{symbol}'." );
                     }
