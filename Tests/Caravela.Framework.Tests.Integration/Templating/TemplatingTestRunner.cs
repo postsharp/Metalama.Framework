@@ -106,6 +106,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             // Write the transformed code to disk.
             var transformedTemplateText = result.TransformedTemplateSyntax!.SyntaxTree.GetText();
             var transformedTemplatePath = Path.Combine( GeneratedDirectoryPath, Path.ChangeExtension( testInput.TestName, ".cs" ) );
+            result.TransformedTemplatePath = transformedTemplatePath;
             Directory.CreateDirectory( Path.GetDirectoryName( transformedTemplatePath ) );
 
             await using ( var textWriter = new StreamWriter( transformedTemplatePath, false, Encoding.UTF8 ) )

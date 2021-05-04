@@ -893,27 +893,67 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
+        protected override ExpressionSyntax TransformInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
         {
-            if ( node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
-                 this._semanticAnnotationMap.GetExpressionType( node.Expression )!.Kind != SymbolKind.DynamicType )
+            
+            List<ExpressionSyntax> transformedContents = new ( node.Contents.Count );
+            
+            foreach ( var content in node.Contents )
             {
-                var token = this.MetaSyntaxFactory.Token(
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
-                    this.Transform( SyntaxKind.InterpolatedStringTextToken ),
-                    node.Expression,
-                    node.Expression,
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
+                switch ( content )
+                {
+                    case InterpolatedStringTextSyntax text:
+                        transformedContents.Add( this.TransformInterpolatedStringText( text ) );
+                        break;
+                    
+                    case InterpolationSyntax interpolation:
+                        if ( this.GetTransformationKind( interpolation ) == TransformationKind.None )
+                        {
+                            // We have a compile-time interpolation (e.g. formatting string argument).
+                            // We can evaluate it at compile time and add it as a text content.
+                            
+                            var compileTimeInterpolatedString = 
+                                InterpolatedStringExpression(
+                                    Token( SyntaxKind.InterpolatedStringStartToken ),
+                                    SyntaxFactory.SingletonList<InterpolatedStringContentSyntax>( interpolation ),
+                                    Token( SyntaxKind.InterpolatedStringEndToken ) );
+                
+                            var token = this.MetaSyntaxFactory.
+                                Token(
+                                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                                    this.Transform( SyntaxKind.InterpolatedStringTextToken ),
+                                    compileTimeInterpolatedString,
+                                    compileTimeInterpolatedString,
+                                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
 
-                return this.DeepIndent( this.MetaSyntaxFactory.InterpolatedStringText( token ) );
+                            transformedContents.Add( this.MetaSyntaxFactory.InterpolatedStringText( token ) );
+                        }
+                        else
+                        {
+                            transformedContents.Add( this.TransformInterpolation( interpolation ) );
+                        }
+                        break;
+                        
+                        default:
+                            throw new AssertionFailedException();
+                        
+                }
             }
-            else
-            {
-                var transformedInterpolation = base.VisitInterpolation( node );
-
-                return transformedInterpolation;
-            }
+            
+            this.Indent();
+            var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterpolatedStringExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
+                Argument(this.Transform(node.StringStartToken)).WithLeadingTrivia(this.GetIndentation()),
+                Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+                Argument(this.MetaSyntaxFactory.List<InterpolatedStringContentSyntax>(transformedContents)).WithLeadingTrivia(this.GetIndentation()),
+                Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
+                Argument(this.Transform(node.StringEndToken)).WithLeadingTrivia(this.GetIndentation()),
+            }))).NormalizeWhitespace();
+            this.Unindent();
+            return result;
+            
+            
         }
+
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
         {

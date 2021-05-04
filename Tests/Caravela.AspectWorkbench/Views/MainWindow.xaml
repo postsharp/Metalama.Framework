@@ -38,7 +38,7 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0">
-                <TextBox DockPanel.Dock="Top">Test Source Code</TextBox>
+                <TextBlock DockPanel.Dock="Top">Test Source Code</TextBlock>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
                               HorizontalAlignment="Stretch">
                     <editor:RoslynCodeEditor Name="sourceTextBox" FontSize="12" FontFamily="Consolas"
@@ -59,7 +59,7 @@
                 </Grid.RowDefinitions>
 
                 <DockPanel Grid.Row="0">
-                    <TextBox DockPanel.Dock="Top">Expected Output</TextBox>
+                    <TextBlock DockPanel.Dock="Top">Expected Output</TextBlock>
                     <TextBox Name="expectedOutputTextBox" Text="{Binding ExpectedOutputText, Mode=TwoWay}"
                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas"
                              AcceptsReturn="True" HorizontalScrollBarVisibility="Auto"
@@ -71,7 +71,7 @@
                 <Button Grid.Row="2" Click="MakeExpectedButton_Click">⬆ Make expected ⬆</Button>
 
                 <DockPanel Grid.Row="3">
-                    <TextBox DockPanel.Dock="Top">Transformed Code</TextBox>
+                    <TextBlock DockPanel.Dock="Top">Transformed Code</TextBlock>
                     <RichTextBox IsReadOnly="True" Name="transformedCodeRichBox" HorizontalAlignment="Stretch"
                                  VerticalAlignment="Stretch"
                                  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -82,7 +82,7 @@
             <GridSplitter Grid.Column="3" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
             <DockPanel Grid.Column="4">
-                <TextBox DockPanel.Dock="Top">Text Source Code with Compile-Time Code Highlighting</TextBox>
+                <TextBlock DockPanel.Dock="Top">Text Source Code with Compile-Time Code Highlighting</TextBlock>
                 <RichTextBox Name="highlightedSourceRichBox" IsReadOnly="True" HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch"
                              HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
@@ -92,7 +92,11 @@
             <GridSplitter Grid.Column="5" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
             <DockPanel Grid.Column="6">
-                <TextBox DockPanel.Dock="Top">Compiled Template</TextBox>
+                <TextBlock DockPanel.Dock="Top">
+                    <Hyperlink Name="compiledTemplateHyperlink" Click="CompiledTemplateHyperlink_OnClick">
+                    Compiled Template
+                    </Hyperlink>
+                </TextBlock>
                 <RichTextBox Name="compiledTemplateRichBox" IsReadOnly="True" HorizontalAlignment="Stretch"
                              VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Auto"
                              VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />

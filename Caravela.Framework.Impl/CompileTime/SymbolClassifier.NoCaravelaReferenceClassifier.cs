@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -23,9 +24,18 @@ namespace Caravela.Framework.Impl.CompileTime
             public static ISymbolClassifier GetInstance() => _instance ??= new VanillaClassifier();
 
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
-                => this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
-                    ? SymbolDeclarationScope.Both
-                    : SymbolDeclarationScope.RunTimeOnly;
+            {
+                if ( TryGetWellKnownScope( symbol, out var scopeFromWellKnown ) )
+                {
+                    return scopeFromWellKnown;
+                }
+                else
+                {
+                    return this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
+                        ? SymbolDeclarationScope.Both
+                        : SymbolDeclarationScope.RunTimeOnly;
+                };
+            }
         }
     }
 }

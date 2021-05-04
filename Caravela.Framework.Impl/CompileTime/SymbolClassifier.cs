@@ -4,6 +4,8 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -17,6 +19,12 @@ namespace Caravela.Framework.Impl.CompileTime
     {
         private static readonly object _addSync = new();
         private static readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
+
+        static Dictionary<string, SymbolDeclarationScope> _wellKnownRunTimeTypes = new()
+        {
+            { "System.Exception", SymbolDeclarationScope.RunTimeOnly },
+            { "System.Console", SymbolDeclarationScope.RunTimeOnly }
+        };
 
         private readonly Compilation _compilation;
         private readonly INamedTypeSymbol _compileTimeAttribute;
@@ -116,6 +124,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
         {
+            // From well-known types.
+            if ( TryGetWellKnownScope( symbol, out var scopeFromWellKnown ) )
+            {
+                return scopeFromWellKnown;
+            }
+
+            // From assembly.
             var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
 
             if ( scopeFromAssembly != null )
@@ -232,6 +247,35 @@ namespace Caravela.Framework.Impl.CompileTime
             }
 
             return AddToCache( null );
+        }
+
+
+        private static bool TryGetWellKnownScope( ISymbol symbol, out SymbolDeclarationScope scope )
+        {
+            scope = SymbolDeclarationScope.Unknown;
+                
+            switch ( symbol )
+            {
+                case INamedTypeSymbol namedType:
+                    if ( namedType.GetReflectionName() is { } name && _wellKnownRunTimeTypes.TryGetValue( name, out scope ) )
+                    {
+                        return true;
+                    }
+                    else if ( namedType.BaseType != null )
+                    {
+                        return TryGetWellKnownScope( namedType.BaseType, out scope );
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                case IMethodSymbol { ContainingType: { } namedType }:
+                    return TryGetWellKnownScope( namedType, out scope );
+
+                default:
+                    return false;
+            }
         }
     }
 }

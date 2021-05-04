@@ -83,6 +83,8 @@ namespace Caravela.TestFramework
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the template.
         /// </summary>
         public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
+        
+        public string TransformedTemplatePath { get; internal set; }
 
         /// <summary>
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.

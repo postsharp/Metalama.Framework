@@ -114,7 +114,7 @@ namespace Caravela.Framework.Impl.Templating
                         return this.TransformArgument( argument );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException($"Unexpected node kind: {transformedNode.Kind()}.");
                 }
             }
 

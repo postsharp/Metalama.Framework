@@ -4,6 +4,7 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -127,23 +128,25 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-
-            if ( scope == SymbolDeclarationScope.Both )
-            {
-                Invariant.Assert( node.GetScopeFromAnnotation() == SymbolDeclarationScope.Both );
-
-                // There is nothing to do because the default scope is Both.
-                return node;
-            }
-
+            
             var existingScope = node.GetScopeFromAnnotation();
 
             if ( existingScope != SymbolDeclarationScope.Both )
             {
-                Invariant.Assert( existingScope == scope );
-
+                if ( existingScope != scope )
+                {
+                    throw new AssertionFailedException( $"Cannot change the scope of the {node.Kind()} from {existingScope} to {scope}." );
+                }
+                
                 return node;
             }
+            
+            if ( scope == SymbolDeclarationScope.Both )
+            {
+                // There is nothing to do because the default scope is Both.
+                return node;
+            }
+
 
             switch ( scope )
             {

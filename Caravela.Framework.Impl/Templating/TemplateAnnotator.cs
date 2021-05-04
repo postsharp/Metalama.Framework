@@ -9,6 +9,7 @@ using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -202,17 +203,22 @@ namespace Caravela.Framework.Impl.Templating
         private static SymbolDeclarationScope GetCombinedScope( params SymbolDeclarationScope[] scopes )
             => GetCombinedScope( (IEnumerable<SymbolDeclarationScope>) scopes );
 
-        private SymbolDeclarationScope GetCombinedScope( params SyntaxNode?[] nodes ) => this.GetCombinedScope( (IEnumerable<SyntaxNode?>) nodes );
+        private SymbolDeclarationScope GetCombinedScope( params SyntaxNode?[]? nodes ) => this.GetCombinedScope( (IEnumerable<SyntaxNode?>?) nodes );
 
-        private SymbolDeclarationScope GetCombinedScope( IEnumerable<SyntaxNode?> nodes ) => GetCombinedScope( nodes.Select( this.GetNodeScope ) );
+        private SymbolDeclarationScope GetCombinedScope( IEnumerable<SyntaxNode?>? nodes ) => GetCombinedScope( nodes?.Select( this.GetNodeScope ) );
 
         /// <summary>
         /// Gives the <see cref="SymbolDeclarationScope"/> of a parent given the scope of its children.
         /// </summary>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        private static SymbolDeclarationScope GetCombinedScope( IEnumerable<SymbolDeclarationScope> scopes )
+        private static SymbolDeclarationScope GetCombinedScope( IEnumerable<SymbolDeclarationScope>? scopes )
         {
+            if ( scopes == null )
+            {
+                return SymbolDeclarationScope.Both;
+            }
+            
             var compileTimeOnlyCount = 0;
             var runtimeCount = 0;
 
@@ -282,7 +288,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-
+            
             // Adds annotations to the children node.
             var transformedNode = base.Visit( node );
 
@@ -521,7 +527,7 @@ namespace Caravela.Framework.Impl.Templating
 
             return updatedInvocation;
         }
-
+        
         public override SyntaxNode? VisitArgument( ArgumentSyntax node )
         {
             var argument = (ArgumentSyntax) base.VisitArgument( node )!;
@@ -543,8 +549,8 @@ namespace Caravela.Framework.Impl.Templating
 
                 var annotatedElse = node.Else != null
                     ? ElseClause(
-                            node.Else.ElseKeyword,
-                            this.Visit( node.Else.Statement )! )
+                        node.Else.ElseKeyword,
+                        this.Visit( node.Else.Statement )! )
                         .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly )
                         .WithTriviaFrom( node.Else )
                     : null;
@@ -560,27 +566,27 @@ namespace Caravela.Framework.Impl.Templating
                     .AddScopeAnnotation( SymbolDeclarationScope.CompileTimeOnly );
             }
 
-            // We have an if statement where the condition is a runtime expression. Any variable assignment
-            // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
-            using ( this.WithScopeContext( this.CreateRuntimeConditionalScope() ) )
-            {
+                // We have an if statement where the condition is a runtime expression. Any variable assignment
+                // within this statement should make the variable as runtime-only, so we're calling EnterRuntimeConditionalBlock.
+                using ( this.WithScopeContext( this.CreateRuntimeConditionalScope() ) )
+                {
                 var annotatedStatement = this.Visit( node.Statement )!;
                 var annotatedElse = this.Visit( node.Else )!;
 
                 var result = node.Update( node.IfKeyword, node.OpenParenToken, annotatedCondition, node.CloseParenToken, annotatedStatement, annotatedElse );
 
-                return result;
+                    return result;
             }
         }
 
         public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
         {
-            return base.VisitBreakStatement( node )!.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
+            return node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
         }
 
         public override SyntaxNode? VisitContinueStatement( ContinueStatementSyntax node )
         {
-            return base.VisitContinueStatement( node )!.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
+            return node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
         }
 
         public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
@@ -1361,6 +1367,65 @@ namespace Caravela.Framework.Impl.Templating
             var transformedNode = (NullableTypeSyntax) base.VisitNullableType( node )!;
 
             return transformedNode.WithScopeAnnotationFrom( transformedNode.ElementType );
+        }
+
+        public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
+        {
+            var transformedType = this.Visit( node.Type );
+            var objectType = this._semanticAnnotationMap.GetExpressionType( node );
+            var objectTypeScope = this.GetSymbolScope( objectType );
+
+            ScopeContext? context = null;
+
+            if ( objectTypeScope == SymbolDeclarationScope.CompileTimeOnly )
+            {
+                context = this.CreateCompileTimeExpressionScope( $"the creation of an instance of the compile-time {objectType}" );
+            }
+
+            using ( this.WithScopeContext( context ) )
+            {
+                var transformedArguments = node.ArgumentList?.Arguments.Select( this.Visit ).ToArray();
+                var argumentsScope = this.GetCombinedScope( transformedArguments );
+                var transformedInitializer = this.Visit( node.Initializer );
+                var initializerScope = this.GetNodeScope( transformedInitializer );
+
+                var combinedScope = objectTypeScope switch
+                {
+                    SymbolDeclarationScope.CompileTimeOnly => SymbolDeclarationScope.CompileTimeOnly,
+                    SymbolDeclarationScope.RunTimeOnly => SymbolDeclarationScope.RunTimeOnly,
+                    _ => GetCombinedScope( argumentsScope, initializerScope )
+                };
+
+                return node.Update(
+                        node.NewKeyword,
+                        transformedType,
+                        transformedArguments != null
+                            ? ArgumentList(
+                                node.ArgumentList.OpenParenToken,
+                                SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
+                                node.ArgumentList.CloseParenToken )
+                            : null,
+                        transformedInitializer )
+                    .AddScopeAnnotation( combinedScope );
+            }
+        }
+
+        public override SyntaxNode? VisitThrowExpression( ThrowExpressionSyntax node )
+        {
+            // Throw is always run-time.
+            var transformedExpression = this.Visit( node.Expression );
+            
+            // this.RequireScope( transformedExpression, SymbolDeclarationScope.RunTimeOnly, "a 'throw' expression" );
+
+            return node.Update( node.ThrowKeyword, transformedExpression ).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
+        }
+
+        public override SyntaxNode? VisitThrowStatement( ThrowStatementSyntax node )
+        {
+            var transformedExpression = this.Visit( node.Expression );
+            this.RequireScope( transformedExpression, SymbolDeclarationScope.RunTimeOnly, "a 'throw' statement" );
+
+            return node.Update( node.ThrowKeyword, transformedExpression, node.SemicolonToken ).AddScopeAnnotation( SymbolDeclarationScope.RunTimeOnly );
         }
 
         public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
