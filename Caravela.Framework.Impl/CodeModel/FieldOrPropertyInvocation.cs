@@ -44,14 +44,14 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object GetValue( object? instance )
         {
-            return new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) ), this.Member.Type, this.Member is Field );
+            return new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) ), this.Member.Type, this.Member is Field );
         }
 
         public object SetValue( object? instance, object? value )
         {
-            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromDynamic( instance ) );
+            var propertyAccess = this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) );
 
-            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromDynamic( value ) );
+            var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
             return new DynamicMember( expression, this.Member.Type, false );
         }

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -142,11 +143,13 @@ namespace Caravela.TestFramework
         /// Gets a value indicating whether the test run succeeded.
         /// </summary>
         public bool Success { get; private set; } = true;
-
-        internal void SetFailed( string reason )
+        
+        public Exception? Exception { get; private set; }
+        
+        internal void SetFailed( string reason, Exception exception = null )
         {
             this.Success = false;
-            this.ErrorMessage = reason;
+            this.ErrorMessage = reason + Environment.NewLine + exception?.ToString();
 
             var emptyStatement =
                 SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )

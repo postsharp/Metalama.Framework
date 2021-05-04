@@ -34,7 +34,12 @@ namespace Caravela.Framework.Impl.Templating
         private bool IsCompileTime( ISymbol? symbol )
             => symbol != null && this._symbolClassifier.GetSymbolDeclarationScope( symbol ).DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly;
         
-        public bool IsDynamic( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
+        
+        public bool IsDynamicParameter( ArgumentSyntax argument )
+            => this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is 
+                IDynamicTypeSymbol 
+                or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
         public bool IsRunTimeMethod( ISymbol symbol )
             => symbol.Name == nameof(TemplateContext.runTime) &&
@@ -48,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsDynamic( SyntaxNode originalNode )
+        public bool IsDynamicType( SyntaxNode originalNode )
         {
             var expressionType = this._semanticAnnotationMap.GetExpressionType( originalNode );
             var nodeSymbol = this._semanticAnnotationMap.GetSymbol( originalNode );
@@ -59,9 +64,9 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
             
-            if ( this.IsDynamic( expressionType )  || 
-                 nodeSymbol is IMethodSymbol method && this.IsDynamic( method.ReturnType ) ||
-                 nodeSymbol is IPropertySymbol property && this.IsDynamic( property.Type  ) )
+            if ( this.IsDynamicType( expressionType )  || 
+                 nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType ) ||
+                 nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type  ) )
             {
                 return true;
             }

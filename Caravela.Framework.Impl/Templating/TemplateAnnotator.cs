@@ -169,7 +169,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // If the node is dynamic, it is run-time only.
-            if ( this._templateMemberClassifier.IsDynamic( node ) )
+            if ( this._templateMemberClassifier.IsDynamicType( node ) )
             {
                 return SymbolDeclarationScope.Dynamic;
             }
@@ -334,7 +334,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
                 if ( transformedNode.GetScopeFromAnnotation() == SymbolDeclarationScope.RunTimeOnly ||
-                     this._templateMemberClassifier.IsDynamic( transformedNode ) )
+                     this._templateMemberClassifier.IsDynamicType( transformedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
                     // Emit an error if the type of the expression is inferred to be runtime-only.
@@ -439,7 +439,7 @@ namespace Caravela.Framework.Impl.Templating
                 }
                 else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
                           (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method)
-                          && this._templateMemberClassifier.IsDynamic( node ) )
+                          && this._templateMemberClassifier.IsDynamicType( node ) )
                 {
                     // Annotate dynamic members differently for syntax coloring.
                     annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
@@ -548,7 +548,7 @@ namespace Caravela.Framework.Impl.Templating
                     ArgumentSyntax transformedArgument;
 
                     // dynamic or dynamic[]
-                    if ( this._templateMemberClassifier.IsDynamic( parameterType ) )
+                    if ( this._templateMemberClassifier.IsDynamicType( parameterType ) )
                     {
                         transformedArgument = (ArgumentSyntax) this.VisitArgument( argument )!;
                     }
@@ -1049,7 +1049,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             // TODO: Verify
             var combinedScope = this.GetNodeScope( annotatedType ) == SymbolDeclarationScope.Both
-                ? this.GetNodeScope( annotatedExpression )
+                ? this.GetNodeScope( annotatedExpression ).DynamicToRunTimeOnly()
                 : this.GetExpressionScope( new[] { annotatedExpression }, transformedCastNode );
 
             if ( combinedScope != SymbolDeclarationScope.Both )
@@ -1246,7 +1246,7 @@ namespace Caravela.Framework.Impl.Templating
             var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation();
 
             if ( (governingExpressionScope == SymbolDeclarationScope.CompileTimeOnly
-                  && this._templateMemberClassifier.IsDynamic( transformedGoverningExpression ))
+                  && this._templateMemberClassifier.IsDynamicType( transformedGoverningExpression ))
                  || governingExpressionScope != SymbolDeclarationScope.CompileTimeOnly )
             {
                 governingExpressionScope = SymbolDeclarationScope.RunTimeOnly;
@@ -1279,7 +1279,7 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedExpression = this.Visit( node.Expression )!;
             var expressionScope = annotatedExpression.GetScopeFromAnnotation();
 
-            if ( (expressionScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamic( annotatedExpression ))
+            if ( (expressionScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( annotatedExpression ))
                  || expressionScope != SymbolDeclarationScope.CompileTimeOnly )
             {
                 expressionScope = SymbolDeclarationScope.RunTimeOnly;
@@ -1381,7 +1381,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // TODO: remove the next line (it should come as Dynamic).
-            if ( (existingScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamic( node )) ||
+            if ( (existingScope == SymbolDeclarationScope.CompileTimeOnly && this._templateMemberClassifier.IsDynamicType( node )) ||
                  existingScope == SymbolDeclarationScope.Dynamic )
             {
                 existingScope = SymbolDeclarationScope.RunTimeOnly;

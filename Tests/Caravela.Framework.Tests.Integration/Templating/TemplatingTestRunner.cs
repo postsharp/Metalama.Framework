@@ -163,6 +163,10 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 var output = driver.ExpandDeclaration( expansionContext );
                 result.SetTransformedTarget( output );
             }
+            catch ( Exception e )
+            {
+                result.SetFailed( "Exception during template expansion", e );
+            }
             finally
             {
                 assemblyLoadContext.Unload();
