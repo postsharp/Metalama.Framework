@@ -94,7 +94,7 @@
             <DockPanel Grid.Column="6">
                 <TextBlock DockPanel.Dock="Top">
                     <Hyperlink Name="compiledTemplateHyperlink" Click="CompiledTemplateHyperlink_OnClick">
-                    Compiled Template
+                        Compiled Template
                     </Hyperlink>
                 </TextBlock>
                 <RichTextBox Name="compiledTemplateRichBox" IsReadOnly="True" HorizontalAlignment="Stretch"

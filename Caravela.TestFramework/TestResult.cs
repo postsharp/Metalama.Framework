@@ -163,7 +163,7 @@ namespace Caravela.TestFramework
 
             this.SetTransformedTarget(
                 emptyStatement
-                    .WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
+                    .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
         }
     }
 }

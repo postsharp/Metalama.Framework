@@ -40,7 +40,7 @@ namespace Caravela.TestFramework
             }
             else
             {
-                testResult.SetFailed( "The pipeline failed." );
+                testResult.SetFailed( "CompileTimeAspectPipeline pipeline failed." );
             }
 
             return testResult;

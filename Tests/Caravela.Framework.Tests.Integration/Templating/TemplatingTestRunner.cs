@@ -98,7 +98,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
             if ( !templateCompilerSuccess )
             {
-                result.SetFailed( "Template compiler failed." );
+                result.SetFailed( "TestTemplateCompiler.TryCompile failed." );
 
                 return result;
             }
@@ -165,7 +165,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
             }
             catch ( Exception e )
             {
-                result.SetFailed( "Exception during template expansion", e );
+                result.SetFailed( "Exception during template expansion: " + e.Message, e );
             }
             finally
             {

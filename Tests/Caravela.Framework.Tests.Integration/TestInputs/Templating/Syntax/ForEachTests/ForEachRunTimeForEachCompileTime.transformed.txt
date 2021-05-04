@@ -1,2 +1,2 @@
-// Compilation error. Code not generated.
+// TestTemplateCompiler.TryCompile failed. 
 // Error CR0110 on `target.Parameters`: `The compile-time loop 'foreach' is not allowed here because it is a part of block whose execution depends on a run-time condition.`

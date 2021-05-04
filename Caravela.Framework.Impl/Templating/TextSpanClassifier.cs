@@ -158,7 +158,7 @@ namespace Caravela.Framework.Impl.Templating
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );
                 }
-                
+
                 // Mark the node.
                 var colorFromAnnotation = node.GetColorFromAnnotation();
 

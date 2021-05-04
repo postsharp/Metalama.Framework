@@ -1,3 +1,5 @@
+#pragma warning disable CS8669 // Nullability
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -5906,8 +5908,8 @@ namespace Caravela.Framework.Impl.Templating
 				SyntaxFactory.Argument( @refKindKeyword ), 
 				SyntaxFactory.Argument( @expression )}))).NormalizeWhitespace();
 
-		public InvocationExpressionSyntax Argument(ExpressionSyntax? @expression)
-			=> SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Argument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
+            public InvocationExpressionSyntax Argument(ExpressionSyntax? @expression)
+            => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( "Argument" ), SyntaxFactory.ArgumentList(SyntaxFactory.SeparatedList<ArgumentSyntax>( new ArgumentSyntax[]{
 				SyntaxFactory.Argument( @expression )}))).NormalizeWhitespace();
 
 		public InvocationExpressionSyntax ArgumentList(ExpressionSyntax @openParenToken, ExpressionSyntax @arguments, ExpressionSyntax @closeParenToken)

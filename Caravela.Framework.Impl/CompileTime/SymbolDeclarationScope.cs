@@ -33,11 +33,15 @@ namespace Caravela.Framework.Impl.CompileTime
         CompileTimeOnly,
 
         /// <summary>
-        /// Using of the symbol is unknown yet. It can be used both at compile time or at run time.
-        /// This is typically for parameters of lambda expressions. The node is evaluated as unknown if at least one children is unknown
-        /// doesn't depends on other children.
+        /// Unknown scope, for instance the scope of a lambda parameter that is not bound to a context.
         /// </summary>
         Unknown,
+        
+        /// <summary>
+        /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. The return
+        /// value does not need to be of the <c>dynamic</c> itself. However, the member must be decorated with both
+        /// <see cref="CompileTimeAttribute"/> (possibly inherited) and <see cref="RunTimeOnlyAttribute"/>.
+        /// </summary>
         Dynamic
     }
 }

@@ -1,3 +1,5 @@
+#pragma warning disable CS0162 // Unreachable code detected
+
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
