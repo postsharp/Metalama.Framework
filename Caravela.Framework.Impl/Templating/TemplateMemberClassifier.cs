@@ -18,11 +18,11 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly ITypeSymbol _templateContextType;
-        private ISymbolClassifier _symbolClassifier;
+        private readonly ISymbolClassifier _symbolClassifier;
 
         public TemplateMemberClassifier(
             Compilation compilation,
-            SemanticAnnotationMap semanticAnnotationMap)
+            SemanticAnnotationMap semanticAnnotationMap )
         {
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._symbolClassifier = SymbolClassifier.GetInstance( compilation );
@@ -32,13 +32,16 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         private bool IsCompileTime( ISymbol? symbol )
-            => symbol != null && this._symbolClassifier.GetSymbolDeclarationScope( symbol ).DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly;
-        
+            => symbol != null && this._symbolClassifier.GetSymbolDeclarationScope( symbol ).DynamicToCompileTimeOnly()
+                == SymbolDeclarationScope.CompileTimeOnly;
+
+#pragma warning disable CA1822 // Static anyway.
         public bool IsDynamicType( ITypeSymbol? type ) => type is IDynamicTypeSymbol or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
-        
+#pragma warning restore CA1822
+
         public bool IsDynamicParameter( ArgumentSyntax argument )
-            => this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is 
-                IDynamicTypeSymbol 
+            => this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is
+                IDynamicTypeSymbol
                 or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
         public bool IsRunTimeMethod( ISymbol symbol )
@@ -63,10 +66,10 @@ namespace Caravela.Framework.Impl.Templating
                 // This may be a dynamic member, but a purely run-time one, and we are not interested in those.
                 return false;
             }
-            
-            if ( this.IsDynamicType( expressionType )  || 
-                 nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType ) ||
-                 nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type  ) )
+
+            if ( this.IsDynamicType( expressionType ) ||
+                 (nodeSymbol is IMethodSymbol method && this.IsDynamicType( method.ReturnType )) ||
+                 (nodeSymbol is IPropertySymbol property && this.IsDynamicType( property.Type )) )
             {
                 return true;
             }

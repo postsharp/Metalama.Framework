@@ -84,8 +84,8 @@ namespace Caravela.TestFramework
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the template.
         /// </summary>
         public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
-        
-        public string TransformedTemplatePath { get; internal set; }
+
+        public string? TransformedTemplatePath { get; internal set; }
 
         /// <summary>
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.
@@ -143,19 +143,24 @@ namespace Caravela.TestFramework
         /// Gets a value indicating whether the test run succeeded.
         /// </summary>
         public bool Success { get; private set; } = true;
-        
+
         public Exception? Exception { get; private set; }
-        
-        internal void SetFailed( string reason, Exception exception = null )
+
+        internal void SetFailed( string reason, Exception? exception = null )
         {
+            this.Exception = exception;
             this.Success = false;
-            this.ErrorMessage = reason + Environment.NewLine + exception?.ToString();
+            this.ErrorMessage = reason;
+
+            if ( exception != null )
+            {
+                this.ErrorMessage += Environment.NewLine + exception;
+            }
 
             var emptyStatement =
                 SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
                     .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
-            
             this.SetTransformedTarget(
                 emptyStatement
                     .WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );

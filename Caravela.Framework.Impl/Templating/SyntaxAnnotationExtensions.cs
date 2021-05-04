@@ -58,7 +58,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case "unknown":
                     return SymbolDeclarationScope.Unknown;
-                
+
                 case "dynamic":
                     return SymbolDeclarationScope.Dynamic;
 
@@ -132,7 +132,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 return null;
             }
-            
+
             var existingScope = node.GetScopeFromAnnotation();
 
             if ( existingScope != SymbolDeclarationScope.Both )
@@ -141,16 +141,15 @@ namespace Caravela.Framework.Impl.Templating
                 {
                     throw new AssertionFailedException( $"Cannot change the scope of the {node.Kind()} from {existingScope} to {scope}." );
                 }
-                
+
                 return node;
             }
-            
+
             if ( scope == SymbolDeclarationScope.Both )
             {
                 // There is nothing to do because the default scope is Both.
                 return node;
             }
-
 
             switch ( scope )
             {
@@ -162,7 +161,7 @@ namespace Caravela.Framework.Impl.Templating
 
                 case SymbolDeclarationScope.Unknown:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
-                
+
                 case SymbolDeclarationScope.Dynamic:
                     return node.WithAdditionalAnnotations( _dynamicAnnotation );
 

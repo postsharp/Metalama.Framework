@@ -40,6 +40,4 @@ namespace Caravela.Framework.Impl.CompileTime
         Unknown,
         Dynamic
     }
-
-
 }

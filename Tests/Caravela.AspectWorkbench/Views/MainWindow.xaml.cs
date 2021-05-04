@@ -153,7 +153,7 @@ namespace Caravela.AspectWorkbench.Views
         {
             if ( this._viewModel.CompiledTemplatePath != null )
             {
-                Process.Start( new ProcessStartInfo( this._viewModel.CompiledTemplatePath ) { UseShellExecute = true} );
+                _ = Process.Start( new ProcessStartInfo( this._viewModel.CompiledTemplatePath ) { UseShellExecute = true } );
             }
         }
     }

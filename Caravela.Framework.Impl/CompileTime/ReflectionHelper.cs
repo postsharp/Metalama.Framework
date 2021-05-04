@@ -14,6 +14,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName ) => new( assemblyName.Name, assemblyName.Version );
 
+        public static string GetReflectionNameSafe( this ISymbol? s )
+            => GetReflectionName( s ) ?? throw new ArgumentOutOfRangeException( $"Cannot get a reflection name for {s}." );
+        
         public static string? GetReflectionName( this ISymbol? s )
         {
             if ( s == null || IsRootNamespace( s ) )
@@ -25,7 +28,6 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 throw new ArgumentOutOfRangeException( nameof(s), "Cannot get the name of an error symbol." );
             }
-
 
             var sb = new StringBuilder();
 
@@ -50,7 +52,9 @@ namespace Caravela.Framework.Impl.CompileTime
                         if ( !namespaceSymbol.IsGlobalNamespace )
                         {
                             if ( !TryFormat( namespaceSymbol ) )
+                            {
                                 return false;
+                            }
 
                             sb.Append( '.' );
                         }
@@ -81,8 +85,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                         case ITypeSymbol type when type.IsAnonymousType:
                             return false;
-                        
-                      
+
                         default:
                             throw new NotImplementedException( $"Don't know how to get the reflection name of '{symbol}'." );
                     }

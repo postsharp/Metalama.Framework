@@ -416,10 +416,10 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             return this.TransformIdentifierName( (IdentifierNameSyntax) expression );
                         }
-                        
+
                         break;
                     }
-                
+
                 case SyntaxKind.SimpleLambdaExpression:
                     break;
             }
@@ -455,7 +455,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._semanticAnnotationMap.GetLocation( expression ),
                                 "" ) );
 
-                        return  LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
+                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
 
                     return InvocationExpression(
@@ -575,15 +575,14 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
-            
             var transformationKind = this.GetTransformationKind( node );
 
-            if ( transformationKind != TransformationKind.Transform && 
+            if ( transformationKind != TransformationKind.Transform &&
                  node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
             {
                 var transformedArguments = node.ArgumentList.Arguments.Select(
-                        a => this._templateMemberClassifier.IsDynamicParameter( a ) 
-                            ? Argument( this.CreateRunTimeExpression( a.Expression ) ) 
+                        a => this._templateMemberClassifier.IsDynamicParameter( a )
+                            ? Argument( this.CreateRunTimeExpression( a.Expression ) )
                             : this.Visit( a )! )
                     .ToArray();
 
@@ -916,36 +915,35 @@ namespace Caravela.Framework.Impl.Templating
 
         protected override ExpressionSyntax TransformInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
         {
-            
-            List<ExpressionSyntax> transformedContents = new ( node.Contents.Count );
-            
+            List<ExpressionSyntax> transformedContents = new( node.Contents.Count );
+
             foreach ( var content in node.Contents )
             {
                 switch ( content )
                 {
                     case InterpolatedStringTextSyntax text:
                         transformedContents.Add( this.TransformInterpolatedStringText( text ) );
+
                         break;
-                    
+
                     case InterpolationSyntax interpolation:
                         if ( this.GetTransformationKind( interpolation ) == TransformationKind.None )
                         {
                             // We have a compile-time interpolation (e.g. formatting string argument).
                             // We can evaluate it at compile time and add it as a text content.
-                            
-                            var compileTimeInterpolatedString = 
+
+                            var compileTimeInterpolatedString =
                                 InterpolatedStringExpression(
                                     Token( SyntaxKind.InterpolatedStringStartToken ),
-                                    SyntaxFactory.SingletonList<InterpolatedStringContentSyntax>( interpolation ),
+                                    SingletonList<InterpolatedStringContentSyntax>( interpolation ),
                                     Token( SyntaxKind.InterpolatedStringEndToken ) );
-                
-                            var token = this.MetaSyntaxFactory.
-                                Token(
-                                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
-                                    this.Transform( SyntaxKind.InterpolatedStringTextToken ),
-                                    compileTimeInterpolatedString,
-                                    compileTimeInterpolatedString,
-                                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
+
+                            var token = this.MetaSyntaxFactory.Token(
+                                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                                this.Transform( SyntaxKind.InterpolatedStringTextToken ),
+                                compileTimeInterpolatedString,
+                                compileTimeInterpolatedString,
+                                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
 
                             transformedContents.Add( this.MetaSyntaxFactory.InterpolatedStringText( token ) );
                         }
@@ -953,28 +951,35 @@ namespace Caravela.Framework.Impl.Templating
                         {
                             transformedContents.Add( this.TransformInterpolation( interpolation ) );
                         }
+
                         break;
-                        
-                        default:
-                            throw new AssertionFailedException();
-                        
+
+                    default:
+                        throw new AssertionFailedException();
                 }
             }
-            
-            this.Indent();
-            var result = InvocationExpression(this.MetaSyntaxFactory.SyntaxFactoryMethod(nameof(InterpolatedStringExpression))).WithArgumentList(ArgumentList(SeparatedList<ArgumentSyntax>(new SyntaxNodeOrToken[]{
-                Argument(this.Transform(node.StringStartToken)).WithLeadingTrivia(this.GetIndentation()),
-                Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-                Argument(this.MetaSyntaxFactory.List<InterpolatedStringContentSyntax>(transformedContents)).WithLeadingTrivia(this.GetIndentation()),
-                Token(SyntaxKind.CommaToken).WithTrailingTrivia(GetLineBreak()),
-                Argument(this.Transform(node.StringEndToken)).WithLeadingTrivia(this.GetIndentation()),
-            }))).NormalizeWhitespace();
-            this.Unindent();
-            return result;
-            
-            
-        }
 
+            this.Indent();
+
+            var result = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
+                .WithArgumentList(
+                    ArgumentList(
+                        SeparatedList<ArgumentSyntax>(
+                            new SyntaxNodeOrToken[]
+                            {
+                                Argument( this.Transform( node.StringStartToken ) ).WithLeadingTrivia( this.GetIndentation() ),
+                                Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
+                                Argument( this.MetaSyntaxFactory.List<InterpolatedStringContentSyntax>( transformedContents ) )
+                                    .WithLeadingTrivia( this.GetIndentation() ),
+                                Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
+                                Argument( this.Transform( node.StringEndToken ) ).WithLeadingTrivia( this.GetIndentation() )
+                            } ) ) )
+                .NormalizeWhitespace();
+
+            this.Unindent();
+
+            return result;
+        }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
         {

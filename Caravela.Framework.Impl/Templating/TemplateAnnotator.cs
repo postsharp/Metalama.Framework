@@ -846,7 +846,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Transform arguments.
-            ArgumentSyntax?[] transformedArguments = null;
+            ArgumentSyntax[]? transformedArguments = null;
 
             if ( node.ArgumentList != null )
             {
@@ -854,15 +854,14 @@ namespace Caravela.Framework.Impl.Templating
                     localScope == SymbolDeclarationScope.CompileTimeOnly
                         ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
                         : ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
-
                 {
-                    transformedArguments = node.ArgumentList.Arguments.Select( this.Visit ).ToArray();
+                    transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a )! ).ToArray();
                 }
             }
 
             var transformedArgumentList = transformedArguments != null
                 ? BracketedArgumentList(
-                    node.ArgumentList.OpenBracketToken,
+                    node.ArgumentList!.OpenBracketToken,
                     SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
                     node.ArgumentList.CloseBracketToken )
                 : null;
@@ -1492,7 +1491,7 @@ namespace Caravela.Framework.Impl.Templating
 
             using ( this.WithScopeContext( context ) )
             {
-                var transformedArguments = node.ArgumentList?.Arguments.Select( this.Visit ).ToArray();
+                var transformedArguments = node.ArgumentList?.Arguments.Select( a => this.Visit( a )! ).ToArray();
                 var argumentsScope = this.GetExpressionScope( transformedArguments, node );
                 var transformedInitializer = this.Visit( node.Initializer );
                 var initializerScope = this.GetNodeScope( transformedInitializer );
@@ -1504,15 +1503,17 @@ namespace Caravela.Framework.Impl.Templating
                     _ => this.GetExpressionScope( new[] { argumentsScope, initializerScope }, node )
                 };
 
+                var transformedArgumentList = transformedArguments != null
+                    ? ArgumentList(
+                        node.ArgumentList!.OpenParenToken,
+                        SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
+                        node.ArgumentList!.CloseParenToken )
+                    : null;
+
                 return node.Update(
                         node.NewKeyword,
                         transformedType,
-                        transformedArguments != null
-                            ? ArgumentList(
-                                node.ArgumentList.OpenParenToken,
-                                SeparatedList( transformedArguments, node.ArgumentList.Arguments.GetSeparators() ),
-                                node.ArgumentList.CloseParenToken )
-                            : null,
+                        transformedArgumentList,
                         transformedInitializer )
                     .AddScopeAnnotation( combinedScope );
             }

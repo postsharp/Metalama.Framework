@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             public SymbolDeclarationScope GetSymbolDeclarationScope( ISymbol symbol )
             {
-                if ( TryGetWellKnownScope( symbol,false, out var scopeFromWellKnown ) )
+                if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
                 {
                     return scopeFromWellKnown;
                 }
@@ -34,7 +33,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this._referenceAssemblyLocator.StandardAssemblyNames.Contains( symbol.ContainingAssembly.Name )
                         ? SymbolDeclarationScope.Both
                         : SymbolDeclarationScope.RunTimeOnly;
-                };
+                }
             }
         }
     }

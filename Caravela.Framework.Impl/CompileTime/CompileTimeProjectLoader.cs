@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity );
 
-            var result = compileTimeProject?.GetType( typeSymbol.GetReflectionName() );
+            var result = compileTimeProject?.GetType( typeSymbol.GetReflectionNameSafe() );
 
             if ( result == null )
             {

@@ -5,7 +5,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -27,15 +26,15 @@ namespace Caravela.Framework.Impl.CompileTime
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes = 
-            new (Type Type,SymbolDeclarationScope Scope, bool MembersOnly )[] 
+        private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
+            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly )[]
             {
-                ( typeof(Console), SymbolDeclarationScope.RunTimeOnly, false ),
-                ( typeof(Process), SymbolDeclarationScope.RunTimeOnly, false ),
-                ( typeof(Thread), SymbolDeclarationScope.RunTimeOnly, false ),
-                ( typeof(AppDomain), SymbolDeclarationScope.RunTimeOnly, false ),
-                ( typeof(MemberInfo), SymbolDeclarationScope.RunTimeOnly, true ),
-                ( typeof(ParameterInfo), SymbolDeclarationScope.RunTimeOnly, true ),
+                (typeof(Console), SymbolDeclarationScope.RunTimeOnly, false),
+                (typeof(Process), SymbolDeclarationScope.RunTimeOnly, false),
+                (typeof(Thread), SymbolDeclarationScope.RunTimeOnly, false),
+                (typeof(AppDomain), SymbolDeclarationScope.RunTimeOnly, false),
+                (typeof(MemberInfo), SymbolDeclarationScope.RunTimeOnly, true),
+                (typeof(ParameterInfo), SymbolDeclarationScope.RunTimeOnly, true)
             }.ToDictionary( t => t.Type.FullName, t => (t.Scope, t.MembersOnly) );
 
         private readonly Compilation _compilation;
@@ -261,22 +260,22 @@ namespace Caravela.Framework.Impl.CompileTime
             return AddToCache( null );
         }
 
-
         private static bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out SymbolDeclarationScope scope )
         {
             scope = SymbolDeclarationScope.Unknown;
-                
+
             switch ( symbol )
             {
                 case IErrorTypeSymbol:
                     return false;
-                
+
                 case INamedTypeSymbol namedType:
                     if ( namedType.GetReflectionName() is { } name &&
                          _wellKnownRunTimeTypes.TryGetValue( name, out var config ) &&
                          (!config.MembersOnly || isMember) )
                     {
                         scope = config.Scope;
+
                         return true;
                     }
                     else if ( namedType.BaseType != null )

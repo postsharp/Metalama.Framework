@@ -24,11 +24,12 @@ namespace Caravela.Framework.Impl.ReflectionMocks
 
         public static Type Create( IType type ) => Create( ((ITypeInternal) type).TypeSymbol.AssertNotNull() );
 
-        public override string Namespace => this.TypeSymbol.ContainingNamespace.GetReflectionName();
+        public override string Namespace => this.TypeSymbol.ContainingNamespace.GetReflectionNameSafe();
 
         public override string Name => this.TypeSymbol.Name;
 
-        public override string FullName => this.TypeSymbol.GetReflectionName();
+        public override string FullName
+            => this.TypeSymbol.GetReflectionNameSafe() ?? throw new InvalidOperationException( "Cannot get a reflection name for this type." );
 
         ISymbol ICompileTimeReflectionObject.Symbol => this.TypeSymbol;
 

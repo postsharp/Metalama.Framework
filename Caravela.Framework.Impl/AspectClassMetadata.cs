@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl
         /// <param name="aspectDriver">Can be null for testing.</param>
         private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver )
         {
-            this.FullName = aspectTypeSymbol.GetReflectionName();
+            this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name;
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;

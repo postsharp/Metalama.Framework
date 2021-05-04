@@ -90,7 +90,6 @@ namespace Caravela.Framework.Impl.Templating
 
         protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
 
-        
         /// <summary>
         /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
         /// irrespective of the <see cref="TransformationKind"/> returned by <see cref="GetTransformationKind"/>.
@@ -118,17 +117,14 @@ namespace Caravela.Framework.Impl.Templating
                         return this.TransformArgument( (ArgumentSyntax) this.Visit( argument ) );
 
                     default:
-                        throw new AssertionFailedException($"Unexpected node kind: {node.Kind()}.");
+                        throw new AssertionFailedException( $"Unexpected node kind: {node.Kind()}." );
                 }
             }
             else
             {
                 return (ExpressionSyntax) this.Visit( node );
-
             }
-
         }
-        
 
         protected ExpressionSyntax Transform( SyntaxKind kind ) => this.MetaSyntaxFactory.Kind( kind );
 
