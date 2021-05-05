@@ -66,18 +66,8 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
-                var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
-
-                var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
-
-                if ( templateMethod == null )
-                {
-                    // This is caused by an error upstream;
-                    return Enumerable.Empty<IntroducedMember>();
-                }
-
-                var templateDriver = new TemplateDriver( this.TemplateMethod.GetSymbol(), templateMethod );
-
+                var templateDriver = this.Advice.Aspect.GetTemplateDriver( this.TemplateMethod );
+             
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {
                     // Template expansion error.

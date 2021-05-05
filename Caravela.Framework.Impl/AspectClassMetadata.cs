@@ -34,6 +34,8 @@ namespace Caravela.Framework.Impl
         /// </summary>
         public AspectClassMetadata? BaseClass { get; }
 
+        public CompileTimeProject Project { get; }
+
         /// <summary>
         /// Gets the aspect driver of the current class, responsible for executing the aspect.
         /// </summary>
@@ -54,12 +56,13 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver )
+        private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver, CompileTimeProject project )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name;
             this.IsAbstract = aspectTypeSymbol.IsAbstract;
             this.BaseClass = baseClass;
+            this.Project = project;
             this._aspectDriver = aspectDriver;
             this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
         }
@@ -79,12 +82,13 @@ namespace Caravela.Framework.Impl
             INamedTypeSymbol aspectNamedType,
             AspectClassMetadata? baseAspectType,
             IAspectDriver? aspectDriver,
+            CompileTimeProject compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out AspectClassMetadata? aspectClassMetadata )
         {
             var layersBuilder = ImmutableArray.CreateBuilder<AspectLayer>();
 
-            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver );
+            var newAspectType = new AspectClassMetadata( aspectNamedType, baseAspectType, aspectDriver, compileTimeProject );
 
             // Add the default part.
             layersBuilder.Add( new AspectLayer( newAspectType, null ) );

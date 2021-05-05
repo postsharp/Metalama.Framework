@@ -98,5 +98,14 @@ namespace Caravela.Framework.Impl.Templating
                     "The advice '{0}' threw '{2}' when applied to '{1}': {3}",
                     _category,
                     DiagnosticSeverity.Error );
+        
+        internal static readonly StrongDiagnosticDescriptor<(string AspectName, string AssemblyName)>
+            CannotFindAspectInCompilation
+                = new(
+                    "CR0113",
+                    "An aspect type defined in a reference assembly could not be found in the compilation",
+                    "Cannot find in the current compilation the aspect type '{0}' defined in the aspect library '{1}'.",
+                    _category,
+                    DiagnosticSeverity.Error );
     }
 }

@@ -58,11 +58,12 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         // The most probably reason we could have a exception here is that the user template has an error.
 
+                        Exception userException = ex.InnerException;
+                        
                         diagnosticAdder.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
                                 this._sourceTemplateSymbol.GetDiagnosticLocation() ?? Location.None,
-                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, ex.InnerException.GetType().Name,
-                                 ex.InnerException.ToString()) ) );
+                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, userException.GetType().Name, userException.ToString()) ) );
 
                         block = null;
 
