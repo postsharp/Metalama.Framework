@@ -97,6 +97,26 @@ namespace Caravela.TestFramework
         /// </summary>
         public SourceText? TransformedTargetSourceText { get; private set; }
 
+        private static string CleanMessage( string text )
+        {
+            // Comment all lines but the first one.
+            var lines = text.Split( '\n' );
+
+            if ( lines.Length == 1 )
+            {
+                return text;
+            }
+
+            lines[0] = lines[0].Trim( '\r' );
+
+            for ( var i = 0; i < lines.Length; i++ )
+            {
+                lines[i] = "// " + lines[i].Trim( '\r' );
+            }
+
+            return string.Join( Environment.NewLine, lines );
+        }
+
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
             static string? GetTextUnderDiagnostic( Diagnostic diagnostic )
@@ -120,7 +140,7 @@ namespace Caravela.TestFramework
             var comments =
                 this.Diagnostics
                     .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList();

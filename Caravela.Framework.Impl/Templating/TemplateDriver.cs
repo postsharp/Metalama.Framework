@@ -8,21 +8,26 @@ using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Runtime.ExceptionServices;
 
 namespace Caravela.Framework.Impl.Templating
 {
     internal class TemplateDriver
     {
+        private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
 
-        public TemplateDriver( MethodInfo templateMethodInfo )
+        public TemplateDriver( ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
-            this._templateMethod = templateMethodInfo ?? throw new ArgumentNullException( nameof(templateMethodInfo) );
+            this._sourceTemplateSymbol = sourceTemplateSymbol;
+            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
         }
 
-        public BlockSyntax ExpandDeclaration( TemplateExpansionContext templateExpansionContext )
+        public bool TryExpandDeclaration(
+            TemplateExpansionContext templateExpansionContext,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out BlockSyntax? block )
         {
             Invariant.Assert( templateExpansionContext.DiagnosticSink.DefaultScope != null );
 
@@ -38,31 +43,37 @@ namespace Caravela.Framework.Impl.Templating
                 templateExpansionContext.Compilation,
                 templateExpansionContext.DiagnosticSink );
 
-            TemplateContext.Initialize( templateContext, templateExpansionContext.ProceedImplementation );
-            TemplateSyntaxFactory.Initialize( templateExpansionContext );
-
-            SyntaxNode output;
-
-            using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
+            using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
+            using ( TemplateContext.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
             {
-                try
-                {
-                    output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
-                }
-                catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
-                {
-                    ExceptionDispatchInfo.Capture( ex.InnerException ).Throw();
+                SyntaxNode output;
 
-                    throw new AssertionFailedException( "this line is unreachable, but is necessary to make the compiler happy" );
+                using ( DiagnosticContext.WithDefaultLocation( templateExpansionContext.DiagnosticSink.DefaultScope.DiagnosticLocation ) )
+                {
+                    try
+                    {
+                        output = (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() );
+                    }
+                    catch ( TargetInvocationException ex ) when ( ex.InnerException != null )
+                    {
+                        // The most probably reason we could have a exception here is that the user template has an error.
+
+                        diagnosticAdder.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
+                                this._sourceTemplateSymbol.GetDiagnosticLocation() ?? Location.None,
+                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, ex.InnerException.GetType().Name,
+                                 ex.InnerException.ToString()) ) );
+
+                        block = null;
+
+                        return false;
+                    }
                 }
+
+                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
+
+                return true;
             }
-
-            var result = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
-
-            TemplateContext.Close();
-            TemplateSyntaxFactory.Close();
-
-            return result;
         }
     }
 }

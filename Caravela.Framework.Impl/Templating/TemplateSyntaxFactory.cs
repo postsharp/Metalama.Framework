@@ -27,14 +27,11 @@ namespace Caravela.Framework.Impl.Templating
         internal static TemplateExpansionContext ExpansionContext
             => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
-        internal static void Initialize( TemplateExpansionContext expansionContext )
+        internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
         {
             _expansionContext = expansionContext;
-        }
 
-        internal static void Close()
-        {
-            _expansionContext = null;
+            return new InitializeCookie();
         }
 
         public static void AddStatement( List<StatementOrTrivia> list, StatementSyntax statement ) => list.Add( new StatementOrTrivia( statement ) );
@@ -134,5 +131,13 @@ namespace Caravela.Framework.Impl.Templating
         public static SyntaxToken GetUniqueIdentifier( string hint ) => SyntaxFactory.Identifier( ExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
 
         public static ExpressionSyntax Serialize<T>( T? o ) => ExpansionContext.SyntaxSerializationService.Serialize( o, ExpansionContext.SyntaxFactory );
+
+        private class InitializeCookie : IDisposable
+        {
+            public void Dispose()
+            {
+                _expansionContext = null;
+            }
+        }
     }
 }

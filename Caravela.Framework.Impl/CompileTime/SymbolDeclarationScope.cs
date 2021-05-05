@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Unknown scope, for instance the scope of a lambda parameter that is not bound to a context.
         /// </summary>
         Unknown,
-        
+
         /// <summary>
         /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. The return
         /// value does not need to be of the <c>dynamic</c> itself. However, the member must be decorated with both

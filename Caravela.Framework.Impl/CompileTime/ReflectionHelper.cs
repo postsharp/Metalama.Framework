@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static string GetReflectionNameSafe( this ISymbol? s )
             => GetReflectionName( s ) ?? throw new ArgumentOutOfRangeException( $"Cannot get a reflection name for {s}." );
-        
+
         public static string? GetReflectionName( this ISymbol? s )
         {
             if ( s == null || IsRootNamespace( s ) )
