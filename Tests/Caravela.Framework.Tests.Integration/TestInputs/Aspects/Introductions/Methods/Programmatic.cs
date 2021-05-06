@@ -3,7 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Programmatic
 {
@@ -49,7 +49,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
         public dynamic Template()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

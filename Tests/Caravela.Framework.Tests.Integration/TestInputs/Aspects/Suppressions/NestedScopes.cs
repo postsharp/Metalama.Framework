@@ -7,7 +7,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 {
@@ -27,13 +27,13 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 #pragma warning disable CS0219
 #endif            
             int a = 0;
-            return proceed();
+            return meta.Proceed();
         }
         
         public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
             aspectBuilder.AdviceFactory.OverrideMethod( aspectBuilder.TargetDeclaration, nameof(Override), AspectLinkerOptions.Create(true) );
-            aspectBuilder.SuppressDiagnostic( this.code, aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Suppress( this.code, aspectBuilder.TargetDeclaration );
         }
     }
     

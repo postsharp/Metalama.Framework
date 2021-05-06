@@ -1,7 +1,8 @@
 using System;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterCompileTime
 {
@@ -11,11 +12,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
-            int a = target.Parameters.Count;
+            int a = meta.Parameters.Count;
             int b = 0;
             try
             {
-                pragma.Comment("comment");
+                meta.Comment("comment");
                 Console.WriteLine(a);
                 
                 var x = 100 / 1;
@@ -24,12 +25,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch(Exception e) when (e.GetType().Name.Contains("DivideByZero"))
             {
-                pragma.Comment("comment");
+                meta.Comment("comment");
                 b =  1;
             }
 
             Console.WriteLine(b);
-            return proceed();
+            return meta.Proceed();
         }
     }
 

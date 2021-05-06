@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNewClass
 {
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNewC
             var o = new TargetCode();
             Console.WriteLine(o.GetType().ToString());
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

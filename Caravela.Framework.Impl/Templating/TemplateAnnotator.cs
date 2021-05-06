@@ -426,29 +426,51 @@ namespace Caravela.Framework.Impl.Templating
                 var scope = this.GetSymbolScope( symbol );
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
-                // Add annotations for syntax coloring.
-                if ( symbol is ILocalSymbol &&
-                     scope == SymbolDeclarationScope.CompileTimeOnly )
-                {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
-                }
-                else if ( symbol.GetAttributes()
-                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
-                {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
-                }
-                else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
-                          (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method)
-                          && this._templateMemberClassifier.IsDynamicType( node ) )
-                {
-                    // Annotate dynamic members differently for syntax coloring.
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
-                }
+                annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbol, scope )!;
 
                 return annotatedNode;
             }
 
             return identifierNameSyntax;
+        }
+
+        private SyntaxNodeOrToken AddColoringAnnotations( SyntaxNodeOrToken nodeOrToken, ISymbol? symbol, SymbolDeclarationScope scope )
+        {
+            switch (symbol)
+            {
+                case null:
+                    return nodeOrToken;
+
+                case ILocalSymbol when scope == SymbolDeclarationScope.CompileTimeOnly:
+                    nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
+
+                    break;
+
+                default:
+                    {
+                        if ( this._templateMemberClassifier.HasTemplateKeywordAttribute( symbol ) )
+                        {
+                            nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                        }
+                        else
+                        {
+                            var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
+                
+                            if ( node != null &&
+                                 scope == SymbolDeclarationScope.RunTimeOnly &&
+                                 (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) &&
+                                 this._templateMemberClassifier.IsDynamicType( node ) )
+                            {
+                                // Annotate dynamic members differently for syntax coloring.
+                                nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.Dynamic );
+                            }
+                        }
+
+                        break;
+                    }
+            }
+
+            return nodeOrToken;
         }
 
         public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
@@ -1460,17 +1482,25 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+            var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
 
             // If the method or type is compile-time, all generic arguments must be.
             if ( scope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                foreach ( var genericArgument in node.TypeArgumentList.Arguments )
+                foreach ( var genericArgument in transformedNode.TypeArgumentList.Arguments )
                 {
                     this.RequireScope( genericArgument, scope, $"a generic argument of the compile-time method '{node.Identifier}'" );
                 }
             }
 
-            return base.VisitGenericName( node )!.AddScopeAnnotation( scope );
+
+            var annotatedIdentifier = AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+            
+
+            return 
+                transformedNode.WithIdentifier( annotatedIdentifier ).AddScopeAnnotation( scope );
         }
 
         public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )

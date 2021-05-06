@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.CompileTimeAnonymousObject
 {
@@ -11,16 +11,16 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Comp
         [TestTemplate]
         dynamic Template()
         {
-            var x = compileTime( new
+            var x = meta.CompileTime( new
             {
-                Arg0 = target.Parameters[0].Name,
-                Count = target.Parameters.Count
+                Arg0 = meta.Parameters[0].Name,
+                Count = meta.Parameters.Count
             } );
 
 
             Console.WriteLine(x.Arg0);
             
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

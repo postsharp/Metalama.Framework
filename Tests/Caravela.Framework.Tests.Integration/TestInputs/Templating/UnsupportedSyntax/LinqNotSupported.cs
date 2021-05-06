@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Linq
         [TestTemplate]
         dynamic Template()
         {
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             IEnumerable<int> list = from i in new int[] { 1, 2, 3 } select i * i;
             if (result == null)

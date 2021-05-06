@@ -2,9 +2,10 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Caravela.Framework;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeUnary
 {
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeUnar
         [TestTemplate]
         dynamic? Template()
         {
-            var x = compileTime(0);
+            var x = meta.CompileTime(0);
             x ++;
             x --;
             ++ x;
@@ -21,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeUnar
             
             
             
-            pragma.Comment( "x = " + x.ToString() );
+            meta.Comment( "x = " + x.ToString() );
             return null;
         }
     }

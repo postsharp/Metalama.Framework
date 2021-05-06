@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.AwaitNotSupported
 {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Awai
         {
             await Task.Yield();
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

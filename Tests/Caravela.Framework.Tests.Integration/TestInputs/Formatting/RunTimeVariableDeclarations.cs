@@ -3,7 +3,7 @@
 using Caravela.Framework.Project;
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations
 {
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
             (int, byte) tuple = (0, 1);
             Tuple<int, byte> generic = new Tuple<int, byte>(2, 3);
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 }

@@ -4,7 +4,8 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
 [assembly: AspectOrderAttribute(typeof(LogAttribute), typeof(CacheAttribute))]
 
@@ -28,18 +29,18 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
     {
         public override dynamic OverrideMethod()
         {
-            Console.WriteLine(target.Method.ToDisplayString() + " started.");
+            Console.WriteLine(meta.Method.ToDisplayString() + " started.");
 
             try
             {
-                dynamic result = proceed();
+                dynamic result = meta.Proceed();
 
-                Console.WriteLine(target.Method.ToDisplayString() + " succeeded.");
+                Console.WriteLine(meta.Method.ToDisplayString() + " succeeded.");
                 return result;
             }
             catch (Exception e)
             {
-                Console.WriteLine(target.Method.ToDisplayString() + " failed: " + e.Message);
+                Console.WriteLine(meta.Method.ToDisplayString() + " failed: " + e.Message);
 
                 throw;
             }
@@ -51,13 +52,13 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
         public override dynamic OverrideMethod()
         {
             // Builds the caching string.
-            var stringBuilder = compileTime(new StringBuilder());
-            stringBuilder.Append(target.Type.ToString());
+            var stringBuilder = meta.CompileTime(new StringBuilder());
+            stringBuilder.Append(meta.Type.ToString());
             stringBuilder.Append('.');
-            stringBuilder.Append(target.Method.Name);
+            stringBuilder.Append(meta.Method.Name);
             stringBuilder.Append('(');
-            int i = compileTime(0);
-            foreach (var p in target.Parameters)
+            int i = meta.CompileTime(0);
+            foreach (var p in meta.Parameters)
             {
                 string comma = i > 0 ? ", " : "";
 
@@ -75,7 +76,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
 
             stringBuilder.Append(')');
 
-            string cacheKey = string.Format(stringBuilder.ToString(), target.Parameters.Values.ToArray());
+            string cacheKey = string.Format(stringBuilder.ToString(), meta.Parameters.Values.ToArray());
 
             // Cache lookup.
             if (SampleCache.Cache.TryGetValue(cacheKey, out object? value))
@@ -86,7 +87,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogA
             else
             {
                 Console.WriteLine("Cache miss.");
-                dynamic result = proceed();
+                dynamic result = meta.Proceed();
 
                 // Add to cache.
                 SampleCache.Cache.TryAdd(cacheKey, result);

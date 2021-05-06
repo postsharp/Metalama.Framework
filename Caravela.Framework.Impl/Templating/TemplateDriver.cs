@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.Templating
                 templateExpansionContext.DiagnosticSink );
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
-            using ( TemplateContext.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
+            using ( meta.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
             {
                 SyntaxNode output;
 

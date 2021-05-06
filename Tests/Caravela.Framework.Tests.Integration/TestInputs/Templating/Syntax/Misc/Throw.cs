@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Misc.Throw
 {
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Misc.Throw
         
             try
             {
-                throw new ArgumentNullException(target.Parameters[0].Name);
+                throw new ArgumentNullException(meta.Parameters[0].Name);
             }
             catch 
             {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Misc.Throw
             }
             
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

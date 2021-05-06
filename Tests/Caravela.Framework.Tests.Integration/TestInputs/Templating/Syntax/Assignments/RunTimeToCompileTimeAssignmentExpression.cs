@@ -2,9 +2,10 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Caravela.Framework;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeToCompileTimeAssignmentExpression
 {
@@ -14,12 +15,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeToCompil
         dynamic? Template()
         {
             var x = 0;
-            var y = compileTime(0);
+            var y = meta.CompileTime(0);
             
             x = y = 1;
             
             
-            pragma.Comment( "y = " + y.ToString());
+            meta.Comment( "y = " + y.ToString());
             return null;
         }
     }

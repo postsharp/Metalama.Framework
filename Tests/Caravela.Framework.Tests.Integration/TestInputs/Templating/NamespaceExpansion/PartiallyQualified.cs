@@ -1,7 +1,7 @@
 using Caravela.Framework.Project;
 
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             {
                 var c = new ChildNs.ChildClass();
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

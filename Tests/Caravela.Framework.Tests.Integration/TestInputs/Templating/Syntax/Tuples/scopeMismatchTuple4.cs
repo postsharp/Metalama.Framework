@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.ScopeMismatchTuples4
 {
@@ -12,10 +12,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.ScopeMis
             var a = 1;
             var b = 2; 
             
-            var namedItems = compileTime((a, b));
+            var namedItems = meta.CompileTime((a, b));
             Console.WriteLine(namedItems.a);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

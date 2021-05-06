@@ -2,7 +2,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.TestApp
 {
@@ -29,7 +29,7 @@ namespace Caravela.Framework.TestApp
         {
             Console.WriteLine( "From IntroduceSomeMethodAspect!" );
 
-            var x = proceed();
+            var x = meta.Proceed();
         }
 
         [IntroduceMethod]

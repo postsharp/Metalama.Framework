@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsStatement
 {
@@ -14,10 +15,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
         dynamic? Template()
         {
             // Expression statement
-            target.Method.Invoke( target.This, 0 );
+            meta.Method.Invoke( meta.This, 0 );
             
             // Assignment
-            _ = target.Method.Invoke( target.This, 1 );
+            _ = meta.Method.Invoke( meta.This, 1 );
             
             return default;
         }

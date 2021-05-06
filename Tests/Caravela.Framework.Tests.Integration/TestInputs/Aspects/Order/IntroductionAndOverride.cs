@@ -4,7 +4,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder(typeof(FirstAttribute), typeof(SecondAttribute), typeof(ThirdAttribute))]
 
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
             try
             {
                 Console.Write("This is overridden by the first aspect.");
-                return proceed();
+                return meta.Proceed();
             }
             finally
             {
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
             try
             {
                 Console.Write("This is overridden by the second aspect.");
-                return proceed();
+                return meta.Proceed();
             }
             finally
             {
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.Introduc
             try
             {
                 Console.Write("This is overridden by the third aspect.");
-                return proceed();
+                return meta.Proceed();
             }
             finally
             {

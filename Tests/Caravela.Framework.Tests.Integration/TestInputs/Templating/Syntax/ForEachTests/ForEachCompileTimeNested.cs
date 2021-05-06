@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachCompileTimeNested
 {
@@ -13,11 +13,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
         [TestTemplate]
         dynamic Template()
         {
-            IEnumerable<int> array = compileTime(Enumerable.Range(1, 2));
+            IEnumerable<int> array = meta.CompileTime(Enumerable.Range(1, 2));
 
             foreach (int n in array)
             {
-                foreach (var p in target.Parameters)
+                foreach (var p in meta.Parameters)
                 {
                     if (p.Value <= n)
                     {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
                 }
             }
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

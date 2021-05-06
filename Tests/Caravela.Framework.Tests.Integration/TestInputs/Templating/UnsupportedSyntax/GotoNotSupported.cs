@@ -1,5 +1,5 @@
 #pragma warning disable CS8600, CS8603
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Goto
         [TestTemplate]
         dynamic Template()
         {
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             if (result != null) goto end;
 

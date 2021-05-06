@@ -21,6 +21,8 @@ namespace Caravela.Framework.Impl
         private readonly AdviceFactory _adviceFactory;
         private bool _skipped;
 
+        public IDiagnosticSink Diagnostics => this._diagnosticSink;
+
         public T TargetDeclaration { get; }
 
         ICodeElement IAspectBuilder.TargetDeclaration => this.TargetDeclaration;
@@ -52,26 +54,6 @@ namespace Caravela.Framework.Impl
                     this._diagnosticSink.ToImmutable(),
                     Array.Empty<IAdvice>(),
                     Array.Empty<IAspectSource>() );
-        }
-
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
-        {
-            this._diagnosticSink.ReportDiagnostic( severity, location, id, formatMessage, args );
-        }
-
-        public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
-        {
-            this._diagnosticSink.ReportDiagnostic( severity, id, formatMessage, args );
-        }
-
-        public void SuppressDiagnostic( string id, ICodeElement scope )
-        {
-            this._diagnosticSink.SuppressDiagnostic( id, scope );
-        }
-
-        public void SuppressDiagnostic( string id )
-        {
-            this._diagnosticSink.SuppressDiagnostic( id );
         }
     }
 }

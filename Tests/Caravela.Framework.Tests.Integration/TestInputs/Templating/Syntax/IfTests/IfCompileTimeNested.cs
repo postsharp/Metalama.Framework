@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompileTimeNested
 {
@@ -11,8 +11,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
         [TestTemplate]
         dynamic Template()
         {
-            int t = compileTime(0);
-            string name = target.Parameters[0].Name;
+            int t = meta.CompileTime(0);
+            string name = meta.Parameters[0].Name;
             if (name.Contains("a"))
             {
                 if (name.Contains("b"))
@@ -37,7 +37,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
             }
 
             Console.WriteLine(t);
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

@@ -1,5 +1,5 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RuntimeSimpleLa
         {
             Action<object> action = a => Console.WriteLine(a.ToString());
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             action(result);
 

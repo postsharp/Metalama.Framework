@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropertyMember
 {
@@ -14,15 +15,15 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropert
         dynamic? Template()
         {
             // Dynamic property as method argument.
-            Console.WriteLine(target.This);
-            Console.WriteLine(target.Parameters[0].Value);
+            Console.WriteLine(meta.This);
+            Console.WriteLine(meta.Parameters[0].Value);
             
             // Dynamic property in assignment;
             object o;
-            o = target.This;
+            o = meta.This;
             
             // Dynamic property in variable initialization/
-            object x = target.This;
+            object x = meta.This;
             
             return default;
         }

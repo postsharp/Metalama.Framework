@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameClashWithMemberAccess
 {
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
         [TestTemplate]
         dynamic Template()
         {
-            var n = target.Parameters.Count; // build-time
+            var n = meta.Parameters.Count; // build-time
 
             if (n == 1)
             {
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
                 Console.WriteLine(WriteLine);
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

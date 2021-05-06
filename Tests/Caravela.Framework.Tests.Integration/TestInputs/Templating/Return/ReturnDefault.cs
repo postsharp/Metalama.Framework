@@ -1,7 +1,7 @@
 #pragma warning disable CS8600, CS8603
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.ReturnDefault
 {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         {
             try
             {
-                dynamic result = proceed();
+                dynamic result = meta.Proceed();
                 return result;
             }
             catch

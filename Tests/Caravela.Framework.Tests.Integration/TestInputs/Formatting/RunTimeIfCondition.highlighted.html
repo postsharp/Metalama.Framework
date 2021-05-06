@@ -2,33 +2,37 @@
 <head>
 <style>
 
-.CompileTime {
-    background-color: #E8F2FF;
+.caravelaClassification_CompileTime,
+.caravelaClassification_Conflict,
+.caravelaClassification_TemplateKeyword,
+.caravelaClassification_Dynamic,
+.caravelaClassification_CompileTimeVariable
+{
+    background-color: rgba(50,50,90,0.1);
 }
-.CompileTimeVariable {
-    background-color: #C6D1DD;
+
+.caravelaClassification_TemplateKeyword
+{
+    color: rgb(250, 0, 250) !important;
+    font-weight: bold;
 }
-.RunTime {
-    background-color: antiquewhite;
+
+.caravelaClassification_Dynamic
+{
+    text-decoration: underline;
 }
-.TemplateKeyword {
-    background-color: #FFFF22;
+
+.caravelaClassification_CompileTimeVariable
+{
+    font-style: italic;
 }
-.Dynamic {
-    background-color: #FFFFBB;
-}
-.Conflict {
-    background-color: red;
-}
-.Default {
-    background-color: lightcoral;
-}
+
 </style>
 </head>
 <body><pre>
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.RunTimeIfCondition
 {
@@ -40,40 +44,40 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
     }
 
     [CompileTimeOnly]
-    <span class='CompileTime'>class CompileTimeClass</span>
-    <span class='CompileTime'>{</span>
-        <span class='CompileTime'>public void CompileTimeMethod()</span>
-        <span class='CompileTime'>{</span>
-        <span class='CompileTime'>}</span>
-    <span class='CompileTime'>}</span>
+    <span class='caravelaClassification_CompileTime'>class CompileTimeClass</span>
+    <span class='caravelaClassification_CompileTime'>{</span>
+        <span class='caravelaClassification_CompileTime'>public void CompileTimeMethod()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
+    <span class='caravelaClassification_CompileTime'>}</span>
 
     [CompileTime]
-    <span class='CompileTime'>class Aspect</span>
-    <span class='CompileTime'>{</span>
+    <span class='caravelaClassification_CompileTime'>class Aspect</span>
+    <span class='caravelaClassification_CompileTime'>{</span>
         [TestTemplate]
-        <span class='CompileTime'>dynamic Template()</span>
-        <span class='CompileTime'>{</span>
-            <span class='RunTime'>var runTimeObject = new RunTimeClass();</span>
-            <span class='CompileTime'>var </span><span class='CompileTimeVariable'>compileTimeObject</span><span class='CompileTime'> = new CompileTimeClass();</span>
+        <span class='caravelaClassification_CompileTime'>dynamic Template()</span>
+        <span class='caravelaClassification_CompileTime'>{</span>
+            <span class='caravelaClassification_RunTime'>var runTimeObject = new RunTimeClass();</span>
+            <span class='caravelaClassification_CompileTime'>var </span><span class='caravelaClassification_CompileTimeVariable'>compileTimeObject</span><span class='caravelaClassification_CompileTime'> = new CompileTimeClass();</span>
 
-            <span class='RunTime'>int runTimeVariable = 1;</span>
+            <span class='caravelaClassification_RunTime'>int runTimeVariable = 1;</span>
 
-            <span class='RunTime'>if (runTimeVariable == 1)</span>
-            <span class='RunTime'>{</span>
-                <span class='RunTime'>runTimeObject.RunTimeMethod();</span>
-                <span class='CompileTimeVariable'>compileTimeObject</span><span class='CompileTime'>.CompileTimeMethod();</span>
-                <span class='TemplateKeyword'>target</span><span class='CompileTime'>.Method.ToString();</span>
-            <span class='RunTime'>}</span>
-            <span class='RunTime'>else</span>
-            <span class='RunTime'>{</span>
-                <span class='RunTime'>runTimeObject.RunTimeMethod();</span>
-                <span class='CompileTimeVariable'>compileTimeObject</span><span class='CompileTime'>.CompileTimeMethod();</span>
-                <span class='TemplateKeyword'>target</span><span class='CompileTime'>.Method.ToString();</span>
-            <span class='RunTime'>}</span>
+            <span class='caravelaClassification_RunTime'>if (runTimeVariable == 1)</span>
+            <span class='caravelaClassification_RunTime'>{</span>
+                <span class='caravelaClassification_RunTime'>runTimeObject.RunTimeMethod();</span>
+                <span class='caravelaClassification_CompileTimeVariable'>compileTimeObject</span><span class='caravelaClassification_CompileTime'>.CompileTimeMethod();</span>
+                <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.Method.ToString();</span>
+            <span class='caravelaClassification_RunTime'>}</span>
+            <span class='caravelaClassification_RunTime'>else</span>
+            <span class='caravelaClassification_RunTime'>{</span>
+                <span class='caravelaClassification_RunTime'>runTimeObject.RunTimeMethod();</span>
+                <span class='caravelaClassification_CompileTimeVariable'>compileTimeObject</span><span class='caravelaClassification_CompileTime'>.CompileTimeMethod();</span>
+                <span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.Method.ToString();</span>
+            <span class='caravelaClassification_RunTime'>}</span>
 
-            <span class='RunTime'>return </span><span class='TemplateKeyword'>proceed</span><span class='CompileTime'>()</span><span class='RunTime'>;</span>
-        <span class='CompileTime'>}</span>
-    <span class='CompileTime'>}
+            <span class='caravelaClassification_RunTime'>return </span><span class='caravelaClassification_TemplateKeyword'>meta</span><span class='caravelaClassification_CompileTime'>.</span><span class='caravelaClassification_TemplateKeyword'>Proceed</span><span class='caravelaClassification_CompileTime'>()</span><span class='caravelaClassification_RunTime'>;</span>
+        <span class='caravelaClassification_CompileTime'>}</span>
+    <span class='caravelaClassification_CompileTime'>}
 </span>}
 
 

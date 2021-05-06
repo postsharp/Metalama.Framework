@@ -27,7 +27,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Methods
         
         public void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
-            aspectBuilder.SuppressDiagnostic( this.code, aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Suppress( this.code, aspectBuilder.TargetDeclaration );
         }
     }
     

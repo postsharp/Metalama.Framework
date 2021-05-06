@@ -4,7 +4,7 @@ using Caravela.Framework;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ExceptionInTemplate
 {
@@ -12,9 +12,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ExceptionInTe
     {
         public override dynamic OverrideMethod()
         {
-            var a = compileTime(0);
+            var a = meta.CompileTime(0);
             var b = 1 / a;
-            return proceed();
+            return meta.Proceed();
         }
                 
     }

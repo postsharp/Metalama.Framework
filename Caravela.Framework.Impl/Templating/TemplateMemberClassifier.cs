@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Project;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolClassifier = SymbolClassifier.GetInstance( compilation );
 
             var reflectionMapper = ReflectionMapper.GetInstance( compilation );
-            this._templateContextType = reflectionMapper.GetTypeSymbol( typeof(TemplateContext) );
+            this._templateContextType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
         private bool IsCompileTime( ISymbol? symbol )
@@ -45,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
                 or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
         public bool IsRunTimeMethod( ISymbol symbol )
-            => symbol.Name == nameof(TemplateContext.runTime) &&
+            => symbol.Name == nameof(meta.RunTime) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._templateContextType.GetDocumentationCommentId();
 
         public bool IsRunTimeMethod( SyntaxNode node )
@@ -88,7 +89,7 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         /// <summary>
-        /// Determines if a symbol represents a call to <c>proceed()</c>.
+        /// Determines if a symbol represents a call to <c>meta.Proceed()</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
@@ -103,5 +104,9 @@ namespace Caravela.Framework.Impl.Templating
 
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
         }
+
+        public bool HasTemplateKeywordAttribute( ISymbol symbol )
+            => symbol.GetAttributes()
+                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
     }
 }

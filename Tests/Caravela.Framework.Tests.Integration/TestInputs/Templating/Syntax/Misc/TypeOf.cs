@@ -3,7 +3,7 @@ using System;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.TypeOf
 {
@@ -13,19 +13,19 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Type
         [TestTemplate]
         dynamic Template()
         {
-            var rt = runTime(typeof(string));
+            var rt = meta.RunTime(typeof(string));
             var ct = typeof(string);
             Console.WriteLine("rt=" + rt);
             Console.WriteLine("ct=" + ct);
 
-            if (target.Parameters[0].ParameterType.Is(typeof(string)))
+            if (meta.Parameters[0].ParameterType.Is(typeof(string)))
             {
             
             }
 
             Console.WriteLine(typeof(MyClass1).FullName);
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

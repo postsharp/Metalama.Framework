@@ -1,7 +1,8 @@
 #pragma warning disable CS0162 // Unreachable code detected
 
+using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
 {
@@ -12,9 +13,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyB
         {
             if ( false )
             {
-                pragma.Comment("Oops 1");
+                meta.Comment("Oops 1");
             }
-            return proceed();
+            return meta.Proceed();
         }
     }
 

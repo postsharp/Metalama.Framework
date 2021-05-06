@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.SerializationError
 {
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.SerializationE
         [TestTemplate]
         dynamic? Template()
         {
-            Console.WriteLine(runTime(target.Method));
+            Console.WriteLine(meta.RunTime(meta.Method));
             return default;
         }
     }

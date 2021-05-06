@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.RunTimeMethod
+namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ThisObject
 {
     [CompileTime]
     class Aspect
@@ -13,8 +14,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.RunTimeMethod
         [TestTemplate]
         dynamic? Template()
         {
-            target.This.MyMethod();
-            target.This.Value = 5;
+            meta.This.MyMethod();
+            meta.This.Value = 5;
             return default;
         }
     }

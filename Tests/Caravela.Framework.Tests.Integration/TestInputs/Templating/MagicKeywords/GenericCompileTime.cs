@@ -2,7 +2,7 @@ using System;
 using Caravela.Framework.Project;
 
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericCompileTime
 {
@@ -14,9 +14,9 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericC
             [TestTemplate]
             dynamic Template()
             {
-                Console.Write(compileTime<int>(0));
+                Console.Write(meta.CompileTime<int>(0));
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

@@ -4,7 +4,7 @@ using Caravela.Framework;
 using Caravela.Framework.Code;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 // TODO: Change the namespace
 namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPattern
@@ -15,14 +15,14 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPattern
         dynamic Template()
         {
           // Compile time
-          var ct = compileTime(new object());
+          var ct = meta.CompileTime(new object());
           var a1 = ct is IParameter { Index: var index } p && p.DefaultValue.IsNull && index > 0;
-          pragma.Comment("a1 = " + a1 );  
+          meta.Comment("a1 = " + a1 );  
           
           // Run-time
-          var a2 = target.Parameters[0].Value is >= 0 and < 5;
+          var a2 = meta.Parameters[0].Value is >= 0 and < 5;
                     
-            return proceed();
+            return meta.Proceed();
         }
     }
 

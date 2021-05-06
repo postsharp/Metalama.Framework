@@ -22,7 +22,7 @@ namespace Caravela.Framework.TestApp
         {
             foreach ( var code in this.codes )
             {
-                aspectBuilder.SuppressDiagnostic( code, aspectBuilder.TargetDeclaration );
+                aspectBuilder.Diagnostics.Suppress( code, aspectBuilder.TargetDeclaration );
             }
         }
     }

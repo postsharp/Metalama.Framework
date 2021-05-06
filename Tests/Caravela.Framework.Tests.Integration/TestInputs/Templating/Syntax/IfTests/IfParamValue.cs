@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParamValue
 {
@@ -11,18 +11,18 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParam
         [TestTemplate]
         dynamic Template()
         {
-            if (target.Parameters[0].Value == null)
+            if (meta.Parameters[0].Value == null)
             {
-                throw new ArgumentNullException(target.Parameters[0].Name);
+                throw new ArgumentNullException(meta.Parameters[0].Name);
             }
 
-            var p = target.Parameters[1];
+            var p = meta.Parameters[1];
             if (p.Value == null)
             {
                 throw new ArgumentNullException(p.Name);
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

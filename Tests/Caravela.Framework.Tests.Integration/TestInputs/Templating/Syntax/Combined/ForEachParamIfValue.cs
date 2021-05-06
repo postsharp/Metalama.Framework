@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEachParamIfValue
 {
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEac
         [TestTemplate]
         dynamic Template()
         {
-            foreach (var p in target.Parameters)
+            foreach (var p in meta.Parameters)
             {
                 if (p.Value == null)
                 {
@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Combined.ForEac
                 }
             }
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

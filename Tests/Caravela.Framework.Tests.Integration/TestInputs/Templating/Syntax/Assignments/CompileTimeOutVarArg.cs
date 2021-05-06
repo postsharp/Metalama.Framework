@@ -2,9 +2,10 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Caravela.Framework;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeOutVarArg
 {
@@ -13,10 +14,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeOutV
         [TestTemplate]
         dynamic? Template()
         {
-            var d = compileTime(new Dictionary<int,int>());
+            var d = meta.CompileTime(new Dictionary<int,int>());
             d.Add(0, 5);
             d.TryGetValue( 0, out var x );
-            pragma.Comment("x = "+x);
+            meta.Comment("x = "+x);
 
             return null;
         }

@@ -1,6 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 // ReSharper disable UnusedMember.Local
 
@@ -44,12 +44,12 @@ namespace Caravela.Framework.TestApp
 
             result += ": ";
 
-            result += target.This.StaticProperty;
+            result += meta.This.StaticProperty;
 
-            if ( !target.Method.IsStatic )
+            if ( !meta.CurrentMethod.IsStatic )
             {
-                result += target.This.InstanceProperty;
-                result += target.This;
+                result += meta.This.InstanceProperty;
+                result += meta.This;
             }
 
             return result;

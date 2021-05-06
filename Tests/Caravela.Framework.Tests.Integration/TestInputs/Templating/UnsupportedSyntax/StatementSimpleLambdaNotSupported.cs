@@ -1,5 +1,5 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.UnsupportedSyntax.Stat
                 Console.WriteLine(p.ToString());
             };
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             action(result);
 

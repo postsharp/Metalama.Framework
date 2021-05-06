@@ -238,7 +238,7 @@ namespace Caravela.Framework.Impl.Linking
                     //           * Call's argument expressions match parameter names of the caller.
                     //           * Parameter names of the caller match parameter names of the callee.
                     //           * Caller and callee signatures are equal.
-                    //       This is satisfied for all proceed().
+                    //       This is satisfied for all meta.Proceed().
 
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, null );
@@ -276,7 +276,7 @@ namespace Caravela.Framework.Impl.Linking
                     //           * Call's argument expressions match parameter names of the caller.
                     //           * Parameter names of the caller match parameter names of the callee.
                     //           * Caller and callee signatures are equal.
-                    //       This is satisfied for all proceed().
+                    //       This is satisfied for all meta.Proceed().
 
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );

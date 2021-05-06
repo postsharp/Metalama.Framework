@@ -2,7 +2,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCast
 {
@@ -13,9 +13,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCas
         dynamic Template()
         {
             object arg0 = null;
-            if (target.Parameters.Count > 0)
+            if (meta.Parameters.Count > 0)
             {
-                arg0 = target.Parameters[0].Value;
+                arg0 = meta.Parameters[0].Value;
                 if (arg0 is string)
                 {
                     string s = (string)arg0;
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Cast.RunTimeCas
                 }
             }
 
-            var result = proceed();
+            var result = meta.Proceed();
             object obj = result;
             string text = obj as string;
             if (text != null)

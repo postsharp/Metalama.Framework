@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 using static System.Math;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.NameCla
             var StringBuilder = new object();
             Console.WriteLine(StringBuilder.ToString());
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

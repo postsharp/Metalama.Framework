@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeToRuntimeAssignmentExpression
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileTimeToRu
         [TestTemplate]
         dynamic? Template()
         {
-            var x = compileTime(0);
+            var x = meta.CompileTime(0);
             var y = 0;
             
             x = y = 1;

@@ -1,7 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.MultipleReturns_TemplateReturns
 {
@@ -13,7 +13,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Multiple
         public override dynamic OverrideMethod()
         {
             Console.WriteLine("Override.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

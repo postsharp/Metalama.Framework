@@ -179,7 +179,7 @@ namespace Caravela.Framework.Impl.Templating
             {
                 switch ( symbol.Name )
                 {
-                    case nameof(ITemplateContextPragma.Comment):
+                    case nameof(meta.Comment):
                         kind = PragmaKind.Comment;
 
                         return true;
@@ -600,7 +600,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
-                // Replace `runtime(x)` to `x`.
+                // Replace `meta.RunTime(x)` to `x`.
                 return this.CreateRunTimeExpression( node.ArgumentList.Arguments[0].Expression );
             }
             else if ( this.TryGetPragma( node.Expression, out var pragmaKind ) )
@@ -1082,7 +1082,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                // Special processing of the `var result = proceed()` statement.
+                // Special processing of the `var result = meta.Proceed()` statement.
 
                 // Transform the variable identifier.
                 var returnVariableIdentifier = this.Transform( proceedAssignments[0].Identifier )!;

@@ -1,7 +1,8 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
+using meta = Caravela.Framework.Aspects.meta;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTemplate
 {
@@ -9,9 +10,9 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromTem
     {
         public override dynamic OverrideMethod()
         {
-            target.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Invalid method.");
+            meta.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Invalid method.");
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

@@ -78,27 +78,31 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
 
                     textWriter.WriteLine(
                         @"
-.CompileTime {
-    background-color: #E8F2FF;
+.caravelaClassification_CompileTime,
+.caravelaClassification_Conflict,
+.caravelaClassification_TemplateKeyword,
+.caravelaClassification_Dynamic,
+.caravelaClassification_CompileTimeVariable
+{
+    background-color: rgba(50,50,90,0.1);
 }
-.CompileTimeVariable {
-    background-color: #C6D1DD;
+
+.caravelaClassification_TemplateKeyword
+{
+    color: rgb(250, 0, 250) !important;
+    font-weight: bold;
 }
-.RunTime {
-    background-color: antiquewhite;
+
+.caravelaClassification_Dynamic
+{
+    text-decoration: underline;
 }
-.TemplateKeyword {
-    background-color: #FFFF22;
+
+.caravelaClassification_CompileTimeVariable
+{
+    font-style: italic;
 }
-.Dynamic {
-    background-color: #FFFFBB;
-}
-.Conflict {
-    background-color: red;
-}
-.Default {
-    background-color: lightcoral;
-}" );
+" );
 
                     textWriter.WriteLine( "</style>" );
                     textWriter.WriteLine( "</head>" );
@@ -114,8 +118,8 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                         }
 
                         textWriter.Write(
-                            $"<span class='{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
-                                                                              + "</span>" );
+                            $"<span class='caravelaClassification_{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
+                                                                                                     + "</span>" );
 
                         i = classifiedSpan.Span.End;
                     }

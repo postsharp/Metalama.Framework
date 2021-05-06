@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Yield
 {
@@ -13,12 +13,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Yield
         {
             yield return 1;
 
-            if (target.Parameters.Count == 0)
+            if (meta.Parameters.Count == 0)
             {
                 yield break;
             }
 
-            proceed();
+            meta.Proceed();
         }
     }
 

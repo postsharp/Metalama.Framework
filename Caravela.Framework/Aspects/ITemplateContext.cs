@@ -9,10 +9,10 @@ namespace Caravela.Framework.Aspects
 {
     /// <summary>
     /// Exposes information about the element of code to which a template was applied.
-    /// This interface is exposed by the <see cref="TemplateContext.target"/> member.
+    /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
     [CompileTimeOnly]
-    public interface ITemplateContextTarget : IDiagnosticSink
+    public interface ITemplateContext : IDiagnosticSink
     {
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
@@ -21,24 +21,22 @@ namespace Caravela.Framework.Aspects
         /// To invoke the method, use <c>Invoke</c>.
         /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        IMethod Method { get; }
+        IMethod CurrentMethod { get; }
 
-        /*
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        IProperty? Property { get; }
+        IProperty CurrentProperty { get; }
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        IEvent? Event { get; }
-*/
+        IEvent CurrentEvent { get; }
 
         /// <summary>
-        /// Gets the list of parameters of <see cref="Method"/>.
+        /// Gets the list of parameters of <see cref="CurrentMethod"/>.
         /// </summary>
-        IAdviceParameterList Parameters { get; }
+        IAdviceParameterList CurrentParameters { get; }
 
         // Gets the project configuration.
         // IProject Project { get; }
@@ -46,12 +44,12 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
         /// </summary>
-        IType Type { get; }
+        INamedType CurrentType { get; }
 
         /// <summary>
         /// Gets the code model of the whole compilation.
         /// </summary>
-        ICompilation Compilation { get; }
+        ICompilation CurrentCompilation { get; }
 
         /// <summary>
         /// Gets an object that gives access to the current type including members introduced by the current aspect.
@@ -60,7 +58,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         [RunTimeOnly]
         dynamic This { get; }
-
+        
         /*
         /// <summary>
         /// Gives access to the current type in the state it was before the current aspect.

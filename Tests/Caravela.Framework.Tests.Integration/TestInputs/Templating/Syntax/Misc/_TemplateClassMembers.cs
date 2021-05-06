@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateClassMembers
 {
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.TemplateC
         [TestTemplate]
         dynamic Template()
         {
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             Console.WriteLine(this.Format(result));
 

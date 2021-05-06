@@ -1,5 +1,5 @@
 using System;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -13,11 +13,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.CompileSimpleLa
         {
             Action<object> action = a => Console.WriteLine(a.ToString());
 
-            var result = compileTime(1);
+            var result = meta.CompileTime(1);
 
             action(result);
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.AnonymousObject
 {
@@ -13,14 +13,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Anon
         {
             var x = new
             {
-                A = target.Parameters[0].Value,
-                B = target.Parameters[1].Value,
-                Count = target.Parameters.Count
+                A = meta.Parameters[0].Value,
+                B = meta.Parameters[1].Value,
+                Count = meta.Parameters.Count
             };
 
             var y = new
             {
-                Count = target.Parameters.Count
+                Count = meta.Parameters.Count
             };
 
             Console.WriteLine(x);
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Anon
             Console.WriteLine(x.Count);
             Console.WriteLine(y.Count);
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

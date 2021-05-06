@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTimeNewClass
 {
@@ -17,13 +17,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTime
         [TestTemplate]
         dynamic Template()
         {
-            var c = compileTime(new CompileTimeClass());
+            var c = meta.CompileTime(new CompileTimeClass());
             Console.WriteLine(c.String);
 
             var c1 = new CompileTimeClass();
             Console.WriteLine(c1.String);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

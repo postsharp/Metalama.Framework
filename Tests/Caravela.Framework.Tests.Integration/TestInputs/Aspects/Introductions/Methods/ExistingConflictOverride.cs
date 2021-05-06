@@ -3,7 +3,7 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictOverride
 {
@@ -17,42 +17,42 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Exis
         public int BaseMethod()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public static int BaseMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public int ExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public static int ExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public int NonExistingMethod()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(ConflictBehavior = ConflictBehavior.Override)]
         public static int NonExistingMethod_Static()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

@@ -53,8 +53,8 @@ namespace Caravela.Framework.Impl.Templating
         internal static readonly StrongDiagnosticDescriptor<string> UnsupportedContextForProceed
             = new(
                 "CR0106",
-                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
-                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
+                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
+                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
                 _category,
                 DiagnosticSeverity.Error );
 

@@ -1,5 +1,6 @@
+using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Pragma.Comments
 {
@@ -8,8 +9,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Pragma.Comments
         [TestTemplate]
         dynamic Template()
         {
-            pragma.Comment("Oops 1", null, "Oops 2");
-            return proceed();
+            meta.Comment("Oops 1", null, "Oops 2");
+            return meta.Proceed();
         }
     }
 

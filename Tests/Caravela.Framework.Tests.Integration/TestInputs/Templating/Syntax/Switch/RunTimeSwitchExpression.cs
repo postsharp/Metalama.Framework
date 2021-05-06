@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Caravela.Framework;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchExpression
 {
@@ -26,11 +26,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
             
             var y = o switch 
             {
-                IEnumerable<object> enumerable when enumerable.Count() > target.Parameters.Count => -1,
+                IEnumerable<object> enumerable when enumerable.Count() > meta.Parameters.Count => -1,
                 IEnumerable<object> enumerable2 => enumerable2.Count()
             };
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

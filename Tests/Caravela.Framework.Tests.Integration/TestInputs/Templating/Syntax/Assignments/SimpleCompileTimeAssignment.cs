@@ -2,9 +2,10 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Caravela.Framework;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.SimpleCompileTimeAssignment
 {
@@ -13,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.SimpleCompileTi
         [TestTemplate]
         dynamic? Template()
         {
-            var x = compileTime(0);
+            var x = meta.CompileTime(0);
             x = 0;
             x += 4;
             x *= 2;
@@ -22,13 +23,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.SimpleCompileTi
             x |= 128;
             x &= 127;
             
-            var y = compileTime<StringBuilder>(null);
+            var y = meta.CompileTime<StringBuilder>(null);
             y ??= new StringBuilder();
             y.Append("yy");
            
             
             
-            pragma.Comment( "x = " + x.ToString(), "y = " + y.ToString());
+            meta.Comment( "x = " + x.ToString(), "y = " + y.ToString());
             return null;
         }
     }

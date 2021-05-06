@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileTimeTuples1
 {
@@ -9,10 +9,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileT
         [TestTemplate]
         dynamic Template()
         {
-            Tuple<string, int> tuple = compileTime(new Tuple<string, int>("string", 0));
+            Tuple<string, int> tuple = meta.CompileTime(new Tuple<string, int>("string", 0));
             Console.WriteLine(tuple.Item1);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

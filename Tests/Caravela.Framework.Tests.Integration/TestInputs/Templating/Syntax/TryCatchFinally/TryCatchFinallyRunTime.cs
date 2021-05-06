@@ -3,7 +3,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.TryCatchFinallyRunTime
 {
@@ -13,11 +13,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
-        var x = compileTime(0);
+        var x = meta.CompileTime(0);
             try
             {
                 Console.WriteLine("try");
-                dynamic result = proceed();
+                dynamic result = meta.Proceed();
                 Console.WriteLine("success");
                 return result;
             }

@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterRunTime
 {
@@ -13,8 +13,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         {
             try
             {
-                Console.WriteLine(target.Parameters.Count);
-                return proceed();
+                Console.WriteLine(meta.Parameters.Count);
+                return meta.Proceed();
             }
             catch (Exception e) when (e.GetType().Name.Contains("DivideByZero"))
             {

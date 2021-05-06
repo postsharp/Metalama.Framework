@@ -1,7 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
 {
@@ -12,7 +12,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple
         public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the overriding method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

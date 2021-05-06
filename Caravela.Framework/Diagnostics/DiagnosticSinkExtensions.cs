@@ -16,7 +16,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
-        public static void ReportDiagnostic(
+        public static void Report(
             this IDiagnosticSink diagnosticSink,
             Severity severity,
             IDiagnosticScope scope,
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Diagnostics
         {
             if ( scope.DiagnosticLocation != null )
             {
-                diagnosticSink.ReportDiagnostic( severity, scope.DiagnosticLocation, id, formatMessage, args );
+                diagnosticSink.Report( severity, scope.DiagnosticLocation, id, formatMessage, args );
             }
         }
     }

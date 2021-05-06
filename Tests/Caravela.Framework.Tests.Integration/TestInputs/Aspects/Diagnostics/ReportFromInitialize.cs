@@ -9,10 +9,10 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Diagnostics.ReportFromIni
     {
         public override void Initialize(IAspectBuilder<IMethod> aspectBuilder)
         {
-            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Error");
-            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Warning, "MY002", "Warning");
-            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Info, "MY003", "Info");
-            aspectBuilder.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity.Hidden, "MY004", "Hidden");
+            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Error, "MY001", "Error");
+            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Warning, "MY002", "Warning");
+            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Info, "MY003", "Info");
+            aspectBuilder.Diagnostics.Report(Caravela.Framework.Diagnostics.Severity.Hidden, "MY004", "Hidden");
         }
 
         public override dynamic? OverrideMethod()
