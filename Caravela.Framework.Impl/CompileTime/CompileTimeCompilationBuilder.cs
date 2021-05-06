@@ -192,10 +192,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !string.IsNullOrWhiteSpace( buildOptions.CompileTimeProjectDirectory ) )
                 {
-                    var mutexName = "Global\\Caravela_" + nameof(CompileTimeCompilationBuilder) + "_"
-                                    + HashUtilities.HashString( outputPaths.Directory );
-
-                    using Mutex mutex = new( false, mutexName );
+                    using Mutex mutex = MutexHelper.CreateGlobalMutex( outputPaths.Directory );
                     mutex.WaitOne();
 
                     try
