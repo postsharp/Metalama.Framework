@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
-using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using meta = Caravela.Framework.Aspects.meta;
+
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicPropertyMember
 {

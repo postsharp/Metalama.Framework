@@ -4,8 +4,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using meta = Caravela.Framework.Aspects.meta;
+
 
 [assembly: AspectOrderAttribute(typeof(LogAttribute), typeof(CacheAttribute))]
 

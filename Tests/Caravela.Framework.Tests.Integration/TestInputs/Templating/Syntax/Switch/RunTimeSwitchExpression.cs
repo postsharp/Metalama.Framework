@@ -3,8 +3,6 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 

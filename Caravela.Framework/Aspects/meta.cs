@@ -73,22 +73,22 @@ namespace Caravela.Framework.Aspects
         /// To invoke the method, use <c>Invoke</c>.
         /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        public static IMethod Method => CurrentContext.CurrentMethod;
+        public static IMethod Method => CurrentContext.Method;
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        public static IProperty Property => CurrentContext.CurrentProperty;
+        public static IProperty Property => CurrentContext.Property;
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        public static IEvent Event => CurrentContext.CurrentEvent;
+        public static IEvent Event => CurrentContext.Event;
 
         /// <summary>
         /// Gets the list of parameters of <see cref="Method"/>.
         /// </summary>
-        public static IAdviceParameterList Parameters => CurrentContext.CurrentParameters;
+        public static IAdviceParameterList Parameters => CurrentContext.Parameters;
 
         // Gets the project configuration.
         // IProject Project { get; }
@@ -96,12 +96,12 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
         /// </summary>
-        public static INamedType Type => CurrentContext.CurrentType;
+        public static INamedType Type => CurrentContext.Type;
 
         /// <summary>
         /// Gets the code model of the whole compilation.
         /// </summary>
-        public static ICompilation Compilation => CurrentContext.CurrentCompilation;
+        public static ICompilation Compilation => CurrentContext.Compilation;
 
         /// <summary>
         /// Gets an object that gives access to the current type including members introduced by the current aspect.
@@ -112,7 +112,7 @@ namespace Caravela.Framework.Aspects
         public static dynamic This => CurrentContext.This;
 
         /// <summary>
-        /// Allows to report and suppress diagnostics.
+        /// Gets a service allowing to report and suppress diagnostics.
         /// </summary>
         public static IDiagnosticSink Diagnostics => CurrentContext;
 
@@ -124,11 +124,7 @@ namespace Caravela.Framework.Aspects
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
         [Pragma]
-#pragma warning disable IDE0060
         public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
-#pragma warning restore IDE0060
-
-#pragma warning restore IDE1006 // Naming Styles
 
         internal static IDisposable WithContext( ITemplateContext current, object proceedImpl )
         {

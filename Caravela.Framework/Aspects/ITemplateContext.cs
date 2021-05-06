@@ -21,22 +21,22 @@ namespace Caravela.Framework.Aspects
         /// To invoke the method, use <c>Invoke</c>.
         /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
-        IMethod CurrentMethod { get; }
+        IMethod Method { get; }
 
         /// <summary>
         /// Gets the target field or property, or null if the advice does not target a field or a property.
         /// </summary>
-        IProperty CurrentProperty { get; }
+        IProperty Property { get; }
 
         /// <summary>
         /// Gets the target event, or null if the advice does not target an event.
         /// </summary>
-        IEvent CurrentEvent { get; }
+        IEvent Event { get; }
 
         /// <summary>
-        /// Gets the list of parameters of <see cref="CurrentMethod"/>.
+        /// Gets the list of parameters of <see cref="Method"/>.
         /// </summary>
-        IAdviceParameterList CurrentParameters { get; }
+        IAdviceParameterList Parameters { get; }
 
         // Gets the project configuration.
         // IProject Project { get; }
@@ -44,12 +44,12 @@ namespace Caravela.Framework.Aspects
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
         /// </summary>
-        INamedType CurrentType { get; }
+        INamedType Type { get; }
 
         /// <summary>
         /// Gets the code model of the whole compilation.
         /// </summary>
-        ICompilation CurrentCompilation { get; }
+        ICompilation Compilation { get; }
 
         /// <summary>
         /// Gets an object that gives access to the current type including members introduced by the current aspect.
@@ -58,7 +58,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         [RunTimeOnly]
         dynamic This { get; }
-        
+
         /*
         /// <summary>
         /// Gives access to the current type in the state it was before the current aspect.

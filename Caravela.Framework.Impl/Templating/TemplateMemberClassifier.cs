@@ -105,8 +105,12 @@ namespace Caravela.Framework.Impl.Templating
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
         }
 
+#pragma warning disable CA1822 // Static anyway.
+
         public bool HasTemplateKeywordAttribute( ISymbol symbol )
             => symbol.GetAttributes()
                 .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
+#pragma warning restore CA1822 
+
     }
 }

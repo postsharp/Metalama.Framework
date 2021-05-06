@@ -1,10 +1,5 @@
 #pragma warning disable CS0219
 
-using System;
-using System.Text;
-using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Aspects;
 

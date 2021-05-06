@@ -1,8 +1,7 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
-using meta = Caravela.Framework.Aspects.meta;
+
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Samples.SimpleLogging
 {

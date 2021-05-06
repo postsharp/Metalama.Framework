@@ -1,7 +1,6 @@
 ﻿using System;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.MultipleReturns_TemplateReturns
 {

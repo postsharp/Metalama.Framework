@@ -7,7 +7,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
 using Caravela.Framework.Advices;
-using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 {

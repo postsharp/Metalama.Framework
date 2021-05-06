@@ -4,7 +4,6 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder(typeof(FirstAttribute), typeof(SecondAttribute), typeof(ThirdAttribute))]
 

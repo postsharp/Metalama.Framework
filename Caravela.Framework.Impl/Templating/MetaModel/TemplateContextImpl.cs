@@ -12,27 +12,27 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     {
         private readonly IDiagnosticSink _diagnosticSink;
 
-        public IMethod CurrentMethod { get; }
+        public IMethod Method { get; }
 
-        public IProperty CurrentProperty => throw new InvalidOperationException();
+        public IProperty Property => throw new InvalidOperationException();
 
-        public IEvent CurrentEvent => throw new InvalidOperationException();
+        public IEvent Event => throw new InvalidOperationException();
 
         [Memo]
-        public IAdviceParameterList CurrentParameters => new AdviceParameterList( this.CurrentMethod );
+        public IAdviceParameterList Parameters => new AdviceParameterList( this.Method );
 
-        public INamedType CurrentType { get; }
+        public INamedType Type { get; }
 
-        public ICompilation CurrentCompilation { get; }
+        public ICompilation Compilation { get; }
 
         // TODO: when possible, this vanishes (e.g. `target.This.Property` is compiled to just `Property`); fix it so that it produces `this` or the name of the type, depending on whether the member on the right is static
-        public dynamic This => new CurrentTypeOrInstanceDynamic( !this.CurrentMethod.IsStatic, this.CurrentType );
+        public dynamic This => new CurrentTypeOrInstanceDynamic( !this.Method.IsStatic, this.Type );
 
         public TemplateContextImpl( IMethod method, INamedType type, ICompilation compilation, IDiagnosticSink diagnosticSink )
         {
-            this.CurrentMethod = method;
-            this.CurrentType = type;
-            this.CurrentCompilation = compilation;
+            this.Method = method;
+            this.Type = type;
+            this.Compilation = compilation;
             this._diagnosticSink = diagnosticSink;
         }
 

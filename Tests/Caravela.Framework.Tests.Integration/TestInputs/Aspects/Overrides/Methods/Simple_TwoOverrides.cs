@@ -2,7 +2,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
 
 [assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
 

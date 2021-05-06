@@ -85,17 +85,16 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxNode node ) => ((SyntaxNodeOrToken) node).GetColorFromAnnotation();
+
         public static TextSpanClassification GetColorFromAnnotation( this SyntaxToken token ) => ((SyntaxNodeOrToken) token).GetColorFromAnnotation();
 
         public static T AddColoringAnnotation<T>( this T node, TextSpanClassification color )
             where T : SyntaxNode
             => (T) ((SyntaxNodeOrToken) node).AddColoringAnnotation( color ).AsNode()!;
-        
+
         public static SyntaxToken AddColoringAnnotation( this SyntaxToken token, TextSpanClassification color )
             => ((SyntaxNodeOrToken) token).AddColoringAnnotation( color ).AsToken();
 
-        
-        
         public static SyntaxNodeOrToken AddColoringAnnotation( this SyntaxNodeOrToken node, TextSpanClassification color )
         {
             if ( color == TextSpanClassification.Default || node.GetColorFromAnnotation() >= color )
@@ -106,7 +105,6 @@ namespace Caravela.Framework.Impl.Templating
             return node.WithoutAnnotations( _colorAnnotationKind )
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
         }
-
 
         [return: NotNullIfNotNull( "node" )]
         public static T? AddScopeAnnotation<T>( this T? node, SymbolDeclarationScope scope )

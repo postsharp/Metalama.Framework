@@ -4,8 +4,6 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Project;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -436,7 +434,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private SyntaxNodeOrToken AddColoringAnnotations( SyntaxNodeOrToken nodeOrToken, ISymbol? symbol, SymbolDeclarationScope scope )
         {
-            switch (symbol)
+            switch ( symbol )
             {
                 case null:
                     return nodeOrToken;
@@ -455,7 +453,7 @@ namespace Caravela.Framework.Impl.Templating
                         else
                         {
                             var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
-                
+
                             if ( node != null &&
                                  scope == SymbolDeclarationScope.RunTimeOnly &&
                                  (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) &&
@@ -1495,11 +1493,9 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
+            var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
 
-            var annotatedIdentifier = AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
-            
-
-            return 
+            return
                 transformedNode.WithIdentifier( annotatedIdentifier ).AddScopeAnnotation( scope );
         }
 

@@ -10,10 +10,10 @@ namespace Caravela.Framework.Aspects
     /// An object by the <see cref="IAspect{T}.Initialize"/> method of the aspect to provide advices and child
     /// aspects. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
-    public interface IAspectBuilder 
+    public interface IAspectBuilder
     {
         IDiagnosticSink Diagnostics { get; }
-        
+
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>

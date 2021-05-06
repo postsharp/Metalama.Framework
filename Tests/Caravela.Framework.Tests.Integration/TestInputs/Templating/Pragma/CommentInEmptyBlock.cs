@@ -2,7 +2,6 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
 {

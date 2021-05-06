@@ -118,8 +118,9 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                         }
 
                         textWriter.Write(
-                            $"<span class='caravelaClassification_{classifiedSpan.Classification}'>" + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
-                                                                                                     + "</span>" );
+                            $"<span class='caravelaClassification_{classifiedSpan.Classification}'>"
+                            + WebUtility.HtmlEncode( sourceText.GetSubText( classifiedSpan.Span ).ToString() )
+                            + "</span>" );
 
                         i = classifiedSpan.Span.End;
                     }
