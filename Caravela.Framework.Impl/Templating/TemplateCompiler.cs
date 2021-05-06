@@ -68,8 +68,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public static bool TryCompile(
+            string templateName,
             Compilation compileTimeCompilation,
-            MethodDeclarationSyntax sourceSyntaxRoot,
+            SyntaxNode sourceSyntaxRoot,
             SemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
@@ -83,7 +84,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, symbolAnnotationMap, diagnostics );
+            var templateCompilerRewriter = new TemplateCompilerRewriter( templateName, compileTimeCompilation, symbolAnnotationMap, diagnostics );
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;

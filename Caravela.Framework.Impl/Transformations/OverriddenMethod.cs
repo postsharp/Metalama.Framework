@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Transformations
                     this.Advice.Aspect.Aspect,
                     this.OverriddenDeclaration,
                     this.OverriddenDeclaration.Compilation,
-                    new LinkerOverrideProceedImpl(
+                    new LinkerOverrideMethodProceedImpl(
                         this.Advice.AspectLayerId,
                         this.OverriddenDeclaration,
                         LinkerAnnotationOrder.Default,
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.LexicalScope,
                     context.DiagnosticSink );
 
-                var compiledTemplateMethodName = this.TemplateMethod.Name + TemplateCompiler.TemplateMethodSuffix;
+                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName(this.TemplateMethod.Name);
 
                 var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
 

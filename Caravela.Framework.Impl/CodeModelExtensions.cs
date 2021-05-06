@@ -51,5 +51,18 @@ namespace Caravela.Framework.Impl
 
             throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
         }
+
+        public static bool IsAccessor( this IMethod method )
+        {
+            return method.MethodKind switch
+            {
+                Code.MethodKind.PropertyGet => true,
+                Code.MethodKind.PropertySet => true,
+                Code.MethodKind.EventAdd => true,
+                Code.MethodKind.EventRemove => true,
+                Code.MethodKind.EventRaise => true,
+                _ => false
+            };
+        }
     }
 }

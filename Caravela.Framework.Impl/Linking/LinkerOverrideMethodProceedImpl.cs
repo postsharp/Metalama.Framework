@@ -14,31 +14,32 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
-    internal class LinkerOverrideProceedImpl : IProceedImpl
+
+    internal class LinkerOverrideMethodProceedImpl : IProceedImpl
     {
-        private readonly IMethod _originalDeclaration;
+        private readonly IMethod _overriddenDeclaration;
         private readonly AspectLayerId _aspectLayerId;
         private readonly LinkerAnnotationOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverrideProceedImpl( AspectLayerId aspectLayerId, IMethod overridenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
+        public LinkerOverrideMethodProceedImpl( AspectLayerId aspectLayerId, IMethod overriddenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
-            this._originalDeclaration = overridenDeclaration;
+            this._overriddenDeclaration = overriddenDeclaration;
             this._order = order;
             this._syntaxFactory = syntaxFactory;
         }
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
+            // TODO: Introduced types?
+            if ( this._overriddenDeclaration.ReturnType.Is( typeof( void ) ) )
             {
-                // TODO: Add the namespace.
-                return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
+                return this._syntaxFactory.GetTypeNameSyntax( typeof( __Void ) );
             }
 
             // TODO: Introduced types?
-            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._originalDeclaration.ReturnType).Symbol );
+            return (TypeSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( (ITypeSymbol) ((NamedType) this._overriddenDeclaration.ReturnType).Symbol );
         }
 
         StatementSyntax IProceedImpl.CreateAssignStatement( SyntaxToken returnValueLocalName )
@@ -54,17 +55,20 @@ namespace Caravela.Framework.Impl.Linking
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
+            if ( this._overriddenDeclaration.ReturnType.Is( typeof( void ) ) )
             {
-                // Emit `<original_method_call>; return`.
-                return Block(
-                    ExpressionStatement( this.CreateOriginalMethodCall() ),
-                    ReturnStatement() );
+                // Emit `{ <original_method_call>; return; }`.
+                return
+                    Block(
+                        ExpressionStatement( this.CreateOriginalMethodCall() ),
+                        ReturnStatement() );
             }
-
-            // Emit `return <original_method_call>`.
-            return
-                ReturnStatement( this.CreateOriginalMethodCall() );
+            else
+            {
+                // Emit `return <original_method_call>`.
+                return
+                    ReturnStatement( this.CreateOriginalMethodCall() );
+            }
         }
 
         private InvocationExpressionSyntax CreateOriginalMethodCall()
@@ -73,13 +77,13 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
             var invocation =
                 InvocationExpression(
-                    !this._originalDeclaration.IsStatic
+                    !this._overriddenDeclaration.IsStatic
                         ? MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
-                            IdentifierName( this._originalDeclaration.Name ) )
-                        : IdentifierName( this._originalDeclaration.Name ),
-                    ArgumentList( SeparatedList( this._originalDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
+                            IdentifierName( this._overriddenDeclaration.Name ) )
+                        : IdentifierName( this._overriddenDeclaration.Name ),
+                    ArgumentList( SeparatedList( this._overriddenDeclaration.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) );
 
             invocation = invocation.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
 

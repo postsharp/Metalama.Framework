@@ -13,19 +13,13 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
-    internal sealed class IntroduceMethodAdvice : Advice, IIntroduceMethodAdvice
+    internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice, IIntroduceMethodAdvice
     {
         private readonly MethodBuilder _methodBuilder;
 
-        public IntroductionScope Scope { get; }
-
-        public ConflictBehavior ConflictBehavior { get; }
-
         public IMethod TemplateMethod { get; }
 
-        public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
-
-        public AspectLinkerOptions? LinkerOptions { get; }
+        public new INamedType TargetDeclaration => base.TargetDeclaration!;
 
         public IntroduceMethodAdvice(
             AspectInstance aspect,
@@ -34,12 +28,9 @@ namespace Caravela.Framework.Impl.Advices
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration )
+            : base( aspect, targetDeclaration, scope, conflictBehavior, linkerOptions )
         {
-            this.Scope = scope;
-            this.ConflictBehavior = conflictBehavior;
             this.TemplateMethod = templateMethod;
-            this.LinkerOptions = linkerOptions;
 
             this._methodBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Name, this.LinkerOptions );
         }

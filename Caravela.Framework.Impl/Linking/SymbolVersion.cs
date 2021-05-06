@@ -13,19 +13,23 @@ namespace Caravela.Framework.Impl.Linking
     {
         public ISymbol Symbol { get; }
 
+        public LinkerAnnotationTargetKind TargetKind { get; }
+
         public AspectLayerId? AspectLayer { get; }
 
-        public SymbolVersion( ISymbol symbol, AspectLayerId? aspectLayer )
+        public SymbolVersion( ISymbol symbol, AspectLayerId? aspectLayer, LinkerAnnotationTargetKind targetKind )
         {
             this.Symbol = symbol;
             this.AspectLayer = aspectLayer;
+            this.TargetKind = targetKind;
         }
 
         public bool Equals( SymbolVersion other )
         {
             return
                 this.AspectLayer == other.AspectLayer
-                && StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol );
+                && StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
+                && this.TargetKind == other.TargetKind;
         }
 
         public override bool Equals( object obj )
@@ -35,7 +39,10 @@ namespace Caravela.Framework.Impl.Linking
 
         public override int GetHashCode()
         {
-            return StructuralSymbolComparer.Default.GetHashCode( this.Symbol ) ^ (this.AspectLayer?.GetHashCode() ?? 0);
+            return HashCode.Combine(
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
+                this.AspectLayer,
+                this.TargetKind);
         }
 
         public static bool operator ==( SymbolVersion left, SymbolVersion right )

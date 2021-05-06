@@ -5,15 +5,22 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Caravela.Framework.Code.RefKind;
+using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
-    internal class PropertyBuilder : MemberBuilder, IProperty
+    internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IProperty
     {
-        public RefKind RefKind => throw new NotImplementedException();
+        RefKind IProperty.RefKind => this.RefKind;
+
+        public RefKind RefKind { get; set; }
 
         public bool IsByRef => throw new NotImplementedException();
 
@@ -21,15 +28,21 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsRefReadonly => throw new NotImplementedException();
 
-        public IParameterList Parameters => throw new NotImplementedException();
+        public ParameterBuilderList Parameters { get; } = new();
+
+        IParameterList IProperty.Parameters => this.Parameters;
 
         public IPropertyInvocation Base => throw new NotImplementedException();
 
-        public IType Type => throw new NotImplementedException();
+        IType IFieldOrProperty.Type => this.Type;
 
-        public IMethod? Getter => throw new NotImplementedException();
+        public IType Type { get; set; }
 
-        public IMethod? Setter => throw new NotImplementedException();
+        [Memo]
+        public IMethod? Getter => new PseudoAccessor( this, PseudoAccessorSemantic.Get );
+
+        [Memo]
+        public IMethod? Setter => new PseudoAccessor( this, PseudoAccessorSemantic.Set );
 
         public bool HasBase => throw new NotImplementedException();
 
@@ -39,7 +52,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public AspectLinkerOptions? LinkerOptions { get; }
 
-        public override MemberDeclarationSyntax InsertPositionNode => throw new NotImplementedException();
+        public override MemberDeclarationSyntax InsertPositionNode
+            => ((NamedType) this.DeclaringType).Symbol.DeclaringSyntaxReferences.Select( x => (TypeDeclarationSyntax) x.GetSyntax() ).FirstOrDefault();
 
         public override CodeElementKind ElementKind => throw new NotImplementedException();
 
@@ -47,6 +61,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             this.LinkerOptions = linkerOptions;
+            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( object ) );
         }
 
         public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
@@ -70,6 +85,35 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        {
+            var syntaxGenerator = this.Compilation.SyntaxGenerator;
+            var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
+
+            // TODO: Indexers.
+            var property = (PropertyDeclarationSyntax)
+                syntaxGenerator.PropertyDeclaration(
+                    this.Name,
+                    syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    this.Accessibility.ToRoslynAccessibility(),
+                    this.ToDeclarationModifiers(),
+                    new[]
+                    {
+                        ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ) ) )
+                    },
+                    Array.Empty<SyntaxNode>() );
+
+            return new[]
+            {
+                new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
+            };
+        }
+
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        {
+            throw new NotImplementedException();
+        }
+
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
         {
             throw new NotImplementedException();
         }

@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -43,15 +44,15 @@ namespace Caravela.Framework.Impl.Advices
         {
             // We do the search against the Roslyn compilation because it is cheaper.
 
-            var methods = this._aspectType.GetSymbol().GetMembers( methodName ).OfType<IMethodSymbol>().ToList();
+            var members = this._aspectType.GetSymbol().GetMembers( methodName ).ToList();
             var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
 
-            if ( methods.Count != 1 )
+            if ( members.Count != 1 )
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMethod.CreateException( (this._aspectType, methodName) );
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspectType, methodName) );
             }
 
-            var method = methods.Single();
+            var method = members.OfType<IMethodSymbol>().Single();
 
             if ( !method.SelectRecursive( m => m.OverriddenMethod, includeThis: true )
                 .SelectMany( m => m.GetAttributes() )
@@ -59,7 +60,7 @@ namespace Caravela.Framework.Impl.Advices
             {
                 if ( throwIfMissing )
                 {
-                    throw GeneralDiagnosticDescriptors.TemplateMethodMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException( (method, expectedAttributeTypeSymbol, adviceName) );
                 }
                 else
                 {
@@ -68,6 +69,41 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             return this._compilation.Factory.GetMethod( method );
+        }
+
+        private IProperty? GetTemplateProperty(
+            string propertyName,
+            Type expectedAttributeType,
+            string adviceName,
+            [DoesNotReturnIf( true )] bool throwIfMissing = true )
+        {
+            // We do the search against the Roslyn compilation because it is cheaper.
+
+            var members = this._aspectType.GetSymbol().GetMembers( propertyName ).ToList();
+            var expectedAttributeTypeSymbol = this._compilation.ReflectionMapper.GetTypeSymbol( expectedAttributeType );
+
+            if ( members.Count != 1 )
+            {
+                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (this._aspectType, propertyName) );
+            }
+
+            var property = members.OfType<IPropertySymbol>().Single();
+
+            if ( !property.SelectRecursive( m => m.OverriddenProperty, includeThis: true )
+                .SelectMany( m => m.GetAttributes() )
+                .Any( a => a.AttributeClass?.Equals( expectedAttributeTypeSymbol, SymbolEqualityComparer.Default ) ?? false ) )
+            {
+                if ( throwIfMissing )
+                {
+                    throw GeneralDiagnosticDescriptors.TemplateMemberMissesAttribute.CreateException( (property, expectedAttributeTypeSymbol, adviceName) );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            return this._compilation.Factory.GetProperty( property );
         }
 
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
@@ -124,17 +160,12 @@ namespace Caravela.Framework.Impl.Advices
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // Set template represents both set and init accessors.
-            var getTemplateMethod = this.GetTemplateMethod(
-                $"get_{defaultTemplate}",
+            var templateProperty = this.GetTemplateProperty(
+                defaultTemplate,
                 typeof(OverrideFieldOrPropertyTemplateAttribute),
                 nameof(this.OverrideFieldOrProperty) );
 
-            var setTemplateMethod = this.GetTemplateMethod(
-                $"set_{defaultTemplate}",
-                typeof(OverrideFieldOrPropertyTemplateAttribute),
-                nameof(this.OverrideFieldOrProperty) );
-
-            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
+            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, templateProperty, null, null, aspectLinkerOptions );
             this._advices.Add( advice );
 
             return advice;
@@ -157,7 +188,7 @@ namespace Caravela.Framework.Impl.Advices
                 typeof(OverrideFieldOrPropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
-            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
+            var advice = new OverrideFieldOrPropertyAdvice( this._aspect, targetDeclaration, null, getTemplateMethod, setTemplateMethod, aspectLinkerOptions );
             this._advices.Add( advice );
 
             return advice;

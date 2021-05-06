@@ -55,6 +55,22 @@ namespace Caravela.Framework.Impl.Linking
 
                     break;
 
+                case (IPropertySymbol propertyX, IPropertySymbol propertyY ):
+                    if ( !PropertyEquals( propertyX, propertyY, this._options ) )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case (IEventSymbol eventX, IEventSymbol eventY ):
+                    if ( !EventEquals( eventX, eventY, this._options ) )
+                    {
+                        return false;
+                    }
+
+                    break;
+
                 case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
                     if ( !NamedTypeEquals( namedTypeX, namedTypeY, this._options ) )
                     {
@@ -130,14 +146,13 @@ namespace Caravela.Framework.Impl.Linking
                 return false;
             }
 
-            if ( (options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ))
-                 && methodX.Parameters.Length != methodY.Parameters.Length )
+            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
             {
-                return false;
-            }
+                if ( methodX.Parameters.Length != methodY.Parameters.Length )
+                {
+                    return false;
+                }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
-            {
                 // TODO: optimize using for loop.
                 foreach ( var (parameterX, parameterY) in Enumerable.Zip( methodX.Parameters, methodY.Parameters, ( x, y ) => (x, y) ) )
                 {
@@ -151,6 +166,48 @@ namespace Caravela.Framework.Impl.Linking
                         return false;
                     }
                 }
+            }
+
+            return true;
+        }
+
+        private static bool PropertyEquals( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralSymbolComparerOptions options )
+        {
+            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( propertyX.Name, propertyY.Name ) )
+            {
+                return false;
+            }
+
+            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+            {
+                if ( propertyX.Parameters.Length != propertyY.Parameters.Length )
+                {
+                    return false;
+                }
+
+                // TODO: optimize using for loop.
+                foreach ( var (parameterX, parameterY) in Enumerable.Zip( propertyX.Parameters, propertyY.Parameters, ( x, y ) => (x, y) ) )
+                {
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
+                    {
+                        return false;
+                    }
+
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterY.RefKind != parameterY.RefKind )
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool EventEquals( IEventSymbol eventX, IEventSymbol eventY, StructuralSymbolComparerOptions options )
+        {
+            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( eventX.Name, eventY.Name ) )
+            {
+                return false;
             }
 
             return true;
@@ -293,6 +350,42 @@ namespace Caravela.Framework.Impl.Linking
                                 h = HashCode.Combine( h, parameter.RefKind );
                             }
                         }
+                    }
+
+                    break;
+
+                case IPropertySymbol property:
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    {
+                        h = HashCode.Combine( h, property.Name );
+                    }
+
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes )
+                         || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                    {
+                        h = HashCode.Combine( h, property.Parameters.Length );
+
+                        // TODO: optimize using for loop.
+                        foreach ( var parameter in property.Parameters )
+                        {
+                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) )
+                            {
+                                h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralSymbolComparerOptions.Type ) );
+                            }
+
+                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                            {
+                                h = HashCode.Combine( h, parameter.RefKind );
+                            }
+                        }
+                    }
+
+                    break;
+
+                case IEventSymbol @event:
+                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    {
+                        h = HashCode.Combine( h, @event.Name );
                     }
 
                     break;

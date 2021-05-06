@@ -8,7 +8,7 @@ using static Caravela.Framework.Aspects.TemplateContext;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Simple
+namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Aspect
 {
     // Tests single OverrideProperty aspect with trivial template on methods with trivial bodies.
 
@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             set
             {
                 Console.WriteLine($"This is the overridden setter.");
-                proceed();
+                var discard = proceed();
             }
         }
     }

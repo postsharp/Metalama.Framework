@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -53,9 +54,9 @@ namespace Caravela.Framework.Impl.Linking
                         continue;
                     }
 
-                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayer );
+                    var symbolVersion = new SymbolVersion( symbolInfo.Symbol.AssertNotNull(), targetLayer, linkerAnnotation.TargetKind );
 
-                    referenceCounters.TryGetValue( symbolVersion, out var counter );
+                    _ = referenceCounters.TryGetValue( symbolVersion, out var counter );
                     referenceCounters[symbolVersion] = counter + 1;
                 }
             }
@@ -64,14 +65,60 @@ namespace Caravela.Framework.Impl.Linking
             // Analyze introduced method bodies.
             foreach ( var introducedMember in input.IntroductionRegistry.GetIntroducedMembers() )
             {
-                var symbol = (IMethodSymbol) input.IntroductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+                var symbol = input.IntroductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+                switch ( symbol )
+                {
+                    case IMethodSymbol methodSymbol:
+                        // TODO: partial methods.
+                        var methodBodyVisitor = new MethodBodyWalker();
+                        methodBodyVisitor.Visit( methodSymbol.DeclaringSyntaxReferences.Single().GetSyntax() );
 
-                // TODO: partial methods.
-                var methodBodyVisitor = new MethodBodyWalker();
-                methodBodyVisitor.Visit( introducedMember.Syntax );
+                        methodBodyInfos[methodSymbol] = new MemberAnalysisResult(
+                            methodSymbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
 
-                methodBodyInfos[symbol] = new MemberAnalysisResult(
-                    symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                        break;
+
+                    case IPropertySymbol propertySymbol:
+                        if (propertySymbol.GetMethod != null)
+                        {
+                            var getterBodyVisitor = new MethodBodyWalker();
+                            getterBodyVisitor.Visit( propertySymbol.GetMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+
+                            methodBodyInfos[propertySymbol.GetMethod] = new MemberAnalysisResult( getterBodyVisitor.ReturnStatementCount <= 1 );
+                        }
+
+                        if ( propertySymbol.SetMethod != null )
+                        {
+                            var setterBodyVisitor = new MethodBodyWalker();
+                            setterBodyVisitor.Visit( propertySymbol.SetMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+
+                            methodBodyInfos[propertySymbol.SetMethod] = new MemberAnalysisResult( setterBodyVisitor.ReturnStatementCount == 0 );
+                        }
+
+                        break;
+
+                    case IEventSymbol eventSymbol:
+                        if ( eventSymbol.AddMethod != null )
+                        {
+                            var addBodyVisitor = new MethodBodyWalker();
+                            addBodyVisitor.Visit( eventSymbol.AddMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+
+                            methodBodyInfos[eventSymbol.AddMethod] = new MemberAnalysisResult( addBodyVisitor.ReturnStatementCount == 0 );
+                        }
+
+                        if ( eventSymbol.RemoveMethod != null )
+                        {
+                            var removeBodyVisitor = new MethodBodyWalker();
+                            removeBodyVisitor.Visit( eventSymbol.RemoveMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
+
+                            methodBodyInfos[eventSymbol.RemoveMethod] = new MemberAnalysisResult( removeBodyVisitor.ReturnStatementCount == 0 );
+                        }
+
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"{symbol.Kind}");
+                }
 
                 // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
                 // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
@@ -79,16 +126,55 @@ namespace Caravela.Framework.Impl.Linking
 
             foreach ( var symbol in input.IntroductionRegistry.GetOverriddenMembers() )
             {
-                var methodBodyVisitor = new MethodBodyWalker();
-                methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );
+                switch ( symbol )
+                {
+                    case IMethodSymbol methodSymbol:
+                        AnalyzeMethodBody( methodBodyInfos, methodSymbol );
+                        break;
 
-                methodBodyInfos[symbol] = new MemberAnalysisResult(
-                    symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
+                    case IPropertySymbol propertySymbol:
+                        if ( propertySymbol.GetMethod != null )
+                        {
+                            AnalyzeMethodBody( methodBodyInfos, propertySymbol.GetMethod );
+                        }
+
+                        if ( propertySymbol.SetMethod != null )
+                        {
+                            AnalyzeMethodBody( methodBodyInfos, propertySymbol.SetMethod );
+                        }
+
+                        break;
+
+                    case IEventSymbol eventSymbol:
+                        if ( eventSymbol.AddMethod != null )
+                        {
+                            AnalyzeMethodBody( methodBodyInfos, eventSymbol.AddMethod );
+                        }
+
+                        if ( eventSymbol.RemoveMethod != null )
+                        {
+                            AnalyzeMethodBody( methodBodyInfos, eventSymbol.RemoveMethod );
+                        }
+
+                        break;
+
+                    default:
+                        throw new NotSupportedException();
+                }
             }
 
             var analysisRegistry = new LinkerAnalysisRegistry( input.IntroductionRegistry, input.OrderedAspectLayers, referenceCounters, methodBodyInfos );
 
             return new LinkerAnalysisStepOutput( input.Diagnostics, input.IntermediateCompilation, analysisRegistry );
+        }
+
+        private static void AnalyzeMethodBody( Dictionary<ISymbol, MemberAnalysisResult> methodBodyInfos, IMethodSymbol symbol )
+        {
+            var methodBodyVisitor = new MethodBodyWalker();
+            methodBodyVisitor.Visit( symbol.DeclaringSyntaxReferences.Single().GetSyntax() );
+
+            methodBodyInfos[symbol] = new MemberAnalysisResult(
+                symbol.ReturnsVoid ? methodBodyVisitor.ReturnStatementCount == 0 : methodBodyVisitor.ReturnStatementCount <= 1 );
         }
     }
 }

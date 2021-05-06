@@ -1,0 +1,48 @@
+[TestOutput]
+internal class TargetClass
+{
+    private int _field;
+    [Override]
+    public int Property
+    {
+        get
+        {
+            return this.__Property__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_SimpleMethodTemplates_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__Property__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_SimpleMethodTemplates_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    public int __Property__OriginalImpl
+    {
+        get
+        {
+            return this._field;
+        }
+
+        set
+        {
+            this._field = value;
+        }
+    }
+
+    public global::System.Int32 __Property__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_SimpleMethodTemplates_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.Property;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.Property = value;
+        }
+    }
+}

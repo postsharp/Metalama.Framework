@@ -3,5 +3,5 @@
 
 namespace Caravela.Framework.Code
 {
-    public interface IFieldBuilder : IFieldOrPropertyBuilder, IMemberBuilder { }
+    public interface IFieldBuilder : IFieldOrPropertyBuilder, IMemberBuilder, IField { }
 }

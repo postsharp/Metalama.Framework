@@ -6,7 +6,7 @@ namespace Caravela.Framework.Impl.Linking
     /// <summary>
     /// Result of member analysis.
     /// </summary>
-    internal class MemberAnalysisResult
+    internal readonly struct MemberAnalysisResult
     {
         public bool HasSimpleReturnControlFlow { get; }
 

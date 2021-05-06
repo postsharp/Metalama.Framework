@@ -105,6 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     var success =
                         TemplateCompiler.TryCompile(
+                            TemplateNameHelper.GetCompiledTemplateName( methodSymbol.Name ),
                             this._compileTimeCompilation,
                             node,
                             this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
@@ -135,8 +136,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( propertySymbol != null && this.SymbolClassifier.IsTemplate( propertySymbol ) )
                 {
                     var success = true;
-                    SyntaxNode? transformedGetNode = null;
-                    SyntaxNode? transformedSetNode = null;
+                    SyntaxNode? transformedGetDeclaration = null;
+                    SyntaxNode? transformedSetDeclaration = null;
 
                     // Compile accessors into templates.
                     if ( !propertySymbol.IsAbstract )
@@ -148,13 +149,6 @@ namespace Caravela.Framework.Impl.CompileTime
                             var setAccessor = node.AccessorList.Accessors.SingleOrDefault(
                                 a => a.Kind() == SyntaxKind.SetAccessorDeclaration || a.Kind() == SyntaxKind.InitAccessorDeclaration );
 
-                            var propertyIdentifier = node switch
-                            {
-                                PropertyDeclarationSyntax property => property.Identifier.ValueText,
-                                IndexerDeclarationSyntax indexer => "Indexer",
-                                _ => throw new AssertionFailedException()
-                            };
-
                             var propertyParameters = node switch
                             {
                                 PropertyDeclarationSyntax property => (SeparatedSyntaxList<ParameterSyntax>?) null,
@@ -165,25 +159,27 @@ namespace Caravela.Framework.Impl.CompileTime
                             if ( getAccessor != null )
                             {
                                 success = success &&
-                                          TemplateCompiler.TryCompile(
-                                              this._compileTimeCompilation,
-                                              RewriteAccessorToMethod( getAccessor, propertyIdentifier, node.Type, propertyParameters ),
-                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnosticAdder,
-                                              out _,
-                                              out transformedGetNode );
+                                    TemplateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
+                                        this._compileTimeCompilation,
+                                        getAccessor,
+                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        out _,
+                                        out transformedGetDeclaration );
                             }
 
                             if ( setAccessor != null )
                             {
                                 success = success &&
-                                          TemplateCompiler.TryCompile(
-                                              this._compileTimeCompilation,
-                                              RewriteAccessorToMethod( setAccessor, propertyIdentifier, node.Type, propertyParameters ),
-                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                              this._diagnosticAdder,
-                                              out _,
-                                              out transformedSetNode );
+                                       TemplateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledPropertySetTemplateName( propertySymbol.Name ),
+                                        this._compileTimeCompilation,
+                                        setAccessor,
+                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        out _,
+                                        out transformedSetDeclaration );
                             }
                         }
                     }
@@ -192,14 +188,14 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         yield return WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
 
-                        if ( transformedGetNode != null )
+                        if ( transformedGetDeclaration != null )
                         {
-                            yield return (MethodDeclarationSyntax) transformedGetNode.AssertNotNull();
+                            yield return (MemberDeclarationSyntax) transformedGetDeclaration;
                         }
 
-                        if ( transformedGetNode != null )
+                        if ( transformedSetDeclaration != null )
                         {
-                            yield return (MethodDeclarationSyntax) transformedGetNode.AssertNotNull();
+                            yield return (MemberDeclarationSyntax) transformedSetDeclaration;
                         }
                     }
                     else
@@ -243,7 +239,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             private static MethodDeclarationSyntax RewriteAccessorToMethod(
                 AccessorDeclarationSyntax node,
-                string methodGroupName,
+                string templateMethodName,
                 TypeSyntax methodGroupReturnType,
                 SeparatedSyntaxList<ParameterSyntax>? methodGroupParameters )
             {
@@ -252,7 +248,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return
                         MethodDeclaration(
                                 PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
-                                $"{node.Keyword.ValueText}_{methodGroupName}" )
+                                templateMethodName )
                             .WithParameterList(
                                 methodGroupParameters != null
                                     ? ParameterList(
@@ -271,7 +267,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return
                         MethodDeclaration(
                                 methodGroupReturnType,
-                                $"{node.Keyword.ValueText}_{methodGroupName}" )
+                                templateMethodName )
                             .WithParameterList( methodGroupParameters != null ? ParameterList( methodGroupParameters.Value ) : ParameterList() )
                             .WithExpressionBody( node.ExpressionBody )
                             .WithBody( node.Body )

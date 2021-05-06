@@ -40,6 +40,7 @@ namespace Caravela.Framework.Impl.Linking
 
             List<SyntaxTree> newTrees = new();
 
+            // TODO: visit only modified trees (add an annotation to modified trees)
             foreach ( var syntaxTree in input.IntermediateCompilation.SyntaxTrees )
             {
                 // Run the linking rewriter for this tree.

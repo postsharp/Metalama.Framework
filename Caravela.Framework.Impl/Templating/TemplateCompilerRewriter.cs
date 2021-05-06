@@ -26,6 +26,7 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter
     {
+        private readonly string _templateName;
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
@@ -34,10 +35,12 @@ namespace Caravela.Framework.Impl.Templating
         private ISymbol? _rootTemplateSymbol;
 
         public TemplateCompilerRewriter(
+            string templateName,
             Compilation compileTimeCompilation,
             SemanticAnnotationMap semanticAnnotationMap,
             IDiagnosticAdder diagnosticAdder ) : base( compileTimeCompilation )
         {
+            this._templateName = templateName;
             this._semanticAnnotationMap = semanticAnnotationMap;
             this._diagnosticAdder = diagnosticAdder;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
@@ -632,26 +635,46 @@ namespace Caravela.Framework.Impl.Templating
 
             this.Indent( 3 );
 
-            // Generates a template method.
+            // TODO: templates may support build-time parameters, which must to the compiled template method.
+
+            var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            var result = this.CreateTemplateMethod( node, body );
+
+            this.Unindent( 3 );
+
+            return result;
+        }
+
+        public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+        {
+            if ( node.Body == null )
+            {
+                // Not supported or incomplete syntax.
+                return node;
+            }
+
+            this.Indent( 3 );
 
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
-            // TODO: also compile templates for properties and so on.
-
             var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            var result = this.CreateTemplateMethod( node, body );
 
-            var result = MethodDeclaration(
-                    this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
-                    Identifier( node.Identifier.Text + TemplateCompiler.TemplateMethodSuffix ) )
+            this.Unindent( 3 );
+
+            return result;
+        }
+
+        private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body )
+        {
+            return MethodDeclaration(
+                    this.MetaSyntaxFactory.Type( typeof( SyntaxNode ) ),
+                    Identifier( this._templateName ) )
                 .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
                 .NormalizeWhitespace()
                 .WithBody( body )
                 .WithLeadingTrivia( node.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
-
-            this.Unindent( 3 );
-
-            return result;
         }
 
         public override SyntaxNode VisitBlock( BlockSyntax node )

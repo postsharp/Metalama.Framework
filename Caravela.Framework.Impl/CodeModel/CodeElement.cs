@@ -29,7 +29,18 @@ namespace Caravela.Framework.Impl.CodeModel
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol );
+        public virtual ICodeElement? ContainingElement =>
+            this.Symbol switch
+            {
+                IMethodSymbol method when
+                    method.MethodKind == Microsoft.CodeAnalysis.MethodKind.PropertyGet
+                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.PropertySet
+                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventAdd
+                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventRemove
+                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventRaise 
+                    => this.Compilation.Factory.GetCodeElement( method.AssociatedSymbol.AssertNotNull() ),
+                _ => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol )
+            };
 
         [Memo]
         public virtual IAttributeList Attributes
@@ -58,8 +69,15 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-            var methodBodyNode = ((MethodDeclarationSyntax) syntaxReference.GetSyntax()).Body;
-            var lookupPosition = methodBodyNode != null ? methodBodyNode.Span.Start : syntaxReference.Span.Start;
+            var bodyNode =
+                syntaxReference.GetSyntax() switch
+                {
+                    MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
+                    PropertyDeclarationSyntax _ => null,
+                    _ => throw new AssertionFailedException()
+                };
+
+            var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
 
             return semanticModel.LookupSymbols( lookupPosition );
         }
