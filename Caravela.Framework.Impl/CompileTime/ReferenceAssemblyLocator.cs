@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
@@ -107,7 +106,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", _projectHash, "TempProject" );
             
-            using Mutex mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
+            using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
             mutex.WaitOne();
 
             try

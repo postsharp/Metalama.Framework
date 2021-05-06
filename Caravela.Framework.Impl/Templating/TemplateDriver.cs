@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         // The most probably reason we could have a exception here is that the user template has an error.
 
-                        Exception userException = ex.InnerException;
+                        var userException = ex.InnerException;
 
                         var stackTrace = new StackTrace( ex.InnerException, true );
 

@@ -5,7 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.RunTimeMethod
+namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ThisObject
 {
     [CompileTime]
     class Aspect

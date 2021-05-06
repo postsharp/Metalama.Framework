@@ -18,7 +18,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -167,7 +166,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             foreach ( var map in maps )
             {
-                string filePath = Path.Combine( outputDirectory, Path.ChangeExtension( map.TargetPath, ".map" ) );
+                var filePath = Path.Combine( outputDirectory, Path.ChangeExtension( map.TargetPath, ".map" ) );
 
                 using ( var writer = File.Create( filePath ) )
                 {
@@ -192,7 +191,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !string.IsNullOrWhiteSpace( buildOptions.CompileTimeProjectDirectory ) )
                 {
-                    using Mutex mutex = MutexHelper.CreateGlobalMutex( outputPaths.Directory );
+                    using var mutex = MutexHelper.CreateGlobalMutex( outputPaths.Directory );
                     mutex.WaitOne();
 
                     try
@@ -421,7 +420,7 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // The project exists in the cache.
 
-                CompileTimeProjectManifest manifest = CompileTimeProjectManifest.Deserialize( File.OpenRead( outputPaths.Manifest ) );
+                var manifest = CompileTimeProjectManifest.Deserialize( File.OpenRead( outputPaths.Manifest ) );
 
                 project = CompileTimeProject.Create(
                     this._domain,
