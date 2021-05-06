@@ -30,6 +30,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
             using var writer = File.CreateText( targetFile );
 
+            writer.WriteLine( "#pragma warning disable CS8669 // Nullability" );
             writer.WriteLine( "using System;" );
             writer.WriteLine( "using System.Linq;" );
             writer.WriteLine( "using System.Collections.Generic;" );

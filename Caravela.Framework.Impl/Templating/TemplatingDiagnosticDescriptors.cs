@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
@@ -27,15 +28,7 @@ namespace Caravela.Framework.Impl.Templating
             = new(
                 "CR0101",
                 "The C# language feature is not supported.",
-                "The {0} language feature is not supported by the template compiler .",
-                _category,
-                DiagnosticSeverity.Error );
-
-        internal static readonly StrongDiagnosticDescriptor<string> LocalVariableAmbiguousCoercion
-            = new(
-                "CR0103",
-                "The local variable is both coerced to be run-time and compile-time",
-                "The local variable '{0}' is both coerced to be run-time and compile-time.",
+                "'{0}' is not supported in a template.",
                 _category,
                 DiagnosticSeverity.Error );
 
@@ -72,5 +65,38 @@ namespace Caravela.Framework.Impl.Templating
                 "The expression '{0}' of type '{1}' cannot be compiled into compile-time code because it is of an unsupported type.",
                 _category,
                 DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<string> CannotSetCompileTimeVariableInRunTimeConditionalBlock
+            = new(
+                "CR0108",
+                "Cannot set a compile-time variable in a block whose execution depends on a run-time condition",
+                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on a run-time condition.",
+                _category,
+                DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<string> UndeclaredRunTimeIdentifier
+            = new(
+                "CR0109",
+                "The run-time identifier was not declared",
+                "The run-time identifier '{0}' was not defined.",
+                _category,
+                DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<string> CannotHaveCompileTimeLoopInRunTimeConditionalBlock
+            = new(
+                "CR0110",
+                "Cannot have a compile-time loop in a block whose execution depends on a run-time condition",
+                "The compile-time loop '{0}' is not allowed here because it is a part of block whose execution depends on a run-time condition.",
+                _category,
+                DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<(ISymbol TemplateSymbol, ICodeElement TargetDeclaration, string ExceptionType, string Exception)>
+            ExceptionInTemplate
+                = new(
+                    "CR0112",
+                    "An advice threw an exception",
+                    "The advice '{0}' threw '{2}' when applied to '{1}': {3}",
+                    _category,
+                    DiagnosticSeverity.Error );
     }
 }

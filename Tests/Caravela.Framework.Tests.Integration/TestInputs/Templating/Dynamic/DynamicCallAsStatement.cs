@@ -13,8 +13,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
         [TestTemplate]
         dynamic? Template()
         {
+            // Expression statement
             target.Method.Invoke( target.This, 0 );
+            
+            // Assignment
             _ = target.Method.Invoke( target.This, 1 );
+            
             return default;
         }
     }

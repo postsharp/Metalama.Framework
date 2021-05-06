@@ -58,6 +58,7 @@ namespace Caravela.Framework.Aspects
         /// Both instance and static members are made accessible. For instance members,
         /// the <c>this</c> instance is assumed.
         /// </summary>
+        [RunTimeOnly]
         dynamic This { get; }
 
         /*

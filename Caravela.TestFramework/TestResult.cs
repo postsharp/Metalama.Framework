@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -84,6 +85,8 @@ namespace Caravela.TestFramework
         /// </summary>
         public SyntaxNode? TransformedTemplateSyntax { get; internal set; }
 
+        public string? TransformedTemplatePath { get; internal set; }
+
         /// <summary>
         /// Gets the root <see cref="SyntaxNode"/> of the transformed syntax tree of the target code element.
         /// </summary>
@@ -93,6 +96,26 @@ namespace Caravela.TestFramework
         /// Gets the transformed <see cref="SourceText"/> of the target code element.
         /// </summary>
         public SourceText? TransformedTargetSourceText { get; private set; }
+
+        private static string CleanMessage( string text )
+        {
+            // Comment all lines but the first one.
+            var lines = text.Split( '\n' );
+
+            if ( lines.Length == 1 )
+            {
+                return text;
+            }
+
+            lines[0] = lines[0].Trim( '\r' );
+
+            for ( var i = 0; i < lines.Length; i++ )
+            {
+                lines[i] = "// " + lines[i].Trim( '\r' );
+            }
+
+            return string.Join( Environment.NewLine, lines );
+        }
 
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
@@ -117,7 +140,7 @@ namespace Caravela.TestFramework
             var comments =
                 this.Diagnostics
                     .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
-                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{d.GetMessage()}`\n" )
+                    .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )
                     .ToList();
@@ -128,6 +151,7 @@ namespace Caravela.TestFramework
             }
 
             // Format the output code.
+
             var outputNodeWithComments = outputNode.WithLeadingTrivia( outputNode.GetLeadingTrivia().AddRange( comments ) );
             var formattedOutput = Formatter.Format( outputNodeWithComments, this.Project.Solution.Workspace );
 
@@ -140,13 +164,26 @@ namespace Caravela.TestFramework
         /// </summary>
         public bool Success { get; private set; } = true;
 
-        internal void SetFailed( string reason )
+        public Exception? Exception { get; private set; }
+
+        internal void SetFailed( string reason, Exception? exception = null )
         {
+            this.Exception = exception;
             this.Success = false;
             this.ErrorMessage = reason;
 
+            if ( exception != null )
+            {
+                this.ErrorMessage += Environment.NewLine + exception;
+            }
+
+            var emptyStatement =
+                SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+                    .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+
             this.SetTransformedTarget(
-                SyntaxFactory.EmptyStatement().WithLeadingTrivia( SyntaxFactory.Comment( "// Compilation error. Code not generated.\n" ) ) );
+                emptyStatement
+                    .WithLeadingTrivia( SyntaxFactory.Comment( $"// {reason} \n" ) ) );
         }
     }
 }

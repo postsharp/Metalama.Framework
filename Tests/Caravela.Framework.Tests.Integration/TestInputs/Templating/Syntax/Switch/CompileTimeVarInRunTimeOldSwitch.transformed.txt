@@ -1,4 +1,2 @@
-// Compilation error. Code not generated.
-// Error CR0104 on `compileTimeVar += 1`: `The expression 'compileTimeVar += 1' is compile-time but it is expected to be run-time because the expression appears in a case statement.`
-
-;
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0108 on `compileTimeVar`: `Cannot set the compile-time variable 'compileTimeVar' here because it is part of a block whose execution depends on a run-time condition.`

@@ -76,7 +76,13 @@ namespace Caravela.Framework.Impl.Transformations
                     return Enumerable.Empty<IntroducedMember>();
                 }
 
-                var newMethodBody = new TemplateDriver( templateMethod ).ExpandDeclaration( expansionContext );
+                var templateDriver = new TemplateDriver( this.TemplateMethod.GetSymbol(), templateMethod );
+
+                if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
+                {
+                    // Template expansion error.
+                    return Enumerable.Empty<IntroducedMember>();
+                }
 
                 var overrides = new[]
                 {

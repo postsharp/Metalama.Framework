@@ -18,14 +18,14 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly IMethod _targetMethod;
 
-        public TemplateExpansionLexicalScope LexicalScope { get; }
+        public TemplateLexicalScope LexicalScope { get; }
 
         public TemplateExpansionContext(
             object templateInstance,
             IMethod targetMethod,
             ICompilation compilation,
             IProceedImpl proceedImpl,
-            TemplateExpansionLexicalScope lexicalScope,
+            TemplateLexicalScope lexicalScope,
             DiagnosticSink diagnosticSink,
             SyntaxSerializationService syntaxSerializationService,
             ISyntaxFactory syntaxFactory )

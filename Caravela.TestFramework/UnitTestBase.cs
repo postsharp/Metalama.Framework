@@ -112,8 +112,7 @@ namespace Caravela.TestFramework
             var actualTransformedSourceText = NormalizeString( testResult.TransformedTargetSourceText!.ToString() );
 
             // Get expectations.
-            Assert.True( File.Exists( expectedTransformedPath ), $"File {expectedTransformedPath} does not exist." );
-            var expectedNonNormalizedSourceText = await File.ReadAllTextAsync( expectedTransformedPath );
+            var expectedNonNormalizedSourceText = File.Exists( expectedTransformedPath ) ? await File.ReadAllTextAsync( expectedTransformedPath ) : "";
             var expectedTransformedSourceText = NormalizeString( expectedNonNormalizedSourceText );
 
             // Update the file in obj/transformed if it is different.

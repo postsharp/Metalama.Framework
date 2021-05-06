@@ -9,31 +9,37 @@ namespace Caravela.Framework.Impl.Templating
     {
         private class ScopeContext
         {
-            public SymbolDeclarationScope CurrentScope { get; private set; }
+            private readonly SymbolDeclarationScope _forcedScope;
+
+            public static ScopeContext Default => new( SymbolDeclarationScope.Both, false, SymbolDeclarationScope.Both, null );
+
+            public SymbolDeclarationScope CurrentBreakOrContinueScope { get; }
 
             /// <summary>
             /// Gets a value indicating whether the current expression is obliged to be compile-time-only.
             /// </summary>
-            public bool ForceCompileTimeOnlyExpression { get; private set; }
+            public bool ForceCompileTimeOnlyExpression => this._forcedScope == SymbolDeclarationScope.CompileTimeOnly;
+
+            public bool PreferRunTimeExpression => this._forcedScope == SymbolDeclarationScope.RunTimeOnly;
 
             /// <summary>
             /// Gets a value indicating whether the current node is guarded by a conditional statement where the condition is a runtime-only
             /// expression.
             /// </summary>
-            public bool IsRuntimeConditionalBlock { get; private set; }
+            public bool IsRuntimeConditionalBlock { get; }
 
-            public string? ForceCompileTimeOnlyExpressionReason { get; private set; }
+            public string? ForcedScopeReason { get; }
 
-            private ScopeContext(
-                SymbolDeclarationScope currentScope,
+            public ScopeContext(
+                SymbolDeclarationScope currentBreakOrContinueScope,
                 bool isRuntimeConditionalBlock,
-                bool forceCompileTimeOnlyExpression,
-                string? forceCompileTimeOnlyExpressionReason )
+                SymbolDeclarationScope forcedScope,
+                string? forcedScopeReason )
             {
-                this.CurrentScope = currentScope;
+                this.CurrentBreakOrContinueScope = currentBreakOrContinueScope;
                 this.IsRuntimeConditionalBlock = isRuntimeConditionalBlock;
-                this.ForceCompileTimeOnlyExpression = forceCompileTimeOnlyExpression;
-                this.ForceCompileTimeOnlyExpressionReason = forceCompileTimeOnlyExpressionReason;
+                this._forcedScope = forcedScope;
+                this.ForcedScopeReason = forcedScopeReason;
             }
 
             /// <summary>
@@ -41,29 +47,29 @@ namespace Caravela.Framework.Impl.Templating
             /// compile-time.
             /// </summary>
             /// <returns>A cookie to dispose at the end.</returns>
-            public static ScopeContext CreateForceCompileTimeExpression( string reason )
-            {
-                return new( SymbolDeclarationScope.CompileTimeOnly, false, true, reason );
-            }
+            public static ScopeContext CreateForcedCompileTimeScope( ScopeContext parentScope, string reason )
+                => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, SymbolDeclarationScope.CompileTimeOnly, reason );
+
+            public static ScopeContext CreateForcedRunTimeScope( ScopeContext parentScope, string reason )
+                => new( parentScope.CurrentBreakOrContinueScope, parentScope.IsRuntimeConditionalBlock, SymbolDeclarationScope.RunTimeOnly, reason );
 
             /// <summary>
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
             /// Local variables modified within such branch cannot be compile-time.
             /// </summary>
             /// <returns>A cookie to dispose at the end.</returns>
-            public static ScopeContext CreateRuntimeConditionalBlock()
-            {
-                return new( SymbolDeclarationScope.RunTimeOnly, true, false, null );
-            }
+            public static ScopeContext CreateRuntimeConditionalScope( ScopeContext parentScope )
+                => new(
+                    parentScope.CurrentBreakOrContinueScope,
+                    true,
+                    parentScope._forcedScope,
+                    parentScope.ForcedScopeReason );
 
-            public static ScopeContext CreateHelperScope(
-                SymbolDeclarationScope scope,
-                bool isRuntimeConditionalBlock = false,
-                bool forceCompileTimeOnlyExpression = false,
-                string? forceCompileTimeOnlyExpressionReason = null )
-            {
-                return new( scope, isRuntimeConditionalBlock, forceCompileTimeOnlyExpression, forceCompileTimeOnlyExpressionReason );
-            }
+            public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, SymbolDeclarationScope scope )
+                => new( scope,
+                        scope == SymbolDeclarationScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
+                        parentScope._forcedScope,
+                        parentScope.ForcedScopeReason );
         }
     }
 }

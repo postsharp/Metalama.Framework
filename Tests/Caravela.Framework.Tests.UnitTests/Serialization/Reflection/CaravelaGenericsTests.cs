@@ -21,7 +21,8 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
             var code = "class Target<TKey> { class Nested<TValue> { public System.Collections.Generic.Dictionary<TKey,TValue> Field; } }";
 
             var serialized = this.Serialize(
-                    CompileTimeFieldOrPropertyInfo.Create( (IFieldOrPropertyInvocation) CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
+                    CompileTimeFieldOrPropertyInfo.Create(
+                        (IFieldOrPropertyInvocation) CreateCompilation( code ).DeclaredTypes.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(

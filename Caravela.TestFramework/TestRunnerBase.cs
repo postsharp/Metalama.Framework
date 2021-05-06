@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -47,21 +48,23 @@ namespace Caravela.TestFramework
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
 
-            var result = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
+            var testResult = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
 
             if ( this.ReportInvalidInputCompilation )
             {
                 var diagnostics = initialCompilation.GetDiagnostics();
+                var errors = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToArray();
 
-                if ( diagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                if ( errors.Any() )
                 {
-                    result.SetFailed( "The initial compilation failed." );
+                    testResult.ReportDiagnostics( errors );
+                    testResult.SetFailed( "The initial compilation failed." );
 
-                    return result;
+                    return testResult;
                 }
             }
 
-            return result;
+            return testResult;
         }
 
         protected virtual bool ReportInvalidInputCompilation => true;

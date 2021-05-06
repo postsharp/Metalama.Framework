@@ -1,4 +1,4 @@
 {
-    global::System.Console.WriteLine("System.Object");
+    global::System.Console.WriteLine("x");
     return this.Method(a);
 }

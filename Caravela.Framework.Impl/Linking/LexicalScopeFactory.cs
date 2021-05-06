@@ -13,22 +13,22 @@ namespace Caravela.Framework.Impl.Linking
     internal class LexicalScopeFactory
     {
         private readonly CompilationModel _compilation;
-        private readonly Dictionary<ICodeElement, TemplateExpansionLexicalScope> _scopes;
+        private readonly Dictionary<ICodeElement, TemplateLexicalScope> _scopes;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
             this._compilation = compilation;
-            this._scopes = new Dictionary<ICodeElement, TemplateExpansionLexicalScope>( compilation.InvariantComparer );
+            this._scopes = new Dictionary<ICodeElement, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
-        public TemplateExpansionLexicalScope GetLexicalScope( ICodeElement codeElement )
+        public TemplateLexicalScope GetLexicalScope( ICodeElement codeElement )
         {
             if ( !this._scopes.TryGetValue( codeElement, out var lexicalScope ) )
             {
                 switch ( codeElement )
                 {
                     case CodeElement sourceCodeElement:
-                        this._scopes[sourceCodeElement] = lexicalScope = new TemplateExpansionLexicalScope( sourceCodeElement.LookupSymbols() );
+                        this._scopes[sourceCodeElement] = lexicalScope = new TemplateLexicalScope( sourceCodeElement.LookupSymbols() );
 
                         break;
 
@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
             return lexicalScope;
         }
 
-        public TemplateExpansionLexicalScope GetLexicalScope( IMemberIntroduction introduction )
+        public TemplateLexicalScope GetLexicalScope( IMemberIntroduction introduction )
         {
             // TODO: This will need to be changed for other transformations than methods.
 
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Linking
                             }
 
                             this._scopes[codeElement] = lexicalScope =
-                                new TemplateExpansionLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
+                                new TemplateLexicalScope( semanticModel.LookupSymbols( lookupPosition ) );
                         }
 
                         return lexicalScope;

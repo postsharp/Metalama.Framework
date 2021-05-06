@@ -9,11 +9,13 @@
     }
     catch
     {
-        global::System.Console.WriteLine("exception");
+        global::System.Console.WriteLine("exception 0");
         throw;
     }
     finally
     {
         global::System.Console.WriteLine("finally");
     }
+
+    global::System.Console.WriteLine(0);
 }

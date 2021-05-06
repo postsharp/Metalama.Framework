@@ -40,6 +40,7 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <returns></returns>
         [Proceed]
+        [return: RunTimeOnly]
         public static dynamic proceed() => _proceedImplementation.Value ?? throw NewInvalidOperationException();
 
         /// <summary>
@@ -70,16 +71,21 @@ namespace Caravela.Framework.Aspects
 
 #pragma warning restore IDE1006 // Naming Styles
 
-        internal static void Initialize( ITemplateContextTarget targetImpl, object proceedImpl )
+        internal static IDisposable WithContext( ITemplateContextTarget targetImpl, object proceedImpl )
         {
             _target.Value = targetImpl;
             _proceedImplementation.Value = proceedImpl;
+
+            return new InitializeCookie();
         }
 
-        internal static void Close()
+        private class InitializeCookie : IDisposable
         {
-            _target.Value = null;
-            _proceedImplementation.Value = null;
+            public void Dispose()
+            {
+                _target.Value = null;
+                _proceedImplementation.Value = null;
+            }
         }
     }
 }

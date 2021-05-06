@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
 
@@ -9,8 +10,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.CompileTime
         [TestTemplate]
         dynamic Template()
         {
-            var o = compileTime(new object());
-            Console.WriteLine(o.GetType().ToString());
+            var o = compileTime(new StringBuilder());
+            o.Append("x");
+            Console.WriteLine(o.ToString());
             
             return proceed();
         }

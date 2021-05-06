@@ -4,8 +4,10 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
@@ -21,6 +23,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( _scopeAnnotationKind, "buildTime" );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( _scopeAnnotationKind, "runTime" );
+        private static readonly SyntaxAnnotation _dynamicAnnotation = new( _scopeAnnotationKind, "dynamic" );
         private static readonly SyntaxAnnotation _unknownAnnotation = new( _scopeAnnotationKind, "unknown" );
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
@@ -39,7 +42,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             var annotation = node.GetAnnotations( _scopeAnnotationKind ).SingleOrDefault();
 
-            // no annotation means it is default scope usable for both (runTime or compileTime)
+            // No annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
             {
                 return SymbolDeclarationScope.Both;
@@ -55,6 +58,9 @@ namespace Caravela.Framework.Impl.Templating
 
                 case "unknown":
                     return SymbolDeclarationScope.Unknown;
+
+                case "dynamic":
+                    return SymbolDeclarationScope.Dynamic;
 
                 default:
                     throw new AssertionFailedException();
@@ -118,21 +124,30 @@ namespace Caravela.Framework.Impl.Templating
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
         }
 
-        public static T AddScopeAnnotation<T>( this T node, SymbolDeclarationScope scope )
+        [return: NotNullIfNotNull( "node" )]
+        public static T? AddScopeAnnotation<T>( this T? node, SymbolDeclarationScope scope )
             where T : SyntaxNode
         {
-            // we never annotated as both scope it is default value of node
-            if ( scope == SymbolDeclarationScope.Both )
+            if ( node == null )
             {
-                return node;
+                return null;
             }
 
             var existingScope = node.GetScopeFromAnnotation();
 
             if ( existingScope != SymbolDeclarationScope.Both )
             {
-                Invariant.Assert( existingScope == scope );
+                if ( existingScope != scope )
+                {
+                    throw new AssertionFailedException( $"Cannot change the scope of the {node.Kind()} from {existingScope} to {scope}." );
+                }
 
+                return node;
+            }
+
+            if ( scope == SymbolDeclarationScope.Both )
+            {
+                // There is nothing to do because the default scope is Both.
                 return node;
             }
 
@@ -147,8 +162,11 @@ namespace Caravela.Framework.Impl.Templating
                 case SymbolDeclarationScope.Unknown:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
+                case SymbolDeclarationScope.Dynamic:
+                    return node.WithAdditionalAnnotations( _dynamicAnnotation );
+
                 default:
-                    return node;
+                    throw new AssertionFailedException();
             }
         }
 

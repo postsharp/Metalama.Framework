@@ -43,5 +43,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public static LiteralExpressionSyntax LiteralExpression( char c )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal( c ) );
+
+        public static StatementSyntax EmptyStatement
+            => SyntaxFactory.ExpressionStatement( SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) ) )
+                .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
     }
 }

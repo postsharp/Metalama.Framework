@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using PostSharp;
 using RoslynPad.Editor;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -146,6 +147,14 @@ namespace Caravela.AspectWorkbench.Views
             this._viewModel.ExpectedOutputText = new TextRange(
                 this._viewModel.TransformedTargetDocument.ContentStart,
                 this._viewModel.TransformedTargetDocument.ContentEnd ).Text;
+        }
+
+        private void CompiledTemplateHyperlink_OnClick( object sender, RoutedEventArgs e )
+        {
+            if ( this._viewModel.CompiledTemplatePath != null )
+            {
+                _ = Process.Start( new ProcessStartInfo( this._viewModel.CompiledTemplatePath ) { UseShellExecute = true } );
+            }
         }
     }
 }

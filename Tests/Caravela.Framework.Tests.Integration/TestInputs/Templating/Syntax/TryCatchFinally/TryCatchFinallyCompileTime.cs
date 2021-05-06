@@ -1,3 +1,4 @@
+using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
@@ -17,11 +18,12 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
             }
             catch
             {
-                n = 3;
+                Console.WriteLine(target.Parameters.Count);
+                
             }
             finally
             {
-                n = 4;
+                Console.WriteLine(target.Parameters.Count);
             }
 
             //target.Parameters[0].Value = n;

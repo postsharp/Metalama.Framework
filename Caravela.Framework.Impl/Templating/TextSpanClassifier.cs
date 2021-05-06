@@ -153,7 +153,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( this._isInTemplate )
             {
-                if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                if ( node.GetScopeFromAnnotation().DynamicToCompileTimeOnly() == SymbolDeclarationScope.CompileTimeOnly )
                 {
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );

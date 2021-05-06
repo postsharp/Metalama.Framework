@@ -320,7 +320,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     AspectTypes = compileTimeCompilation.Assembly
                         .GetTypes()
                         .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
-                        .Select( t => t.GetReflectionName() )
+                        .Select( t => t.GetReflectionNameSafe() )
                         .ToList(),
                     Hash = hash
                 };

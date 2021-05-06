@@ -17,7 +17,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
                 while (j < 2)
                 {
                     i++;
-                    j++;
+// The following line is not allowed because                    
+//                    j++;
                 }
             }
 

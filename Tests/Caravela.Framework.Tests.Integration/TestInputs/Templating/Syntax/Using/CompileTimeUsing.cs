@@ -1,3 +1,5 @@
+#pragma warning disable CS0162
+
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
@@ -21,6 +23,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.CompileTi
             using ( new DisposableClass() )
             {
                 return proceed();
+            }
+            
+            using ( DisposableClass c = null )
+            {
             }
         }
     }

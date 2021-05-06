@@ -55,6 +55,27 @@ namespace Caravela.Framework.Impl.Templating
             return rewriter.Visit( root )!;
         }
 
+        private SyntaxNodeOrToken AddLocationAnnotation( SyntaxNodeOrToken node )
+        {
+            var location = node.GetLocation();
+
+            if ( location != null )
+            {
+                if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
+                {
+                    index = this._locationToIndexMap.Count;
+                    this._indexToLocationMap.Add( location );
+                    this._locationToIndexMap.Add( location, index );
+                }
+
+                node = node.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
+            }
+
+            return node;
+        }
+
+        private SyntaxToken GetAnnotatedToken( SyntaxToken originalToken ) => this.AddLocationAnnotation( originalToken ).AsToken();
+
         /// <summary>
         /// Get the annotated node for an original node.
         /// </summary>
@@ -73,19 +94,7 @@ namespace Caravela.Framework.Impl.Templating
             var annotatedNode = transformedNode;
 
             // Cache location.
-            var location = originalNode.GetLocation();
-
-            if ( location != null )
-            {
-                if ( !this._locationToIndexMap.TryGetValue( location, out var index ) )
-                {
-                    index = this._locationToIndexMap.Count;
-                    this._indexToLocationMap.Add( location );
-                    this._locationToIndexMap.Add( location, index );
-                }
-
-                annotatedNode = annotatedNode.WithAdditionalAnnotations( new SyntaxAnnotation( _locationAnnotationKind, index.ToString() ) );
-            }
+            annotatedNode = this.AddLocationAnnotation( annotatedNode ).AsNode()!;
 
             // Get info from the semantic mode.
             var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
@@ -137,7 +146,7 @@ namespace Caravela.Framework.Impl.Templating
             return annotatedNode;
         }
 
-        public Location? GetLocation( SyntaxNode node )
+        public Location? GetLocation( SyntaxNodeOrToken node )
         {
             var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
 
@@ -268,6 +277,11 @@ namespace Caravela.Framework.Impl.Templating
             {
                 this._semanticModel = semanticModel;
                 this._map = map;
+            }
+
+            public override SyntaxToken VisitToken( SyntaxToken token )
+            {
+                return this._map.GetAnnotatedToken( token );
             }
 
             public override SyntaxNode? Visit( SyntaxNode? node )

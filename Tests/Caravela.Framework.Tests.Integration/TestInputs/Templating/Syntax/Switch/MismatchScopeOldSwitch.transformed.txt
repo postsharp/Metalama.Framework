@@ -1,5 +1,5 @@
-// Compilation error. Code not generated.
-// Error CR0104 on `case (int)SwitchEnum.two:`: `The expression 'case (int)SwitchEnum.two:' is run-time but it is expected to be compile-time because the expression appears in a case.`
-// Error CR0104 on `case (int)SwitchEnum.one:`: `The expression 'case (int)SwitchEnum.one:' is run-time but it is expected to be compile-time because the expression appears in a case.`
-
-;
+// TestTemplateCompiler.TryCompile failed. 
+// Error CR0104 on `two`: `The expression 'two' is run-time but it is expected to be compile-time because the expression appears in the 'case' is a part of a compile-time 'switch'.`
+// Error CR0104 on `SwitchEnum`: `The expression 'SwitchEnum' is run-time but it is expected to be compile-time because the expression appears in the 'case' is a part of a compile-time 'switch'.`
+// Error CR0104 on `SwitchEnum`: `The expression 'SwitchEnum' is run-time but it is expected to be compile-time because the expression appears in the 'case' is a part of a compile-time 'switch'.`
+// Error CR0104 on `one`: `The expression 'one' is run-time but it is expected to be compile-time because the expression appears in the 'case' is a part of a compile-time 'switch'.`

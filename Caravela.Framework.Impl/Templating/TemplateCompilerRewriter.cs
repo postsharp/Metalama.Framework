@@ -105,31 +105,26 @@ namespace Caravela.Framework.Impl.Templating
         /// adds this code to the list of statements of the current <see cref="MetaContext"/>, and returns the identifier of
         /// the compiled template that contains the run-time symbol name.
         /// </summary>
-        /// <param name="buildTimeIdentifier">The name of the identifier in the source template, used as a hint to generate a run-time identifier.</param>
+        /// <param name="symbol">The symbol in the source template.</param>
         /// <returns>The identifier of the compiled template that contains the run-time symbol name.</returns>
-        private IdentifierNameSyntax ReserveRunTimeSymbolName( SyntaxToken buildTimeIdentifier )
+        private IdentifierNameSyntax ReserveRunTimeSymbolName( ISymbol symbol )
         {
-            if ( buildTimeIdentifier.IsMissing )
-            {
-                throw new AssertionFailedException();
-            }
+            var metaVariableIdentifier = this._currentMetaContext!.GetTemplateVariableName( symbol );
 
-            var metaVariableName = "__" + buildTimeIdentifier.Text;
-
-            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( buildTimeIdentifier.Text );
+            var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( symbol.Name );
 
             var localDeclaration =
                 LocalDeclarationStatement(
                         VariableDeclaration( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) )
                             .WithVariables(
                                 SingletonSeparatedList(
-                                    VariableDeclarator( Identifier( metaVariableName ) )
+                                    VariableDeclarator( metaVariableIdentifier )
                                         .WithInitializer( EqualsValueClause( callGetUniqueIdentifier ) ) ) ) )
                     .NormalizeWhitespace();
 
             this._currentMetaContext!.Statements.Add( localDeclaration );
 
-            return IdentifierName( metaVariableName );
+            return IdentifierName( metaVariableIdentifier );
         }
 
         /// <summary>
@@ -141,7 +136,7 @@ namespace Caravela.Framework.Impl.Templating
         /// <returns></returns>
         protected override TransformationKind GetTransformationKind( SyntaxNode node )
         {
-            if ( node.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+            if ( !node.GetScopeFromAnnotation().MustBeTransformed() )
             {
                 return TransformationKind.None;
             }
@@ -152,7 +147,7 @@ namespace Caravela.Framework.Impl.Templating
                   parent != null;
                   parent = parent.Parent )
             {
-                if ( parent.GetScopeFromAnnotation() == SymbolDeclarationScope.CompileTimeOnly )
+                if ( !parent.GetScopeFromAnnotation().MustBeTransformed() )
                 {
                     return parent is IfStatementSyntax || parent is ForEachStatementSyntax || parent is ElseClauseSyntax || parent is WhileStatementSyntax
                            || parent is SwitchSectionSyntax
@@ -265,10 +260,10 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
                 {
-                    if ( !this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out _ ) )
+                    if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out _ ) )
                     {
-                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( token ).Identifier;
-                        this._currentMetaContext.AddGeneratedSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
+                        var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
+                        this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
 
                         return IdentifierName( declaredSymbolNameLocal.Text );
                     }
@@ -333,7 +328,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
             {
-                if ( this._currentMetaContext!.TryGetGeneratedSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
+                if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     return this.MetaSyntaxFactory.IdentifierName1( IdentifierName( declaredSymbolNameLocal.Text ) );
                 }
@@ -343,6 +338,11 @@ namespace Caravela.Framework.Impl.Templating
                     // Identifier definitions should be processed by Transform(SyntaxToken).
 
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
+                            this._semanticAnnotationMap.GetLocation( node ),
+                            node.Identifier.Text ) );
+
                     this.Success = false;
                 }
             }
@@ -355,7 +355,8 @@ namespace Caravela.Framework.Impl.Templating
             // The base implementation is very verbose, so we use this one:
             if ( node.RefKindKeyword.Kind() == SyntaxKind.None )
             {
-                var transformedArgument = this.MetaSyntaxFactory.Argument( this.Transform( node.Expression ) );
+                var transformedExpression = this.Transform( node.Expression )!;
+                var transformedArgument = this.MetaSyntaxFactory.Argument( transformedExpression );
 
                 if ( node.NameColon != null )
                 {
@@ -378,14 +379,16 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        /// <summary>
-        /// Transforms an <see cref="ExpressionSyntax"/>, especially taking care of handling
-        /// transitions between compile-time expressions and run-time expressions. At these transitions,
-        /// compile-time expressions must be wrapped into literals.
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns></returns>
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression )
+        {
+            return this.CreateRunTimeExpression( expression );
+        }
+
+        /// <summary>
+        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
+        /// that represents the input.
+        /// </summary>
+        private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
         {
             switch ( expression.Kind() )
             {
@@ -404,12 +407,27 @@ namespace Caravela.Framework.Impl.Templating
                     // Don't transform default or null.
                     // When we do that, we can try to cast a dynamic 'default' or 'null' into a SyntaxFactory.
                     return expression;
+
+                case SyntaxKind.IdentifierName:
+                    {
+                        var identifierName = (IdentifierNameSyntax) expression;
+
+                        if ( identifierName.IsVar )
+                        {
+                            return this.TransformIdentifierName( (IdentifierNameSyntax) expression );
+                        }
+
+                        break;
+                    }
+
+                case SyntaxKind.SimpleLambdaExpression:
+                    break;
             }
 
             var type = this._semanticAnnotationMap.GetExpressionType( expression )!;
 
             // A local function that wraps the input `expression` into a LiteralExpression.
-            ExpressionSyntax CreateLiteralExpressionFactory( SyntaxKind syntaxKind )
+            ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
             {
                 // new RuntimeExpression(LiteralExpression(syntaxKind, Literal(expression)), type)
                 return ObjectCreationExpression( this.MetaSyntaxFactory.Type( typeof(RuntimeExpression) ) )
@@ -424,9 +442,7 @@ namespace Caravela.Framework.Impl.Templating
             if ( type is IErrorTypeSymbol )
             {
                 // There is a compile-time error. Return default.
-                return LiteralExpression(
-                    SyntaxKind.DefaultLiteralExpression,
-                    Token( SyntaxKind.DefaultKeyword ) );
+                return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
             switch ( type.Name )
@@ -439,7 +455,7 @@ namespace Caravela.Framework.Impl.Templating
                                 this._semanticAnnotationMap.GetLocation( expression ),
                                 "" ) );
 
-                        return LiteralExpression( SyntaxKind.NullLiteralExpression );
+                        return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
 
                     return InvocationExpression(
@@ -449,7 +465,7 @@ namespace Caravela.Framework.Impl.Templating
                             IdentifierName( nameof(IDynamicMember.CreateExpression) ) ) );
 
                 case "String":
-                    return CreateLiteralExpressionFactory( SyntaxKind.StringLiteralExpression );
+                    return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
 
                 case "Int32":
                 case "Int16":
@@ -461,10 +477,10 @@ namespace Caravela.Framework.Impl.Templating
                 case "SByte":
                 case nameof(Single):
                 case nameof(Double):
-                    return CreateLiteralExpressionFactory( SyntaxKind.NumericLiteralExpression );
+                    return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.NumericLiteralExpression );
 
                 case nameof(Char):
-                    return CreateLiteralExpressionFactory( SyntaxKind.CharacterLiteralExpression );
+                    return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
                 case nameof(Boolean):
                     // new RuntimeExpression(LiteralExpression(BooleanKeyword(expression)), "System.Boolean")
@@ -492,7 +508,7 @@ namespace Caravela.Framework.Impl.Templating
                     }
                     else
                     {
-                        // We don't have a valid tree, but let the compilation continue.
+                        // We don't have a valid tree, but let the compilation continue. The call to IsSerializable wrote a diagnostic.
                         return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
             }
@@ -535,7 +551,7 @@ namespace Caravela.Framework.Impl.Templating
             // In the default implementation, such case would result in an exception.
 
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform
-                 || this._templateMemberClassifier.ReturnsRunTimeOnlyValue( node.Expression ) )
+                 || this._templateMemberClassifier.IsDynamicType( node.Expression ) )
             {
                 return this.TransformExpressionStatement( node );
             }
@@ -559,20 +575,20 @@ namespace Caravela.Framework.Impl.Templating
 
         public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
         {
-            bool ArgumentIsDynamic( ArgumentSyntax argument )
-                => this._semanticAnnotationMap.GetParameterSymbol( argument )?.Type is IDynamicTypeSymbol or IArrayTypeSymbol
-                    { ElementType: IDynamicTypeSymbol };
-
             var transformationKind = this.GetTransformationKind( node );
 
-            if ( transformationKind != TransformationKind.Transform && node.ArgumentList.Arguments.Any( ArgumentIsDynamic ) )
+            if ( transformationKind != TransformationKind.Transform &&
+                 node.ArgumentList.Arguments.Any( a => this._templateMemberClassifier.IsDynamicParameter( a ) ) )
             {
+                var transformedArguments = node.ArgumentList.Arguments.Select(
+                        a => this._templateMemberClassifier.IsDynamicParameter( a )
+                            ? Argument( this.CreateRunTimeExpression( a.Expression ) )
+                            : this.Visit( a )! )
+                    .ToArray();
+
                 return node.Update(
                     (ExpressionSyntax) this.Visit( node.Expression )!,
-                    ArgumentList(
-                        SeparatedList(
-                            node.ArgumentList.Arguments.Select(
-                                a => ArgumentIsDynamic( a ) ? Argument( this.TransformExpression( a.Expression ) ) : this.Visit( a )! ) )! ) );
+                    ArgumentList( SeparatedList( transformedArguments )! ) );
             }
 
             if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
@@ -585,7 +601,7 @@ namespace Caravela.Framework.Impl.Templating
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
                 // Replace `runtime(x)` to `x`.
-                return this.TransformExpression( node.ArgumentList.Arguments[0].Expression );
+                return this.CreateRunTimeExpression( node.ArgumentList.Arguments[0].Expression );
             }
             else if ( this.TryGetPragma( node.Expression, out var pragmaKind ) )
             {
@@ -620,21 +636,25 @@ namespace Caravela.Framework.Impl.Templating
 
                 if ( symbol is IMethodSymbol { IsExtensionMethod: true } method )
                 {
+                    var receiver = ((MemberAccessExpressionSyntax) node.Expression).Expression;
+
                     List<ArgumentSyntax> arguments = new( node.ArgumentList.Arguments.Count + 1 )
                     {
-                        Argument( ((MemberAccessExpressionSyntax) node.Expression).Expression )
-                            .WithTemplateAnnotationsFrom( node )
+                        Argument( receiver ).WithTemplateAnnotationsFrom( receiver )
                     };
 
                     arguments.AddRange( node.ArgumentList.Arguments );
 
-                    var result = this.Transform(
-                        InvocationExpression(
+                    var replacementNode = InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 this.MetaSyntaxFactory.Type( method.ContainingType ),
                                 IdentifierName( method.Name ) ),
-                            ArgumentList( SeparatedList( arguments ) ) ) );
+                            ArgumentList( SeparatedList( arguments ) ) )
+                        .WithSymbolAnnotationsFrom( node )
+                        .WithTemplateAnnotationsFrom( node );
+
+                    var result = this.VisitInvocationExpression( replacementNode );
 
                     return result;
                 }
@@ -893,26 +913,72 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
+        protected override ExpressionSyntax TransformInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
         {
-            if ( node.Expression.GetScopeFromAnnotation() != SymbolDeclarationScope.CompileTimeOnly &&
-                 this._semanticAnnotationMap.GetExpressionType( node.Expression )!.Kind != SymbolKind.DynamicType )
-            {
-                var token = this.MetaSyntaxFactory.Token(
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
-                    this.Transform( SyntaxKind.InterpolatedStringTextToken ),
-                    node.Expression,
-                    node.Expression,
-                    LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
+            List<ExpressionSyntax> transformedContents = new( node.Contents.Count );
 
-                return this.DeepIndent( this.MetaSyntaxFactory.InterpolatedStringText( token ) );
-            }
-            else
+            foreach ( var content in node.Contents )
             {
-                var transformedInterpolation = base.VisitInterpolation( node );
+                switch ( content )
+                {
+                    case InterpolatedStringTextSyntax text:
+                        transformedContents.Add( this.TransformInterpolatedStringText( text ) );
 
-                return transformedInterpolation;
+                        break;
+
+                    case InterpolationSyntax interpolation:
+                        if ( this.GetTransformationKind( interpolation ) == TransformationKind.None )
+                        {
+                            // We have a compile-time interpolation (e.g. formatting string argument).
+                            // We can evaluate it at compile time and add it as a text content.
+
+                            var compileTimeInterpolatedString =
+                                InterpolatedStringExpression(
+                                    Token( SyntaxKind.InterpolatedStringStartToken ),
+                                    SingletonList<InterpolatedStringContentSyntax>( interpolation ),
+                                    Token( SyntaxKind.InterpolatedStringEndToken ) );
+
+                            var token = this.MetaSyntaxFactory.Token(
+                                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                                this.Transform( SyntaxKind.InterpolatedStringTextToken ),
+                                compileTimeInterpolatedString,
+                                compileTimeInterpolatedString,
+                                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
+
+                            transformedContents.Add( this.MetaSyntaxFactory.InterpolatedStringText( token ) );
+                        }
+                        else
+                        {
+                            transformedContents.Add( this.TransformInterpolation( interpolation ) );
+                        }
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
+
+            this.Indent();
+
+            var result = InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(InterpolatedStringExpression) ) )
+                .WithArgumentList(
+                    ArgumentList(
+                        SeparatedList<ArgumentSyntax>(
+                            new SyntaxNodeOrToken[]
+                            {
+                                Argument( this.Transform( node.StringStartToken ) ).WithLeadingTrivia( this.GetIndentation() ),
+                                Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
+                                Argument( this.MetaSyntaxFactory.List<InterpolatedStringContentSyntax>( transformedContents ) )
+                                    .WithLeadingTrivia( this.GetIndentation() ),
+                                Token( SyntaxKind.CommaToken ).WithTrailingTrivia( GetLineBreak() ),
+                                Argument( this.Transform( node.StringEndToken ) ).WithLeadingTrivia( this.GetIndentation() )
+                            } ) ) )
+                .NormalizeWhitespace();
+
+            this.Unindent();
+
+            return result;
         }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )

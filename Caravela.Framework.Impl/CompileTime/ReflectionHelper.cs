@@ -14,16 +14,24 @@ namespace Caravela.Framework.Impl.CompileTime
 
         public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName ) => new( assemblyName.Name, assemblyName.Version );
 
-        public static string GetReflectionName( this ISymbol? s )
+        public static string GetReflectionNameSafe( this ISymbol? s )
+            => GetReflectionName( s ) ?? throw new ArgumentOutOfRangeException( $"Cannot get a reflection name for {s}." );
+
+        public static string? GetReflectionName( this ISymbol? s )
         {
             if ( s == null || IsRootNamespace( s ) )
             {
                 return string.Empty;
             }
 
+            if ( s is IErrorTypeSymbol )
+            {
+                throw new ArgumentOutOfRangeException( nameof(s), "Cannot get the name of an error symbol." );
+            }
+
             var sb = new StringBuilder();
 
-            void Format( ISymbol symbol )
+            bool TryFormat( ISymbol symbol )
             {
                 switch ( symbol.ContainingSymbol )
                 {
@@ -31,7 +39,11 @@ namespace Caravela.Framework.Impl.CompileTime
                         break;
 
                     case ITypeSymbol typeSymbol:
-                        Format( typeSymbol );
+                        if ( !TryFormat( typeSymbol ) )
+                        {
+                            return false;
+                        }
+
                         sb.Append( '+' );
 
                         break;
@@ -39,7 +51,11 @@ namespace Caravela.Framework.Impl.CompileTime
                     case INamespaceSymbol namespaceSymbol:
                         if ( !namespaceSymbol.IsGlobalNamespace )
                         {
-                            Format( namespaceSymbol );
+                            if ( !TryFormat( namespaceSymbol ) )
+                            {
+                                return false;
+                            }
+
                             sb.Append( '.' );
                         }
 
@@ -58,18 +74,30 @@ namespace Caravela.Framework.Impl.CompileTime
                     switch ( symbol )
                     {
                         case IArrayTypeSymbol arrayTypeSymbol:
-                            Format( arrayTypeSymbol.ElementType );
+                            if ( !TryFormat( arrayTypeSymbol.ElementType ) )
+                            {
+                                return false;
+                            }
+
                             sb.Append( "[]" );
 
                             break;
+
+                        case ITypeSymbol type when type.IsAnonymousType:
+                            return false;
 
                         default:
                             throw new NotImplementedException( $"Don't know how to get the reflection name of '{symbol}'." );
                     }
                 }
+
+                return true;
             }
 
-            Format( s );
+            if ( !TryFormat( s ) )
+            {
+                return null;
+            }
 
             return sb.ToString();
         }

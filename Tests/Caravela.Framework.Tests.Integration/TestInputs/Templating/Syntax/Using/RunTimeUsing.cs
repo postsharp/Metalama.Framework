@@ -1,3 +1,6 @@
+#pragma warning disable CS0162
+
+using System;
 using System.IO;
 using Caravela.TestFramework;
 using static Caravela.Framework.Aspects.TemplateContext;
@@ -11,7 +14,14 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUs
         {
             using (new MemoryStream())
             {
+                var x = compileTime(0);
+                var y = target.Parameters[0].Value + x;
                 return proceed();
+            }
+            
+            using ( MemoryStream s = new MemoryStream() )
+            {
+              Console.WriteLine("");
             }
         }
     }

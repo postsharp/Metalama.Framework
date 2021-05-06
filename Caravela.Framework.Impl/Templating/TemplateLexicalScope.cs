@@ -7,11 +7,11 @@ using System.Linq;
 
 namespace Caravela.Framework.Impl.Templating
 {
-    internal class TemplateExpansionLexicalScope
+    internal class TemplateLexicalScope
     {
         private readonly HashSet<string> _symbols;
 
-        public TemplateExpansionLexicalScope( IEnumerable<ISymbol> symbols )
+        public TemplateLexicalScope( IEnumerable<ISymbol> symbols )
         {
             this._symbols = new HashSet<string>( symbols.Select( x => x.Name ) );
         }
