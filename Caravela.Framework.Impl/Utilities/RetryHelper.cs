@@ -6,19 +6,31 @@ using System.Threading;
 
 namespace Caravela.Framework.Impl.Utilities
 {
-    internal static class RetryHelper
+    public static class RetryHelper
     {
-        public static void Retry( Action action, Predicate<Exception> retryPredicate )
+        public static void Retry( Action action, Predicate<Exception>? retryPredicate = null )
+            => Retry(
+                () =>
+                {
+                    action();
+
+                    return true;
+                },
+                retryPredicate );
+
+        public static T Retry<T>( Func<T> action, Predicate<Exception>? retryPredicate = null )
         {
             var delay = 10.0;
+            const int maxAttempts = 12;
+            retryPredicate ??= e => e is UnauthorizedAccessException || (uint) e.HResult == 0x80070020;
 
-            for ( var i = 0; i < 8; i++ )
+            for ( var i = 0; /* nothing */; i++ )
             {
                 try
                 {
-                    action();
+                    return action();
                 }
-                catch ( Exception e ) when ( retryPredicate( e ) )
+                catch ( Exception e ) when ( i < maxAttempts && retryPredicate( e ) )
                 {
                     Thread.Sleep( TimeSpan.FromMilliseconds( delay ) );
                     delay *= 1.2;

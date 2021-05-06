@@ -56,7 +56,9 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var compilation = CreateRoslynCompilation( code );
 
-            DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
+            using var buildOptions = new TestBuildOptions();
+            using var domain = new UnloadableCompileTimeDomain();
+            DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 
@@ -79,7 +81,9 @@ namespace Caravela.Framework.Tests.UnitTests
 
             var compilation = CreateRoslynCompilation( code );
 
-            DesignTimeAspectPipeline pipeline = new( new TestBuildOptions() );
+            using var buildOptions = new TestBuildOptions();
+            using var domain = new UnloadableCompileTimeDomain();
+            DesignTimeAspectPipeline pipeline = new( buildOptions, domain );
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             pipeline.Execute( PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 

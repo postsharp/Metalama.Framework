@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -21,15 +22,14 @@ namespace Caravela.Framework.Impl.Templating
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "flatten" );
 
-        [ThreadStatic]
-        private static TemplateExpansionContext? _expansionContext;
+        private static readonly AsyncLocal<TemplateExpansionContext?> _expansionContext = new();
 
-        internal static TemplateExpansionContext ExpansionContext
-            => _expansionContext ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
+        private static TemplateExpansionContext ExpansionContext
+            => _expansionContext.Value ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
         internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
         {
-            _expansionContext = expansionContext;
+            _expansionContext.Value = expansionContext;
 
             return new InitializeCookie();
         }
@@ -136,7 +136,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             public void Dispose()
             {
-                _expansionContext = null;
+                _expansionContext.Value = null;
             }
         }
     }

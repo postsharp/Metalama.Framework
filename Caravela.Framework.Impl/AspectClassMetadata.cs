@@ -6,12 +6,15 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -20,6 +23,8 @@ namespace Caravela.Framework.Impl
     /// </summary>
     internal class AspectClassMetadata : IAspectClassMetadata
     {
+        private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+
         private readonly IAspectDriver? _aspectDriver;
         private IReadOnlyList<AspectLayer>? _layers;
 
@@ -56,7 +61,11 @@ namespace Caravela.Framework.Impl
         /// </summary>
         /// <param name="aspectTypeSymbol"></param>
         /// <param name="aspectDriver">Can be null for testing.</param>
-        private AspectClassMetadata( INamedTypeSymbol aspectTypeSymbol, AspectClassMetadata? baseClass, IAspectDriver? aspectDriver, CompileTimeProject project )
+        private AspectClassMetadata(
+            INamedTypeSymbol aspectTypeSymbol,
+            AspectClassMetadata? baseClass,
+            IAspectDriver? aspectDriver,
+            CompileTimeProject project )
         {
             this.FullName = aspectTypeSymbol.GetReflectionNameSafe();
             this.DisplayName = aspectTypeSymbol.Name;
@@ -124,6 +133,42 @@ namespace Caravela.Framework.Impl
             aspectClassMetadata = newAspectType;
 
             return true;
+        }
+
+        public TemplateDriver GetTemplateDriver( ICodeElement sourceTemplate )
+        {
+            var id = sourceTemplate.GetSymbol().AssertNotNull().GetDocumentationCommentId()!;
+
+            if ( this._templateDrivers.TryGetValue( id, out var templateDriver ) )
+            {
+                return templateDriver;
+            }
+
+            var aspectType = this.Project.GetType( this.FullName ).AssertNotNull();
+
+            MethodInfo? compiledTemplateMethodInfo;
+
+            switch ( sourceTemplate )
+            {
+                case IMethod method:
+                    var methodName = method.Name + TemplateCompiler.TemplateMethodSuffix;
+                    compiledTemplateMethodInfo = aspectType.GetMethod( methodName );
+
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+            if ( compiledTemplateMethodInfo == null )
+            {
+                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
+            }
+
+            templateDriver = new TemplateDriver( this, sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
+            this._templateDrivers.Add( id, templateDriver );
+
+            return templateDriver;
         }
     }
 }

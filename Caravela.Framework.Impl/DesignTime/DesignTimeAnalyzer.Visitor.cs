@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
+using Caravela.Framework.Impl.Pipeline;
 using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -88,7 +89,8 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 if ( methodSymbol != null && this._classifier.IsTemplate( methodSymbol ) )
                 {
-                    _ = TemplateCompiler.TryAnnotate( node, this._context.SemanticModel, this, out _ );
+                    TemplateCompiler templateCompiler = new( ServiceProvider.Empty );
+                    _ = templateCompiler.TryAnnotate( node, this._context.SemanticModel, this, out _ );
                 }
                 else
                 {

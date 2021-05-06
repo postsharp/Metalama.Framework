@@ -66,8 +66,8 @@ namespace Caravela.Framework.Impl.Transformations
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
                     (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
 
-                var templateDriver = this.Advice.Aspect.GetTemplateDriver( this.TemplateMethod );
-             
+                var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
+
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
                 {
                     // Template expansion error.

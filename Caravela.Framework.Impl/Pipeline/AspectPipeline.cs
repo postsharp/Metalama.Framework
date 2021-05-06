@@ -25,14 +25,15 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public IBuildOptions BuildOptions { get; }
 
-        private readonly CompileTimeDomain _domain = new();
+        private readonly CompileTimeDomain _domain;
 
         protected ServiceProvider ServiceProvider { get; } = new();
 
         IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
 
-        protected AspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null )
+        protected AspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null )
         {
+            this._domain = domain;
             this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
             this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );

@@ -41,6 +41,8 @@ namespace Caravela.Framework.Impl.Pipeline
         /// </summary>
         string? CrashReportDirectory { get; }
 
+        string CacheDirectory { get; }
+
         string ProjectId { get; }
 
         ImmutableArray<object> PlugIns { get; }

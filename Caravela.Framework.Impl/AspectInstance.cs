@@ -3,10 +3,7 @@
 
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
-using Caravela.Framework.Impl.Templating;
 using Caravela.Framework.Sdk;
-using System;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -34,31 +31,6 @@ namespace Caravela.Framework.Impl
             this.Aspect = aspect;
             this.CodeElement = codeElement;
             this.AspectClass = aspectClassMetadata;
-        }
-
-        public TemplateDriver GetTemplateDriver( ICodeElement sourceTemplate )
-        {
-            var aspectType = this.Aspect.GetType();
-            MethodInfo? compiledTemplateMethodInfo;
-
-            switch ( sourceTemplate )
-            {
-                case IMethod method:
-                    var methodName = method.Name + TemplateCompiler.TemplateMethodSuffix;
-                    compiledTemplateMethodInfo = aspectType.GetMethod( methodName );
-
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
-
-            if ( compiledTemplateMethodInfo == null )
-            {
-                throw new AssertionFailedException( $"Could not find the compile template for {sourceTemplate}." );
-            }
-
-            return new TemplateDriver( sourceTemplate.GetSymbol().AssertNotNull(), compiledTemplateMethodInfo );
         }
     }
 }

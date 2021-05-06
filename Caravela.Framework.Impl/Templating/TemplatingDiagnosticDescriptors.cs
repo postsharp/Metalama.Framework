@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating
                     "The advice '{0}' threw '{2}' when applied to '{1}': {3}",
                     _category,
                     DiagnosticSeverity.Error );
-        
+
         internal static readonly StrongDiagnosticDescriptor<(string AspectName, string AssemblyName)>
             CannotFindAspectInCompilation
                 = new(

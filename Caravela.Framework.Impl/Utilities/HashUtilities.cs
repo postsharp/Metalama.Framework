@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace Caravela.Framework.Impl.Utilities
@@ -15,5 +16,7 @@ namespace Caravela.Framework.Impl.Utilities
         public static unsafe void Update<T>( this XXH64 hash, T value )
             where T : unmanaged
             => hash.Update( (byte*) &value, sizeof(T) );
+
+        public static void Update( this XXH64 hash, ImmutableArray<byte> bytes ) => hash.Update( bytes.AsSpan() );
     }
 }
