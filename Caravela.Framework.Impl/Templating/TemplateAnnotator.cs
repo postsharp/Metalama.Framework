@@ -485,6 +485,12 @@ namespace Caravela.Framework.Impl.Templating
             {
                 var transformedExpression = this.Visit( node.Expression )!;
 
+                if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.Dynamic )
+                {
+                    // This is something like: target.This.MyMethod(). Not supported yet.
+                    this.ReportUnsupportedLanguageFeature( node.Name, "member access on dynamic object" );
+                }
+
                 if ( scope == SymbolDeclarationScope.Both )
                 {
                     scope = this.GetNodeScope( transformedExpression );
