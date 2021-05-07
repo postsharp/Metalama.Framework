@@ -13,6 +13,9 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     public interface IAspectBuilder
     {
+        /// <summary>
+        /// Gets a service that allows to report or suppress diagnostics.
+        /// </summary>
         IDiagnosticSink Diagnostics { get; }
 
         /// <summary>

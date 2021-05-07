@@ -127,6 +127,9 @@ namespace Caravela.Framework.Code
         /// </summary>
         IAssembly DeclaringAssembly { get; }
 
+        /// <summary>
+        /// Gets a <c>dynamic</c> object that allows to access static members of the current type.
+        /// </summary>
         [RunTimeOnly]
         dynamic AsDynamic { get; }
     }
