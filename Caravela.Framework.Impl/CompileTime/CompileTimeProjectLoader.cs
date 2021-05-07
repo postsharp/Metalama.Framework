@@ -356,8 +356,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 out var compilation,
                 out var assemblyPath,
                 out var sourceDirectory,
-                out var sourceFiles
-                ) )
+                out var sourceFiles ) )
             {
                 project = null;
 

@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             foreach ( var map in maps )
             {
-                var filePath = Path.Combine( outputDirectory, Path.GetFileNameWithoutExtension(   map.TargetPath ) + ".map" );
+                var filePath = Path.Combine( outputDirectory, Path.GetFileNameWithoutExtension( map.TargetPath ) + ".map" );
 
                 using ( var writer = File.Create( filePath ) )
                 {
@@ -226,7 +226,7 @@ namespace Caravela.Framework.Impl.CompileTime
                                 _ = names.Add( treeName );
                             }
 
-                            treeName = treeName + ".cs";
+                            treeName += ".cs";
                             
                             sourceFilesList.Add( treeName );
 
@@ -429,14 +429,11 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // The project exists in the cache.
 
-
-
                 if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
                 {
                     // Read all syntax trees in the directory.
                     var sourceFiles = Directory.GetFiles( outputPaths.Directory, "*.cs" ).ToList();
-                    
-                    
+
                     project = CompileTimeProject.Create(
                         this._domain,
                         runTimeCompilation.Assembly.Identity,
@@ -456,7 +453,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                     catch ( IOException )
                     {
-                        
                     }
 
                     diagnosticSink.Report( GeneralDiagnosticDescriptors.InvalidCachedManifestFile.CreateDiagnostic( Location.None, outputPaths.Manifest ) );

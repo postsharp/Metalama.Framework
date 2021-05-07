@@ -6,7 +6,6 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using Caravela.Framework.Impl.ReflectionMocks;
-using Caravela.Framework.Impl.Templating.MetaModel;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -166,8 +165,6 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly );
-
-        public dynamic AsDynamic => new ThisTypeDynamicReceiver( this );
 
         [Memo]
         public override ICodeElement? ContainingElement

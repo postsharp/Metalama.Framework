@@ -320,8 +320,7 @@ namespace Caravela.Framework.Impl.Utilities
                     h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralSymbolComparerOptions.Type ) );
 
                     break;
-                
-                
+
                 case IPropertySymbol propertySymbol:
                     h = HashCode.Combine( h, propertySymbol.Name );
                     

@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceive
             meta.Parameters[0].Value.MyMethod();
             meta.Parameters[0].Value.MyMethod().More();
             
-            meta.Type.AsDynamic.Hello();
+            meta.ThisStatic.Hello();
             
             return default;
         }

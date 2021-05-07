@@ -129,9 +129,5 @@ namespace Caravela.Framework.Impl
                 "The compile-time project in assembly '{0}' is corrupted.",
                 _category,
                 Error );
-
-            
-        
-        
     }
 }

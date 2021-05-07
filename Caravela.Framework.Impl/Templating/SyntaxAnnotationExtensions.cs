@@ -102,8 +102,12 @@ namespace Caravela.Framework.Impl.Templating
                 return node;
             }
 
-            return node.WithoutAnnotations( _colorAnnotationKind )
+            var transformedNode = node.WithoutAnnotations( _colorAnnotationKind )
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
+
+            Invariant.Assert( transformedNode.GetColorFromAnnotation() == color );
+            
+            return transformedNode;
         }
 
         [return: NotNullIfNotNull( "node" )]

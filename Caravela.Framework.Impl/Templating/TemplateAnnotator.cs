@@ -800,7 +800,9 @@ namespace Caravela.Framework.Impl.Templating
                 }
             }
 
-            return node.AddScopeAnnotation( scope ).AddColoringAnnotation( color );
+            var transformedNode = node.WithIdentifier( node.Identifier.AddColoringAnnotation( color ) ).AddScopeAnnotation( scope );
+
+            return transformedNode;
         }
 
         public override SyntaxNode? VisitDeclarationExpression( DeclarationExpressionSyntax node )

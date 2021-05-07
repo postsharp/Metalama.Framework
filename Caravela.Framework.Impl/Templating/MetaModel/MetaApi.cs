@@ -61,6 +61,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Base => this.GetThisOrBase( "meta.Base", new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Original ) );
 
+        public dynamic ThisStatic
+            => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
+
+        public dynamic BaseStatic 
+            => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Original ) );
+
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
 
         public IDiagnosticSink Diagnostics => this._common.Diagnostics;

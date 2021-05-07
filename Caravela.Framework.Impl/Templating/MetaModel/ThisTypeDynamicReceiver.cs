@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
+using Caravela.Framework.Impl.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -17,10 +18,12 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
     internal class ThisTypeDynamicReceiver : IDynamicReceiver
     {
         private readonly INamedType _type;
+        private readonly LinkerAnnotation _linkerAnnotation;
 
-        public ThisTypeDynamicReceiver( INamedType type )
+        public ThisTypeDynamicReceiver( INamedType type, LinkerAnnotation linkerAnnotation )
         {
             this._type = type;
+            this._linkerAnnotation = linkerAnnotation;
         }
 
         public RuntimeExpression CreateExpression( string? expressionText = null, Location? location = null ) => throw new NotSupportedException();
@@ -29,6 +32,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
             => new( SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( this._type.GetSymbol() ),
-                        SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) ) );
+                        SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
+                        .AddLinkerAnnotation( this._linkerAnnotation ));
     }
 }

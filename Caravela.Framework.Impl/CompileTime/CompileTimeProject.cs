@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -167,7 +166,6 @@ namespace Caravela.Framework.Impl.CompileTime
                     var entry = archive.CreateEntry( sourceFile, CompressionLevel.Optimal );
                     using var entryWriter = new StreamWriter( entry.Open() );
                     entryWriter.Write( sourceText );
-                    
                 }
 
                 // Write manifest.

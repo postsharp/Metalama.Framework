@@ -105,18 +105,49 @@ namespace Caravela.Framework.Aspects
         public static ICompilation Compilation => CurrentContext.Compilation;
 
         /// <summary>
-        /// Gets an object that gives access to the current type including members introduced by the current aspect.
-        /// Only instance members are made accessible. To access static members, use <see cref="INamedType.AsDynamic"/>.
+        /// Gets a <c>dynamic</c> object that represents an instance of the target type. It can be used as a value (e.g. as a method argument)
+        /// or can be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.This.MyMethod()</c>).
+        /// The <see cref="This"/> property exposes the state of the target type as it is <i>after</i> the application
+        /// of the current aspect layer. To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
+        /// To access static members, use <see cref="ThisStatic"/>.
         /// </summary>
+        /// <seealso cref="Base"/>
+        /// <seealso cref="ThisStatic"/>
         [RunTimeOnly]
         public static dynamic This => CurrentContext.This;
 
         /// <summary>
-        /// Gets an object that gives access to the current type in the state it was before the current aspect.
-        /// Only instance members are made accessible. To access static members, use <see cref="INamedType.AsDynamic"/>.
+        /// Gets a <c>dynamic</c> object that must be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.Base.MyMethod()</c>).
+        /// The <see cref="Base"/> property exposes the state of the target type as it is <i>before</i> the application
+        /// of the current aspect layer. To access the current layer, use <see cref="This"/>.
+        /// To access static members, use <see cref="BaseStatic"/>.
         /// </summary>
+        /// <seealso cref="This"/>
+        /// <seealso cref="BaseStatic"/>
         [RunTimeOnly]
         public static dynamic Base => CurrentContext.Base;
+
+        /// <summary>
+        /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.ThisStatic.MyStaticMethod()</c>).
+        /// The <see cref="ThisStatic"/> property exposes the state of the target type as it is <i>after</i> the application
+        /// of the current aspect layer. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseStatic"/>.
+        /// To access instance members, use <see cref="This"/>.
+        /// </summary>
+        /// <seealso cref="This"/>
+        /// <seealso cref="BaseStatic"/>
+        [RunTimeOnly]
+        public static dynamic ThisStatic => CurrentContext.ThisStatic;
+
+        /// <summary>
+        /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
+        /// The <see cref="BaseStatic"/> property exposes the state of the target type as it is <i>before</i> the application
+        /// of the current aspect layer. To access the current layer, use <see cref="ThisStatic"/>.
+        /// To access instance members, use <see cref="Base"/>.
+        /// </summary>
+        /// <seealso cref="Base"/>
+        /// <seealso cref="ThisStatic"/>
+        [RunTimeOnly]
+        public static dynamic BaseStatic => CurrentContext.BaseStatic;
 
         /// <summary>
         /// Gets a service allowing to report and suppress diagnostics.

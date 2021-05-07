@@ -56,7 +56,6 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
-        /// To invoke a static method, use <see cref="INamedType.AsDynamic"/>.
         /// </summary>
         INamedType Type { get; }
 
@@ -69,7 +68,6 @@ namespace Caravela.Framework.Aspects
         /// Gets an object that gives <c>dynamic</c> access to the instance members of the type. Equivalent to the <c>this</c> C# keyword.
         /// </summary>
         /// <seealso cref="Base"/>
-        [RunTimeOnly]
         dynamic This { get; }
 
         /// <summary>
@@ -77,8 +75,11 @@ namespace Caravela.Framework.Aspects
         /// of the current advice. Equivalent to the <c>base</c> C# keyword.
         /// </summary>
         /// <seealso cref="This"/>
-        [RunTimeOnly]
         dynamic Base { get; }
+        
+        dynamic ThisStatic { get; }
+        
+        dynamic BaseStatic { get; }
 
         // Gets the properties that were passed by the aspect initializer.
         IReadOnlyDictionary<string, object?> Tags { get; }

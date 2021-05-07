@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public ulong SourceHash { get; init; }
 
-        public static bool TryDeserialize( Stream stream, [NotNullWhen(true)]  out CompileTimeProjectManifest? manifest )
+        public static bool TryDeserialize( Stream stream, [NotNullWhen(true)] out CompileTimeProjectManifest? manifest )
         {
             try
             {
