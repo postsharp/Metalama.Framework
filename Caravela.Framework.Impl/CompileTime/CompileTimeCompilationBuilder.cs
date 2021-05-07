@@ -166,7 +166,7 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             foreach ( var map in maps )
             {
-                var filePath = Path.Combine( outputDirectory, Path.ChangeExtension( map.TargetPath, ".map" ) );
+                var filePath = Path.Combine( outputDirectory, Path.GetFileNameWithoutExtension(   map.TargetPath ) + ".map" );
 
                 using ( var writer = File.Create( filePath ) )
                 {
