@@ -31,7 +31,7 @@ class C
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>() );
             Assert.Same( type.Methods[0], matchedMethod1 );
@@ -69,11 +69,11 @@ class C
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes[0];
-            var objectType = compilation.Factory.GetTypeByReflectionType( typeof(object) );
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
-            var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) );
-            var intArrayType = compilation.Factory.GetTypeByReflectionType( typeof(int[]) );
-            var objectArrayType = compilation.Factory.GetTypeByReflectionType( typeof(string[]) );
+            var objectType = compilation.Factory.GetTypeByReflectionType( typeof( object ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
+            var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) );
+            var intArrayType = compilation.Factory.GetTypeByReflectionType( typeof( int[] ) );
+            var objectArrayType = compilation.Factory.GetTypeByReflectionType( typeof( string[] ) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { objectType } );
             Assert.Same( type.Methods[0], matchedMethod1 );
@@ -113,7 +113,7 @@ class C
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
             Assert.Same( type.Methods[0], matchedMethod1 );
@@ -154,7 +154,7 @@ class C
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes[0];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, new[] { intType } );
             Assert.Same( type.Methods[0], matchedMethod1 );
@@ -202,7 +202,7 @@ class C : B
 
             var compilation = CreateCompilation( code );
             var type = compilation.DeclaredTypes[2];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
 
             var matchedMethod1 = type.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>() );
             Assert.Null( matchedMethod1 );
@@ -242,7 +242,7 @@ class C : B
             var typeA = compilation.DeclaredTypes[0];
             var typeB = compilation.DeclaredTypes[1];
             var typeC = compilation.DeclaredTypes[2];
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
 
             var matchedMethod1 = typeC.Methods.OfExactSignature( "Foo", 0, Array.Empty<IType>(), declaredOnly: false );
             Assert.Same( typeA.Methods[0], matchedMethod1 );

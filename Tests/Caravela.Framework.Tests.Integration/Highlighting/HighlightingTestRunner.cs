@@ -134,7 +134,7 @@ namespace Caravela.Framework.Tests.Integration.Highlighting
                     textWriter.WriteLine();
                     textWriter.WriteLine( "Legend:" );
 
-                    foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
+                    foreach ( var classification in Enum.GetValues( typeof( TextSpanClassification ) ) )
                     {
                         textWriter.WriteLine( $"<span class='{classification}'>{classification}</span>" );
                     }

@@ -12,7 +12,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( UIntPtr obj, ISyntaxFactory syntaxFactory )
         {
-            return SyntaxFactory.ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(UIntPtr) ) )
+            return SyntaxFactory.ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof( UIntPtr ) ) )
                 .AddArgumentListArguments(
                     SyntaxFactory.Argument(
                         SyntaxFactory.LiteralExpression(

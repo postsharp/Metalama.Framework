@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests
             if ( count < 1 )
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(count),
+                    nameof( count ),
                     "Repeat count must be greater than 0." );
             }
 

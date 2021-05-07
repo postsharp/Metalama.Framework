@@ -25,7 +25,7 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateDriver( AspectClassMetadata aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
             this._sourceTemplateSymbol = sourceTemplateSymbol;
-            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
+            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof( compiledTemplateMethodInfo ) );
             this._aspectClass = aspectClass;
         }
 
@@ -42,11 +42,13 @@ namespace Caravela.Framework.Impl.Templating
                 throw new NotImplementedException();
             }
 
-            var templateContext = new TemplateContextImpl(
-                targetMethod,
-                targetMethod.DeclaringType!,
-                templateExpansionContext.Compilation,
-                templateExpansionContext.DiagnosticSink );
+            MetaApiProperties commonProperties =
+                new( templateExpansionContext.DiagnosticSink, this._sourceTemplateSymbol, templateExpansionContext.Properties, templateExpansionContext
+                         .AspectLayerId );
+
+            var templateContext = new MetaApi( targetMethod, commonProperties );
+
+            var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             using ( TemplateSyntaxFactory.WithContext( templateExpansionContext ) )
             using ( meta.WithContext( templateContext, templateExpansionContext.ProceedImplementation ) )
@@ -83,14 +85,22 @@ namespace Caravela.Framework.Impl.Templating
                     }
                 }
 
+                var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
+
                 block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output );
 
-                return true;
+                return errorCountAfter == errorCountBefore;
             }
         }
 
         private Location? GetSourceCodeLocation( StackTrace stackTrace )
         {
+            if ( this._aspectClass == null! )
+            {
+                // We are in the template test and there is no aspect class. 
+                return null;
+            }
+
             // TODO: This method needs to be rewritten. Ideally, the PDB would be mapped to the source file, it would not be necessary
             // to perform the mapping here.
 

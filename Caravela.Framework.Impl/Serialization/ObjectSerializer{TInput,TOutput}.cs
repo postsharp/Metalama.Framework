@@ -26,8 +26,8 @@ namespace Caravela.Framework.Impl.Serialization
 
         protected ObjectSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public sealed override Type InputType => typeof(TInput);
+        public sealed override Type InputType => typeof( TInput );
 
-        public sealed override Type OutputType => typeof(TOutput);
+        public sealed override Type OutputType => typeof( TOutput );
     }
 }

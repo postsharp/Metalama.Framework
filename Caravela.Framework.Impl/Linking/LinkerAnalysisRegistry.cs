@@ -57,9 +57,9 @@ namespace Caravela.Framework.Impl.Linking
                 if ( symbol.GetAttributes()
                     .Any(
                         attributeData =>
-                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
+                            attributeData.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName
                             && attributeData.NamedArguments
-                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
+                                .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) ) )
                 {
                     // Inlining is explicitly disabled for the method.
                     return false;

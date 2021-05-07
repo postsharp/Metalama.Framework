@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
             this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof(IAdviceAttribute) ) ?? false
+                 where attribute.AttributeClass?.Is( typeof( IAdviceAttribute ) ) ?? false
                  select (attribute, member)).ToList();
         }
 
@@ -61,14 +61,15 @@ namespace Caravela.Framework.Impl
                     false,
                     new ImmutableDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
                     ImmutableArray<IAdvice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty );
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableDictionary<string, object?>.Empty );
 
             if ( aspect.Aspect is not IAspect<T> aspectOfT )
             {
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._compilation.GetTypeByReflectionType( typeof(IAspect<T>) ).AssertNotNull();
+                var interfaceType = this._compilation.GetTypeByReflectionType( typeof( IAspect<T> ) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(
@@ -100,7 +101,8 @@ namespace Caravela.Framework.Impl
                             false,
                             new ImmutableDiagnosticList( e.Diagnostics, ImmutableArray<ScopedSuppression>.Empty ),
                             ImmutableArray<IAdvice>.Empty,
-                            ImmutableArray<IAspectSource>.Empty );
+                            ImmutableArray<IAspectSource>.Empty,
+                            ImmutableDictionary<string, object?>.Empty );
                 }
                 catch ( Exception e )
                 {

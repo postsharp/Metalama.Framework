@@ -59,7 +59,7 @@ namespace Caravela.Obfuscator
         /// <returns></returns>
         public override bool Execute()
         {
-            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof(ObfuscationAttribute) );
+            this._obfuscationAttributeType = (IType) this.Project.Module.Cache.GetType( typeof( ObfuscationAttribute ) );
 
             // IMPORTANT: Pdb obfuscation has to be done before changing declaration names.
             // Obfuscate source documents in the PDB.

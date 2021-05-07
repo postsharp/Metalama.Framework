@@ -11,8 +11,10 @@ namespace Caravela.Framework.Impl.Templating
     /// </summary>
     internal static class SyntaxFactoryEx
     {
-        public static LiteralExpressionSyntax LiteralExpression( string s )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
+        public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
+
+        public static LiteralExpressionSyntax LiteralExpression( string? s )
+            => s == null ? Null : SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
         public static LiteralExpressionSyntax LiteralExpression( int i )
             => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );

@@ -40,13 +40,13 @@ namespace Caravela.Framework.TestApp
     {
         public override dynamic OverrideMethod()
         {
-            string result = proceed();
+            string result = meta.Proceed();
 
             result += ": ";
 
             result += meta.This.StaticProperty;
 
-            if ( !meta.CurrentMethod.IsStatic )
+            if ( !meta.Method.IsStatic )
             {
                 result += meta.This.InstanceProperty;
                 result += meta.This;

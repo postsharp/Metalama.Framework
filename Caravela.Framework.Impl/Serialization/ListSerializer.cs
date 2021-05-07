@@ -33,14 +33,14 @@ namespace Caravela.Framework.Impl.Serialization
                 .NormalizeWhitespace();
         }
 
-        public override Type InputType => typeof(IEnumerable<>);
+        public override Type InputType => typeof( IEnumerable<> );
 
-        public override Type OutputType => typeof(List<>);
+        public override Type OutputType => typeof( List<> );
 
         public override int Priority => 1;
 
         public ListSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IReadOnlyList<>), typeof(IReadOnlyCollection<>) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( IReadOnlyList<> ), typeof( IReadOnlyCollection<> ) );
     }
 }

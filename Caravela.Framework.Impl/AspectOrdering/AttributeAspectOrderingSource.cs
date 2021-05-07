@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.AspectOrdering
                     .SelectMany( m => m.ReferencedAssemblySymbols )
                     .Concat( new[] { roslynCompilation.Assembly } )
                     .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                    .Where( a => a.attribute.AttributeClass?.Is( typeof(AspectOrderAttribute) ) ?? false );
+                    .Where( a => a.attribute.AttributeClass?.Is( typeof( AspectOrderAttribute ) ) ?? false );
 
             return attributes.Select(
                     attribute =>

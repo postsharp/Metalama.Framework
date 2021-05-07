@@ -256,11 +256,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            var resolver = new PathAssemblyResolver( new[] { typeof(object).Assembly.Location } );
-            using var metadataLoadContext = new MetadataLoadContext( resolver, typeof(object).Assembly.GetName().Name );
+            var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );
+            using var metadataLoadContext = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
 
             // LoadFromAssemblyPath throws for mscorlib
-            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
+            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
             {
                 compileTimeProject = null;
 

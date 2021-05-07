@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.Serialization
             var j = b[14];
             var k = b[15];
 
-            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(Guid) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof( Guid ) ) )
                 .AddArgumentListArguments(
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),

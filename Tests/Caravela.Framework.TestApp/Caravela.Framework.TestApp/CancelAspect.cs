@@ -17,7 +17,7 @@ namespace Caravela.Framework.TestApp
             // error CR0101: This C# language feature is not supported by the template compiler - ParenthesizedLambdaExpression.
             // var parameter = target.Parameters.LastOrDefault( p => p.Type.Is( typeof( CancellationToken ) ) );
 
-            var parameter = meta.CurrentParameters.LastOrDefault( TypeIsCancellationToken );
+            var parameter = meta.Parameters.LastOrDefault( TypeIsCancellationToken );
 
             if ( parameter != null )
             {

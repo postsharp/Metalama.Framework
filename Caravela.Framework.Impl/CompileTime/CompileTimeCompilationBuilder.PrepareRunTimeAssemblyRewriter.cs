@@ -22,7 +22,7 @@ namespace Caravela.Framework.Impl.CompileTime
             public PrepareRunTimeAssemblyRewriter( Compilation runTimeCompilation )
                 : base( runTimeCompilation )
             {
-                this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+                this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof( IAspectDriver ).FullName );
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )

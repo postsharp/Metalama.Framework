@@ -33,8 +33,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod templateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration )
+            AspectLinkerOptions? linkerOptions,
+            IReadOnlyDictionary<string, object?> tags )
+            : base( aspect, targetDeclaration, tags )
         {
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
@@ -100,7 +101,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( this.TemplateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
+                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof( object ) );
             }
             else
             {

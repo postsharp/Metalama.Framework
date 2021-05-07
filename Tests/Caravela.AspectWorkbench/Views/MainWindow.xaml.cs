@@ -49,27 +49,27 @@ namespace Caravela.AspectWorkbench.Views
             // TODO RichTextBox doesn't support data binding out of the box. RoslynPad doesn't support binding to text either.
             switch ( e.PropertyName )
             {
-                case nameof(MainViewModel.TestText):
+                case nameof( MainViewModel.TestText ):
                     this.sourceTextBox.Text = this._viewModel.TestText;
 
                     break;
 
-                case nameof(MainViewModel.ColoredTemplateDocument):
+                case nameof( MainViewModel.ColoredTemplateDocument ):
                     this.highlightedSourceRichBox.Document = this._viewModel.ColoredTemplateDocument ?? new FlowDocument();
 
                     break;
 
-                case nameof(MainViewModel.CompiledTemplateDocument):
+                case nameof( MainViewModel.CompiledTemplateDocument ):
                     this.compiledTemplateRichBox.Document = this._viewModel.CompiledTemplateDocument ?? new FlowDocument();
 
                     break;
 
-                case nameof(MainViewModel.TransformedTargetDocument):
+                case nameof( MainViewModel.TransformedTargetDocument ):
                     this.transformedCodeRichBox.Document = this._viewModel.TransformedTargetDocument ?? new FlowDocument();
 
                     break;
 
-                case nameof(MainViewModel.ErrorsDocument):
+                case nameof( MainViewModel.ErrorsDocument ):
                     this.errorsTextBlock.Document = this._viewModel.ErrorsDocument ?? new FlowDocument();
 
                     break;

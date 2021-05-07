@@ -35,7 +35,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object GetIndexerValue( object? instance, params object[] args )
         {
-            return new DynamicMember(
+            return new DynamicExpression(
                 this.CreateIndexerAccess(
                     RuntimeExpression.FromValue( instance ),
                     RuntimeExpression.FromValue( args ) ),
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
-            return new DynamicMember( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type, false );
         }
 
         public PropertyInvocation( IProperty member ) : base( member ) { }

@@ -10,4 +10,6 @@ namespace Caravela.Framework.Project
     /// </summary>
     [AttributeUsage( AttributeTargets.Method )]
     public class ProceedAttribute : Attribute { }
+
+    // TODO: This class and its usages must be removed.
 }

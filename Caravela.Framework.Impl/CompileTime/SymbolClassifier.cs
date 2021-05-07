@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
         private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly )[]
+            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), SymbolDeclarationScope.RunTimeOnly, false),
                 (typeof(Process), SymbolDeclarationScope.RunTimeOnly, false),
@@ -47,9 +47,9 @@ namespace Caravela.Framework.Impl.CompileTime
         private SymbolClassifier( Compilation compilation )
         {
             this._compilation = compilation;
-            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
-            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+            this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ).AssertNotNull();
+            this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof( CompileTimeOnlyAttribute ).FullName ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof( TemplateAttribute ).FullName ).AssertNotNull();
             this._referenceAssemblyLocator = ReferenceAssemblyLocator.GetInstance();
         }
 
@@ -65,7 +65,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 {
                     if ( !_instances.TryGetValue( compilation, out value ) )
                     {
-                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
+                        var hasCaravelaReference = compilation.GetTypeByMetadataName( typeof( CompileTimeAttribute ).FullName ) != null;
                         value = hasCaravelaReference ? new SymbolClassifier( compilation ) : VanillaClassifier.GetInstance();
                         _instances.Add( compilation, value );
                     }

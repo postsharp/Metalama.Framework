@@ -388,7 +388,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     var locationMaps = CreateLocationMaps( compileTimeCompilation, locationAnnotationMap! );
                     WriteLocationMaps( locationMaps, outputPaths.Directory );
 
-                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
+                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName );
 
                     var manifest = new CompileTimeProjectManifest(
                         compileTimeCompilation.AssemblyName!,

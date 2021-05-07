@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol => CodeElementKind.Parameter,
                 IEventSymbol => CodeElementKind.Event,
                 ITypeSymbol => CodeElementKind.None,
-                _ => throw new ArgumentException( nameof(symbol), $"Unexpected symbol: {symbol.GetType().Name}." )
+                _ => throw new ArgumentException( nameof( symbol ), $"Unexpected symbol: {symbol.GetType().Name}." )
             };
 
         /// <summary>

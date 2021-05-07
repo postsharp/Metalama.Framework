@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.List<string> Target; } }",
-                typeof(List<string>),
+                typeof( List<string> ),
                 @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.List`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")))" );
         }
 
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
         {
             this.AssertFieldType(
                 "class Outer { class Inner { System.Collections.Generic.Dictionary<string[],int?> Target; } }",
-                typeof(Dictionary<string[], int?>),
+                typeof( Dictionary<string[], int?> ),
                 @"global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Collections.Generic.Dictionary`2"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.String"")).MakeArrayType(), global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Nullable`1"")).MakeGenericType(global::System.Type.GetTypeFromHandle(global::Caravela.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:System.Int32""))))" );
         }
 

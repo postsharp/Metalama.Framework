@@ -1,5 +1,4 @@
 // Warning CS0219 on `x`: `The variable 'x' is assigned but its value is never used`
-// Warning CS0105 on `Caravela.Framework.Aspects`: `The using directive for 'Caravela.Framework.Aspects' appeared previously in this namespace`
 
 [TestOutput]
 internal class TargetClass

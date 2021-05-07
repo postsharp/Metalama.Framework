@@ -105,12 +105,12 @@ namespace Caravela.Framework.Impl.Serialization
         private static ExpressionSyntax SerializeTypeFromSymbolLeaf( ITypeSymbol typeSymbol, ISyntaxFactory syntaxFactory )
         {
             var documentationId = DocumentationCommentId.CreateDeclarationId( typeSymbol );
-            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeTypeHandle), documentationId );
+            var token = IntrinsicsCaller.CreateLdTokenExpression( nameof( Intrinsics.GetRuntimeTypeHandle ), documentationId );
 
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxFactory.GetTypeSyntax( typeof(Type) ),
+                        syntaxFactory.GetTypeSyntax( typeof( Type ) ),
                         IdentifierName( "GetTypeFromHandle" ) ) )
                 .AddArgumentListArguments( Argument( token ) )
                 .NormalizeWhitespace();

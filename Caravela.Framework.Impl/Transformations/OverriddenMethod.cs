@@ -30,9 +30,9 @@ namespace Caravela.Framework.Impl.Transformations
 
         public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, IMethod templateMethod, AspectLinkerOptions? linkerOptions = null )
         {
-            Invariant.Assert( advice != null );
-            Invariant.Assert( overriddenDeclaration != null );
-            Invariant.Assert( templateMethod != null );
+            Invariant.Assert( advice != null! );
+            Invariant.Assert( overriddenDeclaration != null! );
+            Invariant.Assert( templateMethod != null! );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
@@ -64,7 +64,9 @@ namespace Caravela.Framework.Impl.Transformations
                     context.LexicalScope,
                     context.DiagnosticSink,
                     context.ServiceProvider.GetService<SyntaxSerializationService>(),
-                    (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory );
+                    (ISyntaxFactory) this.OverriddenDeclaration.Compilation.TypeFactory,
+                    this.Advice.AspectLayerId,
+                    this.Advice.AspectBuilderTags );
 
                 var templateDriver = this.Advice.Aspect.AspectClass.GetTemplateDriver( this.TemplateMethod );
 

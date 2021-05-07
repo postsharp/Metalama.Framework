@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
                         throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                     }
 
-                    return new DynamicMember(
+                    return new DynamicExpression(
                         SyntaxFactory.InvocationExpression( name ).AddArgumentListArguments( arguments ),
                         this._method.ReturnType,
                         false );
@@ -52,7 +52,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
                 var receiver = this._method.GetReceiverSyntax( RuntimeExpression.FromValue( instance! ) );
 
-                return new DynamicMember(
+                return new DynamicExpression(
                     SyntaxFactory.InvocationExpression( SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiver, name ) )
                         .AddArgumentListArguments( arguments ),
                     this._method.ReturnType,

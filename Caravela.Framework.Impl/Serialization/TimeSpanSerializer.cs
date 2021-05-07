@@ -14,7 +14,7 @@ namespace Caravela.Framework.Impl.Serialization
     {
         public override ExpressionSyntax Serialize( TimeSpan obj, ISyntaxFactory syntaxFactory )
         {
-            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(TimeSpan) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof( TimeSpan ) ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(

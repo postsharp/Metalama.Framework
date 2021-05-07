@@ -21,7 +21,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object Value
         {
-            get => this.GetValue( this.Member.IsStatic ? null : new CurrentTypeOrInstanceDynamic( true, this.Member.DeclaringType ).CreateExpression() );
+            get => this.GetValue( this.Member.IsStatic ? null : new RuntimeExpression( ThisExpression(), this.Member.DeclaringType ) );
             set => throw new NotSupportedException();
         }
 
@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         public object GetValue( object? instance )
         {
-            return new DynamicMember( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) ), this.Member.Type, this.Member is Field );
+            return new DynamicExpression( this.CreatePropertyExpression( RuntimeExpression.FromValue( instance ) ), this.Member.Type, this.Member is Field );
         }
 
         public object SetValue( object? instance, object? value )
@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var expression = AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, propertyAccess, RuntimeExpression.GetSyntaxFromValue( value ) );
 
-            return new DynamicMember( expression, this.Member.Type, false );
+            return new DynamicExpression( expression, this.Member.Type, false );
         }
 
         public IPropertyInvocation Base => throw new NotImplementedException();

@@ -28,7 +28,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "Field", info.Name );
-                    Assert.Equal( typeof(int), info.FieldType );
+                    Assert.Equal( typeof( int ), info.FieldType );
                 } );
         }
 

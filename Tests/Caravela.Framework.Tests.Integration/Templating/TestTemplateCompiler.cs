@@ -35,7 +35,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
 
         private static bool IsTemplate( ISymbol symbol )
         {
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TestTemplateAttribute) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( TestTemplateAttribute ) );
         }
 
         private bool IsTemplate( SyntaxNode node )

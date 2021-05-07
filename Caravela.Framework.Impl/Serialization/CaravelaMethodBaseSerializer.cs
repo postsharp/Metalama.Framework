@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Serialization
         {
             methodSymbol = methodSymbol.OriginalDefinition;
             var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
-            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
+            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof( Intrinsics.GetRuntimeMethodHandle ), documentationId );
 
             if ( declaringGenericTypeSymbol != null )
             {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Impl.Serialization
                 return SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            syntaxFactory.GetTypeSyntax( typeof(MethodBase) ),
+                            syntaxFactory.GetTypeSyntax( typeof( MethodBase ) ),
                             SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
                     .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) )
                     .NormalizeWhitespace();
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Serialization
             return SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxFactory.GetTypeSyntax( typeof(MethodBase) ),
+                        syntaxFactory.GetTypeSyntax( typeof( MethodBase ) ),
                         SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
                 .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) )
                 .NormalizeWhitespace();
@@ -65,6 +65,6 @@ namespace Caravela.Framework.Impl.Serialization
             return typeHandle;
         }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( MemberInfo ), typeof( MethodBase ) );
     }
 }

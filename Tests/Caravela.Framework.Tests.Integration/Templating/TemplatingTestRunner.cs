@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -162,14 +163,18 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 var compilationModel = CompilationModel.CreateInitialInstance( (CSharpCompilation) testResult.InitialCompilation );
                 var expansionContext = this.CreateTemplateExpansionContext( assembly, compilationModel );
 
-                if ( !driver.TryExpandDeclaration( expansionContext, testResult, out var output ) )
+                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult, out var output );
+
+                testResult.ReportDiagnostics( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
+
+                if ( !expandSuccessful )
                 {
-                    testResult.SetFailed( "The compiled template threw an exception." );
+                    testResult.SetFailed( "The compiled template failed." );
 
                     return testResult;
                 }
 
-                testResult.SetTransformedTarget( output );
+                testResult.SetTransformedTarget( output! );
             }
             catch ( Exception e )
             {
@@ -228,7 +233,9 @@ namespace Caravela.Framework.Tests.Integration.Templating
                 lexicalScope,
                 diagnostics,
                 this._syntaxSerializationService,
-                syntaxFactory );
+                syntaxFactory,
+                default,
+                ImmutableDictionary<string, object?>.Empty );
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl
                 return sourceNamedType.TypeSymbol;
             }
 
-            throw new ArgumentOutOfRangeException( nameof(namedType), "This is not a source symbol." );
+            throw new ArgumentOutOfRangeException( nameof( namedType ), "This is not a source symbol." );
         }
 
         public static ITypeSymbol GetSymbol( this IType type )
@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl
                 return sourceNamedType.TypeSymbol.AssertNotNull();
             }
 
-            throw new ArgumentOutOfRangeException( nameof(type), "This is not a source symbol." );
+            throw new ArgumentOutOfRangeException( nameof( type ), "This is not a source symbol." );
         }
 
         public static IMethodSymbol GetSymbol( this IMethodBase method )
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl
                 return (IMethodSymbol) sourceMethod.Symbol;
             }
 
-            throw new ArgumentOutOfRangeException( nameof(method), "This is not a source symbol." );
+            throw new ArgumentOutOfRangeException( nameof( method ), "This is not a source symbol." );
         }
 
         public static AttributeData GetAttributeData( this IAttribute attribute )
@@ -49,7 +49,7 @@ namespace Caravela.Framework.Impl
                 return attributeModel.AttributeData;
             }
 
-            throw new ArgumentOutOfRangeException( nameof(attribute), "This is not a source attribute." );
+            throw new ArgumentOutOfRangeException( nameof( attribute ), "This is not a source attribute." );
         }
     }
 }

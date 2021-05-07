@@ -188,7 +188,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                                         continue;
 
-                                    // Default: Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
+                                        // Default: Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
                                 }
                             }
 

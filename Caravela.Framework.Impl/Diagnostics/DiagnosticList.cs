@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public int Count => this._list?.Count ?? 0;
 
-        public Diagnostic this[ int index ]
+        public Diagnostic this[int index]
         {
             get
             {

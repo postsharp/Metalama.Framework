@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl
         {
             if ( right.IsGenericType )
             {
-                throw new ArgumentOutOfRangeException( nameof(right), "This method does not work with generic types." );
+                throw new ArgumentOutOfRangeException( nameof( right ), "This method does not work with generic types." );
             }
 
             var rightName = right.FullName;

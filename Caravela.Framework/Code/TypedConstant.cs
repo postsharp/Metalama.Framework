@@ -30,7 +30,7 @@ namespace Caravela.Framework.Code
         /// Gets the type of the value. This is important if the type is an enum, because in this case, if the enum type is not compile-time,
         /// <see cref="Value"/> is set to the underlying integer value.
         /// </summary>
-        public IType Type => this._type ?? throw new ArgumentNullException( $"The {nameof(TypedConstant)} is unassigned." );
+        public IType Type => this._type ?? throw new ArgumentNullException( $"The {nameof( TypedConstant )} is unassigned." );
 
         /// <summary>
         /// Gets a value indicating whether the value is <c>null</c>. Not to be confused with <see cref="IsAssigned"/>.

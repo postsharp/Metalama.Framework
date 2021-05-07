@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.Serialization
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxFactory.GetTypeSyntax( typeof(DateTimeOffset) ),
+                        syntaxFactory.GetTypeSyntax( typeof( DateTimeOffset ) ),
                         IdentifierName( "Parse" ) ) )
                 .AddArgumentListArguments(
                     Argument(

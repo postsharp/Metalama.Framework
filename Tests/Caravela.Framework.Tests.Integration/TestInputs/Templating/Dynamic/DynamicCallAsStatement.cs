@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
         dynamic? Template()
         {
             // Expression statement
-            meta.Method.Invoke( meta.This, 0 );
+            meta.Method.Invoke( meta.This, meta.Parameters[0].Value ).AssertNotNull();
             
             // Assignment
             _ = meta.Method.Invoke( meta.This, 1 );

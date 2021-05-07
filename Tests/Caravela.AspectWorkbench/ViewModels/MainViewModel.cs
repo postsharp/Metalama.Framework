@@ -47,7 +47,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         {
             if ( this.TestText == null )
             {
-                throw new InvalidOperationException( $"Property {nameof(this.TestText)} not set." );
+                throw new InvalidOperationException( $"Property {nameof( this.TestText )} not set." );
             }
 
             try
@@ -156,7 +156,7 @@ namespace Caravela.AspectWorkbench.ViewModels
         {
             this._currentTest = await TestSerializer.LoadFromFileAsync( filePath );
 
-            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof(this._currentTest.Input)} property cannot be null." );
+            var input = this._currentTest.Input ?? throw new InvalidOperationException( $"The {nameof( this._currentTest.Input )} property cannot be null." );
 
             this.TestText = input.TestSource;
             this.ExpectedOutputText = this._currentTest.ExpectedOutput;
@@ -167,7 +167,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
         public async Task SaveTestAsync( string? filePath )
         {
-            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof(filePath) );
+            filePath ??= this.CurrentPath ?? throw new ArgumentNullException( nameof( filePath ) );
 
             if ( string.IsNullOrEmpty( filePath ) )
             {
@@ -176,7 +176,7 @@ namespace Caravela.AspectWorkbench.ViewModels
 
             if ( string.IsNullOrEmpty( this.TestText ) )
             {
-                throw new InvalidOperationException( $"The {nameof(this.TestText)} property cannot be null." );
+                throw new InvalidOperationException( $"The {nameof( this.TestText )} property cannot be null." );
             }
 
             if ( this._currentTest == null )

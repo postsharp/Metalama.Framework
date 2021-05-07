@@ -51,12 +51,12 @@ namespace Caravela.Framework.Tests.UnitTests
                         new[] { "netstandard", "System.Runtime" }
                             .Select(
                                 r => MetadataReference.CreateFromFile(
-                                    Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
+                                    Path.Combine( Path.GetDirectoryName( typeof( object ).Assembly.Location )!, r + ".dll" ) ) ) )
                     .AddReferences(
-                        MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(TestBase).Assembly.Location ),
-                        MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) );
+                        MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( DynamicAttribute ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( TestBase ).Assembly.Location ),
+                        MetadataReference.CreateFromFile( typeof( CompileTimeAttribute ).Assembly.Location ) );
             }
 
             var mainRoslynCompilation = CreateEmptyCompilation();
@@ -131,7 +131,7 @@ class Expression
         {
 #pragma warning disable CS0162 // Unreachable code detected
 
-// ReSharper disable HeuristicUnreachableCode
+            // ReSharper disable HeuristicUnreachableCode
 
             if ( _doCodeExecutionTests )
             {

@@ -31,10 +31,10 @@ namespace Caravela.Framework.Impl.Linking
 
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
+            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
             {
                 // TODO: Add the namespace.
-                return this._syntaxFactory.GetTypeSyntax( typeof(__Void) );
+                return this._syntaxFactory.GetTypeSyntax( typeof( __Void ) );
             }
 
             // TODO: Introduced types?
@@ -54,7 +54,7 @@ namespace Caravela.Framework.Impl.Linking
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            if ( this._originalDeclaration.ReturnType.Is( typeof(void) ) )
+            if ( this._originalDeclaration.ReturnType.Is( typeof( void ) ) )
             {
                 // Emit `<original_method_call>; return`.
                 return Block(

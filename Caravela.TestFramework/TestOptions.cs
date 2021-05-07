@@ -13,5 +13,11 @@ namespace Caravela.TestFramework
         /// This is useful when diagnostic suppression is being tested.
         /// </summary>
         public bool IncludeFinalDiagnostics { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether diagnostics of all severities should be included in the rest result. By default, only
+        /// warnings and errors are included. 
+        /// </summary>
+        public bool IncludeAllSeverities { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -34,6 +35,12 @@ namespace Caravela.Framework.Aspects
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
+
+        /// <summary>
+        /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.Initialize"/> method and are then made
+        /// visible in <see cref="meta.Tags"/>.
+        /// </summary>
+        IDictionary<string, object?> Tags { get; }
     }
 
     /// <summary>

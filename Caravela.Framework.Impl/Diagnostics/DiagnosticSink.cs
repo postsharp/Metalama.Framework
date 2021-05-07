@@ -34,6 +34,11 @@ namespace Caravela.Framework.Impl.Diagnostics
         {
             this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
             this._diagnostics.Add( diagnostic );
+
+            if ( diagnostic.Severity == DiagnosticSeverity.Error )
+            {
+                this.ErrorCount++;
+            }
         }
 
         public void SuppressDiagnostic( ScopedSuppression suppression )

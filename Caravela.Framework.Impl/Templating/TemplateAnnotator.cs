@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private void SetLocalSymbolScope( ISymbol symbol, SymbolDeclarationScope scope )
+        private void SetLocalSymbolScope( ISymbol symbol, SymbolDeclarationScope scope, SyntaxToken identifier )
         {
             if ( this._localScopes.TryGetValue( symbol, out _ ) )
             {
@@ -87,6 +87,11 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             this._localScopes.Add( symbol, scope );
+
+            if ( scope == SymbolDeclarationScope.CompileTimeOnly && identifier.Kind() != SyntaxKind.None )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.VariableIsCompileTime, identifier, symbol );
+            }
         }
 
         /// <summary>
@@ -186,7 +191,8 @@ namespace Caravela.Framework.Impl.Templating
                     }
                     else
                     {
-                        return SymbolDeclarationScope.Both;
+                        // If there is no symbol, the member may be dynamic.
+                        return SymbolDeclarationScope.Unknown;
                     }
 
                 case NullableTypeSyntax nullableType:
@@ -383,7 +389,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope );
+                this.SetLocalSymbolScope( symbol, scope, default );
             }
 
             // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
@@ -455,8 +461,6 @@ namespace Caravela.Framework.Impl.Templating
                             var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
 
                             if ( node != null &&
-                                 scope == SymbolDeclarationScope.RunTimeOnly &&
-                                 (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method) &&
                                  this._templateMemberClassifier.IsDynamicType( node ) )
                             {
                                 // Annotate dynamic members differently for syntax coloring.
@@ -495,6 +499,12 @@ namespace Caravela.Framework.Impl.Templating
 
                     break;
 
+                case SymbolDeclarationScope.Unknown when this._semanticAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
+                    // This is a member access of a dynamic receiver.
+                    scope = SymbolDeclarationScope.RunTimeOnly;
+
+                    break;
+
                 case SymbolDeclarationScope.RunTimeOnly:
                     scope = SymbolDeclarationScope.RunTimeOnly;
 
@@ -504,12 +514,6 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithScopeContext( context ) )
             {
                 var transformedExpression = this.Visit( node.Expression )!;
-
-                if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.Dynamic )
-                {
-                    // This is something like: target.This.MyMethod(). Not supported yet.
-                    this.ReportUnsupportedLanguageFeature( node.Name, "member access on dynamic object" );
-                }
 
                 if ( scope == SymbolDeclarationScope.Both )
                 {
@@ -696,7 +700,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceDefault( SymbolDeclarationScope.RunTimeOnly );
 
-            this.SetLocalSymbolScope( local, forEachScope );
+            this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
 
             this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
 
@@ -784,12 +788,19 @@ namespace Caravela.Framework.Impl.Templating
 
             var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.RunTimeOnly;
 
+            var color = TextSpanClassification.Default;
+
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope );
+                this.SetLocalSymbolScope( symbol, scope, node.Identifier );
+
+                if ( scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    color = TextSpanClassification.CompileTimeVariable;
+                }
             }
 
-            return node.AddScopeAnnotation( scope );
+            return node.AddScopeAnnotation( scope ).AddColoringAnnotation( color );
         }
 
         public override SyntaxNode? VisitDeclarationExpression( DeclarationExpressionSyntax node )
@@ -861,7 +872,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Mark the local variable symbol.
-            this.SetLocalSymbolScope( local, localScope );
+            this.SetLocalSymbolScope( local, localScope, node.Identifier );
 
             var transformedIdentifier = node.Identifier;
 

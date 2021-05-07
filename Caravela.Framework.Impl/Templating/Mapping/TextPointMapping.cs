@@ -8,7 +8,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
     /// <summary>
     /// Represents a mapping between a source and a target <see cref="TextPoint"/>.
     /// </summary>
-    internal record TextPointMapping ( TextPoint Source, TextPoint Target )
+    internal record TextPointMapping( TextPoint Source, TextPoint Target )
     {
         public void Write( BinaryWriter writer )
         {

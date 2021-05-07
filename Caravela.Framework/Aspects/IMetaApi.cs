@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -12,14 +13,26 @@ namespace Caravela.Framework.Aspects
     /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
     [CompileTimeOnly]
-    public interface ITemplateContext : IDiagnosticSink
+    internal interface IMetaApi
     {
+        IConstructor Constructor { get; }
+
+        IMethodBase MethodBase { get; }
+
+        IField Field { get; }
+
+        IFieldOrProperty FieldOrProperty { get; }
+
+        ICodeElement Declaration { get; }
+
+        IMember Member { get; }
+
         /// <summary>
         /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
         /// </summary>
         /// <remarks>
-        /// To invoke the method, use <c>Invoke</c>.
-        /// e.g. <c>OverrideMethodContext.Method.Invoke(1, 2, 3);</c>.
+        /// To invoke the method, use <see cref="IMethodInvocation.Invoke"/>,
+        /// e.g. <c>meta.Method.Invoke(1, 2, 3);</c>.
         /// </remarks>
         IMethod Method { get; }
 
@@ -43,6 +56,7 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
+        /// To invoke a static method, use <see cref="INamedType.AsDynamic"/>.
         /// </summary>
         INamedType Type { get; }
 
@@ -52,21 +66,23 @@ namespace Caravela.Framework.Aspects
         ICompilation Compilation { get; }
 
         /// <summary>
-        /// Gets an object that gives access to the current type including members introduced by the current aspect.
-        /// Both instance and static members are made accessible. For instance members,
-        /// the <c>this</c> instance is assumed.
+        /// Gets an object that gives <c>dynamic</c> access to the instance members of the type. Equivalent to the <c>this</c> C# keyword.
         /// </summary>
+        /// <seealso cref="Base"/>
         [RunTimeOnly]
         dynamic This { get; }
 
-        /*
         /// <summary>
-        /// Gives access to the current type in the state it was before the current aspect.
+        /// Gets an object that gives <c>dynamic</c> access to the instance members of the type in the state they were before the application
+        /// of the current advice. Equivalent to the <c>base</c> C# keyword.
         /// </summary>
-        //dynamic Base { get; }
+        /// <seealso cref="This"/>
+        [RunTimeOnly]
+        dynamic Base { get; }
 
         // Gets the properties that were passed by the aspect initializer.
-        //IReadOnlyDictionary<string, object> Properties { get; }
-        */
+        IReadOnlyDictionary<string, object?> Tags { get; }
+
+        IDiagnosticSink Diagnostics { get; }
     }
 }

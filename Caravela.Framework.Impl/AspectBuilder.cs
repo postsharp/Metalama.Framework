@@ -31,6 +31,8 @@ namespace Caravela.Framework.Impl
 
         public void SkipAspect() => this._skipped = true;
 
+        public IDictionary<string, object?> Tags => this._adviceFactory.Tags;
+
         public AspectBuilder( T targetDeclaration, DiagnosticSink diagnosticSink, IEnumerable<IAdvice> declarativeAdvices, AdviceFactory adviceFactory )
         {
             this.TargetDeclaration = targetDeclaration;
@@ -48,12 +50,14 @@ namespace Caravela.Framework.Impl
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this._declarativeAdvices.ToImmutableArray().AddRange( this._adviceFactory.Advices ),
-                    Array.Empty<IAspectSource>() )
+                    Array.Empty<IAspectSource>(),
+                    this.Tags.ToImmutableDictionary() )
                 : new AspectInstanceResult(
                     success,
                     this._diagnosticSink.ToImmutable(),
                     Array.Empty<IAdvice>(),
-                    Array.Empty<IAspectSource>() );
+                    Array.Empty<IAspectSource>(),
+                    ImmutableDictionary<string, object?>.Empty );
         }
     }
 }

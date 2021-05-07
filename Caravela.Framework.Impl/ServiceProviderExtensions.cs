@@ -10,11 +10,11 @@ namespace Caravela.Framework.Impl
         public static T GetService<T>( this IServiceProvider serviceProvider )
             where T : class
         {
-            var service = (T?) serviceProvider.GetService( typeof(T) );
+            var service = (T?) serviceProvider.GetService( typeof( T ) );
 
             if ( service == null )
             {
-                throw new AssertionFailedException( $"Cannot get the service {typeof(T).Name}." );
+                throw new AssertionFailedException( $"Cannot get the service {typeof( T ).Name}." );
             }
 
             return service;
@@ -22,6 +22,6 @@ namespace Caravela.Framework.Impl
 
         public static T? GetOptionalService<T>( this IServiceProvider serviceProvider )
             where T : class
-            => (T?) serviceProvider.GetService( typeof(T) );
+            => (T?) serviceProvider.GetService( typeof( T ) );
     }
 }

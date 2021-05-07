@@ -94,12 +94,12 @@ namespace MoreLinq
         {
             if ( source == null )
             {
-                throw new ArgumentNullException( nameof(source) );
+                throw new ArgumentNullException( nameof( source ) );
             }
 
             if ( keySelector == null )
             {
-                throw new ArgumentNullException( nameof(keySelector) );
+                throw new ArgumentNullException( nameof( keySelector ) );
             }
 
             return GroupAdjacent( source, keySelector, e => e, comparer );
@@ -176,17 +176,17 @@ namespace MoreLinq
         {
             if ( source == null )
             {
-                throw new ArgumentNullException( nameof(source) );
+                throw new ArgumentNullException( nameof( source ) );
             }
 
             if ( keySelector == null )
             {
-                throw new ArgumentNullException( nameof(keySelector) );
+                throw new ArgumentNullException( nameof( keySelector ) );
             }
 
             if ( elementSelector == null )
             {
-                throw new ArgumentNullException( nameof(elementSelector) );
+                throw new ArgumentNullException( nameof( elementSelector ) );
             }
 
             return GroupAdjacentImpl(
@@ -230,17 +230,17 @@ namespace MoreLinq
         {
             if ( source == null )
             {
-                throw new ArgumentNullException( nameof(source) );
+                throw new ArgumentNullException( nameof( source ) );
             }
 
             if ( keySelector == null )
             {
-                throw new ArgumentNullException( nameof(keySelector) );
+                throw new ArgumentNullException( nameof( keySelector ) );
             }
 
             if ( resultSelector == null )
             {
-                throw new ArgumentNullException( nameof(resultSelector) );
+                throw new ArgumentNullException( nameof( resultSelector ) );
             }
 
             // This should be removed once the target framework is bumped to something that supports covariance
@@ -290,17 +290,17 @@ namespace MoreLinq
         {
             if ( source == null )
             {
-                throw new ArgumentNullException( nameof(source) );
+                throw new ArgumentNullException( nameof( source ) );
             }
 
             if ( keySelector == null )
             {
-                throw new ArgumentNullException( nameof(keySelector) );
+                throw new ArgumentNullException( nameof( keySelector ) );
             }
 
             if ( resultSelector == null )
             {
-                throw new ArgumentNullException( nameof(resultSelector) );
+                throw new ArgumentNullException( nameof( resultSelector ) );
             }
 
             // This should be removed once the target framework is bumped to something that supports covariance
@@ -330,7 +330,7 @@ namespace MoreLinq
                 var key = keySelector( iterator.Current );
                 var element = elementSelector( iterator.Current );
 
-                if ( group is ({ } k, { } members) )
+                if ( group is ({ } k, { } members ) )
                 {
                     if ( comparer.Equals( k, key ) )
                     {
@@ -346,7 +346,7 @@ namespace MoreLinq
             }
 
             {
-                if ( group is ({ } k, { } members) )
+                if ( group is ({ } k, { } members ) )
                 {
                     yield return resultSelector( k, members );
                 }

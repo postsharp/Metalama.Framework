@@ -15,7 +15,7 @@ namespace Caravela.Framework.Aspects
     /// </summary>
     public interface IAdviceParameterList : IReadOnlyList<IAdviceParameter>
     {
-        IAdviceParameter this[ string name ] { get; }
+        IAdviceParameter this[string name] { get; }
 
         IEnumerable<IAdviceParameter> OfType( IType type );
 

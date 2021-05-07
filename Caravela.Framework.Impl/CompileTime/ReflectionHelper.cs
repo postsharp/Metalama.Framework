@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( s is IErrorTypeSymbol )
             {
-                throw new ArgumentOutOfRangeException( nameof(s), "Cannot get the name of an error symbol." );
+                throw new ArgumentOutOfRangeException( nameof( s ), "Cannot get the name of an error symbol." );
             }
 
             var sb = new StringBuilder();

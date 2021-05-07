@@ -133,7 +133,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.GenericType( typeof(SeparatedSyntaxList<>), this.MetaSyntaxFactory.Type( typeof(T) ) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.GenericType( typeof( SeparatedSyntaxList<> ), this.MetaSyntaxFactory.Type( typeof( T ) ) ) );
             }
 
             if ( list.Count == 1 )
@@ -148,7 +148,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list == null )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(BracketedArgumentListSyntax) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( BracketedArgumentListSyntax ) ) );
             }
 
             return this.MetaSyntaxFactory.BracketedArgumentList( this.Transform( list.Arguments ) );
@@ -164,7 +164,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxTokenList) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) );
             }
 
             // TODO: Using default.AddRange is not the right pattern.
@@ -172,7 +172,7 @@ namespace Caravela.Framework.Impl.Templating
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxTokenList) ) ),
+                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxTokenList ) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
@@ -190,13 +190,13 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( list.Count == 0 )
             {
-                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxList<T>) ) );
+                return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) );
             }
 
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxList<T>) ) ),
+                        DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxList<T> ) ) ),
                         IdentifierName( "AddRange" ) ) )
                 .WithArgumentList(
                     ArgumentList(
@@ -214,7 +214,7 @@ namespace Caravela.Framework.Impl.Templating
             switch ( token.Kind() )
             {
                 case SyntaxKind.None:
-                    return DefaultExpression( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) );
+                    return DefaultExpression( this.MetaSyntaxFactory.Type( typeof( SyntaxToken ) ) );
 
                 case SyntaxKind.IdentifierToken:
                     return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( token.Text ) );

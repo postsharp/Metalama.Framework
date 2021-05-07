@@ -5,6 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
 using Caravela.Framework.Project;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -24,11 +25,11 @@ namespace Caravela.Framework.Aspects
     public static class meta
 #pragma warning restore SA1300, IDE1006 // Element should begin with upper-case letter
     {
-        private static readonly AsyncLocal<ITemplateContext?> _currentContext = new();
+        private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
 
         private static readonly AsyncLocal<object?> _proceedImplementation = new();
 
-        private static ITemplateContext CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
+        private static IMetaApi CurrentContext => _currentContext.Value ?? throw NewInvalidOperationException();
 
         // TODO: update the exception message.
         private static InvalidOperationException NewInvalidOperationException() => new( "Code accessing this member has to be compiled using Caravela." );
@@ -105,16 +106,29 @@ namespace Caravela.Framework.Aspects
 
         /// <summary>
         /// Gets an object that gives access to the current type including members introduced by the current aspect.
-        /// Both instance and static members are made accessible. For instance members,
-        /// the <c>this</c> instance is assumed.
+        /// Only instance members are made accessible. To access static members, use <see cref="INamedType.AsDynamic"/>.
         /// </summary>
         [RunTimeOnly]
         public static dynamic This => CurrentContext.This;
 
         /// <summary>
+        /// Gets an object that gives access to the current type in the state it was before the current aspect.
+        /// Only instance members are made accessible. To access static members, use <see cref="INamedType.AsDynamic"/>.
+        /// </summary>
+        [RunTimeOnly]
+        public static dynamic Base => CurrentContext.Base;
+
+        /// <summary>
         /// Gets a service allowing to report and suppress diagnostics.
         /// </summary>
-        public static IDiagnosticSink Diagnostics => CurrentContext;
+        public static IDiagnosticSink Diagnostics => CurrentContext.Diagnostics;
+
+        /// <summary>
+        /// Gets the dictionary of tags that were configured by the <see cref="IAspect{T}.Initialize"/> method using 
+        /// <see cref="IAspectBuilder.Tags"/>. This property returns an immutable snapshot of the dictionary in the state it was
+        /// when the advice was created by <see cref="IAdviceFactory"/>.
+        /// </summary>
+        public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
 
         /// <summary>
         /// Injects a comment to the target code.
@@ -123,10 +137,10 @@ namespace Caravela.Framework.Aspects
         /// <remarks>
         /// This method is not able to add a comment to an empty block. The block must contain at least one statement.
         /// </remarks>
-        [Pragma]
+        [TemplateKeyword]
         public static void Comment( params string?[] lines ) => throw NewInvalidOperationException();
 
-        internal static IDisposable WithContext( ITemplateContext current, object proceedImpl )
+        internal static IDisposable WithContext( IMetaApi current, object proceedImpl )
         {
             _currentContext.Value = current;
             _proceedImplementation.Value = proceedImpl;

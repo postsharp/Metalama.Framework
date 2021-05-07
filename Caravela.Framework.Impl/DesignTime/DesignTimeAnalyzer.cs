@@ -29,10 +29,10 @@ namespace Caravela.Framework.Impl.DesignTime
 
             _supportedDiagnosticDescriptors = DiagnosticDescriptorHelper
                 .GetDiagnosticDescriptors(
-                    typeof(TemplatingDiagnosticDescriptors),
-                    typeof(DesignTimeDiagnosticDescriptors),
-                    typeof(GeneralDiagnosticDescriptors),
-                    typeof(SerializationDiagnosticDescriptors) )
+                    typeof( TemplatingDiagnosticDescriptors ),
+                    typeof( DesignTimeDiagnosticDescriptors ),
+                    typeof( GeneralDiagnosticDescriptors ),
+                    typeof( SerializationDiagnosticDescriptors ) )
                 .ToImmutableArray();
 
             DesignTimeDiagnosticIds = _supportedDiagnosticDescriptors.Select( x => x.Id ).ToImmutableHashSet();

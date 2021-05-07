@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public T? GetCompilerService<T>()
             where T : class, ICompilerService
-            => typeof(T) == typeof(IClassificationService) ? (T) (object) new ClassificationService() : null;
+            => typeof( T ) == typeof( IClassificationService ) ? (T) (object) new ClassificationService() : null;
 
         event Action<ICompilerServiceProvider>? ICompilerServiceProvider.Unloaded
         {

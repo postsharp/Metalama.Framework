@@ -45,12 +45,12 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "\t{" );
 
             var allFactoryMethods =
-                typeof(SyntaxFactory).GetMethods( BindingFlags.Static | BindingFlags.Public ).ToArray();
+                typeof( SyntaxFactory ).GetMethods( BindingFlags.Static | BindingFlags.Public ).ToArray();
 
             // Generate Visit* and Transform* methods.
-            foreach ( var method in typeof(CSharpSyntaxRewriter).GetMethods( BindingFlags.Public | BindingFlags.Instance ).OrderBy( m => m.Name ) )
+            foreach ( var method in typeof( CSharpSyntaxRewriter ).GetMethods( BindingFlags.Public | BindingFlags.Instance ).OrderBy( m => m.Name ) )
             {
-                if ( !method.Name.StartsWith( "Visit" ) || method.ReturnType != typeof(SyntaxNode) )
+                if ( !method.Name.StartsWith( "Visit" ) || method.ReturnType != typeof( SyntaxNode ) )
                 {
                     continue;
                 }
@@ -62,7 +62,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                 var factoryMethod = allFactoryMethods.Where( m => m.Name == factoryMethodName )
                     .OrderByDescending( m => m.GetParameters().Length )
                     .ThenByDescending(
-                        delegate( MethodInfo m )
+                        delegate ( MethodInfo m )
                         {
                             // Prefer tokens to strings and lists to arrays.
                             var p = m.GetParameters();
@@ -72,7 +72,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                                 return 0;
                             }
 
-                            return p[0].ParameterType == typeof(string) || p[0].ParameterType.IsArray ? 1 : 2;
+                            return p[0].ParameterType == typeof( string ) || p[0].ParameterType.IsArray ? 1 : 2;
                         } )
                     .FirstOrDefault();
 
@@ -186,13 +186,13 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
             writer.WriteLine( "\tpartial class MetaSyntaxFactoryImpl" );
             writer.WriteLine( "\t{" );
 
-            foreach ( var methodGroup in typeof(SyntaxFactory).GetMethods( BindingFlags.Public | BindingFlags.Static )
+            foreach ( var methodGroup in typeof( SyntaxFactory ).GetMethods( BindingFlags.Public | BindingFlags.Static )
                 .OrderBy( m => m.Name )
                 .GroupBy( m => m.Name ) )
             {
                 MethodInfo SelectBestMethod( IEnumerable<MethodInfo> methods )
                     => methods
-                        .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof(ParamArrayAttribute) ) ?? false ? 0 : 1 )
+                        .OrderBy( m => m.GetParameters().LastOrDefault()?.IsDefined( typeof( ParamArrayAttribute ) ) ?? false ? 0 : 1 )
                         .First();
 
                 foreach ( var methodsWithSameParameterCount in methodGroup
@@ -233,7 +233,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                                 writer.Write( ", " );
                             }
 
-                            if ( parameter.IsDefined( typeof(ParamArrayAttribute) ) )
+                            if ( parameter.IsDefined( typeof( ParamArrayAttribute ) ) )
                             {
                                 writer.Write( "params " );
                             }
@@ -247,7 +247,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
                                 writer.Write( "ExpressionSyntax" );
                             }
 
-                            if ( parameter.IsDefined( typeof(ParamArrayAttribute) ) )
+                            if ( parameter.IsDefined( typeof( ParamArrayAttribute ) ) )
                             {
                                 paramsParameter = parameter;
                                 writer.Write( "[]" );
@@ -343,7 +343,7 @@ namespace Caravela.Framework.GenerateMetaSyntaxRewriter
 
         private static bool IsEnumerable( ParameterInfo parameter )
         {
-            return parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+            return parameter.ParameterType.IsGenericType && parameter.ParameterType.GetGenericTypeDefinition() == typeof( IEnumerable<> );
         }
     }
 }

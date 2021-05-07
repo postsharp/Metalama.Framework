@@ -24,7 +24,8 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public BuildOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( options ), plugIns ) { }
+            this( new OptionsAdapter( options ), plugIns )
+        { }
 
         public BuildOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) : this( new OptionsAdapter( options ), plugIns ) { }
 

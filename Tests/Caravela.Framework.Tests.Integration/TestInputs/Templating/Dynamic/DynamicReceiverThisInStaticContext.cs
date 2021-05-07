@@ -3,7 +3,7 @@ using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
 
-namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ThisObject
+namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiverThisInStaticContext
 {
     [CompileTime]
     class Aspect
@@ -11,16 +11,16 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ThisObject
         [TestTemplate]
         dynamic? Template()
         {
-            meta.This.MyMethod();
-            meta.This.Value = 5;
+            var x = meta.This;
+            
             return default;
         }
     }
 
     [TestOutput]
-    class TargetCode
+    static class TargetCode
     {
-        int Method(int a)
+        static int Method(int a)
         {
             return a;
         }
