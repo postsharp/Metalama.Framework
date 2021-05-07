@@ -31,7 +31,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.Equal( "target", parameterInfo.Name );
                     Assert.Equal( 0, parameterInfo.Position );
-                    Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                    Assert.Equal( typeof(int), parameterInfo.ParameterType );
                 } );
         }
 
@@ -94,7 +94,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.Equal( "target", parameterInfo.Name );
                     Assert.Equal( 1, parameterInfo.Position );
-                    Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                    Assert.Equal( typeof(int), parameterInfo.ParameterType );
                 } );
         }
 
@@ -114,7 +114,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 parameterInfo =>
                 {
                     Assert.Equal( -1, parameterInfo.Position );
-                    Assert.Equal( typeof( string ), parameterInfo.ParameterType );
+                    Assert.Equal( typeof(string), parameterInfo.ParameterType );
                 } );
         }
 
@@ -134,7 +134,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 parameterInfo =>
                 {
                     Assert.Equal( -1, parameterInfo.Position );
-                    Assert.Equal( typeof( string ), parameterInfo.ParameterType );
+                    Assert.Equal( typeof(string), parameterInfo.ParameterType );
                 } );
         }
 
@@ -155,7 +155,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 {
                     Assert.Equal( "target", parameterInfo.Name );
                     Assert.Equal( 0, parameterInfo.Position );
-                    Assert.Equal( typeof( int ), parameterInfo.ParameterType );
+                    Assert.Equal( typeof(int), parameterInfo.ParameterType );
                 } );
         }
 

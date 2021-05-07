@@ -42,13 +42,13 @@ namespace Caravela.Framework.Impl.Templating
             public MemberAccessExpressionSyntax SyntaxFactoryMethod( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this.Type( typeof( SyntaxFactory ) ),
+                    this.Type( typeof(SyntaxFactory) ),
                     SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericSyntaxFactoryMethod( string name, params TypeSyntax[] typeArguments )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this.Type( typeof( SyntaxFactory ) ),
+                    this.Type( typeof(SyntaxFactory) ),
                     SyntaxFactory.GenericName(
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
@@ -77,7 +77,7 @@ namespace Caravela.Framework.Impl.Templating
 
             public ArrayTypeSyntax ArrayType<T>()
             {
-                return SyntaxFactory.ArrayType( this.Type( typeof( T ) ) )
+                return SyntaxFactory.ArrayType( this.Type( typeof(T) ) )
                     .WithRankSpecifiers(
                         SyntaxFactory.SingletonList(
                             SyntaxFactory.ArrayRankSpecifier(
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Templating
             public ExpressionSyntax Kind( SyntaxKind kind )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this.Type( typeof( SyntaxKind ) ),
+                    this.Type( typeof(SyntaxKind) ),
                     SyntaxFactory.IdentifierName( kind.ToString() ) );
 
             public ExpressionSyntax Literal( SyntaxToken literal )

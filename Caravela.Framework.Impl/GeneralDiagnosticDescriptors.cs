@@ -113,5 +113,25 @@ namespace Caravela.Framework.Impl
                 "The aspect '{0}' cannot add attribute '{1}' to member '{2}' because no compatible constructor exists for given types.",
                 _category,
                 Error );
+        
+        public static readonly StrongDiagnosticDescriptor<string>
+            InvalidCachedManifestFile = new(
+                "CR0028",
+                "The compile-time project manifest file is corrupted.",
+                "The cache file '{0}' was corrupted. It has been deleted. Please restart the compilation.",
+                _category,
+                Error );
+
+        public static readonly StrongDiagnosticDescriptor<string>
+            InvalidCompileTimeProjectResource = new(
+                "CR0029",
+                "The compile-time project resource file was corrupted.",
+                "The compile-time project in assembly '{0}' is corrupted.",
+                _category,
+                Error );
+
+            
+        
+        
     }
 }

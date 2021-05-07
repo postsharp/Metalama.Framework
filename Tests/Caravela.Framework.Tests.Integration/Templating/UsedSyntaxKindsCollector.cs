@@ -19,7 +19,7 @@ namespace Caravela.Framework.Tests.Integration.Templating
         {
             if ( node == null )
             {
-                throw new ArgumentNullException( nameof( node ) );
+                throw new ArgumentNullException( nameof(node) );
             }
 
             base.Visit( node );

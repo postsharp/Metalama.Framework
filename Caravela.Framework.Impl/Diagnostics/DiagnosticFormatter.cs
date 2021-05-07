@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Diagnostics
     {
         public static readonly DiagnosticFormatter Instance = new();
 
-        object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof( ICustomFormatter ) ? this : null;
+        object? IFormatProvider.GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : null;
 
         string ICustomFormatter.Format( string format, object? arg, IFormatProvider formatProvider )
         {

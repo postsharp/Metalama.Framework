@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.ReflectionMocks
             {
                 Property property => Create( property ),
                 Field field => Create( field ),
-                _ => throw new ArgumentOutOfRangeException( nameof( fieldOrProperty ) )
+                _ => throw new ArgumentOutOfRangeException( nameof(fieldOrProperty) )
             };
     }
 }

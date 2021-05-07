@@ -14,12 +14,10 @@ namespace Caravela.AspectWorkbench.ViewModels
         public string Text { get; }
 
         public TextRange( string classification, TextSpan span, SourceText text ) :
-            this( classification, span, text.GetSubText( span ).ToString() )
-        { }
+            this( classification, span, text.GetSubText( span ).ToString() ) { }
 
         public TextRange( string classification, TextSpan span, string text ) :
-            this( new ClassifiedSpan( classification, span ), text )
-        { }
+            this( new ClassifiedSpan( classification, span ), text ) { }
 
         public TextRange( ClassifiedSpan classifiedSpan, string text )
         {

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;
 
-        public IAdviceParameter this[int index] => this._parameters[index];
+        public IAdviceParameter this[ int index ] => this._parameters[index];
 
         public int Count => this._parameters.Length;
 
@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public IAdviceParameter this[string name]
+        public IAdviceParameter this[ string name ]
             => this.SingleOrDefault( p => p.Name == name )
                ?? throw new KeyNotFoundException( $"There is no parameter named '{name}' in method '{this._method.ToDisplayString()}" );
 

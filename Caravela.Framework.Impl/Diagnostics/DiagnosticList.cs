@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         private List<Diagnostic> GetList() => this._list ??= new List<Diagnostic>();
 
-        public void ReportDiagnostic( Diagnostic diagnostic ) => this.GetList().Add( diagnostic );
+        public void Report( Diagnostic diagnostic ) => this.GetList().Add( diagnostic );
 
         public IEnumerator<Diagnostic> GetEnumerator() => this._list?.GetEnumerator() ?? Enumerable.Empty<Diagnostic>().GetEnumerator();
 
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public int Count => this._list?.Count ?? 0;
 
-        public Diagnostic this[int index]
+        public Diagnostic this[ int index ]
         {
             get
             {

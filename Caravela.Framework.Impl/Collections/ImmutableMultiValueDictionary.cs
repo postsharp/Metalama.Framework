@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Collections
 
         IReadOnlyList<TValue> IReadOnlyMultiValueDictionary<TKey, TValue>.GetByKey( TKey key ) => this[key];
 
-        public ImmutableArray<TValue> this[TKey key]
+        public ImmutableArray<TValue> this[ TKey key ]
         {
             get
             {

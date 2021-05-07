@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             this._action = action;
         }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {

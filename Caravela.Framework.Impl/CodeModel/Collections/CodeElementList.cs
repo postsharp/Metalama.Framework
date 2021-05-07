@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this.SourceItems.Length;
 
-        public TCodeElement this[int index]
+        public TCodeElement this[ int index ]
         {
             get
             {

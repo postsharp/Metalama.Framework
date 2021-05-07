@@ -17,7 +17,7 @@ namespace Caravela.Framework.Impl.Serialization
                 .Select(
                     f => (ExpressionSyntax) SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxFactory.GetTypeSyntax( typeof( BindingFlags ) ),
+                        syntaxFactory.GetTypeSyntax( typeof(BindingFlags) ),
                         SyntaxFactory.IdentifierName( f ) ) )
                 .Aggregate( ( l, r ) => SyntaxFactory.BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
                 if ( this._parent.Count == 0 )
                 {
-                    var valueType = this._parent.Compilation.Factory.GetTypeByReflectionType( typeof( ValueType ) ).GetSymbol();
+                    var valueType = this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(ValueType) ).GetSymbol();
                     expression = SyntaxFactory.DefaultExpression( (TypeSyntax) this._parent.Compilation.SyntaxGenerator.TypeExpression( valueType ) );
                 }
                 else

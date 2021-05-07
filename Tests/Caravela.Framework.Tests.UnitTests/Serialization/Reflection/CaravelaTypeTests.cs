@@ -55,7 +55,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "System.Int32[]", info.FullName );
-                    Assert.Equal( typeof( int[] ), info );
+                    Assert.Equal( typeof(int[]), info );
                 } );
         }
 
@@ -75,7 +75,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization.Reflection
                 info =>
                 {
                     Assert.Equal( "System.Int32[,]", info.FullName );
-                    Assert.Equal( typeof( int[,] ), info );
+                    Assert.Equal( typeof(int[,]), info );
                 } );
         }
 

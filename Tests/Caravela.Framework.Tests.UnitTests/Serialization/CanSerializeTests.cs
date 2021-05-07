@@ -40,34 +40,34 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
         [Fact]
         public void Serializable()
         {
-            this.AssertCanSerialize( true, typeof( int ) );
-            this.AssertCanSerialize( true, typeof( Guid ) );
-            this.AssertCanSerialize( true, typeof( DateTime ) );
-            this.AssertCanSerialize( true, typeof( MethodInfo ) );
-            this.AssertCanSerialize( true, typeof( MethodBase ) );
+            this.AssertCanSerialize( true, typeof(int) );
+            this.AssertCanSerialize( true, typeof(Guid) );
+            this.AssertCanSerialize( true, typeof(DateTime) );
+            this.AssertCanSerialize( true, typeof(MethodInfo) );
+            this.AssertCanSerialize( true, typeof(MethodBase) );
         }
 
         [Fact]
         public void Nullable()
         {
-            this.AssertCanSerialize( true, typeof( int? ) );
+            this.AssertCanSerialize( true, typeof(int?) );
         }
 
         [Fact]
         public void Generic()
         {
-            this.AssertCanSerialize( true, typeof( IEnumerable<int> ) );
-            this.AssertCanSerialize( true, typeof( List<int> ) );
-            this.AssertCanSerialize( true, typeof( List<List<int>> ) );
-            this.AssertCanSerialize( true, typeof( List<Guid?> ) );
+            this.AssertCanSerialize( true, typeof(IEnumerable<int>) );
+            this.AssertCanSerialize( true, typeof(List<int>) );
+            this.AssertCanSerialize( true, typeof(List<List<int>>) );
+            this.AssertCanSerialize( true, typeof(List<Guid?>) );
         }
 
         [Fact]
         public void NonSerializable()
         {
-            this.AssertCanSerialize( false, typeof( AppDomain ) );
-            this.AssertCanSerialize( false, typeof( IEnumerable<AppDomain> ) );
-            this.AssertCanSerialize( false, typeof( Queue<> ) );
+            this.AssertCanSerialize( false, typeof(AppDomain) );
+            this.AssertCanSerialize( false, typeof(IEnumerable<AppDomain>) );
+            this.AssertCanSerialize( false, typeof(Queue<>) );
         }
     }
 }

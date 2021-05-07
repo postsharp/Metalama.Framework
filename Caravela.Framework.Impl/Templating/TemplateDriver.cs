@@ -6,11 +6,13 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -25,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating
         public TemplateDriver( AspectClassMetadata aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
             this._sourceTemplateSymbol = sourceTemplateSymbol;
-            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof( compiledTemplateMethodInfo ) );
+            this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
             this._aspectClass = aspectClass;
         }
 
@@ -73,7 +75,7 @@ namespace Caravela.Framework.Impl.Templating
                                        ?? this._sourceTemplateSymbol.GetDiagnosticLocation()
                                        ?? Location.None;
 
-                        diagnosticAdder.ReportDiagnostic(
+                        diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
                                 location,
                                 (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, userException.GetType().Name,
@@ -109,10 +111,10 @@ namespace Caravela.Framework.Impl.Templating
                 stackTrace
                     .GetFrames()
                     .Where( f => f.GetFileName() != null )
-                    .Select( f => (Frame: f, SyntaxTree: this._aspectClass.Project.FindSyntaxTree( f.GetFileName() )) )
-                    .FirstOrDefault( i => i.SyntaxTree != null );
+                    .Select( f => (Frame: f, File: this._aspectClass.Project.FindSourceFile( f.GetFileName() )) )
+                    .FirstOrDefault( i => i.File != null );
 
-            if ( frame.SyntaxTree == null )
+            if ( frame.File == null )
             {
                 return null;
             }
@@ -125,8 +127,10 @@ namespace Caravela.Framework.Impl.Templating
                 return null;
             }
 
+            var transformedText = SourceText.From( File.ReadAllText( frame.File ) );
+
             // Find the node in the syntax tree.
-            var textLines = frame.SyntaxTree.GetText().Lines;
+            var textLines = transformedText.Lines;
             var lineNumber = frame.Frame.GetFileLineNumber();
 
             if ( lineNumber == 0 )
@@ -150,7 +154,9 @@ namespace Caravela.Framework.Impl.Templating
 
             var position = textLine.Start + columnNumber - 1;
 
-            var node = frame.SyntaxTree.GetRoot().FindNode( TextSpan.FromBounds( position, position ) );
+            var transformedTree = CSharpSyntaxTree.ParseText( transformedText );
+
+            var node = transformedTree.GetRoot().FindNode( TextSpan.FromBounds( position, position ) );
             node = FindPotentialExceptionSource( node );
 
             if ( node != null )

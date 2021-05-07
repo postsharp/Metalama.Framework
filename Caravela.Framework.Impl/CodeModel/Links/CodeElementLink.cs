@@ -22,11 +22,11 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             where T : ICodeElement
         {
             Invariant.Implies(
-                typeof( T ) == typeof( IConstructor ),
+                typeof(T) == typeof(IConstructor),
                 symbol.GetCodeElementKind() == CodeElementKind.Constructor );
 
             Invariant.Implies(
-                typeof( T ) == typeof( IMethod ),
+                typeof(T) == typeof(IMethod),
                 symbol.GetCodeElementKind() == CodeElementKind.Method );
 
             return symbol;

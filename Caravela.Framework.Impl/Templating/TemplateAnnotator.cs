@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
         private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, Location? location, T arguments )
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
-            this._diagnosticAdder.ReportDiagnostic( diagnostic );
+            this._diagnosticAdder.Report( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {

@@ -29,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolClassifier = SymbolClassifier.GetInstance( compilation );
 
             var reflectionMapper = ReflectionMapper.GetInstance( compilation );
-            this._metaType = reflectionMapper.GetTypeSymbol( typeof( meta ) );
+            this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
         private bool IsCompileTime( ISymbol? symbol )
@@ -46,7 +46,7 @@ namespace Caravela.Framework.Impl.Templating
                 or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
         public bool IsRunTimeMethod( ISymbol symbol )
-            => symbol.Name == nameof( meta.RunTime ) &&
+            => symbol.Name == nameof(meta.RunTime) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
 
         public bool IsRunTimeMethod( SyntaxNode node )
@@ -79,7 +79,7 @@ namespace Caravela.Framework.Impl.Templating
                 if ( originalNode is InvocationExpressionSyntax invocation
                      && this._semanticAnnotationMap.GetSymbol( invocation.Expression ) is IMethodSymbol invokedMethod )
                 {
-                    return invokedMethod.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof( RunTimeOnlyAttribute ) );
+                    return invokedMethod.GetReturnTypeAttributes().Any( a => a.AttributeClass?.Name == nameof(RunTimeOnlyAttribute) );
                 }
                 else
                 {
@@ -104,14 +104,14 @@ namespace Caravela.Framework.Impl.Templating
                 return false;
             }
 
-            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof( ProceedAttribute ) );
+            return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
         }
 
 #pragma warning disable CA1822 // Static anyway.
 
         public bool HasTemplateKeywordAttribute( ISymbol symbol )
             => symbol.GetAttributes()
-                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof( TemplateKeywordAttribute ) ) );
+                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
 #pragma warning restore CA1822
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace Caravela.Framework.Impl.Templating
             {
                 switch ( symbol.Name )
                 {
-                    case nameof( meta.Comment ):
+                    case nameof(meta.Comment):
                         return MetaMemberKind.Comment;
 
-                    case nameof( meta.This ):
+                    case nameof(meta.This):
                         return MetaMemberKind.This;
 
                     default:

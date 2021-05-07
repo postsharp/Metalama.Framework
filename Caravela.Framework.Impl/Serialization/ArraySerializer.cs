@@ -44,7 +44,7 @@ namespace Caravela.Framework.Impl.Serialization
                 .NormalizeWhitespace();
         }
 
-        public override Type InputType => typeof( Array );
+        public override Type InputType => typeof(Array);
 
         public override Type OutputType => throw new NotSupportedException();
     }

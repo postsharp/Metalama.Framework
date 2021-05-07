@@ -71,7 +71,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( type == null )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.CannotFindType.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
@@ -102,7 +102,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             if ( constructors.Count == 0 )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.NoConstructor.CreateDiagnostic( attribute.GetLocation(), constructorSymbol.ContainingType ) );
 
                 attributeInstance = null;
@@ -111,7 +111,7 @@ namespace Caravela.Framework.Impl.CompileTime
             }
             else if ( constructors.Count > 1 )
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.AmbiguousConstructor.CreateDiagnostic(
                         attribute.GetLocation(),
                         constructorSymbol.ContainingType ) );
@@ -173,7 +173,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    diagnosticAdder.ReportDiagnostic(
+                    diagnosticAdder.Report(
                         AttributeDeserializerDiagnostics.CannotFindMember.CreateDiagnostic(
                             attribute.GetLocation(),
                             (constructorSymbol.ContainingType, name) ) );
@@ -218,7 +218,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             void ReportInvalidTypeDiagnostic()
             {
-                diagnosticAdder.ReportDiagnostic(
+                diagnosticAdder.Report(
                     AttributeDeserializerDiagnostics.CannotReferenceCompileTimeOnly.CreateDiagnostic(
                         attribute.GetLocation(),
                         (value.GetType(), targetType) ) );
@@ -230,7 +230,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.TryTranslateAttributeArgument( attribute, typedConstant, targetType, diagnosticAdder, out translatedValue );
 
                 case ITypeSymbol type:
-                    if ( !targetType.IsAssignableFrom( typeof( Type ) ) )
+                    if ( !targetType.IsAssignableFrom( typeof(Type) ) )
                     {
                         ReportInvalidTypeDiagnostic();
                         translatedValue = null;
@@ -244,7 +244,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 case string str:
                     // Make sure we don't fall under the IEnumerable case.
-                    if ( !targetType.IsAssignableFrom( typeof( string ) ) )
+                    if ( !targetType.IsAssignableFrom( typeof(string) ) )
                     {
                         ReportInvalidTypeDiagnostic();
                         translatedValue = null;
@@ -260,7 +260,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     // We cannot use generic collections here because array of value types are not convertible to arrays of objects.
 
                     var list = enumerable.ToReadOnlyList();
-                    var elementType = targetType.GetElementType() ?? typeof( object );
+                    var elementType = targetType.GetElementType() ?? typeof(object);
 
                     var count = 0;
 

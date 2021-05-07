@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( this._runTimeAssemblyLocator?.TryFindAssembly( runTimeAssemblyIdentity, out metadataReference ) != true )
                 {
-                    diagnosticAdder.ReportDiagnostic(
+                    diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateDiagnostic(
                             Location.None,
                             runTimeAssemblyIdentity ) );
@@ -256,11 +256,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            var resolver = new PathAssemblyResolver( new[] { typeof( object ).Assembly.Location } );
-            using var metadataLoadContext = new MetadataLoadContext( resolver, typeof( object ).Assembly.GetName().Name );
+            var resolver = new PathAssemblyResolver( new[] { typeof(object).Assembly.Location } );
+            using var metadataLoadContext = new MetadataLoadContext( resolver, typeof(object).Assembly.GetName().Name );
 
             // LoadFromAssemblyPath throws for mscorlib
-            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof( object ).Assembly.GetName().Name )
+            if ( Path.GetFileNameWithoutExtension( assemblyPath ) == typeof(object).Assembly.GetName().Name )
             {
                 compileTimeProject = null;
 
@@ -303,7 +303,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Read manifest.
             var manifestEntry = archive.GetEntry( "manifest.json" ).AssertNotNull();
-            var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
+
+            if ( !CompileTimeProjectManifest.TryDeserialize( manifestEntry.Open(), out var manifest ) )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, assemblyIdentity.ToString() ) );
+                
+                project = null;
+                return false;
+            }
 
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
@@ -346,7 +354,10 @@ namespace Caravela.Framework.Impl.CompileTime
                 referenceProjects,
                 diagnosticAdder,
                 out var compilation,
-                out var assemblyPath ) )
+                out var assemblyPath,
+                out var sourceDirectory,
+                out var sourceFiles
+                ) )
             {
                 project = null;
 
@@ -364,7 +375,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 referenceProjects,
                 manifest,
                 assemblyPath,
-                compilation.SyntaxTrees.ToArray(),
+                sourceDirectory,
+                sourceFiles,
                 TextMap.Read );
 
             return true;

@@ -34,7 +34,7 @@ namespace Caravela.Framework.Impl
             this._declarativeAdviceAttributes =
                 (from member in aspectType.GetMembers()
                  from attribute in member.GetAttributes()
-                 where attribute.AttributeClass?.Is( typeof( IAdviceAttribute ) ) ?? false
+                 where attribute.AttributeClass?.Is( typeof(IAdviceAttribute) ) ?? false
                  select (attribute, member)).ToList();
         }
 
@@ -69,7 +69,7 @@ namespace Caravela.Framework.Impl
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._compilation.GetTypeByReflectionType( typeof( IAspect<T> ) ).AssertNotNull();
+                var interfaceType = this._compilation.GetTypeByReflectionType( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectElement.CreateDiagnostic(

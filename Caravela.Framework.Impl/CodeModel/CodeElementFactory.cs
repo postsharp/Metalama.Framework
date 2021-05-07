@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.CodeModel
                 IParameterSymbol parameter => this.GetParameter( parameter ),
                 IEventSymbol @event => this.GetEvent( @event ),
                 IAssemblySymbol assembly => this.GetAssembly( assembly ),
-                _ => throw new ArgumentException( nameof( symbol ) )
+                _ => throw new ArgumentException( nameof(symbol) )
             };
 
         IArrayType ITypeFactory.MakeArrayType( IType elementType, int rank )

@@ -95,7 +95,7 @@ namespace Caravela.Framework.Impl.Pipeline
                     {
                         if ( !this.TryGetOrAddStep( aspectLayerId, -1, false, out var step ) )
                         {
-                            this._diagnostics.ReportDiagnostic(
+                            this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateDiagnostic(
                                     this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
                                     (this._currentStep.AspectLayer.AspectClass.DisplayName, aspectType.DisplayName) ) );
@@ -162,7 +162,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, depth, true, out var step ) )
                 {
-                    this._diagnostics.ReportDiagnostic(
+                    this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateDiagnostic(
                             this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
                             (this._currentStep.AspectLayer.AspectClass.DisplayName, advice.TargetDeclaration) ) );
@@ -197,12 +197,12 @@ namespace Caravela.Framework.Impl.Pipeline
         public void AddDiagnostics( IEnumerable<Diagnostic> diagnostics, IEnumerable<ScopedSuppression> suppressions )
         {
             this._diagnostics.ReportDiagnostics( diagnostics );
-            this._diagnostics.SuppressDiagnostics( suppressions );
+            this._diagnostics.Suppress( suppressions );
         }
 
         public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
             => this._nonObservableTransformations.AddRange( transformations );
 
-        public void ReportDiagnostic( Diagnostic diagnostic ) => this._diagnostics.ReportDiagnostic( diagnostic );
+        public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
     }
 }

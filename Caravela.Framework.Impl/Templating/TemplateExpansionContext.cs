@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Templating
                 return ReturnStatement();
             }
 
-            if ( this._targetMethod.ReturnType.Is( typeof( void ) ) )
+            if ( this._targetMethod.ReturnType.Is( typeof(void) ) )
             {
                 return ReturnStatement();
             }

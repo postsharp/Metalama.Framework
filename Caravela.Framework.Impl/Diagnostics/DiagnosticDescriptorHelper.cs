@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public static IEnumerable<DiagnosticDescriptor> GetDiagnosticDescriptors( Type type )
             => type.GetFields( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
-                .Where( f => typeof( IStrongDiagnosticDescriptor ).IsAssignableFrom( f.FieldType ) )
+                .Where( f => typeof(IStrongDiagnosticDescriptor).IsAssignableFrom( f.FieldType ) )
                 .Select( f => (IStrongDiagnosticDescriptor) f.GetValue( null ) )
                 .Select( d => d.ToDiagnosticDescriptor() );
     }

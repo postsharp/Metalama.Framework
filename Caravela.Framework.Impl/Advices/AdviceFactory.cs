@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Advices
         public IOverrideMethodAdvice OverrideMethod( IMethod targetMethod, string defaultTemplate, AspectLinkerOptions? aspectLinkerOptions = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof( OverrideMethodTemplateAttribute ), nameof( this.OverrideMethod ) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(OverrideMethodTemplateAttribute), nameof(this.OverrideMethod) );
 
             var advice = new OverrideMethodAdvice( this._aspect, targetMethod, templateMethod, this.Tags.ToImmutableDictionary(), aspectLinkerOptions );
             advice.Initialize( diagnosticList );
@@ -90,7 +90,7 @@ namespace Caravela.Framework.Impl.Advices
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
             var diagnosticList = new DiagnosticList();
-            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof( IntroduceMethodTemplateAttribute ), nameof( this.IntroduceMethod ) );
+            var templateMethod = this.GetTemplateMethod( defaultTemplate, typeof(IntroduceMethodTemplateAttribute), nameof(this.IntroduceMethod) );
 
             var advice = new IntroduceMethodAdvice(
                 this._aspect,

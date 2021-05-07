@@ -80,7 +80,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 foreach ( var diagnostic in exception.Diagnostics )
                 {
-                    diagnosticAdder.ReportDiagnostic( diagnostic );
+                    diagnosticAdder.Report( diagnostic );
                 }
 
                 outputCompilation = null;

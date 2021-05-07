@@ -226,13 +226,11 @@ namespace Caravela.Framework.Impl.Templating
                 if ( previousChar == '\n' || previousChar == '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
-                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ )
-                    { }
+                    for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }
                 }
 
                 // If we end with an end-of-line or space, trim it.
-                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- )
-                { }
+                for ( /*void*/; triviaEnd > triviaStart && char.IsWhiteSpace( this._sourceString[triviaEnd] ); triviaEnd-- ) { }
 
                 if ( triviaStart != triviaEnd )
                 {

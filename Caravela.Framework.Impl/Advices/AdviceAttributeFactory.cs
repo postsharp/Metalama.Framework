@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Advices
             }
 
             var aspectLinkerOptionsAttribute = templateMethod.Attributes.FirstOrDefault(
-                x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof( AspectLinkerOptionsAttribute ) ) );
+                x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
 
             AspectLinkerOptions? aspectLinkerOptions = null;
 
@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.Advices
 
                 var forceNotInlineable = false;
 
-                if ( linkerOptionsArguments.TryGetValue( nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ), out var forceNotInlineableValue ) )
+                if ( linkerOptionsArguments.TryGetValue( nameof(AspectLinkerOptionsAttribute.ForceNotInlineable), out var forceNotInlineableValue ) )
                 {
                     forceNotInlineable = (bool) forceNotInlineableValue.Value.AssertNotNull();
                 }
@@ -61,10 +61,10 @@ namespace Caravela.Framework.Impl.Advices
 
             switch ( attribute.AttributeClass?.Name )
             {
-                case nameof( IntroduceMethodAttribute ):
+                case nameof(IntroduceMethodAttribute):
                     {
-                        TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof( IntroduceMethodAttribute.ConflictBehavior ), out var conflictBehavior );
+                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
 
                         var advice = new IntroduceMethodAdvice(
                             aspect,
@@ -77,22 +77,22 @@ namespace Caravela.Framework.Impl.Advices
 
                         advice.Initialize( diagnosticAdder );
 
-                        if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
+                        if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
                             advice.Builder.Name = name;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
                         {
                             advice.Builder.IsVirtual = isVirtual;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsSealed ), out var isSealed ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsSealed), out var isSealed ) )
                         {
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Accessibility ), out var accessibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
                         {
                             advice.Builder.Accessibility = accessibility;
                         }

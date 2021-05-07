@@ -14,6 +14,5 @@ namespace Caravela.Framework.Advices
     /// Interface to be implemented by all custom attributes representing an advice.
     /// </summary>
     public interface IAdviceAttribute<T> : IAdviceAttribute
-        where T : IAdvice
-    { }
+        where T : IAdvice { }
 }

@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CodeModel.Collections
 
         public int Count => this._fields.Count + this._properties.Count;
 
-        public IFieldOrProperty this[int index]
+        public IFieldOrProperty this[ int index ]
         {
             get
             {

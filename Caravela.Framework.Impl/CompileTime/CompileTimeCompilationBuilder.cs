@@ -177,10 +177,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private bool TryEmit(
             Compilation compileTimeCompilation,
-            IDiagnosticAdder diagnosticSink )
+            IDiagnosticAdder diagnosticSink,
+            out IReadOnlyList<string> sourceFiles )
         {
             var outputPaths = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
+            var sourceFilesList = new List<string>();
+            
             DeleteOutputFiles();
 
             try
@@ -223,7 +226,11 @@ namespace Caravela.Framework.Impl.CompileTime
                                 _ = names.Add( treeName );
                             }
 
-                            var path = Path.Combine( outputPaths.Directory, treeName + ".cs" );
+                            treeName = treeName + ".cs";
+                            
+                            sourceFilesList.Add( treeName );
+
+                            var path = Path.Combine( outputPaths.Directory, treeName );
                             var text = tree.GetText();
 
                             // Write the file in a retry loop to handle locks. It seems there are still file lock issues
@@ -260,6 +267,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     DeleteOutputFiles();
                 }
 
+                sourceFiles = sourceFilesList;
                 return emitResult.Success;
             }
             catch
@@ -378,7 +386,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink ) )
+                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, out var sourceFiles ) )
                     {
                         project = null;
 
@@ -388,7 +396,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     var locationMaps = CreateLocationMaps( compileTimeCompilation, locationAnnotationMap! );
                     WriteLocationMaps( locationMaps, outputPaths.Directory );
 
-                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof( IAspect ).FullName );
+                    var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
 
                     var manifest = new CompileTimeProjectManifest(
                         compileTimeCompilation.AssemblyName!,
@@ -407,12 +415,13 @@ namespace Caravela.Framework.Impl.CompileTime
                         referencedProjects,
                         manifest,
                         outputPaths.PE,
-                        compileTimeCompilation.SyntaxTrees.ToArray(),
+                        outputPaths.Directory,
+                        sourceFiles,
                         name => GetLocationMap( locationMaps, name ) );
 
                     using ( var manifestStream = File.Create( outputPaths.Manifest ) )
                     {
-                        project.Serialize( manifestStream );
+                        manifest.Serialize( manifestStream );
                     }
                 }
             }
@@ -420,17 +429,38 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 // The project exists in the cache.
 
-                var manifest = CompileTimeProjectManifest.Deserialize( File.OpenRead( outputPaths.Manifest ) );
 
-                project = CompileTimeProject.Create(
-                    this._domain,
-                    runTimeCompilation.Assembly.Identity,
-                    new AssemblyIdentity( compileTimeAssemblyName ),
-                    referencedProjects,
-                    manifest,
-                    outputPaths.PE,
-                    null,
-                    TextMap.Read );
+
+                if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
+                {
+                    // Read all syntax trees in the directory.
+                    var sourceFiles = Directory.GetFiles( outputPaths.Directory, "*.cs" ).ToList();
+                    
+                    
+                    project = CompileTimeProject.Create(
+                        this._domain,
+                        runTimeCompilation.Assembly.Identity,
+                        new AssemblyIdentity( compileTimeAssemblyName ),
+                        referencedProjects,
+                        manifest,
+                        outputPaths.PE,
+                        outputPaths.Directory,
+                        sourceFiles,
+                        TextMap.Read );
+                }
+                else
+                {
+                    try
+                    {
+                        File.Delete( outputPaths.Manifest );
+                    }
+                    catch ( IOException )
+                    {
+                        
+                    }
+
+                    diagnosticSink.Report( GeneralDiagnosticDescriptors.InvalidCachedManifestFile.CreateDiagnostic( Location.None, outputPaths.Manifest ) );
+                }
             }
 
             this._cache.Add( projectHash, project );
@@ -468,7 +498,9 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticAdder,
             out Compilation compilation,
-            out string assemblyPath )
+            out string assemblyPath,
+            out string sourceDirectory,
+            out IReadOnlyList<string> sourceFiles )
         {
             var outputPaths = this.GetOutputPaths( assemblyName );
 
@@ -476,8 +508,9 @@ namespace Caravela.Framework.Impl.CompileTime
                 .AddSyntaxTrees( syntaxTrees );
 
             assemblyPath = outputPaths.PE;
+            sourceDirectory = outputPaths.Directory;
 
-            return this.TryEmit( compilation, diagnosticAdder );
+            return this.TryEmit( compilation, diagnosticAdder, out sourceFiles );
         }
     }
 }

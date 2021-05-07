@@ -31,13 +31,13 @@ namespace Caravela.Framework.Impl.Templating
             public MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
+                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
                     SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericTemplateSyntaxFactoryMember( string name, params TypeSyntax[] genericParameters )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    this._metaSyntaxFactory.Type( typeof( TemplateSyntaxFactory ) ),
+                    this._metaSyntaxFactory.Type( typeof(TemplateSyntaxFactory) ),
                     SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
                         .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
 
@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating
             /// <param name="hint"></param>
             /// <returns></returns>
             public ExpressionSyntax GetUniqueIdentifier( string hint )
-                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.GetUniqueIdentifier ) ) )
+                => SyntaxFactory.InvocationExpression( this.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetUniqueIdentifier) ) )
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList<ArgumentSyntax>(
@@ -73,7 +73,7 @@ namespace Caravela.Framework.Impl.Templating
                 var invocation = SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            this._metaSyntaxFactory.Type( typeof( Location ) ),
+                            this._metaSyntaxFactory.Type( typeof(Location) ),
                             SyntaxFactory.IdentifierName( "Create" ) ) )
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
@@ -110,7 +110,7 @@ namespace Caravela.Framework.Impl.Templating
                 => this.LinePosition( SyntaxFactoryEx.LiteralExpression( linePosition.Line ), SyntaxFactoryEx.LiteralExpression( linePosition.Character ) );
 
             public ObjectCreationExpressionSyntax LinePosition( ExpressionSyntax startLine, ExpressionSyntax startChar )
-                => SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof( LinePosition ) ) )
+                => SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof(LinePosition) ) )
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList( new[] { SyntaxFactory.Argument( startLine ), SyntaxFactory.Argument( startChar ) } ) ) );

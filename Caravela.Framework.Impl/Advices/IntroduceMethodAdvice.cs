@@ -66,7 +66,7 @@ namespace Caravela.Framework.Impl.Advices
                     if ( this.TargetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
-                        diagnosticAdder.ReportDiagnostic(
+                        diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration) ) );
@@ -101,7 +101,7 @@ namespace Caravela.Framework.Impl.Advices
             if ( this.TemplateMethod.ReturnParameter.ParameterType.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof( object ) );
+                this._methodBuilder.ReturnParameter.ParameterType = this._methodBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {

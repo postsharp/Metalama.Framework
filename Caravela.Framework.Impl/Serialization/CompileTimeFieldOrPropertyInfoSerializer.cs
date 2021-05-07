@@ -58,13 +58,13 @@ namespace Caravela.Framework.Impl.Serialization
                     throw new NotImplementedException();
             }
 
-            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof( FieldOrPropertyInfo ) ) )
+            return ObjectCreationExpression( syntaxFactory.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
                 .AddArgumentListArguments( Argument( propertyInfo ) )
                 .NormalizeWhitespace();
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( MemberInfo ), typeof( MethodBase ) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }
 }

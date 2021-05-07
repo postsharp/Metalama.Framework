@@ -18,8 +18,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base(
             new PipelineStepId( aspectLayer.AspectLayerId, -1 ),
-            aspectLayer )
-        { }
+            aspectLayer ) { }
 
         public override CompilationModel Execute( CompilationModel compilation, PipelineStepsState pipelineStepsState )
         {

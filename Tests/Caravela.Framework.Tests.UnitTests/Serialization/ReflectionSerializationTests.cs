@@ -34,7 +34,7 @@ class C
                 "System.Reflection.MethodBase.GetMethodFromHandle(Caravela.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
 
             var methodInfo = (MethodInfo) ExecuteExpression( code, serialized )!;
-            Assert.Equal( 42, methodInfo.MakeGenericMethod( typeof( int ) ).Invoke( null, new object[] { 21 } ) );
+            Assert.Equal( 42, methodInfo.MakeGenericMethod( typeof(int) ).Invoke( null, new object[] { 21 } ) );
         }
 
         [Fact]

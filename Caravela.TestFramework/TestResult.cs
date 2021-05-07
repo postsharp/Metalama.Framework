@@ -38,7 +38,7 @@ namespace Caravela.TestFramework
             this.InitialCompilation = initialCompilation;
         }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
             this._diagnostics.Add( diagnostic );
         }

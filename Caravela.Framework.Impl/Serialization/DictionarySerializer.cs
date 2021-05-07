@@ -32,7 +32,7 @@ namespace Caravela.Framework.Impl.Serialization
             object defaultComparer = GetDefaultComparer( dictionary );
             object actualComparer = dictionary.Comparer;
 
-            if ( keyType == typeof( string ) )
+            if ( keyType == typeof(string) )
             {
                 string? comparerName = null;
 
@@ -82,7 +82,7 @@ namespace Caravela.Framework.Impl.Serialization
                 {
                     var comparerExpression = MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            syntaxFactory.GetTypeSyntax( typeof( StringComparer ) ),
+                            syntaxFactory.GetTypeSyntax( typeof(StringComparer) ),
                             IdentifierName( comparerName ) )
                         .NormalizeWhitespace();
 
@@ -123,10 +123,10 @@ namespace Caravela.Framework.Impl.Serialization
             return creationExpression;
         }
 
-        public override Type InputType => typeof( IReadOnlyDictionary<,> );
+        public override Type InputType => typeof(IReadOnlyDictionary<,>);
 
-        public override Type OutputType => typeof( Dictionary<,> );
+        public override Type OutputType => typeof(Dictionary<,>);
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( IDictionary<,> ) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }
 }

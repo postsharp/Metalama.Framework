@@ -134,7 +134,7 @@ namespace Caravela.Framework.Impl.Templating
         {
             if ( !textSpan.Span.Contains( splitPosition ) || splitPosition == textSpan.Span.Start )
             {
-                throw new ArgumentException( nameof( splitPosition ) );
+                throw new ArgumentException( nameof(splitPosition) );
             }
 
             return (new MarkedTextSpan( TextSpan.FromBounds( textSpan.Span.Start, splitPosition ), textSpan.Classification ),
@@ -161,7 +161,7 @@ namespace Caravela.Framework.Impl.Templating
 
         public IEnumerable<ClassifiedTextSpan> GetClassifiedSpans( TextSpan textSpan )
         {
-            var previousSpan = default( ClassifiedTextSpan );
+            var previousSpan = default(ClassifiedTextSpan);
 
             foreach ( var pair in this._spans.GetItemsGreaterOrEqualThan( textSpan.Start, true ) )
             {

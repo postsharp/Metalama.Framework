@@ -256,13 +256,13 @@ class C
             var parameterType = Assert.Single( parameterTypes )!;
 
             Assert.Equal( "int[]", parameterType.ToString() );
-            Assert.True( parameterType.Is( typeof( int[] ) ) );
-            Assert.False( parameterType.Is( typeof( int[,] ) ) );
+            Assert.True( parameterType.Is( typeof(int[]) ) );
+            Assert.False( parameterType.Is( typeof(int[,]) ) );
 
             var arrayType = Assert.IsAssignableFrom<IArrayType>( parameterType );
 
             Assert.Equal( "int", arrayType.ElementType.ToString() );
-            Assert.True( arrayType.ElementType.Is( typeof( int ) ) );
+            Assert.True( arrayType.ElementType.Is( typeof(int) ) );
             Assert.Equal( 1, arrayType.Rank );
         }
 
@@ -465,16 +465,16 @@ class C
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",
-                compilation.Factory.GetTypeByReflectionType( typeof( List<>.Enumerator ) )!.ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof(List<>.Enumerator) )!.ToString() );
 
             Assert.Equal(
                 "System.Collections.Generic.Dictionary<int, string>",
-                compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<int, string> ) )!.ToString() );
+                compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<int, string>) )!.ToString() );
 
-            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof( int[][,] ) )!.ToString() );
-            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof( void* ) )!.ToString() );
+            Assert.Equal( "int[][*,*]", compilation.Factory.GetTypeByReflectionType( typeof(int[][,]) )!.ToString() );
+            Assert.Equal( "void*", compilation.Factory.GetTypeByReflectionType( typeof(void*) )!.ToString() );
 
-            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof( int ).MakeByRefType() ) );
+            Assert.Throws<ArgumentException>( () => compilation.Factory.GetTypeByReflectionType( typeof(int).MakeByRefType() ) );
         }
 
         [Fact]
@@ -541,8 +541,8 @@ class C<TC>
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) )!;
-            var stringType = compilation.Factory.GetTypeByReflectionType( typeof( string ) )!;
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) )!;
+            var stringType = compilation.Factory.GetTypeByReflectionType( typeof(string) )!;
 
             var openTypeMethod = type.Methods.First();
             var closedTypeMethod = type.WithGenericArguments( stringType ).Methods.First();

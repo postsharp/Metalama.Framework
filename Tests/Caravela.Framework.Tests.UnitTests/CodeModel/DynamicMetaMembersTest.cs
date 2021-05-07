@@ -74,7 +74,7 @@ class TargetCode
                     new RuntimeExpression( (ExpressionSyntax) generator.LiteralExpression( "x" ) ) ) );
 
             // Test in/out.
-            var intType = compilation.Factory.GetTypeByReflectionType( typeof( int ) );
+            var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             AssertEx.DynamicEquals(
                 byRefMethod.Invoke(
@@ -109,8 +109,8 @@ class TargetCode
             var compilation = CreateCompilation( code );
 
             var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
-            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( string ) )! );
-            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof( int ) )! );
+            var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) )! );
+            var method = nestedType.Methods.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(int) )! );
 
             AssertEx.DynamicEquals(
                 method.Invoke( null ),
@@ -166,7 +166,7 @@ class TargetCode
             Assert.Equal( adviceParameterList[0], adviceParameterList["i"] );
             Assert.Equal( adviceParameterList[1], adviceParameterList["j"] );
 
-            Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof( int ) ) )!.Name );
+            Assert.Equal( "i", Assert.Single( adviceParameterList.OfType( typeof(int) ) )!.Name );
         }
 
         [Fact]
