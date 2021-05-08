@@ -80,14 +80,14 @@ namespace Caravela.Framework.Impl.DesignTime
                         {
                             foreach ( var sourceFile in configuration.CompileTimeProject.CodeFiles )
                             {
-                                // TODO: find the original syntax tree. We cannot currently do that because the name of the syntax tree may have changed.
-
+                                // TODO: less computationally intensive algorithm.
+                                
                                 var syntaxTree =
-                                    compilation.Compilation.SyntaxTrees.Single( t => Path.GetFileName( t.FilePath ) == Path.GetFileName( sourceFile ) );
+                                    compilation.Compilation.SyntaxTrees.Single( t => sourceFile.SourceEquals( t ) );
 
                                 // We will have to somehow store the mapping.
                                 
-                                _ = this._configurationCacheDependencies.TryAdd( sourceFile, syntaxTree );
+                                _ = this._configurationCacheDependencies.TryAdd(syntaxTree.FilePath, syntaxTree );
                             }
                         }
 

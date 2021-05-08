@@ -14,30 +14,37 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class CompileTimeProjectManifest
     {
-        public CompileTimeProjectManifest( string assemblyName, IReadOnlyList<string> aspectTypes, IReadOnlyList<string>? references, ulong sourceHash )
+        public CompileTimeProjectManifest( string assemblyName, IReadOnlyList<string> aspectTypes, IReadOnlyList<string>? references, ulong sourceHash, IReadOnlyList<CompileTimeFile> files )
         {
             this.AssemblyName = assemblyName;
             this.AspectTypes = aspectTypes;
             this.References = references;
             this.SourceHash = sourceHash;
+            this.Files = files;
         }
 
-        public string AssemblyName { get; init; }
+        public string AssemblyName { get; }
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
         /// </summary>
-        public IReadOnlyList<string> AspectTypes { get; init; }
+        public IReadOnlyList<string> AspectTypes { get; }
 
         /// <summary>
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
-        public IReadOnlyList<string>? References { get; init; }
+        public IReadOnlyList<string>? References { get; }
 
         /// <summary>
         /// Gets a unique hash of the source code and its dependencies.
         /// </summary>
-        public ulong SourceHash { get; init; }
+        public ulong SourceHash { get; }
+        
+        
+        /// <summary>
+        /// Gets the list of code files.
+        /// </summary>
+        public IReadOnlyList<CompileTimeFile> Files { get; }
 
         public static bool TryDeserialize( Stream stream, [NotNullWhen(true)] out CompileTimeProjectManifest? manifest )
         {

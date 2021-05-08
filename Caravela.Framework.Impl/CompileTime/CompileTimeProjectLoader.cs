@@ -353,10 +353,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 syntaxTrees,
                 referenceProjects,
                 diagnosticAdder,
-                out var compilation,
                 out var assemblyPath,
-                out var sourceDirectory,
-                out var sourceFiles ) )
+                out var sourceDirectory ) )
             {
                 project = null;
 
@@ -375,7 +373,6 @@ namespace Caravela.Framework.Impl.CompileTime
                 manifest,
                 assemblyPath,
                 sourceDirectory,
-                sourceFiles,
                 TextMap.Read );
 
             return true;

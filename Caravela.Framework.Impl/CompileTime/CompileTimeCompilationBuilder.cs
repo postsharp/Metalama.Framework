@@ -76,7 +76,8 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong hash,
             IDiagnosticAdder diagnosticSink,
             out Compilation? compileTimeCompilation,
-            out ILocationAnnotationMap? locationAnnotationMap )
+            out ILocationAnnotationMap? locationAnnotationMap,
+            out Dictionary<string, SyntaxTree>? syntaxTreeMap )
         {
             locationAnnotationMap = null;
 
@@ -84,7 +85,7 @@ namespace Caravela.Framework.Impl.CompileTime
             if ( treesWithCompileTimeCode.Count == 0 )
             {
                 compileTimeCompilation = null;
-
+                syntaxTreeMap = null;
                 return true;
             }
 
@@ -99,14 +100,18 @@ namespace Caravela.Framework.Impl.CompileTime
                 diagnosticSink,
                 templateCompiler );
 
-            var modifiedSyntaxTrees =
-                treesWithCompileTimeCode.Select(
-                        t => CSharpSyntaxTree.Create(
-                            (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ),
-                            CSharpParseOptions.Default,
-                            t.FilePath,
-                            Encoding.UTF8 ) )
-                    .ToList();
+            // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
+            var syntaxTrees = treesWithCompileTimeCode.Select(
+                    t => (TransformedTree: CSharpSyntaxTree.Create(
+                                  (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ),
+                                  CSharpParseOptions.Default,
+                                  t.FilePath,
+                                  Encoding.UTF8 )
+                              .WithFilePath( GetTransformedFilePath( t.FilePath ) ),
+                          SourceTree: t) )
+                .ToList();
+
+            syntaxTreeMap = syntaxTrees.ToDictionary( t => t.TransformedTree.FilePath, t => t.SourceTree );
 
             locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
@@ -122,11 +127,24 @@ namespace Caravela.Framework.Impl.CompileTime
                 return true;
             }
 
-            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( modifiedSyntaxTrees );
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t=>t.TransformedTree ) );
 
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             return true;
+        }
+
+        private static string GetTransformedFilePath( string originalFilePath )
+        {
+            // Find a decent and unique name.
+            var transformedFileName = !string.IsNullOrWhiteSpace( originalFilePath )
+                ? Path.GetFileNameWithoutExtension( originalFilePath ) 
+                : "Anonymous";
+
+            transformedFileName += "_" + HashUtilities.HashString( originalFilePath );
+            transformedFileName += Path.GetExtension( originalFilePath );
+
+            return transformedFileName;
         }
 
         internal static string GetCompileTimeAssemblyName( string runTimeAssemblyName, IEnumerable<CompileTimeProject> referencedProjects, ulong sourceHash )
@@ -178,11 +196,12 @@ namespace Caravela.Framework.Impl.CompileTime
         private bool TryEmit(
             Compilation compileTimeCompilation,
             IDiagnosticAdder diagnosticSink,
-            out IReadOnlyList<string> sourceFiles )
+            IReadOnlyDictionary<string,SyntaxTree>? syntaxTreeMap,
+            out IReadOnlyList<CompileTimeFile>? codeFiles )
         {
             var outputPaths = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
-            var sourceFilesList = new List<string>();
+            var sourceFilesList = new List<CompileTimeFile>();
             
             DeleteOutputFiles();
 
@@ -207,31 +226,18 @@ namespace Caravela.Framework.Impl.CompileTime
                         compileTimeCompilation =
                             compileTimeCompilation.WithOptions( compileTimeCompilation.Options.WithOptimizationLevel( OptimizationLevel.Debug ) );
 
-                        var names = new HashSet<string>( StringComparer.OrdinalIgnoreCase );
-
-                        foreach ( var tree in compileTimeCompilation.SyntaxTrees )
+                        foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                         {
-                            // Find a decent and unique name.
-                            var treeName = !string.IsNullOrWhiteSpace( tree.FilePath ) ? Path.GetFileNameWithoutExtension( tree.FilePath ) : "Anonymous";
 
-                            if ( names.Contains( treeName ) )
+                            var transformedFileName = Path.Combine( outputPaths.Directory, compileTimeSyntaxTree.FilePath );
+
+                            if ( syntaxTreeMap != null )
                             {
-                                var treeNameSuffix = treeName;
-
-                                for ( var i = 1; names.Contains( treeName = treeNameSuffix + "_" + i ); i++ )
-                                {
-                                    // Intentionally empty.
-                                }
-
-                                _ = names.Add( treeName );
+                                sourceFilesList.Add( new CompileTimeFile( transformedFileName, syntaxTreeMap[compileTimeSyntaxTree.FilePath] ) );
                             }
 
-                            treeName += ".cs";
-                            
-                            sourceFilesList.Add( treeName );
-
-                            var path = Path.Combine( outputPaths.Directory, treeName );
-                            var text = tree.GetText();
+                            var path = Path.Combine( outputPaths.Directory, transformedFileName );
+                            var text = compileTimeSyntaxTree.GetText();
 
                             // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                             // despite the Mutex. 
@@ -245,8 +251,8 @@ namespace Caravela.Framework.Impl.CompileTime
                                 } );
 
                             // Update the link to the file path.
-                            var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) tree.GetRoot(), (CSharpParseOptions?) tree.Options, path, Encoding.UTF8 );
-                            compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( tree, newTree );
+                            var newTree = CSharpSyntaxTree.Create( (CSharpSyntaxNode) compileTimeSyntaxTree.GetRoot(), (CSharpParseOptions?) compileTimeSyntaxTree.Options, path, Encoding.UTF8 );
+                            compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                         }
                     }
                     finally
@@ -267,7 +273,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     DeleteOutputFiles();
                 }
 
-                sourceFiles = sourceFilesList;
+                codeFiles = sourceFilesList;
                 return emitResult.Success;
             }
             catch
@@ -331,13 +337,13 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private bool TryCreateCompileTimeProject(
             Compilation runTimeCompilation,
-            IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
+            IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
             out CompileTimeProject? project )
         {
             // Check the in-process cache.
-            var sourceHash = ComputeSourceHash( treesWithCompileTimeCode );
+            var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash );
 
             if ( this._cache.TryGetValue( projectHash, out project ) )
@@ -353,12 +359,13 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Generate the C# compilation.
                 if ( !this.TryCreateCompileTimeCompilation(
                     runTimeCompilation,
-                    treesWithCompileTimeCode,
+                    sourceTreesWithCompileTimeCode,
                     referencedProjects,
                     projectHash,
                     diagnosticSink,
                     out var compileTimeCompilation,
-                    out var locationAnnotationMap ) )
+                    out var locationAnnotationMap,
+                    out var syntaxTreeMap) )
                 {
                     project = null;
 
@@ -386,7 +393,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, out var sourceFiles ) )
+                    if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, syntaxTreeMap, out var sourceFiles ) )
                     {
                         project = null;
 
@@ -406,7 +413,8 @@ namespace Caravela.Framework.Impl.CompileTime
                             .Select( t => t.GetReflectionNameSafe() )
                             .ToList(),
                         referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
-                        sourceHash );
+                        sourceHash,
+                        sourceFiles);
 
                     project = CompileTimeProject.Create(
                         this._domain,
@@ -416,7 +424,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         manifest,
                         outputPaths.PE,
                         outputPaths.Directory,
-                        sourceFiles,
                         name => GetLocationMap( locationMaps, name ) );
 
                     using ( var manifestStream = File.Create( outputPaths.Manifest ) )
@@ -432,8 +439,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
                 {
                     // Read all syntax trees in the directory.
-                    var sourceFiles = Directory.GetFiles( outputPaths.Directory, "*.cs" ).ToList();
-
+                    
                     project = CompileTimeProject.Create(
                         this._domain,
                         runTimeCompilation.Assembly.Identity,
@@ -442,7 +448,6 @@ namespace Caravela.Framework.Impl.CompileTime
                         manifest,
                         outputPaths.PE,
                         outputPaths.Directory,
-                        sourceFiles,
                         TextMap.Read );
                 }
                 else
@@ -493,20 +498,18 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<SyntaxTree> syntaxTrees,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticAdder,
-            out Compilation compilation,
             out string assemblyPath,
-            out string sourceDirectory,
-            out IReadOnlyList<string> sourceFiles )
+            out string sourceDirectory )
         {
             var outputPaths = this.GetOutputPaths( assemblyName );
 
-            compilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects )
+            var compilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
             assemblyPath = outputPaths.PE;
             sourceDirectory = outputPaths.Directory;
 
-            return this.TryEmit( compilation, diagnosticAdder, out sourceFiles );
+            return this.TryEmit( compilation, diagnosticAdder,null, out _ );
         }
     }
 }
