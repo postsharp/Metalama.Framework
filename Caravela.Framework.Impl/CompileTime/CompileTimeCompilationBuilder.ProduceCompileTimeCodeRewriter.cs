@@ -205,7 +205,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
                 else
                 {
-                    yield return (MethodDeclarationSyntax) this.Visit( node ).AssertNotNull();
+                    yield return (BasePropertyDeclarationSyntax) this.Visit( node ).AssertNotNull();
                 }
             }
 

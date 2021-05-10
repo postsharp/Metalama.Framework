@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Linking
                 var propertyAccessNode = node.Right switch
                 {
                     AssignmentExpressionSyntax innerAssignment => innerAssignment.Left,
-                    _ => node.Right
+                    _ => node.Left
                 };
 
                 var annotation = propertyAccessNode.GetLinkerAnnotation();
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.Linking
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
                     // Inline the accessor body.
-                    return this.GetInlinedBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
+                    return this.GetInlinedBody( resolvedSymbol, null );
                 }
                 else
                 {
@@ -133,8 +133,17 @@ namespace Caravela.Framework.Impl.Linking
                 var innerRewriter = new PropertySetInliningRewriter( this.AnalysisRegistry, this.SemanticModel, calledProperty, returnVariableName, labelId );
                 var declaration = (AccessorDeclarationSyntax) calledProperty.SetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
 
-                // Run the inlined method's body through the rewriter.
-                var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
+                // Run the inlined method's body through the rewriter.                
+                var rewrittenBlock =
+                    declaration switch
+                    {
+                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
+                        { ExpressionBody: not null } => 
+                            (BlockSyntax) innerRewriter.Visit( 
+                                Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
+                            .AssertNotNull(), // TODO: Preserve trivias.
+                        _ => throw new NotSupportedException(), // TODO: Auto-properties.
+                    };
 
                 // Mark the block as flattenable (this is the root block so it will not get marked by the inner rewriter).
                 rewrittenBlock = rewrittenBlock.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );

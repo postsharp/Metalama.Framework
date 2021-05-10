@@ -20,4 +20,5 @@ internal class TargetClass
             throw;
         }
     }
+
 }

@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.Linking
     // Inlining is supported only for specific code constructions, i.e. places where annotated method call is present:
     //  * <variable> = <annotated_method_call>;
     //  * return <annotated_method_call>;
-    //  * <annotated_method_call>; (not yet implemented)
+    //  * <annotated_method_call>;
     //
     //  Explicitly not supported are expressions outside of expression statement. 
 
@@ -81,6 +81,10 @@ namespace Caravela.Framework.Impl.Linking
 
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
             {
+                // Inlined form:
+                //   <variable> = <annotated_method_call>;
+                //   _ = <annotated_method_call>;
+
                 var annotation = node.Right.GetLinkerAnnotation();
 
                 if ( annotation == null )
@@ -101,13 +105,6 @@ namespace Caravela.Framework.Impl.Linking
 
                 if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
                 {
-                    // TODO: Inlineability also depends on parameters passed. 
-                    //       Method is inlineable if only if:
-                    //           * Call's argument expressions match parameter names of the caller.
-                    //           * Parameter names of the caller match parameter names of the callee.
-                    //           * Caller and callee signatures are equal.
-                    //       This is satisfied for all proceed().
-
                     // Inline the method body.
                     return this.GetInlinedMethodBody( resolvedSymbol, GetAssignmentVariableName( node.Left ) );
                 }
@@ -123,6 +120,47 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
+            public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+            {
+                // Supports inlining in form:
+                //    <annotated_method_call>;
+
+                var annotation = node.Expression.GetLinkerAnnotation();
+
+                if ( annotation == null )
+                {
+                    return base.VisitExpressionStatement( node );
+                }
+
+                var invocation = (InvocationExpressionSyntax) node.Expression;
+
+                // This is an invocation of a method that can be possibly inlined.
+                var calleeSymbol = this.SemanticModel.GetSymbolInfo( invocation ).Symbol.AssertNotNull();
+
+                // We are on an assignment of a method return value to a variable.
+                var resolvedSymbol = (IMethodSymbol) this.AnalysisRegistry.ResolveSymbolReference(
+                    this._contextMethod,
+                    calleeSymbol,
+                    annotation.AssertNotNull() );
+
+                if ( this.AnalysisRegistry.IsInlineable( resolvedSymbol ) )
+                {
+                    // Inline the method body.
+                    return this.GetInlinedMethodBody( resolvedSymbol, null );
+                }
+                else
+                {
+                    // Replace with invocation of the correct override.
+                    return
+                        base.VisitExpressionStatement(
+                            node.Update(
+                                invocation.Update(
+                                    ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
+                                    invocation.ArgumentList ),
+                                node.SemicolonToken) );
+                }
+            }
+
             private BlockSyntax? GetInlinedMethodBody( IMethodSymbol calledMethodSymbol, string? returnVariableName )
             {
                 var labelId = this.GetNextReturnLabelId();
@@ -132,10 +170,9 @@ namespace Caravela.Framework.Impl.Linking
                 var declaration = (MethodDeclarationSyntax) calledMethodSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
 
                 // Run the inlined method's body through the rewriter.
-                var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
-
-                // TODO: Replace with unified annotation for prettification rewriter.
-                rewrittenBlock = rewrittenBlock.WithAdditionalAnnotations( new SyntaxAnnotation( _inlineableBlockAnnotationId ) );
+                var rewrittenBlock =
+                    (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull()
+                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
                 if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
                      || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )

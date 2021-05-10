@@ -16,5 +16,5 @@ internal class TargetClass
         int x = 0;
     }
 #pragma warning restore CS0219
-}
 
+}

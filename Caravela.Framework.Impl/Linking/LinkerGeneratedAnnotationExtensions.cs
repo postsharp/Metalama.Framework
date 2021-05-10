@@ -10,11 +10,11 @@ namespace Caravela.Framework.Impl.Linking
     {
         public const string AnnotationKind = "CaravelaAspectLinkerGeneratedNode";
 
-        public static LinkerGeneratedFlags? GetLinkerGeneratedFlags( this SyntaxNode node )
+        public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxNode node )
         {
             var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;
 
-            return annotationValue != null ? LinkerGeneratedAnnotation.FromString( annotationValue ).Flags : null;
+            return annotationValue != null ? LinkerGeneratedAnnotation.FromString( annotationValue ).Flags : LinkerGeneratedFlags.None;
         }
 
         public static T AddLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )

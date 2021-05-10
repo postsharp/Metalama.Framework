@@ -1,219 +1,194 @@
 [TestOutput]
 internal class TargetClass
 {
-    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private int _instanceField__BackingField;
-
     [Override]
-    private int _instanceField
-    {
-        get
-        {            
-            Console.WriteLine("This is the overridden getter.");
-            return _instanceField__BackingField;
-        }
-
-        set
-        {
-            Console.WriteLine($"This is the overridden setter.");
-            _instanceField__BackingField = value;
-        }
-    }
-
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private int _initializerField__BackingField = 42;
-
+    private int _instanceField;
     [Override]
-    private int _initializerField
-    {
-        get
-        {            
-            Console.WriteLine("This is the overridden getter.");
-            return _instanceField__BackingField;
-        }
-
-        set
-        {
-            Console.WriteLine($"This is the overridden setter.");
-            _instanceField__BackingField = value;
-        }
-    }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int _readOnlyField__BackingField;  
-    
+    private int _initializerField = 42;
+    // Needs to change accesses in ctors to the newly defined backing field.
+    // Linker needs to rewrite ctor bodies if there is any such field.
     [Override]
-    private int _readOnlyField
-    {
-        get 
-        {
-            Console.WriteLine("This is the overridden getter.");
-            return _readOnlyField__BackingField;
-        }
-    }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int _initializerReadOnlyField__BackingField = 42;  
-    
+    private readonly int _readOnlyField;
     [Override]
-    private int _initializerReadOnlyField
-    {
-        get 
-        {
-            Console.WriteLine("This is the overridden getter.");
-            return _initializerReadOnlyField__BackingField;
-        }
-    }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private int PublicInstanceField__BackingField;
-
+    private readonly int _initializerReadOnlyField = 42;
     [Override]
-    public int PublicInstanceField
-    {
-        get
-        {            
-            Console.WriteLine("This is the overridden getter.");
-            return PublicInstanceField__BackingField;
-        }
-
-        set
-        {
-            Console.WriteLine($"This is the overridden setter.");
-            PublicInstanceField__BackingField = value;
-        }
-    }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private static int PublicStaticField__BackingField;
-        
+    public int PublicInstanceField;
     [Override]
-    public int PublicStaticField
-    {
-        get
-        {            
-            Console.WriteLine("This is the overridden getter.");
-            return PublicStaticField__BackingField;
-        }
-
-        set
-        {
-            Console.WriteLine($"This is the overridden setter.");
-            PublicStaticField__BackingField = value;
-        }
-    }
-    
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int AutoProperty__BackingField;
-
+    public static int PublicStaticField;
+    // Same as readonly field.
     [Override]
     public int AutoProperty
     {
         get
-        {            
-            Console.WriteLine("This is the overridden getter.");
-            return AutoProperty__BackingField;
+        {
+            return this.__AutoProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+    }
+
+    // Same as readonly field.
+    [Override]
+    public int __AutoProperty__OriginalImpl {
+            get;
         }
 
-        private set
+    public global::System.Int32 __AutoProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.AutoProperty;
+        }
     }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int AutoPropertyWithSetter__BackingField;
 
     [Override]
     public int AutoPropertyWithSetter
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
-            return AutoPropertyWithSetter__BackingField;
+            return this.__AutoPropertyWithSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
         }
 
         set
         {
-            Console.WriteLine($"This is the overridden setter.");
-            AutoPropertyWithSetter__BackingField = value;
+            this.__AutoPropertyWithSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
         }
     }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int AutoPropertyWithPrivateSetter__BackingField;
+
+    [Override]
+    public int __AutoPropertyWithSetter__OriginalImpl {
+            get;
+            set;
+        }
+
+    public global::System.Int32 __AutoPropertyWithSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.AutoPropertyWithSetter;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.AutoPropertyWithSetter = value;
+        }
+    }
 
     [Override]
     public int AutoPropertyWithPrivateSetter
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
-            return AutoPropertyWithPrivateSetter__BackingField;
+            return this.__AutoPropertyWithPrivateSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
         }
 
-        private set
+        set
         {
-            Console.WriteLine($"This is the overridden setter.");
-            AutoPropertyWithPrivateSetter__BackingField = value;
+            this.__AutoPropertyWithPrivateSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
         }
     }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int AutoPropertyWithInitSetter__BackingField;
+
+    [Override]
+    public int __AutoPropertyWithPrivateSetter__OriginalImpl {
+            get;
+            private set;
+        }
+
+    public global::System.Int32 __AutoPropertyWithPrivateSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.AutoPropertyWithPrivateSetter;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.AutoPropertyWithPrivateSetter = value;
+        }
+    }
 
     [Override]
     public int AutoPropertyWithInitSetter
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
-            return AutoPropertyWithInitSetter__BackingField;
-        }
-
-        init
-        {
-            Console.WriteLine($"This is the overridden setter.");
-            AutoPropertyWithInitSetter__BackingField = value;
+            return this.__AutoPropertyWithInitSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
         }
     }
-    
-    [global::System.ComponentModel.BrowsableAttribute(false)]
-    [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
-    private readonly int AutoPropertyWithInitializer__BackingField = 42;
+
+    [Override]
+    public int __AutoPropertyWithInitSetter__OriginalImpl {
+            get;
+            init;
+        }
+
+    public global::System.Int32 __AutoPropertyWithInitSetter__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.AutoPropertyWithInitSetter;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.AutoPropertyWithInitSetter = value;
+        }
+    }
 
     [Override]
     public int AutoPropertyWithInitializer
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
-            return AutoPropertyWithInitializer__BackingField;
+            return this.__AutoPropertyWithInitializer__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
         }
 
-        init
+        set
         {
-            Console.WriteLine($"This is the overridden setter.");
-            AutoPropertyWithInitializer__BackingField = value;
+            this.__AutoPropertyWithInitializer__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    } = 42;
+    [Override]
+    public int __AutoPropertyWithInitializer__OriginalImpl {
+            get;
+            set;
+        }
+
+    = 42;
+    public global::System.Int32 __AutoPropertyWithInitializer__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.AutoPropertyWithInitializer;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.AutoPropertyWithInitializer = value;
         }
     }
 
     [Override]
-    public int ExpressionProperty
+    public int ExpressionProperty { } => 42;
+    [Override]
+    public int __ExpressionProperty__OriginalImpl => 42;
+    public global::System.Int32 __ExpressionProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
-            return 42;
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.ExpressionProperty;
         }
     }
 
@@ -222,14 +197,43 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
+            return __StaticProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            __StaticProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    public static int __StaticProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
         }
+
         set
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public static global::System.Int32 __StaticProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return StaticProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = StaticProperty = value;
         }
     }
 
@@ -238,14 +242,43 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
+            return this.__InstanceProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__InstanceProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    public int __InstanceProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
         }
+
         set
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public global::System.Int32 __InstanceProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.InstanceProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.InstanceProperty = value;
         }
     }
 
@@ -254,15 +287,38 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
+            return this.__InitProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+    }
+
+    [Override]
+    public int __InitProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
         }
 
         init
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public global::System.Int32 __InitProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.InitProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.InitProperty = value;
         }
     }
 
@@ -271,9 +327,26 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("This is the overridden getter.");
+            return this.__GetterProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+    }
+
+    [Override]
+    public int __GetterProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
+        }
+    }
+
+    public global::System.Int32 __GetterProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.GetterProperty;
         }
     }
 
@@ -282,18 +355,48 @@ internal class TargetClass
     {
         set
         {
-            Console.WriteLine($"This is the overridden setter.");
-            Console.WriteLine($"This is the original setter, setting {value}.");
+            this.__SetterProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
         }
     }
 
     [Override]
-    public int InitSetterProperty
+    public int __SetterProperty__OriginalImpl
+    {
+        set
+        {
+            Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public global::System.Int32 __SetterProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.SetterProperty = value;
+        }
+    }
+
+    [Override]
+    public int InitSetterProperty { }
+
+    [Override]
+    public int __InitSetterProperty__OriginalImpl
     {
         init
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public global::System.Int32 __InitSetterProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.InitSetterProperty = value;
         }
     }
 
@@ -302,14 +405,43 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine($"This is the overridden setter.");
+            return this.__ProtectedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__ProtectedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    protected int __ProtectedProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
         }
+
         set
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    protected global::System.Int32 __ProtectedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.ProtectedProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.ProtectedProperty = value;
         }
     }
 
@@ -318,14 +450,43 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine($"This is the overridden setter.");
+            return this.__DifferentAccessibilityProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__DifferentAccessibilityProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    public int __DifferentAccessibilityProperty__OriginalImpl
+    {
+        get
+        {
             Console.WriteLine("This is the original getter.");
             return 42;
         }
+
         private set
         {
-            Console.WriteLine($"This is the overridden setter.");
             Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+    }
+
+    public global::System.Int32 __DifferentAccessibilityProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.DifferentAccessibilityProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.DifferentAccessibilityProperty = value;
         }
     }
 
@@ -334,21 +495,287 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine($"This is the overridden setter.");
-            return 42;
+            return this.__ExpressionBodiedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
         }
-        private set
+
+        set
         {
-            Console.WriteLine($"This is the overridden setter.");
-            Console.WriteLine($"This is the original setter, setting {value}.");
+            this.__ExpressionBodiedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    [Override]
+    protected int __ExpressionBodiedProperty__OriginalImpl {
+            get => 42;
+            set => Console.WriteLine($"This is the original setter, setting {value}.");
+        }
+
+    protected global::System.Int32 __ExpressionBodiedProperty__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.ExpressionBodiedProperty;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Int32 discard;
+            discard = this.ExpressionBodiedProperty = value;
         }
     }
 
     public TargetClass()
     {
-        // No rewriting
-        this._readOnlyField__BackingField = 42;
-        this._initializerReadOnlyField__BackingField = 27;
-        this.AutoProperty__BackingField = 42;
+        this._readOnlyField = 42;
+        this._initializerReadOnlyField = 27;
+        this.AutoProperty = 42;
+    }
+
+    private global::System.Object _instanceField
+    {
+        get
+        {
+            return this.___instanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.___instanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object ___instanceField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object _initializerField
+    {
+        get
+        {
+            return this.___initializerField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.___initializerField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object ___initializerField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object _readOnlyField
+    {
+        get
+        {
+            return this.___readOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.___readOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object ___readOnlyField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object _initializerReadOnlyField
+    {
+        get
+        {
+            return this.___initializerReadOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.___initializerReadOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object ___initializerReadOnlyField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object PublicInstanceField
+    {
+        get
+        {
+            return this.__PublicInstanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__PublicInstanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object __PublicInstanceField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object PublicStaticField
+    {
+        get
+        {
+            return this.__PublicStaticField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute;
+        }
+
+        set
+        {
+            this.__PublicStaticField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute = value;
+        }
+    }
+
+    private global::System.Object __PublicStaticField__OriginalImpl
+    {
+        get
+        {
+            return default(global::System.Object);
+        }
+
+        set
+        {
+        }
+    }
+
+    private global::System.Object ___instanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._instanceField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this._instanceField = value;
+        }
+    }
+
+    private global::System.Object ___initializerField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._initializerField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this._initializerField = value;
+        }
+    }
+
+    private global::System.Object ___readOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._readOnlyField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this._readOnlyField = value;
+        }
+    }
+
+    private global::System.Object ___initializerReadOnlyField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._initializerReadOnlyField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this._initializerReadOnlyField = value;
+        }
+    }
+
+    private global::System.Object __PublicInstanceField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.PublicInstanceField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this.PublicInstanceField = value;
+        }
+    }
+
+    private global::System.Object __PublicStaticField__Caravela_Framework_Tests_Integration_TestInputs_Aspects_Overrides_Properties_Aspect_OverrideAttribute
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this.PublicStaticField;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Object discard;
+            discard = this.PublicStaticField = value;
+        }
     }
 }

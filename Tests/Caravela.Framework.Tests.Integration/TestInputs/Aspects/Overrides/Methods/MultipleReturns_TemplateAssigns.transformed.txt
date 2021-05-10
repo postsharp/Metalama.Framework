@@ -53,4 +53,5 @@ internal class TargetClass
         global::System.Console.WriteLine("End override.");
         return (int)result;
     }
+
 }

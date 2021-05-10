@@ -1,0 +1,36 @@
+[TestOutput]
+[Introduction]
+internal class TargetClass
+{
+    public global::System.Int32 IntroducedProperty_Auto { get; set; }
+
+    public static global::System.Int32 IntroducedProperty_Auto_Static { get; }
+
+    public global::System.Int32 IntroducedProperty_Accessors
+    {
+        get 
+        { 
+            global::System.Console.WriteLine("Get"); 
+            return 42; 
+        }
+
+        set 
+        { 
+            global::System.Console.WriteLine($"Set {value}");
+        }
+    }
+
+    public global::System.Int32 IntroducedProperty_AccessorExpressions
+    {
+        get
+        {
+            return 42;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine($"Set {value}");
+        }
+    }
+
+}

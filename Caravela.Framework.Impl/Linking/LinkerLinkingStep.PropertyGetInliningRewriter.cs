@@ -151,7 +151,13 @@ namespace Caravela.Framework.Impl.Linking
                 var declaration = (AccessorDeclarationSyntax) calledProperty.GetMethod.AssertNotNull().DeclaringSyntaxReferences.Single().GetSyntax();
 
                 // Run the inlined method's body through the rewriter.
-                var rewrittenBlock = (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull();
+                var rewrittenBlock =
+                    declaration switch
+                    {
+                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),                        
+                        { ExpressionBody: not null} => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( declaration.ExpressionBody.Expression ) ) ).AssertNotNull(), // TODO: Preserve trivias.
+                        _ => throw new NotSupportedException(), // TODO: Auto-properties.
+                    };
 
                 // Mark the block as flattenable (this is the root block).
                 rewrittenBlock = rewrittenBlock.AddLinkerGeneratedFlags(LinkerGeneratedFlags.Flattenable);
@@ -177,8 +183,8 @@ namespace Caravela.Framework.Impl.Linking
             /// Replaces call target for non-inlineable methods.
             /// </summary>
             /// <param name="originalSymbol">Original symbol targeted by the call.</param>
-            /// <param name="expression">Call expression.</param>
-            /// <param name="methodSymbol"></param>
+            /// <param name="memberAccess">Call expression.</param>
+            /// <param name="targetSymbol"></param>
             /// <returns></returns>
             private static ExpressionSyntax ReplaceInstancePropertyAccess( IPropertySymbol originalSymbol, MemberAccessExpressionSyntax memberAccess, IPropertySymbol targetSymbol )
             {

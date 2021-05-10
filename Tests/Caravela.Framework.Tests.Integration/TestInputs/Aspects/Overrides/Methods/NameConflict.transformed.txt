@@ -27,4 +27,5 @@ internal class TargetClass
         int i = 0;
         return 42;
     }
+
 }

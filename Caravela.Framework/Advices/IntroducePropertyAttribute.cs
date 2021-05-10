@@ -8,6 +8,6 @@ namespace Caravela.Framework.Advices
     /// <summary>
     /// Custom attribute that marks the target method as a template for <see cref="IOverrideMethodAdvice"/> and results in creation of the advice.
     /// </summary>
-    [AttributeUsage( AttributeTargets.Method, Inherited = true )]
+    [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field, Inherited = true )]
     public class IntroducePropertyAttribute : IntroducePropertyTemplateAttribute, IAdviceAttribute<IIntroduceMethodAdvice> { }
 }

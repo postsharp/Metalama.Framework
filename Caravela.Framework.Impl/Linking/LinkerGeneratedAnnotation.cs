@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.Linking
     [Flags]
     internal enum LinkerGeneratedFlags
     {
+        None = 0,
         Flattenable = 1
     }
 
