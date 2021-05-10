@@ -15,7 +15,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// depends on the scenario: typically one per project at compile time, one per <see cref="AppDomain"/> at design time, and one per test
     /// at testing time.
     /// </summary>
-    internal class CompileTimeDomain : IDisposable
+    public class CompileTimeDomain : IDisposable
     {
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
@@ -25,6 +25,12 @@ namespace Caravela.Framework.Impl.CompileTime
         {
             AppDomain.CurrentDomain.AssemblyResolve += this.ResolveAssemblyReference;
         }
+
+        /// <summary>
+        /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
+        /// but it can be overwritten for .NET Core.
+        /// </summary>
+        protected virtual Assembly LoadAssembly( string path ) => Assembly.LoadFile( path );
 
         private Assembly? ResolveAssemblyReference( object sender, ResolveEventArgs args )
         {
@@ -43,15 +49,19 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets an assembly given its <see cref="AssemblyIdentity"/> and image, or loads it.
         /// </summary>
-        public Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, byte[] image )
-            => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => Assembly.Load( image ) );
+        internal Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, string path )
+            => this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
 
         public override string ToString() => this._domainId.ToString();
 
-        public void Dispose()
+        public virtual void Dispose( bool disposing )
         {
+            this._assemblyCache.Clear();
+
             // We should unload assemblies if we can, but this is a .NET Core feature only.
             AppDomain.CurrentDomain.AssemblyResolve -= this.ResolveAssemblyReference;
         }
+
+        public void Dispose() => this.Dispose( true );
     }
 }

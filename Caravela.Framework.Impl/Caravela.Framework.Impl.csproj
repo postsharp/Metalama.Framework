@@ -70,6 +70,9 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     static class PackageVersions
     {
+        // A GUID generated at every build.
+        public static System.Guid BuildId = new System.Guid("$([System.Guid]::NewGuid())")%3B
+        
         @(PackageVersions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')
     }
 }

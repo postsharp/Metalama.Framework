@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.AspectOrdering;
 using Caravela.Framework.Impl.CodeModel;
-using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
@@ -26,14 +25,15 @@ namespace Caravela.Framework.Impl.Pipeline
     {
         public IBuildOptions BuildOptions { get; }
 
-        private readonly CompileTimeDomain _domain = new();
+        private readonly CompileTimeDomain _domain;
 
         protected ServiceProvider ServiceProvider { get; } = new();
 
         IServiceProvider IAspectPipelineProperties.ServiceProvider => this.ServiceProvider;
 
-        protected AspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null )
+        protected AspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null )
         {
+            this._domain = domain;
             this.BuildOptions = buildOptions;
             this.ServiceProvider.AddService( buildOptions );
             this.ServiceProvider.AddService( ReferenceAssemblyLocator.GetInstance() );
@@ -119,8 +119,7 @@ namespace Caravela.Framework.Impl.Pipeline
             var driverFactory = new AspectDriverFactory( compilation.Compilation, this.BuildOptions.PlugIns );
             var aspectTypeFactory = new AspectClassMetadataFactory( driverFactory );
 
-            var aspectNamedTypes = GetAspectTypes();
-            var aspectTypes = aspectTypeFactory.GetAspectClassMetadatas( aspectNamedTypes, diagnosticAdder ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectTypes
@@ -150,14 +149,6 @@ namespace Caravela.Framework.Impl.Pipeline
             configuration = new PipelineConfiguration( stages, aspectTypes, sortedAspectLayers, compileTimeProject, loader );
 
             return true;
-
-            IReadOnlyList<INamedTypeSymbol> GetAspectTypes()
-                => compileTimeProject?.SelectManyRecursive( p => p.References, includeThis: true, throwOnDuplicate: false )
-                       .SelectMany( p => p.AspectTypes )
-                       .Select( t => compilation.Compilation.GetTypeByMetadataName( t ) )
-                       .WhereNotNull()
-                       .ToImmutableArray()
-                   ?? ImmutableArray<INamedTypeSymbol>.Empty;
 
             static object GetGroupingKey( IAspectDriver driver )
                 => driver switch

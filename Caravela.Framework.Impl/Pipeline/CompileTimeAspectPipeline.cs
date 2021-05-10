@@ -17,7 +17,10 @@ namespace Caravela.Framework.Impl.Pipeline
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        public CompileTimeAspectPipeline( IBuildOptions buildOptions, IAssemblyLocator? assemblyLocator = null ) : base( buildOptions, assemblyLocator )
+        public CompileTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain, IAssemblyLocator? assemblyLocator = null ) : base(
+            buildOptions,
+            domain,
+            assemblyLocator )
         {
             if ( this.BuildOptions.CompileTimeAttachDebugger )
             {

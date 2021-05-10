@@ -3,9 +3,9 @@
 
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.ReflectionMocks;
+using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -303,9 +303,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Read manifest.
             var manifestEntry = archive.GetEntry( "manifest.json" ).AssertNotNull();
-            using var manifestReader = new StreamReader( manifestEntry.Open(), Encoding.UTF8 );
-            var manifestJson = manifestReader.ReadToEnd();
-            var manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+            var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
@@ -341,21 +339,32 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
+            // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
                 assemblyIdentity.Name,
-                manifest,
                 syntaxTrees,
                 referenceProjects,
                 diagnosticAdder,
                 out var compilation,
-                out var memoryStream ) )
+                out var assemblyPath ) )
             {
                 project = null;
 
                 return false;
             }
-
-            project = CompileTimeProject.Create( this._domain, assemblyIdentity, referenceProjects, manifest, compilation, memoryStream.ToArray(), null );
+            
+            // Compute the new hash.
+            var compileTimeAssemblyName = CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
+            
+            project = CompileTimeProject.Create(
+                this._domain,
+                assemblyIdentity,
+                new AssemblyIdentity( compileTimeAssemblyName ),
+                referenceProjects,
+                manifest,
+                assemblyPath,
+                compilation.SyntaxTrees.ToArray(),
+                TextMap.Read );
 
             return true;
         }

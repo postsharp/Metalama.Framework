@@ -40,11 +40,12 @@ namespace Caravela.TestFramework
         {
             // Source.
             var project = this.CreateProject().WithParseOptions( CSharpParseOptions.Default.WithPreprocessorSymbols( "TESTRUNNER" ) );
-            var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, Encoding.UTF8 ) );
+            var testDocument = project.AddDocument( "Test.cs", SourceText.From( testInput.TestSource, Encoding.UTF8 ), filePath: "Test.cs" );
+            var syntaxTree = (await testDocument.GetSyntaxTreeAsync())!;
 
             var initialCompilation = CSharpCompilation.Create(
                 "test",
-                new[] { (await testDocument.GetSyntaxTreeAsync())! },
+                new[] { syntaxTree },
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
 

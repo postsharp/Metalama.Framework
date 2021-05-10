@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
@@ -36,6 +37,8 @@ namespace Caravela.Framework.Impl.Pipeline
         public string? CompileTimeProjectDirectory => this.GetStringOption( "CaravelaCompileTimeProjectDirectory" );
 
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
+
+        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache" );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 

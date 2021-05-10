@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Sdk
 {
@@ -79,41 +78,6 @@ namespace Caravela.Framework.Sdk
                     yield return type;
                 }
             }
-        }
-
-        public static IEnumerable<INamedTypeSymbol> OrderByInheritance( this IReadOnlyList<INamedTypeSymbol> types )
-        {
-            var dictionary = types.ToDictionary( t => t, _ => false );
-            List<INamedTypeSymbol> result = new();
-
-            void VisitType( INamedTypeSymbol type )
-            {
-                if ( !dictionary.TryGetValue( type, out var visited ) )
-                {
-                    // The type is not in the input.
-                }
-                else if ( visited )
-                {
-                    // There is nothing else to do.
-                }
-                else
-                {
-                    if ( type.BaseType != null )
-                    {
-                        VisitType( type.BaseType );
-                    }
-
-                    result.Add( type );
-                    dictionary[type] = true;
-                }
-            }
-
-            foreach ( var type in types )
-            {
-                VisitType( type );
-            }
-
-            return result;
         }
 
         public static object? GetValueSafe( this TypedConstant typedConstant )

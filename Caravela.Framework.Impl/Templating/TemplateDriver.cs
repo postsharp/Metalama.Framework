@@ -7,8 +7,11 @@ using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 
 namespace Caravela.Framework.Impl.Templating
@@ -17,11 +20,13 @@ namespace Caravela.Framework.Impl.Templating
     {
         private readonly ISymbol _sourceTemplateSymbol;
         private readonly MethodInfo _templateMethod;
+        private readonly AspectClassMetadata _aspectClass;
 
-        public TemplateDriver( ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
+        public TemplateDriver( AspectClassMetadata aspectClass, ISymbol sourceTemplateSymbol, MethodInfo compiledTemplateMethodInfo )
         {
             this._sourceTemplateSymbol = sourceTemplateSymbol;
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
+            this._aspectClass = aspectClass;
         }
 
         public bool TryExpandDeclaration(
@@ -58,11 +63,19 @@ namespace Caravela.Framework.Impl.Templating
                     {
                         // The most probably reason we could have a exception here is that the user template has an error.
 
+                        var userException = ex.InnerException;
+
+                        var stackTrace = new StackTrace( ex.InnerException, true );
+
+                        var location = this.GetSourceCodeLocation( stackTrace )
+                                       ?? this._sourceTemplateSymbol.GetDiagnosticLocation()
+                                       ?? Location.None;
+
                         diagnosticAdder.ReportDiagnostic(
                             TemplatingDiagnosticDescriptors.ExceptionInTemplate.CreateDiagnostic(
-                                this._sourceTemplateSymbol.GetDiagnosticLocation() ?? Location.None,
-                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, ex.InnerException.GetType().Name,
-                                 ex.InnerException.ToString()) ) );
+                                location,
+                                (this._sourceTemplateSymbol, templateExpansionContext.TargetDeclaration, userException.GetType().Name,
+                                 userException.ToString()) ) );
 
                         block = null;
 
@@ -74,6 +87,85 @@ namespace Caravela.Framework.Impl.Templating
 
                 return true;
             }
+        }
+
+        private Location? GetSourceCodeLocation( StackTrace stackTrace )
+        {
+            // TODO: This method needs to be rewritten. Ideally, the PDB would be mapped to the source file, it would not be necessary
+            // to perform the mapping here.
+
+            // Get the syntax tree where the exception happened.
+            var frame =
+                stackTrace
+                    .GetFrames()
+                    .Where( f => f.GetFileName() != null )
+                    .Select( f => (Frame: f, SyntaxTree: this._aspectClass.Project.FindSyntaxTree( f.GetFileName() )) )
+                    .FirstOrDefault( i => i.SyntaxTree != null );
+
+            if ( frame.SyntaxTree == null )
+            {
+                return null;
+            }
+
+            // Check if we have a location map for this file anyway.
+            var textMap = this._aspectClass.Project.GetTextMap( frame.Frame.GetFileName() );
+
+            if ( textMap == null )
+            {
+                return null;
+            }
+
+            // Find the node in the syntax tree.
+            var textLines = frame.SyntaxTree.GetText().Lines;
+            var lineNumber = frame.Frame.GetFileLineNumber();
+
+            if ( lineNumber == 0 )
+            {
+                return null;
+            }
+
+            var columnNumber = frame.Frame.GetFileColumnNumber();
+
+            if ( lineNumber > textLines.Count )
+            {
+                return null;
+            }
+
+            var textLine = textLines[lineNumber - 1];
+
+            if ( columnNumber > textLine.End )
+            {
+                return null;
+            }
+
+            var position = textLine.Start + columnNumber - 1;
+
+            var node = frame.SyntaxTree.GetRoot().FindNode( TextSpan.FromBounds( position, position ) );
+            node = FindPotentialExceptionSource( node );
+
+            if ( node != null )
+            {
+                var targetLocation = node.GetLocation();
+                var sourceLocation = textMap.GetSourceLocation( targetLocation.SourceSpan );
+
+                return sourceLocation ?? targetLocation;
+            }
+            else
+            {
+                // TODO: We could report the whole line here.
+                return Location.None;
+            }
+
+            // Finds a parent node that is a potential source of exception.
+            static SyntaxNode? FindPotentialExceptionSource( SyntaxNode? node )
+                => node switch
+                {
+                    null => null,
+                    TypeSyntax type => FindPotentialExceptionSource( type.Parent ),
+                    ExpressionSyntax expression => expression,
+                    StatementSyntax statement => statement,
+                    _ => FindPotentialExceptionSource( node.Parent )
+                };
         }
     }
 }

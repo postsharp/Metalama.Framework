@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Caravela.TestFramework
 {
@@ -19,6 +20,7 @@ namespace Caravela.TestFramework
     public sealed class TestResult : IDiagnosticAdder
     {
         private readonly List<Diagnostic> _diagnostics = new();
+        private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestResult"/> class.
@@ -99,6 +101,9 @@ namespace Caravela.TestFramework
 
         private static string CleanMessage( string text )
         {
+            // Remove local-specific stuff.
+            text = _cleanCallStackRegex.Replace( text, "" );
+
             // Comment all lines but the first one.
             var lines = text.Split( '\n' );
 
@@ -119,8 +124,18 @@ namespace Caravela.TestFramework
 
         internal void SetTransformedTarget( SyntaxNode syntaxNode )
         {
-            static string? GetTextUnderDiagnostic( Diagnostic diagnostic )
-                => diagnostic.Location!.SourceTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+            {
+                var syntaxTree = diagnostic.Location!.SourceTree;
+
+                if ( syntaxTree == null )
+                {
+                    // If we don't have the a SyntaxTree, find it from the input compilation.
+                    syntaxTree = this.InitialCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
+                }
+
+                return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+            }
 
             // Find notes annotated with [TestOutput] and choose the first one. If there is none, the test output is the whole tree
             // passed to this method.

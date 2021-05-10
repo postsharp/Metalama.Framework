@@ -26,7 +26,7 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly object _configureSync = new();
         private PipelineConfiguration? _cachedConfiguration;
 
-        public DesignTimeAspectPipeline( IBuildOptions buildOptions ) : base( buildOptions ) { }
+        public DesignTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain ) : base( buildOptions, domain ) { }
 
         public void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree, out bool isInvalidated )
         {
@@ -74,7 +74,7 @@ namespace Caravela.Framework.Impl.DesignTime
                         // Update cache dependencies.
                         this._configurationCacheDependencies.Clear();
 
-                        if ( configuration.CompileTimeProject != null )
+                        if ( configuration.CompileTimeProject?.SyntaxTrees != null )
                         {
                             foreach ( var syntaxTree in configuration.CompileTimeProject.SyntaxTrees )
                             {

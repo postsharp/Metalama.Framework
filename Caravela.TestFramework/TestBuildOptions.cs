@@ -4,11 +4,18 @@
 using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 namespace Caravela.TestFramework
 {
-    public class TestBuildOptions : IBuildOptions
+    public class TestBuildOptions : IBuildOptions, IDisposable
     {
+        public TestBuildOptions()
+        {
+            this.CacheDirectory = Path.Combine( Path.GetTempPath(), "Caravela", Guid.NewGuid().ToString() );
+            Directory.CreateDirectory( this.CacheDirectory );
+        }
+
         public bool CompileTimeAttachDebugger => false;
 
         public bool DesignTimeAttachDebugger => false;
@@ -19,8 +26,15 @@ namespace Caravela.TestFramework
 
         public virtual string? CrashReportDirectory => null;
 
+        public string CacheDirectory { get; }
+
         public string ProjectId => "test";
 
         public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
+
+        public void Dispose()
+        {
+            Directory.Delete( this.CacheDirectory, true );
+        }
     }
 }

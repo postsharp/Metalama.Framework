@@ -4,7 +4,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Sdk;
-using System.Reflection;
 
 namespace Caravela.Framework.Impl
 {
@@ -32,13 +31,6 @@ namespace Caravela.Framework.Impl
             this.Aspect = aspect;
             this.CodeElement = codeElement;
             this.AspectClass = aspectClassMetadata;
-        }
-
-        public MethodInfo? GetTemplateMethod( string methodName )
-        {
-            var aspectType = this.Aspect.GetType();
-
-            return aspectType.GetMethod( methodName );
         }
     }
 }

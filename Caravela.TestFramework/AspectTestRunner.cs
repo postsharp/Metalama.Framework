@@ -24,7 +24,10 @@ namespace Caravela.TestFramework
         {
             var testResult = await base.RunTestAsync( testInput );
 
-            var pipeline = new CompileTimeAspectPipeline( new TestBuildOptions() );
+            using var buildOptions = new TestBuildOptions();
+            using var domain = new UnloadableCompileTimeDomain();
+
+            var pipeline = new CompileTimeAspectPipeline( buildOptions, domain );
 
             if ( pipeline.TryExecute( testResult, testResult.InitialCompilation, out var resultCompilation, out _ ) )
             {

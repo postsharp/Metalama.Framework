@@ -105,44 +105,54 @@ namespace Caravela.Framework.Impl.CompileTime
         private static IEnumerable<string> GetSystemAssemblyPaths()
         {
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", _projectHash, "TempProject" );
+            
+            using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
+            mutex.WaitOne();
 
-            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
-
-            if ( File.Exists( referenceAssemblyListFile ) )
+            try
             {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+                var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
 
-                if ( referenceAssemblies.All( File.Exists ) )
+                if ( File.Exists( referenceAssemblyListFile ) )
                 {
-                    return referenceAssemblies;
+                    var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+
+                    if ( referenceAssemblies.All( File.Exists ) )
+                    {
+                        return referenceAssemblies;
+                    }
                 }
+
+                Directory.CreateDirectory( tempProjectDirectory );
+
+                File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _projectText );
+
+                var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
+                {
+                    WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
+                };
+
+                var process = Process.Start( psi ).AssertNotNull();
+
+                var lines = new List<string>();
+                process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
+
+                process.BeginOutputReadLine();
+                process.WaitForExit();
+
+                if ( process.ExitCode != 0 )
+                {
+                    throw new InvalidOperationException(
+                        "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
+                                                                                                 + string.Join( Environment.NewLine, lines ) );
+                }
+
+                return File.ReadAllLines( referenceAssemblyListFile );
             }
-
-            Directory.CreateDirectory( tempProjectDirectory );
-
-            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _projectText );
-
-            var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
+            finally
             {
-                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
-            };
-
-            var process = Process.Start( psi ).AssertNotNull();
-
-            var lines = new List<string>();
-            process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
-
-            process.BeginOutputReadLine();
-            process.WaitForExit();
-
-            if ( process.ExitCode != 0 )
-            {
-                throw new InvalidOperationException(
-                    "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
-                                                                                             + string.Join( Environment.NewLine, lines ) );
+                mutex.ReleaseMutex();
             }
-
-            return File.ReadAllLines( referenceAssemblyListFile );
         }
     }
 }
