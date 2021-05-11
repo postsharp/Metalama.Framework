@@ -37,17 +37,6 @@
     <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
-  <!-- Includes referenced DLLs in the package. Based on https://stackoverflow.com/a/56018426/41071 --> 
-  <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
-    <ItemGroup>
-      <!-- remove everything from lib -->
-      <BuildOutputInPackage Remove="@(BuildOutputInPackage)" />
-      <!-- TODO doc xml files are still included -->
-    </ItemGroup>
-  </Target>
-  
- 
-
   <!-- Obfuscation -->
   <PropertyGroup>
     <PostSharpProperties>

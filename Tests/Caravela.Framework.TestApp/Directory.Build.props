@@ -14,11 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Framework" Version="$(CaravelaVersion)" />
-
   </ItemGroup>
-
-  <Import Project="..\..\Caravela.Framework.Impl\build\Caravela.Framework.targets" />
-
 
   <!-- Internal NuGet reposority source -->
   <PropertyGroup>

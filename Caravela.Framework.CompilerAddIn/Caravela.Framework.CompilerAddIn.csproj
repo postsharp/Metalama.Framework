@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageId>Caravela.Framework</PackageId>
+       <PackageDescription>PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.</PackageDescription>
     </PropertyGroup>
     
     
@@ -41,7 +43,20 @@
     
     
     <ItemGroup>
-      <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" />
+        <!-- The dependency to the implementation assembly is a private one; dependencies end up going under the 'analyzer' directory -->
+      <ProjectReference Include="..\Caravela.Framework.Impl\Caravela.Framework.Impl.csproj" PrivateAssets="all" />
+      
+      <!-- The dependency to the public assembly is a public one. This dependency needs to be repeated even if it is added
+           transitively by Caravela.Framework.Impl because we add Caravela.Framework.Impl privately-->
+      <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" /> 
     </ItemGroup>
+    
+      <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
+        <ItemGroup>
+          <!-- remove everything from lib -->
+          <BuildOutputInPackage Remove="@(BuildOutputInPackage)" />
+          <!-- TODO doc xml files are still included -->
+        </ItemGroup>
+      </Target>
     
 </Project>
