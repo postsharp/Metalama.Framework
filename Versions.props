@@ -30,6 +30,9 @@
         <CaravelaCompilerVersion>3.8.7-preview</CaravelaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
+        <SystemCollectionsImmutableVersion>1.7.1</SystemCollectionsImmutableVersion>
+        <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
+        <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
 
         <!-- this cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp -->
         <PostSharpPackageVersion>6.8.7</PostSharpPackageVersion>

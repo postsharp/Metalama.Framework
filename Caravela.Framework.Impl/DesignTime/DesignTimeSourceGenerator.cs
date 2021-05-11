@@ -22,11 +22,15 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 return;
             }
+            
+            var buildOptions = new BuildOptions( context.AnalyzerConfigOptions );
+            
+            DesignTimeDebugger.AttachDebugger( buildOptions );
 
             // Execute the pipeline.
             var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 compilation,
-                new BuildOptions( context.AnalyzerConfigOptions ),
+                buildOptions,
                 context.CancellationToken );
 
             // Add introduced syntax trees.

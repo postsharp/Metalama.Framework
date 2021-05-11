@@ -16,7 +16,7 @@ namespace Caravela.Framework.TestApp
 
         private static void Main()
         {
-            //Console.WriteLine( $"x={x}" );
+            //Console.WriteLine( $"x={x}" ); 
 
             Foo();
             (new Program()).SomeOtherIntroducedMethod();

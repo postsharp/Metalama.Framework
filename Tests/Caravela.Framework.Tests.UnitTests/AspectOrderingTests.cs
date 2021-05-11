@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.UnitTests
     {
         private static string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             DiagnosticList diagnostics = new();
 
             var aspectTypeFactory = new AspectClassMetadataFactory( new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty ) );

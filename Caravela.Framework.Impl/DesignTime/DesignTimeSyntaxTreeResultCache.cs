@@ -143,84 +143,148 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
-        public void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree )
+        internal bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, bool hasCompileTimeCode = false )
         {
-            if ( this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
+            // Check if the source text has changed.
+            if ( newSyntaxTree == oldSyntaxTree )
             {
-                // Check if the source text has changed.
-                if ( syntaxTree != cachedResult.LastComparedSyntaxTree )
+                return false;
+            }
+            else
+            {
+                if ( !newSyntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
                 {
-                    if ( !syntaxTree.GetText().ContentEquals( cachedResult.LastComparedSyntaxTree.GetText() ) )
+                    var newSyntaxRoot = newSyntaxTree.GetRoot();
+                    var oldSyntaxRoot = oldSyntaxTree.GetRoot();
+
+                    // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
+                    foreach ( var change in newSyntaxTree.GetChanges( oldSyntaxTree ) )
                     {
-                        var syntaxRoot = syntaxTree.GetRoot();
+                        // change.Span is a span in the _old_ syntax tree.
+                        // change.NewText is the new text.
+                        var changedSpan = change.Span;
 
-                        // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
-                        foreach ( var change in syntaxTree.GetChanges( cachedResult.LastComparedSyntaxTree ) )
+                        // If we are inserting a space, ignore it.
+                        if ( changedSpan.Length == 0 && string.IsNullOrWhiteSpace( change.NewText ) )
                         {
-                            var changedSpan = change.Span;
-
-                            // If we are inserting a space, ignore it.
-                            if ( changedSpan.Length == 0 && string.IsNullOrWhiteSpace( change.NewText ) )
-                            {
-                                continue;
-                            }
-
-                            // If we are editing a comment, ignore it.
-                            var changedTrivia = syntaxRoot.FindTrivia( changedSpan.Start );
-
-                            var triviaKind = changedTrivia.Kind();
-
-                            if ( triviaKind != SyntaxKind.None && changedTrivia.Span.Contains( changedSpan ) )
-                            {
-                                switch ( triviaKind )
-                                {
-                                    case SyntaxKind.XmlComment:
-                                    case SyntaxKind.SingleLineDocumentationCommentTrivia:
-                                    case SyntaxKind.MultiLineDocumentationCommentTrivia:
-                                    case SyntaxKind.MultiLineCommentTrivia:
-                                    case SyntaxKind.SingleLineCommentTrivia:
-                                        // Editing a comment does not change the semantics.
-                                        if ( change.NewText != null && (change.NewText.Contains( "//" ) || change.NewText.Contains( "/*" )) )
-                                        {
-                                            // This may be an edit that comments out some syntax. Fallback to node analysis.
-                                            break;
-                                        }
-
-                                        continue;
-
-                                    // Default: Adding non-trivia text to a trivia may change the semantics. Fall back to node analysis.
-                                }
-                            }
-
-                            // If the change is in a method body or other expression, ignore it.
-                            var changedNode = syntaxRoot.FindNode( changedSpan );
-
-                            if ( IsIrrelevantChange( changedNode ) )
-                            {
-                                continue;
-                            }
-
-                            // If we are here, it means that we have a relevant change.
-                            _ = this._syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
-
-                            return;
+                            continue;
                         }
-                    }
 
-                    // If we are here, it means that there was no relevant change. Update the syntax tree so the next comparison is less demanding.
-                    cachedResult.LastComparedSyntaxTree = syntaxTree;
+                        // If we are editing a comment, ignore it.
+                        var changedTrivia = oldSyntaxRoot.FindTrivia( changedSpan.Start );
+
+                        var triviaKind = changedTrivia.Kind();
+
+                        if ( triviaKind != SyntaxKind.None && changedTrivia.Span.Contains( changedSpan ) )
+                        {
+                            // If the change is totally contained in a trivia, excluding the trivia prefix, we may ignore it
+
+                            switch ( triviaKind )
+                            {
+                                case SyntaxKind.SingleLineDocumentationCommentTrivia:
+                                case SyntaxKind.MultiLineDocumentationCommentTrivia:
+                                case SyntaxKind.XmlComment:
+                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+
+                                case SyntaxKind.MultiLineCommentTrivia:
+                                case SyntaxKind.SingleLineCommentTrivia:
+                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
+                                    {
+                                        continue;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+
+                                case SyntaxKind.WhitespaceTrivia:
+                                    if ( changedTrivia.Span.Length == changedSpan.Length && change.NewText.Length == 0 )
+                                    {
+                                        // Removing all spaces of a trivia is potentially breaking.
+                                        break;
+                                    }
+                                    else if ( !string.IsNullOrWhiteSpace( change.NewText ) )
+                                    {
+                                        // Adding non-whitespace to a whitespace is breaking.
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                            }
+                        }
+
+                        // If the change is in a method body or other expression, ignore it.
+                        if ( !hasCompileTimeCode )
+                        {
+                            if ( !oldSyntaxRoot.FullSpan.Contains( changedSpan ) )
+                            {
+                                throw new AssertionFailedException();
+                            }
+
+                            var changedNode = oldSyntaxRoot.FindNode( changedSpan );
+
+                            if ( IsChangeIrrelevantToSymbol( changedNode ) )
+                            {
+                                continue;
+                            }
+                        }
+
+                        // If we are here, it means that we have a relevant change.
+                        return true;
+                    }
                 }
+
+                return false;
             }
 
             // Determines if a change in a node can possibly affect a change in symbols.
-            static bool IsIrrelevantChange( SyntaxNode node )
+            static bool IsChangeIrrelevantToSymbol( SyntaxNode node )
                 => node.Parent switch
                 {
                     BaseMethodDeclarationSyntax method => node == method.Body || node == method.ExpressionBody,
                     AccessorDeclarationSyntax accessor => node == accessor.Body || node == accessor.ExpressionBody,
-                    VariableDeclaratorSyntax field => node == field.Initializer?.Value,
-                    _ => node.Parent != null && IsIrrelevantChange( node.Parent )
+                    VariableDeclaratorSyntax field => node == field.Initializer,
+                    PropertyDeclarationSyntax property => node == property.ExpressionBody || node == property.Initializer,
+                    _ => node.Parent != null && IsChangeIrrelevantToSymbol( node.Parent )
                 };
+        }
+
+        /// <summary>
+        /// Invalidates the cache. Returns <c>true</c> if the <see cref="SyntaxTree"/> was different.
+        /// </summary>
+        /// <param name="syntaxTree"></param>
+        /// <param name="hasCompileTimeCode"></param>
+        /// <returns></returns>
+        public bool InvalidateCache( SyntaxTree syntaxTree, bool hasCompileTimeCode )
+        {
+            if ( this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
+            {
+                var isDifferent = this.IsDifferent( cachedResult.LastComparedSyntaxTree, syntaxTree, hasCompileTimeCode );
+
+                if ( isDifferent )
+                {
+                    // If we are here, it means that we have a relevant change.
+                    _ = this._syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
+                }
+                else
+                {
+                    // If we are here, it means that there was no relevant change. Update the syntax tree so the next comparison is less demanding.
+                    cachedResult.LastComparedSyntaxTree = syntaxTree;
+                }
+
+                return isDifferent;
+            }
+
+            return true;
         }
 
         public void Clear()

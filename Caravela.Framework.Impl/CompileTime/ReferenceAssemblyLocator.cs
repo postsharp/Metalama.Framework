@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using static Caravela.Framework.Impl.CompileTime.PackageVersions;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
@@ -19,19 +18,7 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     public class ReferenceAssemblyLocator
     {
-        private static readonly string _projectText = $@"
-<Project Sdk='Microsoft.NET.Sdk'>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include='Microsoft.CSharp' Version='{MicrosoftCSharpVersion}' />
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{MicrosoftCodeAnalysisCSharpVersion}' />
-  </ItemGroup>
-  <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
-    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
-  </Target>
-</Project>";
+        private static readonly string _projectText;
 
         private static readonly string _projectHash;
 
@@ -39,6 +26,23 @@ namespace Caravela.Framework.Impl.CompileTime
 
         static ReferenceAssemblyLocator()
         {
+            AssemblyMetadataReader metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+            
+            _projectText = 
+                $@"
+<Project Sdk='Microsoft.NET.Sdk'>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
+    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion("Microsoft.CodeAnalysis.CSharp" )}' />
+  </ItemGroup>
+  <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
+    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
+  </Target>
+</Project>";
+
             _projectHash = HashUtilities.HashString( _projectText );
         }
 

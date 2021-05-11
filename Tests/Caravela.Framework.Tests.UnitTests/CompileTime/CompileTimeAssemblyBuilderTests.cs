@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
 {
     public class CompileTimeAssemblyBuilderTests : TestBase
     {
-        private static ServiceProvider GetServiceProvider()
+        private static ServiceProvider CreateServiceProvider()
         {
             ServiceProvider serviceProvider = new();
             serviceProvider.AddService<IBuildOptions>( new TestBuildOptions() );
@@ -30,7 +30,7 @@ namespace Caravela.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void RemoveInvalidUsingRewriterTest()
         {
-            var compilation = CreateRoslynCompilation(
+            var compilation = CreateCSharpCompilation(
                 @"
 using System;
 using Nonsense;
@@ -88,13 +88,14 @@ class A : Attribute
     public override string ToString() => $""A({constructorArguments}, P={P})"";
 }";
 
-            var serviceProvider = GetServiceProvider();
+            using var serviceProvider = CreateServiceProvider();
 
-            var roslynCompilation = CreateRoslynCompilation( code );
+            var roslynCompilation = CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( roslynCompilation );
 
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
-            Assert.True( loader.TryGenerateCompileTimeProject( compilation.RoslynCompilation, new DiagnosticList(), out _ ) );
+            var compileTimeDomain = new UnloadableCompileTimeDomain();
+            var loader = CompileTimeProjectLoader.Create( compileTimeDomain, serviceProvider );
+            Assert.True( loader.TryGetCompileTimeProject( compilation.RoslynCompilation, null, new DiagnosticList(), false, out _ ) );
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
             {
@@ -127,13 +128,13 @@ class ReferencingClass
 }
 ";
 
-            var roslynCompilation = CreateRoslynCompilation( referencingCode, referencedCode );
+            var roslynCompilation = CreateCSharpCompilation( referencingCode, referencedCode );
 
-            var serviceProvider = GetServiceProvider();
+            using var serviceProvider = CreateServiceProvider();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
 
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGenerateCompileTimeProject( roslynCompilation, diagnosticList, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
         }
 
         [Fact]
@@ -174,7 +175,7 @@ class ReferencingClass
 
             try
             {
-                var serviceProvider = GetServiceProvider();
+                using var serviceProvider = CreateServiceProvider();
                 var testAssemblyLocator = new TestAssemblyLocator();
                 serviceProvider.AddService<IAssemblyLocator>( testAssemblyLocator );
 
@@ -184,13 +185,15 @@ class ReferencingClass
                     // one for each project.
                     var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
 
-                    var compilation = CreateRoslynCompilation( code, additionalReferences: references );
+                    var compilation = CreateCSharpCompilation( code, additionalReferences: references );
                     DiagnosticList diagnostics = new();
 
                     Assert.True(
-                        loader.TryGenerateCompileTimeProject(
+                        loader.TryGetCompileTimeProject(
                             compilation,
+                            null,
                             diagnostics,
+                            false,
                             out var compileTimeProject ) );
 
                     var runTimePath = Path.GetTempFileName();
@@ -268,32 +271,35 @@ class B
 ";
 
             var guid = Guid.NewGuid();
-            var versionedCompilationV1 = CreateRoslynCompilation( GenerateVersionedCode( 1 ), name: "test_Versioned_" + guid );
-            var versionedCompilationV2 = CreateRoslynCompilation( GenerateVersionedCode( 2 ), name: "test_Versioned_" + guid );
+            var versionedCompilationV1 = CreateCSharpCompilation( GenerateVersionedCode( 1 ), name: "test_Versioned_" + guid );
+            var versionedCompilationV2 = CreateCSharpCompilation( GenerateVersionedCode( 2 ), name: "test_Versioned_" + guid );
 
-            var compilationA = CreateRoslynCompilation(
+            var compilationA = CreateCSharpCompilation(
                 classA,
                 additionalReferences: new[] { versionedCompilationV1.ToMetadataReference() },
                 name: "test_A_" + guid );
 
-            var compilationB1 = CreateRoslynCompilation(
+            var compilationB1 = CreateCSharpCompilation(
                 classB,
                 additionalReferences: new[] { versionedCompilationV1.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            var compilationB2 = CreateRoslynCompilation(
+            var compilationB2 = CreateCSharpCompilation(
                 classB,
                 additionalReferences: new[] { versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            var domain = new CompileTimeDomain();
-            var loaderV1 = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
+            using var domain = new UnloadableCompileTimeDomain();
+            using var serviceProvider1 = CreateServiceProvider();
+
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, serviceProvider1 );
             DiagnosticList diagnosticList = new();
-            Assert.True( loaderV1.TryGenerateCompileTimeProject( compilationB1, diagnosticList, out var project1 ) );
+            Assert.True( loaderV1.TryGetCompileTimeProject( compilationB1, null, diagnosticList, false, out var project1 ) );
             ExecuteAssertions( project1!, 1 );
 
-            var loader2 = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
-            Assert.True( loader2.TryGenerateCompileTimeProject( compilationB2, diagnosticList, out var project2 ) );
+            using var serviceProvider2 = CreateServiceProvider();
+            var loader2 = CompileTimeProjectLoader.Create( domain, serviceProvider2 );
+            Assert.True( loader2.TryGetCompileTimeProject( compilationB2, null, diagnosticList, false, out var project2 ) );
 
             ExecuteAssertions( project2!, 2 );
 
@@ -338,10 +344,72 @@ class C
 ";
 
             var domain = new CompileTimeDomain();
-            var compilation = CreateRoslynCompilation( code, ignoreErrors: true );
-            var loader = CompileTimeProjectLoader.Create( domain, GetServiceProvider() );
+            var compilation = CreateCSharpCompilation( code, ignoreErrors: true );
+            using var serviceProvider = CreateServiceProvider();
+            var loader = CompileTimeProjectLoader.Create( domain, serviceProvider );
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGenerateCompileTimeProject( compilation, diagnosticList, out _ ) );
+            Assert.True( loader.TryGetCompileTimeProject( compilation, null, diagnosticList, false, out _ ) );
+        }
+
+        [Fact]
+        public void CacheWithSameLoader()
+        {
+            var code = @"
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+public class ReferencedClass
+{
+}
+";
+
+            var roslynCompilation = CreateCSharpCompilation( code );
+
+            var serviceProvider = CreateServiceProvider();
+            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+
+            DiagnosticList diagnosticList = new();
+
+            // Getting from cache should fail.
+            Assert.False( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+
+            // Building the project should succeed.
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
+
+            // After building, getting from cache should succeed.
+            Assert.True( loader.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+        }
+
+        [Fact]
+        public void CacheWithDifferentLoader()
+        {
+            var code = @"
+using Caravela.Framework.Project;
+[assembly: CompileTime]
+public class ReferencedClass
+{
+}
+";
+
+            var roslynCompilation = CreateCSharpCompilation( code );
+
+            DiagnosticList diagnosticList = new();
+
+            // We create a single ServiceProvider because we need to share the filesystem cache, and there is one per ServiceProvider
+            // in test projects.
+            using var serviceProvider = CreateServiceProvider();
+
+            // Getting from cache should fail.
+
+            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            Assert.False( loader1.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
+
+            // Building the project should succeed.
+            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            Assert.True( loader2.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, false, out _ ) );
+
+            // After building, getting from cache should succeed.
+            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), serviceProvider );
+            Assert.True( loader3.TryGetCompileTimeProject( roslynCompilation, null, diagnosticList, true, out _ ) );
         }
     }
 }

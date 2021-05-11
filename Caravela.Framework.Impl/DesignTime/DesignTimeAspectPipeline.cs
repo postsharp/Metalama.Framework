@@ -12,43 +12,135 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    internal enum DesignTimeAspectPipelineStatus
+    {
+        /// <summary>
+        /// The pipeline has never been successfully initialized.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// The pipeline has a working configuration.
+        /// </summary>
+        Ready,
+
+        /// <summary>
+        /// The pipeline configuration is outdated. A project build is required.
+        /// </summary>
+        NeedsExternalBuild
+    }
+
     /// <summary>
     /// The design-time implementation of <see cref="AspectPipeline"/>.
     /// </summary>
     internal class DesignTimeAspectPipeline : AspectPipeline
     {
-        // Maps file names to source text on which we have a dependency.
-        private readonly ConcurrentDictionary<string, SyntaxTree> _configurationCacheDependencies = new();
+        // Syntax trees that may have compile time code based on namespaces.
+        private readonly ConcurrentDictionary<string, SyntaxTree?> _compileTimeSyntaxTrees = new();
 
         private readonly object _configureSync = new();
-        private PipelineConfiguration? _cachedConfiguration;
+        private bool _compileTimeSyntaxTreesInitialized;
+        private PipelineConfiguration? _lastKnownConfiguration;
+
+        public DesignTimeAspectPipelineStatus Status { get; private set; }
+
+        // TODO: The cache must invalidate itself on build (e.g. when the output directory content changes)
+
+        public IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation )
+        {
+            List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees.Count );
+
+            if ( !this._compileTimeSyntaxTreesInitialized )
+            {
+                this._compileTimeSyntaxTrees.Clear();
+                
+                foreach ( var syntaxTree in compilation.SyntaxTrees )
+                {
+                    if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
+                    {
+                        this._compileTimeSyntaxTrees.TryAdd( syntaxTree.FilePath, syntaxTree );
+                        trees.Add( syntaxTree );
+                    }
+                }
+
+                this._compileTimeSyntaxTreesInitialized = true;
+            }
+            else
+            {
+                foreach ( var syntaxTree in compilation.SyntaxTrees )
+                {
+                    if ( this._compileTimeSyntaxTrees.ContainsKey( syntaxTree.FilePath ) )
+                    {
+                        trees.Add( syntaxTree );
+                    }
+                }
+            }
+
+            return trees;
+        }
 
         public DesignTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain ) : base( buildOptions, domain ) { }
 
-        public void OnSyntaxTreePossiblyChanged( SyntaxTree syntaxTree, out bool isInvalidated )
+        public bool IsCompileTimeSyntaxTreeOutdated( string name )
+            => this._compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
+        
+        public bool InvalidateCache( SyntaxTree syntaxTree, bool hasCompileTimeCode )
         {
-            isInvalidated = false;
-
-            if ( this._cachedConfiguration == null )
+            if ( this._lastKnownConfiguration == null )
             {
                 // The cache is empty, so there is nothing to invalidate.
-                return;
+                return false;
             }
 
-            if ( this._configurationCacheDependencies.TryGetValue( syntaxTree.FilePath, out var oldSyntaxTree ) )
+            if ( this._compileTimeSyntaxTrees.TryGetValue( syntaxTree.FilePath, out var oldSyntaxTree ) )
             {
-                if ( !syntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
+                if ( oldSyntaxTree != null )
                 {
-                    // We have a breaking change in our pipeline configuration.
-                    this._cachedConfiguration = null;
-                    isInvalidated = true;
+                    if ( !hasCompileTimeCode || !syntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
+                    {
+                        // We have a breaking change in our pipeline configuration. 
+                        this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+
+                        if ( !hasCompileTimeCode )
+                        {
+                            // The tree no longer contains compile-time code.
+                            this._compileTimeSyntaxTrees.TryRemove( syntaxTree.FilePath, out _ );
+                        }
+                        else
+                        {
+                            // The tree still contains compile-time code but is outdated.
+                            this._compileTimeSyntaxTrees.TryUpdate( syntaxTree.FilePath, null, oldSyntaxTree );
+                        }
+
+                        return true;
+                    }
+                }
+                else
+                {
+                    // The tree was already invalidated before.
+                    return false;
                 }
             }
+            else if ( hasCompileTimeCode )
+            {
+                // The syntax tree used to have no compile-time code, but now has.
+                this._compileTimeSyntaxTrees.TryAdd( syntaxTree.FilePath, syntaxTree );
+                this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public void Reset()
+        {
+            this._lastKnownConfiguration = null;
+            this.Status = DesignTimeAspectPipelineStatus.Default;
+            this._compileTimeSyntaxTreesInitialized = false;
         }
 
         private bool TryGetConfiguration(
@@ -56,56 +148,57 @@ namespace Caravela.Framework.Impl.DesignTime
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
-            // Build the pipeline configuration if we don't have a valid one.
-            if ( this._cachedConfiguration == null )
+            lock ( this._configureSync )
             {
-                lock ( this._configureSync )
+                if ( this._lastKnownConfiguration == null )
                 {
-                    if ( this._cachedConfiguration == null )
+                    // If we don't have any configuration, we will build one, because this is the first time we are called.
+
+                    var compileTimeTrees = this.GetCompileTimeSyntaxTrees( compilation.Compilation );
+
+                    if ( !this.TryInitialize(
+                        diagnosticAdder,
+                        compilation,
+                        compileTimeTrees,
+                        out configuration ) )
                     {
-                        if ( !this.TryInitialize(
-                            diagnosticAdder,
-                            compilation,
-                            out configuration ) )
-                        {
-                            configuration = null;
+                        // A failure here means an error or a cache miss.
+                        configuration = null;
 
-                            return false;
-                        }
-
-                        // Update cache dependencies.
-                        this._configurationCacheDependencies.Clear();
-
-                        if ( configuration.CompileTimeProject?.CodeFiles != null )
-                        {
-                            foreach ( var sourceFile in configuration.CompileTimeProject.CodeFiles )
-                            {
-                                // TODO: less computationally intensive algorithm.
-                                
-                                var syntaxTree =
-                                    compilation.Compilation.SyntaxTrees.Single( t => sourceFile.SourceEquals( t ) );
-
-                                // We will have to somehow store the mapping.
-                                
-                                _ = this._configurationCacheDependencies.TryAdd(syntaxTree.FilePath, syntaxTree );
-                            }
-                        }
-
-                        this._cachedConfiguration = configuration;
+                        return false;
+                    }
+                    else
+                    {
+                        this._lastKnownConfiguration = configuration;
+                        this.Status = DesignTimeAspectPipelineStatus.Ready;
 
                         return true;
                     }
                 }
+                else
+                {
+                    if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    // We have a valid configuration and it is not outdated.
+
+                    configuration = this._lastKnownConfiguration;
+
+                    return true;
+                }
             }
-
-            configuration = this._cachedConfiguration;
-
-            return true;
         }
 
         public DesignTimeAspectPipelineResult Execute( PartialCompilation compilation )
         {
             DiagnosticList diagnosticList = new();
+
+            if ( this.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild )
+            {
+                throw new InvalidOperationException();
+            }
 
             if ( !this.TryGetConfiguration( compilation, diagnosticList, out var configuration ) )
             {

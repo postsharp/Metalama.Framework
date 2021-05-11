@@ -45,12 +45,16 @@ namespace Caravela.Framework.Impl.DesignTime
                 .WhereNotNull()
                 .ToList();
 
+            var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+            
+            DesignTimeDebugger.AttachDebugger( buildOptions );
+
             ReportSuppressions(
                 compilation,
                 syntaxTrees,
                 context.ReportedDiagnostics,
                 context.ReportSuppression,
-                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
+                buildOptions,
                 context.CancellationToken );
         }
 

@@ -31,6 +31,9 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
         private readonly IBuildOptions _buildOptions;
 
+        private static string _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).BuildId
+                                         ?? Guid.NewGuid().ToString();
+
         public const string ResourceName = "Caravela.CompileTimeAssembly";
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
@@ -57,7 +60,7 @@ namespace Caravela.Framework.Impl.CompileTime
             ulong sourceHash )
         {
             XXH64 h = new();
-            h.Update( PackageVersions.BuildId.ToString() );
+            h.Update( _buildId );
 
             foreach ( var reference in referencedProjects )
             {
@@ -199,7 +202,7 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyDictionary<string,SyntaxTree>? syntaxTreeMap,
             out IReadOnlyList<CompileTimeFile>? codeFiles )
         {
-            var outputPaths = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
+            var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
             var sourceFilesList = new List<CompileTimeFile>();
             
@@ -213,14 +216,14 @@ namespace Caravela.Framework.Impl.CompileTime
                 // Write the generated files to disk if we should.
                 if ( !string.IsNullOrWhiteSpace( buildOptions.CompileTimeProjectDirectory ) )
                 {
-                    using var mutex = MutexHelper.CreateGlobalMutex( outputPaths.Directory );
+                    using var mutex = MutexHelper.CreateGlobalMutex( outputInfo.Directory );
                     mutex.WaitOne();
 
                     try
                     {
-                        if ( !Directory.Exists( outputPaths.Directory ) )
+                        if ( !Directory.Exists( outputInfo.Directory ) )
                         {
-                            Directory.CreateDirectory( outputPaths.Directory );
+                            Directory.CreateDirectory( outputInfo.Directory );
                         }
 
                         compileTimeCompilation =
@@ -229,14 +232,14 @@ namespace Caravela.Framework.Impl.CompileTime
                         foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                         {
 
-                            var transformedFileName = Path.Combine( outputPaths.Directory, compileTimeSyntaxTree.FilePath );
+                            var transformedFileName = Path.Combine( outputInfo.Directory, compileTimeSyntaxTree.FilePath );
 
                             if ( syntaxTreeMap != null )
                             {
                                 sourceFilesList.Add( new CompileTimeFile( transformedFileName, syntaxTreeMap[compileTimeSyntaxTree.FilePath] ) );
                             }
 
-                            var path = Path.Combine( outputPaths.Directory, transformedFileName );
+                            var path = Path.Combine( outputInfo.Directory, transformedFileName );
                             var text = compileTimeSyntaxTree.GetText();
 
                             // Write the file in a retry loop to handle locks. It seems there are still file lock issues
@@ -261,8 +264,8 @@ namespace Caravela.Framework.Impl.CompileTime
                     }
                 }
 
-                using var peStream = File.Create( outputPaths.PE );
-                using var pdbStream = File.Create( outputPaths.Pdb );
+                using var peStream = File.Create( outputInfo.PE );
+                using var pdbStream = File.Create( outputInfo.Pdb );
 
                 var emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions );
 
@@ -287,26 +290,28 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 try
                 {
-                    if ( File.Exists( outputPaths.PE ) )
+                    if ( File.Exists( outputInfo.PE ) )
                     {
-                        File.Delete( outputPaths.PE );
+                        File.Delete( outputInfo.PE );
                     }
 
-                    if ( File.Exists( outputPaths.Pdb ) )
+                    if ( File.Exists( outputInfo.Pdb ) )
                     {
-                        File.Delete( outputPaths.Pdb );
+                        File.Delete( outputInfo.Pdb );
                     }
                 }
                 catch ( IOException ) { }
             }
         }
 
-        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation runTimeCompilation )
+        private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation runTimeCompilation, IReadOnlyList<SyntaxTree>? compileTimeTreesHint )
         {
             List<SyntaxTree> compileTimeTrees = new();
             var classifier = SymbolClassifier.GetInstance( runTimeCompilation );
+            
+            var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 
-            foreach ( var tree in runTimeCompilation.SyntaxTrees )
+            foreach ( var tree in trees )
             {
                 FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetSemanticModel( tree, true ), classifier );
                 visitor.Visit( tree.GetRoot() );
@@ -323,39 +328,104 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Tries to create a compile-time <see cref="Compilation"/> given a run-time <see cref="Compilation"/>.
         /// </summary>
-        internal bool TryCreateCompileTimeProject(
+        internal bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
-            out CompileTimeProject? project )
-            => this.TryCreateCompileTimeProject(
+            out CompileTimeProject? project,
+            bool cacheOnly )
+            => this.TryGetCompileTimeProject(
                 runTimeCompilation,
-                GetCompileTimeSyntaxTrees( runTimeCompilation ),
+                GetCompileTimeSyntaxTrees( runTimeCompilation, compileTimeTreesHint ),
                 referencedProjects,
                 diagnosticSink,
+                cacheOnly,
                 out project );
 
-        private bool TryCreateCompileTimeProject(
+      
+
+        private bool TryGetCompileTimeProjectFromCache(
+            Compilation runTimeCompilation,
+            IReadOnlyList<CompileTimeProject> referencedProjects,
+            OutputPaths outputPaths,
+            string compileTimeAssemblyName,
+            ulong projectHash,
+            out CompileTimeProject? project )
+        {
+            // Look in in-memory cache.
+            if (this._cache.TryGetValue( projectHash, out project ))
+            {
+                return true;
+            }
+            
+            // Look on disk.
+            if (!File.Exists( outputPaths.PE ) || !File.Exists( outputPaths.Manifest ))
+            {
+                project = null;
+
+                return false;
+            }
+
+            // Deserialize the manifest.
+            if (CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ))
+            {
+                project = CompileTimeProject.Create(
+                    this._domain,
+                    runTimeCompilation.Assembly.Identity,
+                    new AssemblyIdentity( compileTimeAssemblyName ),
+                    referencedProjects,
+                    manifest,
+                    outputPaths.PE,
+                    outputPaths.Directory,
+                    TextMap.Read );
+                
+                this._cache.Add( projectHash, project );
+
+                return true;
+            }
+            else
+            {
+                try
+                {
+                    File.Delete( outputPaths.Manifest );
+                }
+                catch (IOException) { }
+
+                project = null;
+
+                return false;
+            }
+        }
+
+        private bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
+            bool cacheOnly,
             out CompileTimeProject? project )
         {
             // Check the in-process cache.
-            var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode );
-            var projectHash = ComputeProjectHash( referencedProjects, sourceHash );
+            var (sourceHash, projectHash, compileTimeAssemblyName, outputPaths) = 
+                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
-            if ( this._cache.TryGetValue( projectHash, out project ) )
+            if ( !this.TryGetCompileTimeProjectFromCache(
+                runTimeCompilation,
+                referencedProjects,
+                outputPaths,
+                compileTimeAssemblyName,
+                projectHash,
+                out project ) )
             {
-                return true;
-            }
+                if ( cacheOnly )
+                {
+                    // We were asked to get cache projects only. Don't create it.
+                    project = null;
 
-            var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, projectHash );
-            var outputPaths = this.GetOutputPaths( compileTimeAssemblyName );
-
-            if ( !File.Exists( outputPaths.PE ) || !File.Exists( outputPaths.Manifest ) )
-            {
+                    return false;
+                }
+                
                 // Generate the C# compilation.
                 if ( !this.TryCreateCompileTimeCompilation(
                     runTimeCompilation,
@@ -431,42 +501,28 @@ namespace Caravela.Framework.Impl.CompileTime
                         manifest.Serialize( manifestStream );
                     }
                 }
+                
+                this._cache.Add( projectHash, project );
             }
-            else
-            {
-                // The project exists in the cache.
+            
 
-                if ( CompileTimeProjectManifest.TryDeserialize( File.OpenRead( outputPaths.Manifest ), out var manifest ) )
-                {
-                    // Read all syntax trees in the directory.
-                    
-                    project = CompileTimeProject.Create(
-                        this._domain,
-                        runTimeCompilation.Assembly.Identity,
-                        new AssemblyIdentity( compileTimeAssemblyName ),
-                        referencedProjects,
-                        manifest,
-                        outputPaths.PE,
-                        outputPaths.Directory,
-                        TextMap.Read );
-                }
-                else
-                {
-                    try
-                    {
-                        File.Delete( outputPaths.Manifest );
-                    }
-                    catch ( IOException )
-                    {
-                    }
-
-                    diagnosticSink.Report( GeneralDiagnosticDescriptors.InvalidCachedManifestFile.CreateDiagnostic( Location.None, outputPaths.Manifest ) );
-                }
-            }
-
-            this._cache.Add( projectHash, project );
+            
 
             return true;
+        }
+
+        private (ulong sourceHash, ulong projectHash, string compileTimeAssemblyName, OutputPaths outputPaths) GetPreCacheProjectInfo(
+            Compilation runTimeCompilation,
+            IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
+            IReadOnlyList<CompileTimeProject> referencedProjects )
+        {
+            var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode );
+            var projectHash = ComputeProjectHash( referencedProjects, sourceHash );
+
+            var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, projectHash );
+            var outputPaths = this.GetOutputPaths( compileTimeAssemblyName );
+
+            return ( sourceHash, projectHash, compileTimeAssemblyName, outputPaths );
         }
 
         private static TextMap? GetLocationMap( ImmutableArray<TextMap> locationMaps, string name )
@@ -474,14 +530,16 @@ namespace Caravela.Framework.Impl.CompileTime
                 .OrderByDescending( m => m.TargetPath.Length )
                 .FirstOrDefault();
 
-        private (string Directory, string PE, string Pdb, string Manifest) GetOutputPaths( string assemblyName )
+        record OutputPaths(string Directory, string PE, string Pdb, string Manifest);
+        
+        private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
         {
-            var directory = Path.Combine( this._buildOptions.CacheDirectory, "CompileTimeAssemblies", assemblyName );
-            var pe = Path.Combine( directory, assemblyName + ".dll" );
+            var directory = Path.Combine( this._buildOptions.CacheDirectory, "CompileTimeAssemblies", compileTimeAssemblyName );
+            var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );
 
-            return (directory, pe, pdb, manifest);
+            return new (directory, pe, pdb, manifest);
         }
 
         /// <summary>
@@ -501,13 +559,13 @@ namespace Caravela.Framework.Impl.CompileTime
             out string assemblyPath,
             out string sourceDirectory )
         {
-            var outputPaths = this.GetOutputPaths( assemblyName );
+            var outputInfo = this.GetOutputPaths( assemblyName );
 
             var compilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
-            assemblyPath = outputPaths.PE;
-            sourceDirectory = outputPaths.Directory;
+            assemblyPath = outputInfo.PE;
+            sourceDirectory = outputInfo.Directory;
 
             return this.TryEmit( compilation, diagnosticAdder,null, out _ );
         }

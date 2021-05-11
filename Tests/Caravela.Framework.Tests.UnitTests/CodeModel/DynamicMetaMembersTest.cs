@@ -37,7 +37,7 @@ class TargetCode
 
             var generator = CSharpSyntaxGenerator.Instance;
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes[0];
             var toString = type.Methods.OfName( "ToString" ).Single();
@@ -106,7 +106,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.OfName( "TargetCode" ).Single();
             var nestedType = type.NestedTypes.Single().WithGenericArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) )! );
@@ -129,7 +129,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var localFunction = compilation.DeclaredTypes.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
 
             AssertEx.DynamicEquals(
@@ -152,7 +152,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var method = compilation.DeclaredTypes.Single().Methods.Single();
 
             AdviceParameterList adviceParameterList = new( method );
@@ -179,7 +179,7 @@ class TargetCode
     int this[int index] => 42;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.Single();
             var property = type.Properties.OfName( "P" ).Single();
@@ -208,7 +208,7 @@ class TargetCode
     }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
             var type = compilation.DeclaredTypes.Single();
             var method = type.Methods.OfName( "A" ).Single();
             var longMethod = type.Methods.OfName( "B" ).Single();

@@ -19,10 +19,15 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         [Fact]
         public void ObjectIdentity()
         {
+            // This basically tests that [Memo] works.
+            
             var code = "";
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
-            Assert.Same( compilation.DeclaredTypes, compilation.DeclaredTypes );
+            var types1 = compilation.DeclaredTypes;
+            var types2 = compilation.DeclaredTypes;
+            
+            Assert.Same( types1, types2 );
         }
 
         [Fact]
@@ -39,7 +44,7 @@ namespace NS
     class C {}
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var types = compilation.DeclaredTypes.ToList();
             Assert.Equal( 2, types.Count );
@@ -75,7 +80,7 @@ class C
     }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.Single();
             Assert.Equal( "C", type.Name );
@@ -118,7 +123,7 @@ class TestAttribute : Attribute
     public Type[] Types { get; set; }
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var attribute = compilation.DeclaredTypes.ElementAt( 1 ).Attributes.Single();
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
@@ -147,7 +152,7 @@ interface I<T>
     ref readonly int M2();
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var methods = compilation.DeclaredTypes.Single().Methods.ToList();
             Assert.Equal( 2, methods.Count );
@@ -196,7 +201,7 @@ class C<T1, T2>
     static C<int, string> GetInstance() => null;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.Single();
 
@@ -223,7 +228,7 @@ class MyAttribute : Attribute
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var attributes = compilation.Attributes.ToArray();
 
@@ -246,7 +251,7 @@ class C
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var parameterTypes = from type in compilation.DeclaredTypes
                                  from method in type.Methods
@@ -280,7 +285,7 @@ class C
     int field;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -299,7 +304,7 @@ class C
     int c;    
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -321,7 +326,7 @@ class C
     ref readonly int RefReadonly => ref field;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -351,7 +356,7 @@ class C : IDisposable
 	public static C operator -(C c) => c;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -393,7 +398,7 @@ class C<T>
     int s;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -415,7 +420,7 @@ class C
     ref readonly int M3 => ref i;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -434,7 +439,7 @@ class C
     void M(int i, int j = 42, string s = ""forty two"", decimal d = 3.14m, DateTime dt = default, DateTime? dt2 = null, object o = null) {}
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -461,7 +466,7 @@ class C
         [Fact]
         public void GetTypeByReflectionType()
         {
-            var compilation = CreateCompilation( "" );
+            var compilation = CreateCompilationModel( "" );
 
             Assert.Equal(
                 "System.Collections.Generic.List<T>.Enumerator",
@@ -491,7 +496,7 @@ class C<T>
     (int i, int j) t;
 }";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -519,7 +524,7 @@ partial class B
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             Assert.Equal( 2, compilation.DeclaredTypes.Count );
 
@@ -537,7 +542,7 @@ class C<TC>
 }
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
@@ -572,7 +577,7 @@ interface K : I {}
 interface L : J, K {}
 ";
 
-            var compilation = CreateCompilation( code );
+            var compilation = CreateCompilationModel( code );
 
             var type = compilation.DeclaredTypes.OfName( "C" ).Single();
 

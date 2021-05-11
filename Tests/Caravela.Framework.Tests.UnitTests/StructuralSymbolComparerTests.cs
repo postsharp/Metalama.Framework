@@ -53,7 +53,7 @@ namespace D {}
 
             var comparer = new StructuralSymbolComparer( StructuralSymbolComparerOptions.Name );
 
-            var compilation = CreateRoslynCompilation( code );
+            var compilation = CreateCSharpCompilation( code );
             var globalNamespaceMembers = compilation.Assembly.Modules.Single().GlobalNamespace.GetMembers().ToArray();
             var typeA = globalNamespaceMembers[0];
             var typeB = globalNamespaceMembers[1];

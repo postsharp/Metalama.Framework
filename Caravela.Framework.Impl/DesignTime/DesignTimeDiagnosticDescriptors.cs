@@ -57,5 +57,14 @@ namespace Caravela.Framework.Impl.DesignTime
                     "{0}: {1}",
                     _category,
                     DiagnosticSeverity.Hidden );
+        
+        internal static readonly StrongDiagnosticDescriptor<ISymbol>
+            CompileTimeTypeNeedsRebuild
+                = new(
+                    "CR0304",
+                    "The compile-time type needs rebuild.",
+                    "The compile-time type '{0}' has been edited since the last build. Please build the project.",
+                    _category,
+                    DiagnosticSeverity.Error ); 
     }
 }

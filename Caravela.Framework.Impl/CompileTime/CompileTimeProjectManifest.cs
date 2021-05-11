@@ -55,6 +55,15 @@ namespace Caravela.Framework.Impl.CompileTime
                 stream.Close();
 
                 manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+                
+                // Assert that files are properly deserialized.
+                foreach ( var file in manifest.Files )
+                {
+                    if ( file.SourcePath == null! || file.TransformedPath == null!)
+                    {
+                        throw new AssertionFailedException( "Deserialization error." );
+                    }
+                }
 
                 return true;
             }

@@ -51,7 +51,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets the list of aspect types (identified by their fully qualified reflection name) of the aspects
         /// declared in the current project.
         /// </summary>
-        public IReadOnlyList<string> AspectTypes => this.AssertNotEmpty()._manifest!.AspectTypes;
+        public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of compile-time projects referenced by the current project.
@@ -61,7 +61,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        public IReadOnlyList<CompileTimeFile>? CodeFiles => this._manifest?.Files;
+        public IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -72,7 +72,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
         /// </summary>
-        public ulong Hash => this.AssertNotEmpty()._manifest!.SourceHash;
+        public ulong Hash => this._manifest?.SourceHash ?? 0;
 
         /// <summary>
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that

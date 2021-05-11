@@ -22,7 +22,7 @@ namespace Caravela.Framework.Tests.UnitTests.Serialization
             // We need a syntax factory for an arbitrary compilation, but at least with standard references.
             // Note that we cannot easily get a reference to Caravela.Compiler.Interfaces this way because we have a reference assembly.
             this.SyntaxFactory = ReflectionMapper.GetInstance(
-                CreateRoslynCompilation(
+                CreateCSharpCompilation(
                     "/* No code is necessary, only references */",
                     additionalReferences: new[]
                     {

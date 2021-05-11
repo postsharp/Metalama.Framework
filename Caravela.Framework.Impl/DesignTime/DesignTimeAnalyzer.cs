@@ -48,7 +48,6 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            context.EnableConcurrentExecution();
             context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
 
             // Semantic model analysis is used for frequent and "short loop" analysis, principally of the templates themselves.
@@ -58,14 +57,21 @@ namespace Caravela.Framework.Impl.DesignTime
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
             // Execute the analysis that are not performed in the pipeline.
-            Visitor visitor = new( context );
-            visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
+            var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
 
+            
+            DesignTimeDebugger.AttachDebugger( buildOptions );
+
+            // Invalidate the cache.
+            DesignTimeAspectPipelineCache.Instance.ValidateCache(
+                context.SemanticModel.SyntaxTree, 
+                buildOptions );
+            
             // Execute the pipeline.
             var syntaxTreeResults = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
                 context.SemanticModel.Compilation,
                 new[] { context.SemanticModel.SyntaxTree },
-                new BuildOptions( context.Options.AnalyzerConfigOptionsProvider ),
+                buildOptions,
                 context.CancellationToken );
 
             // Report diagnostics from the pipeline.
@@ -80,6 +86,12 @@ namespace Caravela.Framework.Impl.DesignTime
                     context.ReportDiagnostic,
                     true );
             }
+            
+
+            // Additional validations that run out of the pipeline.
+            DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );
+            visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
+
         }
     }
 }

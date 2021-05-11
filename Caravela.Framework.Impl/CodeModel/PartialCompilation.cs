@@ -35,6 +35,8 @@ namespace Caravela.Framework.Impl.CodeModel
         /// </summary>
         public abstract bool IsPartial { get; }
 
+        public bool IsEmpty => this.SyntaxTrees.Count == 0;
+
         private PartialCompilation( Compilation compilation )
         {
             this.Compilation = compilation;

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Caravela.Framework.Impl.Pipeline
 {
-    public class ServiceProvider : IServiceProvider
+    public class ServiceProvider : IServiceProvider, IDisposable
     {
         private readonly Dictionary<Type, object> _services = new();
 
@@ -26,6 +26,17 @@ namespace Caravela.Framework.Impl.Pipeline
         private class EmptyProvider : IServiceProvider
         {
             public object GetService( Type serviceType ) => null!;
+        }
+
+        public void Dispose()
+        {
+            foreach ( var o in this._services.Values )
+            {
+                if ( o is IDisposable disposable )
+                {
+                    disposable.Dispose();
+                }
+            }
         }
     }
 }

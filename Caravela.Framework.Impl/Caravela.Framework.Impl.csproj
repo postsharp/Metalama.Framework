@@ -2,18 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Caravela.Framework</PackageId>
-    <PackageDescription>
-      PostSharp project "Caravela". A tool for aspect-oriented programming (AOP) using templates written in pure C#.
-    </PackageDescription>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\IsExternalInit.cs" Link="IsExternalInit.cs" />
-
-    <None Include="build\Caravela.Framework.targets" Pack="true" PackagePath="build" />
-    <None Include="build\Caravela.CompilerVisibleProperties.targets" Pack="true" PackagePath="build" />
 
     <Compile Remove="CodeModel\Before\**" />
 
@@ -29,23 +23,17 @@
     <InternalsVisibleTo Include="Caravela.Framework.Tests.UnitTests" />
     <InternalsVisibleTo Include="Caravela.Framework.Tests.Integration" />
     
-    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" GeneratePathProperty="true" />
-    <None Include="$(PkgCaravela_CodeAnalysis_CSharp_Workspaces_Lightweight)\lib\netstandard2.0\Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" GeneratePathProperty="true" />
-    <None Include="$(PkgCaravela_CodeAnalysis_Workspaces_Lightweight_Common)\lib\netstandard2.0\Caravela.CodeAnalysis.Workspaces.Lightweight.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-
+    <PackageReference Include="Caravela.CodeAnalysis.CSharp.Workspaces.Lightweight" Version="$(CaravelaCompilerVersion)" />
+    <PackageReference Include="Caravela.CodeAnalysis.Workspaces.Lightweight.Common" Version="$(CaravelaCompilerVersion)" />
     <PackageReference Include="Caravela.Compiler.Sdk" Version="$(CaravelaCompilerVersion)" />
-    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
     <PackageReference Include="K4os.Hash.xxHash" Version="1.0.6" />
     <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="4.7.2" PrivateAssets="all" GeneratePathProperty="true" />
-    <None Include="$(PkgSystem_Reflection_MetadataLoadContext)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" PrivateAssets="all" />
-
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+    <ProjectReference Include="..\Caravela.Framework.DesignTime.Contracts\Caravela.Framework.DesignTime.Contracts.csproj" />
     <ProjectReference Include="..\Caravela.Framework\Caravela.Framework.csproj" />
-    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Caravela.Framework.Sdk\Caravela.Framework.Sdk.csproj" />
     <ProjectReference Include="..\Build\Caravela.MemoTransformer\Caravela.MemoTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   
@@ -53,44 +41,12 @@
   <Target Name="SetPackageContent" AfterTargets="CaravelaCompilerSetLibAssembliesInPackage">
     <ItemGroup>
       <!-- remove everything from lib -->
-      <BuildOutputInPackage Remove="@(ReferenceCopyLocalPaths)" />
+      <BuildOutputInPackage Remove="@(BuildOutputInPackage)" />
+      <!-- TODO doc xml files are still included -->
     </ItemGroup>
   </Target>
   
-  <!-- Generate code that includes the version of package dependencies. This allows to generate build-time projects. -->
-  <Target Name="WritePackageVersions" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
-    <ItemGroup>
-      <PackageVersions Include="@(PackageDefinitions)" DotlessName="$([System.String]::Copy('%(Name)').Replace('.', ''))" Condition="%(Name) == 'Microsoft.CSharp' or %(Name) == 'Microsoft.CodeAnalysis.CSharp' or %(Name) == 'Caravela.Compiler' or %(Name) == 'Caravela.Compiler.Sdk'" />
-    </ItemGroup>
-    
-    <PropertyGroup>
-      <PackageVersionsCode>
-        <![CDATA[
-namespace Caravela.Framework.Impl.CompileTime
-{
-    static class PackageVersions
-    {
-        // A GUID generated at every build.
-        public static System.Guid BuildId = new System.Guid("$([System.Guid]::NewGuid())")%3B
-        
-        @(PackageVersions->'public const string %(DotlessName)Version = "%(Version)"%3B', '%0D%0A        ')
-    }
-}
-        ]]>
-      </PackageVersionsCode>
-    </PropertyGroup>
-    
-    <PropertyGroup>
-      <_PackagesVersion_g_cs_Existed Condition="Exists('CompileTime/PackageVersions.g.cs')">True</_PackagesVersion_g_cs_Existed>
-    </PropertyGroup>
-    
-    <WriteLinesToFile File="CompileTime/PackageVersions.g.cs" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(PackageVersionsCode)" />
-
-    <ItemGroup>
-      <!-- If this is not the first build, the file exists and has been included by wildcards, so we need to exclude it first. -->
-      <Compile Include="CompileTime/PackageVersions.g.cs" Condition="'$(_PackagesVersion_g_cs_Existed)'!='True'" />
-    </ItemGroup>
-  </Target>
+ 
 
   <!-- Obfuscation -->
   <PropertyGroup>
@@ -102,13 +58,22 @@ namespace Caravela.Framework.Impl.CompileTime
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Reference PostSharp for obfuscation -->
     <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+    
+    <!-- Reference Caravela.Compiler for [Memo] -->
+    <PackageReference Include="Caravela.Compiler" Version="$(CaravelaCompilerVersion)" PrivateAssets="all" />
+    
     <ProjectReference Include="..\Build\Caravela.Obfuscator\Caravela.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="CodeModel\Before\**" />
     <EmbeddedResource Remove="Serialization\Reflection\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="build" />
   </ItemGroup>
 
   <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">

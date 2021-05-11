@@ -12,25 +12,27 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal sealed class CompileTimeFile
     {
+        // TODO: Add serialization-deserialization tests because this is brittle.
+        
         /// <summary>
         /// Gets the source path.
         /// </summary>
-        public string SourcePath { get; }
+        public string SourcePath { get; set; }
         
         /// <summary>
         /// Gets the transformed path (relatively to the root of the archive).
         /// </summary>
-        public string TransformedPath { get;  }
+        public string TransformedPath { get; set; }
         
         /// <summary>
         /// Gets the hash of the source.
         /// </summary>
-        public ImmutableArray<byte> SourceHash { get;  }
+        public ImmutableArray<byte> SourceHash { get; set; }
         
         /// <summary>
         /// Gets the algorithm used to produce <see cref="SourceHash"/>.
         /// </summary>
-        public SourceHashAlgorithm SourceHashAlgorithm { get;  }
+        public SourceHashAlgorithm SourceHashAlgorithm { get; set; }
 
         public CompileTimeFile()
         {
@@ -53,8 +55,8 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public bool SourceEquals( SyntaxTree syntaxTree )
             => syntaxTree.FilePath == this.SourcePath && 
-               this.SourceHashAlgorithm == syntaxTree.GetText(  ).ChecksumAlgorithm 
+               (this.SourceHashAlgorithm == syntaxTree.GetText(  ).ChecksumAlgorithm 
                 ? Enumerable.SequenceEqual( syntaxTree.GetText().GetChecksum(), this.SourceHash )
-                : throw new NotImplementedException("Comparing two files with different checksum algorithms is not implemented.");
+                : throw new NotImplementedException("Comparing two files with different checksum algorithms is not implemented."));
     }
 }

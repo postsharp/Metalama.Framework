@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Impl.CompileTime;
+using Caravela.Framework.Impl.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -20,6 +22,8 @@ namespace Caravela.Framework.Tests.UnitTests
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
+            AssemblyMetadataReader metadataReader = AssemblyMetadataReader.GetInstance( typeof(CaravelaCompiler).Assembly );
+            
             var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
@@ -27,8 +31,8 @@ namespace Caravela.Framework.Tests.UnitTests
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include='Caravela.Compiler.Sdk' Version='{PackageVersions.CaravelaCompilerSdkVersion}' />
-    <PackageReference Include='Caravela.Compiler' Version='{PackageVersions.CaravelaCompilerVersion}' />
+    <PackageReference Include='Caravela.Compiler.Sdk' Version='{metadataReader.GetPackageVersion("Caravela.Compiler.Sdk"  )}' />
+    <PackageReference Include='Caravela.Compiler' Version='{metadataReader.GetPackageVersion( "Caravela.Compiler" )}' />
   </ItemGroup>
 </Project>
 ";
