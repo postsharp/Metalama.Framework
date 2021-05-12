@@ -24,7 +24,6 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private static ReferenceAssemblyLocator? _instance;
 
-
         public static ReferenceAssemblyLocator GetInstance()
         {
             // We don't initialize the instance from the static constructor because the constructor is non-trivial
