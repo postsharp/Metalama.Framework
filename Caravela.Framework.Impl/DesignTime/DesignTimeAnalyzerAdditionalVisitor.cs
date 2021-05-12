@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.DesignTime
             // If the scope is null (e.g. in a using statement) or compile-time-only, we should not analyze.
             // Otherwise, we cannot reference a compile-time-only declaration.
 
-            if ( this._currentDeclarationScope.HasValue && this._currentDeclarationScope != SymbolDeclarationScope.CompileTimeOnly )
+            if ( this._currentDeclarationScope.HasValue && this._currentDeclarationScope == SymbolDeclarationScope.RunTimeOnly )
             {
                 var symbolInfo = this._semanticModel.GetSymbolInfo( node );
 

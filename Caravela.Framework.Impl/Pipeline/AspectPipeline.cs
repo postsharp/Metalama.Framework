@@ -255,8 +255,10 @@ namespace Caravela.Framework.Impl.Pipeline
             }
         }
 
+        protected virtual void Dispose( bool disposing ) { }
+
         /// <inheritdoc/>
-        public void Dispose() { }
+        public void Dispose() => this.Dispose( true );
 
         public abstract bool CanTransformCompilation { get; }
     }

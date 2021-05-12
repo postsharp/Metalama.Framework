@@ -40,22 +40,32 @@ namespace Caravela.Framework.Impl.DesignTime
                 return;
             }
 
-            var syntaxTrees = context.ReportedDiagnostics
-                .Select( d => d.Location.SourceTree )
-                .WhereNotNull()
-                .ToList();
+            try
+            {
 
-            var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
-            
-            DesignTimeDebugger.AttachDebugger( buildOptions );
+                DesignTimeLogger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-            ReportSuppressions(
-                compilation,
-                syntaxTrees,
-                context.ReportedDiagnostics,
-                context.ReportSuppression,
-                buildOptions,
-                context.CancellationToken );
+                var syntaxTrees = context.ReportedDiagnostics
+                    .Select( d => d.Location.SourceTree )
+                    .WhereNotNull()
+                    .ToList();
+
+                var buildOptions = new BuildOptions( context.Options.AnalyzerConfigOptionsProvider );
+
+                DesignTimeDebugger.AttachDebugger( buildOptions );
+
+                ReportSuppressions(
+                    compilation,
+                    syntaxTrees,
+                    context.ReportedDiagnostics,
+                    context.ReportSuppression,
+                    buildOptions,
+                    context.CancellationToken );
+            }
+            catch ( Exception e )
+            {
+                DesignTimeLogger.Instance?.Write( e.ToString() );
+            }
         }
 
         /// <summary>
@@ -76,6 +86,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 options,
                 cancellationToken );
 
+            var suppressionsCount = 0;
             foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
             {
                 if ( syntaxTreeResult == null )
@@ -115,10 +126,13 @@ namespace Caravela.Framework.Impl.DesignTime
 
                         if ( groupedSuppressions[symbolId].Any( s => string.Equals( s.Id, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                         {
+                            suppressionsCount++;
                             reportSuppression( Suppression.Create( _supportedSuppressionsDictionary[diagnostic.Id], diagnostic ) );
                         }
                     }
                 }
+                
+                DesignTimeLogger.Instance?.Write( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): {suppressionsCount} suppressions reported." );
             }
         }
 

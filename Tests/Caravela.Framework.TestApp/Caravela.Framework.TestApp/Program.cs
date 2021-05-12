@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Caravela.Framework.TestApp.Aspects;
@@ -18,8 +21,10 @@ namespace Caravela.Framework.TestApp
         {
             //Console.WriteLine( $"x={x}" ); 
 
+            int x = 0;
+
             Foo();
-            (new Program()).SomeOtherIntroducedMethod();
+            new Program().SomeOtherIntroducedMethod();
 
            // IMethod m = null;
             // m.Base.Invoke( null );
@@ -34,6 +39,8 @@ namespace Caravela.Framework.TestApp
             
             Cancel();
         }
+
+        private void Method() { }
         
         [SwallowExceptionsAspect]
         [PrintDebugInfoAspect]

@@ -215,7 +215,6 @@ Target.cs:
                 },
                 assemblyName );
 
-            cache.ValidateCache( compilation3.SyntaxTrees.Single( t => t.FilePath == "Target.cs" ), buildOptions );
             var results3 = cache.GetDesignTimeResults( compilation3, buildOptions );
             var dumpedResults3 = DumpResults( results3 );
 
@@ -235,12 +234,12 @@ Target.cs:
                 assemblyName );
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
-            cache.ValidateCache( aspect4, buildOptions );
+            
+            var results4 = cache.GetDesignTimeResults( compilation4, buildOptions );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
-            
-            var results4 = cache.GetDesignTimeResults( compilation4, buildOptions );
+
             var dumpedResults4 = DumpResults( results4 );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
@@ -264,8 +263,7 @@ Target.cs:
                 assemblyName );
 
             var aspect5 = compilation5.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
-            cache.ValidateCache( aspect5, buildOptions );
-
+            
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
             
             var results5 = cache.GetDesignTimeResults( compilation5, buildOptions );
@@ -291,11 +289,13 @@ Target.cs:
             // A new evaluation of the design-time pipeline should now give the new results.
             var results6 = cache.GetDesignTimeResults( compilation5, buildOptions );
             var dumpedResults6 = DumpResults( results6 );
+            
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
             Assert.Equal( 3, cache.PipelineExecutionCount );
             Assert.Equal( 2, pipeline.PipelineInitializationCount );
-
+            Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
+            
             List<Diagnostic> diagnostics6 = new();
             new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline ).Visit( aspect5.GetRoot( ) );
 

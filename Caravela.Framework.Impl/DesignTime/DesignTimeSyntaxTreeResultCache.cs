@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
@@ -24,6 +25,8 @@ namespace Caravela.Framework.Impl.DesignTime
         /// </summary>
         private readonly ConcurrentDictionary<string, DesignTimeSyntaxTreeResult> _syntaxTreeCache = new();
 
+        public int Count => this._syntaxTreeCache.Count;
+
         /// <summary>
         /// Updates cache with a <see cref="DesignTimeAspectPipelineResult"/> that includes results for several syntax trees.
         /// </summary>
@@ -33,6 +36,11 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var result in resultsByTree )
             {
+                if ( !Path.IsPathRooted( result.SyntaxTree.FilePath ) )
+                {
+                    throw new AssertionFailedException( "A rooted path was expected." );
+                }
+                
                 this._syntaxTreeCache[result.SyntaxTree.FilePath] = result;
             }
         }
@@ -115,180 +123,35 @@ namespace Caravela.Framework.Impl.DesignTime
             return resultsByTree.Select( b => b.Value.ToImmutable( compilation ) );
         }
 
-        public bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out DesignTimeSyntaxTreeResult? result, bool validateDependencies )
+        public bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out DesignTimeSyntaxTreeResult? result)
         {
-            if ( !this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out result ) )
-            {
-                return false;
-            }
-            else
-            {
-                if ( validateDependencies )
-                {
-                    // The item is in the cache, but we need to check that all dependencies are valid.
-                    foreach ( var dependency in result.Dependencies )
-                    {
-                        if ( !this._syntaxTreeCache.ContainsKey( dependency ) )
-                        {
-                            // The dependency is not present, which means that it has been invalidated.
-                            // Remove also the current item.
-                            _ = this._syntaxTreeCache.TryRemove( syntaxTree.FilePath, out _ );
-                        }
-                    }
-
-                    // TODO: Implement a better cache invalidation algorithm so that cache validation is less expensive.
-                }
-
-                return true;
-            }
+            return this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out result );
         }
 
-        internal bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, bool hasCompileTimeCode = false )
+        
+        public void UpdateCompilation( CompilationChanges compilationChanges )
         {
-            // Check if the source text has changed.
-            if ( newSyntaxTree == oldSyntaxTree )
+            foreach ( var change in compilationChanges.SyntaxTreeChanges )
             {
-                return false;
-            }
-            else
-            {
-                if ( !newSyntaxTree.GetText().ContentEquals( oldSyntaxTree.GetText() ) )
+                switch ( change.SyntaxTreeChangeKind )
                 {
-                    var newSyntaxRoot = newSyntaxTree.GetRoot();
-                    var oldSyntaxRoot = oldSyntaxTree.GetRoot();
-
-                    // If the source text has changed, check whether the change can possibly change symbols. Changes in method implementations are ignored.
-                    foreach ( var change in newSyntaxTree.GetChanges( oldSyntaxTree ) )
-                    {
-                        // change.Span is a span in the _old_ syntax tree.
-                        // change.NewText is the new text.
-                        var changedSpan = change.Span;
-
-                        // If we are inserting a space, ignore it.
-                        if ( changedSpan.Length == 0 && string.IsNullOrWhiteSpace( change.NewText ) )
-                        {
-                            continue;
-                        }
-
-                        // If we are editing a comment, ignore it.
-                        var changedTrivia = oldSyntaxRoot.FindTrivia( changedSpan.Start );
-
-                        var triviaKind = changedTrivia.Kind();
-
-                        if ( triviaKind != SyntaxKind.None && changedTrivia.Span.Contains( changedSpan ) )
-                        {
-                            // If the change is totally contained in a trivia, excluding the trivia prefix, we may ignore it
-
-                            switch ( triviaKind )
-                            {
-                                case SyntaxKind.SingleLineDocumentationCommentTrivia:
-                                case SyntaxKind.MultiLineDocumentationCommentTrivia:
-                                case SyntaxKind.XmlComment:
-                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-
-                                case SyntaxKind.MultiLineCommentTrivia:
-                                case SyntaxKind.SingleLineCommentTrivia:
-                                    if ( changedSpan.Start > changedTrivia.Span.Start + 3 )
-                                    {
-                                        continue;
-                                    }
-                                    else
-                                    {
-                                        break;
-                                    }
-
-                                case SyntaxKind.WhitespaceTrivia:
-                                    if ( changedTrivia.Span.Length == changedSpan.Length && change.NewText.Length == 0 )
-                                    {
-                                        // Removing all spaces of a trivia is potentially breaking.
-                                        break;
-                                    }
-                                    else if ( !string.IsNullOrWhiteSpace( change.NewText ) )
-                                    {
-                                        // Adding non-whitespace to a whitespace is breaking.
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        continue;
-                                    }
-                            }
-                        }
-
-                        // If the change is in a method body or other expression, ignore it.
-                        if ( !hasCompileTimeCode )
-                        {
-                            if ( !oldSyntaxRoot.FullSpan.Contains( changedSpan ) )
-                            {
-                                throw new AssertionFailedException();
-                            }
-
-                            var changedNode = oldSyntaxRoot.FindNode( changedSpan );
-
-                            if ( IsChangeIrrelevantToSymbol( changedNode ) )
-                            {
-                                continue;
-                            }
-                        }
-
-                        // If we are here, it means that we have a relevant change.
-                        return true;
-                    }
+                    case SyntaxTreeChangeKind.Added:
+                        break;
+                        
+                    case SyntaxTreeChangeKind.Deleted:
+                    case SyntaxTreeChangeKind.Changed:
+                        DesignTimeLogger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
+                        this._syntaxTreeCache.TryRemove( change.FilePath, out _ );
+                        break;
+                    
                 }
-
-                return false;
             }
-
-            // Determines if a change in a node can possibly affect a change in symbols.
-            static bool IsChangeIrrelevantToSymbol( SyntaxNode node )
-                => node.Parent switch
-                {
-                    BaseMethodDeclarationSyntax method => node == method.Body || node == method.ExpressionBody,
-                    AccessorDeclarationSyntax accessor => node == accessor.Body || node == accessor.ExpressionBody,
-                    VariableDeclaratorSyntax field => node == field.Initializer,
-                    PropertyDeclarationSyntax property => node == property.ExpressionBody || node == property.Initializer,
-                    _ => node.Parent != null && IsChangeIrrelevantToSymbol( node.Parent )
-                };
-        }
-
-        /// <summary>
-        /// Invalidates the cache. Returns <c>true</c> if the <see cref="SyntaxTree"/> was different.
-        /// </summary>
-        /// <param name="syntaxTree"></param>
-        /// <param name="hasCompileTimeCode"></param>
-        /// <returns></returns>
-        public bool InvalidateCache( SyntaxTree syntaxTree, bool hasCompileTimeCode )
-        {
-            if ( this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out var cachedResult ) )
-            {
-                var isDifferent = this.IsDifferent( cachedResult.LastComparedSyntaxTree, syntaxTree, hasCompileTimeCode );
-
-                if ( isDifferent )
-                {
-                    // If we are here, it means that we have a relevant change.
-                    _ = this._syntaxTreeCache.TryRemove( cachedResult.SyntaxTree.FilePath, out _ );
-                }
-                else
-                {
-                    // If we are here, it means that there was no relevant change. Update the syntax tree so the next comparison is less demanding.
-                    cachedResult.LastComparedSyntaxTree = syntaxTree;
-                }
-
-                return isDifferent;
-            }
-
-            return true;
+           
         }
 
         public void Clear()
         {
+            DesignTimeLogger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.Clear()." );
             this._syntaxTreeCache.Clear();
         }
     }

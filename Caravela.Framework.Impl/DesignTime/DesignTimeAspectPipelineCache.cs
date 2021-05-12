@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
-using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using System;
@@ -22,6 +21,8 @@ namespace Caravela.Framework.Impl.DesignTime
     /// </summary>
     internal class DesignTimeAspectPipelineCache : IDisposable
     {
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeSourceGenerator).Assembly.GetName().Name;
+
         private readonly ConditionalWeakTable<Compilation, object> _sync = new();
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
@@ -48,7 +49,20 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="buildOptions"></param>
         /// <returns></returns>
         internal DesignTimeAspectPipeline GetOrCreatePipeline( IBuildOptions buildOptions )
-            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ => new DesignTimeAspectPipeline( buildOptions, this._domain ) );
+            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ =>
+            {
+                var pipeline = new DesignTimeAspectPipeline( buildOptions, this._domain );
+                pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
+
+                return pipeline;
+            } );
+
+        private void OnExternalBuildStarted( object sender, EventArgs e )
+        {
+            // If a build has started, we have to invalidate the whole cache because we have allowed
+            // our cache to become inconsistent when we started to have an outdated pipeline configuration.
+            this._syntaxTreeResultCache.Clear();
+        }
 
         /// <summary>
         /// Gets the design-time results for a whole compilation.
@@ -70,38 +84,57 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             var pipeline = this.GetOrCreatePipeline( buildOptions );
             
-                   
+            // Update the cache.
+            var changes = pipeline.InvalidateCache( compilation );
+
+            if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
+            {
+                this._syntaxTreeResultCache.UpdateCompilation( changes );
+            }
+            else
+            {
+                // We don't invalidate the syntax tree results cache if the pipeline is broken, so we can serve old (outdated) results
+                // instead of nothing.
+            }
+
+
             // If the pipeline has an outdated configuration but we have a compile-time project,
             // then we clear our own result cache because we can rebuild it.
             if ( pipeline.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && 
-                 pipeline.HasCachedCompileTimeProject(
-                     compilation,
-                     NullDiagnosticAdder.Instance,
-                     pipeline.GetCompileTimeSyntaxTrees( compilation ) ) )
+                 pipeline.HasCachedCompileTimeProject( compilation ) )
             {
                 pipeline.Reset();
                 this._syntaxTreeResultCache.Clear();
             }
 
-            var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
-
-            // Execute the pipeline if required, and update the cache.
-            if ( dirtySyntaxTrees.Count > 0 )
+            if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
             {
-                var lockable = this._sync.GetOrCreateValue( compilation );
+                var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
 
-                lock ( lockable )
+                // Execute the pipeline if required, and update the cache.
+                if ( dirtySyntaxTrees.Count > 0 )
                 {
-                    var partialCompilation = PartialCompilation.CreatePartial( compilation, dirtySyntaxTrees );
+                    var lockable = this._sync.GetOrCreateValue( compilation );
 
-                    if ( !partialCompilation.IsEmpty )
+                    lock ( lockable )
                     {
-                        Interlocked.Increment( ref this._pipelineExecutionCount );
-                        var result = pipeline.Execute( partialCompilation );
+                        var partialCompilation = PartialCompilation.CreatePartial( compilation, dirtySyntaxTrees );
 
-                        this._syntaxTreeResultCache.Update( compilation, result );
+                        if ( !partialCompilation.IsEmpty )
+                        {
+                            Interlocked.Increment( ref this._pipelineExecutionCount );
+                            var result = pipeline.Execute( partialCompilation );
+
+                            this._syntaxTreeResultCache.Update( compilation, result );
+                        }
                     }
                 }
+            }
+            else
+            {
+                // If we need a build, we only serve results from the cache.
+                DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required,"+
+                                                  $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
             }
 
             // Get the results from the cache. We don't need to check dependencies
@@ -110,7 +143,7 @@ namespace Caravela.Framework.Impl.DesignTime
             // Create the result.
             foreach ( var syntaxTree in syntaxTrees )
             {
-                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult, false ) )
+                if ( this._syntaxTreeResultCache.TryGetValue( syntaxTree, out var syntaxTreeResult ) )
                 {
                     resultArrayBuilder.Add( syntaxTreeResult );
                 }
@@ -127,7 +160,13 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _, true ) )
+                if ( syntaxTree.FilePath.StartsWith( _sourceGeneratorAssemblyName, StringComparison.Ordinal ) )
+                {
+                    // This is our own generated file. Don't include.
+                    continue;
+                }
+                
+                if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _ ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
                 }
@@ -136,28 +175,8 @@ namespace Caravela.Framework.Impl.DesignTime
             return uncachedSyntaxTrees;
         }
 
-        public void ValidateCache( SyntaxTree updatedSyntaxTree, IBuildOptions buildOptions )
-        {
-            var pipeline = this.GetOrCreatePipeline( buildOptions );
-            this.ValidateCache( updatedSyntaxTree, pipeline );
-        }
-
-        private void ValidateCache( SyntaxTree updatedSyntaxTree, DesignTimeAspectPipeline pipeline )
-        {
-            // Invalidate the cache, if required. We have to look at all syntax trees and just on those we have to focus on.
-
-            var hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( updatedSyntaxTree.GetRoot() );
-
-            pipeline.InvalidateCache( updatedSyntaxTree, hasCompileTimeCode );
-
-            if ( pipeline.Status == DesignTimeAspectPipelineStatus.Ready )
-            {
-                // Validate the cache of syntax tree results.
-                this._syntaxTreeResultCache.InvalidateCache( updatedSyntaxTree, hasCompileTimeCode );
-            }
-     
-        }
-
         public void Dispose() => this._domain.Dispose();
     }
+    
+    
 }

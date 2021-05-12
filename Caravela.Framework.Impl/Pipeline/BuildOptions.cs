@@ -44,6 +44,10 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 
+        public string? BuildTouchFile => this.GetStringOption( "CaravelaBuildTouchFile" );
+
+        public string? AssemblyName => this.GetStringOption( "AssemblyName" );
+
         public ImmutableArray<object> PlugIns { get; }
 
         private bool GetBooleanOption( string name, bool defaultValue = false )

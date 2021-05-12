@@ -15,7 +15,22 @@
     <Target Name="ExportCaravelaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''" />
         <PropertyGroup>
+            <!-- TODO: this property is now unused -->
             <CaravelaCompileTimeProjectDirectory Condition="'$(CaravelaCompileTimeProjectDirectory)'==''">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)compileTime</CaravelaCompileTimeProjectDirectory>
+            <CaravelaBuildTouchFile>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)CaravelaBuild.touch</CaravelaBuildTouchFile>
+
         </PropertyGroup>
+    </Target>
+    
+    <Target Name="CreateCaravelaBuildTouchFile" BeforeTargets="BeforeCompile">
+        <!-- We create a touch file with a new arbitrary content every time that the file is absent. This file is used to signal
+             the design-time Caravela pipeline that a build has started. When the design-time pipeline needs this information again, it will
+             delete the file. It should do that only when the source code has changed (even if it is not saved). We don't overwrite an existing
+             file because this would break incremental build -->
+        <WriteLinesToFile File="$(CaravelaBuildTouchFile)" Lines=">$([System.Guid]::NewGuid())" Condition="!Exists('$(CaravelaBuildTouchFile)')"/>
+        <ItemGroup>
+            <AdditionalFiles Include="$(CaravelaBuildTouchFile)"/>
+            <Clean Include="$(CaravelaBuildTouchFile)"/>
+        </ItemGroup>
     </Target>
 </Project>

@@ -9,14 +9,13 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 {
     public class SyntaxTreeComparisonTests
     {
-        private readonly DesignTimeSyntaxTreeResultCache _cache = new();
 
         [Fact]
         public void SameTrees()
         {
             var syntaxTree = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree, syntaxTree ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree, syntaxTree ) );
         }
 
         [Fact]
@@ -25,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
             var syntaxTree1 = CSharpSyntaxTree.ParseText( @"class C {}" );
             var syntaxTree2 = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -35,7 +34,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// Comment 2\nclass C {}" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -45,7 +44,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment 2222222222 */ class C {}" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -55,7 +54,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment */ class C {} " );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -65,7 +64,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// class C {}" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -75,7 +74,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -85,7 +84,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {  }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -95,7 +94,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -107,7 +106,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             // We don't check whether we are removing white space at a place where it is required or not. 
             // In this case, we detect an irrelevant difference.
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -117,7 +116,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "classC {}" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -127,7 +126,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { return 2; } }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -137,7 +136,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() => 2; } }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -147,7 +146,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { long M() => 1; } }" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -157,7 +156,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get { return 2; } } }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -167,7 +166,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get => 2; } }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -177,7 +176,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M => 2; }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -187,7 +186,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get; } = 2; }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -197,7 +196,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M = 2; }" );
 
-            Assert.False( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact( Skip = "Adding aspects to local functions is not yet supported." )]
@@ -207,7 +206,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { void N() {] } }" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -217,7 +216,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Caravela.Framework.Aspects; class C { int M { get => 2; } }" );
 
-            Assert.True( this._cache.IsDifferent( syntaxTree1, syntaxTree2, true ) );
+            Assert.True( CompilationDiffer.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
     }
 }

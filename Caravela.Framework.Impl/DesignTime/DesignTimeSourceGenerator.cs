@@ -5,6 +5,7 @@ using Caravela.Compiler;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -22,31 +23,45 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 return;
             }
-            
-            var buildOptions = new BuildOptions( context.AnalyzerConfigOptions );
-            
-            DesignTimeDebugger.AttachDebugger( buildOptions );
 
-            // Execute the pipeline.
-            var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
-                compilation,
-                buildOptions,
-                context.CancellationToken );
-
-            // Add introduced syntax trees.
-            foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
+            try
             {
-                if ( syntaxTreeResult != null )
+                DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}')." );
+
+                var buildOptions = new BuildOptions( context.AnalyzerConfigOptions );
+
+                DesignTimeDebugger.AttachDebugger( buildOptions );
+
+                // Execute the pipeline.
+                var results = DesignTimeAspectPipelineCache.Instance.GetDesignTimeResults(
+                    compilation,
+                    buildOptions,
+                    context.CancellationToken );
+
+                // Add introduced syntax trees.
+                var sourcesCount = 0;
+
+                foreach ( var syntaxTreeResult in results.SyntaxTreeResults )
                 {
-                    foreach ( var additionalSyntaxTree in syntaxTreeResult.Introductions )
+                    if ( syntaxTreeResult != null )
                     {
-                        context.AddSource( additionalSyntaxTree.Name, additionalSyntaxTree.GeneratedSyntaxTree.GetText() );
+                        foreach ( var additionalSyntaxTree in syntaxTreeResult.Introductions )
+                        {
+                            sourcesCount++;
+                            context.AddSource( additionalSyntaxTree.Name, additionalSyntaxTree.GeneratedSyntaxTree.GetText() );
+                        }
                     }
                 }
-            }
 
-            // We don't report diagnostics because it seems to be without effect.
-            // All diagnostics are reported by the analyzer.
+                DesignTimeLogger.Instance?.Write( $"DesignTimeSourceGenerator.Execute('{compilation.AssemblyName}'): {sourcesCount} sources generated." );
+
+                // We don't report diagnostics because it seems to be without effect.
+                // All diagnostics are reported by the analyzer.
+            }
+            catch ( Exception e )
+            {
+                DesignTimeLogger.Instance?.Write( e.ToString() );
+            }
         }
 
         void ISourceGenerator.Initialize( GeneratorInitializationContext context )
