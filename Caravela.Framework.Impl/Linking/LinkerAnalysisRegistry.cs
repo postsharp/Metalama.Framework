@@ -64,9 +64,9 @@ namespace Caravela.Framework.Impl.Linking
                 if ( symbol.GetAttributes()
                     .Any(
                         attributeData =>
-                            attributeData.AttributeClass?.ToDisplayString() == typeof( AspectLinkerOptionsAttribute ).FullName
+                            attributeData.AttributeClass?.ToDisplayString() == typeof(AspectLinkerOptionsAttribute).FullName
                             && attributeData.NamedArguments
-                                .Any( x => x.Key == nameof( AspectLinkerOptionsAttribute.ForceNotInlineable ) && (bool?) x.Value.Value == true ) ) )
+                                .Any( x => x.Key == nameof(AspectLinkerOptionsAttribute.ForceNotInlineable) && (bool?) x.Value.Value == true ) ) )
                 {
                     // Inlining is explicitly disabled for the declaration.
                     return false;
@@ -107,11 +107,11 @@ namespace Caravela.Framework.Impl.Linking
 
                 case IPropertySymbol propertySymbol:
                     return this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertyGetAccessor )
-                        && this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertySetAccessor );
+                           && this.HasSingleReference( propertySymbol, aspectLayerId, LinkerAnnotationTargetKind.PropertySetAccessor );
 
                 case IEventSymbol eventSymbol:
                     return this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventAddAccessor )
-                        && this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventRemoveAccessor );
+                           && this.HasSingleReference( eventSymbol, aspectLayerId, LinkerAnnotationTargetKind.EventRemoveAccessor );
 
                 default:
                     throw new NotSupportedException( $"{symbol}" );
@@ -144,7 +144,7 @@ namespace Caravela.Framework.Impl.Linking
             }
 
             return introducedMember.Semantic == IntroducedMemberSemantic.MethodOverride
-                || introducedMember.Semantic == IntroducedMemberSemantic.PropertyOverride;
+                   || introducedMember.Semantic == IntroducedMemberSemantic.PropertyOverride;
         }
 
         /// <summary>
@@ -205,6 +205,7 @@ namespace Caravela.Framework.Impl.Linking
                 else if ( referencedSymbol is IPropertySymbol propertySymbol )
                 {
                     var overridenAccessor = propertySymbol.GetMethod?.OverriddenMethod ?? propertySymbol.SetMethod?.OverriddenMethod;
+
                     if ( overridenAccessor != null )
                     {
                         return overridenAccessor.AssociatedSymbol.AssertNotNull();

@@ -4,11 +4,8 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.Transformations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -45,7 +42,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         ICodeElement? ICodeElement.ContainingElement => throw new NotImplementedException();
 
-        IAttributeList ICodeElement.Attributes => Collections.AttributeList.Empty;
+        IAttributeList ICodeElement.Attributes => AttributeList.Empty;
 
         public override CodeElementKind ElementKind => CodeElementKind.Attribute;
 

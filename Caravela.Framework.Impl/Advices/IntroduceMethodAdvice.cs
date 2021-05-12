@@ -9,7 +9,6 @@ using Caravela.Framework.Impl.CodeModel.Builders;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Transformations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
 {
@@ -17,7 +16,7 @@ namespace Caravela.Framework.Impl.Advices
     {
         public new MethodBuilder MemberBuilder
         {
-            get => (MethodBuilder)base.MemberBuilder;
+            get => (MethodBuilder) base.MemberBuilder;
             set => base.MemberBuilder = value;
         }
 

@@ -97,38 +97,39 @@ namespace Caravela.Framework.Impl.Advices
 
                         return advice;
                     }
-                case nameof( IntroducePropertyAttribute ):
+
+                case nameof(IntroducePropertyAttribute):
                     {
-                        TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out var scope );
-                        TryGetNamedArgument<ConflictBehavior>( nameof( IntroduceMethodAttribute.ConflictBehavior ), out var conflictBehavior );
+                        TryGetNamedArgument<IntroductionScope>( nameof(IntroduceMethodAttribute.Scope), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof(IntroduceMethodAttribute.ConflictBehavior), out var conflictBehavior );
 
                         var advice = new IntroducePropertyAdvice(
                             aspect,
                             (INamedType) declaration,
                             (IProperty) template,
-                            null, 
+                            null,
                             null,
                             null,
                             scope,
                             conflictBehavior,
                             aspectLinkerOptions );
 
-                        if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
+                        if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
                             advice.Builder.Name = name;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsVirtual), out var isVirtual ) )
                         {
                             advice.Builder.IsVirtual = isVirtual;
                         }
 
-                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsSealed ), out var isSealed ) )
+                        if ( TryGetNamedArgument<bool>( nameof(IntroduceMethodAttribute.IsSealed), out var isSealed ) )
                         {
                             advice.Builder.IsSealed = isSealed;
                         }
 
-                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Accessibility ), out var accessibility ) )
+                        if ( TryGetNamedArgument<Accessibility>( nameof(IntroduceMethodAttribute.Accessibility), out var accessibility ) )
                         {
                             advice.Builder.Accessibility = accessibility;
                         }

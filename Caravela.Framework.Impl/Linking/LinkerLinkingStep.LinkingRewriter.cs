@@ -49,9 +49,10 @@ namespace Caravela.Framework.Impl.Linking
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
                     var symbol = semanticModel.GetDeclaredSymbol( member );
 
-                    if (symbol == null)
+                    if ( symbol == null )
                     {
                         newMembers.Add( member );
+
                         continue;
                     }
 
@@ -71,18 +72,21 @@ namespace Caravela.Framework.Impl.Linking
                                     // Non-inlineable method.
                                     var transformedMethod = this.TransformMethod( semanticModel, method, method );
                                     newMembers.Add( transformedMethod );
+
                                     break;
 
                                 case PropertyDeclarationSyntax property:
                                     // Non-inlineable property.
                                     var transformedProperty = this.TransformProperty( semanticModel, property, property );
                                     newMembers.Add( transformedProperty );
+
                                     break;
 
                                 case EventDeclarationSyntax @event:
                                     // Non-inlineable event.
                                     var transformedEvent = this.TransformEvent( semanticModel, @event, @event );
                                     newMembers.Add( transformedEvent );
+
                                     break;
 
                                 default:
@@ -101,18 +105,21 @@ namespace Caravela.Framework.Impl.Linking
                             switch ( member )
                             {
                                 case MethodDeclarationSyntax method:
-                                    var transformedMethod = GetTrampolineMethod( method, (IMethodSymbol)lastOverrideSymbol );
+                                    var transformedMethod = GetTrampolineMethod( method, (IMethodSymbol) lastOverrideSymbol );
                                     newMembers.Add( transformedMethod );
+
                                     break;
 
                                 case PropertyDeclarationSyntax property:
                                     var transformedProperty = GetTrampolineProperty( property, (IPropertySymbol) lastOverrideSymbol );
                                     newMembers.Add( transformedProperty );
+
                                     break;
 
                                 case EventDeclarationSyntax @event:
                                     var transformedEvent = GetTrampolineEvent( @event, (IEventSymbol) lastOverrideSymbol );
                                     newMembers.Add( transformedEvent );
+
                                     break;
 
                                 default:
@@ -128,18 +135,23 @@ namespace Caravela.Framework.Impl.Linking
                                     var lastMethodOverrideSyntax = (MethodDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
                                     var transformedMethod = this.TransformMethod( semanticModel, method, lastMethodOverrideSyntax );
                                     newMembers.Add( transformedMethod );
+
                                     break;
 
                                 case PropertyDeclarationSyntax property:
-                                    var lastPropertyOverrideSyntax = (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+                                    var lastPropertyOverrideSyntax =
+                                        (PropertyDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
+
                                     var transformedProperty = this.TransformProperty( semanticModel, property, lastPropertyOverrideSyntax );
                                     newMembers.Add( transformedProperty );
+
                                     break;
 
                                 case EventDeclarationSyntax @event:
                                     var lastEventOverrideSyntax = (EventDeclarationSyntax) lastOverrideSymbol.DeclaringSyntaxReferences.Single().GetSyntax();
                                     var transformedEvent = this.TransformEvent( semanticModel, @event, lastEventOverrideSyntax );
                                     newMembers.Add( transformedEvent );
+
                                     break;
 
                                 default:
@@ -157,16 +169,19 @@ namespace Caravela.Framework.Impl.Linking
                                 case MethodDeclarationSyntax method:
                                     var originalBodyMethod = GetOriginalImplMethod( method );
                                     newMembers.Add( originalBodyMethod );
+
                                     break;
 
                                 case PropertyDeclarationSyntax property:
                                     var originalBodyProperty = GetOriginalImplProperty( property );
                                     newMembers.Add( originalBodyProperty );
+
                                     break;
 
                                 case EventDeclarationSyntax @event:
                                     var originalBodyEvent = GetOriginalImplEvent( @event );
                                     newMembers.Add( originalBodyEvent );
+
                                     break;
 
                                 default:
@@ -184,37 +199,42 @@ namespace Caravela.Framework.Impl.Linking
                 return node.WithMembers( List( newMembers ) );
             }
 
-            private MethodDeclarationSyntax TransformMethod( SemanticModel semanticModel, MethodDeclarationSyntax methodDeclaration, MethodDeclarationSyntax methodBodySource )
+            private MethodDeclarationSyntax TransformMethod(
+                SemanticModel semanticModel,
+                MethodDeclarationSyntax methodDeclaration,
+                MethodDeclarationSyntax methodBodySource )
             {
                 var symbol = semanticModel.GetDeclaredSymbol( methodDeclaration ).AssertNotNull();
+
                 return
                     methodDeclaration.WithBody( this.GetRewrittenMethodBody( semanticModel, methodBodySource, symbol ) )
-                    .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia())
-                    .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia());
+                        .WithLeadingTrivia( methodDeclaration.GetLeadingTrivia() )
+                        .WithTrailingTrivia( methodDeclaration.GetTrailingTrivia() );
             }
 
-            private PropertyDeclarationSyntax TransformProperty( SemanticModel semanticModel, PropertyDeclarationSyntax propertyDeclaration, PropertyDeclarationSyntax propertyBodySource )
+            private PropertyDeclarationSyntax TransformProperty(
+                SemanticModel semanticModel,
+                PropertyDeclarationSyntax propertyDeclaration,
+                PropertyDeclarationSyntax propertyBodySource )
             {
                 if ( propertyBodySource.AccessorList != null )
                 {
                     var transformedAccessors = new List<AccessorDeclarationSyntax>();
                     var symbol = semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull();
 
-                    foreach (var originalAccessor in propertyBodySource.AccessorList.Accessors )
+                    foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
                     {
                         transformedAccessors.Add(
                             AccessorDeclaration(
                                 originalAccessor.Kind(),
                                 this.GetRewrittenPropertyAccessorBody(
-                                semanticModel,
-                                originalAccessor,
-                                symbol ) ) );
+                                    semanticModel,
+                                    originalAccessor,
+                                    symbol ) ) );
                     }
 
                     return propertyDeclaration
-                        .WithAccessorList(
-                            AccessorList(
-                                List( transformedAccessors ) ) )
+                        .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( propertyDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( propertyDeclaration.GetTrailingTrivia() );
                 }
@@ -224,7 +244,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private EventDeclarationSyntax TransformEvent( SemanticModel semanticModel, EventDeclarationSyntax eventDeclaration, EventDeclarationSyntax propertyBodySource )
+            private EventDeclarationSyntax TransformEvent(
+                SemanticModel semanticModel,
+                EventDeclarationSyntax eventDeclaration,
+                EventDeclarationSyntax propertyBodySource )
             {
                 if ( propertyBodySource.AccessorList != null )
                 {
@@ -233,19 +256,18 @@ namespace Caravela.Framework.Impl.Linking
                     foreach ( var originalAccessor in propertyBodySource.AccessorList.Accessors )
                     {
                         var symbol = semanticModel.GetDeclaredSymbol( originalAccessor ).AssertNotNull();
+
                         transformedAccessors.Add(
                             AccessorDeclaration(
                                 originalAccessor.Kind(),
                                 this.GetRewrittenEventAccessorBody(
-                                semanticModel,
-                                originalAccessor,
-                                symbol ) ) );
+                                    semanticModel,
+                                    originalAccessor,
+                                    symbol ) ) );
                     }
 
                     return eventDeclaration
-                        .WithAccessorList(
-                            AccessorList(
-                                List( transformedAccessors ) ) )
+                        .WithAccessorList( AccessorList( List( transformedAccessors ) ) )
                         .WithLeadingTrivia( eventDeclaration.GetLeadingTrivia() )
                         .WithTrailingTrivia( eventDeclaration.GetTrailingTrivia() );
                 }
@@ -303,19 +325,25 @@ namespace Caravela.Framework.Impl.Linking
                     .WithAccessorList(
                         AccessorList(
                             List(
-                            new[]
-                            {
-                                getAccessor != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    Block( ReturnStatement ( GetInvocationTarget() ) ) )
-                                : null,
-                                setAccessor != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.SetAccessorDeclaration,
-                                    Block( ExpressionStatement ( AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, GetInvocationTarget(), IdentifierName("value") ) ) ) )
-                                : null
-                            }.Where( a => a != null ).AssertNoneNull() ) ) )
+                                new[]
+                                    {
+                                        getAccessor != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                Block( ReturnStatement( GetInvocationTarget() ) ) )
+                                            : null,
+                                        setAccessor != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SimpleAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) ) )
                     .WithLeadingTrivia( property.GetLeadingTrivia() )
                     .WithTrailingTrivia( property.GetTrailingTrivia() );
 
@@ -341,35 +369,36 @@ namespace Caravela.Framework.Impl.Linking
                     .WithAccessorList(
                         AccessorList(
                             List(
-                            new[]
-                            {
-                                addAccessor != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.AddAssignmentExpression,
-                                                MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    GetInvocationTarget(),
-                                                    IdentifierName("e")),
-                                                IdentifierName("value"))) ) )
-                                : null,
-                                removeAccessor != null
-                                ? AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SubtractAssignmentExpression,
-                                                MemberAccessExpression(
-                                                    SyntaxKind.SimpleMemberAccessExpression,
-                                                    GetInvocationTarget(),
-                                                    IdentifierName("e")),
-                                                IdentifierName("value"))) ) )
-                                : null
-                            }.Where( a => a != null ).AssertNoneNull() ) ) )
+                                new[]
+                                    {
+                                        addAccessor != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            MemberAccessExpression(
+                                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                                GetInvocationTarget(),
+                                                                IdentifierName( "e" ) ),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            : null,
+                                        removeAccessor != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            MemberAccessExpression(
+                                                                SyntaxKind.SimpleMemberAccessExpression,
+                                                                GetInvocationTarget(),
+                                                                IdentifierName( "e" ) ),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) ) )
                     .WithLeadingTrivia( @event.GetLeadingTrivia() )
                     .WithTrailingTrivia( @event.GetTrailingTrivia() );
 
@@ -395,18 +424,21 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     return (BlockSyntax) inliningRewriter.VisitBlock( method.Body ).AssertNotNull();
                 }
-                else if (method.ExpressionBody != null)
+                else if ( method.ExpressionBody != null )
                 {
                     // TODO: Correct trivias for the generated block body.
                     return (BlockSyntax) inliningRewriter.VisitBlock( Block( ExpressionStatement( method.ExpressionBody.Expression ) ) ).AssertNotNull();
                 }
                 else
                 {
-                    throw new AssertionFailedException($"{method}");
+                    throw new AssertionFailedException( $"{method}" );
                 }
             }
 
-            private BlockSyntax GetRewrittenPropertyAccessorBody( SemanticModel semanticModel, AccessorDeclarationSyntax accessor, IPropertySymbol propertySymbol )
+            private BlockSyntax GetRewrittenPropertyAccessorBody(
+                SemanticModel semanticModel,
+                AccessorDeclarationSyntax accessor,
+                IPropertySymbol propertySymbol )
             {
                 // Create inlining rewriter and inline calls into this method's body.
                 InliningRewriterBase inliningRewriter =

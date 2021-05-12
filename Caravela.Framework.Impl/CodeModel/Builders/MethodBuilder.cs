@@ -107,7 +107,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             var method = (MethodDeclarationSyntax)
                 syntaxGenerator.MethodDeclaration(
                     this.Name,
-                    this.Parameters.AsBuilderList.Select( p => ((ParameterBuilder)p).ToDeclarationSyntax() ),
+                    this.Parameters.AsBuilderList.Select( p => ((ParameterBuilder) p).ToDeclarationSyntax() ),
                     this.GenericParameters.AsBuilderList.Select( p => p.Name ),
                     syntaxGenerator.TypeExpression( this.ReturnParameter.ParameterType.GetSymbol() ),
                     this.Accessibility.ToRoslynAccessibility(),

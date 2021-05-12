@@ -3,10 +3,8 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
-using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -25,12 +23,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         }
 
         [Memo]
-        public IParameterBuilder ReturnParameter =>
-            (this.ContainingElement, this.MethodKind) switch
+        public IParameterBuilder ReturnParameter
+            => (this.ContainingElement, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet ) => new PropertyGetReturnParameter( this, -1 ),
-                (PropertyBuilder _, MethodKind.PropertySet ) => new VoidReturnParameter( this, -1 ),
-                _ => throw new AssertionFailedException(),
+                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this, -1 ),
+                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this, -1 ),
+                _ => throw new AssertionFailedException()
             };
 
         public IType ReturnType
@@ -58,13 +56,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         IParameterList IMethodBase.Parameters => this.Parameters;
 
-        public ParameterBuilderList Parameters =>
-            (this._containingElement, this.MethodKind) switch
+        public ParameterBuilderList Parameters
+            => (this._containingElement, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
                 // TODO: Events.
-                ( IProperty property, MethodKind.PropertyGet ) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                ( IProperty property, MethodKind.PropertySet ) when property.Parameters.Count == 0 => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
+                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 => new ParameterBuilderList(
+                    new[] { new PropertySetValueParameter( this, 0 ) } ),
                 _ => throw new AssertionFailedException()
             };
 
@@ -81,14 +80,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public string Name
         {
-            get =>
-                this.MethodKind switch
+            get
+                => this.MethodKind switch
                 {
                     MethodKind.PropertyGet => $"get_{this._containingElement.Name}",
                     MethodKind.PropertySet => $"set_{this._containingElement.Name}",
                     MethodKind.EventAdd => $"add_{this._containingElement.Name}",
                     MethodKind.EventRemove => $"remove_{this._containingElement.Name}",
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
             set => throw new NotSupportedException();
         }
@@ -131,7 +130,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IGenericParameterBuilder AddGenericParameter( string name )
         {
-            throw new NotSupportedException("Cannot add generic parameters to accessors.");
+            throw new NotSupportedException( "Cannot add generic parameters to accessors." );
         }
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
@@ -151,7 +150,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMethod WithGenericArguments( params IType[] genericArguments )
         {
-            throw new NotSupportedException("Cannot add generic parameters to accessors.");
+            throw new NotSupportedException( "Cannot add generic parameters to accessors." );
         }
     }
 }

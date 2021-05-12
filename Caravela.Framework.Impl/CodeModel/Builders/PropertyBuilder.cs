@@ -67,14 +67,22 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public bool IsIndexer => this.Name == "Items";
 
-        public PropertyBuilder( Advice parentAdvice, INamedType targetType, string name, bool hasGetter, bool hasSetter, bool isAutoProperty, bool hasInitOnlySetter, AspectLinkerOptions? linkerOptions )
+        public PropertyBuilder(
+            Advice parentAdvice,
+            INamedType targetType,
+            string name,
+            bool hasGetter,
+            bool hasSetter,
+            bool isAutoProperty,
+            bool hasInitOnlySetter,
+            AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
 
             this.LinkerOptions = linkerOptions;
-            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( object ) );
-            
+            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
+
             if ( hasGetter )
             {
                 this.Getter = new AccessorBuilder( this, MethodKind.PropertyGet );
@@ -116,6 +124,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
                 parameter.DefaultValue = defaultValue;
                 this.Parameters.Add( parameter );
+
                 return parameter;
             }
             else
@@ -132,6 +141,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 var parameter = new ParameterBuilder( this, this.Parameters.Count, name, itype, refKind );
                 parameter.DefaultValue = new TypedConstant( itype, defaultValue );
                 this.Parameters.Add( parameter );
+
                 return parameter;
             }
             else
@@ -150,13 +160,12 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                 PropertyDeclaration(
                     List<AttributeListSyntax>(), // TODO: Attributes.
                     GenerateModifierList(),
-                    (TypeSyntax)syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
                     null,
-                    Identifier(this.Name),
+                    Identifier( this.Name ),
                     GenerateAccessorList(),
-                    null, 
-                    null
-                    );
+                    null,
+                    null );
 
             return new[]
             {
@@ -170,7 +179,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
                 this.Accessibility.GetTokens( tokens );
 
-                if (this.IsAbstract)
+                if ( this.IsAbstract )
                 {
                     tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
                 }
@@ -194,12 +203,15 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 switch ( (this.Getter, this.Setter) )
                 {
-                    case ( not null, not null ):
+                    case (not null, not null):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
-                    case ( not null, null ):
+
+                    case (not null, null):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
-                    case ( null, not null ):
+
+                    case (null, not null):
                         return AccessorList( List( new[] { GenerateSetAccessor() } ) );
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -209,7 +221,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if (this.Getter!.Accessibility != this.Accessibility)
+                if ( this.Getter!.Accessibility != this.Accessibility )
                 {
                     this.Getter.Accessibility.GetTokens( tokens );
                 }
@@ -221,11 +233,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
                         this._isAutoProperty
-                        ? null
-                        : Block(
-                            ReturnStatement(
-                                DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
-                        null);
+                            ? null
+                            : Block( ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                        null );
             }
 
             AccessorDeclarationSyntax GenerateSetAccessor()
@@ -243,8 +253,8 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
                         List<AttributeListSyntax>(),
                         TokenList( tokens ),
                         this._isAutoProperty
-                        ? null
-                        : Block(),
+                            ? null
+                            : Block(),
                         null );
             }
         }

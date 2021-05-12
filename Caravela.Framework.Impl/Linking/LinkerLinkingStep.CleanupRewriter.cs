@@ -9,7 +9,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
-
     internal partial class LinkerLinkingStep
     {
         private class CleanupRewriter : CSharpSyntaxRewriter
@@ -21,9 +20,9 @@ namespace Caravela.Framework.Impl.Linking
                 var anyRewrittenStatement = false;
                 var newStatements = new List<StatementSyntax>();
 
-                foreach (var statement in node.Statements)
+                foreach ( var statement in node.Statements )
                 {
-                    if (statement is BlockSyntax innerBlock)
+                    if ( statement is BlockSyntax innerBlock )
                     {
                         var innerBlockFlags = innerBlock.GetLinkerGeneratedFlags();
 
@@ -54,7 +53,7 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         var rewritten = this.Visit( statement );
 
-                        if (rewritten != statement)
+                        if ( rewritten != statement )
                         {
                             anyRewrittenStatement = true;
                         }
@@ -63,7 +62,7 @@ namespace Caravela.Framework.Impl.Linking
                     }
                 }
 
-                if (anyRewrittenStatement)
+                if ( anyRewrittenStatement )
                 {
                     return node.Update( node.OpenBraceToken, List( newStatements ), node.CloseBraceToken );
                 }

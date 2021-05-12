@@ -5,9 +5,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel.Collections;
 using Caravela.Framework.Impl.CodeModel.Links;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -43,10 +41,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public IType Type => this.PropertyBuilder.Type;
 
         [Memo]
-        public IMethod? Getter => this.PropertyBuilder.Getter != null ? new BuiltAccessor( this, (AccessorBuilder)this.PropertyBuilder.Getter) : null;
+        public IMethod? Getter => this.PropertyBuilder.Getter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Getter ) : null;
 
         [Memo]
-        public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder)this.PropertyBuilder.Setter ) : null;
+        public IMethod? Setter => this.PropertyBuilder.Setter != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.Setter ) : null;
 
         public bool HasBase => throw new NotImplementedException();
 

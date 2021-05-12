@@ -8,13 +8,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class ParameterBuilderList : List<IParameterBuilder>, IParameterList
     {
-        public ParameterBuilderList() : base()
-        {
-        }
+        public ParameterBuilderList() : base() { }
 
-        public ParameterBuilderList( IEnumerable<IParameterBuilder> parameterBuilders ) : base( parameterBuilders )
-        {
-        }
+        public ParameterBuilderList( IEnumerable<IParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }
 
         IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
 

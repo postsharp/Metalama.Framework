@@ -669,7 +669,7 @@ namespace Caravela.Framework.Impl.Templating
         private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body )
         {
             return MethodDeclaration(
-                    this.MetaSyntaxFactory.Type( typeof( SyntaxNode ) ),
+                    this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
                     Identifier( this._templateName ) )
                 .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
                 .NormalizeWhitespace()

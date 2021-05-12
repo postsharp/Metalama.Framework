@@ -158,30 +158,30 @@ namespace Caravela.Framework.Impl.CompileTime
 
                             // Auto properties don't have bodies and so we don't need templates.
 
-                            if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null ) )
+                            if ( getAccessor != null && (getAccessor.Body != null || getAccessor.ExpressionBody != null) )
                             {
                                 success = success &&
-                                    TemplateCompiler.TryCompile(
-                                        TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
-                                        this._compileTimeCompilation,
-                                        getAccessor,
-                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnosticAdder,
-                                        out _,
-                                        out transformedGetDeclaration );
+                                          TemplateCompiler.TryCompile(
+                                              TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
+                                              this._compileTimeCompilation,
+                                              getAccessor,
+                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                              this._diagnosticAdder,
+                                              out _,
+                                              out transformedGetDeclaration );
                             }
 
                             if ( setAccessor != null && (setAccessor.Body != null || setAccessor.ExpressionBody != null) )
                             {
                                 success = success &&
-                                    TemplateCompiler.TryCompile(
-                                        TemplateNameHelper.GetCompiledPropertySetTemplateName( propertySymbol.Name ),
-                                        this._compileTimeCompilation,
-                                        setAccessor,
-                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnosticAdder,
-                                        out _,
-                                        out transformedSetDeclaration );
+                                          TemplateCompiler.TryCompile(
+                                              TemplateNameHelper.GetCompiledPropertySetTemplateName( propertySymbol.Name ),
+                                              this._compileTimeCompilation,
+                                              setAccessor,
+                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                              this._diagnosticAdder,
+                                              out _,
+                                              out transformedSetDeclaration );
                             }
 
                             // Expression bodied property.
@@ -189,14 +189,18 @@ namespace Caravela.Framework.Impl.CompileTime
                             {
                                 // TODO: Does this preserve trivias in expression body?
                                 success = success &&
-                                    TemplateCompiler.TryCompile(
-                                        TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
-                                        this._compileTimeCompilation,
-                                        AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, List<AttributeListSyntax>(), TokenList(), propertyNode.ExpressionBody! ),
-                                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnosticAdder,
-                                        out _,
-                                        out transformedGetDeclaration );
+                                          TemplateCompiler.TryCompile(
+                                              TemplateNameHelper.GetCompiledPropertyGetTemplateName( propertySymbol.Name ),
+                                              this._compileTimeCompilation,
+                                              AccessorDeclaration(
+                                                  SyntaxKind.GetAccessorDeclaration,
+                                                  List<AttributeListSyntax>(),
+                                                  TokenList(),
+                                                  propertyNode.ExpressionBody! ),
+                                              this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                              this._diagnosticAdder,
+                                              out _,
+                                              out transformedGetDeclaration );
                             }
                         }
                     }

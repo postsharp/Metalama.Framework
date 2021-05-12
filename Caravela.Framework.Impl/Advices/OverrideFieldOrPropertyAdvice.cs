@@ -42,9 +42,7 @@ namespace Caravela.Framework.Impl
             this.LinkerOptions = aspectLinkerOptions;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
-        {
-        }
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
@@ -59,7 +57,8 @@ namespace Caravela.Framework.Impl
             }
             else if ( this.TargetDeclaration is IProperty property )
             {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
+                return AdviceResult.Create(
+                    new OverriddenProperty( this, property, this.TemplateProperty, this.GetTemplateMethod, this.SetTemplateMethod, this.LinkerOptions ) );
             }
             else
             {

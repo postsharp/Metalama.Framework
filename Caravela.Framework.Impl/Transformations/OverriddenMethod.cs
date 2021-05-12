@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Transformations
                     context.LexicalScope,
                     context.DiagnosticSink );
 
-                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName(this.TemplateMethod.Name);
+                var compiledTemplateMethodName = TemplateNameHelper.GetCompiledTemplateName( this.TemplateMethod.Name );
 
                 var templateMethod = this.Advice.Aspect.GetTemplateMethod( compiledTemplateMethodName );
 

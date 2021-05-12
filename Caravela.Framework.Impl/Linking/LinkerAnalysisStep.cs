@@ -67,6 +67,7 @@ namespace Caravela.Framework.Impl.Linking
             foreach ( var introducedMember in input.IntroductionRegistry.GetIntroducedMembers() )
             {
                 var symbol = input.IntroductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+
                 switch ( symbol )
                 {
                     case IMethodSymbol methodSymbol:
@@ -80,7 +81,7 @@ namespace Caravela.Framework.Impl.Linking
                         break;
 
                     case IPropertySymbol propertySymbol:
-                        if (propertySymbol.GetMethod != null)
+                        if ( propertySymbol.GetMethod != null )
                         {
                             var getterBodyVisitor = new MethodBodyWalker();
                             getterBodyVisitor.Visit( propertySymbol.GetMethod.DeclaringSyntaxReferences.Single().GetSyntax() );
@@ -118,7 +119,7 @@ namespace Caravela.Framework.Impl.Linking
                         break;
 
                     default:
-                        throw new InvalidOperationException($"{symbol.Kind}");
+                        throw new InvalidOperationException( $"{symbol.Kind}" );
                 }
 
                 // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
@@ -131,6 +132,7 @@ namespace Caravela.Framework.Impl.Linking
                 {
                     case IMethodSymbol methodSymbol:
                         AnalyzeMethodBody( methodBodyInfos, methodSymbol );
+
                         break;
 
                     case IPropertySymbol propertySymbol:
@@ -184,7 +186,7 @@ namespace Caravela.Framework.Impl.Linking
                         methodBodyInfos[symbol] = new MemberAnalysisResult(
                             symbol.ReturnsVoid ? methodBodyWalker.ReturnStatementCount == 0 : methodBodyWalker.ReturnStatementCount <= 1 );
                     }
-                    else if (methodDecl.ExpressionBody != null)
+                    else if ( methodDecl.ExpressionBody != null )
                     {
                         methodBodyInfos[symbol] = new MemberAnalysisResult( true );
                     }

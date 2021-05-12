@@ -46,7 +46,7 @@ namespace Caravela.MemoTransformer
                     return node;
                 }
 
-                if ( !IsSupportedPropertyDeclaration(node) )
+                if ( !IsSupportedPropertyDeclaration( node ) )
                 {
                     this.Diagnostics.Add( Diagnostic.Create( _nonExpressionBodyError, node.GetLocation() ) );
 
@@ -64,7 +64,7 @@ namespace Caravela.MemoTransformer
 
                 this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );
 
-                if (node.ExpressionBody != null)
+                if ( node.ExpressionBody != null )
                 {
                     var block = TransformExpression( fieldName, node.ExpressionBody.Expression );
 
@@ -85,8 +85,8 @@ namespace Caravela.MemoTransformer
 
                     var newGetAccessor =
                         getAccessor.WithExpressionBody( null )
-                        .WithSemicolonToken( default )
-                        .WithBody( block );
+                            .WithSemicolonToken( default )
+                            .WithBody( block );
 
                     var newNode = node.WithAccessorList(
                             AccessorList(
@@ -106,7 +106,7 @@ namespace Caravela.MemoTransformer
                     return true;
                 }
 
-                if ( node.AccessorList == null)
+                if ( node.AccessorList == null )
                 {
                     return false;
                 }
@@ -114,7 +114,7 @@ namespace Caravela.MemoTransformer
                 var getAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
                 var setAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration );
 
-                if ( getAccessor?.ExpressionBody == null)
+                if ( getAccessor?.ExpressionBody == null )
                 {
                     return false;
                 }

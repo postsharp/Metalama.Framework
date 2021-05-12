@@ -14,7 +14,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Linking
 {
-
     internal class LinkerOverrideMethodProceedImpl : IProceedImpl
     {
         private readonly IMethod _overriddenDeclaration;
@@ -22,7 +21,11 @@ namespace Caravela.Framework.Impl.Linking
         private readonly LinkerAnnotationOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverrideMethodProceedImpl( AspectLayerId aspectLayerId, IMethod overriddenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
+        public LinkerOverrideMethodProceedImpl(
+            AspectLayerId aspectLayerId,
+            IMethod overriddenDeclaration,
+            LinkerAnnotationOrder order,
+            ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
@@ -33,9 +36,9 @@ namespace Caravela.Framework.Impl.Linking
         TypeSyntax IProceedImpl.CreateTypeSyntax()
         {
             // TODO: Introduced types?
-            if ( this._overriddenDeclaration.ReturnType.Is( typeof( void ) ) )
+            if ( this._overriddenDeclaration.ReturnType.Is( typeof(void) ) )
             {
-                return this._syntaxFactory.GetTypeNameSyntax( typeof( __Void ) );
+                return this._syntaxFactory.GetTypeNameSyntax( typeof(__Void) );
             }
 
             // TODO: Introduced types?
@@ -55,7 +58,7 @@ namespace Caravela.Framework.Impl.Linking
 
         StatementSyntax IProceedImpl.CreateReturnStatement()
         {
-            if ( this._overriddenDeclaration.ReturnType.Is( typeof( void ) ) )
+            if ( this._overriddenDeclaration.ReturnType.Is( typeof(void) ) )
             {
                 // Emit `{ <original_method_call>; return; }`.
                 return

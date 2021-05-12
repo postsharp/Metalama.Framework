@@ -7,7 +7,6 @@ using Caravela.Framework.Impl.CodeModel.Links;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     {
         private readonly BuiltMember _builtMember;
 
-        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder) : base( builtMember.Compilation )
+        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
         {
             this._builtMember = builtMember;
             this.AccessorBuilder = builder;

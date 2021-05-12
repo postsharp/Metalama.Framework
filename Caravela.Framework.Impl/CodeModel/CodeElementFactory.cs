@@ -124,13 +124,13 @@ namespace Caravela.Framework.Impl.CodeModel
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
             => (IProperty) this._cache.GetOrAdd(
                 CodeElementLink.FromBuilder( propertyBuilder ),
-                l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilation) );
+                l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilation ) );
 
         internal ICodeElement GetCodeElement( CodeElementBuilder builder )
             => builder switch
             {
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
-                PropertyBuilder propertyBuilder => this.GetProperty(propertyBuilder),
+                PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
                 ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 GenericParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),

@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Linking
         PropertyGetAccessor,
         PropertySetAccessor,
         EventAddAccessor,
-        EventRemoveAccessor,
+        EventRemoveAccessor
     }
 
     /// <summary>
@@ -47,7 +47,10 @@ namespace Caravela.Framework.Impl.Linking
         /// </summary>
         public LinkerAnnotationTargetKind TargetKind { get; }
 
-        public LinkerAnnotation( AspectLayerId aspectLayer, LinkerAnnotationOrder order, LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
+        public LinkerAnnotation(
+            AspectLayerId aspectLayer,
+            LinkerAnnotationOrder order,
+            LinkerAnnotationTargetKind targetKind = LinkerAnnotationTargetKind.Self )
         {
             this.AspectLayer = aspectLayer;
             this.Order = order;

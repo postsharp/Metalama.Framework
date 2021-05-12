@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -11,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.Linking
 {
@@ -21,7 +21,11 @@ namespace Caravela.Framework.Impl.Linking
         private readonly LinkerAnnotationOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverridePropertyProceedImpl( AspectLayerId aspectLayerId, IMethod overriddenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
+        public LinkerOverridePropertyProceedImpl(
+            AspectLayerId aspectLayerId,
+            IMethod overriddenDeclaration,
+            LinkerAnnotationOrder order,
+            ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
@@ -41,16 +45,16 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case Code.MethodKind.PropertyGet:
+                case MethodKind.PropertyGet:
                     // Emit `xxx = <original_property_access>`.
                     return
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,
                                 IdentifierName( returnValueLocalName ),
-                                this.CreateOriginalPropertyAccess(LinkerAnnotationTargetKind.PropertyGetAccessor) ) );
+                                this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) ) );
 
-                case Code.MethodKind.PropertySet:
+                case MethodKind.PropertySet:
                     // Emit `xxx = <original_property_access> = value`.
                     return
                         ExpressionStatement(
@@ -59,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
                                 IdentifierName( returnValueLocalName ),
                                 AssignmentExpression(
                                     SyntaxKind.SimpleAssignmentExpression,
-                                    this.CreateOriginalPropertyAccess(LinkerAnnotationTargetKind.PropertySetAccessor),
+                                    this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertySetAccessor ),
                                     IdentifierName( "value" ) ) ) );
 
                 default:
@@ -71,12 +75,12 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case Code.MethodKind.PropertyGet:
+                case MethodKind.PropertyGet:
                     // Emit `return <original_property_access>;`.
                     return
                         ReturnStatement( this.CreateOriginalPropertyAccess( LinkerAnnotationTargetKind.PropertyGetAccessor ) );
 
-                case Code.MethodKind.PropertySet:
+                case MethodKind.PropertySet:
                     // Emit `{ <original_property_access> = value; return; }`.
                     return
                         Block(
@@ -92,32 +96,32 @@ namespace Caravela.Framework.Impl.Linking
             }
         }
 
-        private ExpressionSyntax CreateOriginalPropertyAccess( LinkerAnnotationTargetKind annotationTargetKind)
+        private ExpressionSyntax CreateOriginalPropertyAccess( LinkerAnnotationTargetKind annotationTargetKind )
         {
             // TODO: static properties, consider explicit, modifiers interfaces and other special methods.
 
-            if (this.ContainingProperty.Parameters.Count > 0)
+            if ( this.ContainingProperty.Parameters.Count > 0 )
             {
                 Invariant.Assert( !this.ContainingProperty.IsStatic );
                 Invariant.Assert( this.ContainingProperty.Name == "Items" );
 
                 // For indexers, emit `this[ a, b, c ]` where `a, b, c` is the canonical list of arguments.
-                return 
+                return
                     ElementAccessExpression(
-                        ThisExpression(),
-                        BracketedArgumentList( SeparatedList( this.ContainingProperty.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) )
-                    .AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order, annotationTargetKind ) );
+                            ThisExpression(),
+                            BracketedArgumentList( SeparatedList( this.ContainingProperty.Parameters.Select( x => Argument( IdentifierName( x.Name! ) ) ) ) ) )
+                        .AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order, annotationTargetKind ) );
             }
             else
             {
                 // For properties, emit `[[this.]]OriginalProperty`.
                 var expression =
                     !this.ContainingProperty.IsStatic
-                    ? MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        ThisExpression(),
-                        IdentifierName( this.ContainingProperty.Name ) )
-                    : (ExpressionSyntax) IdentifierName( this.ContainingProperty.Name );
+                        ? MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( this.ContainingProperty.Name ) )
+                        : (ExpressionSyntax) IdentifierName( this.ContainingProperty.Name );
 
                 return expression.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order, annotationTargetKind ) );
             }

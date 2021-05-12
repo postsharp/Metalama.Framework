@@ -273,7 +273,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                 {
                     MethodDeclarationSyntax method => method.Identifier.ValueText,
                     PropertyDeclarationSyntax property => property.Identifier.ValueText,
-                    _ => throw new NotSupportedException(),
+                    _ => throw new NotSupportedException()
                 };
 
                 A.CallTo( () => ((ITestTransformation) transformation).IntroducedElementName ).Returns( introducedElementName );
@@ -317,24 +317,31 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                 var methodBodyRewriter = new TestMethodBodyRewriter( aspectName, layerName );
                 MemberDeclarationSyntax overrideSyntax;
+
                 switch ( node )
                 {
                     case MethodDeclarationSyntax method:
                         var rewrittenMethodBody = methodBodyRewriter.VisitBlock( method.Body.AssertNotNull() );
-                        overrideSyntax = 
+
+                        overrideSyntax =
                             method
-                            .WithAttributeLists( List( newAttributeLists ) )
-                            .WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
+                                .WithAttributeLists( List( newAttributeLists ) )
+                                .WithBody( (BlockSyntax) rewrittenMethodBody.AssertNotNull() );
+
                         break;
+
                     case PropertyDeclarationSyntax property:
                         overrideSyntax =
                             property
-                            .WithAttributeLists( List( newAttributeLists ) )
-                            .WithAccessorList(
-                                AccessorList(
-                                    List(
-                                        property.AccessorList.Accessors.Select( a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body ).AssertNotNull() ) ) ) ) );
+                                .WithAttributeLists( List( newAttributeLists ) )
+                                .WithAccessorList(
+                                    AccessorList(
+                                        List(
+                                            property.AccessorList.Accessors.Select(
+                                                a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body ).AssertNotNull() ) ) ) ) );
+
                         break;
+
                     default:
                         throw new NotSupportedException();
                 }
@@ -356,10 +363,10 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                                 {
                                     MethodDeclarationSyntax _ => IntroducedMemberSemantic.MethodOverride,
                                     PropertyDeclarationSyntax _ => IntroducedMemberSemantic.PropertyOverride,
-                                    _ => throw new NotSupportedException(),
+                                    _ => throw new NotSupportedException()
                                 },
                                 AspectLinkerOptions.Create( forceNotInlineable ),
-                                null ),
+                                null )
                         } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentType.AssertNotNull() ) );
@@ -383,7 +390,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         {
                             MethodDeclarationSyntax method => GetSymbolHelperMethod( method ),
                             PropertyDeclarationSyntax property => GetSymbolHelperProperty( property ),
-                            _ => throw new NotSupportedException(),
+                            _ => throw new NotSupportedException()
                         } ) );
             }
 
@@ -411,29 +418,30 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
                         .WithIdentifier( Identifier( property.Identifier.ValueText + "__SymbolHelper" ) )
                         .WithInitializer( null )
                         .WithAccessorList(
-                            AccessorList( List(
-                                property.AccessorList.Accessors.Select(
-                                    a => a switch
-                                    {
-                                        _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
-                                            a.WithBody(
-                                                Block(
-                                                    ReturnStatement(
-                                                        LiteralExpression(
-                                                            SyntaxKind.DefaultLiteralExpression,
-                                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
-                                        _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
-                                            a.WithBody( Block() ),
-                                        _ => throw new NotSupportedException(),
-                                    } ) ) ) );
+                            AccessorList(
+                                List(
+                                    property.AccessorList.Accessors.Select(
+                                        a => a switch
+                                        {
+                                            _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
+                                                a.WithBody(
+                                                    Block(
+                                                        ReturnStatement(
+                                                            LiteralExpression(
+                                                                SyntaxKind.DefaultLiteralExpression,
+                                                                Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                            _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
+                                                a.WithBody( Block() ),
+                                            _ => throw new NotSupportedException()
+                                        } ) ) ) );
                 }
                 else
                 {
                     return property
-                       .WithAttributeLists( List<AttributeListSyntax>() )
-                       .WithIdentifier( Identifier( property.Identifier.ValueText + "__SymbolHelper" ) )
-                       .WithExpressionBody(
-                            ArrowExpressionClause (
+                        .WithAttributeLists( List<AttributeListSyntax>() )
+                        .WithIdentifier( Identifier( property.Identifier.ValueText + "__SymbolHelper" ) )
+                        .WithExpressionBody(
+                            ArrowExpressionClause(
                                 LiteralExpression(
                                     SyntaxKind.DefaultLiteralExpression,
                                     Token( SyntaxKind.DefaultKeyword ) ) ) );

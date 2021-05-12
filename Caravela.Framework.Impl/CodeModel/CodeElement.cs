@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Caravela.Framework.Impl.CodeModel
 {
@@ -29,15 +30,15 @@ namespace Caravela.Framework.Impl.CodeModel
         CodeOrigin ICodeElement.Origin => CodeOrigin.Source;
 
         [Memo]
-        public virtual ICodeElement? ContainingElement =>
-            this.Symbol switch
+        public virtual ICodeElement? ContainingElement
+            => this.Symbol switch
             {
                 IMethodSymbol method when
-                    method.MethodKind == Microsoft.CodeAnalysis.MethodKind.PropertyGet
-                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.PropertySet
-                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventAdd
-                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventRemove
-                    || method.MethodKind == Microsoft.CodeAnalysis.MethodKind.EventRaise 
+                    method.MethodKind == MethodKind.PropertyGet
+                    || method.MethodKind == MethodKind.PropertySet
+                    || method.MethodKind == MethodKind.EventAdd
+                    || method.MethodKind == MethodKind.EventRemove
+                    || method.MethodKind == MethodKind.EventRaise
                     => this.Compilation.Factory.GetCodeElement( method.AssociatedSymbol.AssertNotNull() ),
                 _ => this.Compilation.Factory.GetCodeElement( this.Symbol.ContainingSymbol )
             };
@@ -69,6 +70,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
             var syntaxReference = this.Symbol.DeclaringSyntaxReferences[0];
             var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
+
             var bodyNode =
                 syntaxReference.GetSyntax() switch
                 {

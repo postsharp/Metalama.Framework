@@ -2,10 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Caravela.Framework.Code;
-using Caravela.Framework.Diagnostics;
-using Caravela.Framework.Impl.CodeModel.Collections;
 using System;
-using System.Linq;
 
 namespace Caravela.Framework.Impl.CodeModel.Builders
 {
@@ -17,17 +14,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             protected AccessorBuilder Accessor { get; }
 
-            public ParameterBase(AccessorBuilder accessor, int index) : base(accessor.ParentAdvice)
+            public ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this.Index = index;
                 this._attributeBuilderList = new AttributeBuilderList();
             }
 
-            public virtual TypedConstant DefaultValue 
-            { 
-                get => TypedConstant.Null; 
-                set => throw new NotSupportedException("Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself."); 
+            public virtual TypedConstant DefaultValue
+            {
+                get => TypedConstant.Null;
+                set
+                    => throw new NotSupportedException(
+                        "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
             }
 
             public abstract IType ParameterType { get; set; }
@@ -44,7 +43,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             public override CodeElementKind ElementKind => CodeElementKind.Parameter;
 
-            public IMember DeclaringMember => (IMember)this.Accessor.ContainingElement.AssertNotNull();
+            public IMember DeclaringMember => (IMember) this.Accessor.ContainingElement.AssertNotNull();
 
             IType IParameter.ParameterType => this.ParameterType;
 
@@ -55,10 +54,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         {
             public PropertySetValueParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
 
-            public override IType ParameterType 
-            { 
-                get => ((PropertyBuilder) this.Accessor._containingElement).Type; 
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." ); 
+            public override IType ParameterType
+            {
+                get => ((PropertyBuilder) this.Accessor._containingElement).Type;
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
@@ -89,7 +88,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             public override string Name => throw new NotSupportedException( "Cannot get the name of a return parameter." );
         }
 
-        private class IndexerParameter : ParameterBase 
+        private class IndexerParameter : ParameterBase
         {
             public IndexerParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
 
@@ -117,7 +116,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             [Memo]
             public override IType ParameterType
             {
-                get => this.Compilation.Factory.GetTypeByReflectionType( typeof( void ) );
+                get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 

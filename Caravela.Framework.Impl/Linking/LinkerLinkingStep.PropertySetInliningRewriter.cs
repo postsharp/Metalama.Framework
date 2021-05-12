@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -40,9 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                     contextProperty,
                     contextProperty.SetMethod.AssertNotNull(),
                     returnVariableName,
-                    returnLabelId )
-            {
-            }
+                    returnLabelId ) { }
 
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
             {
@@ -89,11 +86,11 @@ namespace Caravela.Framework.Impl.Linking
                                     node.Left,
                                     node.OperatorToken,
                                     node.Right switch
-                                    { 
-                                        AssignmentExpressionSyntax innerAssignment => 
+                                    {
+                                        AssignmentExpressionSyntax innerAssignment =>
                                             innerAssignment.Update(
                                                 ReplaceInstancePropertyAccess( targetPropertySymbol, memberAccessExpression, resolvedSymbol ),
-                                                innerAssignment.OperatorToken, 
+                                                innerAssignment.OperatorToken,
                                                 innerAssignment.Right.AssertNotNull() ),
                                         _ => ReplaceInstancePropertyAccess( targetPropertySymbol, memberAccessExpression, resolvedSymbol )
                                     } );
@@ -138,11 +135,10 @@ namespace Caravela.Framework.Impl.Linking
                     declaration switch
                     {
                         { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
-                        { ExpressionBody: not null } => 
-                            (BlockSyntax) innerRewriter.Visit( 
-                                Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
-                            .AssertNotNull(), // TODO: Preserve trivias.
-                        _ => throw new NotSupportedException(), // TODO: Auto-properties.
+                        { ExpressionBody: not null } =>
+                            (BlockSyntax) innerRewriter.Visit( Block( ExpressionStatement( declaration.ExpressionBody.Expression ) ) )
+                                .AssertNotNull(),              // TODO: Preserve trivias.
+                        _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 
                 // Mark the block as flattenable (this is the root block so it will not get marked by the inner rewriter).
@@ -172,7 +168,10 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="expression">Call expression.</param>
             /// <param name="methodSymbol"></param>
             /// <returns></returns>
-            private static ExpressionSyntax ReplaceInstancePropertyAccess( IPropertySymbol originalSymbol, MemberAccessExpressionSyntax memberAccess, IPropertySymbol targetSymbol )
+            private static ExpressionSyntax ReplaceInstancePropertyAccess(
+                IPropertySymbol originalSymbol,
+                MemberAccessExpressionSyntax memberAccess,
+                IPropertySymbol targetSymbol )
             {
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, targetSymbol ) )
                 {
@@ -194,7 +193,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private static ExpressionSyntax ReplaceStaticPropertyAccess( IPropertySymbol originalSymbol, IdentifierNameSyntax identifierExpression, IPropertySymbol targetSymbol )
+            private static ExpressionSyntax ReplaceStaticPropertyAccess(
+                IPropertySymbol originalSymbol,
+                IdentifierNameSyntax identifierExpression,
+                IPropertySymbol targetSymbol )
             {
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, targetSymbol ) )
                 {

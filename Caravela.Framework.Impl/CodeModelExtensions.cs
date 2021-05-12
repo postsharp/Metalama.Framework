@@ -6,6 +6,7 @@ using Caravela.Framework.Impl.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using Attribute = Caravela.Framework.Impl.CodeModel.Attribute;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl
 {
@@ -56,11 +57,11 @@ namespace Caravela.Framework.Impl
         {
             return method.MethodKind switch
             {
-                Code.MethodKind.PropertyGet => true,
-                Code.MethodKind.PropertySet => true,
-                Code.MethodKind.EventAdd => true,
-                Code.MethodKind.EventRemove => true,
-                Code.MethodKind.EventRaise => true,
+                MethodKind.PropertyGet => true,
+                MethodKind.PropertySet => true,
+                MethodKind.EventAdd => true,
+                MethodKind.EventRemove => true,
+                MethodKind.EventRaise => true,
                 _ => false
             };
         }

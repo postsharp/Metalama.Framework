@@ -7,7 +7,6 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Collections;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -212,10 +211,20 @@ namespace Caravela.Framework.Impl.Advices
         {
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
-                typeof( IntroducePropertyTemplateAttribute ),
-                nameof( this.IntroduceProperty ) );
+                typeof(IntroducePropertyTemplateAttribute),
+                nameof(this.IntroduceProperty) );
 
-            var advice = new IntroducePropertyAdvice( this._aspect, targetType, templateProperty, null, null, null, scope, conflictBehavior, aspectLinkerOptions );
+            var advice = new IntroducePropertyAdvice(
+                this._aspect,
+                targetType,
+                templateProperty,
+                null,
+                null,
+                null,
+                scope,
+                conflictBehavior,
+                aspectLinkerOptions );
+
             this._advices.Add( advice );
 
             return advice;
@@ -232,15 +241,25 @@ namespace Caravela.Framework.Impl.Advices
         {
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
-                typeof( IntroducePropertyGetTemplateAttribute ),
-                nameof( this.OverrideFieldOrPropertyAccessors ) );
+                typeof(IntroducePropertyGetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
 
             var setTemplateMethod = this.GetTemplateMethod(
                 setTemplate,
-                typeof( IntroducePropertySetTemplateAttribute ),
-                nameof( this.OverrideFieldOrPropertyAccessors ) );
+                typeof(IntroducePropertySetTemplateAttribute),
+                nameof(this.OverrideFieldOrPropertyAccessors) );
 
-            var advice = new IntroducePropertyAdvice( this._aspect, targetType, null, name, getTemplateMethod, setTemplateMethod, scope, conflictBehavior, aspectLinkerOptions );
+            var advice = new IntroducePropertyAdvice(
+                this._aspect,
+                targetType,
+                null,
+                name,
+                getTemplateMethod,
+                setTemplateMethod,
+                scope,
+                conflictBehavior,
+                aspectLinkerOptions );
+
             this._advices.Add( advice );
 
             return advice;

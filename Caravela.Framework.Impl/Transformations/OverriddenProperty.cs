@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -86,8 +85,13 @@ namespace Caravela.Framework.Impl.Transformations
                 var getTemplateMethod = compiledGetTemplateName != null ? this.Advice.Aspect.GetTemplateMethod( compiledGetTemplateName ) : null;
                 var setTemplateMethod = compiledSetTemplateName != null ? this.Advice.Aspect.GetTemplateMethod( compiledSetTemplateName ) : null;
 
-                var getAccessorBody = getTemplateMethod != null && this.OverriddenDeclaration.Getter != null ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter ) : null;
-                var setAccessorBody = setTemplateMethod != null && this.OverriddenDeclaration.Setter != null ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter ) : null;
+                var getAccessorBody = getTemplateMethod != null && this.OverriddenDeclaration.Getter != null
+                    ? this.ExpandAccessorTemplate( context, getTemplateMethod, this.OverriddenDeclaration.Getter )
+                    : null;
+
+                var setAccessorBody = setTemplateMethod != null && this.OverriddenDeclaration.Setter != null
+                    ? this.ExpandAccessorTemplate( context, setTemplateMethod, this.OverriddenDeclaration.Setter )
+                    : null;
 
                 var overrides = new[]
                 {
@@ -100,24 +104,25 @@ namespace Caravela.Framework.Impl.Transformations
                             null,
                             Identifier( propertyName ),
                             AccessorList(
-                                List( 
+                                List(
                                     new[]
-                                    {
-                                        getAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.GetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.Getter.AssertNotNull().GetSyntaxModifierList(),
-                                            getAccessorBody )
-                                        : null,
-                                        setAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.SetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
-                                            setAccessorBody )
-                                        : null
-                                    }.Where(a => a != null).AssertNoneNull() ) ),
+                                        {
+                                            getAccessorBody != null
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.GetAccessorDeclaration,
+                                                    List<AttributeListSyntax>(),
+                                                    this.OverriddenDeclaration.Getter.AssertNotNull().GetSyntaxModifierList(),
+                                                    getAccessorBody )
+                                                : null,
+                                            setAccessorBody != null
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    List<AttributeListSyntax>(),
+                                                    this.OverriddenDeclaration.Setter.AssertNotNull().GetSyntaxModifierList(),
+                                                    setAccessorBody )
+                                                : null
+                                        }.Where( a => a != null )
+                                        .AssertNoneNull() ) ),
                             null,
                             null ),
                         this.Advice.AspectLayerId,

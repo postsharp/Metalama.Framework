@@ -5,8 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -21,7 +19,6 @@ namespace Caravela.Framework.Impl.Linking
 
     internal partial class LinkerLinkingStep
     {
-
         /// <summary>
         /// Produces inlined method body. This rewriter is used recursively when inlining call to the previous (inner) transformation.
         /// </summary>
@@ -39,9 +36,7 @@ namespace Caravela.Framework.Impl.Linking
                 IMethodSymbol contextMethod,
                 string? returnVariableName = null,
                 int? returnLabelId = null )
-                : base(analysisRegistry, semanticModel, contextMethod, contextMethod, returnVariableName, returnLabelId)
-            {
-            }
+                : base( analysisRegistry, semanticModel, contextMethod, contextMethod, returnVariableName, returnLabelId ) { }
 
             protected override SyntaxNode? VisitReturnedExpression( ExpressionSyntax node )
             {
@@ -75,7 +70,9 @@ namespace Caravela.Framework.Impl.Linking
                 }
                 else
                 {
-                    return invocationExpression.Update( ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocationExpression.Expression, resolvedSymbol ), invocationExpression.ArgumentList );
+                    return invocationExpression.Update(
+                        ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocationExpression.Expression, resolvedSymbol ),
+                        invocationExpression.ArgumentList );
                 }
             }
 
@@ -157,7 +154,7 @@ namespace Caravela.Framework.Impl.Linking
                                 invocation.Update(
                                     ReplaceCallTarget( (IMethodSymbol) calleeSymbol, invocation.Expression, resolvedSymbol ),
                                     invocation.ArgumentList ),
-                                node.SemicolonToken) );
+                                node.SemicolonToken ) );
                 }
             }
 
@@ -171,8 +168,9 @@ namespace Caravela.Framework.Impl.Linking
 
                 // Run the inlined method's body through the rewriter.
                 var rewrittenBlock =
-                    (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() ).AssertNotNull()
-                    .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
+                    (BlockSyntax) innerRewriter.VisitBlock( declaration.Body.AssertNotNull() )
+                        .AssertNotNull()
+                        .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
                 if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( calledMethodSymbol )
                      || (!calledMethodSymbol.ReturnsVoid && returnVariableName == null) )

@@ -55,7 +55,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     break;
 
-                case (IPropertySymbol propertyX, IPropertySymbol propertyY ):
+                case (IPropertySymbol propertyX, IPropertySymbol propertyY):
                     if ( !PropertyEquals( propertyX, propertyY, this._options ) )
                     {
                         return false;
@@ -63,7 +63,7 @@ namespace Caravela.Framework.Impl.Linking
 
                     break;
 
-                case (IEventSymbol eventX, IEventSymbol eventY ):
+                case (IEventSymbol eventX, IEventSymbol eventY):
                     if ( !EventEquals( eventX, eventY, this._options ) )
                     {
                         return false;

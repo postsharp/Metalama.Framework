@@ -23,10 +23,10 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         public TypedConstant DefaultValue
         {
             get => this._defaultValue;
-            set =>
-                this._defaultValue = this._name != null
-                ? value
-                : throw new NotSupportedException( "Cannot set default value of a return parameter." );            
+            set
+                => this._defaultValue = this._name != null
+                    ? value
+                    : throw new NotSupportedException( "Cannot set default value of a return parameter." );
         }
 
         public bool IsParams { get; set; }

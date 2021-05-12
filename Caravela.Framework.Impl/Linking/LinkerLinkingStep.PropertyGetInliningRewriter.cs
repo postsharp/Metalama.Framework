@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -40,9 +39,7 @@ namespace Caravela.Framework.Impl.Linking
                     contextProperty,
                     contextProperty.GetMethod.AssertNotNull(),
                     returnVariableName,
-                    returnLabelId )
-            {
-            }
+                    returnLabelId ) { }
 
             public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
             {
@@ -77,10 +74,10 @@ namespace Caravela.Framework.Impl.Linking
                     {
                         case MemberAccessExpressionSyntax memberAccessExpression:
                             // Instance property.
-                            return 
+                            return
                                 node.Update(
-                                    node.Left, 
-                                    node.OperatorToken, 
+                                    node.Left,
+                                    node.OperatorToken,
                                     ReplaceInstancePropertyAccess( targetPropertySymbol, memberAccessExpression, resolvedSymbol ) );
 
                         case IdentifierNameSyntax identifierExpression:
@@ -88,7 +85,7 @@ namespace Caravela.Framework.Impl.Linking
                             return
                                 node.Update(
                                     node.Left,
-                                    node.OperatorToken, 
+                                    node.OperatorToken,
                                     ReplaceStaticPropertyAccess( targetPropertySymbol, identifierExpression, resolvedSymbol ) );
 
                         default:
@@ -154,15 +151,16 @@ namespace Caravela.Framework.Impl.Linking
                 var rewrittenBlock =
                     declaration switch
                     {
-                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),                        
-                        { ExpressionBody: not null} => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( declaration.ExpressionBody.Expression ) ) ).AssertNotNull(), // TODO: Preserve trivias.
-                        _ => throw new NotSupportedException(), // TODO: Auto-properties.
+                        { Body: not null } => (BlockSyntax) innerRewriter.VisitBlock( declaration.Body ).AssertNotNull(),
+                        { ExpressionBody: not null } => (BlockSyntax) innerRewriter.Visit( Block( ReturnStatement( declaration.ExpressionBody.Expression ) ) )
+                            .AssertNotNull(),                  // TODO: Preserve trivias.
+                        _ => throw new NotSupportedException() // TODO: Auto-properties.
                     };
 
                 // Mark the block as flattenable (this is the root block).
-                rewrittenBlock = rewrittenBlock.AddLinkerGeneratedFlags(LinkerGeneratedFlags.Flattenable);
+                rewrittenBlock = rewrittenBlock.AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
 
-                if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( this.ContextAccessor ) || ( returnVariableName == null) )
+                if ( this.AnalysisRegistry.HasSimpleReturnControlFlow( this.ContextAccessor ) || (returnVariableName == null) )
                 {
                     // This method had simple control flow, we can keep the block as-is
                     return rewrittenBlock;
@@ -175,7 +173,7 @@ namespace Caravela.Framework.Impl.Linking
                         Block(
                                 rewrittenBlock.AssertNotNull(),
                                 GetStandaloneLabelStatement( GetReturnLabelName( labelId ) ) )
-                            .AddLinkerGeneratedFlags(LinkerGeneratedFlags.Flattenable);
+                            .AddLinkerGeneratedFlags( LinkerGeneratedFlags.Flattenable );
                 }
             }
 
@@ -186,7 +184,10 @@ namespace Caravela.Framework.Impl.Linking
             /// <param name="memberAccess">Call expression.</param>
             /// <param name="targetSymbol"></param>
             /// <returns></returns>
-            private static ExpressionSyntax ReplaceInstancePropertyAccess( IPropertySymbol originalSymbol, MemberAccessExpressionSyntax memberAccess, IPropertySymbol targetSymbol )
+            private static ExpressionSyntax ReplaceInstancePropertyAccess(
+                IPropertySymbol originalSymbol,
+                MemberAccessExpressionSyntax memberAccess,
+                IPropertySymbol targetSymbol )
             {
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, targetSymbol ) )
                 {
@@ -208,7 +209,10 @@ namespace Caravela.Framework.Impl.Linking
                 }
             }
 
-            private static ExpressionSyntax ReplaceStaticPropertyAccess( IPropertySymbol originalSymbol, IdentifierNameSyntax identifierExpression, IPropertySymbol targetSymbol )
+            private static ExpressionSyntax ReplaceStaticPropertyAccess(
+                IPropertySymbol originalSymbol,
+                IdentifierNameSyntax identifierExpression,
+                IPropertySymbol targetSymbol )
             {
                 if ( SymbolEqualityComparer.Default.Equals( originalSymbol, targetSymbol ) )
                 {

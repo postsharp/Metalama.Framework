@@ -25,7 +25,13 @@ namespace Caravela.Framework.Impl.Advices
 
         protected IMember? TemplateMember { get; }
 
-        public IntroduceMemberAdvice( AspectInstance aspect, INamedType? targetDeclaration, IMember? templateMember, IntroductionScope scope, ConflictBehavior conflictBehavior, AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration )
+        public IntroduceMemberAdvice(
+            AspectInstance aspect,
+            INamedType? targetDeclaration,
+            IMember? templateMember,
+            IntroductionScope scope,
+            ConflictBehavior conflictBehavior,
+            AspectLinkerOptions? linkerOptions ) : base( aspect, targetDeclaration )
         {
             this.TemplateMember = templateMember;
             this.Scope = scope;

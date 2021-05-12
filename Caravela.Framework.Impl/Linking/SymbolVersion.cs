@@ -42,7 +42,7 @@ namespace Caravela.Framework.Impl.Linking
             return HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 this.AspectLayer,
-                this.TargetKind);
+                this.TargetKind );
         }
 
         public static bool operator ==( SymbolVersion left, SymbolVersion right )

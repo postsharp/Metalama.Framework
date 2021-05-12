@@ -10,7 +10,6 @@ using Caravela.Framework.Impl.Transformations;
 using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Linq;
 
 namespace Caravela.Framework.Impl.Advices
@@ -51,14 +50,14 @@ namespace Caravela.Framework.Impl.Advices
             var hasGet = templateProperty != null ? templateProperty.Getter != null : getTemplateMethod != null;
             var hasSet = templateProperty != null ? templateProperty.Setter != null : setTemplateMethod != null;
 
-            this.MemberBuilder = new PropertyBuilder( 
+            this.MemberBuilder = new PropertyBuilder(
                 this,
                 this.TargetDeclaration,
                 name,
-                hasGet, 
+                hasGet,
                 hasSet,
-                this.TemplateMember != null && IsAutoProperty( this.TemplateMember),
-                this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember),
+                this.TemplateMember != null && IsAutoProperty( this.TemplateMember ),
+                this.TemplateMember != null && HasInitOnlySetter( this.TemplateMember ),
                 linkerOptions );
         }
 
@@ -71,13 +70,13 @@ namespace Caravela.Framework.Impl.Advices
         {
             return AdviceResult.Create(
                 this.MemberBuilder,
-                new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod, this.LinkerOptions )
-                );
+                new OverriddenProperty( this, this.MemberBuilder, this.TemplateMember, this._getTemplateMethod, this._setTemplateMethod, this.LinkerOptions ) );
         }
 
-        private static bool HasInitOnlySetter(IProperty templateProperty)
+        private static bool HasInitOnlySetter( IProperty templateProperty )
         {
-            var symbol = (IPropertySymbol)templateProperty.GetSymbol().AssertNotNull();
+            var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
+
             return symbol.SetMethod?.IsInitOnly == true;
         }
 
@@ -85,14 +84,14 @@ namespace Caravela.Framework.Impl.Advices
         {
             var symbol = (IPropertySymbol) templateProperty.GetSymbol().AssertNotNull();
             var syntax = symbol.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(); // TODO: Partial?
-            
-            if (syntax == null)
+
+            if ( syntax == null )
             {
                 // TODO: How to detect without source code?
                 return false;
             }
 
-            return ((PropertyDeclarationSyntax)syntax).AccessorList?.Accessors.All(a => a.Body == null && a.ExpressionBody == null) == true;
+            return ((PropertyDeclarationSyntax) syntax).AccessorList?.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) == true;
         }
     }
 }

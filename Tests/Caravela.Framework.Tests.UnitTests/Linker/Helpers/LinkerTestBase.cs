@@ -160,7 +160,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker.Helpers
 
                     var overridenMemberSymbol = containingSymbol.GetMembers()
                         .Where( x => StringComparer.Ordinal.Equals( x.Name, overriddenElementName ) )
-                        .Where( x => nameObliviousSignatureComparer.Equals(x, symbolHelperSymbol) )
+                        .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
                         .Single();
 
                     var overridenMember = symbolToCodeElement[overridenMemberSymbol];

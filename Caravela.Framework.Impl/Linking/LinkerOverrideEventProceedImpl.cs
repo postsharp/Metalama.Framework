@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Templating.MetaModel;
@@ -9,12 +8,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 
 namespace Caravela.Framework.Impl.Linking
 {
-
     internal class LinkerOverrideEventProceedImpl : IProceedImpl
     {
         private readonly IMethod _overriddenDeclaration;
@@ -22,7 +20,11 @@ namespace Caravela.Framework.Impl.Linking
         private readonly LinkerAnnotationOrder _order;
         private readonly ISyntaxFactory _syntaxFactory;
 
-        public LinkerOverrideEventProceedImpl( AspectLayerId aspectLayerId, IMethod overriddenDeclaration, LinkerAnnotationOrder order, ISyntaxFactory syntaxFactory )
+        public LinkerOverrideEventProceedImpl(
+            AspectLayerId aspectLayerId,
+            IMethod overriddenDeclaration,
+            LinkerAnnotationOrder order,
+            ISyntaxFactory syntaxFactory )
         {
             this._aspectLayerId = aspectLayerId;
             this._overriddenDeclaration = overriddenDeclaration;
@@ -42,7 +44,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case Code.MethodKind.PropertyGet:
+                case MethodKind.PropertyGet:
                     // Emit `xxx = <original_event_access> += value`.
                     return
                         ExpressionStatement(
@@ -54,7 +56,7 @@ namespace Caravela.Framework.Impl.Linking
                                     this.CreateOriginalEventAccess(),
                                     IdentifierName( "value" ) ) ) );
 
-                case Code.MethodKind.PropertySet:
+                case MethodKind.PropertySet:
                     // Emit `xxx = <original_event_access> -= value`.
                     return
                         ExpressionStatement(
@@ -75,7 +77,7 @@ namespace Caravela.Framework.Impl.Linking
         {
             switch ( this._overriddenDeclaration.MethodKind )
             {
-                case Code.MethodKind.EventAdd:
+                case MethodKind.EventAdd:
                     // Emit `{ <original_event_access> += value; return; }`.
                     return
                         Block(
@@ -86,7 +88,7 @@ namespace Caravela.Framework.Impl.Linking
                                     IdentifierName( "value" ) ) ),
                             ReturnStatement() );
 
-                case Code.MethodKind.EventRemove:
+                case MethodKind.EventRemove:
                     // Emit `{ <original_event_access> -= value; return; }`.
                     return
                         Block(
@@ -109,13 +111,13 @@ namespace Caravela.Framework.Impl.Linking
             // TODO: generics, static methods, consider explicit, modifiers interfaces and other special methods.
 
             // For properties, emit `[[this.]]OriginalProperty`.
-            var expression =  
+            var expression =
                 !originalEvent.IsStatic
-                ? MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    IdentifierName( originalEvent.Name ) )
-                : (ExpressionSyntax) IdentifierName( originalEvent.Name );
+                    ? MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( originalEvent.Name ) )
+                    : (ExpressionSyntax) IdentifierName( originalEvent.Name );
 
             return expression.AddLinkerAnnotation( new LinkerAnnotation( this._aspectLayerId, this._order ) );
         }
