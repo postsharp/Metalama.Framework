@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.Pipeline
             {
                 var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-                if ( !this.TryInitialize( diagnosticAdder, partialCompilation,null, out var configuration ) )
+                if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, out var configuration ) )
                 {
                     outputCompilation = null;
                     additionalResources = null;

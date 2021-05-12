@@ -20,13 +20,13 @@ namespace Caravela.Framework.Tests.UnitTests.CodeModel
         public void ObjectIdentity()
         {
             // This basically tests that [Memo] works.
-            
+
             var code = "";
             var compilation = CreateCompilationModel( code );
 
             var types1 = compilation.DeclaredTypes;
             var types2 = compilation.DeclaredTypes;
-            
+
             Assert.Same( types1, types2 );
         }
 

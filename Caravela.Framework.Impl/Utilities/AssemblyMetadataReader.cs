@@ -15,12 +15,12 @@ namespace Caravela.Framework.Impl.Utilities
     /// </summary>
     internal class AssemblyMetadataReader
     {
-        private readonly Dictionary<string, string> _metadata = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
+        private readonly Dictionary<string, string> _metadata = new( StringComparer.OrdinalIgnoreCase );
         private static readonly ConditionalWeakTable<Assembly, AssemblyMetadataReader> _instances = new();
 
-        private AssemblyMetadataReader( Assembly assembly ) 
+        private AssemblyMetadataReader( Assembly assembly )
         {
-            foreach ( var attribute in assembly.GetCustomAttributes( typeof(AssemblyMetadataAttribute)).Cast<AssemblyMetadataAttribute>() )
+            foreach ( var attribute in assembly.GetCustomAttributes( typeof(AssemblyMetadataAttribute) ).Cast<AssemblyMetadataAttribute>() )
             {
                 this._metadata.Add( attribute.Key, attribute.Value );
             }
@@ -55,8 +55,8 @@ namespace Caravela.Framework.Impl.Utilities
         /// Gets the unique BuildId for this assembly.
         /// </summary>
         public string BuildId
-            => this._metadata.TryGetValue( "BuildId", out var value ) 
-                ? value 
+            => this._metadata.TryGetValue( "BuildId", out var value )
+                ? value
                 : throw new AssertionFailedException( "The AssemblyMetadataAttribute BuildId was not defined." );
 
         /// <summary>

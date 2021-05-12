@@ -96,16 +96,16 @@ namespace Caravela.Framework.Impl.Pipeline
         }
 
         public virtual bool WriteUnhandledExceptionsToFile => true;
-        
 
-        public bool HasCachedCompileTimeProject(Compilation compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<SyntaxTree>? compileTimeTreesHint  )
+        public bool HasCachedCompileTimeProject( Compilation compilation, IDiagnosticAdder diagnosticAdder, IReadOnlyList<SyntaxTree>? compileTimeTreesHint )
         {
             var loader = CompileTimeProjectLoader.Create( this._domain, this.ServiceProvider );
+
             return loader.TryGetCompileTimeProject( compilation, compileTimeTreesHint, diagnosticAdder, true, out _ );
         }
-        
+
         public int PipelineInitializationCount { get; set; }
-        
+
         private protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
@@ -113,7 +113,7 @@ namespace Caravela.Framework.Impl.Pipeline
             [NotNullWhen( true )] out PipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
-            
+
             var roslynCompilation = compilation.Compilation;
 
             // Create dependencies.

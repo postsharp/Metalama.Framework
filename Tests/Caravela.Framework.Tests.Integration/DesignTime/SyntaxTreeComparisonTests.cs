@@ -9,7 +9,6 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
 {
     public class SyntaxTreeComparisonTests
     {
-
         [Fact]
         public void SameTrees()
         {
@@ -50,7 +49,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
         [Fact]
         public void DeletingInCommentBlock()
         {
-            var syntaxTree1 = CSharpSyntaxTree.ParseText( "/* Comment XXXXXXXXXXXXXX */ class C {} " );
+            var syntaxTree1 = CSharpSyntaxTree.ParseText( "/* Comment 111111111111111111 */ class C {} " );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment */ class C {} " );
 

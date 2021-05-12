@@ -27,16 +27,17 @@ namespace Caravela.Framework.Impl.DesignTime
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly DesignTimeSyntaxTreeResultCache _syntaxTreeResultCache = new();
         private readonly CompileTimeDomain _domain;
-        private  int _pipelineExecutionCount;
+        private int _pipelineExecutionCount;
 
-        public DesignTimeAspectPipelineCache( CompileTimeDomain domain ) {
+        public DesignTimeAspectPipelineCache( CompileTimeDomain domain )
+        {
             this._domain = domain;
         }
 
         /// <summary>
         /// Gets the singleton instance of this class (other instances can be used in tests).
         /// </summary>
-        public static DesignTimeAspectPipelineCache Instance { get; } = new(new CompileTimeDomain());
+        public static DesignTimeAspectPipelineCache Instance { get; } = new( new CompileTimeDomain() );
 
         /// <summary>
         /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
@@ -49,13 +50,15 @@ namespace Caravela.Framework.Impl.DesignTime
         /// <param name="buildOptions"></param>
         /// <returns></returns>
         internal DesignTimeAspectPipeline GetOrCreatePipeline( IBuildOptions buildOptions )
-            => this._pipelinesByProjectId.GetOrAdd( buildOptions.ProjectId, _ =>
-            {
-                var pipeline = new DesignTimeAspectPipeline( buildOptions, this._domain );
-                pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
+            => this._pipelinesByProjectId.GetOrAdd(
+                buildOptions.ProjectId,
+                _ =>
+                {
+                    var pipeline = new DesignTimeAspectPipeline( buildOptions, this._domain );
+                    pipeline.ExternalBuildStarted += this.OnExternalBuildStarted;
 
-                return pipeline;
-            } );
+                    return pipeline;
+                } );
 
         private void OnExternalBuildStarted( object sender, EventArgs e )
         {
@@ -83,7 +86,7 @@ namespace Caravela.Framework.Impl.DesignTime
             CancellationToken cancellationToken )
         {
             var pipeline = this.GetOrCreatePipeline( buildOptions );
-            
+
             // Update the cache.
             var changes = pipeline.InvalidateCache( compilation );
 
@@ -97,10 +100,9 @@ namespace Caravela.Framework.Impl.DesignTime
                 // instead of nothing.
             }
 
-
             // If the pipeline has an outdated configuration but we have a compile-time project,
             // then we clear our own result cache because we can rebuild it.
-            if ( pipeline.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild && 
+            if ( pipeline.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild &&
                  pipeline.HasCachedCompileTimeProject( compilation ) )
             {
                 pipeline.Reset();
@@ -133,8 +135,9 @@ namespace Caravela.Framework.Impl.DesignTime
             else
             {
                 // If we need a build, we only serve results from the cache.
-                DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required,"+
-                                                  $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
+                DesignTimeLogger.Instance?.Write(
+                    $"DesignTimeAspectPipelineCache.GetDesignTimeResults('{compilation.AssemblyName}'): build required," +
+                    $" returning from cache only. Cache size is {this._syntaxTreeResultCache.Count}" );
             }
 
             // Get the results from the cache. We don't need to check dependencies
@@ -165,7 +168,7 @@ namespace Caravela.Framework.Impl.DesignTime
                     // This is our own generated file. Don't include.
                     continue;
                 }
-                
+
                 if ( !this._syntaxTreeResultCache.TryGetValue( syntaxTree, out _ ) )
                 {
                     uncachedSyntaxTrees.Add( syntaxTree );
@@ -177,6 +180,4 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public void Dispose() => this._domain.Dispose();
     }
-    
-    
 }

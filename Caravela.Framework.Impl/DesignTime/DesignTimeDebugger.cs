@@ -1,3 +1,6 @@
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
 using Caravela.Framework.Impl.Pipeline;
 using System;
 using System.Diagnostics;
@@ -6,10 +9,9 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal static class DesignTimeDebugger
     {
-        private static volatile bool _attachDebuggerRequested;
         private static readonly object _sync = new();
+        private static volatile bool _attachDebuggerRequested;
 
-        
         /// <summary>
         /// Attaches the debugger to the current process if requested.
         /// </summary>

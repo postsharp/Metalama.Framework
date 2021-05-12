@@ -25,12 +25,10 @@ namespace Caravela.Framework.Impl.DesignTime
 
             lock ( this )
             {
-
                 var newTrees = new Dictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>( this._lastTrees?.Count ?? 32 );
 
                 var syntaxTreeChanges = ImmutableArray.CreateBuilder<SyntaxTreeChange>();
-                bool hasCompileTimeChange = false;
-
+                var hasCompileTimeChange = false;
 
                 // Process new trees.
                 foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
@@ -46,8 +44,13 @@ namespace Caravela.Framework.Impl.DesignTime
                             compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, hasCompileTimeCode );
 
                             syntaxTreeChanges.Add(
-                                new SyntaxTreeChange( newSyntaxTree.FilePath, SyntaxTreeChangeKind.Changed,hasCompileTimeCode, compileTimeChangeKind, newSyntaxTree ) );
-                            
+                                new SyntaxTreeChange(
+                                    newSyntaxTree.FilePath,
+                                    SyntaxTreeChangeKind.Changed,
+                                    hasCompileTimeCode,
+                                    compileTimeChangeKind,
+                                    newSyntaxTree ) );
+
                             hasCompileTimeChange |= hasCompileTimeCode || oldEntry.HasCompileTimeCode;
                         }
                         else
@@ -58,20 +61,23 @@ namespace Caravela.Framework.Impl.DesignTime
                     else
                     {
                         // This is a new tree.
-                        
+
                         hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
                         compileTimeChangeKind = GetCompileTimeChangeKind( false, hasCompileTimeCode );
 
                         syntaxTreeChanges.Add(
-                            new SyntaxTreeChange( newSyntaxTree.FilePath, SyntaxTreeChangeKind.Added, hasCompileTimeCode, compileTimeChangeKind, newSyntaxTree ) );
-                        
+                            new SyntaxTreeChange(
+                                newSyntaxTree.FilePath,
+                                SyntaxTreeChangeKind.Added,
+                                hasCompileTimeCode,
+                                compileTimeChangeKind,
+                                newSyntaxTree ) );
+
                         hasCompileTimeChange |= hasCompileTimeCode;
                     }
 
                     newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, hasCompileTimeCode) );
                     this._lastTrees?.Remove( newSyntaxTree.FilePath );
-
-                    
                 }
 
                 // Process old trees.
@@ -94,7 +100,6 @@ namespace Caravela.Framework.Impl.DesignTime
                 this.LastCompilation = newCompilation;
 
                 return new CompilationChanges( syntaxTreeChanges.ToImmutable(), hasCompileTimeChange );
-
             }
         }
 
@@ -108,6 +113,7 @@ namespace Caravela.Framework.Impl.DesignTime
             };
 
         internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree ) => IsDifferent( oldSyntaxTree, newSyntaxTree, out _ );
+
         internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, out bool? hasCompileTimeCode )
         {
             hasCompileTimeCode = null;
@@ -171,7 +177,7 @@ namespace Caravela.Framework.Impl.DesignTime
                                     }
 
                                 case SyntaxKind.WhitespaceTrivia:
-                                    if ( changedTrivia.Span.Length == changedSpan.Length && change.NewText.Length == 0 )
+                                    if ( changedTrivia.Span.Length == changedSpan.Length && (change.NewText == null || change.NewText.Length == 0) )
                                     {
                                         // Removing all spaces of a trivia is potentially breaking.
                                         break;
@@ -190,7 +196,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
                         // If the change is in a method body or other expression, ignore it.
                         hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxTree.GetRoot() );
-                        
+
                         if ( !hasCompileTimeCode.Value )
                         {
                             if ( !oldSyntaxRoot.FullSpan.Contains( changedSpan ) )
@@ -231,58 +237,5 @@ namespace Caravela.Framework.Impl.DesignTime
             this.LastCompilation = null;
             this._lastTrees = null;
         }
-    }
-
-    internal class CompilationChanges
-    {
-        public ImmutableArray<SyntaxTreeChange> SyntaxTreeChanges { get; }
-        public bool HasCompileTimeCodeChange { get; }
-
-        public CompilationChanges( ImmutableArray<SyntaxTreeChange> syntaxTreeChanges, bool hasCompileTimeCodeChange )
-        {
-            this.SyntaxTreeChanges = syntaxTreeChanges;
-            this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
-        }
-
-        private CompilationChanges()
-        {
-            this.SyntaxTreeChanges = ImmutableArray<SyntaxTreeChange>.Empty;
-        }
-
-        public static CompilationChanges Empty { get; } = new();
-    }
-
-    internal struct SyntaxTreeChange
-    {
-        public SyntaxTreeChangeKind SyntaxTreeChangeKind { get; }
-
-        public bool HasCompileTimeCode { get; }
-
-        public CompileTimeChangeKind CompileTimeChangeKind { get; }
-        public string FilePath { get; }
-        public SyntaxTree? NewTree { get; }
-
-        public SyntaxTreeChange( string filePath, SyntaxTreeChangeKind syntaxTreeChangeKind, bool hasCompileTimeCode, CompileTimeChangeKind compileTimeChangeKind, SyntaxTree? newTree )
-        {
-            this.SyntaxTreeChangeKind = syntaxTreeChangeKind;
-            this.HasCompileTimeCode = hasCompileTimeCode;
-            this.CompileTimeChangeKind = compileTimeChangeKind;
-            this.FilePath = filePath;
-            this.NewTree = newTree;
-        }
-    }
-
-    internal enum CompileTimeChangeKind
-    {
-        None,
-        NewlyCompileTime,
-        NoLongerCompileTime
-    }
-
-    internal enum SyntaxTreeChangeKind
-    {
-        Added,
-        Changed,
-        Deleted
     }
 }

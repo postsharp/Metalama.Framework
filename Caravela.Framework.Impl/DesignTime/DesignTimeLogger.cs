@@ -17,7 +17,10 @@ namespace Caravela.Framework.Impl.DesignTime
         private DesignTimeLogger()
         {
             var pid = Process.GetCurrentProcess().Id;
-            this._textWriter = File.CreateText( Path.Combine( Path.GetTempPath(), $"Caravela.Framework.DesignTime.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
+
+            this._textWriter = File.CreateText(
+                Path.Combine( Path.GetTempPath(), $"Caravela.Framework.DesignTime.{Process.GetCurrentProcess().ProcessName}.{pid}.log" ) );
+
             this.Write( $"Process={Process.GetCurrentProcess().ProcessName}, CommandLine={Environment.CommandLine}." );
         }
 
@@ -25,10 +28,9 @@ namespace Caravela.Framework.Impl.DesignTime
         {
             lock ( this._textWriter )
             {
-                this._textWriter.WriteLine($"{DateTime.Now}, Thread {Thread.CurrentThread.ManagedThreadId}: {s}");
+                this._textWriter.WriteLine( $"{DateTime.Now}, Thread {Thread.CurrentThread.ManagedThreadId}: {s}" );
                 this._textWriter.Flush();
             }
         }
-
     }
 }

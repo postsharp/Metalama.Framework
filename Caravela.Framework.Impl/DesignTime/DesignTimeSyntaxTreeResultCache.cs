@@ -4,8 +4,6 @@
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.Pipeline;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -40,7 +38,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     throw new AssertionFailedException( "A rooted path was expected." );
                 }
-                
+
                 this._syntaxTreeCache[result.SyntaxTree.FilePath] = result;
             }
         }
@@ -123,12 +121,11 @@ namespace Caravela.Framework.Impl.DesignTime
             return resultsByTree.Select( b => b.Value.ToImmutable( compilation ) );
         }
 
-        public bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out DesignTimeSyntaxTreeResult? result)
+        public bool TryGetValue( SyntaxTree syntaxTree, [NotNullWhen( true )] out DesignTimeSyntaxTreeResult? result )
         {
             return this._syntaxTreeCache.TryGetValue( syntaxTree.FilePath, out result );
         }
 
-        
         public void UpdateCompilation( CompilationChanges compilationChanges )
         {
             foreach ( var change in compilationChanges.SyntaxTreeChanges )
@@ -137,16 +134,15 @@ namespace Caravela.Framework.Impl.DesignTime
                 {
                     case SyntaxTreeChangeKind.Added:
                         break;
-                        
+
                     case SyntaxTreeChangeKind.Deleted:
                     case SyntaxTreeChangeKind.Changed:
                         DesignTimeLogger.Instance?.Write( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
                         this._syntaxTreeCache.TryRemove( change.FilePath, out _ );
+
                         break;
-                    
                 }
             }
-           
         }
 
         public void Clear()

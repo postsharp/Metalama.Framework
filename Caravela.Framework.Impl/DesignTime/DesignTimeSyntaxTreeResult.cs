@@ -50,6 +50,7 @@ namespace Caravela.Framework.Impl.DesignTime
             this.Dependencies = dependencies ?? ImmutableArray<string>.Empty;
         }
 
-        public override string ToString() => $"FilePath='{this.SyntaxTree.FilePath}, Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}";
+        public override string ToString()
+            => $"FilePath='{this.SyntaxTree.FilePath}, Diagnostics={this.Diagnostics.Length}, Suppressions={this.Suppressions.Length}, Introductions={this.Introductions.Length}";
     }
 }

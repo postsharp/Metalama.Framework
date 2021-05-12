@@ -14,7 +14,12 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     internal class CompileTimeProjectManifest
     {
-        public CompileTimeProjectManifest( string assemblyName, IReadOnlyList<string> aspectTypes, IReadOnlyList<string>? references, ulong sourceHash, IReadOnlyList<CompileTimeFile> files )
+        public CompileTimeProjectManifest(
+            string assemblyName,
+            IReadOnlyList<string> aspectTypes,
+            IReadOnlyList<string>? references,
+            ulong sourceHash,
+            IReadOnlyList<CompileTimeFile> files )
         {
             this.AssemblyName = assemblyName;
             this.AspectTypes = aspectTypes;
@@ -39,14 +44,13 @@ namespace Caravela.Framework.Impl.CompileTime
         /// Gets a unique hash of the source code and its dependencies.
         /// </summary>
         public ulong SourceHash { get; }
-        
-        
+
         /// <summary>
         /// Gets the list of code files.
         /// </summary>
         public IReadOnlyList<CompileTimeFile> Files { get; }
 
-        public static bool TryDeserialize( Stream stream, [NotNullWhen(true)] out CompileTimeProjectManifest? manifest )
+        public static bool TryDeserialize( Stream stream, [NotNullWhen( true )] out CompileTimeProjectManifest? manifest )
         {
             try
             {
@@ -55,11 +59,11 @@ namespace Caravela.Framework.Impl.CompileTime
                 stream.Close();
 
                 manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
-                
+
                 // Assert that files are properly deserialized.
                 foreach ( var file in manifest.Files )
                 {
-                    if ( file.SourcePath == null! || file.TransformedPath == null!)
+                    if ( file.SourcePath == null! || file.TransformedPath == null! )
                     {
                         throw new AssertionFailedException( "Deserialization error." );
                     }
@@ -70,6 +74,7 @@ namespace Caravela.Framework.Impl.CompileTime
             catch ( JsonReaderException )
             {
                 manifest = null;
+
                 return false;
             }
         }

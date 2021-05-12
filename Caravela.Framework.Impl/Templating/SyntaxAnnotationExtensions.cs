@@ -106,7 +106,7 @@ namespace Caravela.Framework.Impl.Templating
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _colorAnnotationKind, color.ToString() ) );
 
             Invariant.Assert( transformedNode.GetColorFromAnnotation() == color );
-            
+
             return transformedNode;
         }
 

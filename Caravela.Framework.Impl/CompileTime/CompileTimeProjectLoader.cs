@@ -19,7 +19,7 @@ namespace Caravela.Framework.Impl.CompileTime
 {
     /// <summary>
     /// This class is responsible to cache and load compile-time projects. The caller must first call
-    /// the <see cref="TryGetCompileTimeProject(Microsoft.CodeAnalysis.Compilation,Caravela.Framework.Impl.Diagnostics.IDiagnosticAdder,bool,out Caravela.Framework.Impl.CompileTime.CompileTimeProject?)"/> for each project with which the loader will be used.
+    /// the <see cref="TryGetCompileTimeProject(Compilation, IReadOnlyList{SyntaxTree}?, IDiagnosticAdder, bool, out CompileTimeProject?)"/> for each project with which the loader will be used.
     /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
     /// class.
     /// </summary>
@@ -175,7 +175,6 @@ namespace Caravela.Framework.Impl.CompileTime
             }
         }
 
-
         /// <summary>
         /// Generates a <see cref="CompileTimeProject"/> for a given run-time <see cref="Compilation"/>.
         /// Referenced projects are loaded or generated as necessary. Note that other methods of this class do not
@@ -212,7 +211,13 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
             }
 
-            if ( !this._builder.TryGetCompileTimeProject( runTimeCompilation, compileTimeTreesHint, referencedProjects, diagnosticSink, out compileTimeProject, cacheOnly ) )
+            if ( !this._builder.TryGetCompileTimeProject(
+                runTimeCompilation,
+                compileTimeTreesHint,
+                referencedProjects,
+                diagnosticSink,
+                out compileTimeProject,
+                cacheOnly ) )
             {
                 compileTimeProject = null;
 
@@ -236,7 +241,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     return this.TryGetCompileTimeProject( filePath!, diagnosticSink, out referencedProject );
 
                 case CompilationReference compilationReference:
-                    return this.TryGetCompileTimeProject( compilationReference.Compilation,null, diagnosticSink, cacheOnly, out referencedProject );
+                    return this.TryGetCompileTimeProject( compilationReference.Compilation, null, diagnosticSink, cacheOnly, out referencedProject );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected reference kind: {reference}." );
@@ -316,8 +321,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, assemblyIdentity.ToString() ) );
-                
+
                 project = null;
+
                 return false;
             }
 

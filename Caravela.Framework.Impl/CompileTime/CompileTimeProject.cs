@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +13,6 @@ using System.Text;
 
 namespace Caravela.Framework.Impl.CompileTime
 {
-    
     /// <summary>
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
@@ -157,11 +155,11 @@ namespace Caravela.Framework.Impl.CompileTime
             using ( var archive = new ZipArchive( stream, ZipArchiveMode.Create, true, Encoding.UTF8 ) )
             {
                 // Write syntax trees.
-                
+
                 foreach ( var sourceFile in this.CodeFiles! )
                 {
                     var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile.TransformedPath ) );
-                   
+
                     var entry = archive.CreateEntry( sourceFile.TransformedPath, CompressionLevel.Optimal );
                     using var entryWriter = new StreamWriter( entry.Open() );
                     entryWriter.Write( sourceText );

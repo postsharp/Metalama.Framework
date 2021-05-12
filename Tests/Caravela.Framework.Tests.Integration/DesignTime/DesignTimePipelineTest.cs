@@ -60,7 +60,7 @@ namespace Caravela.Framework.Tests.Integration.DesignTime
             {
                 var syntaxTree = diagnostic.Location!.SourceTree ?? syntaxTreeResult.SyntaxTree;
 
-                return syntaxTree?.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
+                return syntaxTree.GetText().GetSubText( diagnostic.Location.SourceSpan ).ToString();
             }
 
             stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
@@ -222,7 +222,7 @@ Target.cs:
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
             Assert.Equal( 2, cache.PipelineExecutionCount );
-            
+
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
             // Forth execution, with modified aspect but not target code. We don't trigger a build, so we should get the old result.
@@ -234,7 +234,7 @@ Target.cs:
                 assemblyName );
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
-            
+
             var results4 = cache.GetDesignTimeResults( compilation4, buildOptions );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
@@ -245,15 +245,15 @@ Target.cs:
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
             Assert.Equal( 2, cache.PipelineExecutionCount );
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
-            
+
             // There must be an error on the aspect.
             List<Diagnostic> diagnostics4 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline ).Visit( aspect4.GetRoot( ) );
+            new DesignTimeAnalyzerAdditionalVisitor( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add, pipeline ).Visit( aspect4.GetRoot() );
 
             Assert.Contains(
                 diagnostics4,
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == DesignTimeDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
-            
+
             // Fifth execution, the same scenario as before.
             var compilation5 = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -263,9 +263,9 @@ Target.cs:
                 assemblyName );
 
             var aspect5 = compilation5.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
-            
+
             Assert.Equal( DesignTimeAspectPipelineStatus.NeedsExternalBuild, pipeline.Status );
-            
+
             var results5 = cache.GetDesignTimeResults( compilation5, buildOptions );
             var dumpedResults5 = DumpResults( results5 );
 
@@ -274,7 +274,7 @@ Target.cs:
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
             List<Diagnostic> diagnostics5 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline ).Visit( aspect5.GetRoot( ) );
+            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add, pipeline ).Visit( aspect5.GetRoot() );
 
             Assert.Contains(
                 diagnostics5,
@@ -285,19 +285,18 @@ Target.cs:
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( buildOptions, domain );
             DiagnosticList compileDiagnostics = new();
             Assert.True( compileTimeAspectPipeline.TryExecute( compileDiagnostics, compilation5, out _, out _ ) );
-            
+
             // A new evaluation of the design-time pipeline should now give the new results.
             var results6 = cache.GetDesignTimeResults( compilation5, buildOptions );
             var dumpedResults6 = DumpResults( results6 );
-            
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
             Assert.Equal( 3, cache.PipelineExecutionCount );
             Assert.Equal( 2, pipeline.PipelineInitializationCount );
             Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
-            
+
             List<Diagnostic> diagnostics6 = new();
-            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline ).Visit( aspect5.GetRoot( ) );
+            new DesignTimeAnalyzerAdditionalVisitor( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add, pipeline ).Visit( aspect5.GetRoot() );
 
             Assert.DoesNotContain(
                 diagnostics6,

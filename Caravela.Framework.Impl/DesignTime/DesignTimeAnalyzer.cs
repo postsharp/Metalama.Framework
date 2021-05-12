@@ -41,7 +41,9 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => _supportedDiagnosticDescriptors;
 
+#pragma warning disable RS1026 // Enable concurrent execution
         public override void Initialize( AnalysisContext context )
+#pragma warning restore RS1026 // Enable concurrent execution
         {
             if ( CaravelaCompilerInfo.IsActive )
             {
@@ -53,7 +55,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
             // Semantic model analysis is used for frequent and "short loop" analysis, principally of the templates themselves.
             context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
-            
+
             context.RegisterCompilationAction( this.AnalyzeCompilation );
         }
 
@@ -84,15 +86,12 @@ namespace Caravela.Framework.Impl.DesignTime
                         context.ReportDiagnostic,
                         true );
                 }
-                
             }
             catch ( Exception e )
             {
                 DesignTimeLogger.Instance?.Write( e.ToString() );
             }
         }
-
-     
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
@@ -105,7 +104,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 DesignTimeDebugger.AttachDebugger( buildOptions );
 
-             
                 // Additional validations that run out of the pipeline.
                 DesignTimeAnalyzerAdditionalVisitor visitor = new( context, buildOptions );
                 visitor.Visit( context.SemanticModel.SyntaxTree.GetRoot() );
@@ -114,7 +112,6 @@ namespace Caravela.Framework.Impl.DesignTime
             {
                 DesignTimeLogger.Instance?.Write( e.ToString() );
             }
-
         }
     }
 }

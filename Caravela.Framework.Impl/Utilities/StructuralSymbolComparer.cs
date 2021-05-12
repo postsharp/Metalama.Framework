@@ -323,7 +323,7 @@ namespace Caravela.Framework.Impl.Utilities
 
                 case IPropertySymbol propertySymbol:
                     h = HashCode.Combine( h, propertySymbol.Name );
-                    
+
                     // TODO: Parameters.
                     break;
 

@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -32,19 +31,18 @@ namespace Caravela.Framework.Impl.DesignTime
         private SymbolDeclarationScope? _currentDeclarationScope;
         private ISymbol? _currentDeclaration;
 
-        public DesignTimeAnalyzerAdditionalVisitor(
-            SemanticModelAnalysisContext context, IBuildOptions buildOptions ) : this( context.SemanticModel, context.ReportDiagnostic,  DesignTimeAspectPipelineCache
-                                                               .Instance
-                                                               .GetOrCreatePipeline( buildOptions ))
-        {
-            
-        }
-        public DesignTimeAnalyzerAdditionalVisitor( SemanticModel semanticModel, Action<Diagnostic> reportDiagnostic, DesignTimeAspectPipeline pipeline  )
+        public DesignTimeAnalyzerAdditionalVisitor( SemanticModelAnalysisContext context, IBuildOptions buildOptions ) : this(
+            context.SemanticModel,
+            context.ReportDiagnostic,
+            DesignTimeAspectPipelineCache
+                .Instance
+                .GetOrCreatePipeline( buildOptions ) ) { }
+
+        public DesignTimeAnalyzerAdditionalVisitor( SemanticModel semanticModel, Action<Diagnostic> reportDiagnostic, DesignTimeAspectPipeline pipeline )
         {
             this._semanticModel = semanticModel;
             this._reportDiagnostic = reportDiagnostic;
             this._classifier = SymbolClassifier.GetInstance( semanticModel.Compilation );
-
 
             this._isCompileTimeTreeOutdated = pipeline.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath );
         }
@@ -97,7 +95,6 @@ namespace Caravela.Framework.Impl.DesignTime
             }
 
             base.VisitClassDeclaration( node );
-
         }
 
         public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
@@ -178,7 +175,6 @@ namespace Caravela.Framework.Impl.DesignTime
                 this._currentDeclaration = declaredSymbol;
 
                 return context;
-            
             }
 
             return default;

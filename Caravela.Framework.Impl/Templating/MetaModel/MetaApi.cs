@@ -64,7 +64,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
         public dynamic ThisStatic
             => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Default ) );
 
-        public dynamic BaseStatic 
+        public dynamic BaseStatic
             => new ThisTypeDynamicReceiver( this.Type, new LinkerAnnotation( this._common.AspectLayerId, LinkerAnnotationOrder.Original ) );
 
         public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;

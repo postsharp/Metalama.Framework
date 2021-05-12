@@ -29,31 +29,26 @@ namespace Caravela.Framework.Impl.DesignTime
 
         private readonly object _configureSync = new();
         private readonly CompilationDiffer _compilationDiffer = new();
+        private readonly FileSystemWatcher? _fileSystemWatcher;
 
         private PipelineConfiguration? _lastKnownConfiguration;
 
-        private FileSystemWatcher? _fileSystemWatcher;
-
-        
         public DesignTimeAspectPipelineStatus Status { get; private set; }
 
         public DesignTimeAspectPipeline( IBuildOptions buildOptions, CompileTimeDomain domain ) : base( buildOptions, domain )
         {
             if ( buildOptions.BuildTouchFile != null )
             {
-                this._fileSystemWatcher = new FileSystemWatcher( 
+                this._fileSystemWatcher = new FileSystemWatcher(
                     Path.GetDirectoryName( buildOptions.BuildTouchFile ),
-                    "*" + Path.GetExtension( buildOptions.BuildTouchFile ) )
-                {
-                    IncludeSubdirectories = true
-                };
-                
+                    "*" + Path.GetExtension( buildOptions.BuildTouchFile ) ) { IncludeSubdirectories = true };
+
                 this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
                 this._fileSystemWatcher.EnableRaisingEvents = true;
             }
         }
 
-        public event EventHandler ExternalBuildStarted;
+        public event EventHandler? ExternalBuildStarted;
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
@@ -64,6 +59,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 DesignTimeLogger.Instance?.Write( $"Detected an external build for project '{this.BuildOptions.AssemblyName}'." );
 
                 var hasRelevantChange = false;
+
                 foreach ( var file in this._compileTimeSyntaxTrees )
                 {
                     if ( file.Value == null )
@@ -89,7 +85,7 @@ namespace Caravela.Framework.Impl.DesignTime
                 compilation,
                 NullDiagnosticAdder.Instance,
                 this.GetCompileTimeSyntaxTrees( compilation ) );
-        
+
         private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation )
         {
             List<SyntaxTree> trees = new( this._compileTimeSyntaxTrees.Count );
@@ -102,7 +98,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
                     this.InvalidateCache( compilation );
                 }
-
             }
             else
             {
@@ -118,17 +113,18 @@ namespace Caravela.Framework.Impl.DesignTime
             return trees;
         }
 
-   
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
             => this._compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
-        
+
         public CompilationChanges InvalidateCache( Compilation newCompilation )
         {
             void OnCompileTimeChange()
             {
                 if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
                 {
-                    DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+                    DesignTimeLogger.Instance?.Write(
+                        $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+
                     this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
 
                     if ( this.BuildOptions.BuildTouchFile != null && File.Exists( this.BuildOptions.BuildTouchFile ) )
@@ -177,7 +173,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 return compilationChange;
             }
-
         }
 
         public void Reset()
@@ -185,7 +180,6 @@ namespace Caravela.Framework.Impl.DesignTime
             lock ( this._configureSync )
             {
                 DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.Reset('{this.BuildOptions.AssemblyName}')." );
-
 
                 this._lastKnownConfiguration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;
@@ -214,17 +208,18 @@ namespace Caravela.Framework.Impl.DesignTime
                         out configuration ) )
                     {
                         // A failure here means an error or a cache miss.
-                        
+
                         DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed." );
-                        
+
                         configuration = null;
 
                         return false;
                     }
                     else
                     {
-                        DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') succeeded with a new configuration." );
-                        
+                        DesignTimeLogger.Instance?.Write(
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') succeeded with a new configuration." );
+
                         this._lastKnownConfiguration = configuration;
                         this.Status = DesignTimeAspectPipelineStatus.Ready;
 
@@ -239,8 +234,9 @@ namespace Caravela.Framework.Impl.DesignTime
                     }
 
                     // We have a valid configuration and it is not outdated.
-                    
-                    DesignTimeLogger.Instance?.Write( $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') returned existing configuration." );
+
+                    DesignTimeLogger.Instance?.Write(
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}') returned existing configuration." );
 
                     configuration = this._lastKnownConfiguration;
 

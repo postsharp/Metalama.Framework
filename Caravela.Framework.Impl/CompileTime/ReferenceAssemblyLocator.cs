@@ -26,9 +26,9 @@ namespace Caravela.Framework.Impl.CompileTime
 
         static ReferenceAssemblyLocator()
         {
-            AssemblyMetadataReader metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
-            
-            _projectText = 
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+
+            _projectText =
                 $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
@@ -36,7 +36,7 @@ namespace Caravela.Framework.Impl.CompileTime
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion("Microsoft.CodeAnalysis.CSharp" )}' />
+    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
     <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
