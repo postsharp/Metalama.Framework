@@ -3,6 +3,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -38,13 +39,30 @@ namespace Caravela.Framework.Impl.CompileTime
         /// </summary>
         public ulong SourceHash { get; init; }
 
-        public static CompileTimeProjectManifest Deserialize( Stream stream )
+        public static bool TryDeserialize( Stream stream, [NotNullWhen(true)] out CompileTimeProjectManifest? manifest )
         {
-            using var manifestReader = new StreamReader( stream, Encoding.UTF8 );
-            var manifestJson = manifestReader.ReadToEnd();
-            stream.Close();
+            try
+            {
+                using var manifestReader = new StreamReader( stream, Encoding.UTF8 );
+                var manifestJson = manifestReader.ReadToEnd();
+                stream.Close();
 
-            return JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+                manifest = JsonConvert.DeserializeObject<CompileTimeProjectManifest>( manifestJson ).AssertNotNull();
+
+                return true;
+            }
+            catch ( JsonReaderException )
+            {
+                manifest = null;
+                return false;
+            }
+        }
+
+        public void Serialize( Stream stream )
+        {
+            var manifestJson = JsonConvert.SerializeObject( this, Formatting.Indented );
+            using var manifestWriter = new StreamWriter( stream, Encoding.UTF8 );
+            manifestWriter.Write( manifestJson );
         }
     }
 }

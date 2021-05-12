@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,10 +16,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.LinqWit
             list.Add(2);
             list.Add(5);
 
-            var p = list.Where(a => a > target.Parameters.Count).Count();
+            var p = list.Where(a => a > meta.Parameters.Count).Count();
             Console.WriteLine(p);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

@@ -11,7 +11,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
     /// </summary>
     /// <param name="Character">Position of the character counted from the beginning of the file.</param>
     /// <param name="LinePosition">Line and column.</param>
-    internal record TextPoint ( int Character, LinePosition LinePosition )
+    internal record TextPoint( int Character, LinePosition LinePosition )
     {
         public void Write( BinaryWriter writer )
         {

@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.CompileTimeSimpleLambda
 {
@@ -9,9 +9,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Compile
         [TestTemplate]
         dynamic Template()
         {
-            Func<int, int> action = compileTime(new  Func<int, int> (x => x + 1));
+            Func<int, int> action = meta.CompileTime(new  Func<int, int> (x => x + 1));
         
-            var result = compileTime(1);
+            var result = meta.CompileTime(1);
 
             result = action(result);
 

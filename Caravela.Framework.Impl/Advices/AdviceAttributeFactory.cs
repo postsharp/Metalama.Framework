@@ -7,6 +7,7 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Caravela.Framework.Code.Accessibility;
@@ -71,7 +72,8 @@ namespace Caravela.Framework.Impl.Advices
                             (IMethod) templateMethod,
                             scope,
                             conflictBehavior,
-                            aspectLinkerOptions );
+                            aspectLinkerOptions,
+                            ImmutableDictionary<string, object?>.Empty );
 
                         advice.Initialize( diagnosticAdder );
 

@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using Caravela.Framework.Project;
 using Caravela.Framework.Aspects;
+using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ParameterAssignment
 {
@@ -13,8 +11,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Dynamic.ParameterAssig
         [TestTemplate]
         dynamic? Template()
         {
-            var result = proceed();
-            target.Parameters[0].Value = 5;
+            var result = meta.Proceed();
+            meta.Parameters[0].Value = 5;
             return result;
         }
     }

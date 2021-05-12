@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Templating
             this._serviceProvider = serviceProvider ?? ServiceProvider.Empty;
         }
 
-        public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap; 
+        public ILocationAnnotationMap LocationAnnotationMap => this._semanticAnnotationMap;
 
         public bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
@@ -82,7 +82,12 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Compile the syntax tree.
-            var templateCompilerRewriter = new TemplateCompilerRewriter( compileTimeCompilation, this._semanticAnnotationMap, diagnostics, this._serviceProvider );
+            var templateCompilerRewriter = new TemplateCompilerRewriter(
+                compileTimeCompilation,
+                this._semanticAnnotationMap,
+                diagnostics,
+                this._serviceProvider );
+
             transformedSyntaxRoot = templateCompilerRewriter.Visit( annotatedSyntaxRoot );
 
             return transformedSyntaxRoot != null && templateCompilerRewriter.Success;

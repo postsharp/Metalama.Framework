@@ -98,7 +98,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
                 RuntimeExpression runtimeExpression => runtimeExpression,
 
                 // This case is used to simplify tests.
-                IDynamicMember dynamicMember => dynamicMember.CreateExpression(),
+                IDynamicExpression dynamicMember => dynamicMember.CreateExpression(),
 
                 _ => throw new ArgumentOutOfRangeException( nameof(value) )
             };

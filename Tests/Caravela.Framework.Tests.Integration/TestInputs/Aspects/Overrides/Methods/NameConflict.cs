@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Caravela.Framework.Aspects;
+﻿using Caravela.Framework.Aspects;
 using Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 #pragma warning disable CS0219
@@ -16,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         public override dynamic OverrideMethod()
         {
             int i = 27;
-            return proceed();
+            return meta.Proceed();
         }
     }
 
@@ -25,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         public override dynamic OverrideMethod()
         {
             int i = 42;
-            return proceed();
+            return meta.Proceed();
         }
     }
 

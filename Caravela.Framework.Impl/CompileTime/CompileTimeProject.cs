@@ -3,7 +3,6 @@
 
 using Caravela.Framework.Impl.Templating.Mapping;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +23,11 @@ namespace Caravela.Framework.Impl.CompileTime
         private readonly string? _compiledAssemblyPath;
         private readonly Func<string, TextMap?>? _getLocationMap;
         private Assembly? _assembly;
+
+        /// <summary>
+        /// Gets the full path of the directory containing the transformed source code (typically under a temp directory). 
+        /// </summary>
+        public string? Directory { get; }
 
         /// <summary>
         /// Gets the <see cref="CompileTimeDomain"/> to which the current project belong.
@@ -53,10 +57,9 @@ namespace Caravela.Framework.Impl.CompileTime
         public IReadOnlyList<CompileTimeProject> References { get; }
 
         /// <summary>
-        /// Gets the list of syntax trees of the current project. These syntax trees are fully transformed
-        /// and ready to be compiled.
+        /// Gets the list of transformed code files in the current project. 
         /// </summary>
-        public IReadOnlyList<SyntaxTree>? SyntaxTrees { get; }
+        public IReadOnlyList<string>? CodeFiles { get; }
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -105,17 +108,19 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest? manifest,
             string? compiledAssemblyPath,
-            IReadOnlyList<SyntaxTree>? syntaxTrees,
-            Func<string, TextMap?>? getLocationMap )
+            IReadOnlyList<string>? codeFiles,
+            Func<string, TextMap?>? getLocationMap,
+            string? directory )
         {
             this.Domain = domain;
             this._compiledAssemblyPath = compiledAssemblyPath;
             this._getLocationMap = getLocationMap;
+            this.Directory = directory;
             this._manifest = manifest;
             this.RunTimeIdentity = runTimeIdentity;
             this.CompileTimeIdentity = compileTimeIdentity;
             this.References = references;
-            this.SyntaxTrees = syntaxTrees;
+            this.CodeFiles = codeFiles;
         }
 
         /// <summary>
@@ -128,9 +133,10 @@ namespace Caravela.Framework.Impl.CompileTime
             IReadOnlyList<CompileTimeProject> references,
             CompileTimeProjectManifest manifest,
             string? compiledAssemblyPath,
-            IReadOnlyList<SyntaxTree>? syntaxTrees,
+            string sourceDirectory,
+            IReadOnlyList<string> sourceFiles,
             Func<string, TextMap?> getLocationMap )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, syntaxTrees, getLocationMap );
+            => new( domain, runTimeIdentity, compileTimeIdentity, references, manifest, compiledAssemblyPath, sourceFiles, getLocationMap, sourceDirectory );
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
@@ -140,7 +146,7 @@ namespace Caravela.Framework.Impl.CompileTime
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
-            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+            => new( domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null, null );
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.
@@ -152,28 +158,20 @@ namespace Caravela.Framework.Impl.CompileTime
             using ( var archive = new ZipArchive( stream, ZipArchiveMode.Create, true, Encoding.UTF8 ) )
             {
                 // Write syntax trees.
-                var index = 0;
-
-                foreach ( var syntaxTree in this.SyntaxTrees! )
+                
+                foreach ( var sourceFile in this.CodeFiles! )
                 {
-                    index++;
-                    var filePath = syntaxTree.FilePath;
-
-                    if ( string.IsNullOrEmpty( filePath ) )
-                    {
-                        filePath = $"File{index}.cs";
-                    }
-
-                    var entry = archive.CreateEntry( filePath, CompressionLevel.Optimal );
-                    using var entryWriter = new StreamWriter( entry.Open(), syntaxTree.GetText().Encoding );
-                    syntaxTree.GetText().Write( entryWriter );
+                    var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile ) );
+                   
+                    var entry = archive.CreateEntry( sourceFile, CompressionLevel.Optimal );
+                    using var entryWriter = new StreamWriter( entry.Open() );
+                    entryWriter.Write( sourceText );
                 }
 
                 // Write manifest.
-                var manifestJson = JsonConvert.SerializeObject( this._manifest!, Formatting.Indented );
                 var manifestEntry = archive.CreateEntry( "manifest.json", CompressionLevel.Optimal );
-                using var manifestWriter = new StreamWriter( manifestEntry.Open(), Encoding.UTF8 );
-                manifestWriter.Write( manifestJson );
+                var manifestStream = manifestEntry.Open();
+                this._manifest!.Serialize( manifestStream );
             }
         }
 
@@ -201,9 +199,10 @@ namespace Caravela.Framework.Impl.CompileTime
         /// <returns></returns>
         public Type? GetType( string reflectionName ) => this.IsEmpty ? null : this.Assembly!.GetType( reflectionName, false );
 
-        public SyntaxTree? FindSyntaxTree( string name )
-            => this.SyntaxTrees.Where( t => name.EndsWith( t.FilePath, StringComparison.OrdinalIgnoreCase ) )
-                .OrderByDescending( t => t.FilePath.Length )
+        public string? FindSourceFile( string name )
+            => this.CodeFiles.Where( t => name.EndsWith( t, StringComparison.OrdinalIgnoreCase ) )
+                .OrderByDescending( t => t.Length )
+                .Select( t => Path.Combine( this.Directory, t ) )
                 .FirstOrDefault();
 
         private void LoadAssembly()

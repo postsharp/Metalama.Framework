@@ -56,7 +56,7 @@ namespace Caravela.Framework.Impl.Pipeline
                 case InvalidUserCodeException diagnosticsException:
                     foreach ( var diagnostic in diagnosticsException.Diagnostics )
                     {
-                        diagnosticAdder.ReportDiagnostic( diagnostic );
+                        diagnosticAdder.Report( diagnostic );
                     }
 
                     break;
@@ -87,7 +87,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
                         Console.WriteLine( exception.ToString() );
 
-                        diagnosticAdder.ReportDiagnostic(
+                        diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.UncaughtException.CreateDiagnostic( null, (exception.ToDiagnosticString(), path) ) );
                     }
 
@@ -204,7 +204,7 @@ namespace Caravela.Framework.Impl.Pipeline
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
-                diagnosticAdder.ReportDiagnostic( diagnostic );
+                diagnosticAdder.Report( diagnostic );
             }
 
             return !hasError;

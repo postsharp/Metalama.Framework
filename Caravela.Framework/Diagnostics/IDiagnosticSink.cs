@@ -20,7 +20,7 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
-        void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args );
+        void Report( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args );
 
         /// <summary>
         /// Reports a diagnostic and uses the location of the current target.
@@ -29,19 +29,19 @@ namespace Caravela.Framework.Diagnostics
         /// <param name="id"></param>
         /// <param name="formatMessage"></param>
         /// <param name="args">Arguments of the formatting string.</param>
-        void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args );
+        void Report( Severity severity, string id, string formatMessage, params object[] args );
 
         /// <summary>
         /// Suppresses a diagnostic by specifying the element of code in which the suppression must be effective.
         /// </summary>
         /// <param name="id">The id of the identifier to suppress.</param>
         /// <param name="scope">The code element in which the diagnostic must be suppressed.</param>
-        void SuppressDiagnostic( string id, ICodeElement scope );
+        void Suppress( string id, ICodeElement scope );
 
         /// <summary>
         /// Suppresses a diagnostic in the current target declaration.
         /// </summary>
         /// <param name="id"></param>
-        void SuppressDiagnostic( string id );
+        void Suppress( string id );
     }
 }

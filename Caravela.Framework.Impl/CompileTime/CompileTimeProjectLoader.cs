@@ -160,7 +160,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 if ( this._runTimeAssemblyLocator?.TryFindAssembly( runTimeAssemblyIdentity, out metadataReference ) != true )
                 {
-                    diagnosticAdder.ReportDiagnostic(
+                    diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CannotFindCompileTimeAssembly.CreateDiagnostic(
                             Location.None,
                             runTimeAssemblyIdentity ) );
@@ -303,7 +303,15 @@ namespace Caravela.Framework.Impl.CompileTime
 
             // Read manifest.
             var manifestEntry = archive.GetEntry( "manifest.json" ).AssertNotNull();
-            var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
+
+            if ( !CompileTimeProjectManifest.TryDeserialize( manifestEntry.Open(), out var manifest ) )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, assemblyIdentity.ToString() ) );
+                
+                project = null;
+                return false;
+            }
 
             // Read source files.
             List<SyntaxTree> syntaxTrees = new();
@@ -346,16 +354,19 @@ namespace Caravela.Framework.Impl.CompileTime
                 referenceProjects,
                 diagnosticAdder,
                 out var compilation,
-                out var assemblyPath ) )
+                out var assemblyPath,
+                out var sourceDirectory,
+                out var sourceFiles ) )
             {
                 project = null;
 
                 return false;
             }
-            
+
             // Compute the new hash.
-            var compileTimeAssemblyName = CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
-            
+            var compileTimeAssemblyName =
+                CompileTimeCompilationBuilder.GetCompileTimeAssemblyName( manifest.AssemblyName, referenceProjects, manifest.SourceHash );
+
             project = CompileTimeProject.Create(
                 this._domain,
                 assemblyIdentity,
@@ -363,7 +374,8 @@ namespace Caravela.Framework.Impl.CompileTime
                 referenceProjects,
                 manifest,
                 assemblyPath,
-                compilation.SyntaxTrees.ToArray(),
+                sourceDirectory,
+                sourceFiles,
                 TextMap.Read );
 
             return true;

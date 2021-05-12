@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.MismatchScopePatternMatchingSwitch
 {
@@ -19,13 +19,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.Mismatch
                 case IParameter p:
                     Console.WriteLine("0");
                     break;
-                case IEnumerable<object> e when e.Count() == target.Parameters.Count:
+                case IEnumerable<object> e when e.Count() == meta.Parameters.Count:
                 default:
                     Console.WriteLine("Default");
                     break;
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

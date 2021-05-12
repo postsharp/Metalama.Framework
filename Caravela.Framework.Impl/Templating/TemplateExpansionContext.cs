@@ -8,6 +8,7 @@ using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Caravela.Framework.Impl.Templating
@@ -28,7 +29,9 @@ namespace Caravela.Framework.Impl.Templating
             TemplateLexicalScope lexicalScope,
             DiagnosticSink diagnosticSink,
             SyntaxSerializationService syntaxSerializationService,
-            ISyntaxFactory syntaxFactory )
+            ISyntaxFactory syntaxFactory,
+            AspectLayerId aspectLayerId,
+            IReadOnlyDictionary<string, object?> properties )
         {
             this.TemplateInstance = templateInstance;
             this._targetMethod = targetMethod;
@@ -37,6 +40,8 @@ namespace Caravela.Framework.Impl.Templating
             this.DiagnosticSink = diagnosticSink;
             this.SyntaxSerializationService = syntaxSerializationService;
             this.SyntaxFactory = syntaxFactory;
+            this.AspectLayerId = aspectLayerId;
+            this.Properties = properties;
             this.LexicalScope = lexicalScope;
             Invariant.Assert( diagnosticSink.DefaultScope != null );
             Invariant.Assert( diagnosticSink.DefaultScope!.Equals( targetMethod ) );
@@ -78,5 +83,9 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         public DiagnosticSink DiagnosticSink { get; }
+
+        public AspectLayerId AspectLayerId { get; }
+
+        public IReadOnlyDictionary<string, object?> Properties { get; }
     }
 }

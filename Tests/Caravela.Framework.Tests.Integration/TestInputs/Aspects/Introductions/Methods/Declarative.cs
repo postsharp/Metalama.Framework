@@ -3,7 +3,6 @@ using Caravela.Framework.Advices;
 using Caravela.Framework.Aspects;
 using Caravela.Framework.Code;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Declarative
 {
@@ -17,35 +16,35 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Methods.Decl
         public void IntroducedMethod_Void()
         {
             Console.WriteLine("This is introduced method.");
-            var nic = proceed();
+            var nic = meta.Proceed();
         }
 
         [IntroduceMethod]
         public int IntroducedMethod_Int()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod]
         public int IntroducedMethod_Param(int x)
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod]
         public static int IntroducedMethod_StaticSignature()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
 
         [IntroduceMethod(IsVirtual = true)]
         public int IntroducedMethod_VirtualExplicit()
         {
             Console.WriteLine("This is introduced method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

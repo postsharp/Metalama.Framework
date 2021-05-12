@@ -4,6 +4,7 @@
 using Caravela.Framework.Advices;
 using Caravela.Framework.Impl.Diagnostics;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl
 {
@@ -17,16 +18,20 @@ namespace Caravela.Framework.Impl
 
         public IReadOnlyList<IAspectSource> AspectSources { get; }
 
+        public ImmutableDictionary<string, object?> Tags { get; }
+
         public AspectInstanceResult(
             bool success,
             ImmutableDiagnosticList diagnostics,
             IReadOnlyList<IAdvice> advices,
-            IReadOnlyList<IAspectSource> aspectSources )
+            IReadOnlyList<IAspectSource> aspectSources,
+            ImmutableDictionary<string, object?> tags )
         {
             this.Success = success;
             this.Diagnostics = diagnostics;
             this.Advices = advices;
             this.AspectSources = aspectSources;
+            this.Tags = tags;
         }
     }
 }

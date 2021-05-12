@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.CompileTimeIsPatternVariable
 {
@@ -12,13 +11,13 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.Compile
         [TestTemplate]
         dynamic Template()
         {
-            if ( target.Parameters is IEnumerable disposable )
+            if ( meta.Parameters is IEnumerable disposable )
             {
                 disposable.GetEnumerator();
             }
             
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

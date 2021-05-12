@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples1
 {
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeT
             Tuple<string, int> tuple = new("string", 0);
             Console.WriteLine(tuple.Item1);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

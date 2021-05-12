@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNew
 {
@@ -12,7 +12,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.RunTimeNew
             var o = new object();
             Console.WriteLine(o.GetType().ToString());
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

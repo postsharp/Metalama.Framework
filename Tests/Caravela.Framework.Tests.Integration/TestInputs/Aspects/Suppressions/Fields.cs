@@ -25,7 +25,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.Fields
         {
             foreach ( var code in codes )
             {
-                aspectBuilder.SuppressDiagnostic( code, aspectBuilder.TargetDeclaration );
+                aspectBuilder.Diagnostics.Suppress( code, aspectBuilder.TargetDeclaration );
             }
         }
     }

@@ -19,6 +19,7 @@ namespace Caravela.TestFramework
     /// </summary>
     public sealed class TestResult : IDiagnosticAdder
     {
+        private readonly TestInput _testInput;
         private readonly List<Diagnostic> _diagnostics = new();
         private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
@@ -29,15 +30,15 @@ namespace Caravela.TestFramework
         /// <param name="testName"></param>
         /// <param name="templateDocument">The source code document of the template.</param>
         /// <param name="initialCompilation"></param>
-        internal TestResult( Project project, string testName, Document templateDocument, Compilation initialCompilation )
+        internal TestResult( Project project, TestInput testInput, Document templateDocument, Compilation initialCompilation )
         {
+            this._testInput = testInput;
             this.Project = project;
-            this.TestName = testName;
             this.TemplateDocument = templateDocument;
             this.InitialCompilation = initialCompilation;
         }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
             this._diagnostics.Add( diagnostic );
         }
@@ -56,11 +57,6 @@ namespace Caravela.TestFramework
         /// Gets the test project.
         /// </summary>
         public Project Project { get; }
-
-        /// <summary>
-        /// Gets the short name of the test.
-        /// </summary>
-        public string TestName { get; }
 
         /// <summary>
         /// Gets the source code document of the template.
@@ -114,7 +110,7 @@ namespace Caravela.TestFramework
 
             lines[0] = lines[0].Trim( '\r' );
 
-            for ( var i = 0; i < lines.Length; i++ )
+            for ( var i = 1; i < lines.Length; i++ )
             {
                 lines[i] = "// " + lines[i].Trim( '\r' );
             }
@@ -154,7 +150,7 @@ namespace Caravela.TestFramework
             // Convert diagnostics into comments in the code.
             var comments =
                 this.Diagnostics
-                    .Where( d => !d.Id.StartsWith( "CS" ) || d.Severity >= DiagnosticSeverity.Warning )
+                    .Where( d => this._testInput.Options.IncludeAllSeverities || d.Severity >= DiagnosticSeverity.Warning )
                     .Select( d => $"// {d.Severity} {d.Id} on `{GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n" )
                     .OrderByDescending( s => s )
                     .Select( SyntaxFactory.Comment )

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.RuntimeatternMatchingSwitch
 {
@@ -23,7 +23,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.Runtimea
                     break;
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

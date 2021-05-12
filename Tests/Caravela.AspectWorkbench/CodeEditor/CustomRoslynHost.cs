@@ -33,7 +33,7 @@ namespace Caravela.AspectWorkbench.CodeEditor
                             typeof(Console).Assembly,
                             typeof(DynamicAttribute).Assembly,
                             typeof(SyntaxFactory).Assembly,
-                            typeof(TemplateContext).Assembly,
+                            typeof(meta).Assembly,
                             typeof(TemplateSyntaxFactory).Assembly,
                             typeof(TestTemplateAttribute).Assembly,
                             typeof(TestOutputAttribute).Assembly

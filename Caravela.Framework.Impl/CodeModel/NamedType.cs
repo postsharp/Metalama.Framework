@@ -152,7 +152,7 @@ namespace Caravela.Framework.Impl.CodeModel
             => new GenericParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( tp => CodeElementLink.FromSymbol<IGenericParameter>( tp ) ) );
+                    .Select( CodeElementLink.FromSymbol<IGenericParameter> ) );
 
         [Memo]
         public string? Namespace => this.TypeSymbol.ContainingNamespace?.ToDisplayString();

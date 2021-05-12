@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMethodName
 {
@@ -11,9 +11,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMetho
         [TestTemplate]
         dynamic Template()
         {
-            int b = compileTime(0);
+            int b = meta.CompileTime(0);
 
-            if (target.Method.Name == "Method")
+            if (meta.Method.Name == "Method")
             {
                 b = 1;
             }
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfMetho
 
             Console.WriteLine(b);
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

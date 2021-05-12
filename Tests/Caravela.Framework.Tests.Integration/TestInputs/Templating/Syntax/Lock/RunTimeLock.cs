@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLock
 {
@@ -9,11 +9,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLoc
         [TestTemplate]
         dynamic Template()
         {
-            lock (target.This)
+            lock (meta.This)
             {
-                var x = target.Parameters.Count;
+                var x = meta.Parameters.Count;
                 Console.WriteLine(x);
-                return proceed();
+                return meta.Proceed();
             }
         }
     }

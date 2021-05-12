@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 using Caravela.Framework.Code;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimePatternMatchingSwitch
 {
@@ -22,22 +22,22 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.CompileT
         {
             
 
-            switch (target.Parameters)
+            switch (meta.Parameters)
             {
                 case null:
                     Console.WriteLine("1");
                     break;
                 case IEnumerable<IParameter> enumerable when enumerable.Any():
-                    pragma.Comment(enumerable.Count().ToString());
+                    meta.Comment(enumerable.Count().ToString());
                     break;
                 case IEnumerable<IParameter> enumerable when !enumerable.Any():
-                    pragma.Comment("none");
+                    meta.Comment("none");
                     break;
                 default:
                     break;
             }
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

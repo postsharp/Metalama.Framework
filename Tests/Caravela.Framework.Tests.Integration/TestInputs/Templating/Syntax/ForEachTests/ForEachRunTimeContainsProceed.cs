@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
 
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
             IEnumerable<int> array = Enumerable.Range(1, 2);
             foreach (var i in array)
             {
-                return proceed();
+                return meta.Proceed();
             }
 
             return null;

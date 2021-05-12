@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.ChangeMe
         [TestTemplate]
         dynamic Template()
         {
-            return proceed();
+            return meta.Proceed();
         }
     }
 

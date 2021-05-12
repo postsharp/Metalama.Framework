@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachCompileTimeForEachRunTime
 {
@@ -15,7 +15,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
         {
             IEnumerable<int> array = Enumerable.Range(1, 2);
 
-            foreach (var p in target.Parameters)
+            foreach (var p in meta.Parameters)
             {
                 foreach (int n in array)
                 {
@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
                 }
             }
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

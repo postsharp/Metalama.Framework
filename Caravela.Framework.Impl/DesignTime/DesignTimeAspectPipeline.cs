@@ -12,6 +12,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
@@ -74,11 +76,18 @@ namespace Caravela.Framework.Impl.DesignTime
                         // Update cache dependencies.
                         this._configurationCacheDependencies.Clear();
 
-                        if ( configuration.CompileTimeProject?.SyntaxTrees != null )
+                        if ( configuration.CompileTimeProject?.CodeFiles != null )
                         {
-                            foreach ( var syntaxTree in configuration.CompileTimeProject.SyntaxTrees )
+                            foreach ( var sourceFile in configuration.CompileTimeProject.CodeFiles )
                             {
-                                _ = this._configurationCacheDependencies.TryAdd( syntaxTree.FilePath, syntaxTree );
+                                // TODO: find the original syntax tree. We cannot currently do that because the name of the syntax tree may have changed.
+
+                                var syntaxTree =
+                                    compilation.Compilation.SyntaxTrees.Single( t => Path.GetFileName( t.FilePath ) == Path.GetFileName( sourceFile ) );
+
+                                // We will have to somehow store the mapping.
+                                
+                                _ = this._configurationCacheDependencies.TryAdd( sourceFile, syntaxTree );
                             }
                         }
 

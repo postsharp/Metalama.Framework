@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.InlineDeclarationWithNameClash
 {
@@ -15,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.LocalVariables.InlineD
             Dictionary<string,string> d = new();
             d.TryGetValue( "", out var a );
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

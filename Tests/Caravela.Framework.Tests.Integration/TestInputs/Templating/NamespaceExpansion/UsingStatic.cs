@@ -1,6 +1,6 @@
 using System;
 
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using static System.Math;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
@@ -18,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
                 Console.Write(PI);
                 Console.Write(Max(0, 1));
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

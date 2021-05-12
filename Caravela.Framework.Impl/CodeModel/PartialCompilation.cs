@@ -93,7 +93,7 @@ namespace Caravela.Framework.Impl.CodeModel
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (HashSet<ITypeSymbol> Types, HashSet<SyntaxTree> Trees ) GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
+        private static (HashSet<ITypeSymbol> Types, HashSet<SyntaxTree> Trees) GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;
 

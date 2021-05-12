@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -51,6 +52,68 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList<ArgumentSyntax>(
                                 new SyntaxNodeOrToken[] { SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( hint ) ) } ) ) );
+
+            public ExpressionSyntax Location( Location? location )
+            {
+                if ( location == null )
+                {
+                    return SyntaxFactoryEx.Null;
+                }
+
+                var filePath = SyntaxFactoryEx.LiteralExpression( location.SourceTree?.FilePath );
+                var start = SyntaxFactoryEx.LiteralExpression( location.SourceSpan.Start );
+                var end = SyntaxFactoryEx.LiteralExpression( location.SourceSpan.End );
+                var lineSpan = location.GetLineSpan();
+
+                // Location.Create(
+                //     filePath,
+                //     TextSpan.FromBounds( start, end ),
+                //     new LinePositionSpan( new LinePosition( startLine, startChar ), new LinePosition( endLine, endChar ) ) );
+
+                var invocation = SyntaxFactory.InvocationExpression(
+                        SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            this._metaSyntaxFactory.Type( typeof(Location) ),
+                            SyntaxFactory.IdentifierName( "Create" ) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new[]
+                                {
+                                    SyntaxFactory.Argument( filePath ),
+                                    SyntaxFactory.Argument(
+                                        SyntaxFactory.InvocationExpression(
+                                                SyntaxFactory.MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    this._metaSyntaxFactory.Type( typeof(TextSpan) ),
+                                                    SyntaxFactory.IdentifierName( "FromBounds" ) ) )
+                                            .WithArgumentList(
+                                                SyntaxFactory.ArgumentList(
+                                                    SyntaxFactory.SeparatedList(
+                                                        new[] { SyntaxFactory.Argument( start ), SyntaxFactory.Argument( end ) } ) ) ) ),
+                                    SyntaxFactory.Argument(
+                                        SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof(LinePositionSpan) ) )
+                                            .WithArgumentList(
+                                                SyntaxFactory.ArgumentList(
+                                                    SyntaxFactory.SeparatedList(
+                                                        new[]
+                                                        {
+                                                            SyntaxFactory.Argument( this.LinePosition( lineSpan.StartLinePosition ) ),
+                                                            SyntaxFactory.Argument( this.LinePosition( lineSpan.EndLinePosition ) )
+                                                        } ) ) ) )
+                                } ) ) );
+
+                return invocation;
+            }
+
+            public ObjectCreationExpressionSyntax LinePosition( LinePosition linePosition )
+                => this.LinePosition( SyntaxFactoryEx.LiteralExpression( linePosition.Line ), SyntaxFactoryEx.LiteralExpression( linePosition.Character ) );
+
+            public ObjectCreationExpressionSyntax LinePosition( ExpressionSyntax startLine, ExpressionSyntax startChar )
+                => SyntaxFactory.ObjectCreationExpression( this._metaSyntaxFactory.Type( typeof(LinePosition) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList( new[] { SyntaxFactory.Argument( startLine ), SyntaxFactory.Argument( startChar ) } ) ) );
         }
     }
 }

@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachContinueCompileTime
 {
@@ -11,8 +11,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
         [TestTemplate]
         dynamic Template()
         {
-            int i = compileTime(0);
-            foreach (var p in target.Parameters)
+            int i = meta.CompileTime(0);
+            foreach (var p in meta.Parameters)
             {
                 if (p.Name.Length <= 1) continue;
                 i++;
@@ -20,7 +20,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
 
             Console.WriteLine(i);
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
             return result;
         }
     }

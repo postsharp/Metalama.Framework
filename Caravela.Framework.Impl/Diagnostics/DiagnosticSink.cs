@@ -30,33 +30,38 @@ namespace Caravela.Framework.Impl.Diagnostics
 
         public int ErrorCount { get; private set; }
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
             this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
             this._diagnostics.Add( diagnostic );
+
+            if ( diagnostic.Severity == DiagnosticSeverity.Error )
+            {
+                this.ErrorCount++;
+            }
         }
 
-        public void SuppressDiagnostic( ScopedSuppression suppression )
+        public void Suppress( ScopedSuppression suppression )
         {
             this._suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
             this._suppressions.Add( suppression );
         }
 
-        public void SuppressDiagnostic( string id, ICodeElement scope ) => this.SuppressDiagnostic( new ScopedSuppression( id, scope ) );
+        public void Suppress( string id, ICodeElement scope ) => this.Suppress( new ScopedSuppression( id, scope ) );
 
-        public void SuppressDiagnostics( IEnumerable<ScopedSuppression> suppressions )
+        public void Suppress( IEnumerable<ScopedSuppression> suppressions )
         {
             foreach ( var suppression in suppressions )
             {
-                this.SuppressDiagnostic( suppression );
+                this.Suppress( suppression );
             }
         }
 
-        public void SuppressDiagnostic( string id )
+        public void Suppress( string id )
         {
             if ( this.DefaultScope != null )
             {
-                this.SuppressDiagnostic( new ScopedSuppression( id, this.DefaultScope ) );
+                this.Suppress( new ScopedSuppression( id, this.DefaultScope ) );
             }
         }
 
@@ -78,7 +83,7 @@ namespace Caravela.Framework.Impl.Diagnostics
             return new RestoreLocationCookie( this, oldScope );
         }
 
-        public void ReportDiagnostic( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
+        public void Report( Severity severity, IDiagnosticLocation location, string id, string formatMessage, params object[] args )
         {
             var roslynLocation = ((DiagnosticLocation) location).Location ?? this.DefaultScope?.GetDiagnosticLocation();
             var roslynSeverity = MapSeverity( severity );
@@ -95,7 +100,7 @@ namespace Caravela.Framework.Impl.Diagnostics
                 false,
                 location: roslynLocation );
 
-            this.ReportDiagnostic( diagnostic );
+            this.Report( diagnostic );
 
             if ( severity == Severity.Error )
             {
@@ -103,14 +108,14 @@ namespace Caravela.Framework.Impl.Diagnostics
             }
         }
 
-        public void ReportDiagnostic( Severity severity, string id, string formatMessage, params object[] args )
+        public void Report( Severity severity, string id, string formatMessage, params object[] args )
         {
             if ( this.DefaultScope == null )
             {
                 throw new InvalidOperationException( "Cannot report a diagnostic when the default scope has not been defined." );
             }
 
-            this.ReportDiagnostic( severity, this.DefaultScope, id, formatMessage, args );
+            this.Report( severity, this.DefaultScope, id, formatMessage, args );
         }
 
         public ImmutableDiagnosticList ToImmutable()

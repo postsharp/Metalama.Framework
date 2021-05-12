@@ -4,6 +4,7 @@
 using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Caravela.Framework.Impl.Templating
 {
@@ -53,8 +54,8 @@ namespace Caravela.Framework.Impl.Templating
         internal static readonly StrongDiagnosticDescriptor<string> UnsupportedContextForProceed
             = new(
                 "CR0106",
-                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
-                "The proceed() method can only be invoked from a local variable assignment or a return statement.",
+                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
+                "The meta.Proceed() method can only be invoked from a local variable assignment or a return statement.",
                 _category,
                 DiagnosticSeverity.Error );
 
@@ -95,7 +96,7 @@ namespace Caravela.Framework.Impl.Templating
                 = new(
                     "CR0112",
                     "An advice threw an exception",
-                    "The advice '{0}' threw '{2}' when applied to '{1}': {3}",
+                    "The advice '{0}' threw '{2}' when applied to '{1}':" + Environment.NewLine + "{3}",
                     _category,
                     DiagnosticSeverity.Error );
 
@@ -107,5 +108,33 @@ namespace Caravela.Framework.Impl.Templating
                     "Cannot find in the current compilation the aspect type '{0}' defined in the aspect library '{1}'.",
                     _category,
                     DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<(ISymbol Advice, string Expression, ICodeElement TargetDeclaration, CodeElementKind TargetKind)>
+            CannotUseThisInStaticContext
+                = new(
+                    "CR0114",
+                    "Cannot use 'meta.This' from a static context",
+                    "The advice '{0}' cannot use '{1}' in an advice applied to {3} '{2}' because the target {3} is static.",
+                    _category,
+                    DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<(ISymbol Advice, string Expression, ICodeElement TargetDeclaration, CodeElementKind TargetKind,
+                string MissingKind)>
+            MemberMemberNotAvailable
+                = new(
+                    "CR0115",
+                    "Cannot use a meta member in the current context",
+                    "The advice '{0}' cannot use '{1}' in an advice applied to {3} '{2}' because there is no '{4}' in the context of a {3}.",
+                    _category,
+                    DiagnosticSeverity.Error );
+
+        internal static readonly StrongDiagnosticDescriptor<ISymbol>
+            VariableIsCompileTime
+                = new(
+                    "CR0116",
+                    "Cannot use a meta member in the current context",
+                    "The variable '{0}' is compile-time Info.",
+                    _category,
+                    DiagnosticSeverity.Info );
     }
 }

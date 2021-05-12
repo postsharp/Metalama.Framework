@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.TryCatchFinallyCompileTime
 {
@@ -11,22 +11,22 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
-            int n = compileTime(1);
+            int n = meta.CompileTime(1);
             try
             {
                 n = 2;
             }
             catch
             {
-                Console.WriteLine(target.Parameters.Count);
+                Console.WriteLine(meta.Parameters.Count);
                 
             }
             finally
             {
-                Console.WriteLine(target.Parameters.Count);
+                Console.WriteLine(meta.Parameters.Count);
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

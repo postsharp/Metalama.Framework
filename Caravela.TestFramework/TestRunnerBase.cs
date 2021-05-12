@@ -49,7 +49,7 @@ namespace Caravela.TestFramework
                 project.MetadataReferences,
                 (CSharpCompilationOptions?) project.CompilationOptions );
 
-            var testResult = new TestResult( project, testInput.TestName, testDocument, initialCompilation );
+            var testResult = new TestResult( project, testInput, testDocument, initialCompilation );
 
             if ( this.ReportInvalidInputCompilation )
             {

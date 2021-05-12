@@ -37,6 +37,11 @@ namespace Caravela.TestFramework
                         this.Options.IncludeFinalDiagnostics = true;
 
                         break;
+
+                    case "IncludeAllSeverities":
+                        this.Options.IncludeAllSeverities = true;
+
+                        break;
                 }
             }
         }

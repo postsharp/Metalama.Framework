@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.CompileTime
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
         private static readonly Dictionary<string, (SymbolDeclarationScope Scope, bool MembersOnly)> _wellKnownRunTimeTypes =
-            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly )[]
+            new (Type Type, SymbolDeclarationScope Scope, bool MembersOnly)[]
             {
                 (typeof(Console), SymbolDeclarationScope.RunTimeOnly, false),
                 (typeof(Process), SymbolDeclarationScope.RunTimeOnly, false),

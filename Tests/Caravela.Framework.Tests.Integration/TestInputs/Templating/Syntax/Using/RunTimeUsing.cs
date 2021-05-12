@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUsing
 {
@@ -14,9 +14,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUs
         {
             using (new MemoryStream())
             {
-                var x = compileTime(0);
-                var y = target.Parameters[0].Value + x;
-                return proceed();
+                var x = meta.CompileTime(0);
+                var y = meta.Parameters[0].Value + x;
+                return meta.Proceed();
             }
             
             using ( MemoryStream s = new MemoryStream() )

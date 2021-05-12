@@ -47,7 +47,7 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public dynamic Value
         {
-            get => new DynamicMember( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
+            get => new DynamicExpression( SyntaxFactory.IdentifierName( this._parameter.Name! ), this._parameter.ParameterType, true );
             set => throw new NotImplementedException();
         }
 

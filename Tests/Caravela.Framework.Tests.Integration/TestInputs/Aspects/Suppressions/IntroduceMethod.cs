@@ -32,7 +32,7 @@ namespace Caravela.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
             var introduced = aspectBuilder.AdviceFactory.IntroduceMethod( aspectBuilder.TargetDeclaration, nameof(Introduced));
-            aspectBuilder.SuppressDiagnostic( this.code, introduced.Builder );
+            aspectBuilder.Diagnostics.Suppress( this.code, introduced.Builder );
         }
     }
     

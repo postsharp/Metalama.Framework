@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.DefaultInOldSwitchRunTime
 {
@@ -21,7 +21,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.DefaultI
                     break;
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

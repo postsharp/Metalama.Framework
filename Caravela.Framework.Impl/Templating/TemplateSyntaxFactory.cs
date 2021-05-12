@@ -24,7 +24,7 @@ namespace Caravela.Framework.Impl.Templating
 
         private static readonly AsyncLocal<TemplateExpansionContext?> _expansionContext = new();
 
-        private static TemplateExpansionContext ExpansionContext
+        internal static TemplateExpansionContext ExpansionContext
             => _expansionContext.Value ?? throw new InvalidOperationException( "ExpansionContext cannot be null." );
 
         internal static IDisposable WithContext( TemplateExpansionContext expansionContext )
@@ -114,17 +114,17 @@ namespace Caravela.Framework.Impl.Templating
         public static StatementSyntax TemplateReturnStatement( ExpressionSyntax? returnExpression )
             => ExpansionContext.CreateReturnStatement( returnExpression );
 
-        public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicMember dynamicMember, string member )
+        public static RuntimeExpression CreateDynamicMemberAccessExpression( IDynamicExpression dynamicExpression, string member )
         {
-            if ( dynamicMember is IDynamicMemberDifferentiated metaMemberDifferentiated )
+            if ( dynamicExpression is IDynamicReceiver dynamicMemberAccess )
             {
-                return metaMemberDifferentiated.CreateMemberAccessExpression( member );
+                return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
             return new RuntimeExpression(
                 SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    dynamicMember.CreateExpression().Syntax,
+                    dynamicExpression.CreateExpression().Syntax,
                     SyntaxFactory.IdentifierName( member ) ) );
         }
 

@@ -3,7 +3,7 @@
 using Caravela.Framework.Project;
 using System.Collections.Generic;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
 {
@@ -38,7 +38,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
                 x.ToString();
             }
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 }

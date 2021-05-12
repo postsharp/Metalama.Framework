@@ -1,7 +1,7 @@
 using Caravela.Framework.Project;
 
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 #pragma warning disable CS8632 // Cannot convert null literal to non-nullable reference type.
 
@@ -15,10 +15,10 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.MagicKeywords.GenericC
             [TestTemplate]
             dynamic Template()
             {
-                var x = compileTime<TargetCode?>(null);
-                var y = compileTime<TargetCode>(null);
+                var x = meta.CompileTime<TargetCode?>(null);
+                var y = meta.CompileTime<TargetCode>(null);
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

@@ -53,7 +53,7 @@ namespace Caravela.Framework.Impl.Templating
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
-            public ExpressionSyntax Literal( string s ) => this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
+            public ExpressionSyntax Literal( string? s ) => s == null ? SyntaxFactoryEx.Null : this.Literal( SyntaxFactoryEx.LiteralExpression( s ) );
 
             public ExpressionSyntax Literal( char c ) => this.Literal( SyntaxFactoryEx.LiteralExpression( c ) );
 

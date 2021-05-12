@@ -3,13 +3,11 @@
 
 // ReSharper disable RedundantUsingDirective
 
-using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
 using Caravela.Framework.Impl.Serialization;
 using Caravela.Framework.Impl.Templating.MetaModel;
-using Caravela.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.CodeGeneration;
@@ -53,9 +51,9 @@ namespace Caravela.Framework.Impl.Templating
 
         public bool Success { get; private set; } = true;
 
-        public void ReportDiagnostic( Diagnostic diagnostic )
+        public void Report( Diagnostic diagnostic )
         {
-            this._diagnosticAdder.ReportDiagnostic( diagnostic );
+            this._diagnosticAdder.Report( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -157,37 +155,6 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return TransformationKind.Transform;
-        }
-
-        /// <summary>
-        /// Determines if the node is a pragma and returns the kind of pragma, if any.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="kind"></param>
-        /// <returns></returns>
-        private bool TryGetPragma( SyntaxNode node, out PragmaKind kind )
-        {
-            var symbol = this._semanticAnnotationMap.GetSymbol( node );
-
-            if ( symbol == null || !symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(PragmaAttribute) ) )
-            {
-                kind = PragmaKind.None;
-
-                return false;
-            }
-            else
-            {
-                switch ( symbol.Name )
-                {
-                    case nameof(ITemplateContextPragma.Comment):
-                        kind = PragmaKind.Comment;
-
-                        return true;
-
-                    default:
-                        throw new AssertionFailedException();
-                }
-            }
         }
 
         public override SyntaxNode? Visit( SyntaxNode? node )
@@ -338,7 +305,7 @@ namespace Caravela.Framework.Impl.Templating
                     // Identifier definitions should be processed by Transform(SyntaxToken).
 
                     // However, this can happen in an incorrect/incomplete compilation. In this case, returning anything is fine.
-                    this.ReportDiagnostic(
+                    this.Report(
                         TemplatingDiagnosticDescriptors.UndeclaredRunTimeIdentifier.CreateDiagnostic(
                             this._semanticAnnotationMap.GetLocation( node ),
                             node.Identifier.Text ) );
@@ -450,7 +417,7 @@ namespace Caravela.Framework.Impl.Templating
                 case "dynamic":
                     if ( this._templateMemberClassifier.IsProceed( expression ) )
                     {
-                        this.ReportDiagnostic(
+                        this.Report(
                             TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic(
                                 this._semanticAnnotationMap.GetLocation( expression ),
                                 "" ) );
@@ -458,11 +425,22 @@ namespace Caravela.Framework.Impl.Templating
                         return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
 
-                    return InvocationExpression(
+                    var invocation = InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicMember) ), expression ) ),
-                            IdentifierName( nameof(IDynamicMember.CreateExpression) ) ) );
+                            ParenthesizedExpression( CastFromDynamic( this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ), expression ) ),
+                            IdentifierName( nameof(IDynamicExpression.CreateExpression) ) ) );
+
+                    if ( this._templateMemberClassifier.GetMetaMemberKind( expression ) == MetaMemberKind.This )
+                    {
+                        // This expression can generate a diagnostic, so we need to pass location information.
+                        var expressionText = SyntaxFactoryEx.LiteralExpression( expression.ToString() );
+                        var location = this._templateMetaSyntaxFactory.Location( this._semanticAnnotationMap.GetLocation( expression ) );
+
+                        invocation = invocation.WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( expressionText ), Argument( location ) } ) ) );
+                    }
+
+                    return invocation;
 
                 case "String":
                     return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -535,7 +513,7 @@ namespace Caravela.Framework.Impl.Templating
                             {
                                 Argument(
                                     CastFromDynamic(
-                                        this.MetaSyntaxFactory.Type( typeof(IDynamicMember) ),
+                                        this.MetaSyntaxFactory.Type( typeof(IDynamicExpression) ),
                                         (ExpressionSyntax) this.Visit( node.Expression )! ) ),
                                 Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( node.Name.Identifier.ValueText ) ) )
                             } ) ) );
@@ -594,20 +572,22 @@ namespace Caravela.Framework.Impl.Templating
             if ( this._templateMemberClassifier.IsProceed( node.Expression ) )
             {
                 // We cannot call proceed in an unsupported statement.
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
+                this.Report( TemplatingDiagnosticDescriptors.UnsupportedContextForProceed.CreateDiagnostic( node.Expression.GetLocation(), "" ) );
 
                 return LiteralExpression( SyntaxKind.NullLiteralExpression );
             }
             else if ( this._templateMemberClassifier.IsRunTimeMethod( node.Expression ) )
             {
-                // Replace `runtime(x)` to `x`.
+                // Replace `meta.RunTime(x)` to `x`.
                 return this.CreateRunTimeExpression( node.ArgumentList.Arguments[0].Expression );
             }
-            else if ( this.TryGetPragma( node.Expression, out var pragmaKind ) )
+            else
             {
-                switch ( pragmaKind )
+                // Process special methods.
+
+                switch ( this._templateMemberClassifier.GetMetaMemberKind( node.Expression ) )
                 {
-                    case PragmaKind.Comment:
+                    case MetaMemberKind.Comment:
                         var arguments = node.ArgumentList.Arguments.Insert(
                             0,
                             Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
@@ -623,9 +603,6 @@ namespace Caravela.Framework.Impl.Templating
                         this._currentMetaContext.Statements.Add( add );
 
                         return null;
-
-                    default:
-                        throw new AssertionFailedException();
                 }
             }
 
@@ -1082,7 +1059,7 @@ namespace Caravela.Framework.Impl.Templating
             }
             else
             {
-                // Special processing of the `var result = proceed()` statement.
+                // Special processing of the `var result = meta.Proceed()` statement.
 
                 // Transform the variable identifier.
                 var returnVariableIdentifier = this.Transform( proceedAssignments[0].Identifier )!;

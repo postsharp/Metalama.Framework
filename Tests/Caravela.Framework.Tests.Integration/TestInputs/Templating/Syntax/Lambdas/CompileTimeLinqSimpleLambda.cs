@@ -1,7 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
-using System.Collections.Generic;
+using Caravela.Framework.Aspects;
 using System.Linq;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.CompileTimeLinqSimpleLambda
@@ -11,10 +10,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Compile
         [TestTemplate]
         dynamic Template()
         {
-            var p = target.Parameters.Where(a => a.Name.Length > 8).Count();
+            var p = meta.Parameters.Where(a => a.Name.Length > 8).Count();
             Console.WriteLine(p);
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

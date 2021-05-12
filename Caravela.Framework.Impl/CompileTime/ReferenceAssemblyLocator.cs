@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CompileTime
         private static IEnumerable<string> GetSystemAssemblyPaths()
         {
             var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", _projectHash, "TempProject" );
-            
+
             using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
             mutex.WaitOne();
 

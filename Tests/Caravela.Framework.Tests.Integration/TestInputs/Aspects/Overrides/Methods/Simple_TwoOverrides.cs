@@ -2,7 +2,6 @@
 using Caravela.Framework.Aspects;
 using Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 [assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
 
@@ -15,7 +14,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
         public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the inner overriding template method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 
@@ -24,7 +23,7 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
         public override dynamic OverrideMethod()
         {
             Console.WriteLine("This is the outer overriding template method.");
-            return proceed();
+            return meta.Proceed();
         }
     }
 

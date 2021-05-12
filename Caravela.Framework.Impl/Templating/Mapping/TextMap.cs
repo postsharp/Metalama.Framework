@@ -27,7 +27,7 @@ namespace Caravela.Framework.Impl.Templating.Mapping
         /// Gets the path of the source file (typically the hand-written source code).
         /// </summary>
         public string SourcePath { get; }
-        
+
         /// <summary>
         /// Gets the path of the target file (typically the transformed code).
         /// </summary>
@@ -142,14 +142,14 @@ namespace Caravela.Framework.Impl.Templating.Mapping
                 }
 
                 var sourcePath = reader.ReadString();
-                
+
                 if ( (SourceHashAlgorithm) reader.ReadInt32() != SourceHashAlgorithm.None )
                 {
                     return false;
                 }
 
                 var targetPath = reader.ReadString();
-                
+
                 if ( (SourceHashAlgorithm) reader.ReadInt32() != SourceHashAlgorithm.None )
                 {
                     return false;

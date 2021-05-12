@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.ProceedInOldSwitchRunTime
 {
@@ -17,11 +17,11 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Switch.ProceedI
                     Console.WriteLine("0");
                     break;
                 case 1:
-                    var x = proceed();
+                    var x = meta.Proceed();
                     break;
             }
             
-            return proceed();
+            return meta.Proceed();
         }
     }
 

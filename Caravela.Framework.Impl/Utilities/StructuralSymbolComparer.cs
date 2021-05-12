@@ -321,6 +321,12 @@ namespace Caravela.Framework.Impl.Utilities
 
                     break;
 
+                case IPropertySymbol propertySymbol:
+                    h = HashCode.Combine( h, propertySymbol.Name );
+                    
+                    // TODO: Parameters.
+                    break;
+
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }

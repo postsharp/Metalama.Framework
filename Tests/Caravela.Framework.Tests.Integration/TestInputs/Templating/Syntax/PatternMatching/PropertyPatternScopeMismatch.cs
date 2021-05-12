@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using Caravela.Framework;
 using Caravela.Framework.Code;
-using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPatternScopeMismatch
 {
@@ -18,7 +14,7 @@ namespace Caravela.Framework.Tests.Integration.PatternMatching.PropertyPatternSc
 var a3 = rt is IParameter p3 && p3.DefaultValue.IsNull;
 
                     
-            return proceed();
+            return meta.Proceed();
         }
     }
 

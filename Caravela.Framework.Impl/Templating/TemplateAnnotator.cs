@@ -4,8 +4,6 @@
 using Caravela.Framework.DesignTime.Contracts;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Impl.Diagnostics;
-using Caravela.Framework.Project;
-using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -73,7 +71,7 @@ namespace Caravela.Framework.Impl.Templating
         private void ReportDiagnostic<T>( StrongDiagnosticDescriptor<T> descriptor, Location? location, T arguments )
         {
             var diagnostic = descriptor.CreateDiagnostic( location, arguments );
-            this._diagnosticAdder.ReportDiagnostic( diagnostic );
+            this._diagnosticAdder.Report( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -81,7 +79,7 @@ namespace Caravela.Framework.Impl.Templating
             }
         }
 
-        private void SetLocalSymbolScope( ISymbol symbol, SymbolDeclarationScope scope )
+        private void SetLocalSymbolScope( ISymbol symbol, SymbolDeclarationScope scope, SyntaxToken identifier )
         {
             if ( this._localScopes.TryGetValue( symbol, out _ ) )
             {
@@ -89,6 +87,11 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             this._localScopes.Add( symbol, scope );
+
+            if ( scope == SymbolDeclarationScope.CompileTimeOnly && identifier.Kind() != SyntaxKind.None )
+            {
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.VariableIsCompileTime, identifier, symbol );
+            }
         }
 
         /// <summary>
@@ -188,7 +191,8 @@ namespace Caravela.Framework.Impl.Templating
                     }
                     else
                     {
-                        return SymbolDeclarationScope.Both;
+                        // If there is no symbol, the member may be dynamic.
+                        return SymbolDeclarationScope.Unknown;
                     }
 
                 case NullableTypeSyntax nullableType:
@@ -385,7 +389,7 @@ namespace Caravela.Framework.Impl.Templating
 
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope );
+                this.SetLocalSymbolScope( symbol, scope, default );
             }
 
             // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
@@ -426,29 +430,49 @@ namespace Caravela.Framework.Impl.Templating
                 var scope = this.GetSymbolScope( symbol );
                 var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
 
-                // Add annotations for syntax coloring.
-                if ( symbol is ILocalSymbol &&
-                     scope == SymbolDeclarationScope.CompileTimeOnly )
-                {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
-                }
-                else if ( symbol.GetAttributes()
-                    .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) ) )
-                {
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
-                }
-                else if ( scope == SymbolDeclarationScope.RunTimeOnly &&
-                          (symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Method)
-                          && this._templateMemberClassifier.IsDynamicType( node ) )
-                {
-                    // Annotate dynamic members differently for syntax coloring.
-                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.Dynamic );
-                }
+                annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbol, scope )!;
 
                 return annotatedNode;
             }
 
             return identifierNameSyntax;
+        }
+
+        private SyntaxNodeOrToken AddColoringAnnotations( SyntaxNodeOrToken nodeOrToken, ISymbol? symbol, SymbolDeclarationScope scope )
+        {
+            switch ( symbol )
+            {
+                case null:
+                    return nodeOrToken;
+
+                case ILocalSymbol when scope == SymbolDeclarationScope.CompileTimeOnly:
+                    nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.CompileTimeVariable );
+
+                    break;
+
+                default:
+                    {
+                        if ( this._templateMemberClassifier.HasTemplateKeywordAttribute( symbol ) )
+                        {
+                            nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                        }
+                        else
+                        {
+                            var node = nodeOrToken.AsNode() ?? nodeOrToken.Parent;
+
+                            if ( node != null &&
+                                 this._templateMemberClassifier.IsDynamicType( node ) )
+                            {
+                                // Annotate dynamic members differently for syntax coloring.
+                                nodeOrToken = nodeOrToken.AddColoringAnnotation( TextSpanClassification.Dynamic );
+                            }
+                        }
+
+                        break;
+                    }
+            }
+
+            return nodeOrToken;
         }
 
         public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
@@ -475,6 +499,12 @@ namespace Caravela.Framework.Impl.Templating
 
                     break;
 
+                case SymbolDeclarationScope.Unknown when this._semanticAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol:
+                    // This is a member access of a dynamic receiver.
+                    scope = SymbolDeclarationScope.RunTimeOnly;
+
+                    break;
+
                 case SymbolDeclarationScope.RunTimeOnly:
                     scope = SymbolDeclarationScope.RunTimeOnly;
 
@@ -484,12 +514,6 @@ namespace Caravela.Framework.Impl.Templating
             using ( this.WithScopeContext( context ) )
             {
                 var transformedExpression = this.Visit( node.Expression )!;
-
-                if ( this.GetNodeScope( transformedExpression ) == SymbolDeclarationScope.Dynamic )
-                {
-                    // This is something like: target.This.MyMethod(). Not supported yet.
-                    this.ReportUnsupportedLanguageFeature( node.Name, "member access on dynamic object" );
-                }
 
                 if ( scope == SymbolDeclarationScope.Both )
                 {
@@ -676,7 +700,7 @@ namespace Caravela.Framework.Impl.Templating
 
             var forEachScope = this.GetNodeScope( annotatedExpression ).ReplaceDefault( SymbolDeclarationScope.RunTimeOnly );
 
-            this.SetLocalSymbolScope( local, forEachScope );
+            this.SetLocalSymbolScope( local, forEachScope, node.Identifier );
 
             this.RequireLoopScope( node.Expression, forEachScope, "foreach" );
 
@@ -764,12 +788,21 @@ namespace Caravela.Framework.Impl.Templating
 
             var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? SymbolDeclarationScope.CompileTimeOnly : SymbolDeclarationScope.RunTimeOnly;
 
+            var color = TextSpanClassification.Default;
+
             if ( symbol != null )
             {
-                this.SetLocalSymbolScope( symbol, scope );
+                this.SetLocalSymbolScope( symbol, scope, node.Identifier );
+
+                if ( scope == SymbolDeclarationScope.CompileTimeOnly )
+                {
+                    color = TextSpanClassification.CompileTimeVariable;
+                }
             }
 
-            return node.AddScopeAnnotation( scope );
+            var transformedNode = node.WithIdentifier( node.Identifier.AddColoringAnnotation( color ) ).AddScopeAnnotation( scope );
+
+            return transformedNode;
         }
 
         public override SyntaxNode? VisitDeclarationExpression( DeclarationExpressionSyntax node )
@@ -841,7 +874,7 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             // Mark the local variable symbol.
-            this.SetLocalSymbolScope( local, localScope );
+            this.SetLocalSymbolScope( local, localScope, node.Identifier );
 
             var transformedIdentifier = node.Identifier;
 
@@ -1460,17 +1493,23 @@ namespace Caravela.Framework.Impl.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+            var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
 
             // If the method or type is compile-time, all generic arguments must be.
             if ( scope == SymbolDeclarationScope.CompileTimeOnly )
             {
-                foreach ( var genericArgument in node.TypeArgumentList.Arguments )
+                foreach ( var genericArgument in transformedNode.TypeArgumentList.Arguments )
                 {
                     this.RequireScope( genericArgument, scope, $"a generic argument of the compile-time method '{node.Identifier}'" );
                 }
             }
 
-            return base.VisitGenericName( node )!.AddScopeAnnotation( scope );
+            var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
+
+            return
+                transformedNode.WithIdentifier( annotatedIdentifier ).AddScopeAnnotation( scope );
         }
 
         public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )

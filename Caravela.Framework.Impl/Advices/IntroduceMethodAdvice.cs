@@ -33,8 +33,9 @@ namespace Caravela.Framework.Impl.Advices
             IMethod templateMethod,
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
-            AspectLinkerOptions? linkerOptions )
-            : base( aspect, targetDeclaration )
+            AspectLinkerOptions? linkerOptions,
+            IReadOnlyDictionary<string, object?> tags )
+            : base( aspect, targetDeclaration, tags )
         {
             this.Scope = scope;
             this.ConflictBehavior = conflictBehavior;
@@ -65,7 +66,7 @@ namespace Caravela.Framework.Impl.Advices
                     if ( this.TargetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
-                        diagnosticAdder.ReportDiagnostic(
+                        diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateDiagnostic(
                                 this.TargetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.DisplayName, this._methodBuilder, this.TargetDeclaration) ) );

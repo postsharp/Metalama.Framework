@@ -48,7 +48,7 @@ namespace Caravela.Framework.Impl.Serialization
 
             if ( diagnosticAdder != null )
             {
-                diagnosticAdder.ReportDiagnostic( SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateDiagnostic( diagnosticLocation, type ) );
+                diagnosticAdder.Report( SerializationDiagnosticDescriptors.UnsupportedSerialization.CreateDiagnostic( diagnosticLocation, type ) );
             }
 
             return false;

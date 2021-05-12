@@ -3,6 +3,7 @@
 
 using Caravela.Framework.Code;
 using Caravela.Framework.Diagnostics;
+using System.Collections.Generic;
 
 namespace Caravela.Framework.Aspects
 {
@@ -10,8 +11,13 @@ namespace Caravela.Framework.Aspects
     /// An object by the <see cref="IAspect{T}.Initialize"/> method of the aspect to provide advices and child
     /// aspects. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
-    public interface IAspectBuilder : IDiagnosticSink
+    public interface IAspectBuilder
     {
+        /// <summary>
+        /// Gets a service that allows to report or suppress diagnostics.
+        /// </summary>
+        IDiagnosticSink Diagnostics { get; }
+
         /// <summary>
         /// Gets the declaration to which the aspect was added.
         /// </summary>
@@ -28,10 +34,16 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <remarks>
         /// Note that reporting an error using
-        /// <see cref="IDiagnosticSink.ReportDiagnostic(Caravela.Framework.Diagnostics.Severity,Caravela.Framework.Diagnostics.IDiagnosticLocation?,string,string,object[])"/>
+        /// <see cref="IDiagnosticSink.Report(Caravela.Framework.Diagnostics.Severity,Caravela.Framework.Diagnostics.IDiagnosticLocation,string,string,object[])"/>
         /// automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
+
+        /// <summary>
+        /// Gets a set of opaque properties that can be set by the aspect <see cref="IAspect{T}.Initialize"/> method and are then made
+        /// visible in <see cref="meta.Tags"/>.
+        /// </summary>
+        IDictionary<string, object?> Tags { get; }
     }
 
     /// <summary>

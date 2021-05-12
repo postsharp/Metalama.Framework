@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParametersCount
 {
@@ -11,9 +11,9 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParam
         [TestTemplate]
         dynamic Template()
         {
-            bool b = compileTime(false);
+            bool b = meta.CompileTime(false);
 
-            if (target.Parameters.Count > 0)
+            if (meta.Parameters.Count > 0)
             {
                 b = true;
             }
@@ -24,7 +24,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.IfTests.IfParam
 
             Console.WriteLine(b);
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

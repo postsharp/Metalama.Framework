@@ -1,4 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
@@ -6,16 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Caravela.Framework.Impl.Templating.MetaModel
 {
-    public interface IDynamicMember
-    {
-        RuntimeExpression CreateExpression();
-    }
-
-    // TODO: Smell
-    internal interface IDynamicMemberDifferentiated : IDynamicMember
-    {
-        RuntimeExpression CreateMemberAccessExpression( string member );
-    }
+    // TODO: Usages of this interface must be replaced by IDynamicExpression.
 
     public interface IProceedImpl
     {

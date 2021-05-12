@@ -1,8 +1,7 @@
-using System;
 using System.Linq;
 using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+
 
 namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
 {
@@ -13,17 +12,17 @@ namespace Caravela.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
     {
         public override dynamic? OverrideMethod()
         {
-            var methodInfo = target.Method.ToMethodInfo();
-            var methodBase = target.Method.ToMethodBase();
-            var memberInfo = target.Method.ToMemberInfo();
-            var parameterInfo = target.Method.Parameters[0].ToParameterInfo();
-            var returnValueInfo = target.Method.ReturnParameter.ToParameterInfo();
-            var type = target.Method.DeclaringType.ToType();
+            var methodInfo = meta.Method.ToMethodInfo();
+            var methodBase = meta.Method.ToMethodBase();
+            var memberInfo = meta.Method.ToMemberInfo();
+            var parameterInfo = meta.Method.Parameters[0].ToParameterInfo();
+            var returnValueInfo = meta.Method.ReturnParameter.ToParameterInfo();
+            var type = meta.Method.DeclaringType.ToType();
            // var field = target.Method.DeclaringType.Fields.Single().ToFieldOrPropertyInfo();
-            var propertyAsFieldOrProperty = target.Method.DeclaringType.Properties.Single().ToFieldOrPropertyInfo();
-            var property = target.Method.DeclaringType.Properties.Single().ToPropertyInfo();
-            var constructor = target.Method.DeclaringType.Constructors.Single().ToConstructorInfo();
-            var constructorParameter = target.Method.DeclaringType.Constructors.Single().Parameters.Single().ToParameterInfo();
+            var propertyAsFieldOrProperty = meta.Method.DeclaringType.Properties.Single().ToFieldOrPropertyInfo();
+            var property = meta.Method.DeclaringType.Properties.Single().ToPropertyInfo();
+            var constructor = meta.Method.DeclaringType.Constructors.Single().ToConstructorInfo();
+            var constructorParameter = meta.Method.DeclaringType.Constructors.Single().Parameters.Single().ToParameterInfo();
             
              
             

@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeParenthesizedLambda2
 {
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.Lambdas.Runtime
         {
             Func<int, int, int> action = (int a, int b) => a + b;
 
-            dynamic result = proceed();
+            dynamic result = meta.Proceed();
 
             result = action(result, 2);
 

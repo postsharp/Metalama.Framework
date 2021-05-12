@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.SimpleFor
 {
@@ -16,7 +16,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.ForTests.Simple
             {
                 try
                 {
-                    return proceed();
+                    return meta.Proceed();
                 }
                 catch
                 {

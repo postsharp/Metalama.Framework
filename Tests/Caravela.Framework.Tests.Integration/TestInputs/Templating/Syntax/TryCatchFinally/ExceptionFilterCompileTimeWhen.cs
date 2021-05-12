@@ -1,7 +1,7 @@
 using System;
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally.ExceptionFilterCompileTimeWhen
 {
@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.TryCatchFinally
         [TestTemplate]
         dynamic Template()
         {
-            var ctString = compileTime("DivideByZero");
+            var ctString = meta.CompileTime("DivideByZero");
             try
             {
                 return 1;

@@ -1,7 +1,7 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
 using Caravela.Framework.Project;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {
@@ -12,8 +12,8 @@ namespace Caravela.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Gene
         dynamic Template()
         {
             A<Aspect, int, string> x = new C<object, int, string>();
-            target.Parameters[0].Value = x;
-            dynamic result = proceed();
+            meta.Parameters[0].Value = x;
+            dynamic result = meta.Proceed();
             return result;
         }
     }

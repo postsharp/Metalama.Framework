@@ -5,6 +5,7 @@ using Caravela.Framework.Aspects;
 using Caravela.Framework.Impl.CodeModel;
 using Caravela.Framework.Impl.CompileTime;
 using Caravela.Framework.Project;
+using Caravela.Framework.Sdk;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Caravela.Framework.Impl.Templating
     internal class TemplateMemberClassifier
     {
         private readonly SemanticAnnotationMap _semanticAnnotationMap;
-        private readonly ITypeSymbol _templateContextType;
+        private readonly ITypeSymbol _metaType;
         private readonly ISymbolClassifier _symbolClassifier;
 
         public TemplateMemberClassifier(
@@ -28,7 +29,7 @@ namespace Caravela.Framework.Impl.Templating
             this._symbolClassifier = SymbolClassifier.GetInstance( compilation );
 
             var reflectionMapper = ReflectionMapper.GetInstance( compilation );
-            this._templateContextType = reflectionMapper.GetTypeSymbol( typeof(TemplateContext) );
+            this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
 
         private bool IsCompileTime( ISymbol? symbol )
@@ -45,8 +46,8 @@ namespace Caravela.Framework.Impl.Templating
                 or IArrayTypeSymbol { ElementType: IDynamicTypeSymbol };
 
         public bool IsRunTimeMethod( ISymbol symbol )
-            => symbol.Name == nameof(TemplateContext.runTime) &&
-               symbol.ContainingType.GetDocumentationCommentId() == this._templateContextType.GetDocumentationCommentId();
+            => symbol.Name == nameof(meta.RunTime) &&
+               symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
 
         public bool IsRunTimeMethod( SyntaxNode node )
             => this._semanticAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
@@ -88,12 +89,14 @@ namespace Caravela.Framework.Impl.Templating
         }
 
         /// <summary>
-        /// Determines if a symbol represents a call to <c>proceed()</c>.
+        /// Determines if a symbol represents a call to <c>meta.Proceed()</c>.
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
         public bool IsProceed( SyntaxNode node )
         {
+            // TODO: This class and usages must be removed.
+
             var symbol = this._semanticAnnotationMap.GetSymbol( node );
 
             if ( symbol == null )
@@ -102,6 +105,45 @@ namespace Caravela.Framework.Impl.Templating
             }
 
             return symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(ProceedAttribute) );
+        }
+
+#pragma warning disable CA1822 // Static anyway.
+
+        public bool HasTemplateKeywordAttribute( ISymbol symbol )
+            => symbol.GetAttributes()
+                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
+#pragma warning restore CA1822
+
+        /// <summary>
+        /// Determines if the node is a pragma and returns the kind of pragma, if any.
+        /// </summary>
+        public MetaMemberKind GetMetaMemberKind( SyntaxNode node )
+        {
+            var symbol = this._semanticAnnotationMap.GetSymbol( node );
+
+            return this.GetMetaMemberKind( symbol );
+        }
+
+        public MetaMemberKind GetMetaMemberKind( ISymbol? symbol )
+        {
+            if ( symbol == null || !SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
+            {
+                return MetaMemberKind.None;
+            }
+            else
+            {
+                switch ( symbol.Name )
+                {
+                    case nameof(meta.Comment):
+                        return MetaMemberKind.Comment;
+
+                    case nameof(meta.This):
+                        return MetaMemberKind.This;
+
+                    default:
+                        return MetaMemberKind.Default;
+                }
+            }
         }
     }
 }

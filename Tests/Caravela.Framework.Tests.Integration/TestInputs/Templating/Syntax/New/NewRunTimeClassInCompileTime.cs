@@ -1,6 +1,6 @@
 using System;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.NewRunTimeClassInCompileTime
 {
@@ -9,10 +9,10 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.New.NewRunTimeC
         [TestTemplate]
         dynamic Template()
         {
-            var o = compileTime(new TargetCode());
+            var o = meta.CompileTime(new TargetCode());
             Console.WriteLine(o.GetType().ToString());
 
-            return proceed();
+            return meta.Proceed();
         }
     }
 

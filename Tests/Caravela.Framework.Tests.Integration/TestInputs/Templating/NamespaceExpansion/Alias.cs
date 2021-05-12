@@ -2,7 +2,7 @@ using System;
 using Caravela.Framework.Project;
 
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
+using Caravela.Framework.Aspects;
 using MyMath = System.Math;
 
 namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
@@ -17,7 +17,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Templating.Alias
             {
                 Console.Write(MyMath.PI);
 
-                return proceed();
+                return meta.Proceed();
             }
         }
 

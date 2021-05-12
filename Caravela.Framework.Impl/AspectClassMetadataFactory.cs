@@ -122,7 +122,7 @@ namespace Caravela.Framework.Impl
             {
                 if ( attributeTypeData.Type == null )
                 {
-                    diagnosticAdder.ReportDiagnostic(
+                    diagnosticAdder.Report(
                         TemplatingDiagnosticDescriptors.CannotFindAspectInCompilation.CreateDiagnostic(
                             Location.None,
                             (attributeTypeData.TypeName, attributeTypeData.Project.RunTimeIdentity.Name) ) );

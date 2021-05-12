@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
-using Caravela.Framework;
-using Caravela.Framework.Project;
+using Caravela.Framework.Aspects;
 using Caravela.TestFramework;
-using static Caravela.Framework.Aspects.TemplateContext;
 
 namespace Caravela.Framework.Tests.Integration.Templating.Syntax.AssignmentInRunTimeIf
 {
@@ -12,7 +9,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.AssignmentInRun
         [TestTemplate]
         dynamic? Template()
         {
-            var x = compileTime(0);
+            var x = meta.CompileTime(0);
             
             if ( DateTime.Now.Day > 25 )
             {
@@ -21,7 +18,7 @@ namespace Caravela.Framework.Tests.Integration.Templating.Syntax.AssignmentInRun
             
             
             
-            pragma.Comment( "x = " + x.ToString());
+            meta.Comment( "x = " + x.ToString());
             return null;
         }
     }
