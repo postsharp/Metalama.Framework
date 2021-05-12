@@ -30,7 +30,7 @@ namespace Caravela.Framework.Impl.CodeModel
         [Memo]
         public IMethod? Raiser
             => this._symbol.RaiseMethod == null
-                ? new PseudoAccessor( this, PseudoAccessorSemantic.Raise )
+                ? new PseudoAccessor( this, AccessorSemantic.Raise )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
 
         public override CodeElementKind ElementKind => CodeElementKind.Event;

@@ -16,7 +16,7 @@ internal class TargetClass
 
         set 
         { 
-            global::System.Console.WriteLine($"Set {value}");
+            global::System.Console.WriteLine(value);
         }
     }
 
@@ -29,7 +29,7 @@ internal class TargetClass
 
         set
         {
-            global::System.Console.WriteLine($"Set {value}");
+            global::System.Console.WriteLine(value);
         }
     }
 

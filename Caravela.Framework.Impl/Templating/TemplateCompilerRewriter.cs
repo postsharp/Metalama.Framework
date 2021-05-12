@@ -658,6 +658,7 @@ namespace Caravela.Framework.Impl.Templating
             // TODO: templates may support build-time parameters, which must to the compiled template method.
 
             var body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+
             var result = this.CreateTemplateMethod( node, body );
 
             this.Unindent( 3 );

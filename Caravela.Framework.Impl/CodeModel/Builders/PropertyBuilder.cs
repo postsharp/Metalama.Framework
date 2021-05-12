@@ -6,11 +6,13 @@ using Caravela.Framework.Code;
 using Caravela.Framework.Impl.Advices;
 using Caravela.Framework.Impl.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Caravela.Framework.Code.MethodKind;
 using RefKind = Caravela.Framework.Code.RefKind;
 using TypedConstant = Caravela.Framework.Code.TypedConstant;
 
@@ -18,15 +20,19 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IProperty
     {
+        // TODO: How to set this from user code? Now it's only possible to do through template.
+        private readonly bool _isAutoProperty;
+        private readonly bool _hasInitOnlySetter;
+
         RefKind IProperty.RefKind => this.RefKind;
 
         public RefKind RefKind { get; set; }
 
-        public bool IsByRef => throw new NotImplementedException();
+        public bool IsByRef => this.RefKind != RefKind.None;
 
-        public bool IsRef => throw new NotImplementedException();
+        public bool IsRef => this.RefKind == RefKind.Ref;
 
-        public bool IsRefReadonly => throw new NotImplementedException();
+        public bool IsRefReadonly => this.RefKind == RefKind.RefReadOnly;
 
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -38,11 +44,13 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IType Type { get; set; }
 
-        [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, PseudoAccessorSemantic.Get );
+        public IMethodBuilder? Getter { get; }
 
-        [Memo]
-        public IMethod? Setter => new PseudoAccessor( this, PseudoAccessorSemantic.Set );
+        IMethod? IFieldOrProperty.Getter => this.Getter;
+
+        public IMethodBuilder? Setter { get; }
+
+        IMethod? IFieldOrProperty.Setter => this.Setter;
 
         public bool HasBase => throw new NotImplementedException();
 
@@ -57,11 +65,28 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public override CodeElementKind ElementKind => throw new NotImplementedException();
 
-        public PropertyBuilder( Advice parentAdvice, INamedType targetType, string name, AspectLinkerOptions? linkerOptions )
+        public bool IsIndexer => this.Name == "Items";
+
+        public PropertyBuilder( Advice parentAdvice, INamedType targetType, string name, bool hasGetter, bool hasSetter, bool isAutoProperty, bool hasInitOnlySetter, AspectLinkerOptions? linkerOptions )
             : base( parentAdvice, targetType, name )
         {
+            // TODO: Sanity checks.
+
             this.LinkerOptions = linkerOptions;
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof( object ) );
+            
+            if ( hasGetter )
+            {
+                this.Getter = new AccessorBuilder( this, MethodKind.PropertyGet );
+            }
+
+            if ( hasSetter )
+            {
+                this.Getter = new AccessorBuilder( this, MethodKind.PropertySet );
+            }
+
+            this._isAutoProperty = isAutoProperty;
+            this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
         public dynamic GetIndexerValue( dynamic? instance, params dynamic[] args )
@@ -84,38 +109,144 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             throw new NotImplementedException();
         }
 
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        {
+            if ( this.IsIndexer )
+            {
+                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
+                parameter.DefaultValue = defaultValue;
+                this.Parameters.Add( parameter );
+                return parameter;
+            }
+            else
+            {
+                throw new NotSupportedException( "Adding parameters is only supported on indexers." );
+            }
+        }
+
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        {
+            if ( this.IsIndexer )
+            {
+                var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
+                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, itype, refKind );
+                parameter.DefaultValue = new TypedConstant( itype, defaultValue );
+                this.Parameters.Add( parameter );
+                return parameter;
+            }
+            else
+            {
+                throw new NotSupportedException( "Adding parameters is only supported on indexers." );
+            }
+        }
+
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var syntaxGenerator = this.Compilation.SyntaxGenerator;
             var reflectionMapper = ReflectionMapper.GetInstance( this.Compilation.RoslynCompilation );
 
             // TODO: Indexers.
-            var property = (PropertyDeclarationSyntax)
-                syntaxGenerator.PropertyDeclaration(
-                    this.Name,
-                    syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
-                    this.Accessibility.ToRoslynAccessibility(),
-                    this.ToDeclarationModifiers(),
-                    new[]
-                    {
-                        ReturnStatement( DefaultExpression( (TypeSyntax) syntaxGenerator.TypeExpression( this.Type.GetSymbol() ) ) )
-                    },
-                    Array.Empty<SyntaxNode>() );
+            var property =
+                PropertyDeclaration(
+                    List<AttributeListSyntax>(), // TODO: Attributes.
+                    GenerateModifierList(),
+                    (TypeSyntax)syntaxGenerator.TypeExpression( this.Type.GetSymbol() ),
+                    null,
+                    Identifier(this.Name),
+                    GenerateAccessorList(),
+                    null, 
+                    null
+                    );
 
             return new[]
             {
                 new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this.LinkerOptions, this )
             };
-        }
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
-        {
-            throw new NotImplementedException();
-        }
+            SyntaxTokenList GenerateModifierList()
+            {
+                // Modifiers for property.
+                var tokens = new List<SyntaxToken>();
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
-        {
-            throw new NotImplementedException();
+                this.Accessibility.GetTokens( tokens );
+
+                if (this.IsAbstract)
+                {
+                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                }
+
+                if ( this.IsSealed )
+                {
+                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
+                }
+
+                if ( this.IsOverride )
+                {
+                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+                }
+
+                this.RefKind.GetReturnValueTokens( tokens );
+
+                return TokenList( tokens );
+            }
+
+            AccessorListSyntax GenerateAccessorList()
+            {
+                switch ( (this.Getter, this.Setter) )
+                {
+                    case ( not null, not null ):
+                        return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
+                    case ( not null, null ):
+                        return AccessorList( List( new[] { GenerateGetAccessor() } ) );
+                    case ( null, not null ):
+                        return AccessorList( List( new[] { GenerateSetAccessor() } ) );
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            AccessorDeclarationSyntax GenerateGetAccessor()
+            {
+                var tokens = new List<SyntaxToken>();
+
+                if (this.Getter!.Accessibility != this.Accessibility)
+                {
+                    this.Getter.Accessibility.GetTokens( tokens );
+                }
+
+                // TODO: Attributes.
+                return
+                    AccessorDeclaration(
+                        SyntaxKind.GetAccessorDeclaration,
+                        List<AttributeListSyntax>(),
+                        TokenList( tokens ),
+                        this._isAutoProperty
+                        ? null
+                        : Block(
+                            ReturnStatement(
+                                DefaultExpression( (TypeSyntax) syntaxGenerator!.TypeExpression( this.Type.GetSymbol() ) ) ) ),
+                        null);
+            }
+
+            AccessorDeclarationSyntax GenerateSetAccessor()
+            {
+                var tokens = new List<SyntaxToken>();
+
+                if ( this.Getter!.Accessibility != this.Accessibility )
+                {
+                    this.Getter.Accessibility.GetTokens( tokens );
+                }
+
+                return
+                    AccessorDeclaration(
+                        this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                        List<AttributeListSyntax>(),
+                        TokenList( tokens ),
+                        this._isAutoProperty
+                        ? null
+                        : Block(),
+                        null );
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Caravela.Framework.Impl.Advices
             IntroductionScope scope,
             ConflictBehavior conflictBehavior,
             AspectLinkerOptions? linkerOptions )
-            : base(aspect, targetDeclaration, scope, conflictBehavior, linkerOptions)
+            : base(aspect, targetDeclaration, null, scope, conflictBehavior, linkerOptions)
         {
             this.Builder = new FieldBuilder( this, this.TargetDeclaration, name, linkerOptions );
         }

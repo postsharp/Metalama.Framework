@@ -15,9 +15,9 @@ namespace Caravela.Framework.Impl.CodeModel
     internal class PseudoAccessor : IMethod
     {
         private readonly IMember _containingMember;
-        private readonly PseudoAccessorSemantic _semantic;
+        private readonly AccessorSemantic _semantic;
 
-        public PseudoAccessor( IMember containingMember, PseudoAccessorSemantic semantic )
+        public PseudoAccessor( IMember containingMember, AccessorSemantic semantic )
         {
             this._containingMember = containingMember;
             this._semantic = semantic;
@@ -28,7 +28,7 @@ namespace Caravela.Framework.Impl.CodeModel
 
         [Memo]
         public IType ReturnType
-            => this._semantic != PseudoAccessorSemantic.Get
+            => this._semantic != AccessorSemantic.Get
                 ? ((CompilationModel) this._containingMember.Compilation).Factory.GetTypeByReflectionType( typeof(void) )
                 : ((IProperty) this._containingMember).Type;
 
@@ -53,11 +53,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public MethodKind MethodKind
             => this._semantic switch
             {
-                PseudoAccessorSemantic.Get => MethodKind.PropertyGet,
-                PseudoAccessorSemantic.Set => MethodKind.PropertySet,
-                PseudoAccessorSemantic.Add => MethodKind.EventAdd,
-                PseudoAccessorSemantic.Remove => MethodKind.EventRemove,
-                PseudoAccessorSemantic.Raise => MethodKind.EventRaise,
+                AccessorSemantic.Get => MethodKind.PropertyGet,
+                AccessorSemantic.Set => MethodKind.PropertySet,
+                AccessorSemantic.Add => MethodKind.EventAdd,
+                AccessorSemantic.Remove => MethodKind.EventRemove,
+                AccessorSemantic.Raise => MethodKind.EventRaise,
                 _ => throw new NotSupportedException()
             };
 
@@ -66,11 +66,11 @@ namespace Caravela.Framework.Impl.CodeModel
         public string Name
             => this._semantic switch
             {
-                PseudoAccessorSemantic.Get => $"get_{this._containingMember.Name}",
-                PseudoAccessorSemantic.Set => $"set_{this._containingMember.Name}",
-                PseudoAccessorSemantic.Add => $"add_{this._containingMember.Name}",
-                PseudoAccessorSemantic.Remove => $"remove_{this._containingMember.Name}",
-                PseudoAccessorSemantic.Raise => $"raise_{this._containingMember.Name}",
+                AccessorSemantic.Get => $"get_{this._containingMember.Name}",
+                AccessorSemantic.Set => $"set_{this._containingMember.Name}",
+                AccessorSemantic.Add => $"add_{this._containingMember.Name}",
+                AccessorSemantic.Remove => $"remove_{this._containingMember.Name}",
+                AccessorSemantic.Raise => $"raise_{this._containingMember.Name}",
                 _ => throw new NotSupportedException()
             };
 

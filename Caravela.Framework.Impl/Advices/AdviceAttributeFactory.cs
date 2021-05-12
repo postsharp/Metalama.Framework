@@ -20,7 +20,7 @@ namespace Caravela.Framework.Impl.Advices
             AspectInstance aspect,
             IDiagnosticAdder diagnosticAdder,
             T declaration,
-            ICodeElement templateMethod )
+            ICodeElement template )
             where T : ICodeElement
         {
             var namedArguments = attribute.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
@@ -39,7 +39,7 @@ namespace Caravela.Framework.Impl.Advices
                 return false;
             }
 
-            var aspectLinkerOptionsAttribute = templateMethod.Attributes.FirstOrDefault(
+            var aspectLinkerOptionsAttribute = template.Attributes.FirstOrDefault(
                 x => x.Type == x.Compilation.TypeFactory.GetTypeByReflectionType( typeof(AspectLinkerOptionsAttribute) ) );
 
             AspectLinkerOptions? aspectLinkerOptions = null;
@@ -68,7 +68,7 @@ namespace Caravela.Framework.Impl.Advices
                         var advice = new IntroduceMethodAdvice(
                             aspect,
                             (INamedType) declaration,
-                            (IMethod) templateMethod,
+                            (IMethod) template,
                             scope,
                             conflictBehavior,
                             aspectLinkerOptions );
@@ -95,7 +95,43 @@ namespace Caravela.Framework.Impl.Advices
                             advice.Builder.Accessibility = accessibility;
                         }
 
-                        advice.Builder.ReturnType = ((IMethod) templateMethod).ReturnType;
+                        return advice;
+                    }
+                case nameof( IntroducePropertyAttribute ):
+                    {
+                        TryGetNamedArgument<IntroductionScope>( nameof( IntroduceMethodAttribute.Scope ), out var scope );
+                        TryGetNamedArgument<ConflictBehavior>( nameof( IntroduceMethodAttribute.ConflictBehavior ), out var conflictBehavior );
+
+                        var advice = new IntroducePropertyAdvice(
+                            aspect,
+                            (INamedType) declaration,
+                            (IProperty) template,
+                            null, 
+                            null,
+                            null,
+                            scope,
+                            conflictBehavior,
+                            aspectLinkerOptions );
+
+                        if ( TryGetNamedArgument<string>( nameof( IntroduceMethodAttribute.Name ), out var name ) )
+                        {
+                            advice.Builder.Name = name;
+                        }
+
+                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsVirtual ), out var isVirtual ) )
+                        {
+                            advice.Builder.IsVirtual = isVirtual;
+                        }
+
+                        if ( TryGetNamedArgument<bool>( nameof( IntroduceMethodAttribute.IsSealed ), out var isSealed ) )
+                        {
+                            advice.Builder.IsSealed = isSealed;
+                        }
+
+                        if ( TryGetNamedArgument<Accessibility>( nameof( IntroduceMethodAttribute.Accessibility ), out var accessibility ) )
+                        {
+                            advice.Builder.Accessibility = accessibility;
+                        }
 
                         return advice;
                     }

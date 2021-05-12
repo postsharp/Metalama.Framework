@@ -12,5 +12,9 @@ namespace Caravela.Framework.Code
         IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default );
 
         IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null );
+
+        new IMethodBuilder? Getter { get; }
+
+        new IMethodBuilder? Setter { get; }
     }
 }

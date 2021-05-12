@@ -16,7 +16,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
         MemberLink<IMember> IReplaceMemberTransformation.ReplacedMember => this.ReplacedField.ToMemberLink<IMember>();
 
         public PromotedField( Advice parentAdvice, IField field, AspectLinkerOptions? linkerOptions )
-            : base( parentAdvice, field.DeclaringType, field.Name, linkerOptions )
+            : base( parentAdvice, field.DeclaringType, field.Name, true, true, true, false, linkerOptions )
         {
             this.ReplacedField = field;
         }

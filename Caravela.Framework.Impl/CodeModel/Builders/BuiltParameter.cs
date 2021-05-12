@@ -7,14 +7,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 {
     internal class BuiltParameter : BuiltCodeElement, IParameter
     {
-        public BuiltParameter( ParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation )
         {
             this.ParameterBuilder = builder;
         }
 
-        public ParameterBuilder ParameterBuilder { get; }
+        public IParameterBuilder ParameterBuilder { get; }
 
-        public override CodeElementBuilder Builder => this.ParameterBuilder;
+        public override CodeElementBuilder Builder => (CodeElementBuilder) this.ParameterBuilder;
 
         public RefKind RefKind => this.ParameterBuilder.RefKind;
 

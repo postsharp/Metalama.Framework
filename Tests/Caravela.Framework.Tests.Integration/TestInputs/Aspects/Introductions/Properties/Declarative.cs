@@ -21,16 +21,19 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
         [IntroduceProperty]
         public static int IntroducedProperty_Auto_Static { get; }
 
+        [IntroduceProperty]
         public int IntroducedProperty_Accessors
         {
-            get { Console.WriteLine("Get"); return 42; }
-            set { Console.WriteLine($"Set {value}"); }
-        }
+            get 
+            { 
+                Console.WriteLine("Get"); 
+                return 42; 
+            }
 
-        public int IntroducedProperty_AccessorExpressions
-        {
-            get => 42;
-            set => Console.WriteLine($"Set {value}");
+            set 
+            { 
+                Console.WriteLine(value); 
+            }
         }
     }
 
@@ -38,20 +41,5 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
     [Introduction]
     internal class TargetClass
     {
-        public int IntroducedProperty_Auto { get; set; }
-
-        public static int IntroducedProperty_Auto_Static { get; }
-
-        public int IntroducedProperty_Accessors
-        {
-            get { Console.WriteLine("Get"); return 42; }
-            set { Console.WriteLine($"Set {value}"); }
-        }
-
-        public int IntroducedProperty_AccessorExpressions
-        {
-            get => 42;
-            set => Console.WriteLine($"Set {value}");
-        }
     }
 }

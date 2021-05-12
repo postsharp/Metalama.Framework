@@ -55,6 +55,14 @@ namespace Caravela.Framework.Aspects
 
         IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
+            string? defaultPropertyTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null );
+
+        IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string name,
             string? defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,

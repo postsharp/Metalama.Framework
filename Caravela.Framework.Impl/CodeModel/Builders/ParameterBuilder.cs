@@ -10,6 +10,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
     internal sealed class ParameterBuilder : CodeElementBuilder, IParameterBuilder
     {
         private readonly string? _name;
+        private TypedConstant _defaultValue;
 
         public RefKind RefKind { get; set; }
 
@@ -19,7 +20,14 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public int Index { get; }
 
-        public TypedConstant DefaultValue { get; set; }
+        public TypedConstant DefaultValue
+        {
+            get => this._defaultValue;
+            set =>
+                this._defaultValue = this._name != null
+                ? value
+                : throw new NotSupportedException( "Cannot set default value of a return parameter." );            
+        }
 
         public bool IsParams { get; set; }
 
@@ -29,9 +37,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
         public IMember DeclaringMember { get; }
 
-        public ParameterBuilder( MethodBuilder containingMethod, int index, string? name, IType type, RefKind refKind ) : base( containingMethod.ParentAdvice )
+        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base( declaringMember.ParentAdvice )
         {
-            this.DeclaringMember = containingMethod;
+            this.DeclaringMember = declaringMember;
             this.Index = index;
             this._name = name;
             this.ParameterType = type;

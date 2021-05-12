@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Caravela.Framework.Tests.UnitTests.Linker
 {
-    public class PropertyOverrideBasicTests : LinkerTestBase
+    public class PropertyOverrideIndexerTests : LinkerTestBase
     {
         // TODO: Not implemented fully.
     }

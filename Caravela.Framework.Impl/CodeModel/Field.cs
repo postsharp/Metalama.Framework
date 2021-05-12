@@ -27,10 +27,10 @@ namespace Caravela.Framework.Impl.CodeModel
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
         [Memo]
-        public IMethod? Getter => new PseudoAccessor( this, PseudoAccessorSemantic.Get );
+        public IMethod? Getter => new PseudoAccessor( this, AccessorSemantic.Get );
 
         [Memo]
-        public IMethod? Setter => new PseudoAccessor( this, PseudoAccessorSemantic.Set );
+        public IMethod? Setter => new PseudoAccessor( this, AccessorSemantic.Set );
 
         public dynamic Value
         {
@@ -38,9 +38,9 @@ namespace Caravela.Framework.Impl.CodeModel
             set => throw new InvalidOperationException();
         }
 
-        public object GetValue( object? instance ) => this.Invocation.GetValue( instance );
+        public dynamic GetValue( object? instance ) => this.Invocation.GetValue( instance );
 
-        public object SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
+        public dynamic SetValue( object? instance, object value ) => this.Invocation.SetValue( instance, value );
 
         public bool HasBase => true;
 

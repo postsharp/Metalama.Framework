@@ -41,7 +41,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
         /// <returns></returns>
         public static CodeElementLink<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
             where TCodeElement : class, ICodeElement
-            where TBuilder : CodeElementBuilder
+            where TBuilder : ICodeElementBuilder
         {
             return new( builder );
         }
@@ -105,7 +105,7 @@ namespace Caravela.Framework.Impl.CodeModel.Links
             this.Target = symbol;
         }
 
-        internal CodeElementLink( CodeElementBuilder builder )
+        internal CodeElementLink( ICodeElementBuilder builder )
         {
             this.Target = builder;
             this._kind = CodeElementSpecialKind.Default;

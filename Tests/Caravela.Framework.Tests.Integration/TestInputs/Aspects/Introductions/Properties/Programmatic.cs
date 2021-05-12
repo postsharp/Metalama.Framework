@@ -12,44 +12,54 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         public void Initialize(IAspectBuilder<INamedType> aspectBuilder)
         {
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_Parameters";
-                advice.Builder.AddParameter("x", typeof(int));
-                advice.Builder.AddParameter("y", typeof(int));
+                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(AutoProperty));
+                advice.Builder.Accessibility = Accessibility.Public;
             }
 
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_ReturnType";
-                advice.Builder.ReturnType = advice.Builder.Compilation.TypeFactory.GetTypeByReflectionType(typeof(int));
+                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, nameof(Property));
+                advice.Builder.Accessibility = Accessibility.Public;
             }
 
             {
-                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_Accessibility";
-                advice.Builder.Accessibility = Accessibility.Private;
+                var advice = aspectBuilder.AdviceFactory.IntroduceProperty(aspectBuilder.TargetDeclaration, "PropertyFromAccessors", nameof(GetPropertyTemplate), nameof(SetPropertyTemplate) );
+                advice.Builder.Accessibility = Accessibility.Public;
             }
 
-            {
-                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_IsStatic";
-                advice.Builder.IsStatic = true;
-            }
-
-            {
-                var advice = aspectBuilder.AdviceFactory.IntroduceMethod(aspectBuilder.TargetDeclaration, nameof(Template));
-                advice.Builder.Name = "IntroducedMethod_IsVirtual";
-                advice.Builder.IsVirtual = true;
-            }
-
-            // TODO: Other members.
+            // TODO: Expression bodied template.
         }
 
-        [IntroduceMethodTemplate]
-        public dynamic Template()
+        [IntroducePropertyTemplate]
+        public int AutoProperty { get; set; }
+
+        [IntroducePropertyTemplate]
+        public int Property
         {
-            Console.WriteLine("This is introduced method.");
+            get
+            {
+                Console.WriteLine("Get");
+                return proceed();
+            }
+
+            set
+            {
+                Console.WriteLine("Set");
+                dynamic discard = proceed();
+            }
+        }
+
+        [IntroducePropertyGetTemplate]
+        public int GetPropertyTemplate()
+        {
+            Console.WriteLine("Get");
             return proceed();
+        }
+
+        [IntroducePropertySetTemplate]
+        public void SetPropertyTemplate(int value)
+        {
+            Console.WriteLine("Set");
+            dynamic discard = proceed();
         }
     }
 

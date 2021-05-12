@@ -205,13 +205,45 @@ namespace Caravela.Framework.Impl.Advices
 
         public IIntroducePropertyAdvice IntroduceProperty(
             INamedType targetType,
+            string? defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            ConflictBehavior conflictBehavior = ConflictBehavior.Default,
+            AspectLinkerOptions? aspectLinkerOptions = null )
+        {
+            var templateProperty = this.GetTemplateProperty(
+                defaultTemplate,
+                typeof( IntroducePropertyTemplateAttribute ),
+                nameof( this.IntroduceProperty ) );
+
+            var advice = new IntroducePropertyAdvice( this._aspect, targetType, templateProperty, null, null, null, scope, conflictBehavior, aspectLinkerOptions );
+            this._advices.Add( advice );
+
+            return advice;
+        }
+
+        public IIntroducePropertyAdvice IntroduceProperty(
+            INamedType targetType,
+            string name,
             string? defaultGetTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
-            throw new NotImplementedException();
+            var getTemplateMethod = this.GetTemplateMethod(
+                defaultGetTemplate,
+                typeof( IntroducePropertyGetTemplateAttribute ),
+                nameof( this.OverrideFieldOrPropertyAccessors ) );
+
+            var setTemplateMethod = this.GetTemplateMethod(
+                setTemplate,
+                typeof( IntroducePropertySetTemplateAttribute ),
+                nameof( this.OverrideFieldOrPropertyAccessors ) );
+
+            var advice = new IntroducePropertyAdvice( this._aspect, targetType, null, name, getTemplateMethod, setTemplateMethod, scope, conflictBehavior, aspectLinkerOptions );
+            this._advices.Add( advice );
+
+            return advice;
         }
 
         public IOverrideEventAdvice OverrideEventAccessors(

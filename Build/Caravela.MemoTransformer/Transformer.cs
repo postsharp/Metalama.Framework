@@ -46,7 +46,7 @@ namespace Caravela.MemoTransformer
                     return node;
                 }
 
-                if ( node.ExpressionBody == null )
+                if ( !IsSupportedPropertyDeclaration(node) )
                 {
                     this.Diagnostics.Add( Diagnostic.Create( _nonExpressionBodyError, node.GetLocation() ) );
 
@@ -62,33 +62,89 @@ namespace Caravela.MemoTransformer
 
                 var fieldName = "@" + char.ToLowerInvariant( node.Identifier.ValueText[0] ) + node.Identifier.ValueText.Substring( 1 );
 
-                var expression = node.ExpressionBody.Expression;
+                this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );
 
+                if (node.ExpressionBody != null)
+                {
+                    var block = TransformExpression( fieldName, node.ExpressionBody.Expression );
+
+                    var newNode = node.WithExpressionBody( null )
+                        .WithSemicolonToken( default )
+                        .AddAccessorListAccessors( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, block ) );
+
+                    // PropertyType? field;
+
+                    return newNode;
+                }
+                else
+                {
+                    var getAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration )!;
+                    var setAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration );
+
+                    var block = TransformExpression( fieldName, getAccessor.ExpressionBody!.Expression );
+
+                    var newGetAccessor =
+                        getAccessor.WithExpressionBody( null )
+                        .WithSemicolonToken( default )
+                        .WithBody( block );
+
+                    var newNode = node.WithAccessorList(
+                            AccessorList(
+                                setAccessor != null
+                                    ? List( new[] { newGetAccessor, setAccessor } )
+                                    : SingletonList( newGetAccessor ) ) )
+                        .WithSemicolonToken( default );
+
+                    return newNode;
+                }
+            }
+
+            private static bool IsSupportedPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                if ( node.ExpressionBody != null )
+                {
+                    return true;
+                }
+
+                if ( node.AccessorList == null)
+                {
+                    return false;
+                }
+
+                var getAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.GetAccessorDeclaration );
+                var setAccessor = node.AccessorList!.Accessors.SingleOrDefault( a => a.Kind() == SyntaxKind.SetAccessorDeclaration );
+
+                if ( getAccessor?.ExpressionBody == null)
+                {
+                    return false;
+                }
+
+                if ( setAccessor?.ExpressionBody?.Expression is ThrowExpressionSyntax )
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            private static BlockSyntax TransformExpression( string fieldName, ExpressionSyntax expression )
+            {
                 // PERF: read the field into a local, to avoid unnecessary double read in the fast case
 
                 // if (field == null)
                 //     Interlocked.CompareExchange(ref field, expression, null);
                 // return field;
-
-                var block = Block(
-                    IfStatement(
-                        BinaryExpression( SyntaxKind.EqualsExpression, IdentifierName( fieldName ), LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                        ExpressionStatement(
-                            InvocationExpression( ParseExpression( "Interlocked.CompareExchange" ) )
-                                .AddArgumentListArguments(
-                                    Argument( IdentifierName( fieldName ) ).WithRefKindKeyword( Token( SyntaxKind.RefKeyword ) ),
-                                    Argument( expression ),
-                                    Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
-                    ReturnStatement( IdentifierName( fieldName ) ) );
-
-                var newNode = node.WithExpressionBody( null )
-                    .WithSemicolonToken( default )
-                    .AddAccessorListAccessors( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, block ) );
-
-                // PropertyType? field;
-                this._fieldsToAdd!.Add( FieldDeclaration( VariableDeclaration( NullableType( node.Type ) ).AddVariables( VariableDeclarator( fieldName ) ) ) );
-
-                return newNode;
+                return
+                    Block(
+                        IfStatement(
+                            BinaryExpression( SyntaxKind.EqualsExpression, IdentifierName( fieldName ), LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                            ExpressionStatement(
+                                InvocationExpression( ParseExpression( "Interlocked.CompareExchange" ) )
+                                    .AddArgumentListArguments(
+                                        Argument( IdentifierName( fieldName ) ).WithRefKindKeyword( Token( SyntaxKind.RefKeyword ) ),
+                                        Argument( expression ),
+                                        Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
+                        ReturnStatement( IdentifierName( fieldName ) ) );
             }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
