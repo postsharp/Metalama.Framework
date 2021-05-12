@@ -34,11 +34,6 @@ namespace Caravela.Framework.Impl.DesignTime
 
             foreach ( var result in resultsByTree )
             {
-                if ( !Path.IsPathRooted( result.SyntaxTree.FilePath ) )
-                {
-                    throw new AssertionFailedException( "A rooted path was expected." );
-                }
-
                 this._syntaxTreeCache[result.SyntaxTree.FilePath] = result;
             }
         }
