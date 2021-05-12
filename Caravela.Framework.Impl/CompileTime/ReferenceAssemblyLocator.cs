@@ -18,33 +18,12 @@ namespace Caravela.Framework.Impl.CompileTime
     /// </summary>
     public class ReferenceAssemblyLocator
     {
-        private static readonly string _projectText;
+        private readonly string _projectText;
 
-        private static readonly string _projectHash;
+        private readonly string _projectHash;
 
         private static ReferenceAssemblyLocator? _instance;
 
-        static ReferenceAssemblyLocator()
-        {
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
-
-            _projectText =
-                $@"
-<Project Sdk='Microsoft.NET.Sdk'>
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
-  </ItemGroup>
-  <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
-    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
-  </Target>
-</Project>";
-
-            _projectHash = HashUtilities.HashString( _projectText );
-        }
 
         public static ReferenceAssemblyLocator GetInstance()
         {
@@ -85,7 +64,26 @@ namespace Caravela.Framework.Impl.CompileTime
 
         private ReferenceAssemblyLocator()
         {
-            this.SystemAssemblyPaths = GetSystemAssemblyPaths().ToImmutableArray();
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+
+            this._projectText =
+                $@"
+<Project Sdk='Microsoft.NET.Sdk'>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include='Microsoft.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CSharp" )}' />
+    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
+  </ItemGroup>
+  <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
+    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
+  </Target>
+</Project>";
+
+            this._projectHash = HashUtilities.HashString( this._projectText );
+            
+            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
                 .Select( Path.GetFileNameWithoutExtension )
@@ -106,9 +104,9 @@ namespace Caravela.Framework.Impl.CompileTime
             this.StandardAssemblyPaths = this.SystemAssemblyPaths.Concat( caravelaPaths ).ToImmutableArray();
         }
 
-        private static IEnumerable<string> GetSystemAssemblyPaths()
+        private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", _projectHash, "TempProject" );
+            var tempProjectDirectory = Path.Combine( Path.GetTempPath(), "Caravela", this._projectHash, "TempProject" );
 
             using var mutex = MutexHelper.CreateGlobalMutex( tempProjectDirectory );
             mutex.WaitOne();
@@ -129,7 +127,7 @@ namespace Caravela.Framework.Impl.CompileTime
 
                 Directory.CreateDirectory( tempProjectDirectory );
 
-                File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), _projectText );
+                File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), this._projectText );
 
                 var psi = new ProcessStartInfo( "dotnet", "build -t:WriteReferenceAssemblies" )
                 {

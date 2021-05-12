@@ -63,7 +63,6 @@ namespace Caravela.Framework.DesignTime.Vsix
                 }
             }
 
-
             // Recursively look at projects references.
             foreach ( var reference in project.ProjectReferences )
             {

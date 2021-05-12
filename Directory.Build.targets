@@ -1,7 +1,7 @@
 <Project>
 
     <!-- Include the package version in metadata. -->
-    <Target Name="AddAssemblyMetadata" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies">
+    <Target Name="AddAssemblyMetadata" BeforeTargets="BeforeBuild" DependsOnTargets="RunResolvePackageDependencies" Condition="">
         <ItemGroup>
             <!-- Add all package versions to metadata -->
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

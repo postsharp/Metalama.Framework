@@ -19,7 +19,7 @@ namespace Caravela.Framework.DesignTime.Vsix
     [Guid( PackageGuids.guidPackageString )] // must match GUID in the .vsct file
     public sealed class MyPackage : AsyncPackage
     {
-        public DTE DTE { get; private set; }
+        public DTE? DTE { get; private set; }
 
         // This method is run automatically the first time the command is being executed
         protected override async Task InitializeAsync( CancellationToken cancellationToken, IProgress<ServiceProgressData> progress )

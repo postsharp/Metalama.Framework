@@ -13,10 +13,9 @@ namespace Caravela.Framework.TestApp
     {
         public override void Initialize( IAspectBuilder<IMethod> aspectBuilder )
         {
-         //   Debugger.Launch();
             base.Initialize( aspectBuilder );
 
-            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v20.", aspectBuilder.TargetDeclaration );
+            aspectBuilder.Diagnostics.Report( Diagnostics.Severity.Warning, "MY000", "Hello, {0} v21.", aspectBuilder.TargetDeclaration );
         }
         public override dynamic OverrideMethod()
         {

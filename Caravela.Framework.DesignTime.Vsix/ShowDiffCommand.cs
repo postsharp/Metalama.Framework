@@ -62,8 +62,8 @@ namespace CustomCommandSample
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            var activeDocumentPath = this._package.DTE.ActiveDocument.FullName;
-            var activeProjectPath = this._package.DTE.ActiveDocument.ProjectItem.ContainingProject.FullName;
+            var activeDocumentPath = this._package.DTE!.ActiveDocument.FullName;
+            var activeProjectPath = this._package.DTE!.ActiveDocument.ProjectItem.ContainingProject.FullName;
 
             var relativePath = new Uri( activeProjectPath ).MakeRelativeUri( new Uri( activeDocumentPath ) ).ToString().Replace( "/", "\\" );
 
@@ -91,7 +91,7 @@ namespace CustomCommandSample
             var diffFilesId = 256;
             object args = $"\"{file1}\" \"{file2}\"";
 
-            package.DTE.Commands.Raise( diffFilesCmd, diffFilesId, ref args, ref args );
+            package.DTE!.Commands.Raise( diffFilesCmd, diffFilesId, ref args, ref args );
         }
     }
 }
