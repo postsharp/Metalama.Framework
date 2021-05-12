@@ -10,13 +10,24 @@ using System.Collections.Immutable;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Computes the changes between the last <see cref="Compilation"/> and a new one.
+    /// </summary>
     internal class CompilationDiffer
     {
         private Dictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode)>? _lastTrees;
 
+        /// <summary>
+        /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
+        /// has not been invoked yet.
+        /// </summary>
         public Compilation? LastCompilation { get; private set; }
 
-        public CompilationChanges GetChanges( Compilation newCompilation )
+        /// <summary>
+        /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
+        /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
+        /// </summary>
+        public CompilationChanges Update( Compilation newCompilation )
         {
             if ( newCompilation == this.LastCompilation )
             {
@@ -112,9 +123,12 @@ namespace Caravela.Framework.Impl.DesignTime
                 (false, true) => CompileTimeChangeKind.NewlyCompileTime
             };
 
+        /// <summary>
+        /// Determines whether two syntax trees are significantly different. This overload is called from tests.
+        /// </summary>
         internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree ) => IsDifferent( oldSyntaxTree, newSyntaxTree, out _ );
 
-        internal static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, out bool? hasCompileTimeCode )
+        private static bool IsDifferent( SyntaxTree oldSyntaxTree, SyntaxTree newSyntaxTree, out bool? hasCompileTimeCode )
         {
             hasCompileTimeCode = null;
 
@@ -232,6 +246,9 @@ namespace Caravela.Framework.Impl.DesignTime
                 };
         }
 
+        /// <summary>
+        /// Resets the current <see cref="CompilationDiffer"/> to its initial empty state.
+        /// </summary>
         public void Reset()
         {
             this.LastCompilation = null;

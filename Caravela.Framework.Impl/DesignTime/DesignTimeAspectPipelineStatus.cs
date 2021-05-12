@@ -3,6 +3,9 @@
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Statuses of a <see cref="DesignTimeAspectPipeline"/> instance.
+    /// </summary>
     internal enum DesignTimeAspectPipelineStatus
     {
         /// <summary>

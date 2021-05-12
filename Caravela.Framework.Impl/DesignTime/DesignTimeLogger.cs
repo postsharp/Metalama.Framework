@@ -10,9 +10,9 @@ namespace Caravela.Framework.Impl.DesignTime
 {
     internal class DesignTimeLogger
     {
-        public static DesignTimeLogger? Instance { get; } = new();
-
         private readonly TextWriter _textWriter;
+
+        public static DesignTimeLogger? Instance { get; } = new();
 
         private DesignTimeLogger()
         {

@@ -72,19 +72,16 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 if ( hasRelevantChange )
                 {
-                    this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
-                    this.Reset();
+                    this.OnExternalBuildStarted();
                 }
             }
         }
-
-        // TODO: The cache must invalidate itself on build (e.g. when the output directory content changes)
-
-        public bool HasCachedCompileTimeProject( Compilation compilation )
-            => this.HasCachedCompileTimeProject(
-                compilation,
-                NullDiagnosticAdder.Instance,
-                this.GetCompileTimeSyntaxTrees( compilation ) );
+        
+        internal void OnExternalBuildStarted()
+        {
+            this.Reset();
+            this.ExternalBuildStarted?.Invoke( this, EventArgs.Empty );
+        }
 
         private IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees( Compilation compilation )
         {
@@ -113,33 +110,23 @@ namespace Caravela.Framework.Impl.DesignTime
             return trees;
         }
 
+        /// <summary>
+        /// Determines whether a compile-time syntax tree is outdated. This happens when the syntax
+        /// tree has changed compared to the cached configuration of this pipeline. This method is used to
+        /// determine whether an error must displayed in the editor.  
+        /// </summary>
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
             => this._compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
 
+        /// <summary>
+        /// Invalidates the cache given a new <see cref="Compilation"/> and returns the set of changes between
+        /// the previous compilation and the new one.
+        /// </summary>
         public CompilationChanges InvalidateCache( Compilation newCompilation )
         {
-            void OnCompileTimeChange()
-            {
-                if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
-                {
-                    DesignTimeLogger.Instance?.Write(
-                        $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
-
-                    this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
-
-                    if ( this.BuildOptions.BuildTouchFile != null && File.Exists( this.BuildOptions.BuildTouchFile ) )
-                    {
-                        using var mutex = MutexHelper.CreateGlobalMutex( this.BuildOptions.BuildTouchFile );
-                        mutex.WaitOne();
-                        File.Delete( this.BuildOptions.BuildTouchFile );
-                        mutex.ReleaseMutex();
-                    }
-                }
-            }
-
             lock ( this._configureSync )
             {
-                var compilationChange = this._compilationDiffer.GetChanges( newCompilation );
+                var compilationChange = this._compilationDiffer.Update( newCompilation );
 
                 if ( compilationChange.HasCompileTimeCodeChange )
                 {
@@ -173,8 +160,30 @@ namespace Caravela.Framework.Impl.DesignTime
 
                 return compilationChange;
             }
+            
+            void OnCompileTimeChange()
+            {
+                if ( this.Status == DesignTimeAspectPipelineStatus.Ready )
+                {
+                    DesignTimeLogger.Instance?.Write(
+                        $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+
+                    this.Status = DesignTimeAspectPipelineStatus.NeedsExternalBuild;
+
+                    if ( this.BuildOptions.BuildTouchFile != null && File.Exists( this.BuildOptions.BuildTouchFile ) )
+                    {
+                        using var mutex = MutexHelper.CreateGlobalMutex( this.BuildOptions.BuildTouchFile );
+                        mutex.WaitOne();
+                        File.Delete( this.BuildOptions.BuildTouchFile );
+                        mutex.ReleaseMutex();
+                    }
+                }
+            }
         }
 
+        /// <summary>
+        /// Resets the current pipeline, including all caches and statuses.
+        /// </summary>
         public void Reset()
         {
             lock ( this._configureSync )
@@ -245,6 +254,9 @@ namespace Caravela.Framework.Impl.DesignTime
             }
         }
 
+        /// <summary>
+        /// Executes the pipeline.
+        /// </summary>
         public DesignTimeAspectPipelineResult Execute( PartialCompilation compilation )
         {
             DiagnosticList diagnosticList = new();

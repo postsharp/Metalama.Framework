@@ -4,6 +4,8 @@
 using Caravela.Framework.Impl.Diagnostics;
 using Microsoft.CodeAnalysis;
 
+#pragma warning disable SA1118
+
 namespace Caravela.Framework.Impl.DesignTime
 {
     internal static class DesignTimeDiagnosticDescriptors

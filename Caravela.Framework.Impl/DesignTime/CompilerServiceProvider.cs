@@ -6,6 +6,9 @@ using System;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// The implementation of <see cref="ICompilerServiceProvider"/>.
+    /// </summary>
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
         public static readonly CompilerServiceProvider Instance = new();

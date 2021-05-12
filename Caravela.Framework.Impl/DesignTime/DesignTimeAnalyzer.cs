@@ -12,6 +12,8 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 
+#pragma warning disable RS1026 // Enable concurrent execution
+
 namespace Caravela.Framework.Impl.DesignTime
 {
     /// <summary>
@@ -41,9 +43,7 @@ namespace Caravela.Framework.Impl.DesignTime
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => _supportedDiagnosticDescriptors;
 
-#pragma warning disable RS1026 // Enable concurrent execution
         public override void Initialize( AnalysisContext context )
-#pragma warning restore RS1026 // Enable concurrent execution
         {
             if ( CaravelaCompilerInfo.IsActive )
             {

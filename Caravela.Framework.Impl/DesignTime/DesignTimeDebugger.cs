@@ -7,6 +7,9 @@ using System.Diagnostics;
 
 namespace Caravela.Framework.Impl.DesignTime
 {
+    /// <summary>
+    /// Exposes the <see cref="AttachDebugger"/> method.
+    /// </summary>
     internal static class DesignTimeDebugger
     {
         private static readonly object _sync = new();

@@ -100,15 +100,6 @@ namespace Caravela.Framework.Impl.DesignTime
                 // instead of nothing.
             }
 
-            // If the pipeline has an outdated configuration but we have a compile-time project,
-            // then we clear our own result cache because we can rebuild it.
-            if ( pipeline.Status == DesignTimeAspectPipelineStatus.NeedsExternalBuild &&
-                 pipeline.HasCachedCompileTimeProject( compilation ) )
-            {
-                pipeline.Reset();
-                this._syntaxTreeResultCache.Clear();
-            }
-
             if ( pipeline.Status != DesignTimeAspectPipelineStatus.NeedsExternalBuild )
             {
                 var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilation );
