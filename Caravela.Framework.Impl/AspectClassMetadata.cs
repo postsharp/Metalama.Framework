@@ -153,16 +153,19 @@ namespace Caravela.Framework.Impl
                 case IMethod method when method.ContainingElement is IProperty property && property.Getter == method:
                     var getterTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( property.Name );
                     compiledTemplateMethodInfo = aspectType.GetMethod( getterTemplateName );
+
                     break;
 
                 case IMethod method when method.ContainingElement is IProperty property && property.Setter == method:
-                    var setterTemplateName = TemplateNameHelper.GetCompiledPropertyGetTemplateName( property.Name );
+                    var setterTemplateName = TemplateNameHelper.GetCompiledPropertySetTemplateName( property.Name );
                     compiledTemplateMethodInfo = aspectType.GetMethod( setterTemplateName );
+
                     break;
 
                 case IMethod method when method.ContainingElement is not IProperty:
                     var methodTemplateName = TemplateNameHelper.GetCompiledTemplateName( method.Name );
                     compiledTemplateMethodInfo = aspectType.GetMethod( methodTemplateName );
+
                     break;
 
                 default:

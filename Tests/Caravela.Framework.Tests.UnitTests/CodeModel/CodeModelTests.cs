@@ -355,7 +355,10 @@ class C : IDisposable
 
             var type = Assert.Single( compilation.DeclaredTypes )!;
 
-            Assert.Equal( new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator }, type.Methods.Select( m => m.MethodKind ) );
+            Assert.Equal(
+                new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
+                type.Methods.Select( m => m.MethodKind ) );
+
             Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.Getter!.MethodKind, p.Setter!.MethodKind } ) );
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.Adder!.MethodKind, p.Remover!.MethodKind } ) );
             Assert.Single( type.Constructors );

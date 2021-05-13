@@ -158,11 +158,11 @@ namespace Caravela.Framework.Impl.CompileTime
             using ( var archive = new ZipArchive( stream, ZipArchiveMode.Create, true, Encoding.UTF8 ) )
             {
                 // Write syntax trees.
-                
+
                 foreach ( var sourceFile in this.CodeFiles! )
                 {
                     var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile ) );
-                   
+
                     var entry = archive.CreateEntry( sourceFile, CompressionLevel.Optimal );
                     using var entryWriter = new StreamWriter( entry.Open() );
                     entryWriter.Write( sourceText );

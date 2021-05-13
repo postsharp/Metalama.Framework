@@ -92,7 +92,7 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
 
             if ( hasSetter )
             {
-                this.Getter = new AccessorBuilder( this, MethodKind.PropertySet );
+                this.Setter = new AccessorBuilder( this, MethodKind.PropertySet );
             }
 
             this._isAutoProperty = isAutoProperty;
@@ -244,9 +244,9 @@ namespace Caravela.Framework.Impl.CodeModel.Builders
             {
                 var tokens = new List<SyntaxToken>();
 
-                if ( this.Getter!.Accessibility != this.Accessibility )
+                if ( this.Setter!.Accessibility != this.Accessibility )
                 {
-                    this.Getter.Accessibility.GetTokens( tokens );
+                    this.Setter.Accessibility.GetTokens( tokens );
                 }
 
                 return

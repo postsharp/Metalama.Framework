@@ -183,7 +183,7 @@ namespace Caravela.Framework.Impl.CompileTime
             var outputPaths = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
 
             var sourceFilesList = new List<string>();
-            
+
             DeleteOutputFiles();
 
             try
@@ -227,7 +227,7 @@ namespace Caravela.Framework.Impl.CompileTime
                             }
 
                             treeName += ".cs";
-                            
+
                             sourceFilesList.Add( treeName );
 
                             var path = Path.Combine( outputPaths.Directory, treeName );
@@ -268,6 +268,7 @@ namespace Caravela.Framework.Impl.CompileTime
                 }
 
                 sourceFiles = sourceFilesList;
+
                 return emitResult.Success;
             }
             catch
@@ -451,9 +452,7 @@ namespace Caravela.Framework.Impl.CompileTime
                     {
                         File.Delete( outputPaths.Manifest );
                     }
-                    catch ( IOException )
-                    {
-                    }
+                    catch ( IOException ) { }
 
                     diagnosticSink.Report( GeneralDiagnosticDescriptors.InvalidCachedManifestFile.CreateDiagnostic( Location.None, outputPaths.Manifest ) );
                 }

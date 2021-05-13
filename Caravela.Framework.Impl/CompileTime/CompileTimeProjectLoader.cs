@@ -308,8 +308,9 @@ namespace Caravela.Framework.Impl.CompileTime
             {
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.InvalidCompileTimeProjectResource.CreateDiagnostic( Location.None, assemblyIdentity.ToString() ) );
-                
+
                 project = null;
+
                 return false;
             }
 

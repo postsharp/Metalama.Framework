@@ -39,7 +39,8 @@ namespace Caravela.Framework.Impl.Pipeline
 
         public string? CrashReportDirectory => this.GetStringOption( "CaravelaCrashReportDirectory" );
 
-        public string CacheDirectory => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", PackageVersions.BuildId.ToString() );
+        public string CacheDirectory
+            => this.GetStringOption( "CaravelaCacheDirectory" ) ?? Path.Combine( Path.GetTempPath(), "Caravela", "Cache", PackageVersions.BuildId.ToString() );
 
         public string ProjectId => this.GetStringOption( "CaravelaProjectId" ) ?? this._defaultProjectId;
 

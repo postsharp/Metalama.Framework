@@ -117,6 +117,8 @@ namespace Caravela.Framework.Impl.Advices
                             ImmutableDictionary<string, object?>.Empty,
                             aspectLinkerOptions );
 
+                        advice.Initialize( diagnosticAdder );
+
                         if ( TryGetNamedArgument<string>( nameof(IntroduceMethodAttribute.Name), out var name ) )
                         {
                             advice.Builder.Name = name;

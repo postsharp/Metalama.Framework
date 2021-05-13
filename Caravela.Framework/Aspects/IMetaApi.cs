@@ -76,9 +76,9 @@ namespace Caravela.Framework.Aspects
         /// </summary>
         /// <seealso cref="This"/>
         dynamic Base { get; }
-        
+
         dynamic ThisStatic { get; }
-        
+
         dynamic BaseStatic { get; }
 
         // Gets the properties that were passed by the aspect initializer.

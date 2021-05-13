@@ -289,6 +289,11 @@ namespace Caravela.Framework.Impl.Templating
                 // We change all dynamic into var in the template.
                 return base.TransformIdentifierName( IdentifierName( Identifier( "var" ) ) );
             }
+            else if ( this._templateMemberClassifier.IsImplicitValueParameter( node ) )
+            {
+                // In property setter templates, the 'value' token has a special meaning. We keep the original name.
+                return base.TransformIdentifierName( node );
+            }
 
             // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
             // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined

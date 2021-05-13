@@ -66,6 +66,11 @@ namespace Caravela.Framework.Impl.Advices
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( diagnosticAdder );
+
+            // TODO: The rest (unify with methods?).
+
+            this.MemberBuilder.Type = (this.TemplateMember?.Type ?? this._getTemplateMethod?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility = (this.TemplateMember?.Accessibility ?? this._getTemplateMethod?.Accessibility).AssertNotNull();
         }
 
         public override AdviceResult ToResult( ICompilation compilation )

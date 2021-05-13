@@ -11,7 +11,7 @@ namespace Caravela.Framework.Tests.UnitTests.Linker
     public class PropertyOverrideJumpTests : LinkerTestBase
     {
         [Fact]
-        public void Jumps()
+        public void NoJumps()
         {
             var code = @"
 class T
@@ -40,7 +40,8 @@ class T
         get
         {
             Test(""Get1"");
-            var foo = link(this.Foo);
+            int foo;
+            foo = link(this.Foo);
             if (foo > 0)
             {
                 return foo;
@@ -56,7 +57,7 @@ class T
             if (value != 0)
             {
                 link(this.Foo) = value;
-            }s
+            }
             else
             {
                 throw new InvalidOperationException();
@@ -95,7 +96,9 @@ class T
         {
             Test(""Get2"");
             Test(""Get1"");
-            var foo = _foo;
+            int foo;
+            foo = _foo;
+            __aspect_return_2:
             if (foo > 0)
             {
                 return foo;
@@ -108,7 +111,7 @@ class T
 
         set
         {
-            Test(""Set1"");
+            Test(""Set2"");
             Test(""Set1"");
             if (value != 0)
             {

@@ -17,8 +17,10 @@ namespace Caravela.Framework.IntegrationTests.Aspects.Introductions.Properties.D
         //[IntroduceProperty]
         //public int IntroducedProperty_Auto { get; set; }
 
-        [IntroduceProperty]
-        public static int IntroducedProperty_Auto_Static { get; }
+
+        // TODO: Introduction of auto properties.
+        //[IntroduceProperty]
+        //public static int IntroducedProperty_Auto_Static { get; }
 
         [IntroduceProperty]
         public int IntroducedProperty_Accessors

@@ -86,7 +86,7 @@ namespace Caravela.Framework.Impl.DesignTime
                                     compilation.Compilation.SyntaxTrees.Single( t => Path.GetFileName( t.FilePath ) == Path.GetFileName( sourceFile ) );
 
                                 // We will have to somehow store the mapping.
-                                
+
                                 _ = this._configurationCacheDependencies.TryAdd( sourceFile, syntaxTree );
                             }
                         }

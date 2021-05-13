@@ -26,7 +26,7 @@ namespace Caravela.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [OverrideFieldOrPropertySetTemplate]
         public void SetTemplate()
         {
-            Console.WriteLine($"This is the overridden setter.");
+            Console.WriteLine("This is the overridden setter.");
             var discard = meta.Proceed();
         }
     }

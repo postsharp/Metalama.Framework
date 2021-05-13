@@ -30,9 +30,9 @@ namespace Caravela.Framework.Impl.Templating.MetaModel
 
         public RuntimeExpression CreateMemberAccessExpression( string member )
             => new( SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( this._type.GetSymbol() ),
-                        SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
-                        .AddLinkerAnnotation( this._linkerAnnotation ));
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            (ExpressionSyntax) CSharpSyntaxGenerator.Instance.TypeExpression( this._type.GetSymbol() ),
+                            SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
+                        .AddLinkerAnnotation( this._linkerAnnotation ) );
     }
 }

@@ -169,6 +169,8 @@ namespace Caravela.Framework.Impl.Advices
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // Set template represents both set and init accessors.
+            var diagnosticList = new DiagnosticList();
+
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
                 typeof(OverrideFieldOrPropertyTemplateAttribute),
@@ -183,6 +185,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -195,6 +198,8 @@ namespace Caravela.Framework.Impl.Advices
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
             // Set template represents both set and init accessors.
+            var diagnosticList = new DiagnosticList();
+
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
                 typeof(OverrideFieldOrPropertyGetTemplateAttribute),
@@ -205,15 +210,16 @@ namespace Caravela.Framework.Impl.Advices
                 typeof(OverrideFieldOrPropertySetTemplateAttribute),
                 nameof(this.OverrideFieldOrPropertyAccessors) );
 
-            var advice = new OverrideFieldOrPropertyAdvice( 
-                this._aspect, 
-                targetDeclaration, 
-                null, 
-                getTemplateMethod, 
+            var advice = new OverrideFieldOrPropertyAdvice(
+                this._aspect,
+                targetDeclaration,
+                null,
+                getTemplateMethod,
                 setTemplateMethod,
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -235,6 +241,8 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
+            var diagnosticList = new DiagnosticList();
+
             var templateProperty = this.GetTemplateProperty(
                 defaultTemplate,
                 typeof(IntroducePropertyTemplateAttribute),
@@ -252,6 +260,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
             return advice;
@@ -266,6 +275,8 @@ namespace Caravela.Framework.Impl.Advices
             ConflictBehavior conflictBehavior = ConflictBehavior.Default,
             AspectLinkerOptions? aspectLinkerOptions = null )
         {
+            var diagnosticList = new DiagnosticList();
+
             var getTemplateMethod = this.GetTemplateMethod(
                 defaultGetTemplate,
                 typeof(IntroducePropertyGetTemplateAttribute),
@@ -288,6 +299,7 @@ namespace Caravela.Framework.Impl.Advices
                 this.Tags.ToImmutableDictionary(),
                 aspectLinkerOptions );
 
+            advice.Initialize( diagnosticList );
             this._advices.Add( advice );
 
             return advice;

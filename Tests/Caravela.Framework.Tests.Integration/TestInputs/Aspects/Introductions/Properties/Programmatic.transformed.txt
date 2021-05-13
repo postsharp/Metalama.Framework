@@ -6,13 +6,14 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("Get");
-            return default;
+            global::System.Console.WriteLine("Get");
+            return default(global::System.Int32);
         }
 
         set
         {
-            Console.WriteLine("Set");
+            global::System.Console.WriteLine("Set");
+            global::System.Int32 discard;
         }
     }
 
@@ -20,13 +21,14 @@ internal class TargetClass
     {
         get
         {
-            Console.WriteLine("Get");
-            return default;
+            global::System.Console.WriteLine("Get");
+            return default(global::System.Int32);
         }
 
         set
         {
-            Console.WriteLine("Set");
+            global::System.Console.WriteLine("Set");
+            global::System.Int32 discard;
         }
     }
 
